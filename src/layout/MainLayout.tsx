@@ -28,7 +28,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
       <Header />
       <div className={`${isStoreRoute?"pt-[54px] lg:pt-0" : "pt-[54px] lg:pt-20"}`}>{children}</div>
-      {/* {!isAuthRoute && <Footer />} */}
+      {!isAuthRoute && <Footer />}
     </div>
   );
 };
