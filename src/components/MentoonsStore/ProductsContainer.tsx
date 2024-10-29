@@ -2,10 +2,10 @@ import { useState } from "react";
 import ProductCategories from "./ProductCategories"
 import Products from "./Products"
 
-export type ProductType = 'Comic' | 'Cards' | 'Posters';
+export type ProductType = ""|'Comic' | 'Cards' | 'Posters';
 
 const ProductsContainer = () => {
-  const [selectedCategory, setSelectedCategory] = useState<ProductType>('Comic');
+  const [selectedCategory, setSelectedCategory] = useState<ProductType>('');
 
   const handleCategoryChange = (category: ProductType) => {
     setSelectedCategory(category);

@@ -7,7 +7,7 @@ interface ProductCardProps {
     name: string;
     mini_thumbnail: string;
   }[];
-  type: 'Comic' | 'Cards' | 'Posters';
+  type: ""|'Comic' | 'Cards' | 'Posters';
 }
 
 const ProductCard = ({ item, type }: ProductCardProps) => {
@@ -21,7 +21,7 @@ const ProductCard = ({ item, type }: ProductCardProps) => {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 p-7">
               {item.map((product, idx) => (
-                <div className="relative group" key={idx}>
+                <div className="relative group border-blue-500 border-4 rounded-lg" key={idx}>
                   <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 lg:top-5 lg:right-5 z-10">
                     <div
                       className="relative cursor-pointer"
@@ -124,12 +124,13 @@ const ProductCard = ({ item, type }: ProductCardProps) => {
           <div className="p-7 text-center">No data found</div>
         );
       default:
-        return <h1>No data found</h1>;
+        return null;
     }
   }
 
   return (
     <>
+    <h1 className="text-center text-4xl font-bold text-black [-webkit-text-stroke:2px_yellow]">{type}</h1>
       {renderProductCard(item, type)}
     </>
   )
