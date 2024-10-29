@@ -1,0 +1,56 @@
+.slick-prev,
+.slick-next {
+    font-size: 24px;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #333333;
+    z-index: 30;
+    height: 3rem;
+    width: 3rem;
+    color: #fff;
+    background: #ec9600;
+}
+
+.slick-prev {
+    left: -4.8rem;
+    border-radius: 0rem 1rem 1rem 0rem;
+}
+
+.slick-next {
+    right: -4.8rem;
+    border-radius: 1rem 0rem 0rem 1rem;
+}
+
+
+
+.slick-initialized .slick-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* .slick-dots li button:before {
+    font-size: 12px;
+    color: transparent;
+}
+.slick-dots li.slick-active button:before {
+    color: transparent;
+} */
+ 
+@media(max-width:768px) {
+    .slick-prev {
+        left: -2.8rem;
+    }
+
+    .slick-next {
+        right: -2.8rem;
+    }
+
+    .slick-prev,
+    .slick-next {
+        height: 2rem;
+        width: 2rem;
+    }
+}
