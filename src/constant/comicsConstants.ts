@@ -643,7 +643,7 @@ export const audioComicsData: AudioComic[] = [
     type: ComicType.audioComic,
   },
   {
-    name: "Electronic Gadgets And Kids",
+    name:"Electronic Gadgets And Kids",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
     duration: "5:21",
     mini_thumbnail:

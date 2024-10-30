@@ -1,9 +1,9 @@
+import axiosInstance from "@/api/axios";
 import ComicsSection from "@/components/Home/ComicsSection";
 // import FeelFree from "@/components/Home/FeelFree";
 import HeroBanner from "@/components/Home/HeroBanner";
 // import MdMultiverse from "@/components/Home/MdMultiverse";
 import Struggles from "@/components/Home/Struggles";
-import { audioComicsData, comicsData } from "@/constant/comicsConstants";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useUser, } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
@@ -23,7 +23,7 @@ const Home = () => {
   console.log(user, 'user')
   const sendComic = async () => {
     try {
-      const response = await axios.post(`http://localhost:4000/api/v1/email/sendEmailToUser`, {
+      const response = await axiosInstance.post(`/email/sendEmail`, {
         email: user?.emailAddresses[0].emailAddress,
         data: {
           pdf: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Book+2+-+Electronic+gadgets+and+kids.pdf",
@@ -59,7 +59,7 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1, duration: 0.5, ease: easeInOut }}
-            className="w-full max-w-[90%] md:max-w-[35rem] min-h-[35rem] px-2 pt-2 pb-3 rounded-md backdrop-blur-sm z-[9999] transition-all ease-in-out space-y-2 bg-[#00AEEF]"
+            className="w-full max-w-[90%] md:max-w-[35rem] px-5 pt-2 pb-6 rounded-md backdrop-blur-sm z-[9999] transition-all ease-in-out space-y-2 bg-[#00AEEF]"
             style={{ boxShadow: "2px 3px 4px 0px #90E1FF4A inset, -3px -3px 6px 0px #046D949E inset" }}
           >
             <div className="flex items-center justify-end">
