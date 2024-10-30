@@ -6,7 +6,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { store } from "./redux/store.ts";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-console.log(PUBLISHABLE_KEY,'PUBLISHABLE_KEY')
+
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
@@ -14,7 +14,6 @@ if (!PUBLISHABLE_KEY) {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ClerkProvider
     publishableKey={PUBLISHABLE_KEY}
-    afterSignOutUrl="/"
     appearance={{
       layout: {
         unsafe_disableDevelopmentModeWarnings: true,

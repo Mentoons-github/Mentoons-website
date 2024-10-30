@@ -8,7 +8,7 @@ const Career = () => {
 
       <div className="w-[80%] mx-auto py-16">
         <video
-          src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/team-intro-video.mp4"
+          src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Mentoons+Team+Video+02.mp4"
           className="w-full rounded-xl"
           autoPlay
           muted
