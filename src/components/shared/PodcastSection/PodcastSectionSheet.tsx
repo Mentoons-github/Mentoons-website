@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-react";
 import React from "react";
 import { PODCAST_DETAILS } from "../../../constant";
 import PodcastCardExp from "./PodcastCardExp";
@@ -5,7 +6,9 @@ import PodcastCardExp from "./PodcastCardExp";
 const PodcastSectionSheet = () => {
   const [currentlyPlaying, setCurrentlyPlaying] =
     React.useState<HTMLAudioElement | null>(null);
-  const [isSubscribed, setIsSubscribed] = React.useState<boolean>(false);
+  const { isSignedIn } = useUser();
+
+  const [showModal, setShowModal] = React.useState<boolean>(false);
 
   return (
     // <section className='p-4 pt-0'>
@@ -20,9 +23,10 @@ const PodcastSectionSheet = () => {
         // />
         <PodcastCardExp
           key={podcast.id}
-          isSubscribed={isSubscribed}
-          setIsSubscribed={setIsSubscribed}
+          isSignedIn={isSignedIn}
           podcast={podcast}
+          showModal={showModal}
+          setShowModal={setShowModal}
           currentlyPlaying={currentlyPlaying}
           setCurrentlyPlaying={setCurrentlyPlaying}
         />
