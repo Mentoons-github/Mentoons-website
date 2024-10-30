@@ -6,7 +6,6 @@ import Struggles from "@/components/Home/Struggles";
 import { audioComicsData, comicsData } from "@/constant/comicsConstants";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useUser, } from "@clerk/clerk-react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { easeInOut } from "framer-motion";
 import { useState } from "react";
