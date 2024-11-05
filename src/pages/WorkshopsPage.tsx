@@ -7,7 +7,6 @@ import {
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import CareerCorner from "./CareerCorner";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 export interface WorkshopItems {
   name: string;
