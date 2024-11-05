@@ -7,6 +7,7 @@ import {
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import CareerCorner from "./CareerCorner";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export interface WorkshopItems {
   name: string;
@@ -126,6 +127,7 @@ const WorkshopsPage = () => {
         {showForm && (
           <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
             <DialogContent className="z-[999999] bg-transparent border-0">
+              <DialogTitle></DialogTitle>
               <DialogDescription>
                 <div className="relative">
                   <WorkshopForm
@@ -326,13 +328,6 @@ export const WorkshopsPage1 = () => {
           <img src="/assets/images/buddy-camp-childParent-sm.svg" alt="" />
         </div>
       </div>
-      <div className="relative block md:hidden">
-        <img
-          src="/assets/images/buddy-contactform-sm.svg"
-          className=""
-          alt=""
-        />
-      </div>
     </section>
   );
 };
@@ -431,13 +426,6 @@ export const WorkshopsPage2 = () => {
           />
         </div>
       </div>
-      <div className="">
-        <img
-          src="/assets/images/workshop-enquiry-form.png"
-          alt=""
-          className="w-[80%] mx-auto"
-        />
-      </div>
     </section>
   );
 };
@@ -529,13 +517,6 @@ export const WorkshopsPage3 = () => {
             className="w-full object-cover "
           />
         </div>
-      </div>
-      <div className="">
-        <img
-          src="/assets/images/workshop-enquiry-form.png"
-          alt=""
-          className="w-[80%] mx-auto"
-        />
       </div>
     </section>
   );

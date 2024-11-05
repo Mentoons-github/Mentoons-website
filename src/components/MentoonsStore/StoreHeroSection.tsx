@@ -6,7 +6,7 @@ const StoreHeroSection = () => {
 
   const scrollToProducts = () => {
     if (productsRef.current) {
-      const yOffset = -50; // Adjust this value to fine-tune the scroll position
+      const yOffset = -50;
       const element = productsRef.current;
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
