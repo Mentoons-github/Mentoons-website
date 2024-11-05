@@ -127,7 +127,7 @@ const WorkshopsPage = () => {
         {showForm && (
           <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
             <DialogContent className="z-[999999] bg-transparent border-0">
-              <DialogTitle></DialogTitle>
+              {/* <DialogTitle></DialogTitle> */}
               <DialogDescription>
                 <div className="relative">
                   <WorkshopForm
