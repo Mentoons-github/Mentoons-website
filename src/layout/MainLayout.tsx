@@ -12,9 +12,9 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isStoreRoute = location.pathname === "/mentoons-store"
+  const isStoreRoute = location.pathname === "/mentoons-store" || location.pathname==="/membership"
   const isAuthRoute =
-    location.pathname === "/sign-up" || location.pathname === "/sign-in";
+    location.pathname === "/sign-up" || location.pathname === "/sign-in" ;
 
   return (
     <div className="relative h-full w-full">

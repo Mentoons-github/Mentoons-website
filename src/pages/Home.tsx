@@ -30,6 +30,7 @@ const Home = () => {
           thumbnail: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-13.jpg",
         }
       });
+      console.log(response, 'response')
       if (response.status === 200) {
         successToast("Comic sent successfully");
         console.log("send comic");
@@ -37,7 +38,7 @@ const Home = () => {
       };
     } catch (error: any) {
       errorToast(error.response.data.message);
-      console.log(error);
+      console.log(error,'error');
     }
   };
   return (
