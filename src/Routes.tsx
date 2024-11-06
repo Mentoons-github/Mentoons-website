@@ -14,6 +14,7 @@ import ComicPdfPage from "./pages/ComicPdfPage";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import MentoonsStore from "./pages/MentoonsStore";
+import Membership from "./pages/Membership";
 
 // Lazy load the pages
 const Home = lazy(() => import("./pages/Home"));
@@ -201,6 +202,14 @@ const routes = [
         <MentoonsStore />
       </MainLayout>
     ),
+  },
+  {
+    path:"/membership",
+    element:(
+      <MainLayout>
+        <Membership />
+      </MainLayout>
+    )
   },
   {
     path: "*",
