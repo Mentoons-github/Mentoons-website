@@ -1,3 +1,4 @@
+import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,17 +12,16 @@ import {
 import { applyForJob } from "@/redux/careerSlice";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { Loader } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
+
 
 // import emailjs from "emailjs-com";
 import React, { FormEvent, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "sonner";
 export type TPOSITION = {
   _id: string;
   jobTitle: string;
@@ -30,21 +30,31 @@ export type TPOSITION = {
   skillsRequired: string[];
   jobType: string;
   location: string;
-
 };
 // JOB ACCORDIAN COMPONENT
-const FAQCard = ({ position, id }: { position: TPOSITION, id: string }) => {
-  const navigate = useNavigate()
+const FAQCard = ({
+  position,
+  id,
+ 
+}: {
+  position: TPOSITION;
+  id: string;
+
+}) => {
+  const navigate = useNavigate();
   const { getToken } = useAuth();
   const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
 
   const handleIsExpanded = () => {
     setIsExpanded((prev) => !prev);
   };
+
+
   return (
     <div
-      className={` ${isExpanded ? "max-h-full" : "max-h-16"
-        } rounded-xl flex flex-col items-center justify-between overflow-hidden transition-transform duration-300   bg-orange-200 hover:scale-105`}
+      className={` ${
+        isExpanded ? "max-h-full" : "max-h-16"
+      } rounded-xl flex flex-col items-center justify-between overflow-hidden transition-transform duration-300   bg-orange-200 hover:scale-105`}
     >
       <div
         className=" w-full flex items-center justify-between p-4 text-neutral-700 
@@ -55,8 +65,9 @@ const FAQCard = ({ position, id }: { position: TPOSITION, id: string }) => {
 
         <span
           className={`p-1 rounded-full border border-neutral-700 hover:border-orange-400 hover:bg-orange-400/40
-             flex items-center transition-all duration-300 cursor-pointer ${isExpanded && "rotate-180"
-            }`}
+             flex items-center transition-all duration-300 cursor-pointer ${
+               isExpanded && "rotate-180"
+             }`}
         >
           <IoChevronDown className="" />
         </span>
@@ -96,19 +107,27 @@ const FAQCard = ({ position, id }: { position: TPOSITION, id: string }) => {
       <div className=" w-full px-4 ">
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="text-neutral-700 font-bold px-5 py-2 w-full border bg-transparent border-neutral-700 hover:bg-orange-400/40 hover:border-orange-400 mb-4 rounded-md transition-all duration-300" onClick={async ()=>{
-              const token = await getToken()
-              if(!token) navigate('/sign-in')
-            }}>
-              Apply Now 
+            <Button
+              className="text-neutral-700 font-bold px-5 py-2 w-full border bg-transparent border-neutral-700 hover:bg-orange-400/40 hover:border-orange-400 mb-4 rounded-md transition-all duration-300"
+              onClick={async () => {
+                const token = await getToken();
+                if (!token) navigate("/sign-in");
+              }}
+            >
+              Apply Now
             </Button>
           </DialogTrigger>
           <DialogContent className="z-[999999]">
             <DialogClose asChild>
-              <Button className="absolute top-2 right-2"> <FaTimes/></Button>
+              <Button className="absolute top-2 right-2">
+                {" "}
+                <FaTimes />
+              </Button>
             </DialogClose>
             <DialogHeader>
-              <DialogTitle className="text-center">Job Application Form</DialogTitle>
+              <DialogTitle className="text-center">
+                Job Application Form
+              </DialogTitle>
               <DialogDescription className="text-center">
                 Fill in the details below and we'll contact you.
               </DialogDescription>
@@ -138,7 +157,7 @@ interface FormError {
 }
 
 export function JobApplicationForm({ id }: { id: string }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
   const { loading } = useSelector((state: RootState) => state.career);
@@ -155,9 +174,13 @@ export function JobApplicationForm({ id }: { id: string }) {
 
   const [formErrors, setFormErrors] = useState<FormError>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -165,7 +188,7 @@ export function JobApplicationForm({ id }: { id: string }) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
         resume: e.target.files![0],
       }));
@@ -211,7 +234,11 @@ export function JobApplicationForm({ id }: { id: string }) {
       errors.resume = "Resume is required";
     } else {
       const fileType = formData.resume.type;
-      const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      const validTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
       if (!validTypes.includes(fileType)) {
         errors.resume = "File must be PDF, DOC, or DOCX";
       } else if (formData.resume.size > 5000000) {
@@ -237,24 +264,28 @@ export function JobApplicationForm({ id }: { id: string }) {
     try {
       const token = await getToken();
       if (!token) {
-        navigate('/sign-in')
-        return toast.error('Login first to apply');
+        navigate("/sign-in");
+        return toast.error("Login first to apply");
       }
 
-      const fileAction = await dispatch(uploadFile({ 
-        file: formData.resume, 
-        getToken: async () => token
-      }));
+      const fileAction = await dispatch(
+        uploadFile({
+          file: formData.resume,
+          getToken: async () => token,
+        })
+      );
 
       const fileUrl = fileAction.payload?.data?.imageUrl;
       if (!fileUrl) {
         return toast.error("Failed to upload resume");
       }
 
-      const res = await dispatch(applyForJob({ 
-        jobId: id, 
-        formData: { ...formData, resume: fileUrl } 
-      }));
+      const res = await dispatch(
+        applyForJob({
+          jobId: id,
+          formData: { ...formData, resume: fileUrl },
+        })
+      );
 
       if (res.payload?.success) {
         toast.success("Application submitted successfully");
@@ -266,9 +297,8 @@ export function JobApplicationForm({ id }: { id: string }) {
       toast.error("An error occurred while submitting your application");
     }
   };
-  if (loading) return <Loader />
+  if (loading) return <Loader />;
   return (
-
     <form onSubmit={handleSubmit} className="flex flex-col">
       <div className="w-full flex flex-col mb-4">
         <input
@@ -340,7 +370,9 @@ export function JobApplicationForm({ id }: { id: string }) {
           className="p-3 text-base outline-black border bg-white text-black rounded-lg"
         />
         {formErrors.portfolioLink && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.portfolioLink}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {formErrors.portfolioLink}
+          </p>
         )}
       </div>
 
@@ -385,11 +417,7 @@ export function JobApplicationForm({ id }: { id: string }) {
         className="p-3 text-base bg-primary text-white mb-4 rounded-lg hover:bg-orange-500 transition-all duration-300"
         disabled={loading}
       >
-        {loading ? (
-          "Submitting..."
-        ) : (
-          "Submit"
-        )}
+        {loading ? "Submitting..." : "Submit"}
       </Button>
     </form>
   );

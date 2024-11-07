@@ -8,17 +8,17 @@ import {
 import React from "react";
 import { FaAlignCenter, FaCirclePause, FaCirclePlay } from "react-icons/fa6";
 
-interface IPODCAST {
-  id: number;
+ export interface IPODCAST {
+  id?: number;
   topic: string;
   description: string;
-  audioPodcastSampleSrc: string;
+  audioPodcastSampleSrc?: string;
   audioPodcastSrc: string;
   thumbnail: string;
-  categroy: string;
+  category: string;
   age: string;
-  author: string;
-  duration: string;
+  author?: string;
+  duration?: string;
 }
 
 interface PodcastCardProps {

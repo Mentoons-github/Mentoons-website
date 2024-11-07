@@ -5,11 +5,14 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { getAllPodcast } from "@/redux/Podcastslice";
+import { AppDispatch, RootState } from "@/redux/store";
 import { useUser } from "@clerk/clerk-react";
 import Autoplay from "embla-carousel-autoplay";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PODCAST_DETAILS, PODCAST_SLIDER } from "../../../constant";
 import PodcastCardExp from "./PodcastCardExp";
@@ -26,6 +29,32 @@ const PodcastSection = () => {
   const handleLogin = () => {
     navigate("/sign-in");
   };
+
+   const dispatch = useDispatch<AppDispatch>();
+
+  const getAllPodcastData = async () => {
+    try {
+      await dispatch(getAllPodcast());
+      // toast.success("Podcast fetched successfully");
+    } catch (error) {
+      // toast.error(error.message);
+      console.error("Failed to fetch open positions:", error);
+    }
+  };
+  useEffect(() => {
+    getAllPodcastData();
+  }, []); 
+
+  const { podcasts, loading } = useSelector(
+    (state: RootState) => state.podcast
+  );
+
+  // if (loading) {
+  //   return <Loader/>
+  // }
+
+  console.log(podcasts)
+  console.log(loading)
 
   return (
     <>
@@ -54,8 +83,9 @@ const PodcastSection = () => {
           </motion.div>
         </motion.div>
 
-        <div className=" ">
+        <div className="">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-8 ">
+            {/* //todo use the podcast fetch form api */}
             {PODCAST_DETAILS.map((podcast) => (
               // <PodcastCard
               //   key={podcast.id}
@@ -63,6 +93,7 @@ const PodcastSection = () => {
               //   currentlyPlaying={currentlyPlaying}
               //   setCurrentlyPlaying={setCurrentlyPlaying}
               // />
+              
               <PodcastCardExp
                 key={podcast.id}
                 isSignedIn={isSignedIn}

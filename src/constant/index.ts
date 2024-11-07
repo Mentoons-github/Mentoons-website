@@ -20,7 +20,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/negative_impact_of_mobile.mp3",
     thumbnail: "/assets/images/negative-impact-of-mobile-phone.jpg", //todo Change it.
-    categroy: "",
+    category: "",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -35,7 +35,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/negative-impact-of-social-media.mp3",
     thumbnail: "/assets/images/negative-impact-of-social-media.jpg", //todo Change it
-    categroy: "",
+    category: "",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -50,7 +50,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/how-does-it-feet-to-be-an-teenager-orignals.mp3",
     thumbnail: "/assets/images/how-does-it-feel-to-be-teenager.jpg",
-    categroy: "",
+    category: "",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -65,7 +65,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/perfomance-addiction.mp3",
     thumbnail: "/assets/images/perfomance-addiction.jpg",
-    categroy: "",
+    category: "",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -81,7 +81,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/the-magic-of-play-without-phone.mp3",
     thumbnail: "/assets/images/social-media-reward-system.jpg", // todo change this
-    categroy: "",
+    category: "",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -96,7 +96,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/common-parrenting-mistake-orignals.mp3",
     thumbnail: "/assets/images/common-parenting-mistakes.jpg",
-    categroy: "",
+    category: "",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -111,7 +111,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/entertainment-addiction-orignals.mp3",
     thumbnail: "/assets/images/Entertainment_Addiction_ 2.jpg",
-    categroy: "",
+    category: "",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -126,7 +126,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/toddler-phone-addiction.mp3",
     thumbnail: "/assets/images/toddler-phone-addiction.jpg",
-    categroy: "",
+    category: "",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -141,7 +141,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/social-media-de-addiction-orignals.mp3",
     thumbnail: "/assets/images/social-media-de-addiction.jpg",
-    categroy: "",
+    category: "",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -156,7 +156,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/teen-emotional-and-behavioural-problems-orignals.mp3",
     thumbnail: "/assets/images/Teen_emotion_&_behaviour_problems_ 2.jpg",
-    categroy: "",
+    category: "",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -171,7 +171,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/magical-journey-to-self-dicovery-orignals.mp3",
     thumbnail: "/assets/images/magical-journey-to-self-discovery.jpg",
-    categroy: "",
+    category: "",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -186,7 +186,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/maintaining-relationship-with-teenager-orignals.mp3",
     thumbnail: "/assets/images/maintain-relationship-with-teen.jpg",
-    categroy: "",
+    category: "",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -202,7 +202,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/phrases-sentences-orignals.mp3",
     thumbnail: "/assets/images/Phrases_and_sentences_parents.jpg",
-    categroy: "",
+    category: "",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -217,7 +217,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/role-models-for-kid-orignals.mp3",
     thumbnail: "/assets/images/Role_Model_For_Kids_.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -232,7 +232,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/things-parents-do-that-annoy-kids-orignals.mp3",
     thumbnail: "/assets/images/Things_parents_do_that_annoy_kids 2.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -247,7 +247,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/electronic-gadgets-and-kids-orignals.mp3",
     thumbnail: "/assets/images/Electronic_Gadgets_.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Haaris Rueben",
     duration: "",
@@ -263,7 +263,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/reconnecting-genz-with-value-beyond-the-screen.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Haaris Rueben",
     duration: "",
@@ -278,7 +278,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/fun-beyond-video-game.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -293,7 +293,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/how-to-maintain-healthy-relations.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    categroy: "",
+    category: "",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -696,7 +696,7 @@ export const FOOTER_NAVLINKS = [
   },
   {
     id: "L_4",
-    title: "Workshop",
+    title: "Workshops",
     url: "/mentoons-workshops",
   },
 ];
@@ -723,93 +723,54 @@ export const FOOTER_PAGELINKS = [
         url: "/faq",
       },
       {
-        id: "AB_4",
-        label: "Workshops",
-        url: "/mentoons-workshops",
-      },
-      {
         id: "AB_5",
         label: "Privacy Policy",
-        url: "/privacy-policy",
+        url: "/mentoons-privacy-policy",
       },
       {
         id: "AB_6",
-        label: "Term and Conditions",
-        url: "/term-condictions",
+        label: "Terms and Conditions",
+        url: "/mentoons-term-conditions",
       },
     ],
   },
   {
     id: "FP_2",
-    title: "Find Comics",
-    url: "/find-comics",
+    title: "Buy our Products",
+    url: "/mentoons-store",
     items: [
       {
-        id: "AB_1",
-        label: "About Mentoons",
-        url: "/about-mentoons",
+        id: "S_1",
+        label: "Conversation Starter Card",
+        url: "/mentoons-store",
       },
       {
-        id: "AB_2",
-        label: "Free Downloads",
-        url: "/free-downloads",
+        id: "S_2",
+        label: "Re-Teller Card",
+        url: "/mentoons-store",
       },
       {
-        id: "AB_3",
-        label: "Help & FAQ's",
-        url: "/help-faqs",
-      },
-      {
-        id: "AB_4",
-        label: "Workshops",
-        url: "/workshops",
-      },
-      {
-        id: "AB_5",
-        label: "Privacy Policy",
-        url: "/privacy-policy",
-      },
-      {
-        id: "AB_6",
-        label: "Term and Conditions",
-        url: "/term-condictions",
+        id: "S_3",
+        label: "Silent Stories",
+        url: "/mentoons-store",
       },
     ],
   },
+
   {
     id: "FP_3",
     title: "Contact Us",
-    url: "/about",
+    url: "#",
     items: [
       {
         id: "AB_1",
-        label: "About Mentoons",
-        url: "/about-mentoons",
+        label: "metalmahesh@gmail.com",
+        url: "#",
       },
       {
         id: "AB_2",
-        label: "Free Downloads",
-        url: "/free-downloads",
-      },
-      {
-        id: "AB_3",
-        label: "Help & FAQ's",
-        url: "/help-faqs",
-      },
-      {
-        id: "AB_4",
-        label: "Workshops",
-        url: "/mentoons-workshops",
-      },
-      {
-        id: "AB_5",
-        label: "Privacy Policy",
-        url: "/privacy-policy",
-      },
-      {
-        id: "AB_6",
-        label: "Term and Conditions",
-        url: "/term-condictions",
+        label: "+919036033300",
+        url: "#",
       },
     ],
   },

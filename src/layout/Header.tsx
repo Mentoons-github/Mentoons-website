@@ -11,22 +11,21 @@ import {
 import { date } from "@/constant/websiteConstants";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
+import { FaCalendarAlt, FaHome, FaPhone } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { IoCart } from "react-icons/io5";
 import { MdOutlineClose } from "react-icons/md";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaHome, FaCalendarAlt, FaPhone } from "react-icons/fa";
-import { IoCart } from "react-icons/io5";
 
 const Header = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
-  
+
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
   };
-
 
   const controlHeaderVisibility = () => {
     if (window.scrollY > lastScrollY) {
@@ -53,7 +52,7 @@ const Header = () => {
 
   return (
     <div
-      className={`w-full min-h-fit bg-primary flex items-center justify-around px-4 lg:py-5 top-0 fixed z-[90] gap-[6rem] transition-transform duration-300 ${
+      className={`w-full min-h-fit bg-primary flex items-center justify-around px-4 lg:py-5 top-0 fixed z-[40] gap-[6rem] transition-transform duration-300 ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
       style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 20px 30px" }}
@@ -93,7 +92,10 @@ const Header = () => {
           <MenubarMenu>
             <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
               <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
-                <div className="flex items-center justify-around gap-2"><IoCart />Store</div>
+                <div className="flex items-center justify-around gap-2">
+                  <IoCart />
+                  Store
+                </div>
               </MenubarTrigger>
             </NavLink>
           </MenubarMenu>
@@ -103,7 +105,7 @@ const Header = () => {
         <NavLink to="/" onClick={() => setMenuOpen(false)}>
           <figure className="w-[5rem] h-[5rem] lg:h-[10rem] lg:w-[10rem] absolute bg-primary rounded-full top-[-2.3rem] lg:top-[-6rem] left-1/2 transform -translate-x-1/2 z-40">
             <img
-              src="/assets/images/logo.png"
+              src="/assets/images/mentoons-logo.png"
               alt="mentoonsLogo"
               className="h-full w-full object-contain lg:mt-4"
             />
@@ -221,7 +223,7 @@ const Header = () => {
               <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:hidden">
                 Audio Comics
               </MenubarTrigger>
-            </NavLink>  
+            </NavLink>
           </MenubarMenu>
           <MenubarMenu>
             <NavLink to="/hiring" onClick={() => setMenuOpen(false)}>
@@ -233,7 +235,10 @@ const Header = () => {
           <MenubarMenu>
             <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
               <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
-                <div className="flex items-center justify-around gap-2"><IoCart />Store</div>
+                <div className="flex items-center justify-around gap-2">
+                  <IoCart />
+                  Store
+                </div>
               </MenubarTrigger>
             </NavLink>
           </MenubarMenu>
