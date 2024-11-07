@@ -2,8 +2,8 @@ import AboutSection from "@/components/comics/AboutSection";
 import AudioComics from "@/components/comics/AudioComics";
 import Blogs from "@/components/comics/Blogs";
 import NewComics from "@/components/comics/NewComics";
-import Pricing from "@/components/comics/Pricing";
-import Testimonials from "@/components/comics/Testimonials";
+// import Pricing from "@/components/comics/Pricing";
+// import Testimonials from "@/components/comics/Testimonials";
 import HeroSection from "@/components/comics/HeroSection";
 import React, { Suspense } from "react";
 // import Team from "./Team";
@@ -20,8 +20,8 @@ const Home: React.FC = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Team />
       </Suspense>
-      <Testimonials />
-      <Pricing />
+      {/* <Testimonials /> */}
+      {/* <Pricing /> */}
       <Blogs />
     </>
   );

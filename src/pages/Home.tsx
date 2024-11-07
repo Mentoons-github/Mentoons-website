@@ -20,7 +20,6 @@ const Home = () => {
   const paramData = searchParams.get("openModal");
   const [showPopup, setShowPopup] = useState<boolean>(paramData === "true");
   const { user } = useUser();
-  console.log(user, 'user')
   const sendComic = async () => {
     try {
       const response = await axiosInstance.post(`/email/sendEmail`, {
@@ -30,10 +29,8 @@ const Home = () => {
           thumbnail: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-13.jpg",
         }
       });
-      console.log(response, 'response')
       if (response.status === 200) {
         successToast("Comic sent successfully");
-        console.log("send comic");
         setShowPopup(false);
       };
     } catch (error: any) {

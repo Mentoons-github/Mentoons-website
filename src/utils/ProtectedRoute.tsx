@@ -79,23 +79,37 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!isLoggedIn) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className='bg-gray-100 rounded-lg shadow-lg p-12 lg:p-16 text-center z-[9999]'>
-          <h1 className="font-semibold text-xl flex justify-center gap-2">
-            <img className="w-20" src={MiniLogo} alt="mentoons logo" />
-          </h1>
-          <p className='text-lg text-gray-800 mb-4'>You need to be logged in to access this page.</p>
-          <button className='absolute top-4 right-4' onClick={() => {
-            setOpen(false);
-            navigate('/');
-          }}>
-            <AiOutlineClose />
-          </button>
-          <button
-            className='bg-men-blue text-white rounded-md px-4 py-2 text-base transition duration-300 ease-in-out hover:bg-red-600'
-            onClick={handleLoginRedirect}
+        <DialogContent className='bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto text-center z-[9999]'>
+          {/* Close button */}
+          <button 
+            className='absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors' 
+            onClick={() => {
+              setOpen(false);
+              navigate('/');
+            }}
           >
-            Login / Register
+            <AiOutlineClose className="w-5 h-5 text-gray-500" />
           </button>
+
+          {/* Logo and content */}
+          <div className="space-y-6">
+            <div className="flex flex-col items-center">
+              <img className="w-24 h-auto" src={MiniLogo} alt="mentoons logo" />
+              <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome to Mentoons</h2>
+              <p className='mt-2 text-gray-600'>
+                Please log in or register to access this content
+              </p>
+            </div>
+
+            {/* Action button */}
+            <button
+              className='w-full bg-men-blue text-white rounded-lg py-3 px-4 text-base font-medium
+                transition duration-200 hover:bg-men-blue/90 focus:ring-2 focus:ring-men-blue/20'
+              onClick={handleLoginRedirect}
+            >
+              Login / Register
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     );
