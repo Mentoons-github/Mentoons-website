@@ -1,10 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+import careerReducer from "./careerSlice";
 import comicsReducer from "./comicSlice";
+import fileUploadReducer from "./fileUploadSlice";
+import authReducer from "./loginSlice";
+import podcastReducer from "./Podcastslice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
-import authReducer from "./loginSlice";
-import careerReducer from "./careerSlice";
-import fileUploadReducer from "./fileUploadSlice";
 export const store = configureStore({
   reducer: {
     comics: comicsReducer,
@@ -13,6 +14,7 @@ export const store = configureStore({
     auth: authReducer,
     career: careerReducer,
     fileUpload: fileUploadReducer,
+    podcast: podcastReducer,
   },
 });
 

@@ -1,3 +1,4 @@
+import ContributeYourPodcast from "@/components/shared/ContributeYourPodcast";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import HomeSection from "@/components/shared/hompage/HomeSection";
 import PodcastSection from "@/components/shared/PodcastSection/PodcastSection";
@@ -19,7 +20,7 @@ const PodCast = () => {
       <Testimonial />
 
       {/* <FrequentlyAskeQuestion /> */}
-      {/* <ContributeYourPodcast /> */}
+      <ContributeYourPodcast /> 
     </>
   );
 };

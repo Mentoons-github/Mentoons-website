@@ -10,4 +10,4 @@ const CareerCorner = () => {
   );
 };
 
-export default CareerCorner;
+export default CareerCorner;

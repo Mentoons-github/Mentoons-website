@@ -33,7 +33,7 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay className='z-[9999]' />
+    <DialogOverlay className='z-[50]' />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

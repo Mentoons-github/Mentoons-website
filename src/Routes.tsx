@@ -8,13 +8,16 @@ import Loader from "./components/common/Loader";
 import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
+import AboutMentoons from "./pages/AboutMentoons";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import ComicPdfPage from "./pages/ComicPdfPage";
+import Membership from "./pages/Membership";
+import MentoonsStore from "./pages/MentoonsStore";
+import PolicyPage from "./pages/PolicyPage";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import MentoonsStore from "./pages/MentoonsStore";
-import Membership from "./pages/Membership";
 
 // Lazy load the pages
 const Home = lazy(() => import("./pages/Home"));
@@ -57,6 +60,15 @@ const routes = [
     element: (
       <MainLayout>
         <LogIn />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/about-mentoons",
+
+    element: (
+      <MainLayout>
+        <AboutMentoons />
       </MainLayout>
     ),
   },
@@ -204,12 +216,28 @@ const routes = [
     ),
   },
   {
-    path:"/membership",
-    element:(
+    path: "/mentoons-privacy-policy",
+    element: (
+      <MainLayout>
+        <PolicyPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/mentoons-term-conditions",
+    element: (
+      <MainLayout>
+        <TermsAndConditions />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/membership",
+    element: (
       <MainLayout>
         <Membership />
       </MainLayout>
-    )
+    ),
   },
   {
     path: "*",
@@ -243,7 +271,7 @@ const Router = () => {
           ))}
         </Routes>
       </Suspense>
-      <Toaster position="top-right"/>
+      <Toaster position="top-right" />
       {hoverComicCard !== null && <ComicCard item={hoverComicCard} />}
       {/* <ProgressScroller /> */}
       {showPopup && localStorage.getItem("phoneNumber") && (

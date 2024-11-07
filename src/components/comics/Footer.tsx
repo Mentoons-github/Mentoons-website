@@ -42,29 +42,29 @@
 //       url: "http://www.propellingstories.com/",
 //     },
 //   ];
-//   const contactIcons = [
-//     {
-//       icon: ImLinkedin,
-//       color: "text-blue-700",
-//       link: "https://www.linkedin.com/company/mentoons",
-//     },
-//     {
-//       icon: FaFacebookSquare,
-//       color: "text-blue-500",
-//       link: "https://google.com",
-//     },
-//     {
-//       icon: AiFillInstagram,
-//       color: "text-rose-500",
-//       link: "https://google.com",
-//     },
-//     { icon: IoLogoYoutube, color: "text-red-600", link: "https://google.com" },
-//     {
-//       icon: IoLogoWhatsapp,
-//       color: "text-green-500",
-//       link: "https://wa.me/+919036033300",
-//     },
-//   ];
+// const contactIcons = [
+//   {
+//     icon: ImLinkedin,
+//     color: "text-blue-700",
+//     link: "https://www.linkedin.com/company/mentoons",
+//   },
+//   {
+//     icon: FaFacebookSquare,
+//     color: "text-blue-500",
+//     link: "https://google.com",
+//   },
+//   {
+//     icon: AiFillInstagram,
+//     color: "text-rose-500",
+//     link: "https://google.com",
+//   },
+//   { icon: IoLogoYoutube, color: "text-red-600", link: "https://google.com" },
+//   {
+//     icon: IoLogoWhatsapp,
+//     color: "text-green-500",
+//     link: "https://wa.me/+919036033300",
+//   },
+// ];
 
 //   const validationSchema = Yup.object({
 //     email: Yup.string()
@@ -566,6 +566,8 @@ import {
   SOCIAL_LINKS,
 } from "@/constant";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { MdEmail, MdLocationOn } from "react-icons/md";
+import { PiPhoneCallFill } from "react-icons/pi";
 import {
   SiFacebook,
   SiInstagram,
@@ -573,9 +575,11 @@ import {
   SiWhatsapp,
   SiYoutube,
 } from "react-icons/si";
-import { Link } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
+import MapComponent from "./MapComponent";
 
 interface ApiResponse {
   success: boolean;
@@ -591,142 +595,159 @@ const validationSchema = Yup.object({
     .email("Invalid email address")
     .required("Email is required"),
 });
-//  const scrollToHomeSection = () => {
-//   if (location.pathname === "/") {
-//     window.scrollTo({
-//       top: 0,
-//       behavior: "smooth"
-//     });
-//   } else {
-//     navigate("/", { state: { scrollToTop: true } });
-//   }
-// };
-
-// const scrollToWorkshopPage = () => {
-//   console.log("scrolled");
-//   if (location.pathname === "/mentoons-workshops") {
-//     window.scrollTo({
-//       top: 0,
-//       behavior: "smooth",
-//     });
-//   } else {
-//     navigate("/mentoons-workshops", {
-//       state: { scrollToWorkshopPage: true },
-//     });
-//   }
-// };
-
-const handleSubmit = async (
-  values: FormValues,
-  { setSubmitting, resetForm }: FormikHelpers<FormValues>
-) => {
-  try {
-    const response = await axiosInstance.post<ApiResponse>(
-      "email/subscribeToNewsletter",
-      {
-        email: values.email,
-      }
-    );
-
-    // The data from the response is in response.data
-    const res: ApiResponse = response.data;
-    if (res.success) {
-      toast(`✅ ${res.message}`);
-    } else {
-      throw new Error("Something went wrong");
-    }
-  } catch (err) {
-    toast(`❌ ${err}`);
-  } finally {
-    resetForm();
-    setSubmitting(false); // Stops the loading state after form submission
-  }
-};
 
 const Footer = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isMobile = useMediaQuery({ maxWidth: 767 });
+  const handleSubmit = async (
+    values: FormValues,
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>
+  ) => {
+    try {
+      const response = await axiosInstance.post<ApiResponse>(
+        "email/subscribeToNewsletter",
+        {
+          email: values.email,
+        }
+      );
+
+      // The data from the response is in response.data
+      const res: ApiResponse = response.data;
+      if (res.success) {
+        toast(`✅ ${res.message}`);
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (err) {
+      toast(`❌ ${err}`);
+    } finally {
+      resetForm();
+      setSubmitting(false); // Stops the loading state after form submission
+    }
+  };
+  const scrollToTop = (url: string) => {
+    if (location.pathname === url) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } else {
+      navigate(url, { state: { scrollToTop: true } });
+    }
+  };
+
+  interface LinkItem {
+    id: string;
+    label: string;
+    url: string;
+  }
+
+  const handleLinkClick = (linkItem: LinkItem) => {
+    const { label, url } = linkItem;
+
+    if (label.includes("@")) {
+      window.open(`mailto:${label}`, "_blank");
+      return;
+    }
+
+    if (/^[\d\s+()-]+$/.test(label)) {
+      window.location.href = `tel:${label}`;
+      return;
+    }
+
+    // For regular URLs, use the url property
+    window.location.href = url;
+  };
+
   return (
-    <footer className="bg-gradient-to-b from-[#FEB977] to-[#FF942E] relative  ">
-      <div className="w-full absolute bottom-0 ">
+    <footer className="bg-gradient-to-b from-[#FEB977] to-[#FF942E] relative ">
+      <div className=" w-full  absolute bottom-0">
         <img
           src="/assets/images/footer-illustration.png"
-          alt=""
-          className="w-full object-cover "
+          alt="Mentoons logo"
+          className="w-full max-h-96"
         />
       </div>
-      <div className="  flex flex-wrap justify-center items-center p-4 pt-8 px-20  lg:justify-between ">
+      <div className="flex flex-wrap justify-center items-center p-4 pt-8 px-20  lg:justify-between ">
         <div>
           <img
             src="/assets/images/mentoons-logo.png"
             alt=""
-            className=" h-24 object-cover"
+            className="h-24 object-cover"
           />
         </div>
 
-        <div className="flex flex-[0.4] items-center justify-between   ">
+        <div className="flex flex-[0.4] items-center justify-between relative border-spacing-3  ">
           {FOOTER_NAVLINKS.map((navItem, index) => (
-            <>
+            <div
+              className="flex items-center justify-center hover:underline transition-all duration-300"
+              key={navItem.id}
+              onClick={() => scrollToTop(navItem.url)}
+            >
               <Link
-                key={navItem.id}
                 to={navItem.url}
-                className="p-4 text-[22px] font-bold cursor-pointer"
+                className="p-2 sm:p-4 text-[16px] md:text-[22px] font-bold cursor-pointer"
               >
                 {navItem.title}
               </Link>
               {index < FOOTER_NAVLINKS.length - 1 && (
                 <div className=" h-3 w-[1px] bg-black" />
               )}
-            </>
+            </div>
           ))}
         </div>
 
-        <div className="flex items-center justify-center gap-[8px] my-4">
-          {SOCIAL_LINKS.map((socialItem) => (
-            <Link
-              key={socialItem.id}
-              to={socialItem.link}
-              className="text-xl bg-white p-3 rounded-full cursor-pointer"
-            >
-              {socialItem.icon === "linkedin" ? (
-                <SiLinkedin />
-              ) : socialItem.icon === "facebook" ? (
-                <SiFacebook />
-              ) : socialItem.icon === "instagram" ? (
-                <SiInstagram />
-              ) : socialItem.icon === "youtube" ? (
-                <SiYoutube />
-              ) : socialItem.icon === "whatsapp" ? (
-                <SiWhatsapp />
-              ) : null}
-            </Link>
-          ))}
-        </div>
+        {!isMobile && (
+          <div className="flex items-center justify-center gap-[8px] my-4 relative ">
+            {SOCIAL_LINKS.map((socialItem) => (
+              <Link
+                key={socialItem.id}
+                to={socialItem.link}
+                className="text-xl bg-white p-3 rounded-full cursor-pointer "
+              >
+                {socialItem.icon === "linkedin" ? (
+                  <SiLinkedin className="hover:scale-110 transition-all duration-300" />
+                ) : socialItem.icon === "facebook" ? (
+                  <SiFacebook className="hover:scale-110 transition-all duration-300" />
+                ) : socialItem.icon === "instagram" ? (
+                  <SiInstagram className="hover:scale-110 transition-all duration-300" />
+                ) : socialItem.icon === "youtube" ? (
+                  <SiYoutube className="hover:scale-110 transition-all duration-300" />
+                ) : socialItem.icon === "whatsapp" ? (
+                  <SiWhatsapp className="hover:scale-110 transition-all duration-300" />
+                ) : null}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
-      <div className=" px-16 gap-5 relative   lg:flex ">
-        <div className="flex items-center justify-center gap-10  flex-[0.78] flex-wrap mb-8 lg:gap-24 lg:justify-end ">
+      <div className=" px-16 gap-10 relative   lg:flex  ">
+        <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-32 lg:justify-end   ">
           {FOOTER_PAGELINKS.map((item) => (
             <div key={item.id} className="text-center lg:text-start">
               <Link
                 to={item.url}
-                className="text-lg font-semibold mb-4 cursor-pointer"
+                className="text-xl font-semibold mb-4 cursor-pointer"
               >
                 {item.title}
               </Link>
-              <div className=" mt-2">
+              <div className=" mt-2 text-center">
                 {item.items.map((linkItem) => (
-                  <p
-                    key={linkItem.id}
-                    className="py-[2px] hover:underline transition-all duration-300"
+                  <div
+                    onClick={() => handleLinkClick(linkItem)}
+                    className="cursor-pointer flex items-center gap-2 text-center justify-center lg:justify-normal hover:scale-110 transition-all duration-300  "
                   >
-                    <Link to={linkItem.url} className="cursor-pointer">
-                      {linkItem.label}
-                    </Link>
-                  </p>
+                    {linkItem.label.includes("@") && <MdEmail />}
+                    {linkItem.label.includes("+91") && <PiPhoneCallFill />}
+                    {linkItem.label}
+                  </div>
                 ))}
               </div>
             </div>
           ))}
         </div>
-        <div className="flex flex-col items-start justify-start flex-[0.2] mx-auto gap-4 ">
+        <div className="flex flex-col items-start justify-start flex-[0.24] mx-auto gap-4 ">
           <Formik
             initialValues={{ email: "" }} // Must match FormValues type
             validationSchema={validationSchema}
@@ -753,13 +774,43 @@ const Footer = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
-                  className="bg-orange-600 text-white w-full p-2 rounded-full  hover:bg-orange-700 transition-all duration-300 cursor-pointer"
+                  className="bg-orange-600 text-white w-full p-2 rounded-full  hover:bg-orange-700 transition-all duration-300 cursor-pointer whitespace-nowrap text-ellipsis"
                 >
                   Subscribe to NewsLetter
                 </button>
               </Form>
             )}
           </Formik>
+          {isMobile && (
+            <div className="flex items-center justify-center gap-[8px]  relative  my-1  w-full">
+              {SOCIAL_LINKS.map((socialItem) => (
+                <Link
+                  key={socialItem.id}
+                  to={socialItem.link}
+                  className="text-xl bg-white p-3 rounded-full cursor-pointer "
+                >
+                  {socialItem.icon === "linkedin" ? (
+                    <SiLinkedin className="hover:scale-110 transition-all duration-200" />
+                  ) : socialItem.icon === "facebook" ? (
+                    <SiFacebook className="hover:scale-110 transition-all duration-200" />
+                  ) : socialItem.icon === "instagram" ? (
+                    <SiInstagram className="hover:scale-110 transition-all duration-200" />
+                  ) : socialItem.icon === "youtube" ? (
+                    <SiYoutube className="hover:scale-110 transition-all duration-200" />
+                  ) : socialItem.icon === "whatsapp" ? (
+                    <SiWhatsapp className="hover:scale-110 transition-all duration-200" />
+                  ) : null}
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="space-y-2 w-full ">
+            <MapComponent />{" "}
+            <div className="flex items-center justify-start tracking-wide font-medium text-lg w-full">
+              <MdLocationOn />
+              Domlur, Bangalore{" "}
+            </div>{" "}
+          </div>
         </div>
       </div>
 
