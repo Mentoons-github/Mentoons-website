@@ -41,43 +41,6 @@ const HeroSection: React.FC = () => {
     setShowPdf(false);
     setCurrComic(null);
   };
-
-  const handlePrint = async () => {
-    if (!currComic?.comicLink) {
-      toast.error('Comic link is not available');
-      return;
-    }
-
-    try {
-      const response = await fetch(currComic.comicLink);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const newWindow = window.open(blobUrl, '_blank');
-
-      if (!newWindow) {
-        toast.error('Please allow pop-ups to print the comic.');
-        return;
-      }
-
-      newWindow.onload = () => {
-        newWindow.print();
-      };
-
-      window.addEventListener('beforeunload', () => {
-        URL.revokeObjectURL(blobUrl);
-      });
-
-    } catch (error) {
-      console.error('Error downloading or printing the PDF:', error);
-      toast.error('Failed to download or print the comic. Please try again later.');
-    }
-  };
   
 
   return (

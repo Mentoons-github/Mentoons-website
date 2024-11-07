@@ -14,7 +14,7 @@ const FrequentlyAskeQuestion = () => {
     try {
       await dispatch(getOpenPositions());
       toast.success("Open Positions fetched successfully");
-    } catch (error) {
+    } catch (error:any) {
       toast.error(error.message);
       console.error("Failed to fetch open positions:", error);
     }
