@@ -7,12 +7,15 @@ import { useAuthHook } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { comicsData } from "@/constant/comicsConstants";
 import { Comic } from "@/redux/comicSlice";
+import ComicViewer from '../common/ComicViewer';
+import ProtectedRoute from "@/utils/ProtectedRoute";
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuthHook();
   // const [email, setEmail] = useState<string>();
   const [currComic, setCurrComic] = useState<Comic | null>();
+  const [showPdf, setShowPdf] = useState(false);
 
   const selectedComic = (name: string) => {
     const data = comicsData.find((item) => {
@@ -22,58 +25,21 @@ const HeroSection: React.FC = () => {
   };
 
   const handleSendComic = async () => {
-    // if (!email?.trim()) {
-    //   toast("❌ please enter your email!");
-    //   setCurrComic(null);
-    // }
     try {
       if (isLoggedIn) {
-        window.open(currComic?.comicLink, '_blank');
+        setShowPdf(true);
       } else {
         navigate("/sign-up");
       }
     } catch (err) {
       console.error(err);
       toast("An error occurred. Please try again.");
-    } finally {
-      setCurrComic(null);
     }
   };
-  const handlePrint = async () => {
-    if (!currComic?.comicLink) {
-      toast.error('Comic link is not available');
-      return;
-    }
 
-    try {
-      const response = await fetch(currComic.comicLink);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const newWindow = window.open(blobUrl, '_blank');
-
-      if (!newWindow) {
-        toast.error('Please allow pop-ups to print the comic.');
-        return;
-      }
-
-      newWindow.onload = () => {
-        newWindow.print();
-      };
-
-      window.addEventListener('beforeunload', () => {
-        URL.revokeObjectURL(blobUrl);
-      });
-
-    } catch (error) {
-      console.error('Error downloading or printing the PDF:', error);
-      toast.error('Failed to download or print the comic. Please try again later.');
-    }
+  const handleClosePdf = () => {
+    setShowPdf(false);
+    setCurrComic(null);
   };
   
 
@@ -261,53 +227,45 @@ const HeroSection: React.FC = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="fixed bg-black/50 z-[99999] top-0 w-screen h-screen"
+          className="fixed bg-black/50 z-[50] top-0 w-screen h-screen"
         >
-          <div className="bg-rose-50 flex flex-col md:flex-row items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20rem] md:w-[40rem] lg:w-[50rem] h-fit md:h-[25rem] lg:h-[30rem] rounded-md py-6 md:py-0 space-y-4">
-            <div
-              onClick={() => setCurrComic(null)}
-              className="absolute cursor-pointer top-6 right-4"
-            >
-              <MdClose className="text-2xl" />
+          {showPdf ? (
+            <div className="bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] h-[90vh] rounded-md p-4 max-w-fit">
+              <div onClick={handleClosePdf} className="absolute cursor-pointer top-6 right-4">
+                <MdClose className="text-2xl" />
+              </div>
+              <ProtectedRoute>
+              <ComicViewer pdfUrl={currComic.comicLink} />
+              </ProtectedRoute>
             </div>
-            <div className="w-full md:w-[45%] flex items-center justify-center">
-              <img
-                className="w-[60%] rounded-lg shadow-2xl shadow-rose-400 "
-                src={currComic?.mini_thumbnail}
-                alt="comic image"
-              />
-            </div>
-            <div className="w-full text-center md:w-[65%] space-y-8 md:space-y-10">
-              <h1 className="text-4xl md:text-6xl font-extrabold text-center">
-                {currComic.name}
-              </h1>
-              {/* <div className="space-y-2">
-                <label className="text-rose-400">
-                  Enter Email to Claim your free comic
-                </label>
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="px-4 py-2 rounded-md outline-none w-2/3"
-                  placeholder="Your Email"
+          ) : (
+            <div className="bg-rose-50 flex flex-col md:flex-row items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20rem] md:w-[40rem] lg:w-[50rem] h-fit md:h-[25rem] lg:h-[30rem] rounded-md py-6 md:py-0 space-y-4">
+              <div
+                onClick={() => setCurrComic(null)}
+                className="absolute cursor-pointer top-6 right-4"
+              >
+                <MdClose className="text-2xl" />
+              </div>
+              <div className="w-full md:w-[45%] flex items-center justify-center">
+                <img
+                  className="w-[60%] rounded-lg shadow-2xl shadow-rose-400"
+                  src={currComic?.mini_thumbnail}
+                  alt="comic image"
                 />
-              </div> */}
-              <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
-                <span
+              </div>
+              <div className="w-full text-center md:w-[65%] space-y-8 md:space-y-10">
+                <h1 className="text-4xl md:text-6xl font-extrabold text-center">
+                  {currComic.name}
+                </h1>
+                <button
                   onClick={handleSendComic}
-                  className="bg-rose-400 mr-3 uppercase text-lg font-medium hover:bg-white hover:text-rose-400 transition-all duration-300 ease-in-out text-white py-3 px-7 rounded-full cursor-pointer"
+                  className="px-6 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 transition-colors"
                 >
-                  Read Now!
-                </span>
-                <span
-                  onClick={handlePrint}
-                  className="bg-rose-400 uppercase text-lg font-medium hover:bg-white hover:text-rose-400 transition-all duration-300 ease-in-out text-white py-3 px-7 rounded-full cursor-pointer"
-                >
-                  Print Now!
-                </span>
+                  View Comic
+                </button>
               </div>
             </div>
-          </div>
+          )}
         </motion.div>
       )}
     </div>
