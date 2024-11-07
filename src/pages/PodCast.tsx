@@ -20,7 +20,7 @@ const PodCast = () => {
       <Testimonial />
 
       {/* <FrequentlyAskeQuestion /> */}
-      <ContributeYourPodcast /> 
+      <ContributeYourPodcast />
     </>
   );
 };

@@ -620,7 +620,7 @@ const Footer = () => {
         throw new Error("Something went wrong");
       }
     } catch (err) {
-      toast(`❌ ${err}`);
+      toast(` ${err}`);
     } finally {
       resetForm();
       setSubmitting(false); // Stops the loading state after form submission
@@ -736,6 +736,7 @@ const Footer = () => {
                 {item.items.map((linkItem) => (
                   <div
                     onClick={() => handleLinkClick(linkItem)}
+                    key={linkItem.id}
                     className="cursor-pointer flex items-center gap-2 text-center justify-center lg:justify-normal hover:scale-110 transition-all duration-300  "
                   >
                     {linkItem.label.includes("@") && <MdEmail />}
