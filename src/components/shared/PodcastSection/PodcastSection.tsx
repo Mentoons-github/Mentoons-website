@@ -53,8 +53,8 @@ const PodcastSection = () => {
   //   return <Loader/>
   // }
 
-  console.log(podcasts)
-  console.log(loading)
+  // console.log(podcasts)
+  // console.log(loading)
 
   return (
     <>

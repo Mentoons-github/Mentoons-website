@@ -15,8 +15,8 @@ interface PodcastFormData {
   location: string;
   topic: string;
   description: string;
-  audiofile: File | string;
-  thumbnail?: File | string;
+  audiofile: File | null;
+  thumbnail?: File | null;
   category: string;
 }
 
@@ -54,15 +54,52 @@ const validationSchema = Yup.object({
   category: Yup.string().required("Category is required"),
 });
 const PodcastContributionForm = () => {
+  const uploadFile = async (file: File, fieldName: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    console.log(formData);
+    const response = await fetch(
+      "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload ${fieldName}`);
+    }
+
+    const data = await response.json();
+
+    console.log(data.data.imageUrl);
+    return data.data.imageUrl;
+  };
   const handleSubmit = async (
     values: PodcastFormData,
     { setSubmitting, resetForm }: FormikHelpers<PodcastFormData>
   ) => {
-    console.log("Form values:", values); // Log all the form values
+    console.log(values, "iiiii");
+    const uploadedFiles = {
+      audiofile: values.audiofile
+        ? await uploadFile(values.audiofile, "audiofile")
+        : null,
+      thumbnail: values.thumbnail
+        ? await uploadFile(values.thumbnail, "thumbnail")
+        : null,
+    };
+
+    console.log(uploadFile, "sdkfjsdflksdf");
+    const podcastContributionFormData = {
+      ...values,
+      ...uploadedFiles,
+    };
+
+    console.log("PodcastformData:", values);
     try {
       const response = await axiosInstance.post<ApiResponse>(
         "podcast/contribute",
-        values
+        podcastContributionFormData
       );
 
       // The data from the response is in response.data
@@ -88,8 +125,8 @@ const PodcastContributionForm = () => {
         location: "",
         topic: "",
         description: "",
-        audiofile: "",
-        thumbnail: "",
+        audiofile: null,
+        thumbnail: null,
         category: "",
       }} // Must match FormValues type
       validationSchema={validationSchema}
@@ -98,7 +135,7 @@ const PodcastContributionForm = () => {
       className="w-full"
     >
       {(
-        { isSubmitting, isValid, dirty } // Added isValid and dirty
+        { setFieldValue, isSubmitting, isValid, dirty } // Added isValid and dirty
       ) => (
         <Form className="w-full flex flex-col gap-2">
           <div className="w-full box-border  flex flex-wrap md:flex-nowrap gap-4 ">
@@ -237,36 +274,43 @@ const PodcastContributionForm = () => {
           </div>
           <div className="w-full box-border flex  flex-wrap md:flex-nowrap items-center gap-4">
             <div className="w-full">
-              <label htmlFor="name" className="text-lg font-bold text-gray-700">
-                Audio file
+              <label htmlFor="productFile">
+                Audio File (Image, PDF, Audio, or Video)
               </label>
-              <Field
+              <input
+                id="audiofile"
                 name="audiofile"
                 type="file"
-                className="w-full p-2 px-4  border rounded-full focus:outline-primary"
-                placeholder="Upload audio file"
+                accept="audio/*"
+                onChange={(event) => {
+                  const files = event.currentTarget.files;
+                  setFieldValue("audiofile", files ? files[0] : null);
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <ErrorMessage
                 name="audiofile"
                 component="div"
-                className="text-red-800 text-[14px]"
+                className="text-red-500 text-sm"
               />
             </div>
             <div className="w-full">
-              <label htmlFor="name" className="text-lg font-bold text-gray-700">
-                Thumbnail
-              </label>
-              <Field
+              <label htmlFor="productThumbnail">Thumbnail (Image)</label>
+              <input
+                id="thumbnail"
                 name="thumbnail"
                 type="file"
                 accept="image/*"
-                className="w-full p-2 px-4 border  rounded-full focus:outline-primary"
-                placeholder="Upload thumbnail image"
+                onChange={(event) => {
+                  const files = event.currentTarget.files;
+                  setFieldValue("thumbnail", files ? files[0] : null);
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <ErrorMessage
                 name="thumbnail"
                 component="div"
-                className="text-red-800 text-[14px]"
+                className="text-red-500 text-sm"
               />
             </div>
           </div>
@@ -278,7 +322,7 @@ const PodcastContributionForm = () => {
             disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
             className="bg-orange-600 text-white w-full p-2 rounded-full hover:bg-orange-700 transition-all duration-300 cursor-pointer whitespace-nowrap text-ellipsis"
           >
-            Submit your podcast
+            {isSubmitting ? "Submitting..." : "Submit you podcast"}
           </button>
         </Form>
       )}

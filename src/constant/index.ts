@@ -254,7 +254,7 @@ export const PODCAST_DETAILS = [
   },
 
   {
-    id: 62,
+    id: 17,
     topic: "Reconnecting Gen-Z with value beyond the screen.",
     description:
       "Helping Gen-Z rediscover meaningful connections and life experiences beyond digital screens, fostering deeper relationships and personal growth in a tech-driven world.",
@@ -269,7 +269,7 @@ export const PODCAST_DETAILS = [
     duration: "",
   },
   {
-    id: 63,
+    id: 18,
     topic: "Fun beyond video games",
     description:
       "Helping Gen-Z rediscover meaningful connections and life experiences beyond digital screens, fostering deeper relationships and personal growth in a tech-driven world.",
@@ -284,7 +284,7 @@ export const PODCAST_DETAILS = [
     duration: "",
   },
   {
-    id: 64,
+    id: 19,
     topic: "How to Maintain Healthy Relations",
     description:
       "Podcast on maintaining healthy relationship .A healty realtionship is where you feel the comfort trusted support each other and wellcome",
@@ -302,7 +302,7 @@ export const PODCAST_DETAILS = [
 
 export const AGE_CATEGORY = [
   {
-    id: 16,
+    id: 20,
     minAge: 2,
     maxAge: 5,
     ageCategoryBannerImgSrc: "/assets/images/age_2-5.jpg",
@@ -310,7 +310,7 @@ export const AGE_CATEGORY = [
       "Tiny Explorers Gazette: Discoverying the Wonder of The World for Little Ones",
   },
   {
-    id: 17,
+    id: 21,
     minAge: 6,
     maxAge: 12,
     ageCategoryBannerImgSrc: "/assets/images/age_6-12.jpg",
@@ -318,14 +318,14 @@ export const AGE_CATEGORY = [
       "Junior Discoverers Chornicles: Unraveling the Marvels of Knowledge for Young Minds",
   },
   {
-    id: 18,
+    id: 22,
     minAge: 13,
     maxAge: 19,
     ageCategoryBannerImgSrc: "/assets/images/age_13-19.jpg",
     description: "Youth Horizan: Breaking News and Trend for Teens. ",
   },
   {
-    id: 19,
+    id: 23,
     minAge: 20,
     maxAge: "+",
     ageCategoryBannerImgSrc: "/assets/images/age_20+.jpg",
@@ -335,61 +335,61 @@ export const AGE_CATEGORY = [
 
 export const LEFT_NAVLINKS = [
   {
-    id: 20,
+    id: 24,
     label: "Home",
   },
   {
-    id: 21,
+    id: 25,
     label: "About",
   },
   {
-    id: 22,
+    id: 26,
     label: "WorkShop",
   },
   {
-    id: 23,
+    id: 27,
     label: "Gallery",
   },
   {
-    id: 24,
+    id: 28,
     label: "Team",
   },
 ];
 
 export const RIGHT_NAVLINKS = [
   {
-    id: 25,
+    id: 29,
     label: "Comics",
   },
   {
-    id: 26,
+    id: 30,
     label: "Podcast",
   },
   {
-    id: 28,
+    id: 31,
     label: "Mentoons Store",
   },
   {
-    id: 29,
+    id: 32,
     label: "Sign up",
   },
 ];
 
 export const WORKSHOP = [
   {
-    id: 31,
+    id: 33,
     label: "Buddy Camp",
     imageURL: "/assets/images/buddy-camp.png",
     pageUrl: "/mentoons-workshops?workshop=buddy",
   },
   {
-    id: 30,
+    id: 34,
     label: "Teen Camp",
     imageURL: "/assets/images/teen-camp.png",
     pageUrl: "/mentoons-workshops?workshop=teen",
   },
   {
-    id: 32,
+    id: 35,
     label: "Family Camp",
     imageURL: "/assets/images/family-camp.png",
     pageUrl: "/mentoons-workshops?workshop=family",
@@ -398,22 +398,22 @@ export const WORKSHOP = [
 
 export const SHEET_FILTER = [
   {
-    id: 33,
+    id: 36,
     label: "Comic",
   },
   {
-    id: 34,
+    id: 37,
     label: "Podcast",
   },
   {
-    id: 35,
+    id: 38,
     label: "Workshop",
   },
 ];
 
 export const OPEN_POSITION = [
   {
-    id: 51,
+    id: 39,
     jobId: "JOB001",
     jobTitle: "MERN Developer",
     jobDescription: `We are currently seeking a Backend Developer to join our
@@ -454,7 +454,7 @@ export const OPEN_POSITION = [
     salary: 500000,
   },
   {
-    id: 52,
+    id: 40,
     jobId: "JOB002",
     jobTitle: "Anchor",
     jobDescription:
@@ -467,7 +467,7 @@ export const OPEN_POSITION = [
     salary: 500000,
   },
   {
-    id: 53,
+    id: 41,
     jobId: "JOB003",
     jobTitle: "Actor",
     jobDescription:
@@ -480,7 +480,7 @@ export const OPEN_POSITION = [
     salary: 500000,
   },
   {
-    id: 54,
+    id: 42,
     jobId: "JOB004",
     jobTitle: "Filmmaker",
     jobDescription:
@@ -493,7 +493,7 @@ export const OPEN_POSITION = [
     salary: 500000,
   },
   {
-    id: 55,
+    id: 43,
     jobId: "JOB004",
     jobTitle: "Storyteller",
     jobDescription:
