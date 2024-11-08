@@ -1,7 +1,13 @@
 import axiosInstance from "@/api/axios";
+import { uploadFile } from "@/redux/fileUploadSlice";
+import { AppDispatch } from "@/redux/store";
+import { useAuth } from "@clerk/clerk-react";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
+
 interface ApiResponse {
   success: boolean;
   data?: unknown; // You can replace 'any' with the actual data type you expect
@@ -15,8 +21,8 @@ interface PodcastFormData {
   location: string;
   topic: string;
   description: string;
-  audiofile: File | null;
-  thumbnail?: File | null;
+  audiofile: File;
+  thumbnail?: File;
   category: string;
 }
 
@@ -33,70 +39,48 @@ const validationSchema = Yup.object({
   topic: Yup.string().required("Topic is required"),
   description: Yup.string().required("Description is required"),
   audiofile: Yup.string().required("Audio file is required"),
-  thumbnail: Yup.mixed()
-    .optional()
-    .test(
-      "fileFormat",
-      "Unsupported file format",
-      function (value: any): boolean {
-        if (!value) return true; // Allow null or undefined values
-        if (typeof value === "string") return true;
-        return (
-          value && ["image/jpeg", "image/png", "image/gif"].includes(value.type)
-        );
-      }
-    )
-    .test("fileSize", "File too large", function (value: any): boolean {
-      if (!value) return true;
-      if (typeof value === "string") return true;
-      return value instanceof File && value.size <= 5000000;
-    }),
+  thumbnail: Yup.string(),
   category: Yup.string().required("Category is required"),
 });
 const PodcastContributionForm = () => {
-  const uploadFile = async (file: File, fieldName: string) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    console.log(formData);
-    const response = await fetch(
-      "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { getToken } = useAuth();
 
-    if (!response.ok) {
-      throw new Error(`Failed to upload ${fieldName}`);
-    }
-
-    const data = await response.json();
-
-    console.log(data.data.imageUrl);
-    return data.data.imageUrl;
-  };
   const handleSubmit = async (
     values: PodcastFormData,
     { setSubmitting, resetForm }: FormikHelpers<PodcastFormData>
   ) => {
-    console.log(values, "iiiii");
-    const uploadedFiles = {
-      audiofile: values.audiofile
-        ? await uploadFile(values.audiofile, "audiofile")
-        : null,
-      thumbnail: values.thumbnail
-        ? await uploadFile(values.thumbnail, "thumbnail")
-        : null,
-    };
-
-    console.log(uploadFile, "sdkfjsdflksdf");
-    const podcastContributionFormData = {
-      ...values,
-      ...uploadedFiles,
-    };
-
-    console.log("PodcastformData:", values);
     try {
+      const token = await getToken();
+      if (!token) {
+        navigate("/sign-in");
+        return toast.error("Login first to apply");
+      }
+
+      const audioFileAction = await dispatch(
+        uploadFile({ file: values.audiofile, getToken: async () => token })
+      );
+
+      let thumbnailUrl;
+      if (values.thumbnail) {
+        const thumbnailFileAction = await dispatch(
+          uploadFile({ file: values.thumbnail, getToken: async () => token })
+        );
+        thumbnailUrl = thumbnailFileAction.payload?.data?.data.imageUrl;
+      }
+
+      const audioFileUrl = audioFileAction.payload?.data?.data.imageUrl;
+
+      if (!audioFileUrl) {
+        return toast.error("Failed to upload audio file");
+      }
+      const podcastContributionFormData = {
+        ...values,
+        audiofile: audioFileUrl,
+        thumbnail: thumbnailUrl,
+      };
+
       const response = await axiosInstance.post<ApiResponse>(
         "podcast/contribute",
         podcastContributionFormData
@@ -113,6 +97,7 @@ const PodcastContributionForm = () => {
       toast(`❌ ${err}`);
     } finally {
       resetForm();
+
       setSubmitting(false); // Stops the loading state after form submission
     }
   };
@@ -125,8 +110,8 @@ const PodcastContributionForm = () => {
         location: "",
         topic: "",
         description: "",
-        audiofile: null,
-        thumbnail: null,
+        audiofile: undefined as unknown as File,
+        thumbnail: undefined as unknown as File,
         category: "",
       }} // Must match FormValues type
       validationSchema={validationSchema}
@@ -274,9 +259,7 @@ const PodcastContributionForm = () => {
           </div>
           <div className="w-full box-border flex  flex-wrap md:flex-nowrap items-center gap-4">
             <div className="w-full">
-              <label htmlFor="productFile">
-                Audio File (Image, PDF, Audio, or Video)
-              </label>
+              <label htmlFor="productFile">Audio File</label>
               <input
                 id="audiofile"
                 name="audiofile"
