@@ -84,7 +84,7 @@ const WorkshopForm: React.FC<WorkshopProps> = ({ selectedWorkshop, setShowForm }
           {!isSubmitted ? (
             <>
               <FaTimes
-                className="absolute top-0 right-0 text-2xl text-black"
+                className="absolute top-0 right-0 text-2xl text-black cursor-pointer"
                 onClick={() => setShowForm(false)}
               />
               <div className="text-center mb-8">

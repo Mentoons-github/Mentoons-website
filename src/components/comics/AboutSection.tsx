@@ -48,7 +48,7 @@ const AboutSection: React.FC = () => {
             className="rounded-full w-[80%]"
             src={TeamImage}
           />
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 3 }}
@@ -60,7 +60,7 @@ const AboutSection: React.FC = () => {
               </span>{" "}
               <Wordbreak /> Users
             </div>
-          </motion.div>
+          </motion.div> */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -68,7 +68,7 @@ const AboutSection: React.FC = () => {
             className="absolute bottom-0 left-0 bg-primary text-white rounded-full h-[8em] w-[8rem] lg:h-[13rem] lg:w-[13rem]"
           >
             <div className="w-full absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]  rounded-full font-medium tracking-wider text-center px-4">
-              <span className="text-2xl lg:text-5xl font-extrabold">20+ </span>{" "}
+              <span className="text-2xl lg:text-5xl font-extrabold">2+ </span>{" "}
               <Wordbreak /> Years of comic journey
             </div>
           </motion.div>
@@ -113,7 +113,7 @@ const AboutSection: React.FC = () => {
           <WhyMentoons />
         </motion.div>
       </div>
-      <MiniTestimonailsSlider />
+      {/* <MiniTestimonailsSlider /> */}
     </div>
   );
 };

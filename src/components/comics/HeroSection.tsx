@@ -257,6 +257,9 @@ const HeroSection: React.FC = () => {
                 <h1 className="text-4xl md:text-6xl font-extrabold text-center">
                   {currComic.name}
                 </h1>
+                <p className="text-center text-gray-500 text-sm">
+                  {currComic.desc}
+                </p>
                 <button
                   onClick={handleSendComic}
                   className="px-6 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 transition-colors"

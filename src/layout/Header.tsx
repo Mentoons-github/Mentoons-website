@@ -11,7 +11,7 @@ import {
 import { date } from "@/constant/websiteConstants";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
-import { FaCalendarAlt, FaHome, FaPhone } from "react-icons/fa";
+import { FaCalendarAlt, FaHome, FaPhone, FaUsers } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoCart } from "react-icons/io5";
 import { MdOutlineClose } from "react-icons/md";
@@ -95,6 +95,16 @@ const Header = () => {
                 <div className="flex items-center justify-around gap-2">
                   <IoCart />
                   Store
+                </div>
+              </MenubarTrigger>
+            </NavLink>
+          </MenubarMenu>
+          <MenubarMenu>
+            <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
+              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
+                <div className="flex items-center justify-around gap-2">
+                  <FaUsers className="mr-2" />
+                  Plans
                 </div>
               </MenubarTrigger>
             </NavLink>
@@ -234,10 +244,20 @@ const Header = () => {
           </MenubarMenu>
           <MenubarMenu>
             <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
+              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500] text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
                 <div className="flex items-center justify-around gap-2">
                   <IoCart />
                   Store
+                </div>
+              </MenubarTrigger>
+            </NavLink>
+          </MenubarMenu>
+          <MenubarMenu>
+            <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
+              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
+                <div className="flex items-center justify-around gap-2">
+                  <FaUsers className="mr-2" />
+                  Plans
                 </div>
               </MenubarTrigger>
             </NavLink>

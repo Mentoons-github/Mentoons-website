@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Replace the CDN worker setup with:
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.mjs',
   import.meta.url
@@ -42,9 +41,8 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
 
     if (!context) return;
 
-    // Calculate scale to fit viewport height
     const viewport = page.getViewport({ scale: 1.0 });
-    const containerHeight = window.innerHeight - 100; // Account for navigation
+    const containerHeight = window.innerHeight - 100; 
     const scale = containerHeight / viewport.height;
     
     const scaledViewport = page.getViewport({ scale });
@@ -81,14 +79,18 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
       style.textContent = `
         @media print {
           @page {
-            margin: 1cm;
-            size: auto;
+            size: A4;
+            margin: 0;
           }
           canvas {
-            width: 90% !important;
-            height: full !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 297mm !important; /* A4 height */
+            max-width: 210mm !important;  /* A4 width */
+            object-fit: contain;
             page-break-after: always;
-            margin: 0 auto;
+            margin: 0;
+            padding: 0;
             display: block;
           }
         }
@@ -99,7 +101,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
         const canvas = document.createElement('canvas');
         const page = await pdfDoc.getPage(i);
         
-        const viewport = page.getViewport({ scale: 3.0 });
+        const viewport = page.getViewport({ scale: 2.0 });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         
@@ -138,11 +140,9 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        
         <span className="text-sm text-neutral-600 min-w-[80px] text-center">
           {currentPage} / {numPages}
         </span>
-        
         <button 
           onClick={() => changePage(1)} 
           disabled={currentPage >= numPages}

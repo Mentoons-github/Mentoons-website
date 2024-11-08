@@ -22,7 +22,7 @@ const Home: React.FC = () => {
       </Suspense>
       {/* <Testimonials /> */}
       {/* <Pricing /> */}
-      <Blogs />
+      {/* <Blogs /> */}
     </>
   );
 };

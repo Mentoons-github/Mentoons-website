@@ -11,6 +11,7 @@ import { easeInOut } from "framer-motion";
 import { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
 import { useSearchParams } from "react-router-dom";
+import Membership from "./Membership";
 
 // import PricingPlan from "@/components/shared/Pricing-Plan";
 // import WhatWeOffer from "@/components/Home/WhatWeOffer";
