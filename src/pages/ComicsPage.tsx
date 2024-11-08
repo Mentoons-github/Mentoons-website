@@ -151,7 +151,7 @@ const ComicsPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="lg:absolute lg:left-[50%] lg:top-[40%] lg:translate-x-[-50%] lg:translate-y-[0%] text-center space-y-4">
+          <div className=" text-center space-y-4">
             <div className="text-4xl font-semibold">Comics Coming Soon! 🥺</div>
             <div className="text-gray-500 text-lg">
               Explore Out Other Popular Collections

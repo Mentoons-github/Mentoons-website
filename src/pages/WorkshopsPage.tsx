@@ -590,7 +590,7 @@ export const WorkshopPage4 = () => {
                   <img
                     src="/assets/images/portfolio-management.png"
                     alt="portfolio management "
-                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                 </div>
@@ -598,7 +598,7 @@ export const WorkshopPage4 = () => {
                   <img
                     src="/assets/images/interviewing-skill.png"
                     alt="interview skill"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                 </div>
@@ -606,7 +606,7 @@ export const WorkshopPage4 = () => {
                   <img
                     src="/assets/images/grooming-professional.png"
                     alt="grooming professional"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                 </div>
@@ -614,7 +614,7 @@ export const WorkshopPage4 = () => {
                   <img
                     src="/assets/images/whatsapp-manner.png"
                     alt="whatsapp manner"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                 </div>
@@ -622,7 +622,7 @@ export const WorkshopPage4 = () => {
                   <img
                     src="/assets/images/career-support.png"
                     alt="Career support"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                 </div>
