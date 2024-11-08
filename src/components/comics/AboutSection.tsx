@@ -1,7 +1,7 @@
 import React from "react";
 import TeamImage from "@/assets/imgs/team Illustration.jpg";
 import Wordbreak from "./Wordbreak";
-import { MiniTestimonailsSlider } from "./Sliders";
+// import { MiniTestimonailsSlider } from "./Sliders";
 import { motion } from "framer-motion";
 import WhyMentoons from "./WhyMentoons";
 
