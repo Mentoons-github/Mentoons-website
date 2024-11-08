@@ -368,10 +368,9 @@ export const workshopDetails: WorkshopItems[] = [
 ];
 
 export const audioComicsData: AudioComic[] = [
-  // groupSmall = 6 - 12, groupMedium = 13 - 19, groupLarge = 20+
   {
     name: "Bet Your Life",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A cautionary tale about the dangers of gambling and making risky life choices that can impact your future.",
     duration: "2:17",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-09.jpg",
@@ -384,7 +383,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "The Cell Life of Soniya",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An educational journey through cell biology with Soniya, making science fun and easy to understand.",
     duration: "2:31",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-12.jpg",
@@ -397,7 +396,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Choose Wisely",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A story that emphasizes the importance of making thoughtful decisions and understanding their long-term impact.",
     duration: "4:27",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-08.jpg",
@@ -410,7 +409,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Come out of Gaming",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An eye-opening narrative about gaming addiction and finding balance between virtual and real life.",
     duration: "5:51",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-05.jpg",
@@ -423,7 +422,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Comic on Divorce",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A sensitive exploration of family changes, helping children understand and cope with divorce.",
     duration: "2:04",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
@@ -436,7 +435,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Don't Fade Away",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A powerful story about maintaining your identity and standing strong in the face of peer pressure.",
     duration: "2:54",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-04.jpg",
@@ -449,7 +448,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Hungry for Likes Not Life",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An important message about social media addiction and the pursuit of online validation versus real-life fulfillment.",
     duration: "2:10",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-15.jpg",
@@ -462,7 +461,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "One Way Trip",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A compelling story about life-changing decisions and their irreversible consequences.",
     duration: "4:09",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-22.jpg",
@@ -475,7 +474,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Rishi and Rohit",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A heartwarming tale of friendship, understanding, and personal growth between two friends.",
     duration: "2:20",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
@@ -488,7 +487,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Rohan and the Puppies",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A touching story about compassion, responsibility, and the joy of caring for animals.",
     duration: "2:09",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
@@ -501,7 +500,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Think Before You Act",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An engaging narrative that teaches the importance of considering consequences before taking action.",
     duration: "3:45",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
@@ -514,7 +513,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Tanya's Downfall",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A cautionary tale about the consequences of poor choices and the path to redemption.",
     duration: "1:53",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
@@ -527,7 +526,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "How Teenagers Lose Their Jobs Part-1",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Essential lessons about workplace etiquette and common mistakes that can impact your career.",
     duration: "1:13",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-23.jpg",
@@ -540,7 +539,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "How Teenagers Lose Their Jobs Part-2",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Continued guidance on maintaining professional behavior and building a successful career path.",
     duration: "0:58",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-24.jpg",
@@ -553,7 +552,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "I can Manage (Time Management)",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Practical strategies and tips for effective time management and building productive habits.",
     duration: "1:29",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-02.jpg",
@@ -566,7 +565,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Comic on Honesty",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A valuable lesson about the importance of truthfulness and integrity in daily life.",
     duration: "1:16",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-01.jpg",
@@ -579,7 +578,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Greeting Comic",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Learning social etiquette and the importance of proper greetings in building relationships.",
     duration: "1:44",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/comic_4.jpg",
@@ -592,7 +591,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Live and Let Live",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An inspiring message about acceptance, tolerance, and celebrating differences.",
     duration: "2:02",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-21.jpg",
@@ -605,7 +604,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Say Sorry",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Understanding the power of apology and taking responsibility for our actions.",
     duration: "2:08",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-10.jpg",
@@ -618,7 +617,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "My Daily Routine",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Tips and strategies for creating and maintaining healthy daily habits for success.",
     duration: "0:47",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-01.jpg",
@@ -631,7 +630,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Do You Know",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An informative journey filled with interesting facts and knowledge for curious minds.",
     duration: "3:44",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-20.jpg",
@@ -643,8 +642,8 @@ export const audioComicsData: AudioComic[] = [
     type: ComicType.audioComic,
   },
   {
-    name:"Electronic Gadgets And Kids",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    name: "Electronic Gadgets And Kids",
+    desc: "Understanding the impact of technology on children and promoting healthy digital habits.",
     duration: "5:21",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-13.jpg",
@@ -657,7 +656,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "How to Handle Relationships",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Guidance on building and maintaining healthy relationships with family, friends, and peers.",
     duration: "5:11",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-14.jpg",
@@ -670,7 +669,7 @@ export const audioComicsData: AudioComic[] = [
   },
   {
     name: "Listen To Me",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A story about the importance of active listening and effective communication.",
     duration: "2:12",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-19.jpg",
@@ -686,7 +685,7 @@ export const audioComicsData: AudioComic[] = [
 export const comicsData: Comic[] = [
   {
     name: "Don't Fade Away",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A touching story about staying true to yourself and not losing your identity in the crowd.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-04.jpg",
     thumbnail:
@@ -698,7 +697,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "One Way Trip",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An adventure that teaches valuable lessons about choices and their permanent consequences.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-22.jpg",
     thumbnail:
@@ -710,7 +709,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Bet Your Life",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A powerful narrative about the risks of gambling and making life-altering decisions.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-09.jpg",
     thumbnail:
@@ -722,7 +721,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Come out of Gaming",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A realistic look at gaming addiction and the importance of maintaining life balance.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-05.jpg",
     thumbnail:
@@ -734,7 +733,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "The Cell Life of Soniya",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An entertaining educational journey making cell biology accessible and fun.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-12.jpg",
     thumbnail:
@@ -746,7 +745,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Tanya's Downfall",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A compelling story about facing consequences and finding the strength to change.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
     thumbnail:
@@ -758,7 +757,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Live and Let Live",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "An inspiring message about acceptance, tolerance, and celebrating differences.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-21.jpg",
     thumbnail:
@@ -770,7 +769,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "I can Manage (Time Management)",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Essential strategies for managing time effectively and achieving your goals.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-02.jpg",
     thumbnail:
@@ -782,7 +781,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Choose Wisely",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A thoughtful exploration of decision-making and its impact on our future.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-08.jpg",
     thumbnail:
@@ -794,7 +793,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Rohan and the Puppies",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A heartwarming tale about responsibility, compassion, and caring for animals.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
     thumbnail:
@@ -806,7 +805,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Rishi and Rohit",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A story celebrating friendship, understanding, and personal growth.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
     thumbnail:
@@ -818,7 +817,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "My Daily Routine",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A guide to building productive habits and maintaining a balanced lifestyle.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-01.jpg",
     thumbnail:
@@ -830,7 +829,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Comic on Divorce",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "A sensitive approach to helping children understand and cope with family changes.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
     thumbnail:
@@ -842,7 +841,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Say Sorry",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Learning about the importance of apologizing and making things right.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-10.jpg",
     thumbnail:
@@ -854,7 +853,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "How Teenagers Lose Their Jobs Part-2",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Valuable insights into maintaining professional behavior and building career success.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-24.jpg",
     thumbnail:
@@ -866,7 +865,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Hungry for Likes Not Life",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Examining social media's impact and the importance of real-world connections.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-15.jpg",
     thumbnail:
@@ -878,7 +877,7 @@ export const comicsData: Comic[] = [
   },
   {
     name: "Think Before You Act",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit sapiente maiores eius libero a commodi.",
+    desc: "Understanding the importance of careful consideration before taking action.",
     mini_thumbnail:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
     thumbnail:

@@ -52,7 +52,7 @@ export const VideoPopup: React.FC<VideoPopupProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="relative bg-white rounded-lg shadow-lg p-4 max-w-[425px] space-y-5">
+      <div className="relative bg-white rounded-lg shadow-lg p-4 space-y-5">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-black cursor-pointer text-xl hover:text-red-400 active:scale-50 transition-all ease-in-out duration-300"

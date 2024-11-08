@@ -1,13 +1,14 @@
 import WorkshopForm from "@/components/common/WorkshopForm";
-import WorkshopFeatureCard from "@/components/shared/Workshop/workshopFeatrueCard";
+// import WorkshopFeatureCard from "@/components/shared/Workshop/workshopFeatrueCard";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import ComingSoonModal from "@/components/common/ComingSoonModal";
 
 export interface WorkshopItems {
   name: string;
@@ -46,28 +47,26 @@ const WorkshopsPage = () => {
           className="w-full object-cover"
         /> */}
         <div
-          className={`flex items-center justify-center space-x-2 pt-12  ${
-            activeCategory === "6-12"
+          className={`flex items-center justify-center space-x-2 pt-12  ${activeCategory === "6-12"
               ? "bg-[#ffe5c8]"
               : activeCategory === "13-19"
-              ? "bg-[#ffe899]"
-              : activeCategory === "20+"
-              ? "bg-[#FDF7EE]"
-              : activeCategory === "Parents"
-              ? "bg-[#FFEBC3]"
-              : null
-          }`}
+                ? "bg-[#ffe899]"
+                : activeCategory === "20+"
+                  ? "bg-[#FDF7EE]"
+                  : activeCategory === "Parents"
+                    ? "bg-[#FFEBC3]"
+                    : null
+            }`}
         >
           <div
             className="w-[20%] md:w-[10%]"
             onClick={() => handleCategoryChange(WorkshopType.buddyCamp)}
           >
             <img
-              src={`/assets/images/${
-                activeCategory === "6-12"
+              src={`/assets/images/${activeCategory === "6-12"
                   ? "6-12-active-purple.png"
                   : "6-12-purple.png"
-              }`}
+                }`}
               alt=""
               className="w-full  object-cover"
             />
@@ -77,11 +76,10 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType.teenCamp)}
           >
             <img
-              src={`/assets/images/${
-                activeCategory === "13-19"
+              src={`/assets/images/${activeCategory === "13-19"
                   ? "13-19-active-purple.png"
                   : "13-19-purple.png"
-              }`}
+                }`}
               alt=""
               className="w-36 object-cover"
             />
@@ -91,11 +89,10 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType["20+Camp"])}
           >
             <img
-              src={`/assets/images/${
-                activeCategory === "20+"
+              src={`/assets/images/${activeCategory === "20+"
                   ? "20+-active-purple.png"
                   : "20+-purple.png"
-              }`}
+                }`}
               alt=""
               className="w-full object-cover"
             />
@@ -105,11 +102,10 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType.familyCamp)}
           >
             <img
-              src={`/assets/images/${
-                activeCategory === "Parents"
+              src={`/assets/images/${activeCategory === "Parents"
                   ? "parents-active-purple.png"
                   : "parents-purple.png"
-              }`}
+                }`}
               alt=""
               className="w-full object-cover"
             />
@@ -122,9 +118,8 @@ const WorkshopsPage = () => {
           {activeCategory === "20+" && <WorkshopPage4 />}
         </div>
         <div
-          className={`relative flex items-center justify-center left-0 px-8 py-3 cursor-pointer  ${
-            activeCategory === "20+" && "bg-[#FFE96C]"
-          }`}
+          className={`relative flex items-center justify-center left-0 px-8 py-3 cursor-pointer  ${activeCategory === "20+" && "bg-[#FFE96C]"
+            }`}
         >
           <img
             onClick={() => setShowForm(true)}
@@ -531,45 +526,48 @@ export const WorkshopsPage3 = () => {
 };
 
 export const WorkshopPage4 = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div>
-      <div className="bg-[#FDF7EE] flex flex-col items-start  0 md:flex-row">
-        <div className="flex md:w-[50%] flex-col items-start justify-start p-12 md:px-12">
-          <div className="w-full md:mt-20 md:mb-10">
-            <img
-              src="/assets/images/career-corner-hero-text.png"
-              alt=""
-              className="w-full object-cover"
-            />
-          </div>
-          <div className="w-full ">
-            <img
-              src="/assets/images/career-corner-subtext.png"
-              alt=""
-              className="w-full object-cover"
-            />
-          </div>
-        </div>
-        <div className="md:w-[50%] flex items-center   ">
-          <img
-            src="/assets/images/career-corner-hero-image.png"
-            alt=""
-            className="w-full"
-          />
-        </div>
-      </div>
-      <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full ">
-        <div className="w-full h-full flex flex-wrap   items-center justify-center ">
-          <div className=" flex flex-col   ">
-            <div className="w-full  p-12 ">
+    <>
+      {isModalOpen && <ComingSoonModal setIsModalOpen={setIsModalOpen} />}
+      <div>
+        <div className="bg-[#FDF7EE] flex flex-col items-start  0 md:flex-row">
+          <div className="flex md:w-[50%] flex-col items-start justify-start p-12 md:px-12">
+            <div className="w-full md:mt-20 md:mb-10">
               <img
-                src="/assets/images/career-corner-section-headline.png"
+                src="/assets/images/career-corner-hero-text.png"
                 alt=""
-                className="w-full boject-cover"
+                className="w-full object-cover"
               />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12 ">
-              <div>
+            <div className="w-full ">
+              <img
+                src="/assets/images/career-corner-subtext.png"
+                alt=""
+                className="w-full object-cover"
+              />
+            </div>
+          </div>
+          <div className="md:w-[50%] flex items-center   ">
+            <img
+              src="/assets/images/career-corner-hero-image.png"
+              alt=""
+              className="w-full"
+            />
+          </div>
+        </div>
+        <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full ">
+          <div className="w-full h-full flex flex-wrap   items-center justify-center ">
+            <div className=" flex flex-col   ">
+              <div className="w-full  p-12 ">
+                <img
+                  src="/assets/images/career-corner-section-headline.png"
+                  alt=""
+                  className="w-full boject-cover"
+                />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12 ">
+                {/* <div>
                 <Dialog>
                   <DialogTrigger asChild>
                     <div>
@@ -577,6 +575,7 @@ export const WorkshopPage4 = () => {
                         src="/assets/images/portfolio-management.png"
                         alt="portfolio management "
                         className="w-full object-cover hover:scale-105 transition-all duration-300"
+                        onClick={() => setIsModalOpen(true)}
                       />
                     </div>
                   </DialogTrigger>
@@ -584,46 +583,59 @@ export const WorkshopPage4 = () => {
                     <WorkshopFeatureCard />
                   </DialogContent>
                 </Dialog>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/interviewing-skill.png"
-                  alt="interview skill"
-                  className="w-full object-cover hover:scale-105 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <img
-                  src="/assets/images/grooming-professional.png"
-                  alt="grooming professional"
-                  className="w-full object-cover hover:scale-105 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <img
-                  src="/assets/images/whatsapp-manner.png"
-                  alt="whatsapp manner"
-                  className="w-full object-cover hover:scale-105 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <img
-                  src="/assets/images/career-support.png"
-                  alt="Career support"
-                  className="w-full object-cover hover:scale-105 transition-all duration-300"
-                />
+              </div> */}
+                <div>
+                  <img
+                    src="/assets/images/portfolio-management.png"
+                    alt="portfolio management "
+                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                </div>
+                <div>
+                  <img
+                    src="/assets/images/interviewing-skill.png"
+                    alt="interview skill"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                </div>
+                <div>
+                  <img
+                    src="/assets/images/grooming-professional.png"
+                    alt="grooming professional"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                </div>
+                <div>
+                  <img
+                    src="/assets/images/whatsapp-manner.png"
+                    alt="whatsapp manner"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                </div>
+                <div>
+                  <img
+                    src="/assets/images/career-support.png"
+                    alt="Career support"
+                    className="w-full object-cover hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                </div>
               </div>
             </div>
+            <div className=" md:w-[50%] flex items-center justify-center   ">
+              <img
+                src="/assets/images/career-corner-video-bg.png"
+                alt="Career corner video"
+                className="w-full  object-cover p-12"
+              />
+            </div>
           </div>
-          <div className=" md:w-[50%] flex items-center justify-center   ">
-            <img
-              src="/assets/images/career-corner-video-bg.png"
-              alt="Career corner video"
-              className="w-full  object-cover p-12"
-            />
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 };

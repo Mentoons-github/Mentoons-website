@@ -686,12 +686,12 @@ export const FOOTER_NAVLINKS = [
   },
   {
     id: "L_2",
-    title: "Comic",
+    title: "Comics",
     url: "/mentoons-comics",
   },
   {
     id: "L_3",
-    title: "Podcast",
+    title: "Podcasts",
     url: "/mentoons-podcast",
   },
   {
