@@ -6,13 +6,13 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getAllPodcast } from "@/redux/Podcastslice";
-import { AppDispatch, RootState } from "@/redux/store";
+import { AppDispatch } from "@/redux/store";
 import { useUser } from "@clerk/clerk-react";
 import Autoplay from "embla-carousel-autoplay";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PODCAST_DETAILS, PODCAST_SLIDER } from "../../../constant";
 import PodcastCardExp from "./PodcastCardExp";
@@ -45,9 +45,9 @@ const PodcastSection = () => {
     getAllPodcastData();
   }, []); 
 
-  const { podcasts, loading } = useSelector(
-    (state: RootState) => state.podcast
-  );
+  // const { podcasts, loading } = useSelector(
+  //   (state: RootState) => state.podcast
+  // );
 
   // if (loading) {
   //   return <Loader/>
