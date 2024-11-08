@@ -50,7 +50,7 @@ const PodcastContributionForm = () => {
 
   const handleSubmit = async (
     values: PodcastFormData,
-    { setSubmitting, resetForm }: FormikHelpers<PodcastFormData>
+    { setSubmitting }: FormikHelpers<PodcastFormData>
   ) => {
     try {
       const token = await getToken();
