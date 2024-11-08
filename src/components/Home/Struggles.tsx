@@ -22,16 +22,16 @@ const Struggles = () => {
   }, []);
   return (
     <>
-      <div className='w-full h-full pt-[26%]'>
+      <div className="w-full h-full pt-[26%]">
         <div className="bg-[url('/assets/home/Group 2.png')] lg:bg-cover bg-bottom bg-no-repeat  h-full w-full px-2 ">
-          <div className='relative flex flex-col md:flex-row items-center justify-around space-y-4'>
-            <h1 className='text-3xl lg:text-7xl text-start px-4'>
+          <div className="relative flex flex-col md:flex-row items-center justify-around space-y-4">
+            <h1 className="text-3xl lg:text-7xl text-start px-4">
               We know
               <br />
-              <span className='font-extrabold'>THE STRUGGLES</span>
+              <span className="font-extrabold">THE STRUGGLES</span>
               <br />
               our youth is facing
-              <p className='w-full md:w-[70%] lg:w-[90%] text-sm lg:text-lg text-start mt-4 text-[#ADA6A6] space-x-1'>
+              <p className="w-full md:w-[70%] lg:w-[90%] text-sm lg:text-lg text-start mt-4 text-[#ADA6A6] space-x-1">
                 <span>Mobile Addiction,</span>
                 <span>Scrolling Addiction,</span>
                 <span>Porn Addiction,</span>
@@ -42,8 +42,8 @@ const Struggles = () => {
             </h1>
             <div>
               <video
-                src='https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/struggle-we-know.mp4'
-                className='rounded-xl'
+                src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/struggle-we-know.mp4"
+                className="rounded-xl"
                 autoPlay
                 muted
                 loop
@@ -51,27 +51,47 @@ const Struggles = () => {
               />
             </div>
           </div>
-          <div className='w-full mt-8 '>
+          <div className="w-full mt-8 ">
             <img
-              src='/assets/images/struggle-we-know-banner.png'
-              alt=''
-              className='w-full object-cover'
+              src="/assets/images/struggle-we-know-banner.png"
+              alt=""
+              className="w-full object-cover"
             />
           </div>
         </div>
-        <div className="w-full flex bg-[url('/assets/images/blue-wave.png')] bg-top bg-no-repeat bg-cover pt-[5rem] lg:pt-40">
-          <div className='w-ful  flex flex-1 justify-center'>
+        <div className="w-full flex bg-[url('/assets/images/blue-wave.png')] bg-top bg-no-repeat bg-cover  lg:">
+          <div className="w-ful flex flex-1 justify-center ">
             <img
-              src='/assets/images/here-how-we-help.png'
-              alt='negative effects of mobile'
-              className=' w-[90%] lg:w-[70%]  object-cover pt-14 lg:pt-6'
+              src="/assets/images/here-how-we-help.png"
+              alt="negative effects of mobile"
+              className=" w-[70%] lg:w-[70%]  object-contain pt-12 lg:pt-36 "
             />
           </div>
-          <div className='flex flex-1 items-center'>
+          <div className="flex flex-col flex-1 gap-1 md:gap-4 items-center justify-center  pb-0  pt-12 md:pt-36">
+            {/* <img
+              src="/assets/home/Assets-2.png"
+              alt="negative effects of mobile"
+              className=" w-full object-contain lg:p-12 lg:pt-24"
+            /> */}
             <img
-              src='/assets/home/Assets-2.png'
-              alt='negative effects of mobile'
-              className=' w-full object-contain lg:p-12 lg:pt-24'
+              src="/assets/images/mentoons-offering-comic.png"
+              alt=""
+              className=" w-[80%] object-contain md:pr-12"
+            />{" "}
+            <img
+              src="/assets/images/metnoos-offering-audio-comic.png"
+              alt=""
+              className=" w-[80%] object-contain md:pr-12"
+            />{" "}
+            <img
+              src="/assets/images/mentoons-offering-podcast.png"
+              alt=""
+              className=" w-[80%] object-contain md:pr-12"
+            />{" "}
+            <img
+              src="/assets/images/mentoons-offering-workshop.png"
+              alt=""
+              className=" w-[80%] object-contain md:pr-12"
             />
           </div>
         </div>

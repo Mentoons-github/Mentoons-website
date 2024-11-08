@@ -14,7 +14,6 @@ import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
 
-
 // import emailjs from "emailjs-com";
 import React, { FormEvent, useState } from "react";
 import { FaTimes } from "react-icons/fa";
@@ -32,15 +31,7 @@ export type TPOSITION = {
   location: string;
 };
 // JOB ACCORDIAN COMPONENT
-const FAQCard = ({
-  position,
-  id,
- 
-}: {
-  position: TPOSITION;
-  id: string;
-
-}) => {
+const FAQCard = ({ position, id }: { position: TPOSITION; id: string }) => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
@@ -48,7 +39,6 @@ const FAQCard = ({
   const handleIsExpanded = () => {
     setIsExpanded((prev) => !prev);
   };
-
 
   return (
     <div
@@ -117,7 +107,7 @@ const FAQCard = ({
               Apply Now
             </Button>
           </DialogTrigger>
-          <DialogContent className="z-[999999]">
+          <DialogContent className="z-[999999] w-[90%] md:w-[50%]">
             <DialogClose asChild>
               <Button className="absolute top-2 right-2">
                 {" "}
