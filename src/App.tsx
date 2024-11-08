@@ -1,9 +1,8 @@
 import { Toaster } from "sonner"
 import Router from "./Routes"
 import ScrollToTop from "./components/comics/ScrollToTop"
-
 const App = () => {
-return (
+  return (
     <>
       <ScrollToTop />
       <Toaster position="top-right" closeButton />

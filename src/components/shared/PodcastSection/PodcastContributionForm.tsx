@@ -2,6 +2,7 @@ import axiosInstance from "@/api/axios";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
+import { log } from "console";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +50,7 @@ const PodcastContributionForm = () => {
 
   const handleSubmit = async (
     values: PodcastFormData,
-    { setSubmitting, resetForm }: FormikHelpers<PodcastFormData>
+    { setSubmitting }: FormikHelpers<PodcastFormData>
   ) => {
     try {
       const token = await getToken();
@@ -67,10 +68,11 @@ const PodcastContributionForm = () => {
         const thumbnailFileAction = await dispatch(
           uploadFile({ file: values.thumbnail, getToken: async () => token })
         );
-        thumbnailUrl = thumbnailFileAction.payload?.data?.data.imageUrl;
+        console.log(thumbnailFileAction, 'ppp')
+        thumbnailUrl = thumbnailFileAction.payload?.data?.imageUrl;
       }
 
-      const audioFileUrl = audioFileAction.payload?.data?.data.imageUrl;
+      const audioFileUrl = audioFileAction.payload?.data?.imageUrl;
 
       if (!audioFileUrl) {
         return toast.error("Failed to upload audio file");
@@ -82,22 +84,27 @@ const PodcastContributionForm = () => {
       };
 
       const response = await axiosInstance.post<ApiResponse>(
-        "podcast/contribute",
-        podcastContributionFormData
+        "/userContribution",
+        JSON.stringify(podcastContributionFormData),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        }
       );
 
       // The data from the response is in response.data
       const res: ApiResponse = response.data;
       if (res.success) {
         toast(`✅ ${res.message}`);
+        window.location.reload();
       } else {
         throw new Error("Something went wrong");
       }
     } catch (err) {
       toast(`❌ ${err}`);
     } finally {
-      resetForm();
-
       setSubmitting(false); // Stops the loading state after form submission
     }
   };
@@ -114,7 +121,7 @@ const PodcastContributionForm = () => {
         thumbnail: undefined as unknown as File,
         category: "",
       }} // Must match FormValues type
-      validationSchema={validationSchema}
+      // validationSchema={validationSchema}
       onSubmit={handleSubmit}
       // Correctly passing the handleSubmit
       className="w-full"
