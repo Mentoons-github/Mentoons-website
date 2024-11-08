@@ -2,12 +2,11 @@ import axiosInstance from "@/api/axios";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
-import { log } from "console";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import * as Yup from "yup";
+// import * as Yup from "yup";
 
 interface ApiResponse {
   success: boolean;
@@ -27,22 +26,22 @@ interface PodcastFormData {
   category: string;
 }
 
-const validationSchema = Yup.object({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  age: Yup.number()
-    .typeError("Age must be a number")
-    .positive("Age must be a positive number")
-    .required("Age is required"),
-  location: Yup.string().required("Location is required"),
-  topic: Yup.string().required("Topic is required"),
-  description: Yup.string().required("Description is required"),
-  audiofile: Yup.string().required("Audio file is required"),
-  thumbnail: Yup.string(),
-  category: Yup.string().required("Category is required"),
-});
+// const validationSchema = Yup.object({
+//   name: Yup.string().required("Name is required"),
+//   email: Yup.string()
+//     .email("Invalid email address")
+//     .required("Email is required"),
+//   age: Yup.number()
+//     .typeError("Age must be a number")
+//     .positive("Age must be a positive number")
+//     .required("Age is required"),
+//   location: Yup.string().required("Location is required"),
+//   topic: Yup.string().required("Topic is required"),
+//   description: Yup.string().required("Description is required"),
+//   audiofile: Yup.string().required("Audio file is required"),
+//   thumbnail: Yup.string(),
+//   category: Yup.string().required("Category is required"),
+// });
 const PodcastContributionForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
