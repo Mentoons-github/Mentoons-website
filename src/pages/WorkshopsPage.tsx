@@ -1,16 +1,15 @@
 import WorkshopForm from "@/components/common/WorkshopForm";
-// import WorkshopFeatureCard from "@/components/shared/Workshop/workshopFeatrueCard";
+import WorkshopFeatureCard from "@/components/shared/Workshop/workshopFeatrueCard";
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-
-  // DialogTrigger,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { WORKSHOP_FEATURES } from "@/constant";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ComingSoonModal from "@/components/common/ComingSoonModal";
 
 export interface WorkshopItems {
   name: string;
@@ -20,6 +19,13 @@ export interface WorkshopItems {
   pageUrl: string;
 }
 
+enum WorkshopType {
+  buddyCamp = "6-12",
+  teenCamp = "13-19",
+  "20+Camp" = "20+",
+  familyCamp = "Parents",
+}
+
 const WorkshopsPage = () => {
   const location = useLocation();
   const searchParams = location.search.split("=")[1];
@@ -27,12 +33,6 @@ const WorkshopsPage = () => {
   useEffect(() => {
     setActiveCategory(searchParams || WorkshopType.buddyCamp);
   }, [searchParams]);
-  enum WorkshopType {
-    buddyCamp = "6-12",
-    teenCamp = "13-19",
-    "20+Camp" = "20+",
-    familyCamp = "Parents",
-  }
   const [activeCategory, setActiveCategory] = React.useState<string>("6-12");
   const [showForm, setShowForm] = React.useState<boolean>(false);
 
@@ -49,26 +49,28 @@ const WorkshopsPage = () => {
           className="w-full object-cover"
         /> */}
         <div
-          className={`flex items-center justify-center space-x-2 pt-12  ${activeCategory === "6-12"
+          className={`flex items-center justify-center space-x-2 pt-12  ${
+            activeCategory === "6-12"
               ? "bg-[#ffe5c8]"
               : activeCategory === "13-19"
-                ? "bg-[#ffe899]"
-                : activeCategory === "20+"
-                  ? "bg-[#FDF7EE]"
-                  : activeCategory === "Parents"
-                    ? "bg-[#FFEBC3]"
-                    : null
-            }`}
+              ? "bg-[#ffe899]"
+              : activeCategory === "20+"
+              ? "bg-[#FDF7EE]"
+              : activeCategory === "Parents"
+              ? "bg-[#FFEBC3]"
+              : null
+          }`}
         >
           <div
             className="w-[20%] md:w-[10%]"
             onClick={() => handleCategoryChange(WorkshopType.buddyCamp)}
           >
             <img
-              src={`/assets/images/${activeCategory === "6-12"
+              src={`/assets/images/${
+                activeCategory === "6-12"
                   ? "6-12-active-purple.png"
                   : "6-12-purple.png"
-                }`}
+              }`}
               alt=""
               className="w-full  object-cover"
             />
@@ -78,10 +80,11 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType.teenCamp)}
           >
             <img
-              src={`/assets/images/${activeCategory === "13-19"
+              src={`/assets/images/${
+                activeCategory === "13-19"
                   ? "13-19-active-purple.png"
                   : "13-19-purple.png"
-                }`}
+              }`}
               alt=""
               className="w-36 object-cover"
             />
@@ -91,10 +94,11 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType["20+Camp"])}
           >
             <img
-              src={`/assets/images/${activeCategory === "20+"
+              src={`/assets/images/${
+                activeCategory === "20+"
                   ? "20+-active-purple.png"
                   : "20+-purple.png"
-                }`}
+              }`}
               alt=""
               className="w-full object-cover"
             />
@@ -104,10 +108,11 @@ const WorkshopsPage = () => {
             onClick={() => handleCategoryChange(WorkshopType.familyCamp)}
           >
             <img
-              src={`/assets/images/${activeCategory === "Parents"
+              src={`/assets/images/${
+                activeCategory === "Parents"
                   ? "parents-active-purple.png"
                   : "parents-purple.png"
-                }`}
+              }`}
               alt=""
               className="w-full object-cover"
             />
@@ -120,8 +125,9 @@ const WorkshopsPage = () => {
           {activeCategory === "20+" && <WorkshopPage4 />}
         </div>
         <div
-          className={`relative flex items-center justify-center left-0 px-8 py-3 cursor-pointer  ${activeCategory === "20+" && "bg-[#FFE96C]"
-            }`}
+          className={`relative flex items-center justify-center left-0 px-8 py-3 cursor-pointer  ${
+            activeCategory === "20+" && "bg-[#FFE96C]"
+          }`}
         >
           <img
             onClick={() => setShowForm(true)}
@@ -133,6 +139,12 @@ const WorkshopsPage = () => {
           <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
             <DialogContent className="z-[999999] bg-transparent border-0">
               {/* <DialogTitle></DialogTitle> */}
+              <button
+                onClick={() => setShowForm(false)}
+                className="close-button" // Add your desired styling here
+              >
+                Close
+              </button>
               <DialogDescription>
                 <div className="relative">
                   <WorkshopForm
@@ -495,7 +507,7 @@ export const WorkshopsPage3 = () => {
               <video
                 playsInline
                 webkit-playsinline
-                src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Teen+Camp+Common+Issues.mp4"
+                src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+20%2B/Challenges+Parents+Face+Today.mp4"
                 className=" w-[47%] absolute top-[24%] left-[25%]  md:top-[22%] md:left-[26%]"
                 autoPlay
                 controls
@@ -528,10 +540,29 @@ export const WorkshopsPage3 = () => {
 };
 
 export const WorkshopPage4 = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string[]>([]);
+
+  const handleChange = (feature: string) => {
+    const updatedFeature = selectedFeature.includes(feature)
+      ? selectedFeature.filter((item) => item !== feature)
+      : [...selectedFeature, feature];
+
+    setSelectedFeature(updatedFeature);
+  };
+
+  const handleSelectAllWorkShopModule = () => {
+    if (selectedFeature.length === WORKSHOP_FEATURES.length) {
+      setSelectedFeature([]);
+    } else {
+      const updatedFeature = WORKSHOP_FEATURES.map(
+        (feature) => feature.heading
+      );
+      setSelectedFeature(updatedFeature);
+    }
+  };
+
   return (
     <>
-      {isModalOpen && <ComingSoonModal setIsModalOpen={setIsModalOpen} />}
       <div>
         <div className="bg-[#FDF7EE] flex flex-col items-start  0 md:flex-row">
           <div className="flex md:w-[50%] flex-col items-start justify-start p-12 md:px-12">
@@ -568,63 +599,48 @@ export const WorkshopPage4 = () => {
                   className="w-full boject-cover"
                 />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12 ">
-                {/* <div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <div>
-                      <img
-                        src="/assets/images/portfolio-management.png"
-                        alt="portfolio management "
-                        className="w-full object-cover hover:scale-105 transition-all duration-300"
-                        onClick={() => setIsModalOpen(true)}
-                      />
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="bg-transparent flex items-center justify-center border-none md:w-[40%] ">
-                    <WorkshopFeatureCard />
-                  </DialogContent>
-                </Dialog>
-              </div> */}
-                <div>
-                  <img
-                    src="/assets/images/portfolio-management.png"
-                    alt="portfolio management "
-                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => setIsModalOpen(true)}
-                  />
-                </div>
-                <div>
-                  <img
-                    src="/assets/images/interviewing-skill.png"
-                    alt="interview skill"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => setIsModalOpen(true)}
-                  />
-                </div>
-                <div>
-                  <img
-                    src="/assets/images/grooming-professional.png"
-                    alt="grooming professional"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => setIsModalOpen(true)}
-                  />
-                </div>
-                <div>
-                  <img
-                    src="/assets/images/whatsapp-manner.png"
-                    alt="whatsapp manner"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => setIsModalOpen(true)}
-                  />
-                </div>
-                <div>
-                  <img
-                    src="/assets/images/career-support.png"
-                    alt="Career support"
-                    className="w-full object-cover hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => setIsModalOpen(true)}
-                  />
+              <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12   ">
+                {WORKSHOP_FEATURES.map((feature) => (
+                  <div key={feature.id}>
+                    <Dialog>
+                      <div className="relative marker:">
+                        <DialogTrigger asChild>
+                          <img
+                            src={feature.imageUrl}
+                            alt="portfolio management "
+                            className="w-full object-cover hover:scale-105 transition-all duration-300"
+                          />
+                        </DialogTrigger>
+                        <div className="absolute top-0 left-0">
+                          <input
+                            type="checkbox"
+                            className="w-6 h-6"
+                            checked={selectedFeature.includes(feature.heading)}
+                            onChange={() => handleChange(feature.heading)}
+                          />
+                        </div>
+                      </div>
+                      <DialogContent className="bg-white flex flex-col items-center justify-center border-none w-[95%]  md:w-[60%] lg:w-[30%]  p-0 rounded-[20px] ">
+                        <WorkshopFeatureCard
+                          featureData={feature}
+                          selectedFeature={selectedFeature}
+                          handleChange={handleChange}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                ))}
+                <div className="flex items-center justify-center">
+                  <button
+                    className="bg-mt-pink text-white font-semibold text-xl p-1 rounded-lg px-3 py-2"
+                    onClick={handleSelectAllWorkShopModule}
+                  >
+                    {selectedFeature.length === 0
+                      ? "Select All Modules"
+                      : selectedFeature.length === WORKSHOP_FEATURES.length
+                      ? "Deselect All Modules"
+                      : "Select More Modules"}
+                  </button>
                 </div>
               </div>
             </div>

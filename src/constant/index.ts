@@ -546,6 +546,24 @@ export const PODCAST_CATEGORY = [
         videoSrc:
           "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Build+Confidence.mp4",
       },
+      {
+        title: "Performance Addiction",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Performance+Addiction+6-12.mp4",
+      },
+      {
+        title: "Entertainment Addiction",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Copy+of+ENTERTAINMENT_ADDICTION_01.mp4",
+      },
+      {
+        title: "A Day With and Without a Phone",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/A+Day+Without+Phone+June+12.mp4",
+      },
     ],
   },
   {
@@ -563,6 +581,18 @@ export const PODCAST_CATEGORY = [
         description: "",
         videoSrc:
           "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/how-ai-impact-our-learning.mp4",
+      },
+      {
+        title: "Performance Addiction",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Performance+Addiction+13-19.mp4",
+      },
+      {
+        title: "Entertainment Addiction",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Entertainment+Addiction+01.mp4", 
       },
     ],
   },
@@ -656,7 +686,7 @@ export const SOCIAL_LINKS = [
     id: "S_2",
     icon: "facebook",
     color: "text-blue-500",
-    link: "https://www.facebook.com/profile.php?id=100078670785072&mibextid=LQQJ4d",
+    link: "https://www.facebook.com/profile.php?id=100078693769495",
   },
   {
     id: "S_3",
@@ -773,5 +803,199 @@ export const FOOTER_PAGELINKS = [
         url: "#",
       },
     ],
+  },
+];
+
+export const WORKSHOP_FEATURES = [
+  {
+    id: "WF_1",
+    heading: "Portfolio Management",
+    subHeading: "To help individual present themseleves professionally",
+    imageUrl: "/assets/images/portfolio-management.png",
+    color: "#B38FD8",
+    textColor: "#271481",
+    features: [
+      {
+        id: "pm_01",
+        label: "Resume Creation",
+        description:
+          "Crafting customized resumes that showcase relevant skills and experiences.",
+      },
+      {
+        id: "pm_02",
+        label: "Video Introduction",
+        description:
+          "Guidance for creating engaging, professional video introductions.",
+      },
+      {
+        id: "pm_03",
+        label: "Scrip Editing:",
+        description:
+          "Support for refining presentation scripts for clear, impactful communication.",
+      },
+    ],
+  },
+  {
+    id: "WF_2",
+    heading: "Interviewing Skills",
+    subHeading: "Prepare users for various interview formats and expectations",
+    imageUrl: "/assets/images/interviewing-skill.png",
+    color: "#EB4B7B",
+    textColor: "#66001F",
+    features: [
+      {
+        id: "is_01",
+        label: "Interview Etiquette",
+        description: "Guidance on professional demeanor and behaviour",
+      },
+      {
+        id: "is_02",
+        label: "Scheduling Interview",
+        description: "Tips for managing interview timings and confirmations.",
+      },
+      {
+        id: "is_03",
+        label: "Face-to-face and Video Interviewing",
+        description: "Best practices for in-persong and virtual interviews",
+      },
+    ],
+  },
+  {
+    id: "WF_3",
+    heading: "Grooming and Professional Image",
+    subHeading:
+      "Guide users on professional appearance and behavior to make a positive impression",
+    imageUrl: "/assets/images/grooming-professional.png",
+
+    color: "#FFBC05",
+    textColor: "#4A3602",
+    features: [
+      {
+        id: "gpi_01",
+        label: "Dressing and Styling Recommendataions",
+        description: "Advice on appropriate attire for professional setting. ",
+      },
+      {
+        id: "gpi_02",
+        label: "Image Management",
+        description: "Strategies for cultivating a professional image.",
+      },
+      {
+        id: "gpi_03",
+        label: "Grooming Tips:",
+        description:
+          "Suggestions from maintaining a polished professional appearance",
+      },
+    ],
+  },
+  {
+    id: "WF_4",
+    heading: "WhatsApp Manners",
+    subHeading: "Educate users on professional WhatsApp etiquette",
+    imageUrl: "/assets/images/whatsapp-manner.png",
+    color: "#F96A00",
+    textColor: "#582702",
+    features: [
+      {
+        id: "wm_01",
+        label: "Texting Etiquette",
+        description: "Guidelines for respectfull and concise communication. ",
+      },
+      {
+        id: "wm_02",
+        label: "Content Appropriateness",
+        description:
+          "Recommendataions on what to share and avoid in a professional setting.",
+      },
+      {
+        id: "wm_03",
+        label: "Communication Limits",
+        description:
+          "Advice on maintaining a professional tone and volume of communication",
+      },
+    ],
+  },
+  {
+    id: "WF_5",
+    heading: "Career Support Services",
+    subHeading:
+      "Provide access to top career advice, guidance on trending domains and expert insights",
+    imageUrl: "/assets/images/career-support.png",
+    color: "#0CC5BD",
+    textColor: "#003533",
+    features: [
+      {
+        id: "css_01",
+        label: "Trending Domains and Career Paths",
+        description: "Tips on building a career in high-demand fields",
+      },
+      {
+        id: "css_02",
+        label: "Social Media Guidance",
+        description: "Support for managing professional social media presence",
+      },
+      {
+        id: "css_03",
+        label: "10-minute Complimentary Calls",
+        description: "Short consultations with industry experts.",
+      },
+    ],
+  },
+];
+
+export const EMPLOYEES = [
+  {
+    id: "EMP_1",
+    name: "Mahesh",
+    designation: "Founder & CEO",
+    imageUrl: "/assets/images/mahesh-sir.jpg",
+  },
+  {
+    id: "EMP_2",
+    name: "Lincy",
+    designation: "SEO",
+    imageUrl: "/assets/images/lincy.jpg",
+  },
+  {
+    id: "EMP_3",
+    name: "Anitha",
+    designation: "UI/UX Designer",
+    imageUrl: "/assets/images/anitha.png",
+  },
+  {
+    id: "EMP_4",
+    name: "Mahetalat",
+    designation: "Content Writer & Illustrator",
+    imageUrl: "/assets/images/mahetalat.jpg",
+  },
+  {
+    id: "EMP_5",
+    name: "Ajay",
+    designation: "Video Editor",
+    imageUrl: "/assets/images/ajay.jpg",
+  },
+  {
+    id: "EMP_6",
+    name: "Dinesh",
+    designation: "Graphic Designer",
+    imageUrl: "/assets/images/dinesh.jpg",
+  },
+  {
+    id: "EMP_7",
+    name: "Dhanasekar",
+    designation: "Sketch Artist & Illustrator",
+    imageUrl: "/assets/images/dhanasekar.jpg",
+  },
+  {
+    id: "EMP_8",
+    name: "Ankur",
+    designation: "Fullstack Developer",
+    imageUrl: "/assets/images/ankur.jpg",
+  },
+  {
+    id: "EMP_9",
+    name: "Dheeraj",
+    designation: "Fullstack Developer",
+    imageUrl: "/assets/images/dheeraj.png",
   },
 ];

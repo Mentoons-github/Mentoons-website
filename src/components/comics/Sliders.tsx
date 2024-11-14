@@ -1,16 +1,8 @@
-import { Navigation, Pagination, A11y, Autoplay } from "swiper/modules";
 import User2 from "@/assets/imgs/user2.png";
 import User3 from "@/assets/imgs/user3.png";
+import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/scrollbar";
-import { FaRegStarHalfStroke, FaStar } from "react-icons/fa6";
-import React from "react";
-import TestimonialImg2 from "@/assets/imgs/testimonials2.jpg";
-import TestimonialImg4 from "@/assets/imgs/testemonials4.jpg";
 import Comic1 from "@/assets/imgs/comic1.jpg";
 import Comic2 from "@/assets/imgs/comic2.jpg";
 import Comic3 from "@/assets/imgs/comic3.jpg";
@@ -20,11 +12,16 @@ import Comic6 from "@/assets/imgs/comic6.jpg";
 import Comic7 from "@/assets/imgs/comic7.jpg";
 import Comic8 from "@/assets/imgs/comic8.jpg";
 import Comic9 from "@/assets/imgs/comic9.jpg";
-import Dhanashekar from "@/assets/imgs/dhanasekar Illustration.jpg";
-import Dhinesh from "@/assets/imgs/Dhinesh Illustration.jpg";
-import Sankar from "@/assets/imgs/sankar Illustration.jpg";
-import Ajay from "@/assets/imgs/ajay Illustration.jpg";
+import TestimonialImg4 from "@/assets/imgs/testemonials4.jpg";
+import TestimonialImg2 from "@/assets/imgs/testimonials2.jpg";
+import { EMPLOYEES } from "@/constant";
 import { motion } from "framer-motion";
+import React from "react";
+import { FaRegStarHalfStroke, FaStar } from "react-icons/fa6";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
 
 const TestimonialsSlider: React.FC = () => {
   return (
@@ -348,7 +345,7 @@ export const TeamSlider: React.FC = () => {
       // install Swiper modules
       modules={[Navigation, Pagination, A11y, Autoplay]}
       spaceBetween={50}
-      autoplay={{ delay: 500, disableOnInteraction: false }}
+      autoplay={{ delay: 1500, disableOnInteraction: false }}
       loop={true} // Enable infinite looping
       navigation={false}
       className="w-full"
@@ -366,86 +363,28 @@ export const TeamSlider: React.FC = () => {
         },
       }}
     >
-      <SwiperSlide>
-        <motion.div
-          initial={{ scale: 0.6 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center space-y-1 group"
-        >
-          <div className="overflow-hidden relative rounded-full">
-            <img
-              className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
-              src={Ajay}
-              alt=""
-            />
-          </div>
-          <div>
-            <div className="font-semibold text-xl">Ajay</div>
-            <div className="text-base">Video Editor</div>
-          </div>
-        </motion.div>
-      </SwiperSlide>
-      <SwiperSlide>
-        <motion.div
-          initial={{ scale: 0.6 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center space-y-1 group"
-        >
-          <div className="overflow-hidden relative rounded-full">
-            <img
-              className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
-              src={Dhinesh}
-              alt=""
-            />
-          </div>
-          <div>
-            <div className="font-semibold text-xl">Dhinesh</div>
-            <div className="text-base">Graphic Designer</div>
-          </div>
-        </motion.div>
-      </SwiperSlide>
-      <SwiperSlide>
-        <motion.div
-          initial={{ scale: 0.6 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center space-y-1 group"
-        >
-          <div className="overflow-hidden relative rounded-full">
-            <img
-              className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
-              src={Dhanashekar}
-              alt=""
-            />
-          </div>
-          <div>
-            <div className="font-semibold text-xl">Dhanashekar</div>
-            <div className="text-base">Sketch Artist</div>
-          </div>
-        </motion.div>
-      </SwiperSlide>
-      <SwiperSlide>
-        <motion.div
-          initial={{ scale: 0.6 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center space-y-1 group"
-        >
-          <div className="overflow-hidden relative rounded-full">
-            <img
-              className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
-              src={Sankar}
-              alt=""
-            />
-          </div>
-          <div>
-            <div className="font-semibold text-xl">Sankar</div>
-            <div className="text-base">Illustrator</div>
-          </div>
-        </motion.div>
-      </SwiperSlide>
+      {EMPLOYEES.map((employee) => (
+        <SwiperSlide key={employee.id}>
+          <motion.div
+            initial={{ scale: 0.6 }}
+            whileInView={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-center space-y-1 group"
+          >
+            <div className="overflow-hidden relative rounded-full">
+              <img
+                className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
+                src={employee.imageUrl}
+                alt=""
+              />
+            </div>
+            <div>
+              <div className="font-semibold text-xl">{employee.name}</div>
+              <div className="text-base">{employee.designation}</div>
+            </div>
+          </motion.div>
+        </SwiperSlide>
+      ))}
     </Swiper>
   );
 };

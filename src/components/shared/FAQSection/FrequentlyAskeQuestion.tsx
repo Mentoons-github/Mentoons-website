@@ -14,14 +14,19 @@ const FrequentlyAskeQuestion = () => {
     try {
       await dispatch(getOpenPositions());
       toast.success("Open Positions fetched successfully");
-    } catch (error:any) {
-      toast.error(error.message);
-      console.error("Failed to fetch open positions:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+        console.error("Failed to fetch open positions:", error);
+      } else {
+        toast.error("An unknown error occurred");
+        console.error("Failed to fetch open positions:", error);
+      }
     }
   };
   useEffect(() => {
     getOpenPositionsData();
-  }, []); 
+  }, []);
 
   const { openPositions, loading } = useSelector(
     (state: RootState) => state.career
