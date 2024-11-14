@@ -1,6 +1,6 @@
 import React from "react";
-import Wordbreak from "./Wordbreak";
 import { TeamSlider } from "./Sliders";
+import Wordbreak from "./Wordbreak";
 
 const Team: React.FC = () => {
   return (
@@ -14,7 +14,7 @@ const Team: React.FC = () => {
             Our Team{" "}
           </div>
           <div className="text-5xl text-center lg:text-7xl w-full font-extrabold tracking-wide leading-[1.10]">
-            Meet With Our <Wordbreak /> Comic Artist.
+            Meet With Our <Wordbreak /> Employees
           </div>
         </div>
         <div className="flex items-center justify-between gap-20">

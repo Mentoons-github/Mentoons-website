@@ -5,10 +5,9 @@ import NewComics from "@/components/comics/NewComics";
 // import Pricing from "@/components/comics/Pricing";
 // import Testimonials from "@/components/comics/Testimonials";
 import HeroSection from "@/components/comics/HeroSection";
-import React, { Suspense } from "react";
+// import React, { Suspense } from "react";
 // import Team from "./Team";
-import { lazy } from "react";
-const Team = lazy(() => import("@/components/comics/Team"));
+// import { lazy } from "react";
 
 const Home: React.FC = () => {
   return (
@@ -17,9 +16,9 @@ const Home: React.FC = () => {
       <AboutSection />
       <NewComics />
       <AudioComics />
-      <Suspense fallback={<div>Loading...</div>}>
+      {/* <Suspense fallback={<div>Loading...</div>}>
         <Team />
-      </Suspense>
+      </Suspense> */}
       {/* <Testimonials /> */}
       {/* <Pricing /> */}
       {/* <Blogs /> */}
