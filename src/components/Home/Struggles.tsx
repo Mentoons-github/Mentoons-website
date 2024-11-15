@@ -47,6 +47,8 @@ const Struggles = () => {
                 autoPlay
                 muted
                 loop
+                playsInline
+                webkit-playInline
                 width={videoSize}
               />
             </div>

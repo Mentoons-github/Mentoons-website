@@ -12,6 +12,8 @@ const Career = () => {
           className="w-full rounded-xl"
           autoPlay
           muted
+          playsInline
+          webkit-playInline
           width="400px"
           height="400px"
           // poster='/team-men.png'
@@ -45,7 +47,12 @@ const Career = () => {
 
       <div className=" grid md:grid-cols-2 ">
         <div className="relative p-4 pt-0 pl-5 rounded-lg">
-          <video className="h-full w-full rounded-lg" controls>
+          <video
+            className="h-full w-full rounded-lg"
+            controls
+            playsInline
+            webkit-playinline
+          >
             <source
               src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/experience+video/Abhishek+Testimonial.mp4"
               type="video/mp4"
@@ -53,7 +60,12 @@ const Career = () => {
           </video>
         </div>
         <div className="relative p-4 pt-0 pl-5 rounded-lg">
-          <video className="h-full w-full rounded-lg" controls>
+          <video
+            className="h-full w-full rounded-lg"
+            controls
+            playsInline
+            webkit-playinline
+          >
             <source
               src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/experience+video/Ayushi+Testimonial.mp4"
               type="video/mp4"

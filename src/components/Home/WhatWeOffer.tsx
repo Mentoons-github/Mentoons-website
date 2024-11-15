@@ -52,7 +52,7 @@ const WhatWeOffer = () => {
 
   return (
     <div className="w-full bg-[url('/assets/home/Bg.png')] bg-no-repeat bg-top bg-contain pt-20 lg:pt-[28rem] ">
-      <div className='w-full h-full flex flex-col gap-20 relative bg-[#ff6c6c] px-10 py-10'>
+      <div className="w-full h-full flex flex-col gap-20 relative bg-[#ff6c6c] px-10 py-10">
         {/* <div className="flex flex-col lg:flex-row z-30 items-center lg:text-left">
           <div>
             <Slide direction="left">
@@ -66,49 +66,51 @@ const WhatWeOffer = () => {
           </div>
         </div> */}
         {!showVideo && (
-          <figure className='w-4/5 sm:w-3/4 md:w-1/2 m-auto relative'>
+          <figure className="w-4/5 sm:w-3/4 md:w-1/2 m-auto relative">
             <img
-              src='/assets/home/baloon.png'
-              alt='balloons'
-              className='w-full h-auto'
+              src="/assets/home/baloon.png"
+              alt="balloons"
+              className="w-full h-auto"
             />
-            <div className='absolute top-1/2 left-4 sm:left-6 md:left-10 transform -translate-y-1/2'>
-              <h1 className='text-left text-xl lg:text-6xl md:text-4xl font-bold mb-2 sm:mb-4 md:mb-6 leading-tight text-[#9e7300]'>
+            <div className="absolute top-1/2 left-4 sm:left-6 md:left-10 transform -translate-y-1/2">
+              <h1 className="text-left text-xl lg:text-6xl md:text-4xl font-bold mb-2 sm:mb-4 md:mb-6 leading-tight text-[#9e7300]">
                 ENGAGING
                 <br /> MENTORING FOR
                 <br /> YOUR CHILD
               </h1>
-              <p className='text-left text-white text-base sm:text-lg md:text-xl lg:text-2xl'>
+              <p className="text-left text-white text-base sm:text-lg md:text-xl lg:text-2xl">
                 Made fun and effective
               </p>
             </div>
             <button
-              className='h-8 w-8 lg:h-28 lg:w-28 absolute bottom-8 right-12'
+              className="h-8 w-8 lg:h-28 lg:w-28 absolute bottom-8 right-12"
               onClick={handleShowVideo}
             >
               <img
-                src='/assets/home/btn-yellow.png'
-                alt='blue-btn'
-                className='h-full w-full object-contain'
+                src="/assets/home/btn-yellow.png"
+                alt="blue-btn"
+                className="h-full w-full object-contain"
               />
             </button>
           </figure>
         )}
 
         {showVideo && (
-          <div className='w-[60%] mx-auto'>
+          <div className="w-[60%] mx-auto">
             <video
-              src='https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/What+we+do+(Mentoons+video).mp4'
-              className='w-full h-auto rounded-md'
-              poster='/hero-thumb3.png'
+              src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/What+we+do+(Mentoons+video).mp4"
+              className="w-full h-auto rounded-md"
+              poster="/hero-thumb3.png"
               controls
+              playsInline
+              webkit-playInline
             >
               Your browser does not support the video tag.
             </video>
           </div>
         )}
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 z-30 relative'>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 z-30 relative">
           {cards.map((item, index) => (
             <Fade key={index} delay={index * 100}>
               <Cards indexValue={index} items={item} />

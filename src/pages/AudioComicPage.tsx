@@ -1,18 +1,18 @@
 // import { RootState } from "@/redux/store";
 import React, { useEffect, useRef, useState } from "react";
 // import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { AudioComic } from "@/redux/comicSlice";
+import { RootState } from "@/redux/store";
 import { CiSearch } from "react-icons/ci";
 import { FaRegCirclePlay } from "react-icons/fa6";
 import { IoShareSocial } from "react-icons/io5";
 import { TbExchange } from "react-icons/tb";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { AudioComic } from "@/redux/comicSlice";
+import { useLocation, useNavigate } from "react-router-dom";
 // import PurchaseDialog from "../components/comics/PurchaseDialog";
-import { toast } from "sonner";
-import { useParams } from "react-router-dom";
 import { jokes } from "@/constant/comicsConstants";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 export const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -123,6 +123,8 @@ const AudioComicPage: React.FC = () => {
               height="400"
               loop
               controls
+              playsInline
+              webkit-playsinline
               controlsList="nodownload"
             ></video>
             <div className="space-y-2">

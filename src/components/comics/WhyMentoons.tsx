@@ -66,6 +66,8 @@ export const VideoPopup: React.FC<VideoPopupProps> = ({
           height="1000"
           loop
           autoPlay
+          playsInline
+          webkit-playInline
           controls
           controlsList="nodownload"
         ></video>

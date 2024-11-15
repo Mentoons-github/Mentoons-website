@@ -123,6 +123,8 @@ const InsideMentoons: React.FC<HomeProps> = ({
               src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Team+Video_02.mp4"
               className="w-full h-full object-cover rounded-xl shadow-custom-complex"
               controls
+              playsInline
+                    webkit-playInline
               poster="/team-men.png"
             />
           </div>

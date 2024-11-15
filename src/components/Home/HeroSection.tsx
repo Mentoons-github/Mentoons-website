@@ -60,7 +60,13 @@ const HeroSection: React.FC = () => {
           </div>
         ) : (
           <div className="relative w-full h-full lg:h-screen">
-            <video className="w-full h-full object-cover" controls autoPlay>
+            <video
+              className="w-full h-full object-cover"
+              controls
+              autoPlay
+              playsInline
+              webkit-playInline
+            >
               <source
                 src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Mentor+genie+animation.mp4"
                 type="video/mp4"
@@ -140,6 +146,8 @@ const HeroSection: React.FC = () => {
               className="w-full h-full object-contain lg:object-cover"
               controls
               autoPlay
+              playsInline
+              webkit-playInline
             >
               <source
                 src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Mentor+genie+animation.mp4"
