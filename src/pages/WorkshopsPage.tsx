@@ -265,6 +265,7 @@ export const WorkshopsPage1 = () => {
                 className=" w-[47%] absolute top-[33%] left-[25%]  md:top-[31%] md:left-[26%]"
                 autoPlay
                 controls
+               
                 muted
               ></video>
             </div>

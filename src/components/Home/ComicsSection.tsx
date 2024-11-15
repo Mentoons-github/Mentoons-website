@@ -8,11 +8,11 @@ import WorkshopBgHome from "/assets/home/workshopSection.png";
 // import StoreBgHome from "@/assets/imgs/storeHome.png";
 import ElderWorkshopHome from "@/assets/imgs/elderWorkshopHome.svg";
 import BuddyWorkshopHome from "@/assets/imgs/kidsWorkshopHome.svg";
-import Klement_Toonla_Home from "@/assets/imgs/klement_toonlaBgHome.svg";
+// import Klement_Toonla_Home from "@/assets/imgs/klement_toonlaBgHome.svg";
 import ParentWorkshopHome from "@/assets/imgs/parentsWorkshopHome.png";
 import TeenWorkshopHome from "@/assets/imgs/teenWorkshopHome.svg";
 // import workshopTextHome from "@/assets/imgs/workshopTextHome.svg";
-import { easeInOut, motion } from "framer-motion";
+// import { easeInOut, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 // import AudioComicButton from "@/assets/imgs/audioComicButton.png";
 // import PodcastButton from "@/assets/imgs/podcastButton.png";
@@ -20,7 +20,8 @@ import { useNavigate } from "react-router-dom";
 // import ListenButton from "@/assets/imgs/listenButton.png";
 import { PODCAST_CATEGORY, PODCAST_SLIDER } from "@/constant";
 import Autoplay from "embla-carousel-autoplay";
-import { HiPlay } from "react-icons/hi";
+import { motion } from "framer-motion";
+import { HiPause, HiPlay } from "react-icons/hi";
 import {
   Carousel,
   CarouselContent,
@@ -47,7 +48,7 @@ const ComicsSection: React.FC = () => {
   };
   return (
     <>
-      <div className="relative  space-y-10 mt-20 mb-[160%] sm:mb-[124%] md:mb-[122%] lg:mb-[136%]">
+      <div className="relative  space-y-10 mt-20 mb-[170%] sm:mb-[134%] md:mb-[142%] lg:mb-[140%]">
         {/* WorkShop Section */}
 
         {/* Comic Section */}
@@ -79,7 +80,7 @@ const ComicsSection: React.FC = () => {
               alt="airplane image"
             />
           </div>
-          <div className="hidden lg:block absolute top-[30%] lg:top-[20%]">
+          {/* <div className="hidden lg:block absolute top-[30%] lg:top-[20%]">
             <motion.img
               initial={{ rotateX: 10, y: -200, scale: 0 }}
               whileInView={{ rotateX: 0, y: 300, scale: 1.2, opacity: 0 }}
@@ -108,7 +109,7 @@ const ComicsSection: React.FC = () => {
               src={Klement_Toonla_Home}
               alt="klement and toonla"
             />
-          </div>
+          </div> */}
           <div className="absolute z-50 flex items-center justify-start top-[50%]  left-[10%]">
             <motion.img
               initial={{ y: -20 }}
@@ -124,7 +125,7 @@ const ComicsSection: React.FC = () => {
               alt="books image"
             />
           </div>
-          <div className="absolute flex items-center justify-around top-[40%] ] right-0 lg:right-[10%]">
+          <div className="absolute  flex items-center justify-around top-[40%] ] right-0 lg:right-[10%]">
             <motion.img
               initial={{ y: -20 }}
               animate={{ y: [-20, -10, -20] }} // Smooth movement between values
@@ -208,9 +209,7 @@ const ComicsSection: React.FC = () => {
               </div>
               <div>
                 <img
-                  onClick={() =>
-                    navigate("/mentoons-workshops?workshop=20+")
-                  }
+                  onClick={() => navigate("/mentoons-workshops?workshop=20+")}
                   className="absolute right-[33%] top-[50%] w-[15%] hover:scale-105 cursor-pointer transition-all ease-in-out duration-300"
                   src={ElderWorkshopHome}
                   alt="workshop poster"
@@ -271,7 +270,7 @@ const ComicsSection: React.FC = () => {
         </div> */}
         </div>
         {/* Podcast Section*/}
-        <div className="absolute -bottom-[136%] ">
+        <div className="absolute -bottom-[136%]  ">
           {/* <img className='block' src={podcastSection} alt='workshop' /> */}
           <div className="relative ">
             <img src="/assets/images/new-podcast-page.png" alt="" />
@@ -286,24 +285,38 @@ const ComicsSection: React.FC = () => {
                     autoPlay
                     controls
                     muted
+                    playsInline
+                    webkit-playInline
                   />
                 </div>
 
-                <div className="self-center ">
+                <div className=" w-full  flex items-center justify-center">
                   {PODCAST_CATEGORY.filter(
                     (item) => item.categroy === isActiveCategory
                   ).map((item) => (
-                    <div key={item.categroy} className="pl-2 cursor-pointer">
+                    <div
+                      key={item.categroy}
+                      className=" cursor-pointer   w-full self-center pl-12"
+                    >
                       {item.podcastCategoryTopics.map((topic, index) => (
                         <div
                           key={index}
-                          className="flex items-start gap-2 "
+                          className="flex items-center gap-2 "
                           onClick={() => handleSelectedTopic(topic.videoSrc)}
                         >
-                          <span className="text-3xl md:text-4xl lg:text-6xl">
-                            <HiPlay />
-                          </span>
-                          <span className="text-base md:text-xl lg:text-2xl md:pt-2 hover:underline">
+                          {selectedTopic === topic.videoSrc ? (
+                            <span className="text-3xl md:text-4xl lg:text-6xl">
+                              <HiPause />
+                            </span>
+                          ) : (
+                            <span className="text-3xl md:text-4xl lg:text-6xl">
+                              <HiPlay />
+                            </span>
+                          )}
+                          <span
+                            className={`text-base md:text-xl lg:text-2xl md:pt-2 hover:underline truncate`}
+                            title={topic.title}
+                          >
                             {topic.title}
                           </span>
                         </div>
@@ -314,7 +327,7 @@ const ComicsSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="absolute top-[32%] right-0  w-[45%]  px-2 md:pr-8 ">
+            <div className="absolute top-[32%] right-0  w-[45%]  px-2 md:pr-8  ">
               <div className="relative">
                 <img src="/assets/images/blue-box.png" alt="" />
 

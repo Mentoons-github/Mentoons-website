@@ -16,7 +16,7 @@ const HeroSectionPodcast = () => {
   };
 
   return (
-    <section className='relative bg-primary'>
+    <section className="relative bg-primary">
       {/* <nav className='flex justify-between items-center px-4  pb-0'>
     <div className='w-28 sm:w-40 md:w-60 lg:w-40'>
       <img
@@ -46,67 +46,67 @@ const HeroSectionPodcast = () => {
     <source src='mentoons-intro-audio.mp3' />
   </audio> */}
       {/* Hero Section */}
-      <div className='relative'>
-        <div className='absolute left-1/2 -translate-x-1/2 xxs:top-4 sm:top-8 md:top-4 lg:top-8 2xl:top-24 md:w-[400px] lg:w-[600px] '>
+      <div className="relative">
+        <div className="absolute left-1/2 -translate-x-1/2 xxs:top-4 sm:top-8 md:top-4 lg:top-8 2xl:top-24 md:w-[400px] lg:w-[600px] ">
           <img
-            src='/assets/images/podcast-logo.png'
-            alt='Podcast logo'
-            className='w-full object-cover'
+            src="/assets/images/podcast-logo.png"
+            alt="Podcast logo"
+            className="w-full object-cover"
           />
         </div>
 
         {/* Play button */}
-        <div className='absolute  xxs:bottom-2  sm:bottom-4 left-1/2 -translate-x-1/2 xxs:w-14 flex gap-2 md:w-24 md:bottom-8 z-[40] lg:w-48 lg:bottom-10 '>
+        <div className="absolute  xxs:bottom-2  sm:bottom-4 left-1/2 -translate-x-1/2 xxs:w-14 flex gap-2 md:w-24 md:bottom-8 z-[40] lg:w-48 lg:bottom-10 ">
           <div
-            className='hover:scale-110 transition-all duration-300'
+            className="hover:scale-110 transition-all duration-300"
             onClick={handleIntroPlay}
           >
             <img
-              src='/assets/images/play.png'
-              alt='Play Button'
-              className='w-full object-cover'
+              src="/assets/images/play.png"
+              alt="Play Button"
+              className="w-full object-cover"
             />
             <audio
               ref={audioRef}
-              src='/assets/audios/mentoons-intro-audio.mp3'
+              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/mentoons-intro-audio.mp3"
             ></audio>
           </div>
           <div
-            className='hover:scale-110 transition-all duration-300'
+            className="hover:scale-110 transition-all duration-300"
             onClick={handleIntroPause}
           >
             <img
-              src='/assets/images/pause.png'
-              alt='Pause Button'
-              className='w-full object-cover'
+              src="/assets/images/pause.png"
+              alt="Pause Button"
+              className="w-full object-cover"
             />
             <audio
               ref={audioRef}
-              src='/assets/audios/mentoons-intro-audio.mp3'
+              src="/assets/audios/mentoons-intro-audio.mp3"
             ></audio>
           </div>
         </div>
 
         {/* Hero Image */}
-        <div className='relative pt-4'>
+        <div className="relative pt-4">
           <img
-            src='/assets/images/podcast-hero.png'
-            alt='Podcast hero Image'
-            className='w-full object-cover'
+            src="/assets/images/podcast-hero.png"
+            alt="Podcast hero Image"
+            className="w-full object-cover"
           />
 
           {/* Radio */}
-          <div className='   absolute w-14 sm:w-28 md:w-32 bottom-4 left-4 md:left-10 md:bottom-6 z-[40] lg:w-60'>
+          <div className="   absolute w-14 sm:w-28 md:w-32 bottom-4 left-4 md:left-10 md:bottom-6 z-[40] lg:w-60">
             <img
-              src='/assets/images/radio.png'
-              alt='Radio Illustration'
-              className='w-full object-cover'
+              src="/assets/images/radio.png"
+              alt="Radio Illustration"
+              className="w-full object-cover"
             />
 
             {/* Music Note Div */}
-            <div className='absolute bottom-0  flex sm:gap-2 justify-end  '>
+            <div className="absolute bottom-0  flex sm:gap-2 justify-end  ">
               <motion.div
-                className='w-4 absolute rotate-12 sm:w-6 md:w-12 '
+                className="w-4 absolute rotate-12 sm:w-6 md:w-12 "
                 initial={{ x: 0, opacity: 0, scale: 1, rotate: 0 }}
                 animate={{
                   x: [100, 0],
@@ -120,10 +120,10 @@ const HeroSectionPodcast = () => {
                   delay: 0,
                 }}
               >
-                <img src='/assets/images/music-note-3.png' alt='Music Notes' />
+                <img src="/assets/images/music-note-3.png" alt="Music Notes" />
               </motion.div>
               <motion.div
-                className=' absolute w-4 md:w-12 flex items-center '
+                className=" absolute w-4 md:w-12 flex items-center "
                 initial={{ x: 0, opacity: 0, scale: 1, rotate: 0 }}
                 animate={{
                   x: [100, 0],
@@ -137,10 +137,10 @@ const HeroSectionPodcast = () => {
                   delay: 1,
                 }}
               >
-                <img src='/assets/images/music-note-2.png' alt='Music Notes' />
+                <img src="/assets/images/music-note-2.png" alt="Music Notes" />
               </motion.div>
               <motion.div
-                className='w-4 flex items-end md:w-12 '
+                className="w-4 flex items-end md:w-12 "
                 initial={{ x: 0, opacity: 0, scale: 1, rotate: 0 }}
                 animate={{
                   x: [100, 0],
@@ -154,7 +154,7 @@ const HeroSectionPodcast = () => {
                   delay: 2,
                 }}
               >
-                <img src='/assets/images/music-note-1.png' alt='Music Notes' />
+                <img src="/assets/images/music-note-1.png" alt="Music Notes" />
               </motion.div>
             </div>
           </div>

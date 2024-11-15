@@ -592,7 +592,7 @@ export const PODCAST_CATEGORY = [
         title: "Entertainment Addiction",
         description: "",
         videoSrc:
-          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Entertainment+Addiction+01.mp4", 
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Entertainment+Addiction+01.mp4",
       },
     ],
   },
@@ -754,13 +754,8 @@ export const FOOTER_PAGELINKS = [
       },
       {
         id: "AB_5",
-        label: "Privacy Policy",
+        label: "Mentoons Privacy Policy",
         url: "/mentoons-privacy-policy",
-      },
-      {
-        id: "AB_6",
-        label: "Terms and Conditions",
-        url: "/mentoons-term-conditions",
       },
     ],
   },
