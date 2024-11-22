@@ -305,7 +305,12 @@ const ComicsSection: React.FC = () => {
                           onClick={() => handleSelectedTopic(topic.videoSrc)}
                         >
                           {selectedTopic === topic.videoSrc ? (
-                            <span className="text-3xl md:text-4xl lg:text-6xl">
+                            <span
+                              className={`text-3xl md:text-4xl lg:text-6xl ${
+                                selectedTopic === topic.videoSrc &&
+                                "text-blue-600"
+                              } `}
+                            >
                               <HiPause />
                             </span>
                           ) : (
@@ -314,7 +319,10 @@ const ComicsSection: React.FC = () => {
                             </span>
                           )}
                           <span
-                            className={`text-base md:text-xl lg:text-2xl md:pt-2 hover:underline truncate`}
+                            className={`text-base md:text-xl lg:text-2xl md:pt-2 hover:underline truncate ${
+                              selectedTopic === topic.videoSrc &&
+                              "text-blue-600 underline"
+                            }`}
                             title={topic.title}
                           >
                             {topic.title}

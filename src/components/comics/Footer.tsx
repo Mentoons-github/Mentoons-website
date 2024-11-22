@@ -723,13 +723,10 @@ const Footer = () => {
         )}
       </div>
       <div className=" px-16 gap-10 relative   lg:flex  ">
-        <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-32 lg:justify-end   ">
+        <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-10 lg:justify-end   ">
           {FOOTER_PAGELINKS.map((item) => (
             <div key={item.id} className="text-center lg:text-start">
-              <Link
-                to={item.url}
-                className="text-xl font-semibold mb-4 cursor-pointer"
-              >
+              <Link to={item.url} className="text-lg font-semibold mb-4 ">
                 {item.title}
               </Link>
               <div className=" mt-2 text-center">

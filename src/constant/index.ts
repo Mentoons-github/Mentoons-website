@@ -994,3 +994,291 @@ export const EMPLOYEES = [
     imageUrl: "/assets/images/dheeraj.png",
   },
 ];
+
+//categoryTitle
+//filter items Array
+// -- Trending
+// -- Latest
+// -- Most Popular
+// Product Array
+// -- id
+// -- thumbnail
+// -- description
+// -- prize
+// -- productType : Free / Paid
+// -- product Rating
+// -- productActionType : for Free download and print
+// -- porductActionType : for Pdid Add to cart and Buy Now
+
+export const PRODUCT_FILTERS = [
+  {
+    id: "PF_01",
+    lable: "Trending",
+    value: "trending",
+  },
+  {
+    id: "PF_02",
+    lable: "Latest",
+    value: "latest",
+  },
+  {
+    id: "PF_03",
+    lable: "Most Popular",
+    value: "most-popular",
+  },
+];
+
+export const PRODUCT_DETAILS = [
+  {
+    id: "PD_01",
+    categoryTitle: "Conversation Starter Cards",
+    productTitle: "Conversation Starter Cards (6-12)",
+    age: [6, 7, 8, 9, 10, 11, 12],
+    ageFilter: "Age (6-12)",
+    productSummary:
+      "This conversation starter card helps break the ice and build connections. It's perfect for social gatherings, team-building, or sparking interesting conversations.",
+    rating: "4/5",
+    paperEditionPrice: "₹ 199",
+    printablePrice: "₹ 99",
+    productType: "Free",
+    thumbnails: [
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+    ],
+    description: [
+      {
+        id: "D_01",
+        label: "Feature",
+        fatureList: [
+          {
+            id: "f_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_02",
+        label: "Advantage",
+        advantageList: [
+          {
+            id: "a_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_03",
+        label: "Benefits",
+        benefitsList: [
+          {
+            id: "b_01",
+            description: "",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "PD_02",
+    categoryTitle: "Story Re-Teller Card",
+    productTitle: "Story Re-Teller Card (13-17)",
+    age: [13, 14, 15, 16, 17],
+    ageFilter: "Age (13-17)",
+    productSummary:
+      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
+    rating: "4/5",
+    paperEditionPrice: "₹ 199",
+    printablePrice: "₹ 99",
+    productType: "Free",
+    thumbnails: [
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+    ],
+    description: [
+      {
+        id: "D_01",
+        label: "Feature",
+        fatureList: [
+          {
+            id: "f_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_02",
+        label: "Advantage",
+        advantageList: [
+          {
+            id: "a_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_03",
+        label: "Benefits",
+        benefitsList: [
+          {
+            id: "b_01",
+            description: "",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "PD_03",
+    categoryTitle: "Silent Stories",
+    productTitle: "Silent Stories (18 - 19)",
+    age: [18, 19],
+    ageFilter: "Age (18-19)",
+    productSummary:
+      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
+    rating: "4/5",
+    paperEditionPrice: "₹ 199",
+    printablePrice: "₹ 99",
+    productType: "Free",
+    thumbnails: [
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+    ],
+    description: [
+      {
+        id: "D_01",
+        label: "Feature",
+        fatureList: [
+          {
+            id: "f_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_02",
+        label: "Advantage",
+        advantageList: [
+          {
+            id: "a_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_03",
+        label: "Benefits",
+        benefitsList: [
+          {
+            id: "b_01",
+            description: "",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "PD_04",
+    categoryTitle: "Silent Stories",
+    productTitle: "Silent stories (20+)",
+    age: [20],
+    ageFilter: "Age (20+)",
+    productSummary:
+      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
+    rating: "4/5",
+    paperEditionPrice: "₹ 199",
+    printablePrice: "₹ 99",
+    productType: "Free",
+    thumbnails: [
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+      {
+        id: "th_01",
+        media: "http://example.com",
+      },
+    ],
+    description: [
+      {
+        id: "D_01",
+        label: "Feature",
+        fatureList: [
+          {
+            id: "f_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_02",
+        label: "Advantage",
+        advantageList: [
+          {
+            id: "a_01",
+            description: "",
+          },
+        ],
+      },
+      {
+        id: "D_03",
+        label: "Benefits",
+        benefitsList: [
+          {
+            id: "b_01",
+            description: "",
+          },
+        ],
+      },
+    ],
+  },
+];
