@@ -265,7 +265,6 @@ export const WorkshopsPage1 = () => {
                 className=" w-[47%] absolute top-[33%] left-[25%]  md:top-[31%] md:left-[26%]"
                 autoPlay
                 controls
-               
                 muted
               ></video>
             </div>
@@ -590,9 +589,9 @@ export const WorkshopPage4 = () => {
             />
           </div>
         </div>
-        <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full ">
-          <div className="w-full h-full flex flex-wrap   items-center justify-center ">
-            <div className=" flex flex-col   ">
+        <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full border ">
+          <div className="w-full flex flex-wrap items-center justify-center border ">
+            <div className=" flex flex-col border  ">
               <div className="w-full  p-12 ">
                 <img
                   src="/assets/images/career-corner-section-headline.png"
@@ -600,7 +599,7 @@ export const WorkshopPage4 = () => {
                   className="w-full boject-cover"
                 />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12   ">
+              <div className="grid grid-cols-2 md:grid-cols-3 place-content-center  gap-4 px-6 md:pb-40 md:gap-12">
                 {WORKSHOP_FEATURES.map((feature) => (
                   <div key={feature.id}>
                     <Dialog>
@@ -645,12 +644,14 @@ export const WorkshopPage4 = () => {
                 </div>
               </div>
             </div>
-            <div className=" md:w-[50%] flex items-center justify-center   ">
-              <img
-                src="/assets/images/career-corner-video-bg.png"
-                alt="Career corner video"
-                className="w-full  object-cover p-12"
-              />
+            <div>
+              <div className="w-full flex items-center justify-center   ">
+                <img
+                  src="/assets/images/career-corner-video-bg.png"
+                  alt="Career corner video"
+                  className="w-full  object-cover p-12"
+                />
+              </div>
             </div>
           </div>
         </section>

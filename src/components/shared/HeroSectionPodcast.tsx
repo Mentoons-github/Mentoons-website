@@ -68,6 +68,7 @@ const HeroSectionPodcast = () => {
             />
             <audio
               ref={audioRef}
+              typeof=".mp3"
               src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/mentoons-intro-audio.mp3"
             ></audio>
           </div>
@@ -82,7 +83,7 @@ const HeroSectionPodcast = () => {
             />
             <audio
               ref={audioRef}
-              src="/assets/audios/mentoons-intro-audio.mp3"
+              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/mentoons-intro-audio.mp3"
             ></audio>
           </div>
         </div>

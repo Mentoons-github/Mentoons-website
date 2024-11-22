@@ -215,6 +215,14 @@ const routes = [
       </MainLayout>
     ),
   },
+  // {
+  //   path: "/mentoons-store/product/:productId",
+  //   element: (
+  //     <MainLayout>
+  //       <Product />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/mentoons-privacy-policy",
     element: (
