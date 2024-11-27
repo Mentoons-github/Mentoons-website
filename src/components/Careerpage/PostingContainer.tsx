@@ -64,7 +64,7 @@ const PostingContainer = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <JobApplicationForm id={selectedPosition._id} />
+                                <JobApplicationForm id={selectedPosition._id} setIsFormOpen={setIsFormOpen} />
                             </div>
                         </div>
                     ) : (

@@ -31,7 +31,7 @@ export type TPOSITION = {
   location: string;
 };
 // JOB ACCORDIAN COMPONENT
-const FAQCard = ({ position, id }: { position: TPOSITION; id: string }) => {
+const FAQCard = ({ position }: { position: TPOSITION; }) => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
@@ -122,7 +122,7 @@ const FAQCard = ({ position, id }: { position: TPOSITION; id: string }) => {
                 Fill in the details below and we'll contact you.
               </DialogDescription>
             </DialogHeader>
-            <JobApplicationForm id={id} />
+            {/* <JobApplicationForm id={id} /> */}
           </DialogContent>
         </Dialog>
       </div>
@@ -146,7 +146,7 @@ interface FormError {
   [key: string]: string;
 }
 
-export function JobApplicationForm({ id }: { id: string }) {
+export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFormOpen: (value: boolean) => void }) {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
@@ -279,6 +279,7 @@ export function JobApplicationForm({ id }: { id: string }) {
 
       if (res.payload?.success) {
         toast.success("Application submitted successfully");
+        setIsFormOpen(false);
       } else {
         toast.error(res.payload?.message || "Failed to submit application");
       }
