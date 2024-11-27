@@ -18,6 +18,7 @@ import PolicyPage from "./pages/PolicyPage";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import CareerPage from "./pages/CareerPage";
 
 // Lazy load the pages
 const Home = lazy(() => import("./pages/Home"));
@@ -29,7 +30,7 @@ const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
 const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
-const Career = lazy(() => import("./components/shared/CareerPage/Career"));
+// const Career = lazy(() => import("./components/shared/CareerPage/Career"));
 const PodCast = lazy(() => import("./pages/PodCast"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
@@ -167,14 +168,14 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/hiring",
-    element: (
-      <MainLayout>
-        <Career />
-      </MainLayout>
-    ),
-  },
+  // {
+  //   path: "/hiring",
+  //   element: (
+  //     <MainLayout>
+  //       <Career />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/mentoons-podcast",
     element: (
@@ -244,6 +245,14 @@ const routes = [
     element: (
       <MainLayout>
         <Membership />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/hiring",
+    element: (
+      <MainLayout>
+        <CareerPage />
       </MainLayout>
     ),
   },

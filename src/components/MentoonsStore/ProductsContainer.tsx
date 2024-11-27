@@ -1,15 +1,15 @@
-import { useState } from "react";
-import ProductCategories from "./ProductCategories"
-import Products from "./Products"
+// import { useState } from "react";
+// import ProductCategories from "./ProductCategories"
+// import Products from "./Products"
 
 export type ProductType = ""|'Comic' | 'Cards' | 'Posters';
 
 const ProductsContainer = () => {
-  const [selectedCategory, setSelectedCategory] = useState<ProductType>('');
+  // const [selectedCategory, setSelectedCategory] = useState<ProductType>('');
 
-  const handleCategoryChange = (category: ProductType) => {
-    setSelectedCategory(category);
-  };
+  // const handleCategoryChange = (category: ProductType) => {
+  //   setSelectedCategory(category);
+  // };
 
   return (
     <div className="bg-white rounded-xl shadow-xl w-[80%] m-auto relative -top-16 py-12 flex flex-col space-y-4 lg:space-y-16">
@@ -21,12 +21,12 @@ const ProductsContainer = () => {
         <h1 className="lg:text-[18px] font-semibold text-center">Recent Trending in Mentoons</h1>
       </div>
       </div>
-      <div className="">
+      {/* <div className="">
         <ProductCategories setSelectedCategory={handleCategoryChange} />
       </div>
       <div>
         <Products selectedCategory={selectedCategory}/>
-      </div>
+      </div> */}
     </div>
   )
 }

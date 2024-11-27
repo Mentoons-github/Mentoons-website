@@ -100,7 +100,7 @@ const FAQCard = ({ position, id }: { position: TPOSITION; id: string }) => {
             <Button
               className="text-neutral-700 font-bold px-5 py-2 w-full border bg-transparent border-neutral-700 hover:bg-orange-400/40 hover:border-orange-400 mb-4 rounded-md transition-all duration-300"
               onClick={async () => {
-                const token = await getToken();
+                 const token = await getToken();
                 if (!token) navigate("/sign-in");
               }}
             >
@@ -404,7 +404,7 @@ export function JobApplicationForm({ id }: { id: string }) {
 
       <Button
         type="submit"
-        className="p-3 text-base bg-primary text-white mb-4 rounded-lg hover:bg-orange-500 transition-all duration-300"
+        className="w-full mt-4 bg-gradient-to-b from-[#60C6E6] to-[#3D8196] text-white hover:opacity-90 snap-center transition-all duration-300"
         disabled={loading}
       >
         {loading ? "Submitting..." : "Submit"}

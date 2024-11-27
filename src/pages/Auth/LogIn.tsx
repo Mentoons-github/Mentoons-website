@@ -12,7 +12,7 @@ const LogIn = () => {
         />
       </div>
       <div className="flex-1 flex items-center justify-center">
-        <SignIn signUpUrl="/sign-up" />
+        <SignIn signUpUrl="/sign-up" routing="path" path="/hiring" />
       </div>
     </div>
   );
