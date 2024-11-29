@@ -1,4 +1,3 @@
-import OfferingCards from "./OfferingCards"
 
 const MdMultiverse = () => {
     const OfferingData = [
