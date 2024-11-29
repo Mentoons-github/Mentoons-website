@@ -40,7 +40,7 @@ const FrequentlyAskeQuestion = () => {
       <div className="p-1 flex flex-col gap-4 md:w-[80%] lg:w-[65%]">
         {Array.isArray(openPositions) && openPositions.length > 0 ? (
           openPositions.map((position) => (
-            <FAQCard key={position._id} position={position} id={position._id} />
+            <FAQCard key={position._id} position={position} />
           ))
         ) : (
           <p className="text-2xl font-bold text-center">

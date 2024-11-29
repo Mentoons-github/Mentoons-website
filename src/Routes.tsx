@@ -19,6 +19,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import CareerPage from "./pages/CareerPage";
+import LandingPage from "./pages/LandingPage";
 
 // Lazy load the pages
 const Home = lazy(() => import("./pages/Home"));
@@ -253,6 +254,14 @@ const routes = [
     element: (
       <MainLayout>
         <CareerPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/landing-page",
+    element: (
+      <MainLayout>
+        <LandingPage />
       </MainLayout>
     ),
   },
