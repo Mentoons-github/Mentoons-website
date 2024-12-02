@@ -81,7 +81,9 @@ const WorkshopSection = () => {
                     </figure>
                 </div>
             </div>
-            <img src="/assets/LandingPage/bg1.png" alt="clouds" className="absolute bottom-0 left-0 w-full h-auto object-contain z-20" />
+            <img src="/assets/LandingPage/abc7.png" alt="clouds" className="absolute -bottom-4 left-0 w-full h-auto object-bottom" />
+            <img src="/assets/LandingPage/men-art.png" alt="men art" className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[10rem] md:w-[14rem] lg:w-[18rem] h-auto object-bottom z-20 hidden lg:block" />
+            <h1 className="absolute bottom-8 left-[58%] text-[#864403] font-semibold text-lg md:text-4xl lg:text-3xl z-20 hidden lg:block">Listen to us<br />Daily</h1>
         </div>
     )
 }
