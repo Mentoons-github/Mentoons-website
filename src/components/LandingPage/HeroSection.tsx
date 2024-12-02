@@ -1,33 +1,33 @@
 const HeroSection = () => {
     return (
-        <div className="w-full h-[86vh] lg:h-[92vh]">
+        <div className="w-full h-[86vh] md:h-[90vh] lg:h-[92vh]">
             <div className="w-full h-full relative bg-[url('/assets/LandingPage/fullbg.png')] bg-cover bg-bottom bg-no-repeat">
-                <div className="flex flex-col lg:flex-row items-center justify-between w-full py-10 md:py-10 px-4 md:px-20 relative z-10">
+                <div className="flex flex-col md:flex-row items-center justify-between w-full py-10 md:py-8 lg:py-12 px-4 md:px-8 lg:px-16 xl:px-24 relative z-10">
                     <figure className="w-full h-full">
-                        <img src="/assets/LandingPage/logo.png" alt="hero-bg" className="mx-auto md:mx-0 w-32 sm:w-40 md:w-40 lg:w-auto" />
+                        <img src="/assets/LandingPage/logo.png" alt="hero-bg" className="mx-auto md:mx-0 w-32 sm:w-40 md:w-44 lg:w-auto" />
                     </figure>
-                    <div className="mt-2 md:mt-0 relative">
-                        <h1 className="text-black text-lg sm:text-xl md:text-xl lg:text-4xl font-bold text-center animate-fade-in">
+                    <div className="mt-2 md:mt-4 relative">
+                        <h1 className="text-black text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold text-center animate-fade-in">
                             Transforming Lives Through
                         </h1>
-                        <figure className="relative w-[14rem] md:w-[22rem] lg:w-[30rem]">
-                            <h1 className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white text-lg sm:text-xl md:text-2xl lg:text-5xl font-bold whitespace-nowrap animate-slide-in">
+                        <figure className="relative w-[14rem] md:w-[24rem] lg:w-[30rem]">
+                            <h1 className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white text-lg sm:text-xl md:text-3xl lg:text-5xl font-bold whitespace-nowrap animate-slide-in">
                                 MENTORING AND
                             </h1>
-                            <h1 className="absolute top-[50%] left-[40%] text-white text-lg sm:text-xl md:text-2xl lg:text-5xl font-bold whitespace-nowrap animate-bounce-in">
+                            <h1 className="absolute top-[50%] left-[40%] text-white text-lg sm:text-xl md:text-3xl lg:text-5xl font-bold whitespace-nowrap animate-bounce-in">
                                 CARTOONS
                             </h1>
                             <img src="/assets/LandingPage/mentoring.png" alt="hero-text" className="w-full h-full" />
                         </figure>
                     </div>
                 </div>
-                <figure className="absolute lg:top-1/2 transform -translate-y-1/2 top-[35%] md:top-[35%] left-6 md:left-16 w-[8rem] md:w-[12rem] lg:w-[20rem] transition-transform hover:scale-105 z-10">
+                <figure className="absolute top-[35%] md:top-[45%] lg:top-1/2 transform -translate-y-1/2 left-6 md:left-8 lg:left-12 xl:left-20 w-[8rem] md:w-[10rem] lg:w-[12rem] xl:w-[20rem] transition-transform hover:scale-105 z-10">
                     <img src="/assets/LandingPage/psyco.png" alt="hero-image" className="w-full h-full" />
                 </figure>
-                <figure className="absolute left-1/2 transform -translate-x-1/2 w-[20rem] md:w-[28rem] lg:w-[40rem] bottom-20 md:bottom-24 lg:bottom-40 transition-transform hover:-translate-y-2">
+                <figure className="absolute left-1/2 transform -translate-x-1/2 w-[20rem] md:w-[22rem] lg:w-[26rem] xl:w-[40rem] bottom-20 md:bottom-22 lg:bottom-24 xl:bottom-40 transition-transform hover:-translate-y-2">
                     <img src="/assets/LandingPage/hero.png" alt="hero-image" className="w-full h-full" />
                 </figure>
-                <h1 className="absolute bottom-10 lg:bottom-16 left-1/2 transform -translate-x-1/2 text-white text-[14px] md:text-xl lg:text-3xl font-bold whitespace-nowrap animate-fade-in">
+                <h1 className="absolute bottom-10 md:bottom-10 lg:bottom-12 xl:bottom-16 left-1/2 transform -translate-x-1/2 text-white text-[14px] md:text-lg lg:text-xl xl:text-3xl font-bold whitespace-nowrap animate-fade-in">
                     Dive into a fun and engaging journey to expand your knowledge
                 </h1>
                 <div className="absolute top-20 right-20 animate-float hidden md:block">
