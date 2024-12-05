@@ -12,6 +12,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [audioDropdownOpen, setAudioDropdownOpen] = useState<boolean>(false);
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -48,6 +49,9 @@ const Header = () => {
       document.body.style.overflow = 'unset';
     }
   }, [menuOpen]);
+
+  // Toggle Audio Comics Dropdown for mobile
+  const toggleAudioDropdown = () => setAudioDropdownOpen(!audioDropdownOpen);
 
   return (
     <div
@@ -136,7 +140,7 @@ const Header = () => {
           className={`
             ${menuOpen ? "flex" : "hidden"} 
             z-10 lg:flex flex-col lg:flex-row 
-            items-center justify-between 
+            items-center gap-[10%]
             bg-[#f0ebe5] lg:bg-transparent 
             border-none text-[#989ba2] lg:text-white 
             text-[1vw] lg:static 
@@ -164,199 +168,63 @@ const Header = () => {
               Podcasts
             </button>
           </NavLink>
+
           {/* Audio Comics Dropdown */}
-          <div className="relative group ">
+          <div className="relative group">
             <button
-              className="
-      cursor-pointer lg:hover:text-white lg:hover:bg-red-500 
-      h-[2.5rem] lg:h-[4.5rem] 
-      text-base whitespace-nowrap font-semibold 
-      hidden lg:block
-      transition-colors duration-300 ease-in-out
-    "
+              className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 
+                h-[2.5rem] lg:h-[4.5rem] text-base whitespace-nowrap font-semibold hidden lg:block"
               onClick={() => navigate("/mentoons-comics/audio-comics")}
             >
               Audio Comics
             </button>
 
-            {/* Full Screen Overlay */}
+            {/* Desktop Dropdown Menu */}
             <div
-              className="
-      hidden group-hover:flex 
-      fixed inset-0 
-      bg-black/70 
-      backdrop-blur-md 
-      z-[100] 
-      items-center 
-      justify-center 
-      animate-fade-in
-    "
-              style={{
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)'
-              }}
+              className="hidden group-hover:flex 
+            absolute bg-white text-primary shadow-lg 
+            top-[4rem] left-0 w-[200px] flex-col border rounded-lg 
+            transition-opacity duration-300 ease-in-out"
             >
-              <div
-                className="
-        w-11/12 
-        max-w-4xl 
-        bg-white/10 
-        rounded-2xl 
-        p-8 
-        shadow-2xl 
-        border 
-        border-white/20 
-        text-white
-        animate-slide-up
-      "
-              >
-                <h2 className="text-4xl font-bold mb-8 text-center">
-                  Audio Comics
-                </h2>
+              <NavLink to="/mentoons-comics/audio-comics?filter=groupSmall">
+                <button className="px-4 py-2 hover:bg-gray-100 text-sm w-full text-left">
+                  6 - 12 Kids & Preteens
+                </button>
+              </NavLink>
 
-                <div className="grid grid-cols-3 gap-6">
-                  <button
-                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupSmall")}
-                    className="
-            bg-white/10 
-            hover:bg-white/20 
-            border 
-            border-white/20 
-            rounded-xl 
-            p-6 
-            text-center 
-            transition-all 
-            duration-300 
-            transform 
-            hover:scale-105 
-            hover:shadow-2xl
-            group
-          "
-                  >
-                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
-                      6 - 12
-                    </div>
-                    <div className="text-sm text-gray-300 group-hover:text-primary">
-                      Kids & Preteens
-                    </div>
-                  </button>
+              <NavLink to="/mentoons-comics/audio-comics?filter=groupMedium">
+                <button className="px-4 py-2 hover:bg-gray-100 text-sm w-full text-left">
+                  13 - 19 Teenagers
+                </button>
+              </NavLink>
 
-                  <button
-                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupMedium")}
-                    className="
-            bg-white/10 
-            hover:bg-white/20 
-            border 
-            border-white/20 
-            rounded-xl 
-            p-6 
-            text-center 
-            transition-all 
-            duration-300 
-            transform 
-            hover:scale-105 
-            hover:shadow-2xl
-            group
-          "
-                  >
-                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
-                      13 - 19
-                    </div>
-                    <div className="text-sm text-gray-300 group-hover:text-primary">
-                      Teenagers
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupLarge")}
-                    className="
-            bg-white/10 
-            hover:bg-white/20 
-            border 
-            border-white/20 
-            rounded-xl 
-            p-6 
-            text-center 
-            transition-all 
-            duration-300 
-            transform 
-            hover:scale-105 
-            hover:shadow-2xl
-            group
-          "
-                  >
-                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
-                      20+
-                    </div>
-                    <div className="text-sm text-gray-300 group-hover:text-primary">
-                      Young Adults
-                    </div>
-                  </button>
-                </div>
-
-                <div className="mt-8 text-center">
-                  <button
-                    onClick={() => setMenuOpen(false)}
-                    className="
-            bg-white/10 
-            hover:bg-white/20 
-            border 
-            border-white/20 
-            rounded-xl 
-            px-6 
-            py-3 
-            text-sm 
-            transition-all 
-            duration-300
-          "
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
+              <NavLink to="/mentoons-comics/audio-comics?filter=groupLarge">
+                <button className="px-4 py-2 hover:bg-gray-100 text-sm w-full text-left">
+                  20+ Young Adults
+                </button>
+              </NavLink>
             </div>
+
           </div>
 
-          {/* Mobile-specific additional links */}
+          {/* Mobile Audio Comics link */}
           <NavLink to="/mentoons-comics/audio-comics" className="lg:hidden" onClick={() => setMenuOpen(false)}>
             <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
               Audio Comics
             </button>
           </NavLink>
 
-          <NavLink to="/hiring" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold">
-              Join Us
-            </button>
-          </NavLink>
-
-          <NavLink to="/mentoons-store" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
-              <IoCart />
-              Store
-            </button>
-          </NavLink>
-
-          <NavLink to="/membership" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
-              <FaUsers className="mr-2" />
-              Plans
-            </button>
-          </NavLink>
-
+          {/* Authentication */}
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
           <SignedOut>
-            <NavLink to="/sign-up" onClick={() => setMenuOpen(false)}>
-              <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:h-[4.5rem]">
-                Sign up
+            <NavLink to="/sign-in">
+              <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+                Sign In
               </button>
             </NavLink>
           </SignedOut>
-
-          <SignedIn>
-            <div className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold">
-              <UserButton />
-            </div>
-          </SignedIn>
         </nav>
       </div>
     </div>
