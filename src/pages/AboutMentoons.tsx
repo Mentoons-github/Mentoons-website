@@ -31,7 +31,7 @@ const AboutMentoons = () => {
       </Suspense>
       <div>
         <div
-          className="container flex flex-col bg-mt-teal text-white py-10 space-y-7"
+          className= "flex flex-col bg-mt-teal text-white py-10 space-y-7"
         >
           <div className="py-8 space-y-7" id="fun-section">
             <div className="text-start space-y-4">

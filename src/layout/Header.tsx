@@ -115,7 +115,7 @@ const Header = () => {
       </div>
 
       {/* Right Section - Navigation */}
-      <div className="flex-1 flex justify-end lg:justify-between">
+      <div className="flex-1 flex justify-end lg:justify-between lg:px-5">
         {/* Mobile Menu Toggle */}
         <div className="lg:hidden">
           {menuOpen ? (
@@ -164,10 +164,6 @@ const Header = () => {
               Podcasts
             </button>
           </NavLink>
-          ]
-
-
-          
           {/* Audio Comics Dropdown */}
           <div className="relative group">
             <button

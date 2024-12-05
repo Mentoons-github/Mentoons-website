@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 export const letters = ['M', 'E', 'N', 'T', 'O', 'O', 'N', 'S'];
@@ -6,7 +5,7 @@ export const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pu
 
 const ComicSection = () => {
     return (
-        <div className="w-full relative z-10" style={{ background: "linear-gradient(177.47deg, #FAFDEE 93.25%, #8CB301 108.11%)" }}>
+        <div className="w-full relative z-10 overflow-hidden" style={{ background: "linear-gradient(177.47deg, #FAFDEE 93.25%, #8CB301 108.11%)" }}>
             <motion.img
                 src="/assets/LandingPage/clouds.png"
                 alt="comic-bg"

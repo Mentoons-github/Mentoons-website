@@ -115,7 +115,7 @@ const PodcastSection = () => {
                 alt="clouds"
                 className="absolute -top-1 left-0 w-full object-cover"
             />
-            <div className="w-full flex flex-col lg:flex-row justify-center items-center pt-10 lg:pt-20">
+            <div className="w-full flex flex-col lg:flex-row justify-center items-center pt-20">
                 <div className="w-full lg:w-1/2 px-4 lg:px-0 mb-8 lg:mb-0">
                     <h1 className="text-white text-center text-lg md:text-4xl lg:text-3xl">Children's podcasts are audio shows that<br /> entertain and educate young listeners through<br /> stories and fun learning. They spark<br /> imagination and curiosity.</h1>
                 </div>

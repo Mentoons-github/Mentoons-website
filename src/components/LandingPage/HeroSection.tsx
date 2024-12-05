@@ -1,4 +1,3 @@
-import React from 'react';
 
 const HeroSection = () => {
     return (
@@ -22,7 +21,7 @@ const HeroSection = () => {
             <figure className="absolute top-1/2 -translate-y-1/2 left-2 sm:left-5 md:left-8 lg:left-10 w-[45vw] md:w-[35vw] lg:w-[20vw] z-10 lg:z-auto">
                 <img src="/assets/LandingPage/psyco.png" alt="psyco" className="w-full h-full object-contain" />
             </figure>
-            <h1 className="absolute top-[1/2] -translate-y-1/2 lg:top-[50%] right-40 text-[2.5vw] sm:text-[2vw] md:text-[1.8vw] lg:text-[1.5vw] text-black font-bold text-center tracking-wide z-20 animate-pulse">
+            <h1 className="absolute top-[1/2] -translate-y-1/2 lg:top-[50%] right-[20%] text-[3vw] sm:text-[2vw] md:text-[1.8vw] lg:text-[1.5vw] text-black font-bold text-center tracking-wide z-20 animate-pulse">
                 Hello teenagers, parents and<br/> everyday tech-users!
             </h1>
             <figure className="w-[70vw] sm:w-[60vw] md:w-[40vw] lg:w-[25vw] absolute bottom-[2vh] lg:bottom-[18vh] left-1/2 -translate-x-1/2 z-10 lg:z-auto">
