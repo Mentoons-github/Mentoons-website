@@ -165,7 +165,7 @@ const Header = () => {
             </button>
           </NavLink>
           {/* Audio Comics Dropdown */}
-          <div className="relative group">
+          <div className="relative group ">
             <button
               className="
       cursor-pointer lg:hover:text-white lg:hover:bg-red-500 
@@ -331,14 +331,14 @@ const Header = () => {
           </NavLink>
 
           <NavLink to="/mentoons-store" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2">
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
               <IoCart />
               Store
             </button>
           </NavLink>
 
           <NavLink to="/membership" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2">
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
               <FaUsers className="mr-2" />
               Plans
             </button>
@@ -346,7 +346,7 @@ const Header = () => {
 
           <SignedOut>
             <NavLink to="/sign-up" onClick={() => setMenuOpen(false)}>
-              <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold">
+              <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:h-[4.5rem]">
                 Sign up
               </button>
             </NavLink>

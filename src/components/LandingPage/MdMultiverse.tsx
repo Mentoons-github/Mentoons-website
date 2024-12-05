@@ -35,7 +35,8 @@ const MdMultiverse = () => {
     return (
         <div className="w-full h-full relative" style={{ background: 'linear-gradient(355.82deg, rgba(184, 212, 255, 0.81) -12.98%, rgba(9, 39, 84, 0.94) 76.23%)' }}>
             {/* <img src="/assets/LandingPage/stars.png" alt="multiverse" className="w-full object-contain absolute top-0 left-0" /> */}
-            <div className="flex flex-row items-center px-2 lg:px-[10vw]">
+            <div className="flex flex-row flex-wrap lg:flex-nowrap
+             items-center justify-center px-2 lg:px-[10vw]">
                 <div className="flex flex-col items-center lg:justify-start justify-center h-full p-10 lg:p-10 lg:gap-10 lg:ml-20">
                     <h1 className="text-white text-4xl lg:text-7xl  font-bold whitespace-nowrap">HERE'S HOW<br />
                         WE CAN HELP
