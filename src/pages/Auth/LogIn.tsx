@@ -14,6 +14,7 @@ const LogIn = () => {
       <div className="flex-1 flex items-center justify-center">
         <SignIn signUpUrl="/sign-up" />
       </div>
+      
     </div>
   );
 };

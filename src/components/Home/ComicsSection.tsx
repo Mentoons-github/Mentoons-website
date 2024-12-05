@@ -37,7 +37,7 @@ const ComicsSection: React.FC = () => {
     "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/where-it-all-begin.mp4"
   );
   const plugin = React.useRef(Autoplay({ delay: 2000 }));
-
+  
   const handleSelectedCategroy = (category: string) => {
     setIsActiveCategory(category);
   };
@@ -71,6 +71,7 @@ const ComicsSection: React.FC = () => {
               src={AirplaneBg}
               alt="airplane image"
             />
+            
             <motion.img
               initial={{ x: -300 }}
               whileInView={{ x: 0 }}
