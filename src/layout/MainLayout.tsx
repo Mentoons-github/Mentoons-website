@@ -12,7 +12,6 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isStoreRoute = location.pathname === "/mentoons-store" || location.pathname==="/membership"
   const isAuthRoute =
     location.pathname === "/sign-up" || location.pathname === "/sign-in" ;
 
@@ -27,7 +26,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <Breadcrumbs />
       </div>
       <Header />
-      <div className={`${isStoreRoute?"pt-[54px] lg:pt-0" : "pt-[54px] lg:pt-20"}`}>{children}</div>
+      <div className="">{children}</div>
       {!isAuthRoute && <Footer />}
     </div>
   );

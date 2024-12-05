@@ -10,26 +10,26 @@ module.exports = {
   prefix: "",
   theme: {
     container: {
-      center: true,
-      padding: {
-        DEFAULT: "1rem",
-        sm: "1.5rem",
-        md: "3rem",
-        lg: "5rem",
-        xl: "7.5rem",
-      },
+    //   center: true,
+    //   padding: {
+    //     DEFAULT: "1rem",
+    //     sm: "1.5rem",
+    //     md: "3rem",
+    //     lg: "5rem",
+    //     xl: "7.5rem",
+    //   },
     },
-    screens: {
-      xxs: "300px",
-      xs: "475px",
-      sm: "639px",
-      md: "768px",
-      lg: "1024px",
-      custom: "1110px",
-      xl: "1281px",
-      "2xl": "1441px",
-      "3xl": "1920px",
-    },
+    // screens: {
+    //   xxs: "300px",
+    //   xs: "475px",
+    //   sm: "639px",
+    //   md: "768px",
+    //   lg: "1024px",
+    //   custom: "1110px",
+    //   xl: "1281px",
+    //   "2xl": "1441px",
+    //   "3xl": "1920px",
+    // },
     extend: {
       fontFamily: {
         montserrat: "Montserrat",
@@ -129,6 +129,20 @@ module.exports = {
         'spin-slow': 'spin 8s linear infinite',
         'bounce-slow': 'bounce 3s infinite',
       },
+      animations: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out'
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        }
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

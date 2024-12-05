@@ -1,21 +1,11 @@
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import { date } from "@/constant/websiteConstants";
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
 import { FaCalendarAlt, FaHome, FaPhone, FaUsers } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoCart } from "react-icons/io5";
 import { MdOutlineClose } from "react-icons/md";
-import { NavLink, useNavigate } from "react-router-dom";
+import { date } from "@/constant/websiteConstants";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -50,235 +40,324 @@ const Header = () => {
     };
   }, [lastScrollY]);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [menuOpen]);
+
   return (
     <div
-      className={`w-full min-h-fit bg-primary flex items-center justify-around px-4 lg:py-5 top-0 fixed z-[40] gap-[6rem] transition-transform duration-300 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
-      style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 20px 30px" }}
+      className={`
+        w-full min-h-fit bg-primary flex items-center justify-around p-2 lg:p-1 top-0 sticky z-[40] gap-[1.8rem] 
+        transition-transform duration-300 
+        ${isVisible ? "translate-y-0" : "-translate-y-full"}
+      `}
+      style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 1.25vw 1.875vw" }}
     >
+      {/* Left Section - Desktop Navigation */}
       <div className="flex-1 flex lg:justify-end">
-        <Menubar className="lg:hidden bg-transparent border-0">
-          <MenubarMenu>
-            <NavLink to="/">
-              <FaHome className="text-white text-2xl" />
-            </NavLink>
-          </MenubarMenu>
-        </Menubar>
-        <Menubar className="hidden lg:flex bg-transparent border-0 justify-between w-full">
-          <MenubarMenu>
-            <div>
-              <span className="bg-white text-primary rounded-full py-1 px-3 text-sm font-semibold shadow-md whitespace-nowrap flex items-center">
-                <FaCalendarAlt className="mr-2" />
-                {date}
-              </span>
-            </div>
-          </MenubarMenu>
-          <MenubarMenu>
-            <a href="tel:+919036033300" className="no-underline">
-              <span className="bg-white text-primary rounded-full py-1 px-3 text-sm font-semibold shadow-md whitespace-nowrap flex items-center">
-                <FaPhone className="mr-2" />
-                Call us: +91 90360 33300
-              </span>
-            </a>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/hiring" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
-                Join Us
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
-                <div className="flex items-center justify-around gap-2">
-                  <IoCart />
-                  Store
-                </div>
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
-                <div className="flex items-center justify-around gap-2">
-                  <FaUsers className="mr-2" />
-                  Plans
-                </div>
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-        </Menubar>
+        {/* Mobile Home Icon */}
+        <div className="lg:hidden">
+          <NavLink to="/">
+            <FaHome className="text-white text-2xl" />
+          </NavLink>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex bg-transparent justify-between w-full items-center space-x-4">
+          <div>
+            <span className="bg-white text-primary rounded-full py-[0.25vw] px-[0.75vw] text-[0.875vw] font-semibold shadow-md whitespace-nowrap flex items-center">
+              <FaCalendarAlt className="mr-[0.5vw]" />
+              {date}
+            </span>
+          </div>
+          <a href="tel:+919036033300" className="no-underline">
+            <span className="bg-white text-primary rounded-full py-[0.25vw] px-[0.75vw] text-[0.875vw] font-semibold shadow-md whitespace-nowrap flex items-center">
+              <FaPhone className="mr-[0.5vw]" />
+              Call us: +91 90360 33300
+            </span>
+          </a>
+          <NavLink to="/hiring" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
+              Join Us
+            </button>
+          </NavLink>
+          <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2">
+              <IoCart />
+              Store
+            </button>
+          </NavLink>
+          <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2">
+              <FaUsers className="mr-2" />
+              Plans
+            </button>
+          </NavLink>
+        </nav>
       </div>
-      <div className="relative flex-1 max-w-[7em]">
+
+      {/* Logo Section */}
+      <div className="relative flex-1 max-w-[7vw]">
         <NavLink to="/" onClick={() => setMenuOpen(false)}>
-          <figure className="w-[5rem] h-[5rem] lg:h-[10rem] lg:w-[10rem] absolute bg-primary rounded-full top-[-2.3rem] lg:top-[-6rem] left-1/2 transform -translate-x-1/2 z-40">
+          <figure className="w-[4rem] h-[4rem] md:h-[5.5rem] md:w-[5.5rem] lg:h-[6.5rem] lg:w-[6.5rem] absolute bg-primary rounded-full top-[-1.8rem] lg:top-[-2rem] left-1/2 transform -translate-x-1/2 z-40">
             <img
               src="/assets/images/mentoons-logo.png"
               alt="mentoonsLogo"
-              className="h-full w-full object-contain lg:mt-4"
+              className="h-full w-full object-contain"
             />
           </figure>
         </NavLink>
       </div>
-      <div className="flex-1 flex justify-end lg:justify-between">
+
+      {/* Right Section - Navigation */}
+      <div className="flex-1 flex justify-end lg:justify-between lg:px-5">
+        {/* Mobile Menu Toggle */}
         <div className="lg:hidden">
           {menuOpen ? (
             <MdOutlineClose
-              className="text-3xl text-white my-3"
+              className="text-[1.5rem] text-white my-[0.75vw]"
               onClick={handleMenuToggle}
             />
           ) : (
             <GiHamburgerMenu
-              className="text-3xl text-white my-3"
+              className="text-[1.5rem] text-white my-[0.75vw]"
               onClick={handleMenuToggle}
             />
           )}
         </div>
-        <Menubar
-          className={`${
-            menuOpen ? "flex" : "hidden"
-          }  z-10 lg:flex flex-col lg:flex-row items-center justify-between bg-[#f0ebe5] lg:bg-transparent border-none text-[#989ba2] lg:text-white text-base lg:static absolute top-12 right-0 w-full lg:w-full p-4 lg:p-0  h-90 lg:h-10`}
-        >
-          <MenubarMenu>
-            <NavLink to="/" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:hidden">
-                Home
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/mentoons-comics" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
-                Comics
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/mentoons-podcast" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
-                Podcasts
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
 
-          <MenubarMenu>
-            <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base whitespace-nowrap font-semibold hidden lg:block">
+        {/* Mobile and Desktop Navigation Menu */}
+        <nav
+          className={`
+            ${menuOpen ? "flex" : "hidden"} 
+            z-10 lg:flex flex-col lg:flex-row 
+            items-center justify-between 
+            bg-[#f0ebe5] lg:bg-transparent 
+            border-none text-[#989ba2] lg:text-white 
+            text-[1vw] lg:static 
+            absolute top-[2.5rem] right-0 
+            w-full lg:w-full 
+            p-[4vw] lg:p-0 
+            h-90 lg:h-[2.5vw]
+          `}
+        >
+          {/* Mobile-specific Home link */}
+          <NavLink to="/" className="lg:hidden" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              Home
+            </button>
+          </NavLink>
+
+          <NavLink to="/mentoons-comics" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              Comics
+            </button>
+          </NavLink>
+
+          <NavLink to="/mentoons-podcast" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              Podcasts
+            </button>
+          </NavLink>
+          {/* Audio Comics Dropdown */}
+          <div className="relative group ">
+            <button
+              className="
+      cursor-pointer lg:hover:text-white lg:hover:bg-red-500 
+      h-[2.5rem] lg:h-[4.5rem] 
+      text-base whitespace-nowrap font-semibold 
+      hidden lg:block
+      transition-colors duration-300 ease-in-out
+    "
+              onClick={() => navigate("/mentoons-comics/audio-comics")}
+            >
               Audio Comics
-            </MenubarTrigger>
-            <MenubarContent>
-              <MenubarSub>
-                <MenubarSubTrigger>Age Groups</MenubarSubTrigger>
-                <MenubarSubContent>
-                  <MenubarItem
-                    onClick={() => {
-                      navigate(
-                        "/mentoons-comics/audio-comics?filter=groupSmall"
-                      );
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Age 6 - 12
-                  </MenubarItem>
-                  <MenubarItem
-                    onClick={() => {
-                      navigate(
-                        "/mentoons-comics/audio-comics?filter=groupMedium"
-                      );
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Age 13 - 19
-                  </MenubarItem>
-                  <MenubarItem
-                    onClick={() => {
-                      navigate(
-                        "/mentoons-comics/audio-comics?filter=groupLarge"
-                      );
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Age 20+
-                  </MenubarItem>
-                </MenubarSubContent>
-              </MenubarSub>
-              <MenubarSub>
-                <MenubarItem
-                  onClick={() => {
-                    navigate("/mentoons-comics/audio-comics?filter=groupLarge");
-                    setMenuOpen(false);
-                  }}
-                >
-                  Family
-                </MenubarItem>
-              </MenubarSub>
-            </MenubarContent>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink
-              to="/mentoons-workshops"
-              onClick={() => setMenuOpen(false)}
+            </button>
+
+            {/* Full Screen Overlay */}
+            <div
+              className="
+      hidden group-hover:flex 
+      fixed inset-0 
+      bg-black/70 
+      backdrop-blur-md 
+      z-[100] 
+      items-center 
+      justify-center 
+      animate-fade-in
+    "
+              style={{
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)'
+              }}
             >
-              <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
-                Workshops
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink
-              to="/mentoons-comics/audio-comics"
-              onClick={() => setMenuOpen(false)}
-            >
-              <MenubarTrigger className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:hidden">
-                Audio Comics
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/hiring" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
-                Join Us
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500] text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
-                <div className="flex items-center justify-around gap-2">
-                  <IoCart />
-                  Store
+              <div
+                className="
+        w-11/12 
+        max-w-4xl 
+        bg-white/10 
+        rounded-2xl 
+        p-8 
+        shadow-2xl 
+        border 
+        border-white/20 
+        text-white
+        animate-slide-up
+      "
+              >
+                <h2 className="text-4xl font-bold mb-8 text-center">
+                  Audio Comics
+                </h2>
+
+                <div className="grid grid-cols-3 gap-6">
+                  <button
+                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupSmall")}
+                    className="
+            bg-white/10 
+            hover:bg-white/20 
+            border 
+            border-white/20 
+            rounded-xl 
+            p-6 
+            text-center 
+            transition-all 
+            duration-300 
+            transform 
+            hover:scale-105 
+            hover:shadow-2xl
+            group
+          "
+                  >
+                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
+                      6 - 12
+                    </div>
+                    <div className="text-sm text-gray-300 group-hover:text-primary">
+                      Kids & Preteens
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupMedium")}
+                    className="
+            bg-white/10 
+            hover:bg-white/20 
+            border 
+            border-white/20 
+            rounded-xl 
+            p-6 
+            text-center 
+            transition-all 
+            duration-300 
+            transform 
+            hover:scale-105 
+            hover:shadow-2xl
+            group
+          "
+                  >
+                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
+                      13 - 19
+                    </div>
+                    <div className="text-sm text-gray-300 group-hover:text-primary">
+                      Teenagers
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/mentoons-comics/audio-comics?filter=groupLarge")}
+                    className="
+            bg-white/10 
+            hover:bg-white/20 
+            border 
+            border-white/20 
+            rounded-xl 
+            p-6 
+            text-center 
+            transition-all 
+            duration-300 
+            transform 
+            hover:scale-105 
+            hover:shadow-2xl
+            group
+          "
+                  >
+                    <div className="text-3xl font-bold mb-4 group-hover:text-primary">
+                      20+
+                    </div>
+                    <div className="text-sm text-gray-300 group-hover:text-primary">
+                      Young Adults
+                    </div>
+                  </button>
                 </div>
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
-          <MenubarMenu>
-            <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:hidden">
-                <div className="flex items-center justify-around gap-2">
-                  <FaUsers className="mr-2" />
-                  Plans
+
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    className="
+            bg-white/10 
+            hover:bg-white/20 
+            border 
+            border-white/20 
+            rounded-xl 
+            px-6 
+            py-3 
+            text-sm 
+            transition-all 
+            duration-300
+          "
+                  >
+                    Close
+                  </button>
                 </div>
-              </MenubarTrigger>
-            </NavLink>
-          </MenubarMenu>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile-specific additional links */}
+          <NavLink to="/mentoons-comics/audio-comics" className="lg:hidden" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              Audio Comics
+            </button>
+          </NavLink>
+
+          <NavLink to="/hiring" className="lg:hidden" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold">
+              Join Us
+            </button>
+          </NavLink>
+
+          <NavLink to="/mentoons-store" className="lg:hidden" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
+              <IoCart />
+              Store
+            </button>
+          </NavLink>
+
+          <NavLink to="/membership" className="lg:hidden" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold flex items-center justify-around gap-2 h-[2.5rem] lg:h-[4.5rem]">
+              <FaUsers className="mr-2" />
+              Plans
+            </button>
+          </NavLink>
+
           <SignedOut>
-            <MenubarMenu>
-              <NavLink to="/sign-up" onClick={() => setMenuOpen(false)}>
-                <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold ">
-                  Sign up
-                </MenubarTrigger>
-              </NavLink>
-            </MenubarMenu>
+            <NavLink to="/sign-up" onClick={() => setMenuOpen(false)}>
+              <button className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold lg:h-[4.5rem]">
+                Sign up
+              </button>
+            </NavLink>
           </SignedOut>
+
           <SignedIn>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold ">
-                <UserButton />
-              </MenubarTrigger>
-            </MenubarMenu>
+            <div className="cursor-pointer hover:text-white hover:bg-red-500 h-full text-base whitespace-nowrap text-[#989ba2] lg:text-white font-semibold">
+              <UserButton />
+            </div>
           </SignedIn>
-        </Menubar>
+        </nav>
       </div>
     </div>
   );

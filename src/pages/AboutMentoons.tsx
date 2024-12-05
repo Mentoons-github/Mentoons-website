@@ -1,8 +1,17 @@
 import Team from "@/components/comics/Team";
 import Wordbreak from "@/components/comics/Wordbreak";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 const AboutMentoons = () => {
+  useEffect(() => {
+    if (window.location.hash === '#fun-section') {
+      setTimeout(() => {
+        const element = document.getElementById('fun-section');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="w-full">
       <img
@@ -22,10 +31,9 @@ const AboutMentoons = () => {
       </Suspense>
       <div>
         <div
-          id="team"
-          className="container flex flex-col bg-mt-teal text-white py-10 space-y-7"
+          className= "flex flex-col bg-mt-teal text-white py-10 space-y-7"
         >
-          <div className="py-8 space-y-7">
+          <div className="py-8 space-y-7" id="fun-section">
             <div className="text-start space-y-4">
               <div className=" text-3xl lineBefore uppercase text-[#d71515]">
                 Fun with mentoons{" "}

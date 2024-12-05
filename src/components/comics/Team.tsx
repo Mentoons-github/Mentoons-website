@@ -6,7 +6,7 @@ const Team: React.FC = () => {
   return (
     <div
       id="team"
-      className="container flex flex-col bg-primary text-white py-10 space-y-7"
+      className="flex flex-col bg-primary text-white py-10 space-y-7"
     >
       <div className="py-8 space-y-7">
         <div className="text-start space-y-4">

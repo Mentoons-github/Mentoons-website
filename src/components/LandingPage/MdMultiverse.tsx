@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router-dom";
 
 const MdMultiverse = () => {
+    const navigate = useNavigate();
     const OfferingData = [
         {
             title: "Comic",
@@ -33,13 +35,19 @@ const MdMultiverse = () => {
     return (
         <div className="w-full h-full relative" style={{ background: 'linear-gradient(355.82deg, rgba(184, 212, 255, 0.81) -12.98%, rgba(9, 39, 84, 0.94) 76.23%)' }}>
             {/* <img src="/assets/LandingPage/stars.png" alt="multiverse" className="w-full object-contain absolute top-0 left-0" /> */}
-            <div className="flex flex-row items-center lg:justify-start justify-center h-full p-10 lg:p-10 lg:gap-10 lg:ml-20">
-                <h1 className="text-white text-4xl lg:text-7xl  font-bold">HERE'S HOW<br />
-                    WE CAN HELP
-                </h1>
-                <figure>
-                    <img src="/assets/LandingPage/md-exp.png" alt="md-multiverse" />
-                </figure>
+            <div className="flex flex-row flex-wrap lg:flex-nowrap
+             items-center justify-center px-2 lg:px-[10vw]">
+                <div className="flex flex-col items-center lg:justify-start justify-center h-full p-10 lg:p-10 lg:gap-10 lg:ml-20">
+                    <h1 className="text-white text-4xl lg:text-7xl  font-bold whitespace-nowrap">HERE'S HOW<br />
+                        WE CAN HELP
+                    </h1>
+                    <figure>
+                        <img src="/assets/LandingPage/md-exp.png" alt="md-multiverse" />
+                    </figure>
+                </div>
+                <div>
+                    <h1 className="text-white text-medium text-left">With Mentoons, You can Imagine a world where your kids are not only gadget-friendly but also culturally rooted and emotionally balanced individuals who respect their elders and value their heritage.</h1>
+                </div>
             </div>
             {/* Mentoons Offering */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 lg:px-10 py-8">
@@ -51,6 +59,7 @@ const MdMultiverse = () => {
                                 <img src={offering.image} alt={offering.title} className="absolute inset-0 w-full h-full object-contain p-4" />
                             </div>
                             <div className="p-6 relative bg-[url('/assets/LandingPage/offering-bg.png')] bg-cover bg-center">
+                                <div className="absolute inset-0 bg-white/10"></div>
                                 <h3 className="text-white text-xl font-bold mb-2">{offering.title}</h3>
                                 <p className="text-white text-sm">{offering.description}</p>
                             </div>
@@ -83,7 +92,12 @@ const MdMultiverse = () => {
                             WebkitTextFillColor: 'transparent'
                         }}>MEET OUR MENTORS</h1>
                         <p className="text-black text-lg lg:text-2xl text-center lg:text-left">Our mentors are the pillars of<br className="hidden lg:block" /> wisdom, experience, and support,<br className="hidden lg:block" /> dedicated to guiding us through our<br className="hidden lg:block" /> journey. They bring valuable<br className="hidden lg:block" /> insights, encouragement, and<br className="hidden lg:block" /> constructive feedback, ensuring we<br className="hidden lg:block" /> achieve our full potential.</p>
-                        <button className="bg-[#FF6403] text-white font-bold text-lg lg:text-xl px-4 py-2 rounded-lg w-full lg:w-auto">
+                        <button
+                            className="bg-[#FF6403] text-white font-bold text-lg lg:text-xl px-4 py-2 rounded-lg w-full lg:w-auto z-[10]"
+                            onClick={() => {
+                                navigate('/about-mentoons#fun-section');
+                            }}
+                        >
                             Watch our videos
                         </button>
                     </div>
