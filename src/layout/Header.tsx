@@ -12,7 +12,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
-  const [audioDropdownOpen, setAudioDropdownOpen] = useState<boolean>(false);
+  // const [audioDropdownOpen, setAudioDropdownOpen] = useState<boolean>(false);
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -51,7 +51,7 @@ const Header = () => {
   }, [menuOpen]);
 
   // Toggle Audio Comics Dropdown for mobile
-  const toggleAudioDropdown = () => setAudioDropdownOpen(!audioDropdownOpen);
+  // const toggleAudioDropdown = () => setAudioDropdownOpen(!audioDropdownOpen);
 
   return (
     <div
