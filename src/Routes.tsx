@@ -27,7 +27,7 @@ import Home from './pages/Home'
 // const Home = lazy(() => import("./pages/Home"));
 
 const Wishlist = lazy(() => import("./pages/Wishlist"));
-const Cart = lazy(() => import("./pages/Cart"));
+// const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPage = lazy(() => import("./pages/ComicsPage"));
 const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
@@ -86,14 +86,14 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/cart",
-    element: (
-      <MainLayout>
-        <Cart />
-      </MainLayout>
-    ),
-  },
+  // {
+  //   path: "/cart",
+  //   element: (
+  //     <MainLayout>
+  //       <Cart />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/mentoons-comics",
     element: (
