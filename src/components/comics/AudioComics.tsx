@@ -1,12 +1,12 @@
+import { AudioComic } from "@/redux/comicSlice";
+import { RootState } from "@/redux/store";
+import { motion } from "framer-motion";
 import React from "react";
-import Wordbreak from "./Wordbreak";
 import { FaCirclePlay } from "react-icons/fa6";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { AudioComic } from "@/redux/comicSlice";
-import { motion } from "framer-motion";
+import Wordbreak from "./Wordbreak";
 
 const AudioComics: React.FC = () => {
   const navigate = useNavigate();

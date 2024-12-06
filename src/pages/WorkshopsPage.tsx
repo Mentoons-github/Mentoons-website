@@ -589,9 +589,9 @@ export const WorkshopPage4 = () => {
             />
           </div>
         </div>
-        <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full border ">
-          <div className="w-full flex flex-wrap items-center justify-center border ">
-            <div className=" flex flex-col border  ">
+        <section className="bg-[url(/assets/images/career-corner-section-bg.png)] w-full  ">
+          <div className="w-full flex flex-wrap items-center justify-center  ">
+            <div className=" flex flex-col   ">
               <div className="w-full  p-12 ">
                 <img
                   src="/assets/images/career-corner-section-headline.png"

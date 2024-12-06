@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import cardProductReducer from "./cardProductSlice";
 import careerReducer from "./careerSlice";
 import comicsReducer from "./comicSlice";
 import fileUploadReducer from "./fileUploadSlice";
@@ -15,6 +16,7 @@ export const store = configureStore({
     career: careerReducer,
     fileUpload: fileUploadReducer,
     podcast: podcastReducer,
+    cardProduct: cardProductReducer,
   },
 });
 

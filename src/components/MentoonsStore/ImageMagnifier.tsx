@@ -57,7 +57,7 @@ export default function ImageMagnifier({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 items-start">
+    <div className="flex flex-col lg:flex-row gap-4 items-start ">
       <div className="relative border" style={{ width, height }}>
         <img
           ref={imgRef}
@@ -86,7 +86,7 @@ export default function ImageMagnifier({
       </div>
 
       <div
-        className="border border-gray-300 bg-white"
+        className="border border-gray-300 bg-amber-50 absolute z-10 right-52 top-36 shadow-lg rounded-2xl "
         style={{
           display: showMagnifier ? "block" : "none",
           height: `${magnifierHeight}px`,

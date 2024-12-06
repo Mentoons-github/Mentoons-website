@@ -3,11 +3,11 @@ import { useEffect } from "react";
 
 const Register = () => {
   const { signUp } = useSignUp();
-  
+
   // Handle successful signup
   useEffect(() => {
     if (!signUp) return;
-    
+
     if (signUp.status === "complete") {
       handleSendPDF();
     }
@@ -23,15 +23,15 @@ const Register = () => {
       //   method: 'POST',
       //   body: JSON.stringify({ email: signUp.emailAddress }),
       // });
-      console.log("hello world")
-      localStorage.setItem("Signed up", "true")
+      console.log("hello world");
+      localStorage.setItem("Signed up", "true");
     } catch (error) {
-      console.error('Error sending PDF:', error);
+      console.error("Error sending PDF:", error);
     }
   };
 
   return (
-    <div className="h-screen flex ">
+    <div className="h-screen flex  bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
       <div className="hidden flex-1 lg:block ">
         <img
           src="/assets/images/team-Illustration.png"
@@ -39,8 +39,8 @@ const Register = () => {
           className="object-cover"
         />
       </div>
-      <div className="flex-1 flex items-center justify-center">
-        <SignUp signInUrl="/sign-in" forceRedirectUrl="/?openModal=true"/>
+      <div className="flex-1 flex items-center justify-center ">
+        <SignUp signInUrl="/sign-in" forceRedirectUrl="/?openModal=true" />
       </div>
     </div>
   );
