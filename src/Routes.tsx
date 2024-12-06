@@ -20,6 +20,7 @@ import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import CareerPage from "./pages/CareerPage";
 import LandingPage from "./pages/LandingPage";
+import Home from './pages/Home'
 
 // Lazy load the pages
 // const Home = lazy(() => import("./pages/Home"));
@@ -43,8 +44,8 @@ const routes = [
     path: "/",
     element: (
       <MainLayout>
-        {/* <Home /> */}
-        <LandingPage />
+        <Home />
+        {/* <LandingPage /> */}
       </MainLayout>
     ),
   },

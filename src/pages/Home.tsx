@@ -1,9 +1,10 @@
 import axiosInstance from "@/api/axios";
-import ComicsSection from "@/components/Home/ComicsSection";
-// import FeelFree from "@/components/Home/FeelFree";
-import HeroBanner from "@/components/Home/HeroBanner";
-// import MdMultiverse from "@/components/Home/MdMultiverse";
-import Struggles from "@/components/Home/Struggles";
+import Struggles from "@/components/LandingPage/Struggles";
+import ComicSection from "@/components/LandingPage/ComicSection";
+import HeroSection from "@/components/LandingPage/HeroSection";
+import MdMultiverse from "@/components/LandingPage/MdMultiverse";
+import PodcastSection from "@/components/LandingPage/PodcastSection";
+import WorkshopSection from "@/components/LandingPage/WorkshopSection";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useUser } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
@@ -47,15 +48,12 @@ const Home = () => {
   return (
     <>
       <div className="h-full w-full">
-        <HeroBanner />
-        <Struggles />
-        {/* <MdMultiverse /> */}
-        {/* <WhatWeOffer /> */}
-        {/* <FeelFree /> */}
-        <ComicsSection />
-        {/* <section id='pricing'>
-        <PricingPlan />
-      </section> */}
+      <HeroSection />
+      <Struggles />
+      <MdMultiverse />
+      <ComicSection />
+      <WorkshopSection />
+      <PodcastSection />
       </div>
       {showPopup && (
         <div className="w-screen h-screen bg-black/60 fixed top-0 left-0 flex items-center justify-center z-[999999] ">
