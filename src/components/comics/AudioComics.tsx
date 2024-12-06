@@ -17,6 +17,7 @@ const AudioComics: React.FC = () => {
 
   return (
     <div className="container bg-[#62f262] space-y-5 py-14 lg:py-28">
+      // Animation for the heading
       <motion.div
         initial={{ opacity: 0.5 }}
         whileInView={{ opacity: 1 }}
