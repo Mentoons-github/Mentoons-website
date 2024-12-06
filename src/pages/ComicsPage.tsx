@@ -35,7 +35,7 @@ const ComicsPage: React.FC = () => {
   };
 
   return (
-    <div className="container py-16 md:py-20 space-y-8">
+    <div className="py-16 px-5 md:py-20 space-y-8">
       <div className="space-y-7">
         <div className="flex items-center justify-between">
           {/* <div className="flex items-center gap-1 text-black py-1 px-2 bg-gray-50 shadow-sm rounded-md  ">

@@ -32,7 +32,7 @@ const AboutSection: React.FC = () => {
   return (
     <div
       id="about"
-      className="container overflow-hidden py-20 bg-[#59B2DC] space-y-5"
+      className="overflow-hidden py-20 bg-[#59B2DC] space-y-5"
     >
       <div className="flex flex-col lg:flex-row space-y-10   items-center justify-between">
         <motion.div

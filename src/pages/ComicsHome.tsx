@@ -1,5 +1,4 @@
 import AboutSection from "@/components/comics/AboutSection";
-import AudioComics from "@/components/comics/AudioComics";
 // import Blogs from "@/components/comics/Blogs";
 import NewComics from "@/components/comics/NewComics";
 // import Pricing from "@/components/comics/Pricing";
@@ -15,7 +14,7 @@ const Home: React.FC = () => {
       <HeroSection />
       <AboutSection />
       <NewComics />
-      <AudioComics />
+      {/* <AudioComics /> */}
       {/* <Suspense fallback={<div>Loading...</div>}>
         <Team />
       </Suspense> */}

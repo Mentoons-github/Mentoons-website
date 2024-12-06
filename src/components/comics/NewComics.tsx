@@ -39,8 +39,8 @@ const NewComics: React.FC = () => {
   return (
     <>
       {isModalOpen && <ComingSoonModal setIsModalOpen={setIsModalOpen} />}
-      <div className="bg-primary text-white pt-20 pb-14 lg:pb-0">
-        <div className="container space-y-12">
+      <div className="bg-primary text-white pt-20 pb-14 lg:pb-40">
+        <div className="space-y-12">
           <div className="text-center space-y-4">
             <motion.div
               initial={{ opacity: 0.5 }}
