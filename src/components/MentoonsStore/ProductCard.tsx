@@ -140,55 +140,68 @@ import { Link } from "react-router-dom";
 
 // export default ProductCard
 
-interface Thumbnail {
+interface ProductImage {
+  imageSrc: string;
+}
+interface ProductReviews {
   id: string;
-  media: string;
+  quote: string;
+  author: string;
+}
+
+interface ProductVidoes {
+  videoSrc: string;
 }
 
 interface DescriptionItem {
-  id: string;
   label: string;
-  fatureList?: { id: string; description: string }[]; // Optional for features
-  advantageList?: { id: string; description: string }[]; // Optional for advantages
-  benefitsList?: { id: string; description: string }[]; // Optional for benefits
+  descriptionList: [{ description: string }];
 }
 
-interface ProductDetail {
-  id: string;
-  categoryTitle: string;
+export interface ProductDetail {
+  _id: string;
   productTitle: string;
-  age: number[];
-  ageFilter: string;
+  productCategory: string;
   productSummary: string;
+  minAge: number;
+  maxAge: number;
+  ageFilter: string;
   rating: string;
   paperEditionPrice: string;
   printablePrice: string;
-  productType: string;
-  thumbnails: Thumbnail[];
-  description: DescriptionItem[];
+  productImages: ProductImage[];
+  productVideos: ProductVidoes[];
+  productDescription: DescriptionItem[];
+  productReview: ProductReviews[];
 }
 
 const ProductCard = ({ productDetails }: { productDetails: ProductDetail }) => {
   return (
-    <Link to={`/mentoons-store/product/${productDetails.id}`} className="flex">
+    <Link
+      to={`/mentoons-store/product/${productDetails._id}`}
+      state={{ productDetails }}
+      className="flex"
+    >
       <div className=" p-2 py-3 border-[0.5px] border-transparent hover:border-[0.5px] hover:border-white/50  hover:shadow-2xl hover:scale-105 transition-all duration-300 rounded-2xl bg-amber-50">
         <div>
-          <img
-            src="/assets/images/product-card-thumbnail.png"
-            alt=""
-            className=""
-          />
+          <div className="border-2 rounded-xl flex items-center justify-center ">
+            <img
+              src={productDetails.productImages[0].imageSrc}
+              alt=""
+              className="w-64 object-cover "
+            />
+          </div>
           <div className=" ">
             <div className="w-72 p-2  flex flex-col  justify-between">
-              <div className="flex  items-start justify-between">
+              <div className="flex  items-start justify-between gap-4">
                 <h1 className="text-2xl font-bold ">
                   {productDetails.productTitle}
                 </h1>
-                <p className="font-bold text-lg text-zinc-700 whitespace-nowrap">
-                  {productDetails.paperEditionPrice}
+                <p className="font-bold text-lg text-black whitespace-nowrap">
+                  ₹ {productDetails.paperEditionPrice}
                 </p>
               </div>
-              <h2 className="text-zinc-700 w-full  ">
+              <h2 className="text-zinc-700 w-full line-clamp-5 ">
                 {productDetails.productSummary}
               </h2>
             </div>

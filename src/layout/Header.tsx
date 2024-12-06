@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { FaCalendarAlt, FaHome, FaPhone, FaUsers } from "react-icons/fa";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { IoCart } from "react-icons/io5";
-import { MdOutlineClose } from "react-icons/md";
 import { date } from "@/constant/websiteConstants";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { FaCalendarAlt, FaHome, FaPhone } from "react-icons/fa";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { MdOutlineClose } from "react-icons/md";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -44,9 +43,9 @@ const Header = () => {
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (menuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
   }, [menuOpen]);
 
@@ -57,7 +56,7 @@ const Header = () => {
     <div
       className={`
         w-full min-h-fit bg-primary flex items-center justify-around p-2 lg:p-1 top-0 sticky z-[40] gap-[1.8rem] 
-        transition-transform duration-300 
+        transition-transform duration-300  
         ${isVisible ? "translate-y-0" : "-translate-y-full"}
       `}
       style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 1.25vw 1.875vw" }}
@@ -86,19 +85,19 @@ const Header = () => {
             </span>
           </a>
           <NavLink to="/hiring" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold">
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold lg:px-2  lg:rounded-xl">
               Join Us
             </button>
           </NavLink>
           <NavLink to="/mentoons-store" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2">
-              <IoCart />
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2 lg:px-2  lg:rounded-xl">
+              {/* <IoCart /> */}
               Store
             </button>
           </NavLink>
           <NavLink to="/membership" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2">
-              <FaUsers className="mr-2" />
+            <button className="cursor-pointer hover:text-white hover:bg-red-500 h-[4.5rem] text-base whitespace-nowrap text-white font-semibold flex items-center justify-around gap-2 lg:px-2  lg:rounded-xl">
+              {/* <FaUsers className="mr-2" /> */}
               Plans
             </button>
           </NavLink>
@@ -108,7 +107,7 @@ const Header = () => {
       {/* Logo Section */}
       <div className="relative flex-1 max-w-[7vw]">
         <NavLink to="/" onClick={() => setMenuOpen(false)}>
-          <figure className="w-[4rem] h-[4rem] md:h-[5.5rem] md:w-[5.5rem] lg:h-[6.5rem] lg:w-[6.5rem] absolute bg-primary rounded-full top-[-1.8rem] lg:top-[-2rem] left-1/2 transform -translate-x-1/2 z-40">
+          <figure className="w-[4rem] h-[4rem] md:h-[5.5rem] md:w-[5.5rem] lg:h-[6.5rem] lg:w-[6.5rem] absolute bg-primary rounded-full top-[-1.8rem] lg:top-[-2rem] left-1/2 transform -translate-x-1/2 z-40 lg:pb-8 pb-2">
             <img
               src="/assets/images/mentoons-logo.png"
               alt="mentoonsLogo"
@@ -151,21 +150,60 @@ const Header = () => {
           `}
         >
           {/* Mobile-specific Home link */}
-          <NavLink to="/" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+          <NavLink
+            to="/"
+            className="lg:hidden"
+            onClick={() => setMenuOpen(false)}
+          >
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold pt-6 lg:px-2  lg:rounded-xl">
               Home
             </button>
           </NavLink>
 
           <NavLink to="/mentoons-comics" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:px-2 lg:rounded-xl">
               Comics
             </button>
           </NavLink>
 
           <NavLink to="/mentoons-podcast" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:px-2 lg:rounded-xl">
               Podcasts
+            </button>
+          </NavLink>
+          <NavLink
+            to="/hiring"
+            onClick={() => setMenuOpen(false)}
+            className="lg:hidden"
+          >
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:px-2 lg:rounded-xl">
+              Join Us
+            </button>
+          </NavLink>
+          <NavLink
+            to="/mentoons-store"
+            onClick={() => setMenuOpen(false)}
+            className="lg:hidden"
+          >
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              {/* <IoCart /> */}
+              Store
+            </button>
+          </NavLink>
+          <NavLink
+            to="/membership"
+            onClick={() => setMenuOpen(false)}
+            className="lg:hidden"
+          >
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold flex items-center">
+              {/* <FaUsers className="mr-2" /> */}
+              Plans
+            </button>
+          </NavLink>
+
+          <NavLink to="/mentoons-workshops" onClick={() => setMenuOpen(false)}>
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold lg:px-2 lg:rounded-xl">
+              Workshop
             </button>
           </NavLink>
 
@@ -173,7 +211,7 @@ const Header = () => {
           <div className="relative group">
             <button
               className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 
-                h-[2.5rem] lg:h-[4.5rem] text-base whitespace-nowrap font-semibold hidden lg:block"
+                h-[2.5rem] lg:h-[4.5rem] text-base whitespace-nowrap font-semibold hidden lg:block lg:px-2  lg:rounded-xl"
               onClick={() => navigate("/mentoons-comics/audio-comics")}
             >
               Audio Comics
@@ -204,12 +242,15 @@ const Header = () => {
                 </button>
               </NavLink>
             </div>
-
           </div>
 
           {/* Mobile Audio Comics link */}
-          <NavLink to="/mentoons-comics/audio-comics" className="lg:hidden" onClick={() => setMenuOpen(false)}>
-            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+          <NavLink
+            to="/mentoons-comics/audio-comics"
+            className="lg:hidden"
+            onClick={() => setMenuOpen(false)}
+          >
+            <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold ">
               Audio Comics
             </button>
           </NavLink>
@@ -220,7 +261,7 @@ const Header = () => {
           </SignedIn>
           <SignedOut>
             <NavLink to="/sign-in">
-              <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold">
+              <button className="cursor-pointer lg:hover:text-white lg:hover:bg-red-500 h-[2.5rem] lg:h-[4.5rem] text-base font-semibold ">
                 Sign In
               </button>
             </NavLink>

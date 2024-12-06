@@ -594,6 +594,25 @@ export const PODCAST_CATEGORY = [
         videoSrc:
           "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Entertainment+Addiction+01.mp4",
       },
+      {
+        title: "AI Impact Learning and Focus",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/AI+Impacts+Learning+and+Focus.mp4",
+      },
+      {
+        title: "Betting Apps Risking Teen Careers",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Betting+Apps+Risking+Teen+Careers.mp4",
+      },
+
+      {
+        title: "How Social Media Creates FOMO",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/How+Social+Media+Creates+FOMO.mp4",
+      },
     ],
   },
   {
@@ -610,6 +629,18 @@ export const PODCAST_CATEGORY = [
         description: "",
         videoSrc:
           "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/pornography-de-addiction.mp4",
+      },
+      {
+        title: "Challenges Parents Face Today",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+20%2B/Challenges+Parents+Face+Today.mp4",
+      },
+      {
+        title: "How Parents Can Bond with Kids",
+        description: "",
+        videoSrc:
+          "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+20%2B/How+Parents+Can+Bond+with+Kids.mp4",
       },
     ],
   },
@@ -767,11 +798,11 @@ export const FOOTER_PAGELINKS = [
       {
         id: "S_1",
         label: "Conversation Starter Card",
-        url: "/mentoons-store",
+        url: "/mentoons-store/",
       },
       {
         id: "S_2",
-        label: "Re-Teller Card",
+        label: "Story Re-Teller Card",
         url: "/mentoons-store",
       },
       {
@@ -995,20 +1026,7 @@ export const EMPLOYEES = [
   },
 ];
 
-//categoryTitle
-//filter items Array
-// -- Trending
-// -- Latest
-// -- Most Popular
-// Product Array
-// -- id
-// -- thumbnail
-// -- description
-// -- prize
-// -- productType : Free / Paid
-// -- product Rating
-// -- productActionType : for Free download and print
-// -- porductActionType : for Pdid Add to cart and Buy Now
+
 
 export const PRODUCT_FILTERS = [
   {
@@ -1028,257 +1046,19 @@ export const PRODUCT_FILTERS = [
   },
 ];
 
-export const PRODUCT_DETAILS = [
+
+
+export const PRODUT_CAROUSEL_ITEM = [
   {
-    id: "PD_01",
-    categoryTitle: "Conversation Starter Cards",
-    productTitle: "Conversation Starter Cards (6-12)",
-    age: [6, 7, 8, 9, 10, 11, 12],
-    ageFilter: "Age (6-12)",
-    productSummary:
-      "This conversation starter card helps break the ice and build connections. It's perfect for social gatherings, team-building, or sparking interesting conversations.",
-    rating: "4/5",
-    paperEditionPrice: "₹ 199",
-    printablePrice: "₹ 99",
-    productType: "Free",
-    thumbnails: [
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-    ],
-    description: [
-      {
-        id: "D_01",
-        label: "Feature",
-        fatureList: [
-          {
-            id: "f_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_02",
-        label: "Advantage",
-        advantageList: [
-          {
-            id: "a_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_03",
-        label: "Benefits",
-        benefitsList: [
-          {
-            id: "b_01",
-            description: "",
-          },
-        ],
-      },
-    ],
+    id: "pci_01",
+    imageURL: "/assets/images/conversation-starter-card.png",
   },
   {
-    id: "PD_02",
-    categoryTitle: "Story Re-Teller Card",
-    productTitle: "Story Re-Teller Card (13-17)",
-    age: [13, 14, 15, 16, 17],
-    ageFilter: "Age (13-17)",
-    productSummary:
-      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
-    rating: "4/5",
-    paperEditionPrice: "₹ 199",
-    printablePrice: "₹ 99",
-    productType: "Free",
-    thumbnails: [
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-    ],
-    description: [
-      {
-        id: "D_01",
-        label: "Feature",
-        fatureList: [
-          {
-            id: "f_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_02",
-        label: "Advantage",
-        advantageList: [
-          {
-            id: "a_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_03",
-        label: "Benefits",
-        benefitsList: [
-          {
-            id: "b_01",
-            description: "",
-          },
-        ],
-      },
-    ],
+    id: "pci_02",
+    imageURL: "/assets/images/story-re-teller-card.png",
   },
   {
-    id: "PD_03",
-    categoryTitle: "Silent Stories",
-    productTitle: "Silent Stories (18 - 19)",
-    age: [18, 19],
-    ageFilter: "Age (18-19)",
-    productSummary:
-      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
-    rating: "4/5",
-    paperEditionPrice: "₹ 199",
-    printablePrice: "₹ 99",
-    productType: "Free",
-    thumbnails: [
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-    ],
-    description: [
-      {
-        id: "D_01",
-        label: "Feature",
-        fatureList: [
-          {
-            id: "f_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_02",
-        label: "Advantage",
-        advantageList: [
-          {
-            id: "a_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_03",
-        label: "Benefits",
-        benefitsList: [
-          {
-            id: "b_01",
-            description: "",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "PD_04",
-    categoryTitle: "Silent Stories",
-    productTitle: "Silent stories (20+)",
-    age: [20],
-    ageFilter: "Age (20+)",
-    productSummary:
-      "This conversation starter card is designed to help you break the ice and build meaningful connections with others. It's perfect for social gatherings, team-building activities, or simply to spark interesting conversations.",
-    rating: "4/5",
-    paperEditionPrice: "₹ 199",
-    printablePrice: "₹ 99",
-    productType: "Free",
-    thumbnails: [
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-      {
-        id: "th_01",
-        media: "http://example.com",
-      },
-    ],
-    description: [
-      {
-        id: "D_01",
-        label: "Feature",
-        fatureList: [
-          {
-            id: "f_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_02",
-        label: "Advantage",
-        advantageList: [
-          {
-            id: "a_01",
-            description: "",
-          },
-        ],
-      },
-      {
-        id: "D_03",
-        label: "Benefits",
-        benefitsList: [
-          {
-            id: "b_01",
-            description: "",
-          },
-        ],
-      },
-    ],
+    id: "pci_03",
+    imageURL: "/assets/images/silent-stories.png",
   },
 ];

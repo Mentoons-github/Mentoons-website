@@ -1,10 +1,9 @@
 import { SignIn } from "@clerk/clerk-react";
 
 const LogIn = () => {
-
   return (
-    <div className="h-screen flex ">
-      <div className="hidden flex-1 lg:block ">
+    <div className=" h-screen  flex  bg-[url(/assets/images/team-background.png)] bg-no-repeat bg-cover bg-center">
+      <div className="hidden flex-1 lg:block  ">
         <img
           src="/assets/images/team-Illustration.png"
           alt=""

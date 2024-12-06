@@ -291,7 +291,10 @@ const ComicsSection: React.FC = () => {
                   />
                 </div>
 
-                <div className=" w-full  flex items-center justify-center">
+                <div className=" w-full   flex flex-col items-center justify-center">
+                  <h2 className="bg-blue-600/50 border border-blue-600 text-white px-3 py-1 self-start ml-12 mb-2 rounded-xl text-sm font-semibold">
+                    {isActiveCategory}
+                  </h2>
                   {PODCAST_CATEGORY.filter(
                     (item) => item.categroy === isActiveCategory
                   ).map((item) => (
@@ -1046,3 +1049,30 @@ export default ComicsSection;
 // };
 
 // export default ComicsSection;
+
+// Hoke Tetho duur mein
+// Khoya apne aap nu
+
+// Adda hissa mere dil da
+// Hoeya tere khilaaf Kyun
+
+// Adda dil chaunda ae tenu
+// Karni chaunda baat kyun
+
+//Tareyaan di roshni de wangu
+// Gal nal laaja raat nu
+
+//Dil mere nu smajhaja
+//Hathan wich hath tu paaja
+
+//Pehlan jo dekhi nahi mein
+//Aaisi duniya tu dikhaa ja
+
+// Hokay tetho duur wey sajna
+// Hokay tetho duur wey sajna
+
+// Hun tera mera dekhi dim naiyo lagna (Dil baiya lagna)
+// Hogaye see majboor we sajna
+
+// Dono majboor we sajna
+// Kee daa ae kasoor way sajna

@@ -1,13 +1,11 @@
-import React, { ChangeEvent } from "react";
-import Wordbreak from "@/components/comics/Wordbreak";
-import { MdDelete } from "react-icons/md";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { v4 as uuidv4 } from "uuid";
+import Carts from "@/components/MentoonsStore/Carts";
 import {
   removeFromCartReducer,
   updateComicQuantityReducer,
 } from "@/redux/comicSlice";
+import { RootState } from "@/redux/store";
+import React, { ChangeEvent } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Cart: React.FC = () => {
@@ -25,13 +23,10 @@ const Cart: React.FC = () => {
   };
 
   return (
-    <div className="container py-10 lg:py-20 space-y-10 lg:space-y-20">
-      <div className="text-start pb-7 space-y-4 border-b border-black">
-        <div className=" text-3xl lineBefore uppercase text-[#d71515]">
-          Your Cart{" "}
-        </div>
+    <div className="container py-10 lg:py-20 space-y-10 ">
+      <div className="text-start pb-3  border-b border-black">
         <div className="text-5xl lg:text-7xl w-full font-extrabold leading-[1.10]">
-          Checkout Your <Wordbreak /> Comic Books.
+          Checkout Your Cart
         </div>
       </div>
       <div
@@ -39,7 +34,7 @@ const Cart: React.FC = () => {
           cartData.length > 0 && "border-b border-black"
         } pb-14 flex flex-col justify-between w-full gap-20`}
       >
-        {cartData.length <= 0 ? (
+        {cartData.length !== 0 ? (
           <div className="lg:absolute lg:left-[50%] top-[10%] lg:top-[80%] lg:translate-x-[-50%] lg:translate-y-[0%] text-center space-y-4">
             <div className="text-4xl text-center lg:text-4xl font-semibold">
               No Comics Found! 🥺
@@ -55,67 +50,18 @@ const Cart: React.FC = () => {
             </button>
           </div>
         ) : (
-          cartData?.map((item, idx) => {
-            return (
-              <div
-                key={uuidv4()}
-                className="flex items-start justify-between gap-4"
-              >
-                <div className="flex w-[25%] items-center justify-between gap-8">
-                  <div className="text-6xl text-red-500">0{idx + 1}</div>
-                  <div>
-                    <img
-                      className="w-[15rem] rounded-md"
-                      src={item?.thumbnail}
-                      alt="comic image"
-                    />
-                  </div>
-                </div>
-                <div className="w-[30%] space-y-6">
-                  <div className="text-xl font-medium text-gray-400">
-                    Comic Name
-                  </div>
-                  <div className="text-4xl tracking-wide">{item?.name}</div>
-                </div>
-                <div className="w-[15%] space-y-6">
-                  <div className="text-xl font-medium text-gray-400">
-                    Quantity
-                  </div>
-                  <input
-                    value={item?.quantity}
-                    onChange={(e) => updateQuantity(e, item?.thumbnail)}
-                    className="w-[7rem] bg-gray-100 px-2 py-4 rounded-sm outline-none border-none"
-                    type="number"
-                  />
-                </div>
-                <div className="w-[15%] space-y-6">
-                  <div className="text-xl font-medium text-gray-400">Price</div>
-                  <div className="text-3xl font-semibold">Rs. {item.price}</div>
-                </div>
-                <div className="w-[10%] space-y-6">
-                  <div className="text-xl font-medium text-gray-400">
-                    Action
-                  </div>
-                  <div className="flex items-center justify-start gap-2">
-                    <div
-                      onClick={() => removeComic(item?.thumbnail)}
-                      className="bg-red-500 rounded-full p-2"
-                    >
-                      <MdDelete className="text-2xl text-white cursor-pointer" />
-                    </div>
-                  </div>
-                </div>
-                <div className="w-[10%] space-y-6">
-                  <div className="text-xl font-medium text-gray-400">
-                    Subtotal
-                  </div>
-                  <div className="text-3xl font-semibold">
-                    Rs. {item?.price}
-                  </div>
-                </div>
-              </div>
-            );
-          })
+          <div className="flex flex-wrap gap-4">
+            <div className="w-full flex flex-col gap-4  md:flex-[0.7]">
+              {" "}
+              <Carts />
+              <Carts />
+              <Carts />
+              <Carts />
+            </div>
+            <div className=" w-full h-48 flex  md:flex-[0.3] border  bg-white rounded-lg shadow-2xl p-4 pl-6 ">
+              <h1 className="text-2xl font-semibold ">Your Subtotal: ₹ 199</h1>
+            </div>
+          </div>
         )}
       </div>
       {cartData.length > 0 && (

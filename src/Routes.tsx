@@ -8,6 +8,7 @@ import Loader from "./components/common/Loader";
 import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
+import Product from "./components/MentoonsStore/Products";
 import AboutMentoons from "./pages/AboutMentoons";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
@@ -126,14 +127,14 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/mentoons-comics/comics",
-  //   element: (
-  //     <MainLayout>
-  //       <ComicsPage page='Comics' />
-  //     </MainLayout>
-  //   ),
-  // },
+  {
+    path: "/mentoons-comics/comics",
+    element: (
+      <MainLayout>
+        <ComicsPage />
+      </MainLayout>
+    ),
+  },
   {
     path: "/mentoons-workshops",
     element: (
@@ -218,14 +219,14 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/mentoons-store/product/:productId",
-  //   element: (
-  //     <MainLayout>
-  //       <Product />
-  //     </MainLayout>
-  //   ),
-  // },
+  {
+    path: "/mentoons-store/product/:productId",
+    element: (
+      <MainLayout>
+        <Product />
+      </MainLayout>
+    ),
+  },
   {
     path: "/mentoons-privacy-policy",
     element: (
