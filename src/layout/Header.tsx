@@ -221,7 +221,7 @@ const Header = () => {
             <div
               className="hidden group-hover:flex 
             absolute bg-white text-primary shadow-lg 
-            top-[4rem] left-0 w-[200px] flex-col border rounded-lg 
+            top-[5rem] left-0 w-[200px] flex-col border rounded-lg 
             transition-opacity duration-300 ease-in-out"
             >
               <NavLink to="/mentoons-comics/audio-comics?filter=groupSmall">
