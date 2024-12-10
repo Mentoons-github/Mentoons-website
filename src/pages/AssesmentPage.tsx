@@ -1,5 +1,6 @@
 import FilterComics from "@/components/comics/FilterComics";
 import { motion } from "framer-motion"; // Add framer-motion for animations
+import { useNavigate } from "react-router-dom";
 
 
 const AssesmentPage: React.FC = () => {
@@ -69,6 +70,9 @@ const AssesmentPage: React.FC = () => {
         }, 
 
     ];
+const navigate = useNavigate();
+
+
     return (
         <motion.div 
             className="py-8 px-4 md:py-16 md:px-5 lg:py-20 space-y-6 md:space-y-8"
@@ -150,6 +154,7 @@ const AssesmentPage: React.FC = () => {
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             className="border-2 cursor-pointer bg-primary border-primary px-5 py-1 rounded-full text-white font-semibold text-sm md:text-base"
+                                        onClick={() => navigate(`/assesment-questions`)}
                                         >
                                             TEST NOW
                                         </motion.div>
