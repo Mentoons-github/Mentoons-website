@@ -792,7 +792,7 @@ export const FOOTER_PAGELINKS = [
   },
   {
     id: "FP_2",
-    title: "Buy our Products",
+    title: "Our Products",
     url: "/mentoons-store",
     items: [
       {
@@ -809,6 +809,11 @@ export const FOOTER_PAGELINKS = [
         id: "S_3",
         label: "Silent Stories",
         url: "/mentoons-store",
+      },
+      {
+        id: "S_4",
+        label: "Assesments",
+        url: "/assesment-page",
       },
     ],
   },

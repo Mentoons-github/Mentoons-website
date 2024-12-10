@@ -623,7 +623,7 @@ const Footer = () => {
       toast(` ${err}`);
     } finally {
       resetForm();
-      setSubmitting(false); // Stops the loading state after form submission
+      setSubmitting(false);
     }
   };
   const scrollToTop = (url: string) => {

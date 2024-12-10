@@ -22,6 +22,8 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import CareerPage from "./pages/CareerPage";
 import LandingPage from "./pages/LandingPage";
 import Home from './pages/Home'
+import AssesmentPage from "./pages/AssesmentPage";
+import AssesmentQuestions from "./pages/AssesmentQuestions";
 
 // Lazy load the pages
 // const Home = lazy(() => import("./pages/Home"));
@@ -265,6 +267,22 @@ const routes = [
     element: (
       <MainLayout>
         <LandingPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/assesment-page",
+    element: (
+      <MainLayout>
+        <AssesmentPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/assesment-questions",
+    element: (
+      <MainLayout>
+        <AssesmentQuestions />
       </MainLayout>
     ),
   },
