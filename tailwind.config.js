@@ -19,17 +19,17 @@ module.exports = {
     //     xl: "7.5rem",
     //   },
     },
-    // screens: {
-    //   xxs: "300px",
-    //   xs: "475px",
-    //   sm: "639px",
-    //   md: "768px",
-    //   lg: "1024px",
-    //   custom: "1110px",
-    //   xl: "1281px",
-    //   "2xl": "1441px",
-    //   "3xl": "1920px",
-    // },
+    screens: {
+      xxs: "300px",
+      xs: "475px",
+      sm: "639px",
+      md: "768px",
+      lg: "1026px",
+      custom: "1110px",
+      xl: "1281px",
+      "2xl": "1441px",
+      "3xl": "1920px",
+    },
     extend: {
       fontFamily: {
         montserrat: "Montserrat",

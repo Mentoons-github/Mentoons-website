@@ -34,7 +34,7 @@ const Register = () => {
     <div className="h-screen flex  bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
       <div className="hidden flex-1 lg:block ">
         <img
-          src="/assets/images/team-Illustration.png"
+          src="/assets/home/team007.png"
           alt=""
           className="object-cover"
         />
