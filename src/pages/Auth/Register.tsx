@@ -36,9 +36,9 @@ const Register = () => {
         <img
           src="/assets/home/team007.png"
           alt=""
-          className="object-cover"
+          className="object-cover" 
         />
-      </div>
+      </div> 
       <div className="flex-1 flex items-center justify-center ">
         <SignUp signInUrl="/sign-in" forceRedirectUrl="/?openModal=true" />
       </div>

@@ -9,6 +9,7 @@ const MdMultiverse = () => {
             image: "/assets/LandingPage/com.png",
             color: "#FFF27E",
             signImage: "/assets/LandingPage/com-si.png",
+            link: '/mentoons-comics'
         },
         {
             title: "Audio Comic",
@@ -16,6 +17,8 @@ const MdMultiverse = () => {
             image: "/assets/LandingPage/audio.png",
             color: "#4FE5FF",
             signImage: "/assets/LandingPage/aud-si.png",
+            link: '/mentoons-comics/audio-comics'
+
         },
         {
             title: "Podcast",
@@ -23,6 +26,7 @@ const MdMultiverse = () => {
             image: "/assets/LandingPage/pod.png",
             color: "#C0FFA0",
             signImage: "/assets/LandingPage/pod-si.png",
+            link: '/mentoons-podcast'
         },
         {
             title: "Workshop",
@@ -30,6 +34,7 @@ const MdMultiverse = () => {
             image: "/assets/LandingPage/works.png",
             color: "#FBB13E",
             signImage: "/assets/LandingPage/work-si.png",
+            link: '/mentoons-workshops'
         }
     ]
     return (
@@ -52,7 +57,7 @@ const MdMultiverse = () => {
             {/* Mentoons Offering */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 lg:px-10 py-8">
                 {OfferingData.map((offering, index) => (
-                    <div key={index} className="relative group hover:scale-105 transition-transform duration-300">
+                    <div key={index} className="relative group hover:scale-105 transition-transform duration-300" onClick={() => navigate(offering.link)}>
                         <div className="rounded-xl shadow-lg overflow-hidden h-full">
                             <div className="h-48 relative" style={{ backgroundColor: offering.color }}>
                                 <img src='/assets/LandingPage/star-bg.png' alt='star bg' className="absolute inset-0 w-full h-full opacity-50" />
