@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { colors } from "./ComicSection"
 
-import { letters } from "./ComicSection"
 
 const WorkshopSection = () => {
     const navigate = useNavigate();
+    const letters = ['M', 'E', 'N', 'T', 'O', 'R', 'I','N','G'];
+    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'purple', 'purple','green'];
     return (
         <div className="w-full min-h-screen relative z-10" style={{ background: "linear-gradient(180deg, #A4CC13 12.08%, #FFEE67 100%)" }}>
             <img src="/assets/LandingPage/workshop-ass.png" alt="workshop assets" className="absolute top-0 left-0 w-full object-contain" />
