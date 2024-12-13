@@ -1,19 +1,12 @@
-import HeroSection from "@/components/LandingPage/HeroSection"
-import Struggles from "@/components/LandingPage/Struggles"
-import MdMultiverse from "@/components/LandingPage/MdMultiverse"
-import ComicSection from "@/components/LandingPage/ComicSection"
-import PodcastSection from "@/components/LandingPage/PodcastSection"
-import WorkshopSection from "@/components/LandingPage/WorkshopSection"
+import WorkshopMain from "@/components/Workshop/WorkshopMain"
+
 const LandingPage = () => {
   return (
-    <div>
-      <HeroSection />
-      <Struggles />
-      <MdMultiverse />
-      <ComicSection />
-      <WorkshopSection />
-      <PodcastSection />
+    <div className="h-full w-full relative">
+      <WorkshopMain />  
+      
     </div>
   )
 }
+
 export default LandingPage
