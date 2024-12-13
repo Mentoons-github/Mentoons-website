@@ -101,7 +101,7 @@ const WorkshopMain = () => {
                     </div>
                 </div>
             </section>
-            <section className="bg-[url(/assets/camps/cc.png)] w-full min-h-screen pt-32">
+            <section className="bg-[url(/assets/camps/cc.png)] w-full min-h-screen pt-32 bg-no-repeat bg-cover lg:bg-repeat">
                 <div className="w-full flex flex-wrap lg:flex-nowrap gap-8 px-4 md:px-8">
                     {/* Left Column */}
                     <div className="w-full lg:w-1/2">
@@ -182,7 +182,7 @@ const WorkshopMain = () => {
                 </div>
 
                 <div className="relative">
-                    <figure className="h-12 w-12 absolute -top-8 left-[27%]">
+                    <figure className="h-12 w-12 absolute -top-14 left-[27%]">
                         <img src="/assets/camps/“.png" alt="teenpoints" className="w-full h-full object-cover" />
                     </figure>
                     <p className="text-xl text-center text-white">Say goodbye to uncontrolled screen time, liberate yourself from digital dependence and<br /> rediscover the joy of real-life experiences.</p>
