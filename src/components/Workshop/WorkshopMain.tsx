@@ -62,7 +62,7 @@ const WorkshopMain = () => {
                                 <div className="w-1/2 h-1/2">
                                     <figure className="w-full h-full">
                                         <img
-                                            src="/assets/camps/teen.png"
+                                            src="/assets/camps/Teen.png"
                                             alt="workshop title"
                                             className="h-full w-full object-contain"
                                         />
