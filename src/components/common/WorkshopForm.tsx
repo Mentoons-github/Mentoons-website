@@ -74,7 +74,7 @@ const WorkshopForm: React.FC<WorkshopProps> = ({ selectedWorkshop, setShowForm }
   return (
     <>
       {loading && <Loader />}
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="w-full p-5">
         <div
           className={`relative ${!isSubmitted
             ? "bg-[url('/assets/images/Frame2.png')] bg-cover bg-no-repeat bg-center bg-opacity-25"
