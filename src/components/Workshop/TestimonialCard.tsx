@@ -12,7 +12,7 @@ interface TestimonialProps {
         <img 
           src={testimonial.img} 
           alt={testimonial.title} 
-          className="absolute -top-8 -left-8 w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-md" 
+          className="absolute -top-0 -left-2 lg:-left-8 w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-md" 
         />
         
         <div className="flex flex-col items-center justify-center w-full p-6 pt-12 space-y-4">
