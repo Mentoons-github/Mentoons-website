@@ -1,11 +1,13 @@
-import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
-import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogOverlay, DialogTrigger } from "@radix-ui/react-dialog";
+import React, { useEffect, useState } from "react";
 import TestimonialCard from "./TestimonialCard";
 import { WORKSHOP_FEATURES } from "@/constant";
+import WorkshopForm from "../common/WorkshopForm";
 
-type Category = 'Buddy Camp' | 'Teen Camp' | 'Family Camp' | 'Career Corner';
+type Category = '6-12' | '13-19' | 'parents' | '20+';
 
 interface CategoryContent {
+    cat: string;
     title: string;
     subTitle: string;
     description: string;
@@ -25,10 +27,11 @@ interface CategoryContent {
 }
 
 const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
-    'Buddy Camp': {
+    '6-12': {
+        cat: "6-12",
         title: 'MENTOONS Kids Camp',
         subTitle: 'Fun Learning Workshop For Kids (7-12 Years)',
-        description: 'Nurture your child\'s creativity and learning with our engaging Kids Camp workshop.',
+        description: "Nurture your child's creativity and learning with our engaging Kids Camp workshop.",
         mainImage: '/assets/camps/Buddy.png',
         heroImage: '/assets/camps/bdy-img.png',
         video: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Children+Common+Issues.mp4",
@@ -68,7 +71,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
         ]
 
     },
-    'Teen Camp': {
+    '13-19': {
+        cat: "13-19",
         title: 'MENTOONS Teen Camp',
         subTitle: 'Identity Workshop For Teenagers (13-19 Years)',
         description: 'Help your teenager navigate the challenges of adolescence with our comprehensive Teen Camp workshop.',
@@ -111,7 +115,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
         ]
 
     },
-    'Family Camp': {
+    'parents': {
+        cat: "parents",
         title: 'Family Camp',
         subTitle: 'Guiding Parents in Modern Parenting',
         description: 'Empower yourself with effective parenting strategies for the digital age.',
@@ -154,7 +159,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
         ]
 
     },
-    'Career Corner': {
+    '20+': {
+        cat: "20+",
         title: 'Career Corner',
         subTitle: 'Career Guidance for Students',
         description: 'Expert guidance to help students explore and plan their career paths.',
@@ -200,9 +206,10 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
 };
 
 const WorkshopMain = () => {
-    const [selectedCategory, setSelectedCategory] = useState<Category>('Teen Camp');
+    const [selectedCategory, setSelectedCategory] = useState<Category>('13-19');
     const [currentTextIndex, setCurrentTextIndex] = useState(0);
     const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+    const [showForm, setShowForm] = React.useState<boolean>(false);
 
     const handleNextTestimonial = () => {
         setCurrentTestimonialIndex((prev) =>
@@ -229,11 +236,11 @@ const WorkshopMain = () => {
     }, [selectedCategory, content.texts.length]);
 
     return (
-        <div className="overflow-x-hidden">
+        <div className="overflow-x-hidden relative w-full">
             {/* Category Selector */}
-            <div className="bg-[#FDF7EE] pb-7 pt-12 relative">
+            <div className="bg-[#FDF7EE] pb-7 pt-4 lg:pt-12 relative">
                 {/* Career Corner Image */}
-                <div className="absolute -right-4 lg:g:right-2 top-1/2 -translate-y-1/2 cursor-pointer z-10" onClick={() => setSelectedCategory("Career Corner")}>
+                <div className="absolute -right-4 lg:g:right-2 top-1/2 -translate-y-1/2 cursor-pointer z-10" onClick={() => setSelectedCategory("20+")}>
                     <img
                         src="/assets/images/career-corner.png"
                         alt="Career Corner"
@@ -243,11 +250,12 @@ const WorkshopMain = () => {
 
                 {/* All Categories Including Career Corner */}
                 <div className="w-[95%] lg:w-[90%] mx-auto flex lg:justify-center gap-4 lg:gap-24 flex-nowrap">
-                    {(Object.keys(CATEGORY_CONTENT) as Category[]).filter(category => category !== 'Career Corner').map((category) => (
-                        <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={`px-1 lg:px-4 
+                    {(Object.keys(CATEGORY_CONTENT) as Category[]).filter(category => category !== '20+').map((category) => (
+                        <div className="flex items-center justify-center gap-3 relative">
+                            <button
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`px-1 lg:px-4 
                 py-1 lg:py-4 
                 text-sm lg:text-lg
                 rounded-lg transition-all duration-300 
@@ -255,12 +263,16 @@ const WorkshopMain = () => {
                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2)]
                 hover:shadow-[0_6px_8px_-1px_rgba(0,0,0,0.3)]
                 ${selectedCategory === category
-                                    ? 'bg-[#765EED] text-white'
-                                    : 'bg-[#CEC4FF] hover:bg-[#4395DD]'
-                                }`}
-                        >
-                            {category}
-                        </button>
+                                        ? 'bg-[#765EED] text-white'
+                                        : 'bg-[#CEC4FF] hover:bg-[#4395DD]'
+                                    }`}
+                            >
+                                <h1>{category.charAt(0).toLocaleUpperCase() + category.slice(1)}</h1>
+                            </button>
+                            {/* <figure className="absolute -top-5 -right-5 w-full h-full">
+                                <img src={CATEGORY_CONTENT[category].mainImage} alt="" />
+                            </figure> */}
+                        </div>
                     ))}
                 </div>
             </div>
@@ -341,9 +353,6 @@ const WorkshopMain = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <DialogContent className="bg-white flex flex-col items-center justify-center border-none w-[95%] md:w-[60%] lg:w-[30%] p-0 rounded-[20px]">
-                                            {/* Dialog content */}
-                                        </DialogContent>
                                     </Dialog>
                                 </div>
                             ))}
@@ -469,11 +478,32 @@ const WorkshopMain = () => {
                         Register Now
                     </h1>
                     <p className="mb-6 text-xl text-gray-700">Join {selectedCategory} today!</p>
-                    <button className="bg-gradient-to-r from-[#FF8C1E] to-[#FF6B1E] px-6 py-3 rounded-xl text-2xl font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="bg-gradient-to-r from-[#FF8C1E] to-[#FF6B1E] px-6 py-3 rounded-xl text-2xl font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300">
                         Get Started
                     </button>
                 </div>
             </section>
+            {/* workshop form */}
+            {showForm && (
+                <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
+                    <DialogOverlay className="fixed inset-0 bg-black/50 z-[100]" />
+                    <DialogContent
+                        className="fixed z-[101] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                        w-screen h-screen max-w-full max-h-full
+                        flex items-center justify-center 
+                        pointer-events-none"
+                    >
+                        <div className="w-[100%] max-w-4xl bg-transparent rounded-xl pointer-events-auto">
+                            <WorkshopForm
+                                selectedWorkshop={content.cat}
+                                setShowForm={setShowForm}
+                            />
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 };

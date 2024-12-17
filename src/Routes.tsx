@@ -40,7 +40,7 @@ const PodCast = lazy(() => import("./pages/PodCast"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const WorkshopsPage = lazy(() => import("./pages/WorkshopsPage"));
+// const WorkshopsPage = lazy(() => import("./pages/WorkshopsPage"));
 
 const routes = [
   {
@@ -142,7 +142,7 @@ const routes = [
     path: "/mentoons-workshops",
     element: (
       <MainLayout>
-        <WorkshopsPage />
+        <LandingPage />
       </MainLayout>
     ),
   },
