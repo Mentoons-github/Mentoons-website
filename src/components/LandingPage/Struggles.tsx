@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect, useRef } from "react";
 import AddictionCards from "./AddictionCards";
 
 const Struggles = () => {
@@ -53,109 +54,129 @@ const Struggles = () => {
         }
     ];
 
+    const controls = useAnimation();
+    const sectionRef = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    controls.start("visible");
+                } else {
+                    controls.start("hidden");
+                }
+            },
+            { threshold: 0.2 } // Trigger when 20% of the section is visible
+        );
+
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current);
+        }
+
+        return () => {
+            if (sectionRef.current) {
+                observer.unobserve(sectionRef.current);
+            }
+        };
+    }, [controls]);
+
+    const fadeInVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeInOut" } },
+    };
+
+    const staggerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+            },
+        },
+    };
+
     return (
-        <div className="w-full min-h-screen bg-[#FFF2E7] p-4 sm:p-6 lg:p-10">
+        <div
+            ref={sectionRef}
+            className="w-full min-h-screen bg-[#FFF2E7] px-4 sm:px-6 lg:px-10 py-10"
+        >
             <motion.div
-                className="w-full md:w-[80%] lg:w-[60%] mx-auto py-5 lg:py-10 flex flex-col lg:flex-row items-center lg:gap-6"
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
+                className="w-full max-w-[1200px] mx-auto py-8 lg:py-12 flex flex-col lg:flex-row items-center lg:gap-8"
+                variants={fadeInVariants}
+                initial="hidden"
+                animate={controls}
             >
-                <div className="w-full h-full space-y-2 mb-6">
-                    <motion.h2
-                        className="text-xl lg:text-4xl font-thin"
-                        initial={{ x: -50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                    >
+                {/* Text Section */}
+                <div className="w-full lg:w-1/2 space-y-4 text-center lg:text-left mb-6 lg:mb-0">
+                    <motion.h2 className="text-2xl lg:text-4xl font-thin text-gray-800">
                         We know
                     </motion.h2>
-                    <motion.h1
-                        className="text-3xl lg:text-6xl font-bold whitespace-nowrap"
-                        initial={{ x: -50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                    >
+                    <motion.h1 className="text-3xl lg:text-6xl font-bold text-gray-900">
                         THE STRUGGLES
                     </motion.h1>
-                    <motion.h2
-                        className="text-xl lg:text-3xl font-light"
-                        initial={{ x: -50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.7, delay: 0.4 }}
-                    >
+                    <motion.h2 className="text-lg lg:text-2xl font-light text-gray-700">
                         Our Youth is facing
                     </motion.h2>
-                    <motion.p
-                        className="text-md lg:text-lg font-medium"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
-                    >
-                        We all delve into the dazzling world of digital entertainment,
-                        Our hands crave for devices, eyes crave for screens, and our mind craves for continuous digital stimulation.
+                    <motion.p className="text-md lg:text-lg font-medium text-gray-800">
+                        We delve into the dazzling world of digital entertainment,
+                        our hands crave devices, our eyes crave screens, and our minds crave constant stimulation.
                     </motion.p>
-                    <motion.p
-                        className="text-xs lg:text-sm font-light"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.9, delay: 0.6 }}
-                    >
-                        #Mobile Addiction, #Scrolling Addiction, #Porn Addiction,<br className="hidden sm:block" />
-                        #Sex Addiction, #Performance Addiction, #Entertainment Addiction.
+                    <motion.p className="text-sm lg:text-base font-light text-gray-600">
+                        #Mobile Addiction, #Scrolling Addiction, #Gaming Addiction,
+                        #Social Media Addiction, and more.
                     </motion.p>
                 </div>
+
+                {/* Video Section */}
                 <motion.div
-                    className="w-full h-full flex justify-center"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    className="w-full lg:w-1/2 flex justify-center"
+                    initial="hidden"
+                    animate={controls}
+                    variants={fadeInVariants}
                 >
-                    <video
-                        src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/struggle-we-know.mp4"
-                        className="rounded-xl w-full max-w-[600px]"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        webkit-playsinline
-                    />
+                    <div className="aspect-w-16 aspect-h-9 w-full max-w-[600px] rounded-xl overflow-hidden">
+                        <video
+                            src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/struggle-we-know.mp4"
+                            className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                        />
+                    </div>
                 </motion.div>
             </motion.div>
+
+            {/* Divider */}
             <motion.hr
-                className="w-[80%] h-1 mx-auto bg-black mb-5"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-            />
-            <motion.h1
-                className="text-lg text-center text-bold text-black mb-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 0.3 }}
-            >
-                Our digital lives have started to take a toll on our mental<br /> and physical health, affecting our sleep, productivity, relationships and even self-esteem.
-            </motion.h1>
-            <motion.div
-                className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4"
+                className="w-[90%] h-[2px] mx-auto bg-gray-300 mb-8"
+                variants={fadeInVariants}
                 initial="hidden"
-                animate="visible"
-                variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                        opacity: 1,
-                        transition: {
-                            staggerChildren: 0.2
-                        }
-                    }
-                }}
+                animate={controls}
+            />
+
+            {/* Description */}
+            <motion.h1
+                className="text-center text-xl lg:text-2xl font-semibold text-gray-800 mb-10"
+                variants={fadeInVariants}
+                initial="hidden"
+                animate={controls}
+            >
+                Our digital lives have started to take a toll on our mental and physical health,
+                affecting our sleep, productivity, relationships, and even self-esteem.
+            </motion.h1>
+
+            {/* Addiction Cards */}
+            <motion.div
+                className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                variants={staggerVariants}
+                initial="hidden"
+                animate={controls}
             >
                 {AddictionCardsData.map((card, index) => (
                     <motion.div
                         key={index}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        variants={fadeInVariants}
                     >
                         <AddictionCards {...card} />
                     </motion.div>

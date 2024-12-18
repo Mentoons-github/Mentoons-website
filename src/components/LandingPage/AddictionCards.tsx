@@ -12,7 +12,7 @@ interface AddictionCardsProps {
 const AddictionCards = ({ title, description, image, background, gradient, text }: AddictionCardsProps) => {
     const navigate = useNavigate()
     return (
-        <div className="w-full rounded-lg shadow-lg relative" style={{ background: background }}>
+        <div className="w-full h-full rounded-lg shadow-lg relative" style={{ background: background }}>
             <div className="flex items-center justify-between gap-4 pb-10 lg:pb-0">
                 <figure>
                     <img src={image} alt={title} />

@@ -5,8 +5,6 @@ import { IoCloseOutline } from "react-icons/io5";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { AxiosError } from "axios";
-
-// Import your section components
 import Struggles from "@/components/LandingPage/Struggles";
 import ComicSection from "@/components/LandingPage/ComicSection";
 import HeroSection from "@/components/LandingPage/HeroSection";
@@ -18,21 +16,6 @@ const Home = () => {
   const { user } = useUser();
   const [showPopup, setShowPopup] = React.useState(false);
 
-  // Minimal animation variant
-  const sectionVariants = {
-    hidden: { 
-      opacity: 0,
-      y: 20
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    }
-  };
 
   // Comic sending function
   const sendComic = async () => {
@@ -62,7 +45,6 @@ const Home = () => {
     <div className="w-full">
       <HeroSection />
 
-      {/* Sections with minimal scroll animations */}
       {[
         { Component: Struggles, key: 'struggles' },
         { Component: MdMultiverse, key: 'multiverse' },
@@ -70,18 +52,11 @@ const Home = () => {
         { Component: WorkshopSection, key: 'workshop' },
         { Component: PodcastSection, key: 'podcast' }
       ].map(({ Component, key }) => (
-        <motion.div
-          key={key}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
-          variants={sectionVariants}
-        >
+        <motion.div key={key}>
           <Component />
         </motion.div>
       ))}
 
-      {/* Popup Modal - Simplified */}
       {showPopup && (
         <motion.div 
           initial={{ opacity: 0 }}
