@@ -264,8 +264,8 @@ export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFor
           getToken: async () => token,
         })
       );
-
-      const fileUrl = fileAction.payload?.data?.imageUrl;
+     
+      const fileUrl = fileAction.payload?.data?.fileDetails.url;
       if (!fileUrl) {
         return toast.error("Failed to upload resume");
       }
