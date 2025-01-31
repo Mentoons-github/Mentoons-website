@@ -4,9 +4,13 @@ import { useState } from "react";
 import { BsPlayCircleFill } from "react-icons/bs";
 import { FaHandPointRight } from "react-icons/fa";
 import { IoShareSocialSharp } from "react-icons/io5";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import Testimonial from "../common/Testimonial";
 import { DialogContent, DialogTrigger } from "../ui/dialog";
+import { useAuth } from "@clerk/clerk-react";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { addItemCart } from "@/redux/cartSlice";
 interface ProductImage {
   id: number;
   imageSrc: string;
@@ -49,9 +53,10 @@ const Product = () => {
   const location = useLocation();
   const productDetails = location.state?.productDetails;
   const [activeProdcutImage, setActiveProductImage] = useState(
-    productDetails.productImages[0].imageSrc
+    productDetails?.productImages[0]?.imageSrc
   );
-
+  const { getToken, userId } = useAuth();
+  const dispatch = useDispatch();
   //orderDetails
   const handleQuantityDecrement = () => {
     if (quantity > 0) {
@@ -59,11 +64,45 @@ const Product = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   const handlesQuantityIncrement = () => {
     setQuantity(quantity + 1);
   };
 
-  console.log("ProductDetails", productDetails);
+   const handleAddtoCart = async () => {
+     try {
+       const token = await getToken();
+       if (!token) {
+         toast.error("Please login to add to cart");
+         return;
+       }
+       if (userId) {
+        await dispatch(
+           addItemCart({
+             token,
+             userId,
+             productId: productDetails._id,
+             quantity: 1,
+             price: parseInt(productDetails.paperEditionPrice),
+           })
+         );
+         toast.success("Item Added to cart");
+         navigate("/cart");
+         //when you click on the buy now the an order summary should be displayed with that product only and also navigate to the order summary page
+       } else {
+         toast.error("User ID is missing");
+       }
+     } catch (error) {
+       console.error("Error while adding to cart", error);
+       toast.error("Error while adding to cart");
+     }
+   };
+
+   const handleBuyNow = () => {
+     handleAddtoCart();
+     navigate("/cart");
+   };
 
   return (
     <section className="bg-[linear-gradient(360deg,_#42A0CE_0%,_#034E73_100%)] min-h-screen py-14 pb-0">
@@ -92,7 +131,7 @@ const Product = () => {
               {productDetails.productImages.map((item: ProductImage) => (
                 <div
                   key={item.imageSrc}
-                  className="border rounded-xl border-[#3a2901] cursor-pointer overflow-hidden w-20 h-20 flex items-center justify-center"
+                  className="border rounded-xl border-[#3a2901] cursor-pointer overflow-hidden w-16 h-16 flex items-center justify-center"
                   onClick={() => setActiveProductImage(item.imageSrc)}
                 >
                   <img
@@ -105,7 +144,7 @@ const Product = () => {
               {productDetails.productVideos.map((item: ProductVideos) => (
                 <div key={item.id} className="w-full relative">
                   <Dialog>
-                    <DialogTrigger className="relative w-20 h-20 flex items-center justify-center border border-[#3a2901] rounded-xl">
+                    <DialogTrigger className="relative w-16 h-16 flex items-center justify-center border border-[#3a2901] rounded-xl">
                       <img
                         src="/assets/images/product-card-thumbnail.png"
                         alt=""
@@ -228,17 +267,25 @@ const Product = () => {
               </div>
             </div>
             <div className=" p-1 flex items-center justify-between pb-4 gap-8 ">
-              <button className="text-lg font-bold flex-1 py-2  rounded-lg bg-stone-500 text-white md:text-xl">
+              <button
+                className="text-lg font-bold flex-1 py-2  rounded-lg bg-stone-500 text-white md:text-xl"
+                onClick={handleAddtoCart}
+              >
                 Add to Card
               </button>
-              <button className="text-lg font-bold flex-1 py-2 rounded-lg bg-red-600 text-white md:text-xl">
+              <button
+                className="text-lg font-bold flex-1 py-2 rounded-lg bg-red-600 text-white md:text-xl"
+                onClick={handleBuyNow}
+              >
                 Buy Now
               </button>
             </div>
 
             <div>
               <p className="text-2xl font-bold md:text-3xl">Description : </p>
-              <p className="pb-4 md:text-lg ">{productDetails.productSummary}</p>
+              <p className="pb-4 md:text-lg ">
+                {productDetails.productSummary}
+              </p>
             </div>
           </div>
         </div>

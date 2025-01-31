@@ -59,7 +59,7 @@ const FilteredProduct: React.FC<FilteredProductProps> = ({
       <div>
         <h1 className="text-5xl text-white font-bold mb-6">Popular Products</h1>
         {filteredProduct?.length > 0 ? (
-          <div className="pb-24 flex gap-4 items-start justify-center  md:justify-between flex-wrap">
+          <div className="pb-24 flex gap-4 items-start justify-center  md:justify-between flex-wrap ">
             {filteredProduct.map((product) => (
               <ProductCard key={product._id} productDetails={product} />
             ))}

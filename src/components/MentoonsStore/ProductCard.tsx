@@ -2,7 +2,12 @@
 // import { useState } from "react";
 // import { FaHeart, FaRegHeart, FaThumbsUp } from "react-icons/fa"
 
-import { Link } from "react-router-dom";
+import { addItemCart } from "@/redux/cartSlice";
+import type { AppDispatch } from "@/redux/store";
+import { useAuth } from "@clerk/clerk-react";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // interface ProductCardProps {
 //   item: {
@@ -140,20 +145,20 @@ import { Link } from "react-router-dom";
 
 // export default ProductCard
 
-interface ProductImage {
+export interface ProductImage {
   imageSrc: string;
 }
-interface ProductReviews {
+export interface ProductReviews {
   id: string;
   quote: string;
   author: string;
 }
 
-interface ProductVidoes {
+export interface ProductVidoes {
   videoSrc: string;
 }
 
-interface DescriptionItem {
+export interface DescriptionItem {
   label: string;
   descriptionList: [{ description: string }];
 }
@@ -176,56 +181,102 @@ export interface ProductDetail {
 }
 
 const ProductCard = ({ productDetails }: { productDetails: ProductDetail }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { getToken, userId } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAddtoCart = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to add to cart");
+        return;
+      }
+      if (userId) {
+        await dispatch(
+          addItemCart({
+            token,
+            userId,
+            productId: productDetails._id,
+            quantity: 1,
+            price: parseInt(productDetails.paperEditionPrice),
+          })
+        );
+        toast.success("Item Added to cart");
+        navigate("/cart");
+        //when you click on the buy now the an order summary should be displayed with that product only and also navigate to the order summary page
+      } else {
+        toast.error("User ID is missing");
+      }
+    } catch (error) {
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+    }
+  };
+
+  const handleBuyNow = () => {
+    handleAddtoCart();
+    navigate("/cart");
+  };
+
   return (
-    <Link
-      to={`/mentoons-store/product/${productDetails._id}`}
-      state={{ productDetails }}
-      className="flex"
-    >
-      <div className=" p-2 py-3 border-[0.5px] border-transparent hover:border-[0.5px] hover:border-white/50  hover:shadow-2xl hover:scale-105 transition-all duration-300 rounded-2xl bg-amber-50">
-        <div>
-          <div className="border-2 rounded-xl flex items-center justify-center ">
-            <img
-              src={productDetails.productImages[0].imageSrc}
-              alt=""
-              className="w-64 object-cover "
-            />
-          </div>
-          <div className=" ">
-            <div className="w-72 p-2  flex flex-col  justify-between">
-              <div className="flex  items-start justify-between gap-4">
-                <h1 className="text-2xl font-bold ">
-                  {productDetails.productTitle}
-                </h1>
-                <p className="font-bold text-lg text-black whitespace-nowrap">
-                  ₹ {productDetails.paperEditionPrice}
-                </p>
+    <div className="bg-amber-50 border-[4px] group hover:shadow-2xl hover:scale-105 transition-all duration-300 rounded-2xl  ">
+      <Link
+        to={`/mentoons-store/product/${productDetails?._id}`}
+        state={{ productDetails }}
+        className="flex"
+      >
+        <div className=" p-2 py-3 rounded-2xl ">
+          <div>
+            <div className="border-2 rounded-xl flex items-center justify-center ">
+              <img
+                src={productDetails.productImages[0]?.imageSrc}
+                alt=""
+                className="w-64 object-cover "
+              />
+            </div>
+            <div className=" ">
+              <div className="w-72 p-2  flex flex-col  justify-between">
+                <div className="flex  items-start justify-between gap-4">
+                  <h1 className="text-2xl font-bold ">
+                    {productDetails.productTitle}
+                  </h1>
+                  <p className="font-bold text-lg text-black whitespace-nowrap">
+                    ₹ {productDetails.paperEditionPrice}
+                  </p>
+                </div>
+                <h2 className="text-zinc-700 w-full line-clamp-5 ">
+                  {productDetails.productSummary}
+                </h2>
               </div>
-              <h2 className="text-zinc-700 w-full line-clamp-5 ">
-                {productDetails.productSummary}
-              </h2>
-            </div>
-            <div className="flex items-center justify-between p-2">
-              <span className="text-md font-semibold text-zinc-700">
-                {" "}
-                Rating: ⭐️⭐️⭐️⭐️
-              </span>
-              <span className="text-md font-semibold text-zinc-700">
-                {productDetails.rating}
-              </span>
-            </div>
-            <div className="flex items-center  justify-between gap-4 p-2">
-              <button className="px-5 py-2  border font-semibold border-black/30 rounded-full bg-white/60">
-                Add to cart
-              </button>
-              <button className="px-5 py-2 border font-semibold bg-green-300 rounded-full border-green-200">
-                Buy Now
-              </button>
+              <div className="flex items-center justify-between p-2">
+                <span className="text-md font-semibold text-zinc-700">
+                  {" "}
+                  Rating: ⭐️⭐️⭐️⭐️
+                </span>
+                <span className="text-md font-semibold text-zinc-700">
+                  {productDetails.rating}
+                </span>
+              </div>
             </div>
           </div>
         </div>
+      </Link>
+      <div className="flex items-center  justify-between gap-2 px-3 pb-3 ">
+        <button
+          className="px-5 py-3  border font-semibold border-black/30 rounded-full bg-white/60"
+          onClick={handleAddtoCart}
+        >
+          Add to cart
+        </button>
+        <button
+          className="px-5 py-3 border font-semibold bg-green-300 rounded-full border-green-300"
+          onClick={handleBuyNow}
+        >
+          Buy Now
+        </button>
       </div>
-    </Link>
+    </div>
   );
 };
 

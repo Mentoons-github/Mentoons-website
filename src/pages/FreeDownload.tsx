@@ -30,7 +30,7 @@ const FreeDownload: React.FC = () => {
   const [showFreeDownloadForm, setShowFreeDownloadForm] =
     useState<boolean>(false);
   return (
-    <div className="container py-10 md:py-20 bg-[#00B0A5]">
+    <div className="py-10 md:py-20 bg-[#00B0A5]">
       <motion.div
         initial={{ opacity: 0.5 }}
         whileInView={{ opacity: 1 }}

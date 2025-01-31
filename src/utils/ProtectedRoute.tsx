@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthHook } from '@/hooks/useAuth';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { AiOutlineClose } from 'react-icons/ai';
-import MiniLogo from "@/assets/imgs/logo mini.png";
+// import MiniLogo from "@/assets/imgs/logo mini.png";
 import { useDailyAccess } from '@/hooks/useRestricted';
 
 type ProtectedRouteProps = {
@@ -94,7 +94,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           {/* Logo and content */}
           <div className="space-y-6">
             <div className="flex flex-col items-center">
-              <img className="w-24 h-auto" src={MiniLogo} alt="mentoons logo" />
+              {/* add mini logo */}
+              <img className="w-24 h-auto" src="" alt="mentoons logo" /> 
               <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome to Mentoons</h2>
               <p className='mt-2 text-gray-600'>
                 Please log in or register to access this content

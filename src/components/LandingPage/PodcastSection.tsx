@@ -6,50 +6,49 @@ export const PODCAST_DATA = [
     {
         title: "Where It All Began?",
         description: "",
-        videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/where-it-all-begin.mp4",
+        videoSrc:`${import.meta.env.VITE_STATIC_URL}static/Where It All Began.mp4`,
         category: "6-12"
     },
     {
         title: "Parents Want To Buy Peace",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/parent-want-to-buy-peace.mp4",
+           `${import.meta.env.VITE_STATIC_URL}static/Parents Want To Buy Peace_01 (Mentoons).mp4`,
         category: "6-12"
     },
     {
         title: "How To Use Gadgets Effectively",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/how-to-use-gadgets.mp4",
+            `${import.meta.env.VITE_STATIC_URL}static/How to Use Gadgets Effectively (6 - 12)_02.mp4`,
         category: "6-12"
     },
     {
         title: "How to build Confidence",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Build+Confidence.mp4",
+            `${import.meta.env.VITE_STATIC_URL}static/How to Build Confidence (6-12).mp4`,
         category: "6-12"
     },
     {
         title: "Performance Addiction",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Performance+Addiction+6-12.mp4",
+            `${import.meta.env.VITE_STATIC_URL}static/Performance Addiction (6 - 12)(1).mp4`,
         category: "6-12"
     },
     {
         title: "Entertainment Addiction",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/Copy+of+ENTERTAINMENT_ADDICTION_01.mp4",
+            `${import.meta.env.VITE_STATIC_URL}static/Entertainment Addiction_01 (13 - 19).mp4`,
         category: "6-12"
     },
     {
         title: "A Day With and Without a Phone",
         description: "",
         videoSrc:
-            "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+6+-+12/A+Day+Without+Phone+June+12.mp4",
+            `${import.meta.env.VITE_STATIC_URL}static/A Day With and Without a Phone (6-12)(1).mp4`,
         category: "6-12"
     },
 
@@ -58,43 +57,43 @@ export const PODCAST_DATA = [
         title:
             "Statistic of (Teenage suicide rate Teen pregnancy Gaming Addiction Social media addiction)",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/teenage-statistics.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/Statistic of (Teenage suicide rate Teen pregnancy Gaming Addiction Social media addiction).mp4`,
         category: "13-19"
     },
     {
         title: "How AI Impacts Our Learning and Focus",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/how-ai-impact-our-learning.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/How AI Impacts Our Learning and Focus_01.mp4`,
         category: "13-19"
     },
     {
         title: "Performance Addiction",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Performance+Addiction+13-19.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/Performance Addiction (13-19)_01.mp4`,
         category: "13-19"
     },
     {
         title: "Entertainment Addiction",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Entertainment+Addiction+01.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/Entertainment Addiction_01 (13 - 19).mp4`,
         category: "13-19"
     },
     // 20+ & Parent's
     {
         title: "Why work from home is preferred",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/work-from-home.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/Why Work From Home Is Preferred_02.mp4`,
         category: "20+ & Parent's"
     },
     {
         title: "Pornography De-Addiction",
         description: "",
-        videoSrc: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/pornography-de-addiction.mp4",
+        videoSrc: `${import.meta.env.VITE_STATIC_URL}static/Pornography De-Addiction (3 min) .mp4`,
         category: "20+ & Parent's"
     },
 ];
 
-interface Podcast {
+export interface Podcast {
     title: string;
     description: string;
     videoSrc: string;
