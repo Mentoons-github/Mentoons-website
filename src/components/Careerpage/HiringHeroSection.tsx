@@ -17,7 +17,7 @@ const HiringHeroSection = () => {
               <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-purple-500 rounded-lg opacity-30"></div>
               <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-300 group-hover:scale-[1.02]">
                 <video 
-                  src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Mentoons+Team+Video+02.mp4" 
+                  src={`${import.meta.env.VITE_STATIC_URL}static/Mentoons Team Video_03.mp4`}
                   autoPlay 
                   loop 
                   muted 

@@ -333,48 +333,6 @@ export const AGE_CATEGORY = [
   },
 ];
 
-export const LEFT_NAVLINKS = [
-  {
-    id: 24,
-    label: "Home",
-  },
-  {
-    id: 25,
-    label: "About",
-  },
-  {
-    id: 26,
-    label: "WorkShop",
-  },
-  {
-    id: 27,
-    label: "Gallery",
-  },
-  {
-    id: 28,
-    label: "Team",
-  },
-];
-
-export const RIGHT_NAVLINKS = [
-  {
-    id: 29,
-    label: "Comics",
-  },
-  {
-    id: 30,
-    label: "Podcast",
-  },
-  {
-    id: 31,
-    label: "Mentoons Store",
-  },
-  {
-    id: 32,
-    label: "Sign up",
-  },
-];
-
 export const WORKSHOP = [
   {
     id: 33,
@@ -1031,8 +989,6 @@ export const EMPLOYEES = [
   },
 ];
 
-
-
 export const PRODUCT_FILTERS = [
   {
     id: "PF_01",
@@ -1051,8 +1007,6 @@ export const PRODUCT_FILTERS = [
   },
 ];
 
-
-
 export const PRODUT_CAROUSEL_ITEM = [
   {
     id: "pci_01",
@@ -1065,5 +1019,96 @@ export const PRODUT_CAROUSEL_ITEM = [
   {
     id: "pci_03",
     imageURL: "/assets/images/silent-stories.png",
+  },
+];
+
+export interface NavLink {
+  id: string;
+  label: string;
+  icon: string;
+  url: string;
+  items?: NavLink[];
+}
+
+export const NAV_LINKS: NavLink[] = [
+  {
+    id: "NL_01",
+    label: "Date",
+    icon: "date_range",
+    url: "/",
+  },
+  {
+    id: "NL_02",
+    label: "Call us",
+    icon: "phone",
+    url: "/",
+  },
+  {
+    id: "NL_03",
+    label: "Join Us",
+    icon: "group",
+    url: "/hiring",
+  },
+  {
+    id: "NL_04",
+    label: "Store",
+    icon: "store",
+    url: "/mentoons-store",
+  },
+  {
+    id: "NL_05",
+    label: "Plans",
+    icon: "description",
+    url: "/membership",
+  },
+  {
+    id: "NL_06",
+    label: "Comics",
+    icon: "book",
+    url: "/mentoons-comics",
+  },
+  {
+    id: "NL_07",
+    label: "Podcast",
+    icon: "mic",
+    url: "/mentoons-podcast",
+  },
+  {
+    id: "NL_08",
+    label: "Workshops",
+    icon: "work",
+    url: "/mentoons-workshops",
+  },
+  {
+    id: "NL_09",
+    label: "Audio Comics",
+    icon: "info",
+    url: "/about-mentoons",
+    items: [
+      {
+        id: "AC_01",
+        label: "Audio Comics",
+        url: "/about-mentoons",
+        icon: "info",
+      },
+      {
+        id: "AC_02",
+        label: "Audio Podcast",
+        url: "/about-mentoons",
+        icon: "info",
+      },
+    ],
+  },
+  {
+    id: "NL_10",
+    label: "Cart",
+    icon: "shopping_cart",
+    url: "/cart",
+  },
+  {
+    id: "NL_11",
+    label: "User",
+    icon: "User",
+    url: "/user",
   },
 ];

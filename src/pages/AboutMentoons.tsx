@@ -1,5 +1,5 @@
 import Team from "@/components/comics/Team";
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import "../components/videoModal/";
 
 const AboutMentoons = () => {
@@ -8,10 +8,10 @@ const AboutMentoons = () => {
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (window.location.hash === '#fun-section') {
+    if (window.location.hash === "#fun-section") {
       setTimeout(() => {
-        const element = document.getElementById('fun-section');
-        element?.scrollIntoView({ behavior: 'smooth' });
+        const element = document.getElementById("fun-section");
+        element?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
   }, []);
@@ -34,38 +34,44 @@ const AboutMentoons = () => {
       title: "Sarah",
       thumbnail: "/assets/images/persona-2.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Sarah%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-      description: "Discover how Sarah inspires young minds as an elementary school teacher."
+      description:
+        "Discover how Sarah inspires young minds as an elementary school teacher.",
     },
     {
       title: "Raj",
       thumbnail: "/assets/images/persona-1.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Raj%2C+42+Years%2C+IT+Manager%2C+Podcast+%26+Convo+Ca.mp4",
-      description: "Raj shares his journey of mentorship and fostering innovation in IT."
+      description:
+        "Raj shares his journey of mentorship and fostering innovation in IT.",
     },
     {
       title: "Emma",
       thumbnail: "/assets/images/persona-3.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Emma%2C+28+Years%2C+Psychologist.mp4",
-      description: "Emma reveals her creative approach to empowering mental well-being."
+      description:
+        "Emma reveals her creative approach to empowering mental well-being.",
     },
     {
       title: "Samantha",
       thumbnail: "/assets/images/persona-6.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Samantha%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-      description: "Explore Samantha's impactful teaching methods in elementary education."
+      description:
+        "Explore Samantha's impactful teaching methods in elementary education.",
     },
     {
       title: "Rajesh",
       thumbnail: "/assets/images/persona-4.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Rajesh+K+42+Years+old+(IT+Manager).mp4",
-      description: "Rajesh discusses how mentorship drives success in the IT world."
+      description:
+        "Rajesh discusses how mentorship drives success in the IT world.",
     },
     {
       title: "Olivia",
       thumbnail: "/assets/images/persona-5.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Olivia%2C+28+Years%2C+Psychologist(1).mp4",
-      description: "Olivia shares her passion for helping others through psychology."
-    }
+      description:
+        "Olivia shares her passion for helping others through psychology.",
+    },
   ];
 
   const newMentorVideos = [
@@ -73,14 +79,16 @@ const AboutMentoons = () => {
       title: "Kumar Archit",
       thumbnail: "/assets/images/persona-1.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/KUMAR_SIR.mp4",
-      description: "Exploring the transformative power of mentorship and personal growth."
+      description:
+        "Exploring the transformative power of mentorship and personal growth.",
     },
     {
       title: "Nithya Raghunath",
-      thumbnail: "/assets/images/persona-2.jpg", 
+      thumbnail: "/assets/images/persona-2.jpg",
       src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/NITHYA+MA'AM.mp4",
-      description: "Building meaningful connections and inspiring potential in others."
-    }
+      description:
+        "Building meaningful connections and inspiring potential in others.",
+    },
   ];
 
   const closeVideoModal = () => {
@@ -154,16 +162,16 @@ const AboutMentoons = () => {
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
                         <div className="bg-white p-2 rounded-full">
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="currentColor" 
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
                             className="w-12 h-12 text-blue-500"
                           >
-                            <path 
-                              fillRule="evenodd" 
-                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z" 
-                              clipRule="evenodd" 
+                            <path
+                              fillRule="evenodd"
+                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z"
+                              clipRule="evenodd"
                             />
                           </svg>
                         </div>
@@ -171,7 +179,9 @@ const AboutMentoons = () => {
                     </div>
                     <div className="mt-2 text-center">
                       <h3 className="font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-700">{video.description}</p>
+                      <p className="text-sm text-gray-700">
+                        {video.description}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -251,16 +261,16 @@ const AboutMentoons = () => {
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
                         <div className="bg-white p-2 rounded-full">
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="currentColor" 
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
                             className="w-12 h-12 text-orange-500"
                           >
-                            <path 
-                              fillRule="evenodd" 
-                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z" 
-                              clipRule="evenodd" 
+                            <path
+                              fillRule="evenodd"
+                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z"
+                              clipRule="evenodd"
                             />
                           </svg>
                         </div>
@@ -268,7 +278,9 @@ const AboutMentoons = () => {
                     </div>
                     <div className="mt-2 text-center">
                       <h3 className="font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-600">{video.description}</p>
+                      <p className="text-sm text-gray-600">
+                        {video.description}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -286,27 +298,26 @@ const AboutMentoons = () => {
         </div>
       </section>
 
-
       {/* Video Modal */}
       {selectedVideo && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
           onClick={closeVideoModal}
         >
-          <div 
+          <div
             className="relative w-full max-w-4xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               onClick={closeVideoModal}
               className="absolute -top-10 right-0 text-white text-3xl hover:text-gray-300"
             >
               ×
             </button>
-            <video 
+            <video
               src={selectedVideo}
-              controls 
-              autoPlay 
+              controls
+              autoPlay
               className="w-full rounded-lg"
             />
           </div>

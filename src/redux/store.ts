@@ -1,13 +1,24 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cardProductReducer from "./cardProductSlice";
 import careerReducer from "./careerSlice";
+import cartReducer from "./cartSlice";
 import comicsReducer from "./comicSlice";
 import fileUploadReducer from "./fileUploadSlice";
 import authReducer from "./loginSlice";
 import podcastReducer from "./Podcastslice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
-export const store = configureStore({
+export const store = configureStore<{
+  comics: ReturnType<typeof comicsReducer>;
+  user: ReturnType<typeof userReducer>;
+  workshop: ReturnType<typeof workshopReducer>;
+  auth: ReturnType<typeof authReducer>;
+  career: ReturnType<typeof careerReducer>;
+  fileUpload: ReturnType<typeof fileUploadReducer>;
+  podcast: ReturnType<typeof podcastReducer>;
+  cardProduct: ReturnType<typeof cardProductReducer>;
+  cart: ReturnType<typeof cartReducer>;
+}>({
   reducer: {
     comics: comicsReducer,
     user: userReducer,
@@ -17,6 +28,7 @@ export const store = configureStore({
     fileUpload: fileUploadReducer,
     podcast: podcastReducer,
     cardProduct: cardProductReducer,
+    cart: cartReducer,
   },
 });
 

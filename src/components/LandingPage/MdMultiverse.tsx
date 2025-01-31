@@ -71,7 +71,7 @@ const MdMultiverse = () => {
             className="w-full h-full relative"
             style={{
                 background:
-                    "linear-gradient(355.82deg, rgba(184, 212, 255, 0.81) -12.98%, rgba(9, 39, 84, 0.94) 76.23%)",
+                    "#F9F8DD",
             }}
         >
             {/* Title and Description Section */}
@@ -86,7 +86,7 @@ const MdMultiverse = () => {
                 }}
             >
                 <div className="flex flex-col items-center lg:justify-start justify-center h-full p-10 lg:p-10 lg:gap-10 lg:ml-20">
-                    <h1 className="text-white text-4xl lg:text-7xl font-bold whitespace-nowrap">
+                    <h1 className="text-4xl lg:text-7xl font-bold whitespace-nowrap">
                         HERE'S HOW
                         <br />
                         WE CAN HELP
@@ -99,7 +99,7 @@ const MdMultiverse = () => {
                     </figure>
                 </div>
                 <div>
-                    <h1 className="text-white text-medium text-left">
+                    <h1 className="text-medium text-left">
                         With Mentoons, You can Imagine a world where your kids
                         are not only gadget-friendly but also culturally rooted
                         and emotionally balanced individuals who respect their
@@ -150,10 +150,10 @@ const MdMultiverse = () => {
                             </div>
                             <div className="p-6 relative bg-[url('/assets/LandingPage/offering-bg.png')] bg-cover bg-center">
                                 <div className="absolute inset-0 bg-white/10"></div>
-                                <h3 className="text-white text-xl font-bold mb-2">
+                                <h3 className="text-xl font-bold mb-2">
                                     {offering.title}
                                 </h3>
-                                <p className="text-white text-sm">
+                                <p className="text-sm">
                                     {offering.description}
                                 </p>
                             </div>
@@ -166,6 +166,7 @@ const MdMultiverse = () => {
                     </motion.div>
                 ))}
             </motion.div>
+            
         </div>
     );
 };

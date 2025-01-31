@@ -8,28 +8,31 @@ import Loader from "./components/common/Loader";
 import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
+import OrderSummary from "@/components/OrderSummary";
+import PaymentForm from "@/components/PaymentForm";
 import Product from "./components/MentoonsStore/Products";
 import AboutMentoons from "./pages/AboutMentoons";
+import AssesmentPage from "./pages/AssesmentPage";
+import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
+import CareerPage from "./pages/CareerPage";
 import ComicPdfPage from "./pages/ComicPdfPage";
+import Home from "./pages/Home";
+import LandingPage from "./pages/LandingPage";
 import Membership from "./pages/Membership";
+import MentoonsAdda from "./pages/MentoonsAdda";
 import MentoonsStore from "./pages/MentoonsStore";
 import PolicyPage from "./pages/PolicyPage";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import CareerPage from "./pages/CareerPage";
-import LandingPage from "./pages/LandingPage";
-import Home from './pages/Home'
-import AssesmentPage from "./pages/AssesmentPage";
-import AssesmentQuestions from "./pages/AssesmentQuestions";
 
 // Lazy load the pages
 // const Home = lazy(() => import("./pages/Home"));
 
 const Wishlist = lazy(() => import("./pages/Wishlist"));
-// const Cart = lazy(() => import("./pages/Cart"));
+const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPage = lazy(() => import("./pages/ComicsPage"));
 const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
@@ -88,14 +91,16 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/cart",
-  //   element: (
-  //     <MainLayout>
-  //       <Cart />
-  //     </MainLayout>
-  //   ),
-  // },
+  {
+    path: "/cart",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <Cart />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/mentoons-comics",
     element: (
@@ -283,6 +288,26 @@ const routes = [
     element: (
       <MainLayout>
         <AssesmentQuestions />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/mentoons-adda",
+    element: <MentoonsAdda />,
+  },
+  {
+    path: "/order-summary",
+    element: (
+      <MainLayout>
+        <OrderSummary />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/payment",
+    element: (
+      <MainLayout>
+        <PaymentForm />
       </MainLayout>
     ),
   },

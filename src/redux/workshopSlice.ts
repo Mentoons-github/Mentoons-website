@@ -52,7 +52,7 @@ export const submitWorkshopForm = createAsyncThunk<
         return rejectWithValue({ message: response.data.message || "Submission failed" });
       }
       return response.data;
-    } catch (error: any) {
+    } catch (error:any) {
       console.log(error,'yuuttt')
       console.error("Error in submitWorkshopForm:", error);
       if (error.response && error.response.data.error) {

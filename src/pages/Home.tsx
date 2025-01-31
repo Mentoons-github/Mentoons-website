@@ -6,11 +6,10 @@ import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { AxiosError } from "axios";
 import Struggles from "@/components/LandingPage/Struggles";
-import ComicSection from "@/components/LandingPage/ComicSection";
 import HeroSection from "@/components/LandingPage/HeroSection";
 import MdMultiverse from "@/components/LandingPage/MdMultiverse";
-import PodcastSection from "@/components/LandingPage/PodcastSection";
-import WorkshopSection from "@/components/LandingPage/WorkshopSection";
+import NewSection from "@/components/LandingPage/NewSection";
+import MeetMentors from "@/components/LandingPage/MeetMentors";
 
 const Home = () => {
   const { user } = useUser();
@@ -48,9 +47,8 @@ const Home = () => {
       {[
         { Component: Struggles, key: 'struggles' },
         { Component: MdMultiverse, key: 'multiverse' },
-        { Component: ComicSection, key: 'comic' },
-        { Component: WorkshopSection, key: 'workshop' },
-        { Component: PodcastSection, key: 'podcast' }
+        { Component: MeetMentors, key: 'meet mentors' },
+        { Component: NewSection, key: 'new section' }
       ].map(({ Component, key }) => (
         <motion.div key={key}>
           <Component />

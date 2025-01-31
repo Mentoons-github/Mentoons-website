@@ -1,78 +1,131 @@
-// import Carts from "@/components/MentoonsStore/Carts";
-// import {
-//   removeFromCartReducer,
-//   updateComicQuantityReducer,
-// } from "@/redux/comicSlice";
-// import { RootState } from "@/redux/store";
-// import React, { ChangeEvent } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useNavigate } from "react-router-dom";
+import ProductCard from "@/components/MentoonsStore/ProductCard";
+import { getAllProducts } from "@/redux/cardProductSlice";
+import { getCart } from "@/redux/cartSlice";
+import { AppDispatch, RootState } from "@/redux/store";
+import { useAuth } from "@clerk/clerk-react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import CartItemCard from "../components/MentoonsStore/CartItemCard";
+const Cart: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
-// const Cart: React.FC = () => {
-//   const navigate = useNavigate();
-//   const dispatch = useDispatch();
-//   const cartData = useSelector((store: RootState) => store.comics.cart);
-//   const totalPrice = cartData.reduce((acc, curr) => curr.price + acc, 0);
-//   // const updateQuantity = (e: ChangeEvent<HTMLInputElement>, img: string) => {
-//   //   const val = Number(e.target.value);
-//   //   dispatch(updateComicQuantityReducer({ image: img, quantity: val }));
-//   // };
+  const { getToken, userId } = useAuth();
 
-//   // const removeComic = (image: string) => {
-//   //   dispatch(removeFromCartReducer(image));
-//   // };
+  const { cart, loading, error } = useSelector(
+    (state: RootState) => state.cart
+  );
+  const { cardProducts } = useSelector((state: RootState) => state.cardProduct);
 
-//   return (
-//     <div className="container py-10 lg:py-20 space-y-10 ">
-//       <div className="text-start pb-3  border-b border-black">
-//         <div className="text-5xl lg:text-7xl w-full font-extrabold leading-[1.10]">
-//           Checkout Your Cart
-//         </div>
-//       </div>
-//       <div
-//         className={`relative ${
-//           cartData.length > 0 && "border-b border-black"
-//         } pb-14 flex flex-col justify-between w-full gap-20`}
-//       >
-//         {cartData.length !== 0 ? (
-//           <div className="lg:absolute lg:left-[50%] top-[10%] lg:top-[80%] lg:translate-x-[-50%] lg:translate-y-[0%] text-center space-y-4">
-//             <div className="text-4xl text-center lg:text-4xl font-semibold">
-//               No Comics Found! 🥺
-//             </div>
-//             <div className="text-gray-500 text-lg">
-//               Try adding some comics in wishlist
-//             </div>
-//             <button
-//               onClick={() => navigate("/comics-list")}
-//               className="bg-primary hover:scale-105 active:scale-95 transition-all ease-in-out duration-300 text-white px-6 py-3 rounded-full"
-//             >
-//               View Comics
-//             </button>
-//           </div>
-//         ) : (
-//           <div className="flex flex-wrap gap-4">
-//             <div className="w-full flex flex-col gap-4  md:flex-[0.7]">
-//               {" "}
-//               <Carts />
-//               <Carts />
-//               <Carts />
-//               <Carts />
-//             </div>
-//             <div className=" w-full h-48 flex  md:flex-[0.3] border  bg-white rounded-lg shadow-2xl p-4 pl-6 ">
-//               <h1 className="text-2xl font-semibold ">Your Subtotal: ₹ 199</h1>
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//       {cartData.length > 0 && (
-//         <div className="flex items-center justify-end">
-//           <div className="text-white cursor-pointer hover:bg-white hover:text-primary border border-primary px-5 py-3 rounded-full bg-primary">
-//             Pay Rs. {totalPrice}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+  const handleCheckout = () => {
+    navigate("/order-summary");
+  };
 
-// export default Cart;
+  useEffect(() => {
+    const fetchCart = async () => {
+      const token = await getToken();
+      if (token && userId) {
+        dispatch(getCart({ token, userId }));
+        const response = await dispatch(
+          getAllProducts({ search: "", filtercategory: "" })
+        );
+        console.log("Response", response.payload);
+      }
+    };
+    fetchCart();
+  }, [dispatch, getToken, userId, cart.totalItemCount]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className=" p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto  ">
+      <div className="text-start pb-3 ">
+        <div className="text-5xl lg:text-7xl w-full  border-b-4 border-black font-extrabold leading-[1.10] pb-4">
+          Checkout Your Cart
+        </div>
+      </div>
+
+      {error || cart?.items?.length > 0 ? (
+        <div className="flex gap-4 bg-transparent flex-wrap ">
+          <div className="w-full flex flex-col lg:flex-row-reverse gap-4">
+            <div className="w-full lg:w-[40%] flex flex-col items-start justify-between rounded-3xl border-4 bg-white shadow-xl h-fit text-2xl font-semibold p-4">
+              <div className=" text-lg w-full">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-lg font-medium">
+                    Subtotal
+                  </span>
+                  <span>₹{cart.totalPrice.toFixed(2)}</span>
+                </div>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span>₹{cart.totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="w-full mt-6 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors text-lg"
+                onClick={handleCheckout}
+              >
+                Proceed to Checkout
+              </button>
+            </div>
+            <div className="w-full flex flex-col gap-4 items-center">
+              {cart.items.length > 0 ? (
+                cart.items.map((item) => (
+                  <CartItemCard
+                    key={item.productId._id + "_"}
+                    cartItem={item}
+                  />
+                ))
+              ) : (
+                <div className="text-center flex flex-col items-center justify-center gap-6">
+                  <p className="text-xl md:text-4xl font-semibold ">
+                    Your cart is empty
+                  </p>
+                  <Link
+                    to="/mentoons-store"
+                    className="text-white bg-primary p-2 px-6 rounded-full text-lg font-medium  hover:bg-primary-dark transition-colors duration-300"
+                  >
+                    Visit our store to add some items!
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className=" mt-4 p-4 w-full  ">
+            <h2 className="text-4xl font-semibold mb-8">People also bought</h2>
+
+            <div className="flex flex-wrap gap-4">
+              {cardProducts?.length > 0 ? (
+                cardProducts.map((product) => (
+                  <ProductCard key={product._id} productDetails={product} />
+                ))
+              ) : (
+                <div>No Product found</div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="text-center flex flex-col items-center justify-center gap-6">
+          <p className="text-xl md:text-4xl font-semibold ">
+            Your cart is empty
+          </p>
+          <Link
+            to="/mentoons-store"
+            className="text-white bg-primary p-2 px-6 rounded-full text-lg font-medium  hover:bg-primary-dark transition-colors duration-300"
+          >
+            Visit our store to add some items!
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Cart;
