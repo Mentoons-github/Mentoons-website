@@ -1,16 +1,17 @@
+import { addItemCart } from "@/redux/cartSlice";
+import type { AppDispatch } from "@/redux/store";
+import { useAuth } from "@clerk/clerk-react";
 import { Dialog } from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { BsPlayCircleFill } from "react-icons/bs";
 import { FaHandPointRight } from "react-icons/fa";
 import { IoShareSocialSharp } from "react-icons/io5";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import Testimonial from "../common/Testimonial";
 import { DialogContent, DialogTrigger } from "../ui/dialog";
-import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
-import { useDispatch } from "react-redux";
-import { addItemCart } from "@/redux/cartSlice";
 interface ProductImage {
   id: number;
   imageSrc: string;
@@ -55,8 +56,9 @@ const Product = () => {
   const [activeProdcutImage, setActiveProductImage] = useState(
     productDetails?.productImages[0]?.imageSrc
   );
-  const { getToken, userId } = useAuth();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userId, getToken } = useAuth();
+
   //orderDetails
   const handleQuantityDecrement = () => {
     if (quantity > 0) {
@@ -70,39 +72,39 @@ const Product = () => {
     setQuantity(quantity + 1);
   };
 
-   const handleAddtoCart = async () => {
-     try {
-       const token = await getToken();
-       if (!token) {
-         toast.error("Please login to add to cart");
-         return;
-       }
-       if (userId) {
+  const handleAddtoCart = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to add to cart");
+        return;
+      }
+      if (userId) {
         await dispatch(
-           addItemCart({
-             token,
-             userId,
-             productId: productDetails._id,
-             quantity: 1,
-             price: parseInt(productDetails.paperEditionPrice),
-           })
-         );
-         toast.success("Item Added to cart");
-         navigate("/cart");
-         //when you click on the buy now the an order summary should be displayed with that product only and also navigate to the order summary page
-       } else {
-         toast.error("User ID is missing");
-       }
-     } catch (error) {
-       console.error("Error while adding to cart", error);
-       toast.error("Error while adding to cart");
-     }
-   };
+          addItemCart({
+            token,
+            userId,
+            productId: productDetails._id,
+            quantity: 1,
+            price: parseInt(productDetails.paperEditionPrice),
+          })
+        );
+        toast.success("Item Added to cart");
+        navigate("/cart");
+        //when you click on the buy now the an order summary should be displayed with that product only and also navigate to the order summary page
+      } else {
+        toast.error("User ID is missing");
+      }
+    } catch (error) {
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+    }
+  };
 
-   const handleBuyNow = () => {
-     handleAddtoCart();
-     navigate("/cart");
-   };
+  const handleBuyNow = () => {
+    handleAddtoCart();
+    navigate("/cart");
+  };
 
   return (
     <section className="bg-[linear-gradient(360deg,_#42A0CE_0%,_#034E73_100%)] min-h-screen py-14 pb-0">
