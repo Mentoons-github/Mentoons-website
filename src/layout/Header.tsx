@@ -109,9 +109,9 @@ const Header = () => {
           onClick={() => navigate("/")}
         >
           <img
-            src="/src/assets/imgs/logo.png"
+            src="/assets/images/mentoons-logo.png"
             alt="Company Logo"
-            className="max-h-40 pb-4 pt-8 bg-primary rounded-full relative z-50 border-b"
+            className="max-h-24 pr-1 pt-4 pb-2 bg-primary rounded-full relative z-50 border-b"
           />
         </div>
 
