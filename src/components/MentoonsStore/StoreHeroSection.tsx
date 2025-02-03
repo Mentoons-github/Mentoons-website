@@ -108,7 +108,7 @@ const StoreHeroSection = () => {
         <div className="bg-[linear-gradient(360deg,_#42A0CE_0%,_#034E73_100%)] h-full">
           <div className="flex flex-col md:flex-row items-center justify-between p-4 md:p-10">
             <div className="flex flex-col items-center md:items-start space-y-6 md:space-y-10 w-full md:w-1/2 text-center md:text-left pl-0 lg:pl-16">
-              <h1 className="text-white font-bold text-4xl sm:text-6xl md:text-[82px]">
+              <h1 className="text-white font-bold text-4xl sm:text-6xl md:text-[82px] pt-12 lg:pt-0">
                 Mentoons Store
               </h1>
               <p className="text-white text-lg lg:leading-normal sm:text-xl md:text-[30px]">
@@ -188,7 +188,7 @@ const StoreHeroSection = () => {
           className="bg-[linear-gradient(358.67deg,_#CCFF96_36.53%,_#419ECC_100.68%)] min-h-screen"
           ref={productsRef}
         >
-          <div className="w-[80%]  mx-auto ">
+          <div className="w-[90%]  mx-auto ">
             <div className="pb-20">
               <h2 className="text-center text-white/70 text-4xl font-bold ">
                 Mentoons Product

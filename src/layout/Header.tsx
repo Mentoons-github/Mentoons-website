@@ -57,17 +57,17 @@ const Header = () => {
     };
   }, [lastScrollY]);
 
-  // Prevent body scroll when mobile menu is open
-  // useEffect(() => {
-  //   if (menuOpen) {
-  //     document.body.style.overflow = "hidden";
-  //   } else {
-  //     document.body.style.overflow = "unset";
-  //   }
-  // }, [menuOpen]);
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
 
-  // Toggle Audio Comics Dropdown for mobile
-  // const toggleAudioDropdown = () => setAudioDropdownOpen(!audioDropdownOpen);
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [menuOpen]);
 
   return (
     <div
@@ -77,35 +77,34 @@ const Header = () => {
     >
       <div className="flex items-center justify-between px-4 h-full  ">
         {/* Left Section - Hidden on mobile */}
-        <div className=" flex items-center space-x-6  flex-1 font-semibold text-black md:hidden lg:flex pl-6">
+        <div className=" hidden lg:flex items-center space-x-6  flex-1 font-semibold text-black md:hidden  pl-6 ">
           {NAV_LINKS.filter((link) =>
             ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
               link.label
             )
           ).map((link) => (
-            <NavLink
-              key={link.id}
-              to={link.url}
-              className="text-white whitespace-nowrap"
-            >
+            <div key={link.id} className="text-white whitespace-nowrap">
               {link.label === "Date" ? (
                 <span className="bg-white text-primary p-1 rounded-sm whitespace-nowrap ">
                   {new Date().toDateString()}
                 </span>
               ) : link.label === "Call us" ? (
-                <span className="bg-white text-primary p-1 rounded-sm whitespace-nowrap">
+                <a
+                  href="tel:+91 90360 33300"
+                  className="bg-white text-primary p-1 rounded-sm whitespace-nowrap"
+                >
                   Call us: +91 90360 33300
-                </span>
+                </a>
               ) : (
-                link.label
+                <NavLink to={link.url}>{link.label} </NavLink>
               )}
-            </NavLink>
+            </div>
           ))}
         </div>
 
         {/* Middle Section - Logo */}
         <div
-          className="flex items-center md:hidden lg:flex"
+          className=" items-center hidden lg:flex"
           onClick={() => navigate("/")}
         >
           <img
@@ -116,7 +115,7 @@ const Header = () => {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center flex-1 justify-end font-semibold md:hidden lg:flex">
+        <div className=" hidden lg:flex items-center flex-1 justify-end font-semibold md:hidden ">
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center justify-betwee space-x-6 text-white">
             {/* <NavLink
@@ -177,7 +176,7 @@ const Header = () => {
           </div>
         </div>
         {/* Mobile Menu */}
-        <div className=" flex items-center justify-between lg:hidden  w-full ">
+        <div className=" flex items-center justify-between sm:flex md:flex lg:hidden  w-full ">
           <figure className="w-6 h-6">
             <img
               src="/assets/home/home-icn.png"
@@ -192,7 +191,7 @@ const Header = () => {
             <img
               src="/src/assets/imgs/logo.png"
               alt="Company Logo"
-              className="max-h-40 pb-4 pt-8 bg-primary rounded-full relative z-[999] border-b"
+              className="max-h-24 pr-1 pt-4 pb-2 bg-primary rounded-full relative z-[999] border-b"
             />
           </div>
           <div className="w-6 h-6" onClick={handleMenuToggle}>
@@ -205,7 +204,9 @@ const Header = () => {
           {isVisible && menuOpen && (
             <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
               <ul>
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.filter(
+                  (link) => !["Date", "Call us"].includes(link.label)
+                ).map((link) => (
                   <li
                     key={link.id}
                     className="py-2 cursor-pointer text-2xl font-semibold text-gray-700"

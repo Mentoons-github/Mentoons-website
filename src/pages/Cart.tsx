@@ -37,7 +37,29 @@ const Cart: React.FC = () => {
   }, [dispatch, getToken, userId, cart.totalItemCount]);
 
   if (loading) {
-    return <div>Loading...</div>;
+  return (
+    <div className="p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto animate-pulse">
+      <div className="h-20 bg-gray-200 rounded-lg w-1/2 mb-10"></div>
+      <div className="flex gap-4 flex-wrap">
+        <div className="w-full flex flex-col lg:flex-row-reverse gap-4">
+          <div className="w-full lg:w-[40%] h-48 bg-gray-200 rounded-3xl"></div>
+          <div className="w-full flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-full h-32 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+        <div className="w-full mt-4">
+          <div className="h-12 bg-gray-200 rounded w-48 mb-8"></div>
+          <div className="flex flex-wrap gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-64 h-72 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
   }
 
   return (

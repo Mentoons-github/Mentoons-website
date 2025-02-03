@@ -1041,7 +1041,7 @@ export const NAV_LINKS: NavLink[] = [
     id: "NL_02",
     label: "Call us",
     icon: "phone",
-    url: "/",
+    url: "",
   },
   {
     id: "NL_03",
