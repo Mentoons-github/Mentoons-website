@@ -1,14 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import Wordbreak from "./Wordbreak";
-import React, {useState } from "react";
-import { MdClose } from "react-icons/md";
-import { motion } from "framer-motion";
-import { useAuthHook } from "@/hooks/useAuth";
-import { toast } from "sonner";
 import { comicsData } from "@/constant/comicsConstants";
+import { useAuthHook } from "@/hooks/useAuth";
 import { Comic } from "@/redux/comicSlice";
-import ComicViewer from '../common/ComicViewer';
 import ProtectedRoute from "@/utils/ProtectedRoute";
+import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { MdClose } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import ComicViewer from "../common/ComicViewer";
+import Wordbreak from "./Wordbreak";
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
@@ -41,7 +41,6 @@ const HeroSection: React.FC = () => {
     setShowPdf(false);
     setCurrComic(null);
   };
-  
 
   return (
     <div className="relative w-full text-[#864747] h-[150vh] md:h-[250vh] bg-comicsHome bg-no-repeat bg-cover bg-bottom bg-[#59B2DC]">
@@ -77,7 +76,7 @@ const HeroSection: React.FC = () => {
           <div onClick={() => selectedComic("Don't Fade Away")}>
             <img
               className="w-[4rem] md:w-24 lg:w-32 border-[3px] shadow-md shadow-black rounded-md border-black absolute top-[60%] right-[15%] lg:top-8 lg:left-[65%] -rotate-[25deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-04.jpg"
+              src="/assets/comics/dont-fade-away.jpg"
             />
           </div>
           {/* black jalebi image */}
@@ -89,7 +88,7 @@ const HeroSection: React.FC = () => {
           <div onClick={() => selectedComic("One Way Trip")}>
             <img
               className=" w-[4rem] md:w-24 lg:w-32 border-[3px] shadow-md shadow-black rounded-md border-black absolute top-[55%] right-[42%] md:top-[52%] md:right-[43%] lg:top-[28%] lg:right-[10%] rotate-[40deg] lg:rotate-[25deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-22.jpg"
+              src="/assets/comics/one-way-trip.jpg"
             />
           </div>
           {/* power image */}
@@ -101,14 +100,14 @@ const HeroSection: React.FC = () => {
           <div onClick={() => selectedComic("Bet Your Life")}>
             <img
               className="w-16 md:w-24 lg:w-32 border-[3px] z-50 shadow-md shadow-black rounded-md border-black absolute left-[10%] bottom-[10%] md:-bottom-[20%] lg:left-[56%] lg:bottom-[30%] rotate-[25deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-09.jpg"
+              src="/assets/comics/bet-your-life.jpg"
             />
           </div>
           {/* come out of gaming comic */}
           <div onClick={() => selectedComic("Come out of Gaming")}>
             <img
               className="w-16 md:w-24 lg:w-32 border-[3px] z-50 shadow-md shadow-black rounded-md border-black absolute right-10 bottom-0 md:right-24 md:-bottom-36 lg:right-20 lg:bottom-8 md:rotate-[20deg] lg:-rotate-[35deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-05.jpg"
+              src="/assets/comics/come-out-of-gaming.jpg"
             />
           </div>
           {/* cell life of soniya comic */}
@@ -143,7 +142,7 @@ const HeroSection: React.FC = () => {
           <div onClick={() => selectedComic("Choose Wisely")}>
             <img
               className="w-16 md:w-24 lg:w-32 border-[3px] z-50 shadow-md shadow-black rounded-md border-black absolute right-[8%] -bottom-[30%] md:-bottom-[65%] lg:right-[14%] lg:-bottom-[30%] -rotate-[30deg] lg:rotate-[20deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-08.jpg"
+              src="/assets/comics/choose-wisely.jpg"
             />
           </div>
           {/* rohan and puppies comic */}
@@ -196,7 +195,7 @@ const HeroSection: React.FC = () => {
           <div onClick={() => selectedComic("Hungry for Likes Not Life")}>
             <img
               className="hidden xl:block w-32 border-[3px] z-50 shadow-md shadow-black rounded-md border-black absolute left-[30%] md:left-[58%] -bottom-[230%] md:-bottom-[180%] xl:-bottom-[160%] -rotate-[60deg] cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out"
-              src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-15.jpg"
+              src="/assets/comics/hungry-for-likes-not-likes.jpg"
             />
           </div>
           {/* Think before you act comic */}
@@ -231,11 +230,14 @@ const HeroSection: React.FC = () => {
         >
           {showPdf ? (
             <div className="bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] h-[90vh] rounded-md p-4 max-w-fit">
-              <div onClick={handleClosePdf} className="absolute cursor-pointer top-6 right-4">
+              <div
+                onClick={handleClosePdf}
+                className="absolute cursor-pointer top-6 right-4"
+              >
                 <MdClose className="text-2xl" />
               </div>
               <ProtectedRoute>
-              <ComicViewer pdfUrl={currComic.comicLink} />
+                <ComicViewer pdfUrl={currComic.comicLink} />
               </ProtectedRoute>
             </div>
           ) : (

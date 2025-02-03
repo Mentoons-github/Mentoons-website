@@ -1,6 +1,6 @@
 import AboutSection from "@/components/comics/AboutSection";
 // import Blogs from "@/components/comics/Blogs";
-import NewComics from "@/components/comics/NewComics";
+// import NewComics from "@/components/comics/NewComics";
 // import Pricing from "@/components/comics/Pricing";
 // import Testimonials from "@/components/comics/Testimonials";
 import HeroSection from "@/components/comics/HeroSection";
@@ -13,7 +13,7 @@ const Home: React.FC = () => {
     <>
       <HeroSection />
       <AboutSection />
-      <NewComics />
+      {/* <NewComics /> */}
       {/* <AudioComics /> */}
       {/* <Suspense fallback={<div>Loading...</div>}>
         <Team />

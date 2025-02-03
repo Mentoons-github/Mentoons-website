@@ -56,10 +56,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
     }
   };
 
- 
-
   const handleUpdateQuantity = async (flag: string) => {
-
     try {
       const token = await getToken();
       if (!token) {
@@ -72,7 +69,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
             token,
             userId,
             productId: cartItem.productId._id,
-            flag
+            flag,
           })
         );
         dispatch(getCart({ token, userId }));
@@ -93,9 +90,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
           return prev - 1;
         }
       }
-    }
-      );
-  
+    });
   };
 
   return (
@@ -131,18 +126,18 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
               <div className="flex items-center space-x-2">
                 <button
                   disabled={quantity === 1}
-                  onClick={()=>handleUpdateQuantity("-")}
+                  onClick={() => handleUpdateQuantity("-")}
                   className="p-2 rounded-full border hover:bg-black hover:text-white transition all duration-300 disabled:opacity-50  "
                 >
                   <Minus
                     className={`w-4 h-4 ${
-                      quantity === 1 ? "text-gray-400" : "text-black"
+                      quantity === 1 ? "text-gray-400" : ""
                     }`}
                   />
                 </button>
                 <span className="w-8 text-center">{quantity}</span>
                 <button
-                  onClick={()=>handleUpdateQuantity("+")}
+                  onClick={() => handleUpdateQuantity("+")}
                   className="p-2 rounded-full border hover:bg-black hover:text-white transition all duration-300"
                 >
                   <Plus className="w-4 h-4" />

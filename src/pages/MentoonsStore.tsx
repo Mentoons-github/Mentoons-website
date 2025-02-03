@@ -1,11 +1,7 @@
-import StoreHeroSection from "@/components/MentoonsStore/StoreHeroSection"
+import StoreHeroSection from "@/components/MentoonsStore/StoreHeroSection";
 
 const MentoonsStore = () => {
-  return (
-    <div>
-      <StoreHeroSection />
-    </div>
-  )
-}
+  return <StoreHeroSection />;
+};
 
-export default MentoonsStore
+export default MentoonsStore;
