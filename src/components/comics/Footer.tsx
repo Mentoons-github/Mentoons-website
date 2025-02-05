@@ -774,7 +774,7 @@ const Footer = () => {
                   disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
                   className="bg-orange-600 text-white w-full p-2 rounded-full  hover:bg-orange-700 transition-all duration-300 cursor-pointer whitespace-nowrap text-ellipsis"
                 >
-                  Subscribe to NewsLetter
+                  Be the first to be Informed
                 </button>
               </Form>
             )}

@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 import Struggles from "@/components/LandingPage/Struggles";
 import HeroSection from "@/components/LandingPage/HeroSection";
 import MdMultiverse from "@/components/LandingPage/MdMultiverse";
-import NewSection from "@/components/LandingPage/NewSection";
+// import NewSection from "@/components/LandingPage/NewSection";
 import MeetMentors from "@/components/LandingPage/MeetMentors";
 
 const Home = () => {
@@ -48,7 +48,7 @@ const Home = () => {
         { Component: Struggles, key: 'struggles' },
         { Component: MdMultiverse, key: 'multiverse' },
         { Component: MeetMentors, key: 'meet mentors' },
-        { Component: NewSection, key: 'new section' }
+        // { Component: NewSection, key: 'new section' }
       ].map(({ Component, key }) => (
         <motion.div key={key}>
           <Component />

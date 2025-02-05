@@ -205,7 +205,7 @@ const Header = () => {
             <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
               <ul>
                 {NAV_LINKS.filter(
-                  (link) => !["Date", "Call us"].includes(link.label)
+                  (link) => !["Date", "Call us", "User"].includes(link.label)
                 ).map((link) => (
                   <li
                     key={link.id}
@@ -218,6 +218,9 @@ const Header = () => {
                     {link.label}
                   </li>
                 ))}
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
               </ul>
             </div>
           )}
