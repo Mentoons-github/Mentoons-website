@@ -64,8 +64,7 @@ const FilteredProduct: React.FC<FilteredProductProps> = ({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-80">
-          <h1 className="text-2xl font-semibold">No Product found</h1>
+        <div className="flex items-center justify-center h-80 w-full">
           {[1, 2, 3].map((_, index) => (
             <div key={index} className="animate-pulse">
               <div className="w-64 h-72 bg-gray-300 rounded-lg mb-4"></div>

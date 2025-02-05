@@ -1,11 +1,16 @@
-import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from "@radix-ui/react-dialog";
-import React, { useEffect, useState, useRef, ReactNode } from "react";
-import TestimonialCard from "./TestimonialCard";
-import WorkshopForm from "../common/WorkshopForm";
-import { motion, useInView, useAnimation } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogTrigger,
+} from "@radix-ui/react-dialog";
+import { motion, useAnimation, useInView } from "framer-motion";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import WorkshopForm from "../common/WorkshopForm";
+import TestimonialCard from "./TestimonialCard";
 
-type Category = '6-12' | '13-19' | 'parents' | '20+';
+type Category = "6-12" | "13-19" | "parents" | "20+";
 
 interface WorkshopFeature {
   id: string;
@@ -45,14 +50,17 @@ interface CategoryContent {
 }
 
 const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
-  '6-12': {
+  "6-12": {
     cat: "6-12",
-    title: 'MENTOONS Kids Camp',
-    subTitle: 'Fun Learning Workshop For Kids (7-12 Years)',
-    description: "Nurture your child's creativity and learning with our engaging Kids Camp workshop.",
-    mainImage: '/assets/camps/Buddy.png',
-    heroImage: '/assets/camps/bdy-img.png',
-    video:`${import.meta.env.VITE_STATIC_URL}static/Buddy Camp Common Issues (6-12).mp4`,
+    title: "MENTOONS Kids Camp",
+    subTitle: "Fun Learning Workshop For Kids (7-12 Years)",
+    description:
+      "Nurture your child's creativity and learning with our engaging Kids Camp workshop.",
+    mainImage: "/assets/camps/Buddy.png",
+    heroImage: "/assets/camps/bdy-img.png",
+    video: `${
+      import.meta.env.VITE_STATIC_URL
+    }static/Buddy Camp Common Issues (6-12).mp4`,
     texts: ["Creative Learning", "Social Skills", "Digital Literacy"],
     bgUrl: "/assets/camps/dd.png",
     color: "#8AD983",
@@ -88,7 +96,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       {
         id: "WF_2",
         heading: "Interviewing Skills",
-        subHeading: "Prepare users for various interview formats and expectations",
+        subHeading:
+          "Prepare users for various interview formats and expectations",
         imageUrl: "/assets/camps/teen (2).png",
         color: "#EB4B7B",
         textColor: "#66001F",
@@ -101,7 +110,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "is_02",
             label: "Scheduling Interview",
-            description: "Tips for managing interview timings and confirmations.",
+            description:
+              "Tips for managing interview timings and confirmations.",
           },
           {
             id: "is_03",
@@ -123,7 +133,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "gpi_01",
             label: "Dressing and Styling Recommendataions",
-            description: "Advice on appropriate attire for professional setting. ",
+            description:
+              "Advice on appropriate attire for professional setting. ",
           },
           {
             id: "gpi_02",
@@ -149,7 +160,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "wm_01",
             label: "Texting Etiquette",
-            description: "Guidelines for respectfull and concise communication. ",
+            description:
+              "Guidelines for respectfull and concise communication. ",
           },
           {
             id: "wm_02",
@@ -182,7 +194,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "css_02",
             label: "Social Media Guidance",
-            description: "Support for managing professional social media presence",
+            description:
+              "Support for managing professional social media presence",
           },
           {
             id: "css_03",
@@ -208,7 +221,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "css_02",
             label: "Social Media Guidance",
-            description: "Support for managing professional social media presence",
+            description:
+              "Support for managing professional social media presence",
           },
           {
             id: "css_03",
@@ -219,26 +233,48 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       },
     ],
     points: [
-      { img: "/assets/camps/teenpoints (1).png", text: "Interactive group discussions" },
-      { img: "/assets/camps/teenpoints (2).png", text: "Peer learning activities" },
+      {
+        img: "/assets/camps/teenpoints (1).png",
+        text: "Interactive group discussions",
+      },
+      {
+        img: "/assets/camps/teenpoints (2).png",
+        text: "Peer learning activities",
+      },
       { img: "/assets/camps/teenpoints (3).png", text: "Practical workshops" },
       { img: "/assets/camps/teenpoints (4).png", text: "Expert guidance" },
-      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" }
+      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" },
     ],
     testimonials: [
-      { title: 'Mithran', img: "/assets/camps/img-tt.png", message: "As a teacher, I find Mentoons' resources invaluable." },
-      { title: 'Sarah', img: "/assets/camps/img-tt.png", message: "The workshop helped my child develop better social skills and confidence." }
-    ]
+      {
+        title: "Mithran",
+        img: "/assets/camps/img-tt.png",
+        message: "As a teacher, I find Mentoons' resources invaluable.",
+      },
+      {
+        title: "Sarah",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "The workshop helped my child develop better social skills and confidence.",
+      },
+    ],
   },
-  '13-19': {
+  "13-19": {
     cat: "13-19",
-    title: 'MENTOONS Teen Camp',
-    subTitle: 'Identity Workshop For Teenagers (13-19 Years)',
-    description: 'Help your teenager navigate the challenges of adolescence with our comprehensive Teen Camp workshop.',
-    mainImage: '/assets/camps/Teen.png',
-    heroImage: '/assets/camps/w-img.png',
-    video:`${import.meta.env.VITE_STATIC_URL}static/Teen Camp Common Issues (13-19)_02.mp4`,
-    texts: ["Scrolling De-Addiction", "Hormonal Changes", "Substance De-Addiction"],
+    title: "MENTOONS Teen Camp",
+    subTitle: "Identity Workshop For Teenagers (13-19 Years)",
+    description:
+      "Help your teenager navigate the challenges of adolescence with our comprehensive Teen Camp workshop.",
+    mainImage: "/assets/camps/Teen.png",
+    heroImage: "/assets/camps/w-img.png",
+    video: `${
+      import.meta.env.VITE_STATIC_URL
+    }static/Teen Camp Common Issues (13-19)_02.mp4`,
+    texts: [
+      "Scrolling De-Addiction",
+      "Hormonal Changes",
+      "Substance De-Addiction",
+    ],
     bgUrl: "/assets/camps/cc.png",
     color: "#4395DD",
     workshop_features: [
@@ -273,7 +309,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       {
         id: "WF_2",
         heading: "Interviewing Skills",
-        subHeading: "Prepare users for various interview formats and expectations",
+        subHeading:
+          "Prepare users for various interview formats and expectations",
         imageUrl: "/assets/images/interviewing-skill.png",
         color: "#EB4B7B",
         textColor: "#66001F",
@@ -286,7 +323,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "is_02",
             label: "Scheduling Interview",
-            description: "Tips for managing interview timings and confirmations.",
+            description:
+              "Tips for managing interview timings and confirmations.",
           },
           {
             id: "is_03",
@@ -308,7 +346,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "gpi_01",
             label: "Dressing and Styling Recommendataions",
-            description: "Advice on appropriate attire for professional setting. ",
+            description:
+              "Advice on appropriate attire for professional setting. ",
           },
           {
             id: "gpi_02",
@@ -334,7 +373,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "wm_01",
             label: "Texting Etiquette",
-            description: "Guidelines for respectfull and concise communication. ",
+            description:
+              "Guidelines for respectfull and concise communication. ",
           },
           {
             id: "wm_02",
@@ -367,7 +407,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "css_02",
             label: "Social Media Guidance",
-            description: "Support for managing professional social media presence",
+            description:
+              "Support for managing professional social media presence",
           },
           {
             id: "css_03",
@@ -378,25 +419,44 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       },
     ],
     points: [
-      { img: "/assets/camps/teenpoints (1).png", text: "Interactive group discussions" },
-      { img: "/assets/camps/teenpoints (2).png", text: "Peer learning activities" },
+      {
+        img: "/assets/camps/teenpoints (1).png",
+        text: "Interactive group discussions",
+      },
+      {
+        img: "/assets/camps/teenpoints (2).png",
+        text: "Peer learning activities",
+      },
       { img: "/assets/camps/teenpoints (3).png", text: "Practical workshops" },
       { img: "/assets/camps/teenpoints (4).png", text: "Expert guidance" },
-      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" }
+      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" },
     ],
     testimonials: [
-      { title: 'Raj', img: "/assets/camps/img-tt.png", message: "An excellent program that addresses modern challenges faced by teenagers." },
-      { title: 'Priya', img: "/assets/camps/img-tt.png", message: "The interactive sessions and expert guidance made a real difference." }
-    ]
+      {
+        title: "Raj",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "An excellent program that addresses modern challenges faced by teenagers.",
+      },
+      {
+        title: "Priya",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "The interactive sessions and expert guidance made a real difference.",
+      },
+    ],
   },
-  'parents': {
+  parents: {
     cat: "parents",
-    title: 'Family Camp',
-    subTitle: 'Guiding Parents in Modern Parenting',
-    description: 'Empower yourself with effective parenting strategies for the digital age.',
-    mainImage: '/assets/camps/Family.png',
-    heroImage: '/assets/images/family-camp-hero.png',
-    video: `${import.meta.env.VITE_STATIC_URL}static/How parents can bond with their kids_02.mp4`,
+    title: "Family Camp",
+    subTitle: "Guiding Parents in Modern Parenting",
+    description:
+      "Empower yourself with effective parenting strategies for the digital age.",
+    mainImage: "/assets/camps/Family.png",
+    heroImage: "/assets/images/family-camp-hero.png",
+    video: `${
+      import.meta.env.VITE_STATIC_URL
+    }static/How parents can bond with their kids_02.mp4`,
     texts: ["Digital Parenting", "Communication Skills", "Child Development"],
     bgUrl: "/assets/camps/cc.png",
     color: "#4395DD",
@@ -432,7 +492,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       {
         id: "WF_2",
         heading: "Interviewing Skills",
-        subHeading: "Prepare users for various interview formats and expectations",
+        subHeading:
+          "Prepare users for various interview formats and expectations",
         imageUrl: "/assets/images/interviewing-skill.png",
         color: "#EB4B7B",
         textColor: "#66001F",
@@ -445,7 +506,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "is_02",
             label: "Scheduling Interview",
-            description: "Tips for managing interview timings and confirmations.",
+            description:
+              "Tips for managing interview timings and confirmations.",
           },
           {
             id: "is_03",
@@ -467,7 +529,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "gpi_01",
             label: "Dressing and Styling Recommendataions",
-            description: "Advice on appropriate attire for professional setting. ",
+            description:
+              "Advice on appropriate attire for professional setting. ",
           },
           {
             id: "gpi_02",
@@ -493,7 +556,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "wm_01",
             label: "Texting Etiquette",
-            description: "Guidelines for respectfull and concise communication. ",
+            description:
+              "Guidelines for respectfull and concise communication. ",
           },
           {
             id: "wm_02",
@@ -526,7 +590,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "css_02",
             label: "Social Media Guidance",
-            description: "Support for managing professional social media presence",
+            description:
+              "Support for managing professional social media presence",
           },
           {
             id: "css_03",
@@ -537,25 +602,43 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       },
     ],
     points: [
-      { img: "/assets/camps/teenpoints (1).png", text: "Interactive group discussions" },
-      { img: "/assets/camps/teenpoints (2).png", text: "Peer learning activities" },
+      {
+        img: "/assets/camps/teenpoints (1).png",
+        text: "Interactive group discussions",
+      },
+      {
+        img: "/assets/camps/teenpoints (2).png",
+        text: "Peer learning activities",
+      },
       { img: "/assets/camps/teenpoints (3).png", text: "Practical workshops" },
       { img: "/assets/camps/teenpoints (4).png", text: "Expert guidance" },
-      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" }
+      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" },
     ],
     testimonials: [
-      { title: 'Mithran', img: "/assets/camps/img-tt.png", message: "As a teacher, I find Mentoons' resources invaluable." },
-      { title: 'Sarah', img: "/assets/camps/img-tt.png", message: "The workshop helped my child develop better social skills and confidence." }
-    ]
+      {
+        title: "Mithran",
+        img: "/assets/camps/img-tt.png",
+        message: "As a teacher, I find Mentoons' resources invaluable.",
+      },
+      {
+        title: "Sarah",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "The workshop helped my child develop better social skills and confidence.",
+      },
+    ],
   },
-  '20+': {
+  "20+": {
     cat: "20+",
-    title: 'Career Corner',
-    subTitle: 'Career Guidance for Students',
-    description: 'Expert guidance to help students explore and plan their career paths.',
-    mainImage: '/assets/camps/Group 540.png',
-    heroImage: '/assets/images/career-corner-hero-image.png',
-    video: `${import.meta.env.VITE_STATIC_URL}static/The Challenges Youngsters Face Today (20+)_01 (1).mp4`,
+    title: "Career Corner",
+    subTitle: "Career Guidance for Students",
+    description:
+      "Expert guidance to help students explore and plan their career paths.",
+    mainImage: "/assets/camps/Group 540.png",
+    heroImage: "/assets/images/career-corner-hero-image.png",
+    video: `${
+      import.meta.env.VITE_STATIC_URL
+    }static/The Challenges Youngsters Face Today (20+)_01 (1).mp4`,
     texts: ["Career Exploration", "Skill Assessment", "Industry Insights"],
     bgUrl: "/assets/camps/cc.png",
     color: "#4395DD",
@@ -591,7 +674,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       {
         id: "WF_2",
         heading: "Interviewing Skills",
-        subHeading: "Prepare users for various interview formats and expectations",
+        subHeading:
+          "Prepare users for various interview formats and expectations",
         imageUrl: "/assets/images/interviewing-skill.png",
         color: "#EB4B7B",
         textColor: "#66001F",
@@ -604,7 +688,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "is_02",
             label: "Scheduling Interview",
-            description: "Tips for managing interview timings and confirmations.",
+            description:
+              "Tips for managing interview timings and confirmations.",
           },
           {
             id: "is_03",
@@ -626,7 +711,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "gpi_01",
             label: "Dressing and Styling Recommendataions",
-            description: "Advice on appropriate attire for professional setting. ",
+            description:
+              "Advice on appropriate attire for professional setting. ",
           },
           {
             id: "gpi_02",
@@ -652,7 +738,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "wm_01",
             label: "Texting Etiquette",
-            description: "Guidelines for respectfull and concise communication. ",
+            description:
+              "Guidelines for respectfull and concise communication. ",
           },
           {
             id: "wm_02",
@@ -685,7 +772,8 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
           {
             id: "css_02",
             label: "Social Media Guidance",
-            description: "Support for managing professional social media presence",
+            description:
+              "Support for managing professional social media presence",
           },
           {
             id: "css_03",
@@ -696,19 +784,43 @@ const CATEGORY_CONTENT: Record<Category, CategoryContent> = {
       },
     ],
     points: [
-      { img: "/assets/camps/teenpoints (1).png", text: "Interactive group discussions" },
-      { img: "/assets/camps/teenpoints (2).png", text: "Peer learning activities" },
+      {
+        img: "/assets/camps/teenpoints (1).png",
+        text: "Interactive group discussions",
+      },
+      {
+        img: "/assets/camps/teenpoints (2).png",
+        text: "Peer learning activities",
+      },
       { img: "/assets/camps/teenpoints (3).png", text: "Practical workshops" },
       { img: "/assets/camps/teenpoints (4).png", text: "Expert guidance" },
-      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" }
+      { img: "/assets/camps/teenpoints (5).png", text: "Personal development" },
     ],
     testimonials: [
-      { title: 'Arjun', img: "/assets/camps/img-tt.png", message: "The guidance I received was life-changing and set me on the right career path." },
-      { title: 'Ritika', img: "/assets/camps/img-tt.png", message: "The workshop provided clarity and helped me build confidence for interviews." }
-    ]
-  }
+      {
+        title: "Arjun",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "The guidance I received was life-changing and set me on the right career path.",
+      },
+      {
+        title: "Ritika",
+        img: "/assets/camps/img-tt.png",
+        message:
+          "The workshop provided clarity and helped me build confidence for interviews.",
+      },
+    ],
+  },
 };
-const AnimatedSection = ({ children, className, style }: { children: ReactNode, className: string, style?: React.CSSProperties }) => {
+const AnimatedSection = ({
+  children,
+  className,
+  style,
+}: {
+  children: ReactNode;
+  className: string;
+  style?: React.CSSProperties;
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
   const controls = useAnimation();
@@ -731,9 +843,9 @@ const AnimatedSection = ({ children, className, style }: { children: ReactNode, 
           y: 0,
           transition: {
             duration: 0.6,
-            ease: "easeOut"
-          }
-        }
+            ease: "easeOut",
+          },
+        },
       }}
       className={className}
       style={style}
@@ -750,7 +862,7 @@ const WorkshopMain = () => {
   const [showForm, setShowForm] = React.useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const category = (searchParams.get('workshop') as Category) || '6-12'; 
+  const category = (searchParams.get("workshop") as Category) || "6-12";
 
   const [selectedCategory, setSelectedCategory] = useState(category);
 
@@ -776,7 +888,6 @@ const WorkshopMain = () => {
     );
   };
 
-
   const content = CATEGORY_CONTENT[selectedCategory as Category];
 
   useEffect(() => {
@@ -789,12 +900,13 @@ const WorkshopMain = () => {
     return () => clearInterval(interval);
   }, [selectedCategory, content.texts.length, currentTextIndex]);
 
-
-
   return (
     <div className="overflow-x-hidden relative w-full scrollbar-hidden">
       <AnimatedSection className="bg-[#FDF7EE] pb-7 pt-4 lg:pt-12 relative">
-        <div className="absolute -right-4 lg:g:right-2 top-1/2 -translate-y-1/2 cursor-pointer z-10" onClick={() => handleCategoryChange('20+')}>
+        <div
+          className="absolute -right-4 lg:g:right-2 top-1/2 -translate-y-1/2 cursor-pointer z-10"
+          onClick={() => handleCategoryChange("20+")}
+        >
           <img
             src="/assets/images/career-corner.png"
             alt="Career Corner"
@@ -804,12 +916,14 @@ const WorkshopMain = () => {
 
         {/* All Categories Including Career Corner */}
         <div className="w-[95%] lg:w-[90%] mx-auto flex justify-center gap-4 lg:gap-24 flex-nowrap">
-          {(Object.keys(CATEGORY_CONTENT) as Category[]).filter(category => category !== '20+').map((category) => (
-            <div className="flex items-center justify-center gap-3 relative">
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`
+          {(Object.keys(CATEGORY_CONTENT) as Category[])
+            .filter((category) => category !== "20+")
+            .map((category) => (
+              <div className="flex items-center justify-center gap-3 relative">
+                <button
+                  key={category}
+                  onClick={() => handleCategoryChange(category)}
+                  className={`
                                       relative
                                       px-1 lg:px-4 
                                       py-1 lg:py-4 
@@ -825,23 +939,30 @@ const WorkshopMain = () => {
                                       before:transition-transform
                                       before:duration-300
                                       hover:before:translate-y-[4px]
-                                      ${selectedCategory === category
-                    ? 'text-white [clip-path:polygon(0_0,100%_10%,100%_90%,0%_100%)] before:[clip-path:polygon(0_0,100%_10%,100%_90%,0%_100%)]'
-                    : 'text-[#4A3602] hover:text-white [clip-path:polygon(0_10%,100%_0,100%_100%,0%_90%)] before:[clip-path:polygon(0_10%,100%_0,100%_100%,0%_90%)]'
-                  }
+                                      ${
+                                        selectedCategory === category
+                                          ? "text-white [clip-path:polygon(0_0,100%_10%,100%_90%,0%_100%)] before:[clip-path:polygon(0_0,100%_10%,100%_90%,0%_100%)]"
+                                          : "text-[#4A3602] hover:text-white [clip-path:polygon(0_10%,100%_0,100%_100%,0%_90%)] before:[clip-path:polygon(0_10%,100%_0,100%_100%,0%_90%)]"
+                                      }
                                   `}
-                style={{
-                  backgroundColor: selectedCategory === category ? '#765EED' : '#CEC4FF',
-                  '--before-bg': selectedCategory === category ? '#5840C4' : '#9B8BFF',
-                } as React.CSSProperties}
-              >
-                <h1>{category.charAt(0).toLocaleUpperCase() + category.slice(1)}</h1>
-              </button>
-              {/* <figure className="absolute -top-5 -right-5 w-full h-full">
+                  style={
+                    {
+                      backgroundColor:
+                        selectedCategory === category ? "#765EED" : "#CEC4FF",
+                      "--before-bg":
+                        selectedCategory === category ? "#5840C4" : "#9B8BFF",
+                    } as React.CSSProperties
+                  }
+                >
+                  <h1>
+                    {category.charAt(0).toLocaleUpperCase() + category.slice(1)}
+                  </h1>
+                </button>
+                {/* <figure className="absolute -top-5 -right-5 w-full h-full">
                                 <img src={CATEGORY_CONTENT[category].mainImage} alt="" />
                             </figure> */}
-            </div>
-          ))}
+              </div>
+            ))}
         </div>
       </AnimatedSection>
 
@@ -897,7 +1018,8 @@ const WorkshopMain = () => {
                     transition={{ duration: 0.6, delay: 0.5 }}
                     className="mt-4 text-gray-600 text-lg"
                   >
-                    {content.subTitle}<br />
+                    {content.subTitle}
+                    <br />
                     <motion.p
                       key={currentTextIndex}
                       initial={{ opacity: 0, y: 20 }}
@@ -940,7 +1062,14 @@ const WorkshopMain = () => {
         </div>
       </AnimatedSection>
       {/* Features Section */}
-      <AnimatedSection className="w-full min-h-screen pt-32 bg-no-repeat bg-cover lg:bg-repeat" style={{ background: `url(${content.bgUrl})`,backgroundRepeat: 'no-repeat', backgroundSize: 'cover' }}>
+      <AnimatedSection
+        className="w-full min-h-screen pt-32 bg-no-repeat bg-cover lg:bg-repeat"
+        style={{
+          background: `url(${content.bgUrl})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+        }}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -978,7 +1107,7 @@ const WorkshopMain = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{
                     duration: 0.5,
-                    delay: index * 0.1 // Stagger effect
+                    delay: index * 0.1, // Stagger effect
                   }}
                   className="max-w-[200px] mx-auto"
                 >
@@ -998,10 +1127,7 @@ const WorkshopMain = () => {
                         animate={{ opacity: 1 }}
                         className="absolute top-2 left-2"
                       >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4"
-                        />
+                        <input type="checkbox" className="w-4 h-4" />
                       </motion.div>
                     </div>
                   </Dialog>
@@ -1051,9 +1177,10 @@ const WorkshopMain = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="text-center text-lg max-w-xl px-4 text-white"
               >
-                Our workshops provides essential knowledge and skills for teenagers navigating
-                the complexities of adolescence. It offers a supportive space for young people
-                to learn, grow, and connect with others facing similar challenges.
+                Our workshops provides essential knowledge and skills for
+                teenagers navigating the complexities of adolescence. It offers
+                a supportive space for young people to learn, grow, and connect
+                with others facing similar challenges.
               </motion.p>
             </div>
           </motion.div>
@@ -1069,15 +1196,17 @@ const WorkshopMain = () => {
         </motion.h1>
       </AnimatedSection>
 
-
       {/* Points Section - Animated */}
-      <AnimatedSection className="px-4 py-6" style={{ background: content.color }}>
+      <AnimatedSection
+        className="px-4 py-6"
+        style={{ background: content.color }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.6,
-            staggerChildren: 0.1
+            staggerChildren: 0.1,
           }}
           className="flex gap-20 p-20 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
@@ -1103,7 +1232,6 @@ const WorkshopMain = () => {
           ))}
         </motion.div>
 
-
         {/* Testimonials Section - Animated */}
         <AnimatedSection className="mt-10 md:mt-20 mb-6 md:mb-10">
           <h1 className="text-3xl md:text-4xl text-center text-white font-semibold mb-8 md:mb-12 px-4">
@@ -1115,7 +1243,7 @@ const WorkshopMain = () => {
               <motion.div
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{
-                  transform: `translateX(-${currentTestimonialIndex * 100}%)`
+                  transform: `translateX(-${currentTestimonialIndex * 100}%)`,
                 }}
               >
                 {content.testimonials.map((testimonial, index) => (
@@ -1136,10 +1264,11 @@ const WorkshopMain = () => {
                   key={index}
                   onClick={() => setCurrentTestimonialIndex(index)}
                   className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 
-                        ${currentTestimonialIndex === index
-                      ? 'bg-white scale-125'
-                      : 'bg-white/50 hover:bg-white/70'
-                    }`}
+                        ${
+                          currentTestimonialIndex === index
+                            ? "bg-white scale-125"
+                            : "bg-white/50 hover:bg-white/70"
+                        }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
@@ -1186,9 +1315,6 @@ const WorkshopMain = () => {
             </button>
           </div>
         </AnimatedSection>
-
-
-
 
         {/* Registration Section - Animated */}
         <motion.div
