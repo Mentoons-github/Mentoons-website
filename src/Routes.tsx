@@ -27,6 +27,7 @@ import PolicyPage from "./pages/PolicyPage";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import ComicsPageV2 from "./pages/ComicsPageV2";
 
 // Lazy load the pages
 // const Home = lazy(() => import("./pages/Home"));
@@ -105,7 +106,10 @@ const routes = [
     path: "/mentoons-comics",
     element: (
       <MainLayout>
-        <ComicsHome />
+        {/* <ComicsHome /> */}
+
+        <ComicsPageV2 />
+        
       </MainLayout>
     ),
   },
