@@ -18,6 +18,7 @@ import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
 import ComicPdfPage from "./pages/ComicPdfPage";
+import ComicsPageV2 from "./pages/ComicsPageV2";
 import Home from "./pages/Home";
 import LandingPage from "./pages/LandingPage";
 import Membership from "./pages/Membership";
@@ -34,7 +35,8 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPage = lazy(() => import("./pages/ComicsPage"));
-const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
+// const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
+
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
 const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
@@ -105,7 +107,9 @@ const routes = [
     path: "/mentoons-comics",
     element: (
       <MainLayout>
-        <ComicsHome />
+        {/* <ComicsHome /> */}
+
+        <ComicsPageV2 />
       </MainLayout>
     ),
   },
