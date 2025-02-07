@@ -18,7 +18,6 @@ import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
 import ComicPdfPage from "./pages/ComicPdfPage";
-import ComicsPageV2 from "./pages/ComicsPageV2";
 import Home from "./pages/Home";
 import LandingPage from "./pages/LandingPage";
 import Membership from "./pages/Membership";
@@ -37,11 +36,14 @@ const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPage = lazy(() => import("./pages/ComicsPage"));
 // const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 
+const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
+const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
+
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
 const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 // const Career = lazy(() => import("./components/shared/CareerPage/Career"));
-const PodCast = lazy(() => import("./pages/PodCast"));
+// const PodCast = lazy(() => import("./pages/PodCast"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -195,7 +197,7 @@ const routes = [
     path: "/mentoons-podcast",
     element: (
       <MainLayout>
-        <PodCast />
+        <Podcastv2 />
       </MainLayout>
     ),
   },

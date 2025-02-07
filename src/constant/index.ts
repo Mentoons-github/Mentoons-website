@@ -1172,3 +1172,131 @@ export const AddictionCardsData = [
     text: "#6B2100",
   },
 ];
+
+export const PODCAST_OFFERINGS = [
+  {
+    id: "PO_01",
+    label: "Expert-Crafted Content",
+    imgeUrl: "/assets/podcastv2/expert-crafted-content.png",
+    accentColor: "#4285F4",
+  },
+  {
+    id: "PO_02",
+    label: "Age-Appropriate Discussion",
+    imgeUrl: "/assets/podcastv2/age-appropriate-discussion.png",
+    accentColor: "#EF4444",
+  },
+  {
+    id: "PO_03",
+    label: "Engaging Story-telling",
+    imgeUrl: "/assets/podcastv2/engaging-story-telling.png",
+    accentColor: "#22C55E",
+  },
+  {
+    id: "PO_04",
+    label: "Valuable Life Lessons",
+    imgeUrl: "/assets/podcastv2/valuable-life-lession.png",
+    accentColor: "#F7941D",
+  },
+];
+
+export const PODCAST_V2_CATEGORY = [
+  {
+    id: "PCV2_01",
+    lable: "mobile addiction",
+    imgeUrl: "/assets/podcastv2/mobile-addiction.png",
+  },
+  {
+    id: "PCV2_02",
+    lable: "gaming addiction",
+    imgeUrl: "/assets/podcastv2/gaming-addiction.png",
+  },
+  {
+    id: "PCV2_03",
+    lable: "teen emotions",
+    imgeUrl: "/assets/podcastv2/teen-emotion.png",
+  },
+];
+
+export const PODCAST_CARD_DATA = [
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+    isPaid: true,
+    price: 10,
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+    isPaid: true,
+    price: 25,
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+    isPaid: true,
+    price: 20,
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+    isPaid: true,
+    price: 10,
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+  },
+  {
+    id: "PCD_01",
+    title: "Teen emotions and Behavioural Problems",
+    imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
+    date: "JAN 2024",
+    duration: "30 MIN",
+    isPaid: true,
+    price: 15,
+  },
+];

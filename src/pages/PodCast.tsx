@@ -8,18 +8,9 @@ const PodCast = () => {
   return (
     <>
       <HeroSectionPodcast />
-      {/* CATEGORY */}
-      {/* <Category />
-      <AgeCategory /> */}
-      {/* PODCAST LIST */}
-      {/* <CategoryCard /> */}
       <PodcastSection />
-      {/* Stats section */}
-      {/* <StatisticsSection /> */}
       <HomeSection />
       <Testimonial />
-
-      {/* <FrequentlyAskeQuestion /> */}
       <ContributeYourPodcast />
     </>
   );
