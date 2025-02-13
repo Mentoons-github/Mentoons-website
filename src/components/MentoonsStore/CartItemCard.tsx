@@ -17,7 +17,7 @@ interface CartItem {
     _id: string;
     productTitle: string;
     productSummary: string;
-    productImage: string;
+    productImages: string;
   };
   price: number;
   stock: "In Stock" | "Out of Stock";
@@ -28,6 +28,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
   const [quantity, setQuantity] = useState(cartItem.quantity);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
+  console.log("Cart Item", cartItem);
 
   const handleRemoveItemFromCart = async () => {
     console.log("Remove Item from Cart", cartItem);
@@ -44,9 +45,10 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
             token,
             userId,
             productId: cartItem.productId._id,
-          })
+          }),
         );
         console.log("Remove Item Result", result);
+        dispatch(getCart({ token, userId }));
       } else {
         toast.error("Please login to remove the item from the cart");
       }
@@ -70,7 +72,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
             userId,
             productId: cartItem.productId._id,
             flag,
-          })
+          }),
         );
         dispatch(getCart({ token, userId }));
         console.log("Update Quantity Result", result);
@@ -99,7 +101,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
       <div className="flex flex-col md:flex-row gap-4 items-start w-full">
         <div className="relative border rounded-lg overflow-hidden flex items-center">
           <img
-            src="https://via.placeholder.com/400x300"
+            src={cartItem?.productId?.productImages || ""}
             alt="product"
             className="w-48 h-40 object-cover"
           />

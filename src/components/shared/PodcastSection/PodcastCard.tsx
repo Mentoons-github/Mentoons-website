@@ -77,43 +77,43 @@ const PodcastCard = ({
   }, [setCurrentlyPlaying]);
 
   return (
-    <div className=' border-2 border-neutral-800 p-4 pb-0 rounded-tr-[28px] rounded-tl-[28px] group'>
-      <div className=' h-[200px] rounded-tr-xl rounded-tl-xl overflow-hidden  '>
+    <div className=" border-2 border-neutral-800 p-4 pb-0 rounded-tr-[28px] rounded-tl-[28px] group">
+      <div className=" h-[200px] rounded-tr-xl rounded-tl-xl overflow-hidden  ">
         <img
           src={podcast.thumbnail}
-          alt='Podcast thumbnail'
-          className='aspect-video object-cover  group-hover:scale-110 transition-all duration-300'
+          alt="Podcast thumbnail"
+          className="aspect-video object-cover  group-hover:scale-110 transition-all duration-300"
         />
       </div>
-      <div className='pt-2'>
-        <h1 className='text-left text-xl text-neutral-800 font-bold truncate'>
+      <div className="pt-2">
+        <h1 className="text-left text-xl text-neutral-800 font-bold truncate">
           {podcast.topic}
         </h1>
-        <p className='text-left text-sm text-neutral-600  pb-4 '>
+        <p className="text-left text-sm text-neutral-600  pb-4 ">
           {podcast.description}
         </p>
       </div>
-      <div className='border-t border-black flex items-center justify-end py-2 gap-2'>
+      <div className="border-t border-black flex items-center justify-end py-2 gap-2">
         <span
-          className='border border-black  flex rounded-full px-2 py-1 gap-2 cursor-pointer hover:scale-110 transition-all duration-200'
+          className="border border-black  flex rounded-full px-2 py-1 gap-2 cursor-pointer hover:scale-110 transition-all duration-200"
           onClick={handleSamplePlay}
         >
-          <p className='font-semibold '>Play Now</p>
-          <button className='text-xl'>
+          <p className="font-semibold ">Play Now</p>
+          <button className="text-xl">
             {isPlaying ? (
-              <FaCirclePause color='red' />
+              <FaCirclePause color="red" />
             ) : (
-              <FaCirclePlay color='red' />
+              <FaCirclePlay color="red" />
             )}
           </button>
           <audio ref={audioRef} src={podcast.audioPodcastSampleSrc}></audio>
         </span>
 
-        <span className='border border-black  flex rounded-full px-2 py-1 gap-2 cursor-pointer hover:scale-110 transition-all duration-200'>
-          <p className='font-semibold '>Buy Now</p>
-          <button className='text-xl'>
-            <div className='w-6'>
-              <img src='/assets/cart.svg' alt='Cart icon' />
+        <span className="border border-black  flex rounded-full px-2 py-1 gap-2 cursor-pointer hover:scale-110 transition-all duration-200">
+          <p className="font-semibold ">Buy Now</p>
+          <button className="text-xl">
+            <div className="w-6">
+              <img src="/assets/cart.svg" alt="Cart icon" />
             </div>
           </button>
         </span>

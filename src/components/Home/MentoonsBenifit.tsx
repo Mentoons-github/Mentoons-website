@@ -5,7 +5,7 @@ import { Fade, Zoom } from "react-awesome-reveal";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../../styles/slider.css";
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay } from "react-icons/fa";
 
 type HomeProps = {
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,7 +27,10 @@ const sliderSettings = {
   arrows: false,
 };
 
-const MentoonsBenifit: React.FC<HomeProps> = ({ setModalOpen, setVideoType }) => {
+const MentoonsBenifit: React.FC<HomeProps> = ({
+  setModalOpen,
+  setVideoType,
+}) => {
   const sliderImages: SliderImages[] = [
     { imgUrl: "/slide1.jpg", altText: "Slide 1" },
     { imgUrl: "/slide2.jpg", altText: "Slide 2" },

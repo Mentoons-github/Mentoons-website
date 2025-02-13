@@ -38,6 +38,7 @@ const ComicsPage = lazy(() => import("./pages/ComicsPage"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
+const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
 const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
@@ -153,7 +154,8 @@ const routes = [
     path: "/mentoons-workshops",
     element: (
       <MainLayout>
-        <LandingPage />
+        {/* <LandingPage /> */}
+        <Workshopv2 />
       </MainLayout>
     ),
   },
@@ -162,7 +164,6 @@ const routes = [
     element: (
       <MainLayout>
         <ComicsPage />
-
         <ComicsPage />
       </MainLayout>
     ),
@@ -330,11 +331,11 @@ const routes = [
 const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(true);
   const hoverComicCard = useSelector(
-    (store: RootState) => store.comics.currentHoverComic
+    (store: RootState) => store.comics.currentHoverComic,
   );
 
   const userLoggedIn = useSelector(
-    (store: RootState) => store.user.userLoggedIn
+    (store: RootState) => store.user.userLoggedIn,
   );
 
   console.log(showPopup + " " + userLoggedIn);

@@ -124,7 +124,7 @@ const InsideMentoons: React.FC<HomeProps> = ({
               className="w-full h-full object-cover rounded-xl shadow-custom-complex"
               controls
               playsInline
-                    webkit-playInline
+              webkit-playInline
               poster="/team-men.png"
             />
           </div>

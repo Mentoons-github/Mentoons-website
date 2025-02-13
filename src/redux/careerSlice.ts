@@ -1,10 +1,16 @@
 import axiosInstance from "@/api/axios";
-import {
-  HiringFormData,
-  TPOSITION,
-} from "@/components/shared/FAQSection/FAQCard";
+import { HiringFormData } from "@/components/shared/FAQSection/FAQCard";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+export type TPOSITION = {
+  _id: string;
+  jobTitle: string;
+  jobDescription: string;
+  thumbnail: string;
+  skillsRequired: string[];
+  jobType: string;
+  location: string;
+};
 const initialState: {
   loading: boolean;
   error: string | null;

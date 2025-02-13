@@ -602,14 +602,14 @@ const Footer = () => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const handleSubmit = async (
     values: FormValues,
-    { setSubmitting, resetForm }: FormikHelpers<FormValues>
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
   ) => {
     try {
       const response = await axiosInstance.post<ApiResponse>(
         "email/subscribeToNewsletter",
         {
           email: values.email,
-        }
+        },
       );
 
       // The data from the response is in response.data
@@ -752,7 +752,7 @@ const Footer = () => {
             onSubmit={handleSubmit} // Correctly passing the handleSubmit
           >
             {(
-              { isSubmitting, isValid, dirty } // Added isValid and dirty
+              { isSubmitting, isValid, dirty }, // Added isValid and dirty
             ) => (
               <Form className="w-full flex flex-col gap-4">
                 <div className="w-full box-border ">

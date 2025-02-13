@@ -33,12 +33,8 @@ const Register = () => {
   return (
     <div className="h-screen flex  bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
       <div className="hidden flex-1 lg:block ">
-        <img
-          src="/assets/home/team007.png"
-          alt=""
-          className="object-cover" 
-        />
-      </div> 
+        <img src="/assets/home/team007.png" alt="" className="object-cover" />
+      </div>
       <div className="flex-1 flex items-center justify-center ">
         <SignUp signInUrl="/sign-in" forceRedirectUrl="/?openModal=true" />
       </div>

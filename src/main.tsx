@@ -7,7 +7,6 @@ import "./index.css";
 import { store } from "./redux/store.ts";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }
@@ -46,5 +45,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <App />
       </Provider>
     </BrowserRouter>
-  </ClerkProvider>
+  </ClerkProvider>,
 );

@@ -112,7 +112,7 @@ const Navbar: React.FC = () => {
                       <MenubarItem
                         onClick={() =>
                           navigate(
-                            "/mentoons-comics/audio-comics?filter=groupSmall"
+                            "/mentoons-comics/audio-comics?filter=groupSmall",
                           )
                         }
                       >
@@ -121,7 +121,7 @@ const Navbar: React.FC = () => {
                       <MenubarItem
                         onClick={() =>
                           navigate(
-                            "/mentoons-comics/audio-comics?filter=groupMedium"
+                            "/mentoons-comics/audio-comics?filter=groupMedium",
                           )
                         }
                       >
@@ -130,7 +130,7 @@ const Navbar: React.FC = () => {
                       <MenubarItem
                         onClick={() =>
                           navigate(
-                            "/mentoons-comics/audio-comics?filter=groupLarge"
+                            "/mentoons-comics/audio-comics?filter=groupLarge",
                           )
                         }
                       >
@@ -142,7 +142,7 @@ const Navbar: React.FC = () => {
                     <MenubarItem
                       onClick={() =>
                         navigate(
-                          "/mentoons-comics/audio-comics?filter=groupLarge"
+                          "/mentoons-comics/audio-comics?filter=groupLarge",
                         )
                       }
                     >

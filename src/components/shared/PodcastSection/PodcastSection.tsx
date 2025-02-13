@@ -30,7 +30,7 @@ const PodcastSection = () => {
     navigate("/sign-in");
   };
 
-   const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch<AppDispatch>();
 
   const getAllPodcastData = async () => {
     try {
@@ -43,7 +43,7 @@ const PodcastSection = () => {
   };
   useEffect(() => {
     getAllPodcastData();
-  }, []); 
+  }, []);
 
   // const { podcasts, loading } = useSelector(
   //   (state: RootState) => state.podcast
@@ -93,7 +93,7 @@ const PodcastSection = () => {
               //   currentlyPlaying={currentlyPlaying}
               //   setCurrentlyPlaying={setCurrentlyPlaying}
               // />
-              
+
               <PodcastCardExp
                 key={podcast.id}
                 isSignedIn={isSignedIn}

@@ -23,7 +23,7 @@ interface DescriptionItem {
   descriptionList: [
     {
       description: string;
-    }
+    },
   ];
 }
 
@@ -55,7 +55,7 @@ const FilteredProduct: React.FC<FilteredProductProps> = ({
   console.log("FilteredProduct received:", filteredProduct);
 
   return (
-    <div className="">
+    <div className="w-full">
       <h1 className="text-5xl text-white font-bold mb-6">Popular Products</h1>
       {filteredProduct?.length > 0 ? (
         <div className="pb-24 flex gap-4 items-start flex-wrap md:justify-between ">
@@ -65,8 +65,8 @@ const FilteredProduct: React.FC<FilteredProductProps> = ({
         </div>
       ) : (
         <div className="flex items-center justify-center h-80 w-full">
-          {[1, 2, 3].map((_, index) => (
-            <div key={index} className="animate-pulse">
+          {[1, 2, 3, 4, 5].map((_, index) => (
+            <div key={index} className="animate-pulse w-full">
               <div className="w-64 h-72 bg-gray-300 rounded-lg mb-4"></div>
               <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2"></div>

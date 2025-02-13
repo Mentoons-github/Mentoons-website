@@ -1,6 +1,6 @@
-import EmployeeTestimonials from "@/components/Careerpage/EmployeeTestimonials"
-import HiringHeroSection from "@/components/Careerpage/HiringHeroSection"
-import OpenPositions from "@/components/Careerpage/OpenPositions"
+import EmployeeTestimonials from "@/components/Careerpage/EmployeeTestimonials";
+import HiringHeroSection from "@/components/Careerpage/HiringHeroSection";
+import OpenPositions from "@/components/Careerpage/OpenPositions";
 import { getOpenPositions } from "@/redux/careerSlice";
 import { AppDispatch } from "@/redux/store";
 import { useEffect } from "react";
@@ -15,12 +15,12 @@ export type OpenPositionsType = {
   applicationCount: number;
   skillsRequired: string[];
   thumbnail: string;
-}
+};
 
 const CareerPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const getOpenPositionsData = async () => {
-    const data =  await dispatch(getOpenPositions());
+    const data = await dispatch(getOpenPositions());
     console.log(data.payload.data.jobs);
   };
   useEffect(() => {
@@ -28,11 +28,11 @@ const CareerPage = () => {
   }, []);
   return (
     <div className="">
-        <HiringHeroSection />
-        <OpenPositions />
-        <EmployeeTestimonials />
+      <HiringHeroSection />
+      <OpenPositions />
+      <EmployeeTestimonials />
     </div>
-  )
-}
+  );
+};
 
-export default CareerPage
+export default CareerPage;

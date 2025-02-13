@@ -54,7 +54,7 @@ const Product = () => {
   const location = useLocation();
   const productDetails = location.state?.productDetails;
   const [activeProdcutImage, setActiveProductImage] = useState(
-    productDetails?.productImages[0]?.imageSrc
+    productDetails?.productImages[0]?.imageSrc,
   );
   const dispatch = useDispatch<AppDispatch>();
   const { userId, getToken } = useAuth();
@@ -85,9 +85,9 @@ const Product = () => {
             token,
             userId,
             productId: productDetails._id,
-            quantity: 1,
+            quantity: quantity,
             price: parseInt(productDetails.paperEditionPrice),
-          })
+          }),
         );
         toast.success("Item Added to cart");
         navigate("/cart");
@@ -132,7 +132,7 @@ const Product = () => {
             <div className="  flex gap-2 flex-[0.15] p-2 md:px-0  overflow-y-auto md:flex-col">
               {productDetails.productImages.map((item: ProductImage) => (
                 <div
-                  key={item.imageSrc}
+                  key={item.id + Date.now().toString()}
                   className="border rounded-xl border-[#3a2901] cursor-pointer overflow-hidden w-16 h-16 flex items-center justify-center"
                   onClick={() => setActiveProductImage(item.imageSrc)}
                 >
@@ -273,7 +273,7 @@ const Product = () => {
                 className="text-lg font-bold flex-1 py-2  rounded-lg bg-stone-500 text-white md:text-xl"
                 onClick={handleAddtoCart}
               >
-                Add to Card
+                Add to Cart
               </button>
               <button
                 className="text-lg font-bold flex-1 py-2 rounded-lg bg-red-600 text-white md:text-xl"
@@ -291,13 +291,13 @@ const Product = () => {
             </div>
           </div>
         </div>
-        <div className=" ">
+        <div className="">
           <div className="">
             <h2 className="text-center text-4xl font-bold py-6 md:py-12 md:text-5xl md:pb-6">
               {" "}
               How {productDetails.productTitle} helps.
             </h2>
-            <div className=" mx-2 md:mx-12 mb-6 ">
+            <div className=" md:mx-12 mb-6 ">
               {/*Add video src */}
               <video
                 src={productDetails.productVideos[0].videoSrc}
@@ -306,7 +306,7 @@ const Product = () => {
                 controls
                 playsInline
                 webkit-playinline
-                className="rounded-3xl   border-4 border-[#3a2901]"
+                className="rounded-3xl border-4 border-[#3a2901]"
               ></video>
             </div>
             <div className="flex flex-col gap-4 md:flex-row md:gap-4 md:items-start md:justify-center px-4 ">
@@ -347,17 +347,17 @@ const Product = () => {
                                 {descriptionItem.description}
                               </p>
                             </li>
-                          )
+                          ),
                         )}
                       </ul>
                     </div>
-                  )
+                  ),
                 )}
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-8">
+      <div className="mt-8 border border-black">
         <Testimonial />
       </div>
     </section>

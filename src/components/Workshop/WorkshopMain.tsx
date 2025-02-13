@@ -878,13 +878,13 @@ const WorkshopMain = () => {
 
   const handleNextTestimonial = () => {
     setCurrentTestimonialIndex((prev) =>
-      prev === content.testimonials.length - 1 ? 0 : prev + 1
+      prev === content.testimonials.length - 1 ? 0 : prev + 1,
     );
   };
 
   const handlePrevTestimonial = () => {
     setCurrentTestimonialIndex((prev) =>
-      prev === 0 ? content.testimonials.length - 1 : prev - 1
+      prev === 0 ? content.testimonials.length - 1 : prev - 1,
     );
   };
 
@@ -893,7 +893,7 @@ const WorkshopMain = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTextIndex((prevIndex) =>
-        prevIndex === content.texts.length - 1 ? 0 : prevIndex + 1
+        prevIndex === content.texts.length - 1 ? 0 : prevIndex + 1,
       );
     }, 3000);
 
@@ -971,7 +971,7 @@ const WorkshopMain = () => {
         <div className="w-[90%] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-[60%] space-y-8">
-              <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex flex-col md:flex-row items-center gap-8 border border-green-600">
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}

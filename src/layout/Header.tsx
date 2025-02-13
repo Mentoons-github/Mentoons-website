@@ -80,23 +80,28 @@ const Header = () => {
         <div className=" hidden lg:flex items-center space-x-6  flex-1 font-semibold text-black md:hidden  pl-6 ">
           {NAV_LINKS.filter((link) =>
             ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
-              link.label
-            )
+              link.label,
+            ),
           ).map((link) => (
             <div key={link.id} className="text-white whitespace-nowrap">
               {link.label === "Date" ? (
-                <span className="bg-white text-primary p-1 rounded-sm whitespace-nowrap ">
+                <span className="bg-white text-primary px-3 py-2 rounded-full whitespace-nowrap ">
                   {new Date().toDateString()}
                 </span>
               ) : link.label === "Call us" ? (
                 <a
                   href="tel:+91 90360 33300"
-                  className="bg-white text-primary p-1 rounded-sm whitespace-nowrap"
+                  className="bg-white text-primary px-3 py-2 rounded-full whitespace-nowrap "
                 >
                   Call us: +91 90360 33300
                 </a>
               ) : (
-                <NavLink to={link.url}>{link.label} </NavLink>
+                <NavLink
+                  to={link.url}
+                  className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
+                >
+                  {link.label}{" "}
+                </NavLink>
               )}
             </div>
           ))}
@@ -127,33 +132,29 @@ const Header = () => {
             </NavLink> */}
             <NavLink
               to="/mentoons-comics"
-              className="text-white hover:text-gray-200"
+              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200 whitespace-nowrap"
             >
               {" "}
-              Comics
-            </NavLink>
-            <NavLink
-              to="/mentoons-comics/audio-comics"
-              className="text-white hover:text-gray-200 whitespace-nowrap"
-            >
-              {" "}
-              Audio Comics
+              Comics and Audio Comics
             </NavLink>
 
             <NavLink
               to="/mentoons-podcast"
-              className="text-white hover:text-gray-200"
+              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
             >
               Podcasts
             </NavLink>
             <NavLink
               to="/mentoons-workshops"
-              className="text-white hover:text-gray-200"
+              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
             >
               Workshops
             </NavLink>
             <SignedIn>
-              <NavLink to="/cart" className="text-white hover:text-gray-200">
+              <NavLink
+                to="/cart"
+                className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
+              >
                 <div className="relative ">
                   <span className=" absolute -top-3 -right-3 bg-red-600 text-xs px-1 rounded-sm font-medium">
                     {cart.totalItemCount}
@@ -165,7 +166,7 @@ const Header = () => {
             </SignedIn>
             <SignedOut>
               <NavLink to="/sign-in">
-                <button className="text-white hover:text-gray-200 whitespace-nowrap">
+                <button className="text-white hover:text-gray-200 whitespace-nowrap border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200">
                   Sign In
                 </button>
               </NavLink>
@@ -205,7 +206,7 @@ const Header = () => {
             <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
               <ul>
                 {NAV_LINKS.filter(
-                  (link) => !["Date", "Call us", "User"].includes(link.label)
+                  (link) => !["Date", "Call us", "User"].includes(link.label),
                 ).map((link) => (
                   <li
                     key={link.id}

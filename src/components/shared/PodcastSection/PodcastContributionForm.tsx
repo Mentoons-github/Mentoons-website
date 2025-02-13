@@ -49,7 +49,7 @@ const PodcastContributionForm = () => {
 
   const handleSubmit = async (
     values: PodcastFormData,
-    { setSubmitting }: FormikHelpers<PodcastFormData>
+    { setSubmitting }: FormikHelpers<PodcastFormData>,
   ) => {
     try {
       const token = await getToken();
@@ -59,15 +59,15 @@ const PodcastContributionForm = () => {
       }
 
       const audioFileAction = await dispatch(
-        uploadFile({ file: values.audiofile, getToken: async () => token })
+        uploadFile({ file: values.audiofile, getToken: async () => token }),
       );
 
       let thumbnailUrl;
       if (values.thumbnail) {
         const thumbnailFileAction = await dispatch(
-          uploadFile({ file: values.thumbnail, getToken: async () => token })
+          uploadFile({ file: values.thumbnail, getToken: async () => token }),
         );
-        console.log(thumbnailFileAction, 'ppp')
+        console.log(thumbnailFileAction, "ppp");
         thumbnailUrl = thumbnailFileAction.payload?.data?.imageUrl;
       }
 
@@ -88,9 +88,9 @@ const PodcastContributionForm = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
 
       // The data from the response is in response.data
@@ -126,7 +126,7 @@ const PodcastContributionForm = () => {
       className="w-full"
     >
       {(
-        { setFieldValue, isSubmitting, isValid, dirty } // Added isValid and dirty
+        { setFieldValue, isSubmitting, isValid, dirty }, // Added isValid and dirty
       ) => (
         <Form className="w-full flex flex-col gap-2">
           <div className="w-full box-border  flex flex-wrap md:flex-nowrap gap-4 ">

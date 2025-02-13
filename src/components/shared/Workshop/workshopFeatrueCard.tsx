@@ -59,7 +59,7 @@ WorkshopFeatureCard2Props) => {
 
   const handleSubmit = async (
     values: REQUEST_CALL_DATA,
-    { setSubmitting }: FormikHelpers<REQUEST_CALL_DATA>
+    { setSubmitting }: FormikHelpers<REQUEST_CALL_DATA>,
   ) => {
     try {
       const WorkshopFeatureCardFormData = {
@@ -74,7 +74,7 @@ WorkshopFeatureCard2Props) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       const res: ApiResponse = response.data;
 

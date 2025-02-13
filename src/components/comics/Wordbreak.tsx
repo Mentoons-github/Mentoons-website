@@ -1,4 +1,4 @@
-const Wordbreak= () => {
+const Wordbreak = () => {
   return <br className="hidden md:block" />;
 };
 

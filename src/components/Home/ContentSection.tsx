@@ -31,7 +31,8 @@ const ContentSection = () => {
             </div>
             <div>
               <h2 className="mb-4 text-3xl md:text-4xl lg:text-5xl tracking-tight font-extrabold text-gray-800 dark:text-white text-center">
-                Are You Struggling to Cut Down on Mobile, Social Media, Gaming, and Gambling Addiction?
+                Are You Struggling to Cut Down on Mobile, Social Media, Gaming,
+                and Gambling Addiction?
               </h2>
             </div>
           </Slider>
@@ -39,11 +40,15 @@ const ContentSection = () => {
             Made Fun and Effective
           </p>
           <p className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-700 dark:text-gray-300 text-center">
-            Give your child the gift of growth with <b>mentoons</b> a versatile platform that combines enriching mentorship with the captivating power of cartoons.
+            Give your child the gift of growth with <b>mentoons</b> a versatile
+            platform that combines enriching mentorship with the captivating
+            power of cartoons.
           </p>
           <div className="flex flex-col items-center justify-around gap-6 mt-12 lg:mt-8">
             <h1 className="text-3xl md:text-3xl lg:text-5xl text-center font-bold text-gray-800 dark:text-white">
-              Get Engaging <span className="animate-pulse text-primary">mentoring</span> for your child!
+              Get Engaging{" "}
+              <span className="animate-pulse text-primary">mentoring</span> for
+              your child!
             </h1>
             <button className="px-6 md:px-8 py-2 md:py-3 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-yellow-600 transition-all duration-300">
               Get Started Now

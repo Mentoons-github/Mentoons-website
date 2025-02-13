@@ -84,7 +84,7 @@ const AudioComicPage: React.FC = () => {
       },
       (err) => {
         console.error("Failed to copy URL: ", err);
-      }
+      },
     );
   };
 

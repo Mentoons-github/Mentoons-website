@@ -14,7 +14,7 @@ const Struggles = () => {
           controls.start("hidden");
         }
       },
-      { threshold: 0.2 } // Trigger when 20% of the section is visible
+      { threshold: 0.2 }, // Trigger when 20% of the section is visible
     );
 
     if (sectionRef.current) {

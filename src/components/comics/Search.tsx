@@ -242,7 +242,7 @@ const Search: React.FC<{ content: string }> = ({ content }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const comicsData = useSelector(
-    (store: RootState) => store.comics.audioComics
+    (store: RootState) => store.comics.audioComics,
   );
   const popularComics = comicsData.slice(0, 12);
   const [showButton, setShowButton] = useState<ShowButtonInterface>({
@@ -303,7 +303,7 @@ const Search: React.FC<{ content: string }> = ({ content }) => {
                           <Button
                             onClick={() =>
                               navigate(
-                                "/mentoons-comics/audio-comics/" + item.name
+                                "/mentoons-comics/audio-comics/" + item.name,
                               )
                             }
                             className="absolute left-0 font-semibold bottom-0 w-full bg-primary text-white hover:text-primary hover:bg-white duration-500 z-[50]"
@@ -395,7 +395,7 @@ const Search: React.FC<{ content: string }> = ({ content }) => {
 export const SearchPage: React.FC = () => {
   const navigate = useNavigate();
   const audioComics = useSelector(
-    (store: RootState) => store.comics.audioComics
+    (store: RootState) => store.comics.audioComics,
   );
   const comics = useSelector((store: RootState) => store.comics.comics);
   const comicsData = [...audioComics, ...comics];
@@ -406,7 +406,7 @@ export const SearchPage: React.FC = () => {
     show: false,
   });
   const [searchedComics, setSearchedComics] = useState<(AudioComic | Comic)[]>(
-    []
+    [],
   );
 
   const handleFilterComics = (value: string) => {

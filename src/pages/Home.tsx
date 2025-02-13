@@ -15,7 +15,6 @@ const Home = () => {
   const { user } = useUser();
   const [showPopup, setShowPopup] = React.useState(false);
 
-
   // Comic sending function
   const sendComic = async () => {
     try {
@@ -45,9 +44,9 @@ const Home = () => {
       <HeroSection />
 
       {[
-        { Component: Struggles, key: 'struggles' },
-        { Component: MdMultiverse, key: 'multiverse' },
-        { Component: MeetMentors, key: 'meet mentors' },
+        { Component: Struggles, key: "struggles" },
+        { Component: MdMultiverse, key: "multiverse" },
+        { Component: MeetMentors, key: "meet mentors" },
         // { Component: NewSection, key: 'new section' }
       ].map(({ Component, key }) => (
         <motion.div key={key}>
@@ -56,7 +55,7 @@ const Home = () => {
       ))}
 
       {showPopup && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -67,7 +66,7 @@ const Home = () => {
             className="w-full max-w-md bg-white rounded-lg shadow-xl p-6"
           >
             <div className="flex justify-end">
-              <button 
+              <button
                 onClick={() => setShowPopup(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -79,12 +78,12 @@ const Home = () => {
               <h2 className="text-2xl font-semibold text-gray-800">
                 Congratulations! 🎉
               </h2>
-              
+
               <p className="text-gray-600">
                 Hi {user?.firstName}, you've successfully joined!
               </p>
 
-              <button 
+              <button
                 onClick={sendComic}
                 className="bg-green-500 text-white px-5 py-2 rounded-md hover:bg-green-600 transition-colors"
               >

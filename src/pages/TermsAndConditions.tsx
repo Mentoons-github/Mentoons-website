@@ -47,7 +47,7 @@ const TermsAndConditions = () => {
 
   const [expandedSection, setExpandedSection] = useState(null);
 
-  const toggleSection = (index:any) => {
+  const toggleSection = (index: any) => {
     setExpandedSection(expandedSection === index ? null : index);
   };
 

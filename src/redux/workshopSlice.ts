@@ -5,7 +5,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 interface SubmitWorkshopResponse {
   success: boolean;
   message?: string;
-  error?:string
+  error?: string;
 }
 
 interface SubmitWorkshopError {
@@ -24,8 +24,8 @@ interface FormValues {
   age: string;
   message: string;
   city: string;
-  duration:string;
-  workshop:string;
+  duration: string;
+  workshop: string;
 }
 const initialState: WorkshopState = {
   loading: false,
@@ -43,24 +43,26 @@ export const submitWorkshopForm = createAsyncThunk<
     try {
       const response = await axiosInstance.post<SubmitWorkshopResponse>(
         Endpoints.WORKSHOP_FORM,
-        formData
+        formData,
       );
-      console.log(response,'lllll')
-      console.log(response.data,'llllluuuu')
-      if (response.data.success===false) {
-        console.log(response,'p;dldl;dkl')
-        return rejectWithValue({ message: response.data.message || "Submission failed" });
+      console.log(response, "lllll");
+      console.log(response.data, "llllluuuu");
+      if (response.data.success === false) {
+        console.log(response, "p;dldl;dkl");
+        return rejectWithValue({
+          message: response.data.message || "Submission failed",
+        });
       }
       return response.data;
-    } catch (error:any) {
-      console.log(error,'yuuttt')
+    } catch (error: any) {
+      console.log(error, "yuuttt");
       console.error("Error in submitWorkshopForm:", error);
       if (error.response && error.response.data.error) {
         return rejectWithValue({ message: error.response.data.error });
       }
       return rejectWithValue({ message: "Something went wrong!" });
     }
-  }
+  },
 );
 
 const workshopSlice = createSlice({

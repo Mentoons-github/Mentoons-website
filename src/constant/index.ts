@@ -1063,7 +1063,7 @@ export const NAV_LINKS: NavLink[] = [
   },
   {
     id: "NL_06",
-    label: "Comics",
+    label: "Comics and Audio Comics",
     icon: "book",
     url: "/mentoons-comics",
   },
@@ -1229,7 +1229,7 @@ export const PODCAST_CARD_DATA = [
     price: 10,
   },
   {
-    id: "PCD_01",
+    id: "PCD_02",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
@@ -1238,7 +1238,7 @@ export const PODCAST_CARD_DATA = [
     price: 25,
   },
   {
-    id: "PCD_01",
+    id: "PCD_03",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
@@ -1247,7 +1247,7 @@ export const PODCAST_CARD_DATA = [
     price: 20,
   },
   {
-    id: "PCD_01",
+    id: "PCD_04",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
@@ -1256,47 +1256,416 @@ export const PODCAST_CARD_DATA = [
     price: 10,
   },
   {
-    id: "PCD_01",
+    id: "PCD_05",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
   },
   {
-    id: "PCD_01",
+    id: "PCD_06",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
   },
   {
-    id: "PCD_01",
+    id: "PCD_07",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
   },
   {
-    id: "PCD_01",
+    id: "PCD_08",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
   },
   {
-    id: "PCD_01",
+    id: "PCD_09",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
   },
   {
-    id: "PCD_01",
+    id: "PCD_10",
     title: "Teen emotions and Behavioural Problems",
     imageUrl: "/assets/podcastv2/teen-emotions-and-behavioural-problem.png",
     date: "JAN 2024",
     duration: "30 MIN",
     isPaid: true,
     price: 15,
+  },
+];
+
+export const WORKSHOPS = [
+  {
+    id: "WD_01",
+    category: "6-12",
+    title: "Buddy Camp",
+    workshopLogo: "/assets/workshopv2/buddycamp/buddy-camp-logo.png",
+    workshopSubTitle: "Fun Learning Workshop For Kids (6-12 Years)",
+    workshopAim: "Social Skills",
+    workshopAimDescription:
+      "Nurture your child's creativity and learning with our engaging Buddy Camp workshop",
+    workshopOfferings: [
+      {
+        id: "WO_01",
+        title: "Interactive group discussions",
+        description:
+          "Engaging activities to encourage social interaction and communication",
+        imageUrl: "/assets/workshopv2/interactive-group-discussions.png",
+        accentColor: "#4285F4",
+      },
+      {
+        id: "WO_02",
+        title: "Peer learning activities",
+        description:
+          "Collaborative exercises to foster teamwork and cooperation",
+        imageUrl: "/assets/workshopv2/peer-learning-activities.png",
+        accentColor: "#EF4444",
+      },
+      {
+        id: "WO_03",
+        title: "Practical workshops",
+        description:
+          "Hands-on activities to develop problem-solving and critical thinking skills",
+        imageUrl: "/assets/workshopv2/practical-workshops.png",
+        accentColor: "#22C55E",
+      },
+      {
+        id: "WO_04",
+        title: "Expert guidance",
+        description:
+          "Insightful sessions led by industry experts and experienced mentors",
+        imageUrl: "/assets/workshopv2/expert-guidance.png",
+        accentColor: "#F7941D",
+      },
+    ],
+    addressedIssues: [
+      {
+        id: "AI_01",
+        title: "Low confidence",
+        description: "Building self-esteem and confidence in social settings",
+        imageUrl: "/assets/workshopv2/low-confidance.png",
+      },
+      {
+        id: "AI_02",
+        title: "Aggressive behaviour",
+        description: "Developing empathy and understanding towards others",
+        imageUrl: "/assets/workshopv2/aggressive-behaviour.png",
+      },
+      {
+        id: "AI_03",
+        title: "LACK OF COMMUNICATION",
+        description: "Developing effective communication skills",
+        imageUrl: "/assets/workshopv2/lack-of-communication.png",
+      },
+      {
+        id: "AI_04",
+        title: "Disobedience",
+        description: "Encouraging positive behaviour and respect for authority",
+        imageUrl: "/assets/workshopv2/disobedience.png",
+      },
+    ],
+    workshopAccentColor: "#FFE0A9",
+
+    registerFormIllustration:
+      "/assets/workshopv2/buddycamp/buddy-camp-register-illustration.png",
+    registerFormbgColor: "#F7941D",
+  },
+
+  {
+    id: "WD_02",
+    category: "13-19",
+    title: "Teen Camp",
+    workshopLogo: "/assets/workshopv2/teencamp/teen-camp-logo.png",
+    workshopSubTitle: "Interactive Workshop For Teenagers (13-19 Years)",
+    workshopAim: "Substance De-addiction",
+    workshopAimDescription:
+      "Help your teenager navigate the challenges of adolescence with our comprehensive Teen Camp workshop.",
+    workshopOfferings: [
+      {
+        id: "WO_01",
+        title: "Personal Development",
+        description: "Guidance on building self-confidence and self-awareness",
+        imageUrl: "/assets/workshopv2/interactive-group-discussions.png",
+        accentColor: "#4285F4",
+      },
+      {
+        id: "WO_02",
+        title: "Peer learning activities",
+        description:
+          "Collaborative exercises to foster teamwork and cooperation",
+        imageUrl: "/assets/workshopv2/peer-learning-activities.png",
+        accentColor: "#EF4444",
+      },
+      {
+        id: "WO_03",
+        title: "Practical workshops",
+        description:
+          "Hands-on activities to develop problem-solving and critical thinking skills",
+        imageUrl: "/assets/workshopv2/practical-workshops.png",
+        accentColor: "#22C55E",
+      },
+      {
+        id: "WO_04",
+        title: "Expert guidance",
+        description:
+          "Insightful sessions led by industry experts and experienced mentors",
+        imageUrl: "/assets/workshopv2/expert-guidance.png",
+        accentColor: "#F7941D",
+      },
+    ],
+    addressedIssues: [
+      {
+        id: "AI_01",
+        title: "Substance addiction",
+        description:
+          "Understanding the risks and consequences of substance abuse",
+        imageUrl: "/assets/workshopv2/substance-addiction.png",
+      },
+      {
+        id: "AI_02",
+        title: "Aggressive behaviour",
+        description: "Developing empathy and understanding towards others",
+        imageUrl: "/assets/workshopv2/aggressive-behaviour.png",
+      },
+      {
+        id: "AI_03",
+        title: "Hormonal changes",
+        description:
+          "Navigating the physical and emotional changes of adolescence",
+        imageUrl: "/assets/workshopv2/hormonal-changes.png",
+      },
+      {
+        id: "AI_04",
+        title: "Disobedience",
+        description: "Encouraging positive behaviour and respect for authority",
+        imageUrl: "/assets/workshopv2/disobedience.png",
+      },
+    ],
+    workshopAccentColor: "#FFB5B5",
+    registerFormIllustration:
+      "/assets/workshopv2/teencamp/teen-camp-register-illustration.png",
+    registerFormbgColor: "#EF4444",
+  },
+
+  {
+    id: "WD_03",
+    category: "parent",
+    title: "Family Camp",
+    workshopLogo: "/assets/workshopv2/familycamp/family-camp-logo.png",
+    workshopSubTitle: "Interactive & Engaging Workshop For Family ",
+    workshopAim: "Digital Parenting",
+    workshopAimDescription:
+      "Empower yourself with effective parenting strategies for the digital age.",
+    workshopOfferings: [
+      {
+        id: "WO_01",
+        title: "Personal Development",
+        description: "Guidance on building self-confidence and self-awareness",
+        imageUrl: "/assets/workshopv2/interactive-group-discussions.png",
+        accentColor: "#4285F4",
+      },
+      {
+        id: "WO_02",
+        title: "Parenting Guidance",
+        description:
+          "Insightful sessions on effective parenting strategies and techniques",
+        imageUrl: "/assets/workshopv2/peer-learning-activities.png",
+        accentColor: "#EF4444",
+      },
+      {
+        id: "WO_03",
+        title: "Practical workshops",
+        description:
+          "Hands-on activities to develop problem-solving and critical thinking skills",
+        imageUrl: "/assets/workshopv2/practical-workshops.png",
+        accentColor: "#22C55E",
+      },
+      {
+        id: "WO_04",
+        title: "Expert guidance",
+        description:
+          "Insightful sessions led by industry experts and experienced mentors",
+        imageUrl: "/assets/workshopv2/expert-guidance.png",
+        accentColor: "#F7941D",
+      },
+    ],
+    addressedIssues: [
+      {
+        id: "AI_01",
+        title: "Substance addiction",
+        description:
+          "Understanding the risks and consequences of substance abuse",
+        imageUrl: "/assets/workshopv2/substance-addiction.png",
+      },
+      {
+        id: "AI_02",
+        title: "Aggressive behaviour",
+        description: "Developing empathy and understanding towards others",
+        imageUrl: "/assets/workshopv2/aggressive-behaviour.png",
+      },
+      {
+        id: "AI_03",
+        title: "Hormonal changes",
+        description:
+          "Navigating the physical and emotional changes of adolescence",
+        imageUrl: "/assets/workshopv2/hormonal-changes.png",
+      },
+      {
+        id: "AI_04",
+        title: "Disobedience",
+        description: "Encouraging positive behaviour and respect for authority",
+        imageUrl: "/assets/workshopv2/disobedience.png",
+      },
+    ],
+    workshopAccentColor: "#A0FFBA",
+
+    registerFormIllustration:
+      "/assets/workshopv2/familycamp/family-camp-register-illustration.png",
+    registerFormbgColor: "#22C55E",
+  },
+
+  {
+    id: "WD_04",
+    category: "20+",
+    title: "Career Corner",
+    workshopLogo: "/assets/workshopv2/careercorner/career-corner-logo.png",
+    workshopSubTitle: "Workshops on Career Guidance for 20 +",
+    workshopAim: "Career Exploration",
+    workshopAimDescription:
+      "We provide practical tips on creating impactful video resumes, writing attention-grabbing cover letters, and designing effective emailers to ensure your application stands out from the rest.",
+    workshopOfferings: [
+      {
+        id: "WO_01",
+        title: "Interview Tips & Tricks",
+        description: "Learn how to ace your interviews with our expert tips.",
+        imageUrl: "/assets/workshopv2/interactive-group-discussions.png",
+        accentColor: "#4285F4",
+      },
+      {
+        id: "WO_02",
+        title: "Networking Guidance",
+        description:
+          "Learn how to build a strong professional network and leverage it to your advantage.",
+        imageUrl: "/assets/workshopv2/peer-learning-activities.png",
+        accentColor: "#EF4444",
+      },
+      {
+        id: "WO_03",
+        title: "Skill Assessments",
+        description:
+          "Identify your strengths and weaknesses with our comprehensive skill assessments.",
+        imageUrl: "/assets/workshopv2/practical-workshops.png",
+        accentColor: "#22C55E",
+      },
+      {
+        id: "WO_04",
+        title: "Expert guidance",
+        description:
+          "Insightful sessions led by industry experts and experienced mentors",
+        imageUrl: "/assets/workshopv2/expert-guidance.png",
+        accentColor: "#F7941D",
+      },
+    ],
+    addressedIssues: [
+      {
+        id: "AI_01",
+        title: "Interviewing Skills",
+        description:
+          "Learn how to prepare for interviews and make a lasting impression.",
+        imageUrl: "/assets/workshopv2/careercorner/interviewing-skills.png",
+      },
+      {
+        id: "AI_02",
+        title: "Professional Image",
+        description: "Learn how to present yourself professionally.",
+        imageUrl: "/assets/workshopv2/careercorner/professional-image.png",
+      },
+      {
+        id: "AI_03",
+        title: "Portfolio Management",
+        description:
+          "Learn how to create a professional portfolio that showcases your skills and experiences.",
+        imageUrl: "/assets/workshopv2/careercorner/portfolio-management.png",
+      },
+      {
+        id: "AI_04",
+        title: "Lack of career support",
+        description:
+          "Get access to top career advice, guidance on trending domains, and expert insights.",
+        imageUrl: "/assets/workshopv2/careercorner/lack-of-career-support.png",
+      },
+    ],
+    workshopAccentColor: "#8CB8FF",
+    registerFormIllustration:
+      "/assets/workshopv2/careercorner/career-corner-register-illustration.png",
+    registerFormbgColor: "#4285F4",
+  },
+];
+
+export const WORKSHOP_MATTERS_POINTS = [
+  {
+    id: "WM_01",
+    lable: "Engaging Learning",
+    description: "Complex topics presented in an easy-to-understand format",
+    icon: "/assets/workshopv2/engaging-learning.png",
+  },
+  {
+    id: "WM_02",
+    lable: "Caharacter Development",
+    description: "Stories that inspire positive behavior and values.",
+    icon: "/assets/workshopv2/character-development.png",
+  },
+  {
+    id: "WM_03",
+    lable: "Relatable Scenarios",
+    description: "Real-life situations that resonate with young readers",
+    icon: "/assets/workshopv2/relatable-scenario.png",
+  },
+  {
+    id: "WM_04",
+    lable: "Family Bonding",
+    description:
+      "Perfect for shared reading experiences between parents and children",
+    icon: "/assets/workshopv2/family-bonding.png",
+  },
+];
+
+export const WORKSHOP_FAQ = [
+  {
+    id: "WF_01",
+    question: "How do I register for these Workshops?",
+    answer:
+      "Simply sign up with your email or social media account. Once registered, you buy our membership and become a part of the community, ask questions, and connect with other community members.",
+  },
+  {
+    id: "WF_02",
+    question: "What types of topics can I discuss here?",
+    answer:
+      "We offer workshops on a wide range of topics, including career guidance, personal development, and social skills. You can find detailed information about each workshop on our website or mobile app.",
+  },
+  {
+    id: "WF_03",
+    question: "What activities are done in workshops?",
+    answer:
+      "Our workshops include interactive group discussions, peer learning activities, practical workshops, and expert guidance sessions. Each workshop is designed to be engaging and informative, with a focus on skill-building and personal development.",
+  },
+  {
+    id: "WF_04",
+    question: "How do I engage with other users?",
+    answer:
+      "You can engage with other users by participating in group discussions, sharing your thoughts and experiences, and asking questions. You can also connect with other users through private messages and group chats.",
+  },
+  {
+    id: "WF_05",
+    question: "Can experts contribute to the platform?",
+    answer:
+      "Yes, we welcome contributions from experts in various fields. If you are an expert and would like to share your knowledge and insights with our community, please contact us for more information.",
   },
 ];

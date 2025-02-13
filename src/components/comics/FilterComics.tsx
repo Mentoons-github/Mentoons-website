@@ -56,7 +56,7 @@ const FilterComics: React.FC = () => {
   };
 
   const handleUpdate = (param: string) => {
-    const selectedGroup = AgeGroup.find(group => group.value === param);
+    const selectedGroup = AgeGroup.find((group) => group.value === param);
     if (selectedGroup) {
       setValue(selectedGroup.value);
     } else {
@@ -105,7 +105,7 @@ const FilterComics: React.FC = () => {
                   <CheckIcon
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === item.value ? "opacity-100" : "opacity-0"
+                      value === item.value ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>
