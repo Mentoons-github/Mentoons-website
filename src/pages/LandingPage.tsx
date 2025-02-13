@@ -1,12 +1,11 @@
-import WorkshopMain from "@/components/Workshop/WorkshopMain"
+import WorkshopMain from "@/components/Workshop/WorkshopMain";
 
 const LandingPage = () => {
   return (
-    <div className="h-full w-full relative">
-      <WorkshopMain />  
-      
+    <div className="relative w-full h-full border border-red-500">
+      <WorkshopMain />
     </div>
-  )
-}
+  );
+};
 
-export default LandingPage
+export default LandingPage;

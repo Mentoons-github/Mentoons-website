@@ -8,7 +8,7 @@ import {
 import React from "react";
 import { FaAlignCenter, FaCirclePause, FaCirclePlay } from "react-icons/fa6";
 
- export interface IPODCAST {
+export interface IPODCAST {
   id?: number;
   topic: string;
   description: string;

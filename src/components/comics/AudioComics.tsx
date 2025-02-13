@@ -11,7 +11,7 @@ import Wordbreak from "./Wordbreak";
 const AudioComics: React.FC = () => {
   const navigate = useNavigate();
   const comicsData = useSelector(
-    (store: RootState) => store.comics.audioComics
+    (store: RootState) => store.comics.audioComics,
   );
   const comics = comicsData.slice(0, 6);
 

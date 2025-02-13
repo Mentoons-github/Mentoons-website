@@ -14,7 +14,7 @@ const Cart: React.FC = () => {
   const { getToken, userId } = useAuth();
 
   const { cart, loading, error } = useSelector(
-    (state: RootState) => state.cart
+    (state: RootState) => state.cart,
   );
   const { cardProducts } = useSelector((state: RootState) => state.cardProduct);
 
@@ -28,7 +28,7 @@ const Cart: React.FC = () => {
       if (token && userId) {
         dispatch(getCart({ token, userId }));
         const response = await dispatch(
-          getAllProducts({ search: "", filtercategory: "" })
+          getAllProducts({ search: "", filtercategory: "" }),
         );
         console.log("Response", response.payload);
       }
@@ -37,29 +37,32 @@ const Cart: React.FC = () => {
   }, [dispatch, getToken, userId, cart.totalItemCount]);
 
   if (loading) {
-  return (
-    <div className="p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto animate-pulse">
-      <div className="h-20 bg-gray-200 rounded-lg w-1/2 mb-10"></div>
-      <div className="flex gap-4 flex-wrap">
-        <div className="w-full flex flex-col lg:flex-row-reverse gap-4">
-          <div className="w-full lg:w-[40%] h-48 bg-gray-200 rounded-3xl"></div>
-          <div className="w-full flex flex-col gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-full h-32 bg-gray-200 rounded-xl"></div>
-            ))}
+    return (
+      <div className="p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto animate-pulse">
+        <div className="h-20 bg-gray-200 rounded-lg w-1/2 mb-10"></div>
+        <div className="flex gap-4 flex-wrap">
+          <div className="w-full flex flex-col lg:flex-row-reverse gap-4">
+            <div className="w-full lg:w-[40%] h-48 bg-gray-200 rounded-3xl"></div>
+            <div className="w-full flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="w-full h-32 bg-gray-200 rounded-xl"
+                ></div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="w-full mt-4">
-          <div className="h-12 bg-gray-200 rounded w-48 mb-8"></div>
-          <div className="flex flex-wrap gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="w-64 h-72 bg-gray-200 rounded-xl"></div>
-            ))}
+          <div className="w-full mt-4">
+            <div className="h-12 bg-gray-200 rounded w-48 mb-8"></div>
+            <div className="flex flex-wrap gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-64 h-72 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    );
   }
 
   return (
@@ -97,13 +100,26 @@ const Cart: React.FC = () => {
               </button>
             </div>
             <div className="w-full flex flex-col gap-4 items-center">
-              {cart.items.length > 0 ? (
-                cart.items.map((item) => (
-                  <CartItemCard
-                    key={item.productId._id + "_"}
-                    cartItem={item}
-                  />
-                ))
+              {cart.items && cart.items.length > 0 ? (
+                cart.items.map((item) => {
+                  // Ensure product data exists before rendering
+                  if (item.productId && item.productId._id) {
+                    return (
+                      <CartItemCard
+                        key={item.productId._id + "_" + Date.now()} // Add timestamp to ensure unique key
+                        cartItem={{
+                          ...item,
+                          productId: {
+                            ...item.productId,
+                            productImages:
+                              item?.productId?.productImages[0].imageSrc || [], // Handle missing productImages
+                          },
+                        }}
+                      />
+                    );
+                  }
+                  return null; // Skip rendering if product data is incomplete
+                })
               ) : (
                 <div className="text-center flex flex-col items-center justify-center gap-6">
                   <p className="text-xl md:text-4xl font-semibold ">

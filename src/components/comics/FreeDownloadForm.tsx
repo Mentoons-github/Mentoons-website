@@ -31,7 +31,7 @@ const validationSchema = Yup.object({
     .required("Phone number is required!")
     .matches(
       /^\+?\d{10,15}$/,
-      "Invalid phone number format (e.g., +918777328451)"
+      "Invalid phone number format (e.g., +918777328451)",
     ),
 });
 
@@ -40,7 +40,7 @@ const initialState: FormType = { name: "", email: "", phone: "" };
 const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
   setShowFreeDownloadForm,
   selectedComic,
-  page
+  page,
 }) => {
   const sendEmail = (values: FormType) => {
     emailjs
@@ -55,14 +55,14 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
           pdf_url: selectedComic?.pdf_url,
           thumbnail_url: selectedComic?.thumbnail_url,
         },
-        import.meta.env.VITE_EMAIL_JS_USER_ID
+        import.meta.env.VITE_EMAIL_JS_USER_ID,
       )
       .then(
         (response) => {
           console.log(
             "Email sent successfully!",
             response.status,
-            response.text
+            response.text,
           );
           toast("Comic sent successfully 🥳", {
             description: date,
@@ -77,7 +77,7 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
             description: date,
           });
           console.error("Failed to send email.", error);
-        }
+        },
       )
       .finally(() => {
         setShowFreeDownloadForm(false);
@@ -90,7 +90,7 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className={`relative text-black ${page === 'freedownload' ? 'w-[90%] md:max-w-md py-8 px-10' : 'w-full h-full'} space-y-4 rounded-md bg-white shadow shadow-white`}
+        className={`relative text-black ${page === "freedownload" ? "w-[90%] md:max-w-md py-8 px-10" : "w-full h-full"} space-y-4 rounded-md bg-white shadow shadow-white`}
       >
         <button
           onClick={() => setShowFreeDownloadForm(false)}
@@ -99,10 +99,11 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
           <IoMdClose className="text-2xl hover:text-red-400 active:scale-50 transition-all ease-in-out duration-300" />
         </button>
 
-        {page === 'freedownload' ? (
+        {page === "freedownload" ? (
           <>
             <h1 className="font-semibold text-xl flex justify-center gap-2">
-              Free <img className="w-20" src={MiniLogo} alt="mentoons logo" /> Gifts
+              Free <img className="w-20" src={MiniLogo} alt="mentoons logo" />{" "}
+              Gifts
             </h1>
             <Formik<FormType>
               initialValues={initialState}

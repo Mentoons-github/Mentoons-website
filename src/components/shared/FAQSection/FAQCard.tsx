@@ -1,130 +1,65 @@
 import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { applyForJob } from "@/redux/careerSlice";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
 
-// import emailjs from "emailjs-com";
 import React, { FormEvent, useState } from "react";
-import { FaTimes } from "react-icons/fa";
-import { IoChevronDown } from "react-icons/io5";
+import { IoAdd } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-export type TPOSITION = {
-  _id: string;
-  jobTitle: string;
-  jobDescription: string;
-  thumbnail: string;
-  skillsRequired: string[];
-  jobType: string;
-  location: string;
+export type TWORKSHOPFAQ = {
+  id: string;
+  question: string;
+  answer: string;
 };
-// JOB ACCORDIAN COMPONENT
-const FAQCard = ({ position }: { position: TPOSITION; }) => {
-  const navigate = useNavigate();
-  const { getToken } = useAuth();
-  const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
 
-  const handleIsExpanded = () => {
-    setIsExpanded((prev) => !prev);
-  };
-
+const FAQCard = ({
+  faq,
+  isExpanded,
+  onClick,
+}: {
+  faq: TWORKSHOPFAQ;
+  isExpanded: boolean;
+  onClick: () => void;
+}) => {
   return (
     <div
-      className={` ${
-        isExpanded ? "max-h-full" : "max-h-16"
-      } rounded-xl flex flex-col items-center justify-between overflow-hidden transition-transform duration-300   bg-orange-200 hover:scale-105`}
+      onClick={onClick}
+      className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer rounded-xl hover:border-primary/50 ${
+        isExpanded ? "border-primary/50" : "border-neutral-200"
+      }`}
     >
-      <div
-        className=" w-full flex items-center justify-between p-4 text-neutral-700 
-        "
-        onClick={handleIsExpanded}
-      >
-        <span className="text-2xl font-bold">{position.jobTitle}</span>
-
+      <div className="flex items-center justify-between w-full p-4 text-neutral-700">
+        <span className="text-xl font-semibold transition-colors duration-300">
+          {faq.question}
+        </span>
         <span
-          className={`p-1 rounded-full border border-neutral-700 hover:border-orange-400 hover:bg-orange-400/40
-             flex items-center transition-all duration-300 cursor-pointer ${
-               isExpanded && "rotate-180"
-             }`}
+          className={`p-1 rounded-full border-2 flex items-center transition-all duration-300 ease-in-out transform ${
+            isExpanded
+              ? "rotate-45 bg-primary/10 border-primary"
+              : "hover:bg-primary/10 hover:border-primary"
+          }`}
         >
-          <IoChevronDown className="" />
+          <IoAdd
+            className={`text-xl transition-colors duration-300 ${
+              isExpanded ? "text-primary" : "text-neutral-800"
+            }`}
+          />
         </span>
       </div>
-      <div className="p-4">
-        {/* description and illustration */}
-        <div className="flex-wrap flex md:flex-nowrap items-start justify-center gap-2">
-          <div className="w-full">
-            <img
-              src={position.thumbnail}
-              alt=""
-              className="w-full object-cover"
-            />
-          </div>
-          <div className=" text-neutral-700 w-full  ">
-            {position.jobDescription}
-            <div className="flex flex-wrap  ">
-              {position.skillsRequired.map((item) => {
-                return (
-                  <div className="w-32 relative " key={item}>
-                    <img
-                      src="/assets/images/stroke1.png"
-                      alt=""
-                      className=" object-cover"
-                    />
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full  text-purple-100">
-                      {item}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          isExpanded
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="p-4 pt-0 text-neutral-600 ">{faq.answer}</div>
         </div>
-        {/* skill */}
-      </div>
-      <div className=" w-full px-4 ">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              className="text-neutral-700 font-bold px-5 py-2 w-full border bg-transparent border-neutral-700 hover:bg-orange-400/40 hover:border-orange-400 mb-4 rounded-md transition-all duration-300"
-              onClick={async () => {
-                 const token = await getToken();
-                if (!token) navigate("/sign-in");
-              }}
-            >
-              Apply Now
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="z-[999999] w-[90%] md:w-[50%]">
-            <DialogClose asChild>
-              <Button className="absolute top-2 right-2">
-                {" "}
-                <FaTimes />
-              </Button>
-            </DialogClose>
-            <DialogHeader>
-              <DialogTitle className="text-center">
-                Job Application Form
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                Fill in the details below and we'll contact you.
-              </DialogDescription>
-            </DialogHeader>
-            {/* <JobApplicationForm id={id} /> */}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
@@ -146,7 +81,13 @@ interface FormError {
   [key: string]: string;
 }
 
-export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFormOpen: (value: boolean) => void }) {
+export function JobApplicationForm({
+  id,
+  setIsFormOpen,
+}: {
+  id: string;
+  setIsFormOpen: (value: boolean) => void;
+}) {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
@@ -264,7 +205,7 @@ export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFor
           getToken: async () => token,
         })
       );
-     
+
       const fileUrl = fileAction.payload?.data?.fileDetails.url;
       if (!fileUrl) {
         return toast.error("Failed to upload resume");
@@ -291,54 +232,54 @@ export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFor
   if (loading) return <Loader />;
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <input
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
           placeholder="Name"
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         />
         {formErrors.name && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <input
           type="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
           placeholder="Email"
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         />
         {formErrors.email && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <input
           type="tel"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
           placeholder="Phone Number"
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         />
         {formErrors.phone && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <select
           name="gender"
           value={formData.gender}
           onChange={handleChange}
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         >
           <option value="">Select Gender</option>
           <option value="Male">Male</option>
@@ -347,40 +288,40 @@ export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFor
           <option value="Prefer not to say">Prefer not to say</option>
         </select>
         {formErrors.gender && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.gender}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.gender}</p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <input
           type="url"
           name="portfolioLink"
           value={formData.portfolioLink}
           onChange={handleChange}
           placeholder="Portfolio Link"
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         />
         {formErrors.portfolioLink && (
-          <p className="text-red-500 text-sm mt-1">
+          <p className="mt-1 text-sm text-red-500">
             {formErrors.portfolioLink}
           </p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <textarea
           name="coverNote"
           value={formData.coverNote}
           onChange={handleChange}
           placeholder="Cover Note"
-          className="p-3 text-base outline-black border bg-white text-black rounded-lg"
+          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
         />
         {formErrors.coverNote && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.coverNote}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.coverNote}</p>
         )}
       </div>
 
-      <div className="w-full flex flex-col mb-4">
+      <div className="flex flex-col w-full mb-4">
         <input
           type="file"
           id="resume"
@@ -393,13 +334,13 @@ export function JobApplicationForm({ id, setIsFormOpen }: { id: string, setIsFor
           <Button
             type="button"
             onClick={() => document.getElementById("resume")?.click()}
-            className="p-3 w-full text-base text-black mb-4 rounded-lg bg-slate-200 hover:bg-slate-300 transition-all duration-300"
+            className="w-full p-3 mb-4 text-base text-black transition-all duration-300 rounded-lg bg-slate-200 hover:bg-slate-300"
           >
             {formData.resume ? formData.resume.name : "Upload Resume"}
           </Button>
         </label>
         {formErrors.resume && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.resume}</p>
+          <p className="mt-1 text-sm text-red-500">{formErrors.resume}</p>
         )}
       </div>
 

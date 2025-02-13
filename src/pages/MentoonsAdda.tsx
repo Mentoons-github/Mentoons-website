@@ -4,7 +4,7 @@ import MentoonsAddaRightSidebar from "@/components/MentoonsAdda/MentoonsAddaRigh
 
 const MentoonsAdda = () => {
   return (
-    <div className=" relative border border-red-500 h-screen flex  "> 
+    <div className=" relative border border-red-500 h-screen flex  ">
       <MentoonsAddaLeftSidebar />
       <MentoonsAddaMainContent />
       <MentoonsAddaRightSidebar />

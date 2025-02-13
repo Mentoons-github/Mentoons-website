@@ -50,7 +50,7 @@ const Workshops = () => {
   ];
 
   const [selectedCamp, setSelectedCamp] = useState<CampDetails | null>(
-    campDetails[0]
+    campDetails[0],
   );
 
   const handleCampClick = (id: number) => {
@@ -68,7 +68,7 @@ const Workshops = () => {
       <div className="h-[3rem]"></div>
       <div
         className="h-[10rem] w-[20rem] absolute right-0 top-28 hidden lg:block transition-all duration-500"
-        style={{ opacity: selectedCamp ? 1 : 0 }} 
+        style={{ opacity: selectedCamp ? 1 : 0 }}
       >
         <img
           src={selectedCamp?.CornerImgUrl}

@@ -16,9 +16,9 @@ import { useAuthHook } from "@/hooks/useAuth";
 const ComicsPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {isLoggedIn} = useAuthHook()
+  const { isLoggedIn } = useAuthHook();
   const { comics, audioComics, selectedFilter } = useSelector(
-    (store: RootState) => store.comics
+    (store: RootState) => store.comics,
   );
   const comicsData = [...comics, ...audioComics];
   const selectedFilterVariable = selectedFilter;
@@ -128,9 +128,16 @@ const ComicsPage: React.FC = () => {
                         className="text-end flex items-center justify-end gap-2 group-hover:text-red-500 group-hover:underline text-xl cursor-pointer"
                       >
                         Play Sample{" "}
-                        <FaCirclePlay className="text-2xl text-red-700 group-hover:text-500" onClick={() =>
-                          isLoggedIn ? navigate(`/mentoons-comics/audio-comics/${item.name}`) : navigate('/sign-in')
-                        }/>
+                        <FaCirclePlay
+                          className="text-2xl text-red-700 group-hover:text-500"
+                          onClick={() =>
+                            isLoggedIn
+                              ? navigate(
+                                  `/mentoons-comics/audio-comics/${item.name}`,
+                                )
+                              : navigate("/sign-in")
+                          }
+                        />
                       </div>
                       <div
                         onClick={(e) => {

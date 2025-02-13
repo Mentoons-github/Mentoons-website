@@ -55,14 +55,14 @@ export const getAllProducts = createAsyncThunk(
               filter: { ageFilter: val.filtercategory },
             }),
           },
-        }
+        },
       );
       console.log("Response", response.data.data.allProduct);
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch all the product");
     }
-  }
+  },
 );
 
 const cardProductSlice = createSlice({

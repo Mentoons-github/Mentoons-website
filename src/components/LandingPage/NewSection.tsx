@@ -8,7 +8,7 @@ const NewSection = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("6-12");
   const filteredPodcasts = PODCAST_DATA.filter(
-    (podcast) => podcast.category === selectedCategory
+    (podcast) => podcast.category === selectedCategory,
   );
   const [selectedPodcast, setSelectedPodcast] = useState(filteredPodcasts[0]);
 

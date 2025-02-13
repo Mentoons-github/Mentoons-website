@@ -1,18 +1,18 @@
-import { Player } from '@lottiefiles/react-lottie-player';
-import React from 'react';
+import { Player } from "@lottiefiles/react-lottie-player";
+import React from "react";
 
-type animateData={
-    animationData:object;
-}
+type animateData = {
+  animationData: object;
+};
 
-const AnimatedArtwork: React.FC<animateData> = ({animationData}) => {
+const AnimatedArtwork: React.FC<animateData> = ({ animationData }) => {
   return (
-    <div className='w-12 h-12'>
+    <div className="w-12 h-12">
       <Player
         autoplay
         loop
         src={animationData}
-        style={{ height: '20rem', width: '20rem',position:'static' }}
+        style={{ height: "20rem", width: "20rem", position: "static" }}
       />
     </div>
   );

@@ -53,12 +53,12 @@ const WorkshopsPage = () => {
             activeCategory === "6-12"
               ? "bg-[#ffe5c8]"
               : activeCategory === "13-19"
-              ? "bg-[#ffe899]"
-              : activeCategory === "20+"
-              ? "bg-[#FDF7EE]"
-              : activeCategory === "Parents"
-              ? "bg-[#FFEBC3]"
-              : null
+                ? "bg-[#ffe899]"
+                : activeCategory === "20+"
+                  ? "bg-[#FDF7EE]"
+                  : activeCategory === "Parents"
+                    ? "bg-[#FFEBC3]"
+                    : null
           }`}
         >
           <div
@@ -555,7 +555,7 @@ export const WorkshopPage4 = () => {
       setSelectedFeature([]);
     } else {
       const updatedFeature = WORKSHOP_FEATURES.map(
-        (feature) => feature.heading
+        (feature) => feature.heading,
       );
       setSelectedFeature(updatedFeature);
     }
@@ -638,8 +638,8 @@ export const WorkshopPage4 = () => {
                     {selectedFeature.length === 0
                       ? "Select All Modules"
                       : selectedFeature.length === WORKSHOP_FEATURES.length
-                      ? "Deselect All Modules"
-                      : "Select More Modules"}
+                        ? "Deselect All Modules"
+                        : "Select More Modules"}
                   </button>
                 </div>
               </div>

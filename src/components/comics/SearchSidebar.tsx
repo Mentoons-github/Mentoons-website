@@ -28,7 +28,7 @@ const SearchSidebar: React.FC = () => {
     show: false,
   });
   const [searchedComics, setSearchedComics] = useState<(AudioComic | Comic)[]>(
-    []
+    [],
   );
   const handleFilterComics = () => {
     const items = comicsData?.filter((item) => {

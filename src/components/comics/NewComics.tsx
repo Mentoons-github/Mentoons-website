@@ -83,7 +83,7 @@ const NewComics: React.FC = () => {
                           <TooltipTrigger>
                             <div
                               // onClick={() =>
-                                
+
                               //   addToWishlist(item.thumbnail, item.type)
                               // }
                               onClick={handleComingSoon}

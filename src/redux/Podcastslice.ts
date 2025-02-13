@@ -23,7 +23,7 @@ export const getAllPodcast = createAsyncThunk(
     } catch (error) {
       throw new Error("Failed to fetch all podcasts");
     }
-  }
+  },
 );
 
 export const getPodcast = createAsyncThunk(
@@ -35,17 +35,20 @@ export const getPodcast = createAsyncThunk(
     } catch (error) {
       throw new Error("Failed to fetch the podcast");
     }
-  }
+  },
 );
 
-export const createYourWonPodcast = createAsyncThunk("podcast/createYourWonPodcast", async (data: IPODCAST) => {
-  try {
-    const response = await axiosInstance.post("/podcast/create", data);
-    return response.data;
-  } catch (error) {
-    throw new Error("Failed to create your podcast");
-  }
-});
+export const createYourWonPodcast = createAsyncThunk(
+  "podcast/createYourWonPodcast",
+  async (data: IPODCAST) => {
+    try {
+      const response = await axiosInstance.post("/podcast/create", data);
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to create your podcast");
+    }
+  },
+);
 
 //Todo: create your won podcast form;
 
@@ -84,20 +87,20 @@ const podcastSlice = createSlice({
       state.loading = false;
       state.error = action.error.message || "Something went wrong!";
     });
-  builder.addCase(createYourWonPodcast.pending, (state) => {
-    state.loading = true;
-    state.error = null;
-    state.success = false;
-  });
-  builder.addCase(createYourWonPodcast.fulfilled, (state, action) => {
-    state.loading = false;
-    state.success = true;
-    state.podcasts = action.payload?.data?.data;
-  });
-  builder.addCase(createYourWonPodcast.rejected, (state, action) => {
-    state.loading = false;
-    state.error = action.error.message || "Something went wrong!";
-  });
+    builder.addCase(createYourWonPodcast.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.success = false;
+    });
+    builder.addCase(createYourWonPodcast.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.podcasts = action.payload?.data?.data;
+    });
+    builder.addCase(createYourWonPodcast.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "Something went wrong!";
+    });
   },
 });
 

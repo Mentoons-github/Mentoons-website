@@ -49,7 +49,7 @@ const PaymentForm = () => {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-        }
+        },
       );
 
       // Assuming the response contains the HTML string for the form

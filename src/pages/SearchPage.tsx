@@ -23,7 +23,7 @@ export const SearchPage: React.FC = () => {
     show: false,
   });
   const [searchedComics, setSearchedComics] = useState<(AudioComic | Comic)[]>(
-    []
+    [],
   );
   const handleFilterComics = (value: string) => {
     const items = comicsData?.filter((item) => {

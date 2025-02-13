@@ -34,10 +34,10 @@ const ComicsSection: React.FC = () => {
   const navigate = useNavigate();
   const [isActiveCategory, setIsActiveCategory] = React.useState("6-12");
   const [selectedTopic, setSelectedTopic] = React.useState(
-    "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/where-it-all-begin.mp4"
+    "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/where-it-all-begin.mp4",
   );
   const plugin = React.useRef(Autoplay({ delay: 2000 }));
-  
+
   const handleSelectedCategroy = (category: string) => {
     setIsActiveCategory(category);
   };
@@ -71,7 +71,7 @@ const ComicsSection: React.FC = () => {
               src={AirplaneBg}
               alt="airplane image"
             />
-            
+
             <motion.img
               initial={{ x: -300 }}
               whileInView={{ x: 0 }}
@@ -296,7 +296,7 @@ const ComicsSection: React.FC = () => {
                     {isActiveCategory}
                   </h2>
                   {PODCAST_CATEGORY.filter(
-                    (item) => item.categroy === isActiveCategory
+                    (item) => item.categroy === isActiveCategory,
                   ).map((item) => (
                     <div
                       key={item.categroy}
@@ -352,7 +352,7 @@ const ComicsSection: React.FC = () => {
                             className="relative"
                             onClick={() =>
                               handleSelectedCategroy(
-                                PODCAST_CATEGORY[0]?.categroy
+                                PODCAST_CATEGORY[0]?.categroy,
                               )
                             }
                           >
@@ -371,7 +371,7 @@ const ComicsSection: React.FC = () => {
                             className="relative  pr-1"
                             onClick={() =>
                               handleSelectedCategroy(
-                                PODCAST_CATEGORY[1]?.categroy
+                                PODCAST_CATEGORY[1]?.categroy,
                               )
                             }
                           >
@@ -401,7 +401,7 @@ const ComicsSection: React.FC = () => {
                           className="relative md:pl-5"
                           onClick={() =>
                             handleSelectedCategroy(
-                              PODCAST_CATEGORY[2]?.categroy
+                              PODCAST_CATEGORY[2]?.categroy,
                             )
                           }
                         >

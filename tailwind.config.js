@@ -10,14 +10,14 @@ module.exports = {
   prefix: "",
   theme: {
     container: {
-    //   center: true,
-    //   padding: {
-    //     DEFAULT: "1rem",
-    //     sm: "1.5rem",
-    //     md: "3rem",
-    //     lg: "5rem",
-    //     xl: "7.5rem",
-    //   },
+      //   center: true,
+      //   padding: {
+      //     DEFAULT: "1rem",
+      //     sm: "1.5rem",
+      //     md: "3rem",
+      //     lg: "5rem",
+      //     xl: "7.5rem",
+      //   },
     },
     screens: {
       xxs: "300px",
@@ -42,7 +42,7 @@ module.exports = {
         "mt-pink": "#eb4b7b",
         "mt-yellow": "#ffbc05",
         "mt-orange": "#f96A00",
-        "mt-teal":"#0cc5bd",
+        "mt-teal": "#0cc5bd",
         mustard: "#ec9600",
         "light-yellow": "#fdfcdc",
         border: "hsl(var(--border))",
@@ -96,7 +96,7 @@ module.exports = {
         "custom-complex":
           "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
       },
-      
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -115,34 +115,32 @@ module.exports = {
           to: { height: "0" },
         },
         float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-20px)' },
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { transform: "translateY(20px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        'float': 'float 6s ease-in-out infinite',
-        'float-delayed': 'float 6s ease-in-out 3s infinite',
-        'float-reverse': 'float 7s ease-in-out infinite reverse',
-        'float-slow': 'float 8s ease-in-out infinite',
-        'spin-slow': 'spin 8s linear infinite',
-        'bounce-slow': 'bounce 3s infinite',
+        float: "float 6s ease-in-out infinite",
+        "float-delayed": "float 6s ease-in-out 3s infinite",
+        "float-reverse": "float 7s ease-in-out infinite reverse",
+        "float-slow": "float 8s ease-in-out infinite",
+        "spin-slow": "spin 8s linear infinite",
+        "bounce-slow": "bounce 3s infinite",
       },
       animations: {
-        'fade-in': 'fadeIn 0.3s ease-out',
-        'slide-up': 'slideUp 0.4s ease-out'
+        "fade-in": "fadeIn 0.3s ease-out",
+        "slide-up": "slideUp 0.4s ease-out",
       },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' }
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' }
-        }
-      }
     },
   },
   plugins: [require("tailwindcss-animate")],

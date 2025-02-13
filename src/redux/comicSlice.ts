@@ -54,7 +54,7 @@ export const comicsSlice = createSlice({
       const currComic = action.payload;
       console.log(currComic);
       const isPresent = state.cart.find(
-        (item) => item.thumbnail === currComic.thumbnail
+        (item) => item.thumbnail === currComic.thumbnail,
       );
 
       if (!isPresent) {
@@ -90,7 +90,7 @@ export const comicsSlice = createSlice({
     },
     updateComicQuantityReducer: (
       state,
-      action: PayloadAction<{ image: string; quantity: number }>
+      action: PayloadAction<{ image: string; quantity: number }>,
     ) => {
       const { image, quantity } = action.payload;
       const item = state.cart.find((item) => {
@@ -106,7 +106,7 @@ export const comicsSlice = createSlice({
     },
     updateCurrentHoverComicReducer: (
       state,
-      action: PayloadAction<AudioComic | Comic | null>
+      action: PayloadAction<AudioComic | Comic | null>,
     ) => {
       state.currentHoverComic = action.payload;
     },

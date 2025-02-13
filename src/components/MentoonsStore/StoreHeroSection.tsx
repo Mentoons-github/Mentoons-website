@@ -81,7 +81,7 @@ const StoreHeroSection = () => {
           getAllProducts({
             search: searchTerm,
             filtercategory: filterCategory === "all" ? "" : filterCategory,
-          })
+          }),
         );
         const data = response.payload?.data;
         if (data) {
@@ -105,7 +105,7 @@ const StoreHeroSection = () => {
     <>
       {isModalOpen && <ComingSoonModal setIsModalOpen={setIsModalOpen} />}
       <div>
-        <div className="bg-[linear-gradient(360deg,_#42A0CE_0%,_#034E73_100%)] h-full">
+        <div className=" bg-gradient-to-b from-primary/70 to-mt-orange/80 h-full">
           <div className="flex flex-col md:flex-row items-center justify-between p-4 md:p-10">
             <div className="flex flex-col items-center md:items-start space-y-6 md:space-y-10 w-full md:w-1/2 text-center md:text-left pl-0 lg:pl-16">
               <h1 className="text-white font-bold text-4xl sm:text-6xl md:text-[82px] pt-12 lg:pt-0">
@@ -185,7 +185,7 @@ const StoreHeroSection = () => {
           </div>
         </div>
         <div
-          className="bg-[linear-gradient(358.67deg,_#CCFF96_36.53%,_#419ECC_100.68%)] min-h-screen"
+          className="min-h-screen bg-gradient-to-b from-mt-orange/80 to-primary/70"
           ref={productsRef}
         >
           <div className="w-[90%]  mx-auto ">
@@ -247,7 +247,7 @@ const StoreHeroSection = () => {
                             >
                               {item !== "all" ? `${item} years` : item}
                             </div>
-                          )
+                          ),
                         )}
                       </motion.div>
                     )}

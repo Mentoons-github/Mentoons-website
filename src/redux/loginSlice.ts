@@ -50,7 +50,7 @@ export const signup = createAsyncThunk<
       Endpoints.SIGNUP,
       {
         phoneNumber,
-      }
+      },
     );
     if (response.data.success) {
       return response.data;
@@ -83,7 +83,7 @@ export const verifyOTP = createAsyncThunk<
       {
         otp,
         phoneNumber,
-      }
+      },
     );
     if (response.data.success) {
       return response.data;
@@ -139,7 +139,7 @@ export const verifyLoginOTP = createAsyncThunk<
       {
         otp,
         phoneNumber,
-      }
+      },
     );
     if (response.data.success) {
       return response.data;
@@ -219,7 +219,7 @@ const authSlice = createSlice({
           localStorage.setItem("token", action.payload.data.accessToken);
           localStorage.setItem(
             "phoneNumber",
-            action.payload.data.result.phoneNumber
+            action.payload.data.result.phoneNumber,
           );
         }
       })

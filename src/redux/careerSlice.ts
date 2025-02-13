@@ -26,7 +26,7 @@ export const getOpenPositions = createAsyncThunk(
     } catch (error) {
       throw new Error("Failed to fetch open positions");
     }
-  }
+  },
 );
 
 export const applyForJob = createAsyncThunk(
@@ -35,13 +35,13 @@ export const applyForJob = createAsyncThunk(
     try {
       const response = await axiosInstance.post(
         `/career/jobs/apply/${data.jobId}`,
-        data.formData
+        data.formData,
       );
       return response.data;
     } catch (error) {
       throw new Error("Failed to apply for job");
     }
-  }
+  },
 );
 
 const careerSlice = createSlice({

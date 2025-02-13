@@ -29,7 +29,7 @@ const FrequentlyAskeQuestion = () => {
   }, []);
 
   const { openPositions, loading } = useSelector(
-    (state: RootState) => state.career
+    (state: RootState) => state.career,
   );
   if (loading) return <Loader />;
   return (

@@ -22,7 +22,7 @@ const SheetOverlay = React.forwardRef<
   <SheetPrimitive.Overlay
     className={cn(
       "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
+      className,
     )}
     {...props}
     ref={ref}
@@ -46,7 +46,7 @@ const sheetVariants = cva(
     defaultVariants: {
       side: "right",
     },
-  }
+  },
 );
 
 interface SheetContentProps
@@ -66,19 +66,19 @@ const SheetContent = React.forwardRef<
     >
       {children}
       <SheetPrimitive.Close
-        className='absolute flex items-center justify-between w-full top-0 left-0 rounded-sm  ring-offset-background transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-secondary'
-        id='Comic'
+        className="absolute flex items-center justify-between w-full top-0 left-0 rounded-sm  ring-offset-background transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-secondary"
+        id="Comic"
       >
-        <div className='relative flex items-center justify-center  w-full  opacity-1 '>
+        <div className="relative flex items-center justify-center  w-full  opacity-1 ">
           <img
-            src='/assets/images/mentoons-logo.png'
-            alt=''
-            className='w-48 pt-3'
+            src="/assets/images/mentoons-logo.png"
+            alt=""
+            className="w-48 pt-3"
           />
-          <X className=' absolute top-2 right-2  ' />
+          <X className=" absolute top-2 right-2  " />
         </div>
 
-        <span className='sr-only'>Close</span>
+        <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
     </SheetPrimitive.Content>
   </SheetPortal>
@@ -92,7 +92,7 @@ const SheetHeader = ({
   <div
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
-      className
+      className,
     )}
     {...props}
   />
@@ -106,7 +106,7 @@ const SheetFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
+      className,
     )}
     {...props}
   />

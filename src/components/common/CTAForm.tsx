@@ -29,7 +29,7 @@ const CTAForm: React.FC = () => {
         import.meta.env.VITE_EMAIL_JS_SERVICE_ID,
         import.meta.env.VITE_EMAIL_JS_TEMPLATE_ID,
         values,
-        import.meta.env.VITE_EMAIL_JS_USER_ID
+        import.meta.env.VITE_EMAIL_JS_USER_ID,
       )
       .then((result) => {
         console.log(result.text);

@@ -15,11 +15,13 @@ export const useDailyAccess = () => {
 
     if (accessData.timeSpentToday >= 30) {
       setIsRestricted(true);
-      return; 
+      return;
     }
 
     const intervalId = setInterval(() => {
-      let currentData = JSON.parse(localStorage.getItem("accessData") || "null");
+      let currentData = JSON.parse(
+        localStorage.getItem("accessData") || "null",
+      );
       console.log("Current time spent:", currentData?.timeSpentToday);
 
       if (currentData?.timeSpentToday >= 30) {
@@ -29,12 +31,12 @@ export const useDailyAccess = () => {
         const updatedTime = (currentData?.timeSpentToday || 0) + 1;
         const updatedData = {
           startDate: today,
-          timeSpentToday: updatedTime
+          timeSpentToday: updatedTime,
         };
         localStorage.setItem("accessData", JSON.stringify(updatedData));
         console.log("Updated time:", updatedTime);
       }
-    }, 60000); 
+    }, 60000);
 
     return () => clearInterval(intervalId);
   }, []);

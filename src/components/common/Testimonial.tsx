@@ -7,7 +7,7 @@ const Testimonial = () => {
   return (
     <div
       id="team"
-      className="container flex flex-col bg-mt-orange text-white py-10 space-y-7"
+      className=" flex flex-col bg-mt-orange text-white py-10 space-y-7"
     >
       <div className="py-8 space-y-12">
         <div className="text-start space-y-4">
@@ -16,7 +16,7 @@ const Testimonial = () => {
             about Metnoons
           </div>
         </div>
-        <div className=" ">
+        <div className="w-[80%] mx-auto ">
           <Swiper
             // install Swiper modules
             modules={[Navigation, Pagination, A11y, Autoplay]}
