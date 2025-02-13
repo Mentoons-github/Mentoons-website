@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import Loader from "../../common/Loader";
-import FAQCard from "./FAQCard";
+// import FAQCard from "./FAQCard";
 
 const FrequentlyAskeQuestion = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,18 +29,20 @@ const FrequentlyAskeQuestion = () => {
   }, []);
 
   const { openPositions, loading } = useSelector(
-    (state: RootState) => state.career,
+    (state: RootState) => state.career
   );
   if (loading) return <Loader />;
   return (
-    <section className="flex flex-col items-center p-4 transition-all duration-300 py-8">
-      {/* <h1 className='text-4xl font-semibold pb-8 rubik-bubbles-regular text-dark-gray  text-center'>
+    <section className="flex flex-col items-center p-4 py-8 transition-all duration-300">
+      {/* <h1 className='pb-8 text-4xl font-semibold text-center rubik-bubbles-regular text-dark-gray'>
         Frequently Ask Question
       </h1> */}
       <div className="p-1 flex flex-col gap-4 md:w-[80%] lg:w-[65%]">
         {Array.isArray(openPositions) && openPositions.length > 0 ? (
           openPositions.map((position) => (
-            <FAQCard key={position._id} position={position} />
+            // <FAQCard key={position._id} position={position} />
+            // //todo:fix this
+            <h1>{position.jobTitle}</h1>
           ))
         ) : (
           <p className="text-2xl font-bold text-center">

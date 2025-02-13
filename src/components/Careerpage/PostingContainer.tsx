@@ -39,13 +39,13 @@ const PostingContainer = () => {
       ))}
 
       {isModalOpen && selectedPosition && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           {isFormOpen ? (
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg p-14 relative">
               <div className="absolute top-4 right-4 z-10 hover:scale-110 transition-transform bg-gradient-to-b from-[#60C6E6] to-[#3D8196] max-w-fit">
                 <FaTimes
                   onClick={() => setIsFormOpen(false)}
-                  className="text-white text-xl md:text-2xl lg:text-3xl cursor-pointer "
+                  className="text-xl text-white cursor-pointer md:text-2xl lg:text-3xl "
                 />
               </div>
               <div className="flex flex-col gap-4">
@@ -54,11 +54,11 @@ const PostingContainer = () => {
                     <img
                       src="/assets/Career/form-icon.png"
                       alt="form icon"
-                      className="w-full h-full object-contain"
+                      className="object-contain w-full h-full"
                     />
                   </figure>
                   <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black">
+                    <h1 className="text-2xl font-bold text-black md:text-3xl lg:text-4xl">
                       {selectedPosition.jobTitle}
                     </h1>
                     <p className="text-sm md:text-base lg:text-lg text-black/50">
@@ -76,42 +76,42 @@ const PostingContainer = () => {
             <div className="bg-[url('/assets/Career/posting-bg.png')] bg-cover bg-center w-full max-w-4xl max-h-[90vh] rounded-sm relative">
               <IoChevronBack
                 onClick={() => setIsModalOpen(false)}
-                className="text-white text-2xl md:text-3xl lg:text-4xl cursor-pointer absolute top-4 left-4 z-10 hover:scale-110 transition-transform"
+                className="absolute z-10 text-2xl text-white transition-transform cursor-pointer md:text-3xl lg:text-4xl top-4 left-4 hover:scale-110"
               />
 
               <div className="p-6 md:p-12 lg:p-16 overflow-y-auto max-h-[90vh]">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+                <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
                   {/* Content Column */}
                   <div className="flex-1">
                     <div className="text-center md:text-left">
-                      <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-white">
+                      <h1 className="text-xl font-bold text-white md:text-3xl lg:text-4xl">
                         {selectedPosition.jobTitle}
                       </h1>
-                      <div className="flex flex-wrap gap-2 md:gap-4 mt-3 justify-center md:justify-start">
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-white text-xs md:text-sm">
+                      <div className="flex flex-wrap justify-center gap-2 mt-3 md:gap-4 md:justify-start">
+                        <span className="px-3 py-1 text-xs text-white rounded-full bg-white/20 md:text-sm">
                           {selectedPosition.jobType}
                         </span>
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-white text-xs md:text-sm">
+                        <span className="px-3 py-1 text-xs text-white rounded-full bg-white/20 md:text-sm">
                           {selectedPosition.location}
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-white mt-6">
-                      <h2 className="text-base md:text-lg lg:text-xl font-bold">
+                    <div className="mt-6 text-white">
+                      <h2 className="text-base font-bold md:text-lg lg:text-xl">
                         Description
                       </h2>
-                      <p className="text-sm md:text-base lg:text-lg mt-2">
+                      <p className="mt-2 text-sm md:text-base lg:text-lg">
                         {selectedPosition.jobDescription}
                       </p>
                     </div>
 
-                    <div className="text-white mt-6">
-                      <h2 className="text-base md:text-lg lg:text-xl font-bold">
+                    <div className="mt-6 text-white">
+                      <h2 className="text-base font-bold md:text-lg lg:text-xl">
                         Required Skills
                       </h2>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {selectedPosition.skillsRequired.map((skill, index) => (
+                        {selectedPosition.skillsRequired.map((skill:string, index:number) => (
                           <span
                             key={index}
                             className="bg-white/10 px-3 py-1.5 rounded-lg text-xs md:text-sm"
@@ -122,7 +122,7 @@ const PostingContainer = () => {
                       </div>
                     </div>
                     <Button
-                      className="w-full mt-6 bg-white text-black hover:bg-white/80"
+                      className="w-full mt-6 text-black bg-white hover:bg-white/80"
                       onClick={async () => {
                         const token = await getToken();
                         if (!token) {

@@ -1,10 +1,16 @@
 import axiosInstance from "@/api/axios";
-import {
-  HiringFormData,
-  TPOSITION,
-} from "@/components/shared/FAQSection/FAQCard";
+import { HiringFormData } from "@/components/shared/FAQSection/FAQCard";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+export type TPOSITION = {
+  _id: string;
+  jobTitle: string;
+  jobDescription: string;
+  thumbnail: string;
+  skillsRequired: string[];
+  jobType: string;
+  location: string;
+};
 const initialState: {
   loading: boolean;
   error: string | null;
@@ -26,7 +32,7 @@ export const getOpenPositions = createAsyncThunk(
     } catch (error) {
       throw new Error("Failed to fetch open positions");
     }
-  },
+  }
 );
 
 export const applyForJob = createAsyncThunk(
@@ -35,13 +41,13 @@ export const applyForJob = createAsyncThunk(
     try {
       const response = await axiosInstance.post(
         `/career/jobs/apply/${data.jobId}`,
-        data.formData,
+        data.formData
       );
       return response.data;
     } catch (error) {
       throw new Error("Failed to apply for job");
     }
-  },
+  }
 );
 
 const careerSlice = createSlice({
