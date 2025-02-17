@@ -1,7 +1,10 @@
-import StoreHeroSection from "@/components/MentoonsStore/StoreHeroSection";
+import Store from './Store';
 
 const MentoonsStore = () => {
-  return <StoreHeroSection />;
+  return (
+    // <StoreHeroSection />
+    <Store />
+  );
 };
 
 export default MentoonsStore;

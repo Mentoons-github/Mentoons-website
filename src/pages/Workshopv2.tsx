@@ -342,6 +342,7 @@ const Workshopv2 = () => {
                       key={faq.id}
                       faq={faq}
                       isExpanded={expandedIndex === index}
+                      color={workshop.registerFormbgColor}
                       onClick={() =>
                         setExpandedIndex(index === expandedIndex ? -1 : index)
                       }

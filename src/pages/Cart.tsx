@@ -103,6 +103,7 @@ const Cart: React.FC = () => {
               {cart.items && cart.items.length > 0 ? (
                 cart.items.map((item) => {
                   // Ensure product data exists before rendering
+                  console.log("Item", item);
                   if (item.productId && item.productId._id) {
                     return (
                       <CartItemCard
@@ -112,7 +113,7 @@ const Cart: React.FC = () => {
                           productId: {
                             ...item.productId,
                             productImages:
-                              item?.productId?.productImage[0].imageSrc || "", // Handle missing productImages
+                              item?.productId?.productImage[0].imageSrc || "", // Changed productImages to productImage
                           },
                         }}
                       />

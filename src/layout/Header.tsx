@@ -71,13 +71,13 @@ const Header = () => {
 
   return (
     <div
-      className={`h-16 bg-primary border-b-[.5px] border-gray-200 fixed top-0 w-full z-[999] transition-transform duration-300 ${
+      className={`h-16 bg-primary border-b-[.5px] border-gray-200 shadow-2xl fixed top-0 w-full z-[999] transition-transform duration-300 ${
         isVisible || lastScrollY < 64 ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="flex items-center justify-between px-4 h-full  ">
+      <div className="flex items-center justify-between h-full px-4 ">
         {/* Left Section - Hidden on mobile */}
-        <div className=" hidden lg:flex items-center space-x-6  flex-1 font-semibold text-black md:hidden  pl-6 ">
+        <div className="items-center flex-1 hidden pl-6 space-x-6 font-semibold text-black lg:flex md:hidden">
           {NAV_LINKS.filter((link) =>
             ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
               link.label,
@@ -85,20 +85,20 @@ const Header = () => {
           ).map((link) => (
             <div key={link.id} className="text-white whitespace-nowrap">
               {link.label === "Date" ? (
-                <span className="bg-white text-primary px-3 py-2 rounded-full whitespace-nowrap ">
+                <span className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap ">
                   {new Date().toDateString()}
                 </span>
               ) : link.label === "Call us" ? (
                 <a
                   href="tel:+91 90360 33300"
-                  className="bg-white text-primary px-3 py-2 rounded-full whitespace-nowrap "
+                  className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap "
                 >
                   Call us: +91 90360 33300
                 </a>
               ) : (
                 <NavLink
                   to={link.url}
-                  className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
+                  className="px-3 py-2 text-white transition-all duration-200 border rounded-full hover:text-gray-200 border-primary hover:border-white/20 hover:bg-white/10"
                 >
                   {link.label}{" "}
                 </NavLink>
@@ -109,20 +109,20 @@ const Header = () => {
 
         {/* Middle Section - Logo */}
         <div
-          className=" items-center hidden lg:flex"
+          className="items-center hidden lg:flex"
           onClick={() => navigate("/")}
         >
           <img
             src="/assets/images/mentoons-logo.png"
             alt="Company Logo"
-            className="max-h-24 pr-1 pt-4 pb-2 bg-primary rounded-full relative z-50 border-b"
+            className="relative z-50 pt-4 pb-2 pr-1 border-b rounded-full max-h-24 bg-primary"
           />
         </div>
 
         {/* Right Section */}
-        <div className=" hidden lg:flex items-center flex-1 justify-end font-semibold md:hidden ">
+        <div className="items-center justify-end flex-1 hidden font-semibold lg:flex md:hidden">
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center justify-betwee space-x-6 text-white">
+          <div className="items-center hidden space-x-6 text-white md:flex justify-betwee">
             {/* <NavLink
               to="/mentoons-store"
               className="text-white hover:text-gray-200"
@@ -156,7 +156,7 @@ const Header = () => {
                 className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
               >
                 <div className="relative ">
-                  <span className=" absolute -top-3 -right-3 bg-red-600 text-xs px-1 rounded-sm font-medium">
+                  <span className="absolute px-1 text-xs font-medium bg-red-600 rounded-sm -top-3 -right-3">
                     {cart.totalItemCount}
                   </span>
                   <IoCart className="text-2xl font-bold " />
@@ -177,16 +177,16 @@ const Header = () => {
           </div>
         </div>
         {/* Mobile Menu */}
-        <div className=" flex items-center justify-between sm:flex md:flex lg:hidden  w-full ">
+        <div className="flex items-center justify-between w-full sm:flex md:flex lg:hidden">
           <figure className="w-6 h-6">
             <img
               src="/assets/home/home-icn.png"
               alt="home icon"
-              className="h-full w-full object-contain "
+              className="object-contain w-full h-full "
             />
           </figure>
           <div
-            className="flex items-center  lg:hidden"
+            className="flex items-center lg:hidden"
             onClick={() => navigate("/")}
           >
             <img
@@ -197,7 +197,7 @@ const Header = () => {
           </div>
           <div className="w-6 h-6" onClick={handleMenuToggle}>
             {menuOpen ? (
-              <IoClose className="w-full h-full text-white font-semibold" />
+              <IoClose className="w-full h-full font-semibold text-white" />
             ) : (
               <IoMenu className="w-full h-full text-white" />
             )}
@@ -210,7 +210,7 @@ const Header = () => {
                 ).map((link) => (
                   <li
                     key={link.id}
-                    className="py-2 cursor-pointer text-2xl font-semibold text-gray-700"
+                    className="py-2 text-2xl font-semibold text-gray-700 cursor-pointer"
                     onClick={() => {
                       setMenuOpen(false);
                       navigate(link.url);
