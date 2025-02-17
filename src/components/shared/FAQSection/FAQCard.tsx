@@ -19,17 +19,25 @@ export type TWORKSHOPFAQ = {
 const FAQCard = ({
   faq,
   isExpanded,
+  color = "#60C6E6",
   onClick,
 }: {
   faq: TWORKSHOPFAQ;
   isExpanded: boolean;
+  color?: string;
   onClick: () => void;
 }) => {
   return (
     <div
       onClick={onClick}
-      className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer rounded-xl hover:border-primary/50 ${
-        isExpanded ? "border-primary/50" : "border-neutral-200"
+      style={
+        {
+          borderColor: isExpanded ? `${color}80` : "",
+          "--hover-border-color": `${color}80`,
+        } as React.CSSProperties
+      }
+      className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer rounded-xl hover:border-[var(--hover-border-color)] ${
+        isExpanded ? "" : "border-neutral-200"
       }`}
     >
       <div className="flex items-center justify-between w-full p-4 text-neutral-700">
@@ -37,15 +45,24 @@ const FAQCard = ({
           {faq.question}
         </span>
         <span
+          style={
+            {
+              backgroundColor: isExpanded ? `${color}1A` : "",
+              borderColor: isExpanded ? color : "",
+              "--hover-bg-color": `${color}1A`,
+              "--hover-border-color": color,
+            } as React.CSSProperties
+          }
           className={`p-1 rounded-full border-2 flex items-center transition-all duration-300 ease-in-out transform ${
             isExpanded
-              ? "rotate-45 bg-primary/10 border-primary"
-              : "hover:bg-primary/10 hover:border-primary"
+              ? "rotate-45"
+              : "hover:bg-[var(--hover-bg-color)] hover:border-[var(--hover-border-color)]"
           }`}
         >
           <IoAdd
+            style={{ color: isExpanded ? color : "" }}
             className={`text-xl transition-colors duration-300 ${
-              isExpanded ? "text-primary" : "text-neutral-800"
+              isExpanded ? "" : "text-neutral-800"
             }`}
           />
         </span>
@@ -58,7 +75,7 @@ const FAQCard = ({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="p-4 pt-0 text-neutral-600 ">{faq.answer}</div>
+          <div className="p-4 pt-0 text-neutral-600">{faq.answer}</div>
         </div>
       </div>
     </div>

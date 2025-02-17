@@ -24,6 +24,8 @@ import Membership from "./pages/Membership";
 import MentoonsAdda from "./pages/MentoonsAdda";
 import MentoonsStore from "./pages/MentoonsStore";
 import PolicyPage from "./pages/PolicyPage";
+import ProductCategory from "./pages/ProductCategory";
+import ProductDetails from "./pages/ProductDetails";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -235,6 +237,22 @@ const routes = [
     ),
   },
   {
+    path: "/mentoons-store/:category",
+    element: (
+      <MainLayout>
+        <ProductCategory />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/mentoons-store/:category/:productId",
+    element: (
+      <MainLayout>
+        <ProductDetails />
+      </MainLayout>
+    ),
+  },
+  {
     path: "/mentoons-store/product/:productId",
     element: (
       <MainLayout>
@@ -331,11 +349,11 @@ const routes = [
 const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(true);
   const hoverComicCard = useSelector(
-    (store: RootState) => store.comics.currentHoverComic,
+    (store: RootState) => store.comics.currentHoverComic
   );
 
   const userLoggedIn = useSelector(
-    (store: RootState) => store.user.userLoggedIn,
+    (store: RootState) => store.user.userLoggedIn
   );
 
   console.log(showPopup + " " + userLoggedIn);
