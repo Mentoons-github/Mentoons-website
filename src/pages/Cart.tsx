@@ -113,7 +113,7 @@ const Cart: React.FC = () => {
                           productId: {
                             ...item.productId,
                             productImages:
-                              item?.productId?.productImage[0].imageSrc || "", // Changed productImages to productImage
+                              item?.productId?.productImages[0].imageSrc || "", // Changed productImages to productImage
                           },
                         }}
                       />

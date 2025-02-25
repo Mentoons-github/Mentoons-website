@@ -1,12 +1,12 @@
 import { useAuth } from "@clerk/clerk-react";
 // import axios from "axios";
 import React from "react";
-import { useDispatch } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { Toaster } from "sonner";
 import Router from "./Routes";
 import ScrollToTop from "./components/comics/ScrollToTop";
 import { getCart } from "./redux/cartSlice";
-import { AppDispatch } from "./redux/store";
+import { AppDispatch, store } from "./redux/store";
 
 // const AgeCategory = {
 //   CHILD: "6-12",
@@ -80,11 +80,11 @@ const App = () => {
     // createProduct();
   }, [dispatch, getToken, userId]);
   return (
-    <>
+    <Provider store={store}>
       <ScrollToTop />
-      <Toaster position="top-right" closeButton />
       <Router />
-    </>
+      <Toaster position="top-right" closeButton />
+    </Provider>
   );
 };
 
