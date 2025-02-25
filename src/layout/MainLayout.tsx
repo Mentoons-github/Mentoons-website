@@ -1,7 +1,6 @@
 import Footer from "@/components/comics/Footer";
-import Breadcrumbs from "@/components/common/BreadCrumbs";
 import { ReactNode } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 
@@ -17,15 +16,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <>
-      <div className="relative h-full w-full">
+      <div className="relative w-full h-full">
         <div className="absolute top-[5rem] left-[0.5rem] z-50 lg:hidden">
           <button onClick={() => navigate(-1)} className="flex items-center">
-            <FaArrowLeft className="text-xl mr-3" />
+            <FaArrowLeft className="mr-3 text-xl" />
           </button>
         </div>
-        <div className="absolute top-24 left-10 z-[99] hidden lg:block">
-          <Breadcrumbs />
+        <div className="absolute top-[5rem] right-[0.5rem] z-50 lg:hidden">
+          <button onClick={() => navigate(1)} className="flex items-center">
+            <FaArrowRight className="mr-3 text-xl" />
+          </button>
         </div>
+        {/* <div className="absolute top-24 left-10 z-[99] hidden lg:block">
+          <Breadcrumbs />
+        </div> */}
         <Header />
 
         <div className="pt-[64px] ">{children}</div>

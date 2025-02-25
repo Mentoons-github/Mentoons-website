@@ -1683,7 +1683,7 @@ export const PRODUCT_DATA = [
   },
   {
     id: "P_02",
-    title: "Story Re-Teller Cards",
+    title: "Story Re-teller Cards",
     description:
       "Help kids to practice their communication skills and grow stronger in their storytelling abilities.",
     age: "6-12",

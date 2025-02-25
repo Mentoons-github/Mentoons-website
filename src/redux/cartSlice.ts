@@ -9,17 +9,17 @@ interface Cart {
         _id: string;
         productTitle: string;
         productSummary: string;
-        productImage: [
+        productImages: [
           {
             imageSrc: string;
-          },
+          }
         ];
         productCategory: string;
       };
       quantity: number;
       stock: "In Stock" | "Out of Stock";
       price: number;
-    },
+    }
   ];
   totalPrice: number;
   totalItemCount: number;
@@ -43,7 +43,7 @@ const initialState: {
           _id: "",
           productTitle: "",
           productSummary: "",
-          productImage: [
+          productImages: [
             {
               imageSrc: "",
             },
@@ -72,14 +72,14 @@ export const getCart = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
       console.log("ThunkActionResult", response.data);
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch the Cart");
     }
-  },
+  }
 );
 
 export const addItemCart = createAsyncThunk(
@@ -112,13 +112,13 @@ export const addItemCart = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
       return response.data;
     } catch (error) {
       throw new Error("Failed to add the product to the Cart");
     }
-  },
+  }
 );
 
 export const removeItemFromCart = createAsyncThunk(
@@ -140,13 +140,13 @@ export const removeItemFromCart = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
       return response.data;
     } catch (error) {
       throw new Error("Failed to remove the product from the Cart");
     }
-  },
+  }
 );
 
 export const updateItemQuantity = createAsyncThunk(
@@ -174,13 +174,13 @@ export const updateItemQuantity = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
       return response.data;
     } catch (error) {
       throw new Error("Failed to update the product quantity in the Cart");
     }
-  },
+  }
 );
 
 export const cartSlice = createSlice({

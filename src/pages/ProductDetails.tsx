@@ -95,9 +95,9 @@ const ProductDetails = () => {
     });
   };
   return (
-    <div className="w-[90%] mx-auto my-20 border border-red-500">
+    <div className="w-[90%] mx-auto my-20 ">
       <div
-        className="flex h-[240px] sm:h-[500px] md:h-[600px] p-4 sm:p-8 md:p-12 rounded-2xl border"
+        className="flex h-[240px] sm:h-[500px] md:h-[600px] p-4 sm:p-8 md:p-12 rounded-2xl "
         // style={{ backgroundColor: product.accentColor }}
       >
         <div className="flex flex-col flex-1 pb-3 pl-1">

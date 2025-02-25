@@ -26,6 +26,7 @@ import MentoonsStore from "./pages/MentoonsStore";
 import PolicyPage from "./pages/PolicyPage";
 import ProductCategory from "./pages/ProductCategory";
 import ProductDetails from "./pages/ProductDetails";
+import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -257,6 +258,14 @@ const routes = [
     element: (
       <MainLayout>
         <Product />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/product-management",
+    element: (
+      <MainLayout>
+        <ProductManagement />
       </MainLayout>
     ),
   },
