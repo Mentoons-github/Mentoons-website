@@ -252,7 +252,6 @@ const Store = () => {
   // const handleClick = () => {
   //   setIsExpanded(!isExpanded);
   // };
-  
 
   const handleSelectedCategory = (category: string) => {
     setSelecteCategory(category);

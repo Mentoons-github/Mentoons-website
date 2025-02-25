@@ -6,7 +6,7 @@ import comicsReducer from "./comicSlice";
 import fileUploadReducer from "./fileUploadSlice";
 import authReducer from "./loginSlice";
 import podcastReducer from "./Podcastslice";
-import productsReducer from "./productSlice";
+// import productsReducer from "./productSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
 
@@ -20,7 +20,7 @@ export const store = configureStore<{
   podcast: ReturnType<typeof podcastReducer>;
   cardProduct: ReturnType<typeof cardProductReducer>;
   cart: ReturnType<typeof cartReducer>;
-  products: ReturnType<typeof productsReducer>;
+  // products: ReturnType<typeof productsReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -32,7 +32,7 @@ export const store = configureStore<{
     podcast: podcastReducer,
     cardProduct: cardProductReducer,
     cart: cartReducer,
-    products: productsReducer,
+    // products: productsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
