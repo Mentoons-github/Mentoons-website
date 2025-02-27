@@ -56,16 +56,19 @@ export const fetchProducts = createAsyncThunk<
   const filter = filterParams || state.filter;
 
   try {
-    const response = await axios.get("http://localhost:4000/api/v1/products", {
-      params: {
-        search,
-        sortBy,
-        order,
-        page,
-        limit,
-        ...filter, // Spread filter params into request
-      },
-    });
+    const response = await axios.get(
+      "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+      {
+        params: {
+          search,
+          sortBy,
+          order,
+          page,
+          limit,
+          ...filter, // Spread filter params into request
+        },
+      }
+    );
     console.log("Product Response", response.data.data);
     return { items: response.data.data, total: response.data.total };
   } catch (error: unknown) {
@@ -86,7 +89,7 @@ export const fetchProductById = createAsyncThunk<
 >("products/fetchProductById", async (id, thunkAPI) => {
   try {
     const response = await axios.get(
-      `http://localhost:4000/api/v1/products/${id}`
+      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
     );
     return response.data;
   } catch (error: unknown) {
@@ -145,7 +148,7 @@ export const createProduct = createAsyncThunk<
     }
 
     const response = await axios.post(
-      "http://localhost:4000/api/v1/products",
+      "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
       formData,
       {
         headers: {
@@ -200,7 +203,7 @@ export const updateProduct = createAsyncThunk<
     }
 
     const response = await axios.put(
-      `http://localhost:4000/api/v1/products/${id}`,
+      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`,
       formData,
       {
         headers: {
@@ -226,7 +229,9 @@ export const deleteProduct = createAsyncThunk<
   { rejectValue: string }
 >("products/deleteProduct", async (id, thunkAPI) => {
   try {
-    await axios.delete(`http://localhost:4000/api/v1/products/${id}`);
+    await axios.delete(
+      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
+    );
     return id;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
