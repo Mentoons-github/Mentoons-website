@@ -1674,6 +1674,7 @@ export const PRODUCT_DATA = [
   {
     id: "P_01",
     title: "Conversation Starter Cards",
+    type: "conversation starter cards",
     description:
       "Help kids overcome the fear of express themeseleves and improve their communication skills.",
     age: "6-12",
@@ -1684,6 +1685,7 @@ export const PRODUCT_DATA = [
   {
     id: "P_02",
     title: "Story Re-teller Cards",
+    type: "story re-teller cards",
     description:
       "Help kids to practice their communication skills and grow stronger in their storytelling abilities.",
     age: "6-12",
@@ -1694,6 +1696,7 @@ export const PRODUCT_DATA = [
   {
     id: "P_03",
     title: "Silent Stories",
+    type: "silent stories",
     description:
       "Help kids to improve focus and logical thinking with our engaging silent stories.",
     age: "6-12",
@@ -1704,6 +1707,7 @@ export const PRODUCT_DATA = [
   {
     id: "P_04",
     title: "Conversation Story Cards",
+    type: "conversation story cards",
     description:
       "Help kids overcome the fear of express themeseleves and improve their communication skills.",
     age: "6-12",
@@ -1714,6 +1718,7 @@ export const PRODUCT_DATA = [
   {
     id: "P_05",
     title: "Coloring Book",
+    type: "coloring book",
     description:
       "Spark creativity and imagination with our fun and engaging coloring book.",
     age: "6-12",
