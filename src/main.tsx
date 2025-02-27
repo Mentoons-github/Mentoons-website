@@ -2,11 +2,15 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import { scan } from "react-scan";
 import App from "./App.tsx";
 import "./index.css";
 import { store } from "./redux/store.ts";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+scan({
+  enabled: true,
+});
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }
@@ -45,5 +49,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <App />
       </Provider>
     </BrowserRouter>
-  </ClerkProvider>,
+  </ClerkProvider>
 );

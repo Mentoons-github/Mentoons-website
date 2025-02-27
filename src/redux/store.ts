@@ -1,12 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import cardProductReducer from "./cardProductSlice";
+// import cardProductReducer from "./cardProductSlice";
 import careerReducer from "./careerSlice";
 import cartReducer from "./cartSlice";
 import comicsReducer from "./comicSlice";
 import fileUploadReducer from "./fileUploadSlice";
 import authReducer from "./loginSlice";
 import podcastReducer from "./Podcastslice";
-// import productsReducer from "./productSlice";
+import productsReducer from "./productSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
 
@@ -18,9 +18,9 @@ export const store = configureStore<{
   career: ReturnType<typeof careerReducer>;
   fileUpload: ReturnType<typeof fileUploadReducer>;
   podcast: ReturnType<typeof podcastReducer>;
-  cardProduct: ReturnType<typeof cardProductReducer>;
+  // cardProduct: ReturnType<typeof cardProductReducer>;
   cart: ReturnType<typeof cartReducer>;
-  // products: ReturnType<typeof productsReducer>;
+  products: ReturnType<typeof productsReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -30,9 +30,9 @@ export const store = configureStore<{
     career: careerReducer,
     fileUpload: fileUploadReducer,
     podcast: podcastReducer,
-    cardProduct: cardProductReducer,
+    // cardProduct: cardProductReducer,
     cart: cartReducer,
-    // products: productsReducer,
+    products: productsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

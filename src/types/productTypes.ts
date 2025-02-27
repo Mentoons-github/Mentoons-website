@@ -13,7 +13,7 @@ export enum ProductType {
   WORKSHOP = "workshop",
   ASSESSMENT = "assessment",
   MERCHANDISE = "merchandise",
-  SELF_HELP_CARD = "self_help_card",
+  MENTOONS_CARDS = "mentoons cards",
 }
 
 export interface ISSUES {
@@ -33,18 +33,15 @@ export interface ProductBase {
   type: ProductType;
   tags?: string[];
   rating: number;
-  pruductImages?: [
-    {
-      _id: string;
-      imageSrc: string;
-    }
-  ];
-  productVideos?: [
-    {
-      _id: string;
-      videoSrc: string;
-    }
-  ];
+  accentColor?: string;
+  productImages?: {
+    _id: string;
+    imageUrl: string;
+  }[];
+  productVideos?: {
+    _id: string;
+    videoUrl: string;
+  }[];
   isFeatured?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -54,7 +51,8 @@ export interface ProductBase {
     | PodcastProduct["details"]
     | WorkshopProduct["details"]
     | AssessmentProduct["details"]
-    | MerchandiseProduct["details"];
+    | MerchandiseProduct["details"]
+    | MentoonsCardProduct["details"];
 }
 
 // Discriminator interfaces for specific product types:
@@ -146,42 +144,8 @@ export interface MerchandiseProduct extends ProductBase {
   };
 }
 
-interface ProductImage {
-  id: number;
-  imageSrc: string;
-}
-
-interface ProductVideos {
-  id: number;
-  videoSrc: string;
-}
-interface ProductReviews {
-  id: string;
-  quote: string;
-  author: string;
-}
-
-interface DescriptionItem {
-  _id: string;
-  label: string;
-  descriptionList: [{ _id: string; description: string }];
-}
-
-export interface ProductDetail {
-  minAge: number;
-  maxAge: number;
-  ageFilter: string;
-  rating: string;
-  paperEditionPrice: string;
-  printablePrice: string;
-  productImages: ProductImage[];
-  productVideos: ProductVideos[];
-  productDescription: DescriptionItem[];
-  productReview: ProductReviews[];
-}
-
 export interface MentoonsCardProduct {
-  type: ProductType.SELF_HELP_CARD; // Updated to reflect the self-help card type
+  type: ProductType.MENTOONS_CARDS; // Updated to reflect the self-help card type
   details: {
     cardType:
       | "conversation starter cards"
@@ -189,13 +153,15 @@ export interface MentoonsCardProduct {
       | "silent stories"
       | "conversation story cards"; // Types of self-help cards
     accentColor?: string; // Color theme for the card
-    addressedIssue: {
+    addressedIssues: {
       title: string;
       description: string;
       issueIllustrationUrl: string;
     }[];
-    productDescription: {label: string;
-  descriptionList: [{ _id: string; description: string }]}[];
+    productDescription: {
+      label: string;
+      descriptionList: { _id: string; description: string }[];
+    }[];
   }[];
 }
 

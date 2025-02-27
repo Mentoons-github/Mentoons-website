@@ -1,9 +1,12 @@
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
-import { PRODUCT_DATA, WORKSHOP_FAQ, WORKSHOPS } from "@/constant";
+import { WORKSHOP_FAQ } from "@/constant";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch } from "@/redux/store";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { IoIosCart } from "react-icons/io";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 // import { WORKSHOPS } from "../constant";
 // interface IPRODUCT {
@@ -243,94 +246,301 @@ import { useNavigate } from "react-router-dom";
 //     </div>
 //   );
 // };
+import { useSelector } from "react-redux";
+import { setFilter } from "../redux/productSlice";
+import { RootState } from "../redux/store";
 
 const Store = () => {
   const [selecteCategory, setSelecteCategory] = useState("6-12");
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
+  const [cardType, setCardType] = useState("Conversation Starter Cards");
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const handleCardType = (type: string) => {
+    setCardType(type);
+  };
+
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   // const handleClick = () => {
   //   setIsExpanded(!isExpanded);
   // };
+  const {
+    items: products,
+    loading,
+    error,
+    total,
+    page: currentPage,
+    search,
+    filter,
+  } = useSelector((state: RootState) => state.products);
+
+  console.log("Product", products);
+  console.log("total", total);
+  console.log("page", currentPage);
+  console.log("search", search);
+  console.log("filter", filter);
 
   const handleSelectedCategory = (category: string) => {
     setSelecteCategory(category);
+
+    dispatch(setFilter({ ageCategory: category }));
   };
+  useEffect(() => {
+    const fetchMentoonsCard = async () => {
+      try {
+        dispatch(
+          setFilter({ type: "mentoons cards", ageCategory: selecteCategory })
+        );
+        const cards = await dispatch(fetchProducts() as any);
+        console.log(cards.payload);
+        console.log(cards.payload.itmes);
+      } catch (error: unknown) {
+        console.error(error);
+      }
+    };
+    fetchMentoonsCard();
+  }, [dispatch, selecteCategory]);
+
+  if (loading) {
+    return (
+      <div className="animate-pulse">
+        {/* Hero Skeleton */}
+        <div className="relative bg-gray-200 md:min-h-[600px]">
+          <div className="flex md:min-h-[600px] relative flex-col gap-4 md:gap-6 justify-end items-center py-6 md:py-10">
+            <div className="h-16 bg-gray-300 rounded w-3/4 mb-8"></div>
+            <div className="flex flex-col md:flex-row gap-3 w-full px-4">
+              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
+              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
+              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
+              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
+              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Challenges Section Skeleton */}
+        <div className="flex flex-col p-12 py-16">
+          <div className="h-10 bg-gray-300 rounded w-1/2 mx-auto mb-16"></div>
+          <div className="flex flex-col gap-4 items-center md:flex-row md:justify-around">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="flex flex-col gap-6 items-center">
+                <div className="w-72 h-72 bg-gray-300 rounded-xl"></div>
+                <div className="h-8 bg-gray-300 rounded w-40"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Products Section Skeleton */}
+        <div className="pb-16">
+          <div className="flex gap-4 items-start p-4 md:items-center">
+            <div className="h-8 bg-gray-300 rounded w-64"></div>
+            <div className="h-8 bg-gray-300 rounded-full w-32"></div>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-8 justify-around items-center p-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="flex flex-col w-full md:w-96 h-[500px]"
+              >
+                <div className="bg-gray-300 rounded-lg h-[300px] w-full"></div>
+                <div className="flex justify-between items-center pt-4">
+                  <div className="h-6 bg-gray-300 rounded w-40"></div>
+                  <div className="h-6 bg-gray-300 rounded w-16"></div>
+                </div>
+                <div className="h-4 bg-gray-300 rounded w-full mt-3"></div>
+                <div className="h-4 bg-gray-300 rounded w-3/4 mt-2"></div>
+                <div className="flex gap-1 mt-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <div
+                      key={star}
+                      className="w-8 h-8 bg-gray-300 rounded-full"
+                    ></div>
+                  ))}
+                </div>
+                <div className="h-10 bg-gray-300 rounded w-full mt-auto"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <img
+            src="/assets/error-icon.png"
+            alt="Error"
+            className="w-32 h-32 mb-6 mx-auto opacity-80"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src =
+                "https://img.icons8.com/clouds/100/000000/error.png";
+            }}
+          />
+        </motion.div>
+
+        <motion.h2
+          className="text-3xl font-bold text-gray-800 mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          Oops! Something went wrong
+        </motion.h2>
+
+        <motion.p
+          className="text-lg text-gray-600 mb-8 max-w-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          We couldn't load the products. Error: {error}
+        </motion.p>
+
+        <motion.button
+          onClick={() => navigate("/")}
+          className="px-8 py-3 font-semibold text-white rounded-lg bg-primary hover:bg-primary/90 transition-all duration-200 flex items-center gap-2"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Back to Home
+        </motion.button>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="relative">
+      <div
+        className="relative bg-cover bg-center md:min-h-[600px]"
+        style={{
+          backgroundImage:
+            "url('/assets/productv2/mentoon-store-hero-banner.png')",
+        }}
+      >
         <div className="absolute inset-0 bg-gradient-to-t via-transparent from-neutral-800" />
-        <img
-          src="/assets/productv2/mentoon-store-hero-banner.png"
-          alt=""
-          className="w-full"
-        />
-        <div className="flex absolute inset-0 flex-col gap-6 justify-end items-center py-10">
+        <div className="flex md:min-h-[600px] relative flex-col gap-4 md:gap-6 justify-end items-center py-6 md:py-10">
           <motion.h1
-            className="text-7xl font-bold text-white"
-            initial={{ scale: 0 }}
-            animate={{ scale: [1, 1.1, 1] }}
+            className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-bold text-center px-4 mb-4 text-white"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              textShadow: "0px 2px 4px rgba(0,0,0,0.2)",
+            }}
             transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              repeatType: "reverse",
+              duration: 0.8,
+              ease: "easeOut",
+            }}
+            whileInView={{
+              scale: [1, 1.1, 1],
+              transition: {
+                duration: 1,
+                repeat: Infinity,
+                repeatType: "reverse",
+              },
             }}
           >
             Mentoons Store
           </motion.h1>
-          <div className="flex-col gap-12 justify-end items-center text-2xl font-semibold md:flex md:flex-row">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-6 justify-center items-center text-lg md:text-xl lg:text-2xl font-semibold w-full px-4">
             <button
-              className={`flex items-center justify-start text-yellow-500 px-3 gap-3 w-32 py-[7px] rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 ${
+              className={`flex items-center justify-start text-yellow-500 px-3 gap-2 w-full md:w-32 py-[7px] rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 mb-2 md:mb-0 ${
                 selecteCategory === "6-12" && "ring-4 ring-yellow-400 "
               }`}
               onClick={() => handleSelectedCategory("6-12")}
             >
-              <span className="w-5 h-5 bg-yellow-500 rounded-full" />
+              <span className="w-4 md:w-5 h-4 md:h-5 bg-yellow-500 rounded-full" />
               6-12
             </button>
             <button
-              className={`flex items-center justify-start gap-3 text-rose-600 w-32  px-3 py-[7px] rounded-full bg-red-200 border border-red-500 hover:ring-4 hover:ring-red-500 transition-all duration-200 ${
+              className={`flex items-center justify-start gap-2 text-rose-600 w-full md:w-32 px-3 py-[7px] rounded-full bg-red-200 border border-red-500 hover:ring-4 hover:ring-red-500 transition-all duration-200 mb-2 md:mb-0 ${
                 selecteCategory === "13-19" && "ring-4 ring-red-500 "
               }`}
-              onClick={() => handleSelectedCategory("13-19")}
+              onClick={() => handleSelectedCategory("13-16")}
             >
-              <span className="w-5 h-5 bg-rose-500 rounded-full" />
-              13-19
+              <span className="w-4 md:w-5 h-4 md:h-5 bg-rose-500 rounded-full" />
+              13-16
+            </button>
+            <button
+              className={`flex items-center justify-start gap-2 text-purple-600 w-full md:w-32 px-3 py-[7px] rounded-full bg-purple-200 border border-purple-500 hover:ring-4 hover:ring-purple-500 transition-all duration-200 mb-2 md:mb-0 ${
+                selecteCategory === "17-19" && "ring-4 ring-purple-500 "
+              }`}
+              onClick={() => handleSelectedCategory("17-19")}
+            >
+              <span className="w-4 md:w-5 h-4 md:h-5 bg-purple-500 rounded-full" />
+              17-19
             </button>
 
             <button
-              className={`flex items-center justify-start gap-3 text-blue-500  w-32 px-3 py-[7px]  rounded-full bg-blue-200 border border-blue-500  hover:ring-4 hover:ring-blue-500 transition-all duration-200  ${
+              className={`flex items-center justify-start gap-2 text-blue-500 w-full md:w-32 px-3 py-[7px] rounded-full bg-blue-200 border border-blue-500 hover:ring-4 hover:ring-blue-500 transition-all duration-200 mb-2 md:mb-0 ${
                 selecteCategory === "20+" && "ring-4 ring-blue-500 "
               }`}
               onClick={() => handleSelectedCategory("20+")}
             >
-              <span className="w-5 h-5 bg-blue-500 rounded-full" />
+              <span className="w-4 md:w-5 h-4 md:h-5 bg-blue-500 rounded-full" />
               20+
             </button>
             <button
-              className={`flex items-center justify-start gap-3 text-green-500 w-32 px-3 py-2  rounded-full bg-green-200 border border-green-500  hover:ring-4 hover:ring-green-500 transition-all duration-200  ${
+              className={`flex items-center justify-start gap-2 text-green-500 w-full md:w-32 px-3 py-[7px] rounded-full bg-green-200 border border-green-500 hover:ring-4 hover:ring-green-500 transition-all duration-200 ${
                 selecteCategory === "parent" && "ring-4 ring-green-500 "
               }`}
-              onClick={() => handleSelectedCategory("parent")}
+              onClick={() => handleSelectedCategory("parents")}
             >
-              <span className="w-5 h-5 bg-green-500 rounded-full" />
+              <span className="w-4 md:w-5 h-4 md:h-5 bg-green-500 rounded-full" />
               Parent
             </button>
           </div>
         </div>
-
-        {/* Challenges face by */}
       </div>
+
+      {/* Challenges faced by Parents */}
       <div className="flex flex-col p-12 py-16">
         <h2 className="pb-16 text-4xl font-semibold text-center">
-          Challenges faced by Parents
+          Challenges faced by{" "}
+          {selecteCategory === "6-12"
+            ? "Children"
+            : selecteCategory === "13-16"
+            ? "Teenagers"
+            : selecteCategory === "17-19"
+            ? "Young Adults"
+            : selecteCategory === "20+"
+            ? "Adults"
+            : "Parents"}
         </h2>
         <div className="flex flex-col gap-4 items-center md:flex-row md:justify-around">
-          {WORKSHOPS.filter((workshop) => workshop.category === selecteCategory)
-            .flatMap((workshop) => workshop.addressedIssues)
-            .map((issue) => (
+          {((products[0]?.details as any)?.addressedIssues || []).map(
+            (
+              issue: { id: string | number; title: string; imageUrl: string },
+              index: number
+            ) => (
               <div
-                key={issue.id}
+                key={`${issue.id}_${index}`}
                 className="flex flex-col gap-12 justify-center items-center rounded-xl transition-all duration-200 hover:scale-110"
               >
                 <img
@@ -342,7 +552,8 @@ const Store = () => {
                   {issue.title.toLocaleUpperCase()}
                 </p>
               </div>
-            ))}
+            )
+          )}
         </div>
       </div>
       <div className="flex flex-col items-center pb-12 mx-auto bg-amber-50">
@@ -353,138 +564,230 @@ const Store = () => {
           {isExpanded ? "Collapse All" : "Expand All"}
         </button>
 
-        <div className="flex gap-8 px-24 w-full">
-          {[1, 2, 3].map((index) => (
-            <div
-              key={index}
-              className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer hover:border-[var(--hover-border-color)] w-[90%] mx-auto ${
-                isExpanded ? "" : "border-neutral-200"
-              }`}
-            >
-              <div className="flex items-center justify-between w-full p-4 text-black bg-[#FABB05]">
-                <span className="text-xl font-semibold transition-colors duration-300">
-                  Conversation Starter Cards
-                </span>
-                {/* <span
-                  className={`p-1 rounded-full border-2 flex items-center transition-all duration-300 ease-in-out transform ${
-                    isExpanded
-                      ? "rotate-45"
-                      : "hover:bg-[var(--hover-bg-color)] hover:border-[var(--hover-border-color)]"
-                  }`}
-                >
-                  <IoAdd
-                    className={`text-xl transition-colors duration-300 ${
-                      isExpanded ? "":"text-neutral-800"}`}
-                  />
-                </span> */}
-              </div>
-              <div
-                className={`grid transition-all duration-300 ease-in-out ${
-                  isExpanded
-                    ? "opacity-100 grid-rows-[1fr]"
-                    : "opacity-0 grid-rows-[0fr]"
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="p-4 pt-0 text-neutral-600">
-                    <ul className="flex flex-col gap-4 p-12">
-                      <li className="flex gap-8 items-center">
-                        <span className="flex items-center justify-center p-2 px-[10px] text-xl border-2 border-black rounded-full">
-                          01
-                        </span>
-                        <span className="text-xl font-semibold">
-                          Learn easily oldest format of communication
-                        </span>
-                      </li>
-                      <li className="flex gap-8 items-center">
-                        <span className="flex items-center justify-center p-2 px-[10px] text-xl border-2 border-black rounded-full">
-                          02
-                        </span>
-                        <span className="text-xl font-semibold">
-                          Developed by Psychologists and Educators
-                        </span>
-                      </li>
-                      <li className="flex gap-8 items-center">
-                        <span className="flex items-center justify-center p-2 px-[10px] text-xl border-2 border-black rounded-full">
-                          03
-                        </span>
-                        <span className="text-xl font-semibold">
-                          Age appropriate content
-                        </span>
-                      </li>
-                      <li className="flex gap-8 items-center">
-                        <span className="flex items-center justify-center p-2 px-[10px] text-xl border-2 border-black rounded-full">
-                          04
-                        </span>
-                        <span className="text-xl font-semibold">
-                          Beautifully illustrated
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="flex gap-8 px-1 w-full flex-col md:flex-row md:px-24">
+          {products
+            .filter((product) => {
+              // Extract card type from product title
+              const matchCardType = product.title.includes(cardType);
+              return matchCardType;
+            })
+            .map((product) => {
+              interface ProductDetails {
+                cardType:
+                  | "conversation starter cards"
+                  | "story re-teller cards"
+                  | "silent stories"
+                  | "conversation story cards"; // Types of self-help cards
+                accentColor?: string; // Color theme for the card
+                addressedIssues: {
+                  title: string;
+                  description: string;
+                  issueIllustrationUrl: string;
+                }[];
+                productDescription: {
+                  label: string;
+                  descriptionList: { _id: string; description: string }[];
+                }[];
+              }
+              return (
+                <React.Fragment key={product._id}>
+                  {(product.details as ProductDetails).productDescription.map(
+                    (description) => (
+                      <div
+                        key={description.label}
+                        className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer hover:border-[var(--hover-border-color)] w-[90%] mx-auto ${
+                          isExpanded ? "" : "border-neutral-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full p-4 text-black bg-[#FABB05]">
+                          <span className="text-xl font-semibold transition-colors duration-300">
+                            {description.label}
+                          </span>
+                        </div>
+                        <div
+                          className={`grid transition-all duration-300 ease-in-out ${
+                            isExpanded
+                              ? "opacity-100 grid-rows-[1fr]"
+                              : "opacity-0 grid-rows-[0fr]"
+                          }`}
+                        >
+                          <div className="overflow-hidden">
+                            <div className="p-4 pt-0 text-neutral-600">
+                              <ul className="flex flex-col gap-4 p-2 md:p-12 pt-4">
+                                {description?.descriptionList.map(
+                                  (item, index) => (
+                                    <li
+                                      key={item._id}
+                                      className="flex gap-8 items-start md:items-center "
+                                    >
+                                      {" "}
+                                      {/* Added key prop */}
+                                      <span className="flex items-center justify-center p-2 px-[10px] text-xl border-2 border-black rounded-full ">
+                                        {index + 1}{" "}
+                                        {/* Changed to show correct index */}
+                                      </span>
+                                      <span className="text-xl font-semibold">
+                                        {item.description}{" "}
+                                        {/* Fixed to show correct description */}
+                                      </span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </React.Fragment>
+              );
+            })}
         </div>
       </div>
 
-      <div className="bg-gradient-to-t from-[#F7941D] to-[#FFE18B] flex flex-col items-center justify-center p-12 md:flex-row md:justify-around px-24">
+      <div className="bg-gradient-to-t from-[#F7941D] to-[#FFE18B] flex flex-col items-center justify-center p-12 md:flex-row md:justify-around px-4 gap-12 md:px-24">
         <div className="flex-1">
           <img
             src="/assets/productv2/mentoons-product-wheel.png"
             alt="Mentoons Product wheel"
           />
         </div>
-        <div className="flex-1">
-          <video
-            src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/Why+Choose+Mentoons+Comics.mp4s"
-            autoPlay
-            controls
-            muted
-            playsInline
-            webkit-playInline
-            className="w-full rounded-xl"
-          ></video>
+        <div className="flex-1 flex flex-col">
+          <div className="relative overflow-hidden border rounded-xl group">
+            {products.map((product, index) => (
+              <div
+                key={product._id}
+                className="w-full transition-opacity duration-500"
+                style={{
+                  display: index === currentVideoIndex ? "block" : "none",
+                }}
+              >
+                <video
+                  src={product?.productVideos?.[0]?.videoUrl}
+                  autoPlay
+                  controls
+                  muted
+                  playsInline
+                  webkit-playsinline
+                  className="w-full rounded-xl"
+                ></video>
+              </div>
+            ))}
+
+            {/* Navigation buttons */}
+            {products.length > 1 && (
+              <>
+                <button
+                  onClick={() =>
+                    setCurrentVideoIndex((prev) =>
+                      prev === 0 ? products.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-opacity opacity-0 group-hover:opacity-100 z-10"
+                  aria-label="Previous video"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentVideoIndex((prev) => (prev + 1) % products.length)
+                  }
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-opacity opacity-0 group-hover:opacity-100 z-10"
+                  aria-label="Next video"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Indicators */}
+          {products.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {products.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentVideoIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentVideoIndex ? "bg-primary" : "bg-gray-300"
+                  }`}
+                  aria-label={`Go to video ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="pb-16">
-        <div className="flex gap-8 items-center">
-          <span className="py-12 pl-12 text-3xl font-semibold">
+        <div className="flex gap-4 items-start p-4  md:items-center ">
+          <span className="py-0 pl-0 text-2xl font-semibold  md:py-12 md:text-3xl">
             {" "}
             Product Specifically designed for
           </span>
           <button
-            className={`flex items-center justify-start px-2 pr-3 gap-2 w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl
+            className={`flex items-center justify-start px-2 pr-3 gap-2 w-fit md:w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl whitespace-nowrap
               ${
                 selecteCategory === "6-12" &&
                 "text-yellow-500 bg-yellow-100 border-yellow-400 ring-4 ring-yellow-400"
               }
               ${
-                selecteCategory === "13-19" &&
+                selecteCategory === "13-16" &&
                 "text-rose-600 bg-red-100 border-red-500 ring-4 ring-red-500"
+              }
+              ${
+                selecteCategory === "17-19" &&
+                "text-purple-600 bg-purple-100 border-purple-500 ring-4 ring-purple-500"
               }
               ${
                 selecteCategory === "20+" &&
                 "text-blue-500 bg-blue-100 border-blue-500 ring-4 ring-blue-500"
               } 
               ${
-                selecteCategory === "parent" &&
+                selecteCategory === "parents" &&
                 "text-green-500 bg-green-100 border-green-500 ring-4 ring-green-500"
               }
               border hover:ring-4
               ${selecteCategory === "6-12" && "hover:ring-yellow-300"}
-              ${selecteCategory === "13-19" && "hover:ring-red-300"}
+              ${selecteCategory === "13-16" && "hover:ring-red-300"}
+              ${selecteCategory === "17-19" && "hover:ring-purple-300"}
               ${selecteCategory === "20+" && "hover:ring-blue-300"}
-              ${selecteCategory === "parent" && "hover:ring-green-300"}
+              ${selecteCategory === "parents" && "hover:ring-green-300"}
             `}
             onClick={() => handleSelectedCategory(selecteCategory)}
           >
             <span
               className={`w-5 h-5 rounded-full
               ${selecteCategory === "6-12" && "bg-yellow-500"}
-              ${selecteCategory === "13-19" && "bg-rose-500"}
+              ${selecteCategory === "13-16" && "bg-rose-500"}
+              ${selecteCategory === "17-19" && "bg-purple-500"}
               ${selecteCategory === "20+" && "bg-blue-500"}
               ${selecteCategory === "parent" && "bg-green-500"}
             `}
@@ -513,35 +816,32 @@ const Store = () => {
           </div>
         </div> */}
         <div
-          className="flex gap-4 justify-around items-center"
+          className="flex flex-col md:flex-row gap-4 justify-around items-center p-4"
           // ref={carouselRef}
         >
-          {PRODUCT_DATA.filter(
-            (product) =>
-              (product.title.includes("Conversation Starter Cards") ||
-                product.title.includes("Story Re-teller Cards") ||
-                product.title.includes("Silent Stories")) &&
-              product.age === selecteCategory
-          ).map((product) => (
+          {products.map((product) => (
             <motion.div
               className="flex flex-col h-[500px] cursor-pointer"
-              key={product.id}
-              onClick={() =>
+              key={product._id}
+              onClick={() => {
+                handleCardType(product.type);
                 navigate(
-                  `/mentoons-store/${product.title.toLowerCase()}/${product.id}`
-                )
-              }
+                  `/mentoons-store/${product.title.toLowerCase()}/${
+                    product._id
+                  }`
+                );
+              }}
               whileHover={{ scale: 1.05 }} // Scale up on hover
               transition={{ type: "spring", stiffness: 300 }} // Spring animation
             >
               <div
                 style={{
-                  backgroundColor: `${product.accentColor}40`,
+                  backgroundColor: `${product?.accentColor}40`,
                 }}
                 className=""
               >
                 <img
-                  src={product.imageUrl}
+                  src={product?.productImages?.[0]?.imageUrl}
                   alt="comic 1"
                   className="object-cover rounded-lg w-96 h-[300px]"
                 />
@@ -550,7 +850,10 @@ const Store = () => {
                 <span> {product.title}</span>
                 <span className="text-primary">₹ 199</span>{" "}
               </div>
-              <p className="text-gray-500 w-[30ch]">{product.description}</p>
+              <p className="text-gray-500 w-[30ch] line-clamp-3">
+                {product?.description}
+              </p>{" "}
+              {/* Added optional chaining for safety */}
               <div className="">
                 <Rating ratings={4.5} />
               </div>
