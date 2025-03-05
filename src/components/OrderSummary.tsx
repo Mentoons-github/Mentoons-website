@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 const OrderSummary: React.FC = () => {
   const { cart } = useSelector((state: RootState) => state.cart);
   const { userId } = useAuth();
-  const [formData, setFormData] = useState({
+  const [formData] = useState({
     merchant_id: "3545043",
     order_id: `#ORD-${Date.now()}`,
     currency: "INR",
