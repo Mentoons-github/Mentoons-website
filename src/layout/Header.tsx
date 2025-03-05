@@ -80,8 +80,8 @@ const Header = () => {
         <div className="items-center flex-1 hidden pl-6 space-x-6 font-semibold text-black lg:flex md:hidden">
           {NAV_LINKS.filter((link) =>
             ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
-              link.label,
-            ),
+              link.label
+            )
           ).map((link) => (
             <div key={link.id} className="text-white whitespace-nowrap">
               {link.label === "Date" ? (
@@ -206,7 +206,7 @@ const Header = () => {
             <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
               <ul>
                 {NAV_LINKS.filter(
-                  (link) => !["Date", "Call us", "User"].includes(link.label),
+                  (link) => !["Date", "Call us", "User"].includes(link.label)
                 ).map((link) => (
                   <li
                     key={link.id}
@@ -222,6 +222,17 @@ const Header = () => {
                 <SignedIn>
                   <UserButton />
                 </SignedIn>
+                <SignedOut>
+                  <li
+                    className="py-2 text-2xl font-semibold text-gray-700 cursor-pointer"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/sign-in");
+                    }}
+                  >
+                    Sign In
+                  </li>
+                </SignedOut>
               </ul>
             </div>
           )}

@@ -1,137 +1,214 @@
+import ProductCard from "@/components/MentoonsStore/ProductCard";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
-import { PRODUCT_DATA, WORKSHOP_FAQ } from "@/constant";
-import { getCart, updateItemQuantity } from "@/redux/cartSlice";
-import { AppDispatch } from "@/redux/store";
+import { WORKSHOP_FAQ } from "@/constant";
+import { addItemCart, getCart, updateItemQuantity } from "@/redux/cartSlice";
+import {
+  fetchProductById,
+  fetchProducts,
+  setFilter,
+} from "@/redux/productSlice";
+import { AppDispatch, RootState } from "@/redux/store";
+import { ProductBase } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
-import { useDispatch } from "react-redux";
+import { IoIosCart } from "react-icons/io";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const ProductDetails = () => {
-  const cartItem = {
-    productId: {
-      _id: "1",
-      productTitle: "Product Title",
-      productSummary: "Product Summary",
-      productImages: "Product Images",
-    },
-    price: 199,
-    stock: "In Stock",
-    quantity: 1,
-  };
-  const { productId, category } = useParams();
-  const [quantity, setQuantity] = useState(cartItem.quantity);
+  const { productId } = useParams();
+  const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
-  console.log("Cart Item", cartItem, productId);
+
   const navigate = useNavigate();
+  const [product, setProduct] = useState<ProductBase>();
 
-  // const handleRemoveItemFromCart = async () => {
-  //   console.log("Remove Item from Cart", cartItem);
-  //   try {
-  //     const token = await getToken();
-  //     if (!token) {
-  //       toast.error("Please login to remove the item from the cart");
-  //       return;
-  //     }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        if (!productId) {
+          toast.error("Product ID is missing");
+          return;
+        }
+        const productResponse = await dispatch(fetchProductById(productId));
+        console.log("ProductResponse", productResponse.payload);
+        if (
+          typeof productResponse.payload === "object" &&
+          productResponse.payload !== null
+        ) {
+          setProduct(productResponse.payload as ProductBase);
+        } else {
+          console.error(
+            "Invalid product data received",
+            productResponse.payload
+          );
+          toast.error("Failed to fetch product details");
+        }
+      } catch (error) {
+        console.error("Error fetching product details", error);
+        toast.error("Failed to fetch product details");
+      }
+    };
+    fetchProduct();
+  }, [dispatch, productId]);
 
-  //     if (userId) {
-  //       const result = await dispatch(
-  //         removeItemFromCart({
-  //           token,
-  //           userId,
-  //           productId: cartItem.productId._id,
-  //         })
-  //       );
-  //       console.log("Remove Item Result", result);
-  //       dispatch(getCart({ token, userId }));
-  //     } else {
-  //       toast.error("Please login to remove the item from the cart");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Failed to remove the item from the cart");
-  //   }
-  // };
+  const { items: recommendedProducts } = useSelector(
+    (state: RootState) => state.products
+  );
+
+  useEffect(() => {
+    const RecommendedProducts = async () => {
+      try {
+        dispatch(
+          setFilter({
+            type: "mentoons cards",
+            ageCategory: product?.ageCategory,
+          })
+        );
+        const recommendedProducts = await dispatch(fetchProducts());
+
+        console.log("Recommended Products", recommendedProducts.payload);
+      } catch (error) {
+        console.error("Error fetching recommended products", error);
+        toast.error("Failed to fetch recommended products");
+      }
+    };
+    RecommendedProducts();
+  }, [product, dispatch]);
 
   const handleUpdateQuantity = async (flag: string) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to update cart");
+        return;
+      }
+
+      // Calculate new quantity
+      const newQuantity =
+        flag === "+" ? quantity + 1 : Math.max(1, quantity - 1);
+
+      // If no change in quantity (trying to decrease below 1), return early
+      if (newQuantity === quantity) return;
+
+      if (userId) {
+        const result = await dispatch(
+          updateItemQuantity({
+            token,
+            userId,
+            productId: product?._id,
+            quantity: newQuantity, // Pass the new quantity to the action
+          })
+        );
+
+        console.log("Update Quantity Result", result);
+        dispatch(getCart({ token, userId }));
+        setQuantity(newQuantity);
+        toast.success("Cart updated successfully");
+      } else {
+        toast.error("Please login to update the cart");
+      }
+    } catch (error) {
+      console.error("Error while updating the cart", error);
+      toast.error("Error while updating the quantity");
+    }
+  };
+  const handleAddtoCart = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+
     try {
       const token = await getToken();
       if (!token) {
         toast.error("Please login to add to cart");
         return;
       }
+
+      if (!product) {
+        toast.error("Product details not available");
+        return;
+      }
+
       if (userId) {
-        const result = await dispatch(
-          updateItemQuantity({
+        const response = await dispatch(
+          addItemCart({
             token,
             userId,
-            productId: cartItem.productId._id,
-            flag,
+            productId: product._id,
+            productType: product.type,
+            title: product.title,
+            quantity: 1,
+            price: product.price,
+            ageCategory: product.ageCategory,
+            productImage: product.productImages?.[0].imageUrl,
+            productDetails: product.details,
           })
         );
-        dispatch(getCart({ token, userId }));
-        console.log("Update Quantity Result", result);
-        toast.success("Item quantity updated");
+        if (response.payload) {
+          toast.success("Item Added to cart");
+          navigate("/cart");
+        }
+        setIsLoading(false);
+      } else {
+        toast.error("User ID is missing");
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error while updating the cart", error);
-      toast.error("Error while updating the quantity");
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+      setIsLoading(false);
     }
-    setQuantity((prev) => {
-      if (flag === "+") {
-        return prev + 1;
-      } else {
-        if (prev === 1) {
-          return prev;
-        } else {
-          return prev - 1;
-        }
-      }
-    });
+  };
+
+  const handleBuyNow = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    handleAddtoCart(event);
+    navigate("/cart");
   };
   return (
     <div className="w-[90%] mx-auto my-20 ">
-      <div
-        className="flex h-[240px] sm:h-[500px] md:h-[600px] p-4 sm:p-8 md:p-12 rounded-2xl "
-        // style={{ backgroundColor: product.accentColor }}
-      >
-        <div className="flex flex-col flex-1 pb-3 pl-1">
-          <span className="px-6 py-2 mb-2 text-2xl font-bold text-white rounded-full p bg-primary w-fit">
-            For 6-12
+      <div className="flex flex-col md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
+        <div className="flex flex-col flex-1 pb-3">
+          <span className="px-4 sm:px-6 py-1 sm:py-2 mb-2 text-sm sm:text-lg md:text-2xl font-bold text-white rounded-full bg-primary w-fit">
+            For {product?.ageCategory}
           </span>
-          <h1 className="pb-2 text-3xl font-bold sm:text-4xl md:text-6xl lg:text-8xl leading-wider line-clamp-2">
-            {category?.toLocaleUpperCase()}
+          <h1 className="pb-2 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            {product?.title}
           </h1>
-          <p className="pb-4 text-sm sm:text-lg leading-tight w-[90%] line-clamp-3">
-            Help you kid overcom the fear of express themeselves
+          <p className="pb-4 text-xs sm:text-sm md:text-base lg:text-lg w-full md:w-[90%]">
+            {product?.description}
           </p>
         </div>
-        <div className="flex items-center justify-center flex-1 w-full">
+        <div className="flex items-center justify-center flex-1 w-full h-[200px] sm:h-[300px] md:h-auto ">
           <img
-            src="/assets/productv2/conversation-starter-cards-13-16.png"
-            alt=""
-            className="object-cover w-full h-full"
+            src={product?.productImages?.[0]?.imageUrl}
+            alt={product?.title || "Product image"}
+            className="object-contain w-full h-full md:object-cover"
           />
         </div>
       </div>
 
-      <div className="border-gray-200 rder mt">
-        <span className="font-semibold text-gray-500">Creator Name</span>
-        <Rating ratings={2} />
-        <p className="my-2 text-lg font-semibold text-neutral-800"> ₹ 199 </p>
-        <p>
-          Blandit et vestibulum elementum euismod dictum eget placerat egestas
-          nisi metus et, eu This is a very brief description about the product.
-          All the details of the product is listed below separately{" "}
+      <div className="border-gray-200">
+        <span className="font-semibold text-gray-500">Mentoons</span>
+
+        <Rating ratings={Number(product?.rating)} />
+        <p className="my-2 text-lg font-semibold text-neutral-800">
+          {" "}
+          ₹ {product?.price}{" "}
         </p>
+
+        {/* <p>{product?.description}</p> */}
         {/* Quantitu */}
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 pb-4">
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-2">
               <button
@@ -140,24 +217,38 @@ const ProductDetails = () => {
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
               >
                 <Minus
-                  className={`w-4 h-4 ${quantity === 1 ? "text-gray-400" : ""}`}
+                  className={`w-4 h-4  font-bold flex${
+                    quantity === 1 ? "text-gray-400" : ""
+                  } `}
                 />
               </button>
-              <span className="w-8 text-center">{quantity}</span>
+              <span className="w-8 text-center font-bold">{quantity}</span>
               <button
                 onClick={() => handleUpdateQuantity("+")}
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 font-bold" />
               </button>
             </div>
           </div>
-          <p className="self-end text-xl font-bold">₹ {cartItem.price}</p>
         </div>
 
         {/* Buy Now Button */}
-        <div className="w-full">
-          <button className="w-full px-6 py-2 mt-4 text-xl font-semibold text-white bg-primary">
+        <div className="w-full flex flex-col gap-4 mt-4">
+          <button
+            className="flex justify-center items-center px-4 py-2 w-full font-medium text-primary border border-primary rounded hover:bg-primary/10 transition-colors"
+            onClick={(e) => handleAddtoCart(e)}
+            disabled={isLoading}
+          >
+            <IoIosCart className="mr-2 w-5 h-5" />
+            {isLoading ? "Adding..." : "Add to Cart"}
+          </button>
+
+          <button
+            className="flex justify-center items-center px-4 py-2 w-full font-medium text-white bg-primary rounded hover:bg-primary-dark transition-colors"
+            onClick={(e) => handleBuyNow(e)}
+            disabled={isLoading}
+          >
             Buy Now
           </button>
         </div>
@@ -166,7 +257,7 @@ const ProductDetails = () => {
         <div className="w-full h-[1.25px] my-12 mb-8 bg-primary" />
 
         {/* Product description */}
-        <div className="text-lg font-medium utral-800">
+        <div className="text-lg font-medium text-neutral-800">
           {/* use map here */}
           <div className="flex ">
             <div className="flex-1 ">Language:</div>
@@ -191,50 +282,26 @@ const ProductDetails = () => {
         </div>
 
         {/* You may also like this section */}
-        <div className="pt-20 ">
-          <h3 className="pb-6 text-4xl font-semibold ">
+
+        <div className="w-full p-4 mt-4 ">
+          <h2 className="mb-8 text-4xl font-semibold">
             You will also like this -
-          </h3>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {PRODUCT_DATA.map((product) => (
-              <div
-                className="flex flex-col cursor-pointer"
-                key={product.id}
-                onClick={() =>
-                  navigate(
-                    `/mentoons-store/${product.title.toLowerCase()}/${
-                      product.id
-                    }`
-                  )
-                }
-              >
-                <div
-                  style={{
-                    backgroundColor: `${product.accentColor}40`,
-                  }}
-                  className="w-full "
-                >
-                  <img
-                    src={product.imageUrl}
-                    alt="comic 1"
-                    className="object-cover w-full border rounded-lg"
-                  />
-                </div>
-                <h3 className="pt-4 text-xl font-semibold text-neutral-700">
-                  {product.title}
-                </h3>
-                {/* <p className="pt-2 text-gray-500">{product.description}</p> */}
-                <p className="py-2 text-xl font-semibold text-primary">
-                  ₹ {product.price}
-                </p>
-                <button
-                  className="w-full px-6 py-2 font-semibold text-white bg-primary"
-                  // style={{ backgroundColor: `${product.accentColor}` }}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))}
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto">
+            {recommendedProducts?.length > 0 ? (
+              recommendedProducts.map((product) => {
+                // Ensure all required properties are present before passing to ProductCard
+
+                return (
+                  <div className="flex justify-center w-full" key={product._id}>
+                    <ProductCard productDetails={product} />
+                  </div>
+                );
+              })
+            ) : (
+              <div>No Product found</div>
+            )}
           </div>
         </div>
 
@@ -351,7 +418,7 @@ const Rating = ({ ratings }: { ratings: number }) => {
           );
         })}
       </div>
-      <span className="font-semibold text-gray-500 ">{ratings} / 5</span>
+      <span className="font-semibold text-gray-500 ">{ratings}</span>
     </div>
   );
 };

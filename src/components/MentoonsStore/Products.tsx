@@ -130,7 +130,7 @@ const Product = () => {
             </div>
 
             <div className="  flex gap-2 flex-[0.15] p-2 md:px-0  overflow-y-auto md:flex-col">
-              {productDetails.productImages.map((item: ProductImage) => (
+              {productDetails?.productImages.map((item: ProductImage) => (
                 <div
                   key={item.id + Date.now().toString()}
                   className="border rounded-xl border-[#3a2901] cursor-pointer overflow-hidden w-16 h-16 flex items-center justify-center"
