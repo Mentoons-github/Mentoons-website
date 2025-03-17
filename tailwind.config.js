@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import tailwindAnimate from "tailwindcss-animate";
+
+export default {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -9,16 +11,7 @@ module.exports = {
   ],
   prefix: "",
   theme: {
-    container: {
-      //   center: true,
-      //   padding: {
-      //     DEFAULT: "1rem",
-      //     sm: "1.5rem",
-      //     md: "3rem",
-      //     lg: "5rem",
-      //     xl: "7.5rem",
-      //   },
-    },
+    container: {},
     screens: {
       xxs: "300px",
       xs: "475px",
@@ -33,6 +26,7 @@ module.exports = {
     extend: {
       fontFamily: {
         montserrat: "Montserrat",
+        
       },
       colors: {
         "men-blue": "#003366",
@@ -96,7 +90,6 @@ module.exports = {
         "custom-complex":
           "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
       },
-
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -143,5 +136,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindAnimate],
 };
