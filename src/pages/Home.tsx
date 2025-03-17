@@ -5,7 +5,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { AxiosError } from "axios";
-import Struggles from "@/components/LandingPage/Struggles";
+import AddaSection from "@/components/LandingPage/addaSection";
 import HeroSection from "@/components/LandingPage/HeroSection";
 import MdMultiverse from "@/components/LandingPage/MdMultiverse";
 // import NewSection from "@/components/LandingPage/NewSection";
@@ -44,7 +44,7 @@ const Home = () => {
       <HeroSection />
 
       {[
-        { Component: Struggles, key: "struggles" },
+        { Component: AddaSection, key: "struggles" },
         { Component: MdMultiverse, key: "multiverse" },
         { Component: MeetMentors, key: "meet mentors" },
         // { Component: NewSection, key: 'new section' }
