@@ -122,7 +122,7 @@ const Header = () => {
         {/* Right Section */}
         <div className="items-center justify-end flex-1 hidden font-semibold lg:flex md:hidden">
           {/* Desktop Menu */}
-          <div className="items-center hidden space-x-6 text-white md:flex justify-betwee">
+          <div className="items-center hidden space-x-6 text-white md:flex justify-between">
             {/* <NavLink
               to="/mentoons-store"
               className="text-white hover:text-gray-200"
