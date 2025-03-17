@@ -26,7 +26,23 @@ export default {
     extend: {
       fontFamily: {
         montserrat: "Montserrat",
-        
+        akshar: ["Akshar", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        fredoka: ["Fredoka", "sans-serif"],
+        epilogue: ["Epilogue", "sans-serif"],
+        figtree: ["Figtree", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
+        mulish: ["Mulish", "sans-serif"],
+        forum: ["Forum", "sans-serif"],
+        outfit: ["Outfit", "sans-serif"],
+        cormorant: ["Cormorant", "sans-serif"],
+        dmsans: ["DM Sans", "sans-serif"],
+        firasans: ["Fira Sans", "sans-serif"],
+        manrope: ["Manrope", "sans-serif"],
+        inconsolata: ["Inconsolata", "sans-serif"],
+        jost: ["Jost", "sans-serif"],
+        futura: ["Futura Std", "sans-serif"],
       },
       colors: {
         "men-blue": "#003366",
