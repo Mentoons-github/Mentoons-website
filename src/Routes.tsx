@@ -10,7 +10,6 @@ import Popup from "./layout/Popup";
 
 import OrderSummary from "@/components/OrderSummary";
 import PaymentForm from "@/components/PaymentForm";
-import Product from "./components/MentoonsStore/Products";
 // import Career from "./components/shared/CareerPage/Career.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 import AssesmentPage from "./pages/AssesmentPage";
@@ -258,7 +257,7 @@ const routes = [
     path: "/mentoons-store/product/:productId",
     element: (
       <MainLayout>
-        <Product />
+        <ProductDetails />
       </MainLayout>
     ),
   },

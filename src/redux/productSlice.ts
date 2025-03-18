@@ -121,13 +121,16 @@ export const createProduct = createAsyncThunk<
 
     // Handle product images
     if ("productImages" in productData && productData.productImages) {
-      const images = productData.productImages as (File | { _id: string; imageUrl: string })[];
+      const images = productData.productImages as (
+        | File
+        | { _id: string; imageUrl: string }
+      )[];
       images.forEach((image) => {
         if (image instanceof File) {
-          formData.append('productImages', image);
+          formData.append("productImages", image);
         } else {
           // If it's an existing image, append its ID
-          formData.append('existingImages', image._id);
+          formData.append("existingImages", image._id);
         }
       });
     }
@@ -177,13 +180,16 @@ export const updateProduct = createAsyncThunk<
     const formData = new FormData();
 
     if ("productImages" in updatedData && updatedData.productImages) {
-      const images = updatedData.productImages as (File | { _id: string; imageUrl: string })[];
+      const images = updatedData.productImages as (
+        | File
+        | { _id: string; imageUrl: string }
+      )[];
       images.forEach((image) => {
         if (image instanceof File) {
-          formData.append('productImages', image);
+          formData.append("productImages", image);
         } else {
           // If it's an existing image, append its ID
-          formData.append('existingImages', image._id);
+          formData.append("existingImages", image._id);
         }
       });
     }
