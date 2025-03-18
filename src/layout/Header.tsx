@@ -86,48 +86,65 @@ const Header = () => {
   };
 
   return (
-    <div
-      className={`h-16 bg-primary border-b-[.5px] border-gray-200 shadow-2xl fixed top-0 w-full z-[999] transition-transform duration-300 ${
-        isVisible || lastScrollY < 64 ? "translate-y-0" : "-translate-y-full"
-      }`}
+    <header
+      className={`${
+        isScrolled ? "fixed w-full top-0 left-0 shadow-md" : "relative"
+      } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto`}
     >
-      <div className="flex items-center justify-between h-full px-4 ">
-        {/* Left Section - Hidden on mobile */}
-        <div className="items-center flex-1 hidden pl-6 space-x-6 font-semibold text-black lg:flex md:hidden">
-          {NAV_LINKS.filter((link) =>
-            ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
-              link.label,
-            ),
-          ).map((link) => (
-            <div key={link.id} className="text-white whitespace-nowrap">
-              {link.label === "Date" ? (
-                <span className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap ">
-                  {new Date().toDateString()}
-                </span>
-              ) : link.label === "Call us" ? (
-                <a
-                  href="tel:+91 90360 33300"
-                  className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap "
-                >
-                  Call us: +91 90360 33300
-                </a>
-              ) : (
-                <NavLink
-                  to={link.url}
-                  className="px-3 py-2 text-white transition-all duration-200 border rounded-full hover:text-gray-200 border-primary hover:border-white/20 hover:bg-white/10"
-                >
-                  {link.label}{" "}
-                </NavLink>
-              )}
-            </div>
-          ))}
+      <a
+        href="tel:+919036033300"
+        className={`no-underline ${
+          title === "adda" ? "lg:hidden block" : "md:hidden block"
+        } whitespace-nowrap`}
+      >
+        <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+          <FaPhone /> <span> +91 90360 33300</span>
         </div>
+      </a>
+      <nav
+        className={`w-auto lg:w-1/2 ${
+          title === "adda"
+            ? "hidden lg:flex gap-3 md:gap-10"
+            : "hidden lg:flex gap-3 md:gap-20"
+        } justify-start lg:justify-center items-center `}
+      >
+        <a href="tel:+919036033300" className="no-underline hidden xl:block">
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+            <FaPhone /> <span> +91 90360 33300</span>
+          </div>
+        </a>
+        {navLeft.map(({ icon: Icon, id, label, url, items }) => (
+          <div key={id} className="relative">
+            {items && items?.length ? (
+              <NavButton
+                label={label}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+              >
+                {dropdown.products && <DropDown items={items} />}
+              </NavButton>
+            ) : (
+              <NavLink
+                to={url}
+                className="relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1"
+              >
+                {typeof Icon === "function" ? (
+                  <Icon className="sm:text-sm md:text-lg" />
+                ) : null}
+                {label}
 
-        {/* Middle Section - Logo */}
-        <div
-          className="items-center hidden lg:flex"
-          onClick={() => navigate("/")}
-        >
+                {label === "Mythos" && (
+                  <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[12px] leading-none">
+                    Introducing
+                  </span>
+                )}
+              </NavLink>
+            )}
+          </div>
+        ))}
+      </nav>
+      <div className="flex justify-center">
+        <NavLink to="/">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
             alt="mentoons-logo"
@@ -201,59 +218,19 @@ const Header = () => {
               )}
             </NavLink>
           </div>
-        </div>
-        {/* Mobile Menu */}
-        <div className="flex items-center justify-between w-full sm:flex md:flex lg:hidden">
-          <figure className="w-6 h-6">
-            <img
-              src="/assets/home/home-icn.png"
-              alt="home icon"
-              className="object-contain w-full h-full "
-            />
-          </figure>
-          <div
-            className="flex items-center lg:hidden"
-            onClick={() => navigate("/")}
-          >
-            <img
-              src="/assets/images/mentoons-logo.png"
-              alt="Company Logo"
-              className="max-h-24 pr-1 pt-4 pb-2 bg-primary rounded-full relative z-[999] border-b"
-            />
-          </div>
-          <div className="w-6 h-6" onClick={handleMenuToggle}>
-            {menuOpen ? (
-              <IoClose className="w-full h-full font-semibold text-white" />
-            ) : (
-              <IoMenu className="w-full h-full text-white" />
-            )}
-          </div>
-          {isVisible && menuOpen && (
-            <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
-              <ul>
-                {NAV_LINKS.filter(
-                  (link) => !["Date", "Call us", "User"].includes(link.label),
-                ).map((link) => (
-                  <li
-                    key={link.id}
-                    className="py-2 text-2xl font-semibold text-gray-700 cursor-pointer"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(link.url);
-                    }}
-                  >
-                    {link.label}
-                  </li>
-                ))}
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+        </SignedIn>
+      </nav>
+      <Sidebar
+        token={userId ?? null}
+        isOpen={sidebarOpen}
+        title={title}
+        dropdown={dropdown}
+        handleHover={handleHover}
+        handleMouseLeave={handleMouseLeave}
+        setIsOpen={setSideBarOpen}
+        handlePlans={handleBrowsePlansClick}
+      />
+    </header>
   );
 };
 
