@@ -31,7 +31,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/negative_impact_of_mobile.mp3",
     thumbnail: "/assets/images/negative-impact-of-mobile-phone.jpg", //todo Change it.
-    category: "",
+    category: "mobile addiction",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -46,41 +46,41 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/negative-impact-of-social-media.mp3",
     thumbnail: "/assets/images/negative-impact-of-social-media.jpg", //todo Change it
-    category: "",
+    category: "mobile addiction",
     age: "",
     author: "Haaris Rueben",
     duration: "",
-  },
-  {
+    },
+    {
     id: 3,
     topic: "How does it feel to be an teenager",
     description:
-      "Podcast on How Does It Feel to Be a Teenager explores the unique challenges and experiences of adolescence in today’s fast-paced world. Each episode dives into topics like identity, peer pressure, mental health, and navigating relationships during this transformative phase of life. Featuring candid conversations with teens, experts, and influencers, we shed light on the emotions, struggles, and joys that come with being a teenager. Together, we’ll provide insights and advice to help teens feel understood, empowered, and confident in their journey to adulthood.",
+      "Podcast on How Does It Feel to Be a Teenager explores the unique challenges and experiences of adolescence in today's fast-paced world. Each episode dives into topics like identity, peer pressure, mental health, and navigating relationships during this transformative phase of life. Featuring candid conversations with teens, experts, and influencers, we shed light on the emotions, struggles, and joys that come with being a teenager. Together, we'll provide insights and advice to help teens feel understood, empowered, and confident in their journey to adulthood.",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/how-does-it-feet-to-be-an-teenager-orignals.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/how-does-it-feet-to-be-an-teenager-orignals.mp3",
     thumbnail: "/assets/images/how-does-it-feel-to-be-teenager.jpg",
-    category: "",
+    category: "teen emotions",
     age: "",
     author: "Haaris Rueben",
     duration: "",
-  },
-  {
+    },
+    {
     id: 4,
     topic: "Performance Addiction",
     description:
-      "Podcast on Performance Addiction explores the relentless pursuit of achievement and perfection in today’s competitive culture. Each episode delves into how the pressure to constantly excel—whether in academics, career, or personal life—can lead to burnout, anxiety, and a diminished sense of self-worth. Through interviews with psychologists, performance coaches, and individuals who have struggled with this addiction, we unpack the harmful effects of an overemphasis on success and offer strategies to cultivate self-acceptance, balance, and fulfillment beyond mere performance.",
+      "Podcast on Performance Addiction explores the relentless pursuit of achievement and perfection in today's competitive culture. Each episode delves into how the pressure to constantly excel—whether in academics, career, or personal life—can lead to burnout, anxiety, and a diminished sense of self-worth. Through interviews with psychologists, performance coaches, and individuals who have struggled with this addiction, we unpack the harmful effects of an overemphasis on success and offer strategies to cultivate self-acceptance, balance, and fulfillment beyond mere performance.",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/perfomance-addiction.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/perfomance-addiction.mp3",
     thumbnail: "/assets/images/perfomance-addiction.jpg",
-    category: "",
+    category: "teen emotions",
     age: "",
     author: "Haaris Rueben",
     duration: "",
-  },
+    },
   // todo change the content
   {
     id: 5,
@@ -92,7 +92,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/the-magic-of-play-without-phone.mp3",
     thumbnail: "/assets/images/social-media-reward-system.jpg", // todo change this
-    category: "",
+    category: "mobile addiction",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -101,13 +101,13 @@ export const PODCAST_DETAILS = [
     id: 6,
     topic: "Common Parenting Mistake",
     description:
-      "Podcast on Common Parenting Mistakes offers a compassionate and insightful look into the missteps many parents make in raising their children. Each episode explores topics like overprotection, inconsistency, unrealistic expectations, and miscommunication, revealing how these actions can impact a child’s emotional and behavioral development. Through expert interviews and real-life anecdotes, we provide practical advice to help parents recognize and correct these mistakes, fostering healthier relationships, stronger communication, and a nurturing environment for their children to thrive..",
+      "Podcast on Common Parenting Mistakes offers a compassionate and insightful look into the missteps many parents make in raising their children. Each episode explores topics like overprotection, inconsistency, unrealistic expectations, and miscommunication, revealing how these actions can impact a child's emotional and behavioral development. Through expert interviews and real-life anecdotes, we provide practical advice to help parents recognize and correct these mistakes, fostering healthier relationships, stronger communication, and a nurturing environment for their children to thrive..",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/common-parrenting-mistake-orignals.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/common-parrenting-mistake-orignals.mp3",
     thumbnail: "/assets/images/common-parenting-mistakes.jpg",
-    category: "",
+    category: "teen emotions",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -122,7 +122,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/entertainment-addiction-orignals.mp3",
     thumbnail: "/assets/images/Entertainment_Addiction_ 2.jpg",
-    category: "",
+    category: "gaming addiction",
     age: "",
     author: "Haaris Rueben",
     duration: "",
@@ -131,13 +131,13 @@ export const PODCAST_DETAILS = [
     id: 8,
     topic: "Toddler phone Addiction",
     description:
-      "Podcast on Toddler Phone Addiction investigates the effects of early exposure to screens on young children’s development and behavior. Each episode explores how excessive phone use can impact toddlers' cognitive, social, and emotional growth, and offers insights into the challenges faced by parents in managing screen time. Through expert interviews, case studies, and practical advice, we provide strategies for creating healthy screen habits, encouraging interactive play, and supporting a balanced approach to technology in early childhood.",
+      "Podcast on Toddler Phone Addiction investigates the effects of early exposure to screens on young children's development and behavior. Each episode explores how excessive phone use can impact toddlers' cognitive, social, and emotional growth, and offers insights into the challenges faced by parents in managing screen time. Through expert interviews, case studies, and practical advice, we provide strategies for creating healthy screen habits, encouraging interactive play, and supporting a balanced approach to technology in early childhood.",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/toddler-phone-addiction.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/toddler-phone-addiction.mp3",
     thumbnail: "/assets/images/toddler-phone-addiction.jpg",
-    category: "",
+    category: "mobile addiction",
     age: "",
     author: "Kisha Kothari",
     duration: "",
@@ -152,7 +152,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/social-media-de-addiction-orignals.mp3",
     thumbnail: "/assets/images/social-media-de-addiction.jpg",
-    category: "",
+    category: "mobile addiction",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -167,7 +167,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/teen-emotional-and-behavioural-problems-orignals.mp3",
     thumbnail: "/assets/images/Teen_emotion_&_behaviour_problems_ 2.jpg",
-    category: "",
+    category: "teen emotions",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -182,7 +182,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/magical-journey-to-self-dicovery-orignals.mp3",
     thumbnail: "/assets/images/magical-journey-to-self-discovery.jpg",
-    category: "",
+    category: "teen emotions",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -197,7 +197,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/maintaining-relationship-with-teenager-orignals.mp3",
     thumbnail: "/assets/images/maintain-relationship-with-teen.jpg",
-    category: "",
+    category: "teen emotions",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -213,7 +213,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/phrases-sentences-orignals.mp3",
     thumbnail: "/assets/images/Phrases_and_sentences_parents.jpg",
-    category: "",
+    category: "teen emotions",
     age: "6-12",
     author: "Kisha Kothari",
     duration: "",
@@ -222,13 +222,13 @@ export const PODCAST_DETAILS = [
     id: 14,
     topic: "Role Model For Kids",
     description:
-      "Podcast on Role Model for Kids explores the vital role that positive role models play in a child’s development. Each episode highlights how behaviors, values, and attitudes demonstrated by parents, caregivers, and other influential figures can shape a child's character and aspirations. Through expert interviews, inspiring stories, and actionable advice, we discuss ways to model integrity, resilience, and kindness. This podcast provides practical tips for adults to embody the qualities they hope to instill in children, helping them become confident, responsible, and compassionate individuals.",
+      "Podcast on Role Model for Kids explores the vital role that positive role models play in a child's development. Each episode highlights how behaviors, values, and attitudes demonstrated by parents, caregivers, and other influential figures can shape a child's character and aspirations. Through expert interviews, inspiring stories, and actionable advice, we discuss ways to model integrity, resilience, and kindness. This podcast provides practical tips for adults to embody the qualities they hope to instill in children, helping them become confident, responsible, and compassionate individuals.",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/role-models-for-kid-orignals.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/role-models-for-kid-orignals.mp3",
     thumbnail: "/assets/images/Role_Model_For_Kids_.jpg",
-    category: "",
+    category: "teen emotions",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -243,7 +243,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/things-parents-do-that-annoy-kids-orignals.mp3",
     thumbnail: "/assets/images/Things_parents_do_that_annoy_kids 2.jpg",
-    category: "",
+    category: "teen emotions",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -252,13 +252,13 @@ export const PODCAST_DETAILS = [
     id: 16,
     topic: "Electronic gadgets and kids.",
     description:
-      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children’s development and daily lives. Each episode explores how smartphones, tablets, and other gadgets influence aspects such as cognitive development, social skills, and physical health. Through expert interviews, research findings, and practical advice, we address the benefits and potential drawbacks of technology use, offering strategies for setting healthy boundaries and encouraging balanced screen time. Our goal is to help parents and caregivers navigate the digital landscape to support their children’s overall well-being and growth.",
+      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives. Each episode explores how smartphones, tablets, and other gadgets influence aspects such as cognitive development, social skills, and physical health. Through expert interviews, research findings, and practical advice, we address the benefits and potential drawbacks of technology use, offering strategies for setting healthy boundaries and encouraging balanced screen time. Our goal is to help parents and caregivers navigate the digital landscape to support their children's overall well-being and growth.",
     audioPodcastSampleSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/electronic-gadgets-and-kids-orignals.mp3",
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/electronic-gadgets-and-kids-orignals.mp3",
     thumbnail: "/assets/images/Electronic_Gadgets_.jpg",
-    category: "",
+    category: "mobile addiction",
     age: "2-6",
     author: "Haaris Rueben",
     duration: "",
@@ -274,7 +274,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/reconnecting-genz-with-value-beyond-the-screen.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    category: "",
+    category: "mobile addiction",
     age: "2-6",
     author: "Haaris Rueben",
     duration: "",
@@ -289,7 +289,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/fun-beyond-video-game.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    category: "",
+    category: "gaming addiction",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -304,7 +304,7 @@ export const PODCAST_DETAILS = [
     audioPodcastSrc:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/podcast/how-to-maintain-healthy-relations.mp3",
     thumbnail: "/assets/images/reconnecting-genz-with-value-beyond-screen.jpg",
-    category: "",
+    category: "teen emotions",
     age: "2-6",
     author: "Kisha Kothari",
     duration: "",
@@ -1815,5 +1815,175 @@ export const PRODUCT_DATA = [
     imageUrl: "/assets/productv2/colouring-book-6-12.png",
     price: 199,
     accentColor: "#B454FE",
+  },
+];
+
+export const ISSUES_FACED_BY_USERS = [
+  {
+    id: "IFU_01",
+    title: "Low confidence",
+    ageCategory: "6-12",
+    description: "Building self-esteem and confidence in social settings",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/low-confidence.png",
+  },
+  {
+    id: "IFU_02",
+    title: "Aggressive behaviour",
+    ageCategory: "6-12",
+    description: "Developing empathy and understanding towards others",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/aggressive-behaviour.png",
+  },
+  {
+    id: "IFU_03",
+    title: "LACK OF COMMUNICATION",
+    ageCategory: "6-12",
+    description: "Developing effective communication skills",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/lack-of-communication.png",
+  },
+  {
+    id: "IFU_04",
+    title: "Disobedience",
+    ageCategory: "6-12",
+    description: "Encouraging positive behaviour and respect for authority",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/disobidience.png",
+  },
+  {
+    id: "IFU_06",
+    title: "Dipression",
+    ageCategory: "13-16",
+    description: "Developing empathy and understanding towards others",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/dipression.png",
+  },
+  {
+    id: "IFU_07",
+    title: "Bullying",
+    ageCategory: "13-16",
+    description: "Bullying in the workplace and how to deal with it",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/bullying.png",
+  },
+  {
+    id: "IFU_05",
+    title: "Cyber addiction",
+    ageCategory: "13-16",
+    description: "Understanding the risks and consequences of cyber addiction",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/cyber-addiction.png",
+  },
+  {
+    id: "IFU_08",
+    title: "Peer Pressure",
+    ageCategory: "13-16",
+    description:
+      "Understanding peer pressure and how to make decisions that are right for you",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/peer-pressure.png",
+  },
+  {
+    id: "IFU_09",
+    title: "Interviewing Skills",
+    ageCategory: "17-19",
+    description:
+      "Learn how to prepare for interviews and make a lasting impression",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/interview-skill.png",
+  },
+  {
+    id: "IFU_10",
+    title: "Professional Image",
+    ageCategory: "17-19",
+    description: "Learn how to present yourself professionally",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/professional-image.png",
+  },
+  {
+    id: "IFU_11",
+    title: "Portfolio Management",
+    ageCategory: "17-19",
+    description:
+      "Learn how to create a professional portfolio that showcases your skills and experiences",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/portfolio-managment.png",
+  },
+  {
+    id: "IFU_12",
+    title: "Lack of career support",
+    ageCategory: "17-19",
+    description:
+      "Get access to top career advice, guidance on trending domains, and expert insights",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/lack-of-career-support.png",
+  },
+  {
+    id: "IFU_09",
+    title: "Interviewing Skills",
+    ageCategory: "20+",
+    description:
+      "Learn how to prepare for interviews and make a lasting impression",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/interview-skill.png",
+  },
+  {
+    id: "IFU_10",
+    title: "Professional Image",
+    ageCategory: "20+",
+    description: "Learn how to present yourself professionally",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/professional-image.png",
+  },
+  {
+    id: "IFU_11",
+    title: "Portfolio Management",
+    ageCategory: "20+",
+    description:
+      "Learn how to create a professional portfolio that showcases your skills and experiences",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/portfolio-managment.png",
+  },
+  {
+    id: "IFU_12",
+    title: "Lack of career support",
+    ageCategory: "20+",
+    description:
+      "Get access to top career advice, guidance on trending domains, and expert insights",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/lack-of-career-support.png",
+  },
+  {
+    id: "IFU_13",
+    title: "Managing Screentime",
+    ageCategory: "parents",
+    description: "Description for the new issue",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/manage-screen-time.png", // Add image URL for IFU_13
+  },
+  {
+    id: "IFU_14",
+    title: "Overspending Money",
+    ageCategory: "parents",
+    description: "Learn effective strategies for managing time efficiently",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/over-spending-money.png",
+  },
+  {
+    id: "IFU_15",
+    title: "Handling Tantrums",
+    ageCategory: "parents",
+    description: "Learn effective strategies for managing time efficiently",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/handling-tantrum.png",
+  },
+  {
+    id: "IFU_16",
+    title: "Online Safety",
+    ageCategory: "parents",
+    description: "Learn effective strategies for managing time efficiently",
+    imageUrl:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/online-safety.png",
   },
 ];

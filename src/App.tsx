@@ -83,7 +83,7 @@ const App = () => {
     <Provider store={store}>
       <ScrollToTop />
       <Router />
-      <Toaster position="top-right" closeButton />
+      <Toaster position="top-right" closeButton richColors />
     </Provider>
   );
 };

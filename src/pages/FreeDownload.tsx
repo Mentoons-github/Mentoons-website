@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import Wordbreak from "@/components/comics/Wordbreak";
-import { v4 } from "uuid";
-import { MdCloudDownload } from "react-icons/md";
 import FreeDownloadForm from "@/components/comics/FreeDownloadForm";
+import Wordbreak from "@/components/comics/Wordbreak";
 import { gamesData } from "@/constant/comicsConstants";
+import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { MdCloudDownload } from "react-icons/md";
+import { v4 } from "uuid";
 
 export interface GamesData {
   name: string;
@@ -30,7 +30,7 @@ const FreeDownload: React.FC = () => {
   const [showFreeDownloadForm, setShowFreeDownloadForm] =
     useState<boolean>(false);
   return (
-    <div className="py-10 md:py-20 bg-[#00B0A5]">
+    <div className="py-10 md:py-20 bg-[#00B0A5]  md:p-12">
       <motion.div
         initial={{ opacity: 0.5 }}
         whileInView={{ opacity: 1 }}
@@ -79,7 +79,7 @@ const FreeDownload: React.FC = () => {
                 className={`${item?.imgStyling} overflow-hidden rounded-2xl`}
               >
                 <img
-                  className="w-full h-[23rem] lg:h-[16rem] rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300"
+                  className="w-full h-[23rem] lg:h-[16rem] rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
                   src={item?.image}
                   alt="comic image"
                 />

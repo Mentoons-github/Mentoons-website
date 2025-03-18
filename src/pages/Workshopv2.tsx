@@ -1,7 +1,10 @@
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ, WORKSHOP_MATTERS_POINTS, WORKSHOPS } from "@/constant";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
+import { useInView } from "react-intersection-observer";
+
 export type TPOSITION = {
   _id: string;
   jobTitle: string;
@@ -19,13 +22,95 @@ const Workshopv2 = () => {
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+      },
+    },
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const scaleIn = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  // Setting up intersection observers for different sections
+  const [headerRef, headerInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [welcomeRef, welcomeInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [expectRef, expectInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [challengesRef, challengesInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [mattersRef, mattersInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [registerRef, registerInView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+  const [faqRef, faqInView] = useInView({ threshold: 0.2, triggerOnce: true });
+
   return (
     <div>
       {WORKSHOPS.filter((item) => item.category === selecteCategory).map(
         (workshop) => (
           <div key={workshop.id} className="">
-            <div className="relative justify-between overflow-hidden md:flex">
-              <div className="flex-1 px-8 pt-24 md:px-20 ">
+            <motion.div
+              ref={headerRef}
+              initial="hidden"
+              animate={headerInView ? "visible" : "hidden"}
+              variants={fadeIn}
+              className="relative justify-between overflow-hidden md:flex"
+            >
+              <motion.div
+                variants={fadeInUp}
+                className="flex-1 px-8 pt-24 md:px-20 "
+              >
                 <h1 className="text-5xl font-semibold text-primary md:text-6xl">
                   Workshops for All!
                 </h1>
@@ -37,8 +122,11 @@ const Workshopv2 = () => {
                   individuals to develop a healthy and balanced relationship
                   with technology.
                 </p>
-              </div>
-              <div className="flex-col items-center justify-center flex-1 gap-12 pb-24 text-2xl font-semibold md:pt-24">
+              </motion.div>
+              <motion.div
+                variants={fadeInUp}
+                className="flex-col items-center justify-center flex-1 gap-12 pb-24 text-2xl font-semibold md:pt-24"
+              >
                 <div className="flex items-center justify-center gap-16 py-16 ">
                   <button
                     className={`flex items-center justify-start text-yellow-500 px-3 gap-3 w-32 py-[7px] rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 ${
@@ -83,22 +171,34 @@ const Workshopv2 = () => {
                     Parent
                   </button>
                 </div>
-              </div>
-              <img
+              </motion.div>
+              <motion.img
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
                 src="/assets/images/career-corner.png"
                 alt="career-corner"
                 className="absolute w-24 transition-all duration-200 -top-2 -right-2 md:w-48 md:-top-4 md:-right-4 hover:scale-110"
                 onClick={() => handleSelectedCategory("20+")}
               />
-            </div>
+            </motion.div>
             {/* dynamic section */}
             <div
               style={{
                 background: `linear-gradient(to bottom, ${workshop.workshopAccentColor}, #FFFFFF)`,
               }}
             >
-              <div className="gap-12 p-8 md:py-16 md:px-20 md:flex">
-                <div className="flex-col gap-8 md:flex-1 md:flex ">
+              <motion.div
+                ref={welcomeRef}
+                initial="hidden"
+                animate={welcomeInView ? "visible" : "hidden"}
+                variants={fadeIn}
+                className="gap-12 p-8 md:py-16 md:px-20 md:flex"
+              >
+                <motion.div
+                  variants={fadeInUp}
+                  className="flex-col gap-8 md:flex-1 md:flex"
+                >
                   <div>
                     <h2 className="pb-3 text-5xl font-bold">
                       {" "}
@@ -116,30 +216,51 @@ const Workshopv2 = () => {
                       {workshop.workshopAimDescription}
                     </p>
                   </div>
-                </div>
-                <figure className="flex items-center justify-center flex-1 p-4 ">
+                </motion.div>
+                <motion.figure
+                  variants={scaleIn}
+                  className="flex items-center justify-center flex-1 p-4"
+                >
                   <img
                     src={workshop.workshopLogo}
                     alt="Buddy Camp Illustrations"
                     className="object-cover"
                   />
-                </figure>
-              </div>
+                </motion.figure>
+              </motion.div>
 
               {/* What to expect section */}
-              <div className="flex flex-col pt-0 md:p-12 ">
-                <h2 className="pb-12 text-3xl font-semibold text-center ">
+              <motion.div
+                ref={expectRef}
+                initial="hidden"
+                animate={expectInView ? "visible" : "hidden"}
+                variants={fadeIn}
+                className="flex flex-col pt-0 md:p-12"
+              >
+                <motion.h2
+                  variants={fadeInUp}
+                  className="pb-12 text-3xl font-semibold text-center"
+                >
                   What to expect from {workshop.title}?
-                </h2>
-                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-around">
-                  {workshop.workshopOfferings.map((offering) => (
-                    <div
+                </motion.h2>
+                <motion.div
+                  variants={staggerContainer}
+                  className="flex flex-col items-center gap-4 md:flex-row md:justify-around"
+                >
+                  {workshop.workshopOfferings.map((offering, index) => (
+                    <motion.div
                       key={offering.id}
+                      variants={scaleIn}
+                      custom={index}
                       style={{
                         border: `1px solid ${offering.accentColor}`,
                         backgroundColor: `${offering.accentColor}20`,
                       }}
-                      className="flex flex-col items-center gap-4  p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                      className="flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                      whileHover={{
+                        scale: 1.05,
+                        transition: { duration: 0.3 },
+                      }}
                     >
                       <img
                         src={offering.imageUrl}
@@ -152,24 +273,41 @@ const Workshopv2 = () => {
                       >
                         {offering.title}
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* Challenges faced by Youngsters */}
-
-              <div className="flex flex-col p-12">
-                <h2 className="pb-12 text-3xl font-semibold text-center ">
+              <motion.div
+                ref={challengesRef}
+                initial="hidden"
+                animate={challengesInView ? "visible" : "hidden"}
+                variants={fadeIn}
+                className="flex flex-col p-12"
+              >
+                <motion.h2
+                  variants={fadeInUp}
+                  className="pb-12 text-3xl font-semibold text-center"
+                >
                   Challenges faced by Youngsters
-                </h2>
-                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-around">
-                  {workshop.addressedIssues.map((issue) => (
-                    <div
+                </motion.h2>
+                <motion.div
+                  variants={staggerContainer}
+                  className="flex flex-col items-center gap-4 md:flex-row md:justify-around"
+                >
+                  {workshop.addressedIssues.map((issue, index) => (
+                    <motion.div
                       key={issue.id}
+                      variants={scaleIn}
+                      custom={index}
                       className="flex flex-col items-center gap-4 border p-4 rounded-xl w-[280px] h-[280px] justify-center"
                       style={{
                         border: `1px solid ${workshop.registerFormbgColor}`,
+                      }}
+                      whileHover={{
+                        scale: 1.05,
+                        transition: { duration: 0.3 },
                       }}
                     >
                       <img
@@ -180,19 +318,36 @@ const Workshopv2 = () => {
                       <p className="text-lg font-bold text-center whitespace-nowrap">
                         {issue.title}
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
 
             {/* Why our WorkShops Matters */}
-            <div className="px-6 md:py-12 md:flex md:items-start md:px-20">
-              <div className="flex-1 ">
-                {WORKSHOP_MATTERS_POINTS.map((point) => (
-                  <div key={point.id} className="flex items-start gap-5 p-4">
+            <motion.div
+              ref={mattersRef}
+              initial="hidden"
+              animate={mattersInView ? "visible" : "hidden"}
+              variants={fadeIn}
+              className="px-6 md:py-12 md:flex md:items-start md:px-20"
+            >
+              <motion.div variants={staggerContainer} className="flex-1">
+                {WORKSHOP_MATTERS_POINTS.map((point, index) => (
+                  <motion.div
+                    key={point.id}
+                    variants={fadeInUp}
+                    custom={index}
+                    className="flex items-start gap-5 p-4"
+                  >
                     <figure className="">
-                      <img src={point.icon} alt="icon" className="w-16" />
+                      <motion.img
+                        src={point.icon}
+                        alt="icon"
+                        className="w-16"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ duration: 0.3 }}
+                      />
                     </figure>
                     <div>
                       <p className="text-2xl ">
@@ -202,35 +357,63 @@ const Workshopv2 = () => {
                         {point.description}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-              <div className="relative items-center justify-center flex-1 ">
+              </motion.div>
+              <motion.div
+                variants={fadeInUp}
+                className="relative items-center justify-center flex-1"
+              >
                 <h2 className="pt-4 text-8xl font-semibold text-center luckiest-guy-regular text-primary [-webkit-text-stroke:_2px_black]">
                   Why our workshops matter?
                 </h2>
                 <figure className="flex items-center justify-end w-full p-4 pt-0 ">
-                  <img src="/assets/workshopv2/man-thinking.png" alt="" />
-                </figure>
-              </div>
-            </div>
-            {/* Registrations Form */}
-            <div
-              className="p-4 py-12 "
-              style={{ backgroundColor: `${workshop.workshopAccentColor}` }}
-            >
-              <h2 className="text-3xl font-semibold text-center">
-                REGISTER FOR OUR {workshop.title.toUpperCase()} HERE !
-              </h2>
-              <div className="my-12 md:flex">
-                <figure className="flex-1 ">
-                  <img
-                    src={workshop.registerFormIllustration}
+                  <motion.img
+                    src="/assets/workshopv2/man-thinking.png"
                     alt=""
-                    className="w-[60%] mx-auto object-cover p-4 "
+                    initial={{ x: 100, opacity: 0 }}
+                    animate={
+                      mattersInView
+                        ? { x: 0, opacity: 1 }
+                        : { x: 100, opacity: 0 }
+                    }
+                    transition={{ duration: 0.8, delay: 0.3 }}
                   />
                 </figure>
-                <div className="flex-1 px-6 md:px-36">
+              </motion.div>
+            </motion.div>
+
+            {/* Registrations Form */}
+            <motion.div
+              ref={registerRef}
+              initial="hidden"
+              animate={registerInView ? "visible" : "hidden"}
+              variants={fadeIn}
+              className="p-4 py-12"
+              style={{ backgroundColor: `${workshop.workshopAccentColor}` }}
+            >
+              <motion.h2
+                variants={fadeInUp}
+                className="text-3xl font-semibold text-center"
+              >
+                REGISTER FOR OUR {workshop.title.toUpperCase()} HERE !
+              </motion.h2>
+              <motion.div variants={fadeInUp} className="my-12 md:flex">
+                <figure className="flex-1 ">
+                  <motion.img
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={
+                      registerInView
+                        ? { opacity: 1, scale: 1 }
+                        : { opacity: 0, scale: 0.8 }
+                    }
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    src={workshop.registerFormIllustration}
+                    alt=""
+                    className="w-[60%] mx-auto object-cover p-4"
+                  />
+                </figure>
+                <motion.div variants={scaleIn} className="flex-1 px-6 md:px-36">
                   <form className="flex flex-col w-full gap-4">
                     <div className="box-border flex gap-4">
                       <div className="flex-1 ">
@@ -318,45 +501,75 @@ const Workshopv2 = () => {
                       ></textarea>
                     </div>
 
-                    <button
-                      className="py-3 text-xl font-semibold text-white rounded-lg shadow-lg "
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="py-3 text-xl font-semibold text-white rounded-lg shadow-lg"
                       style={{
                         backgroundColor: workshop.registerFormbgColor,
                       }}
                     >
                       Submit
-                    </button>
+                    </motion.button>
                   </form>
-                </div>
-              </div>
-            </div>
-            {/* Frequently asked questions */}
-            <div className="p-8 md:px-28">
-              <h2 className="pb-6 text-2xl font-semibold ">
-                Frequently asked questions
-              </h2>
-              <div className="md:flex md:gap-8 ">
-                <div className="flex flex-col flex-1 gap-4 mb-8 ">
-                  {WORKSHOP_FAQ.map((faq, index) => (
-                    <FAQCard
-                      key={faq.id}
-                      faq={faq}
-                      isExpanded={expandedIndex === index}
-                      color={workshop.registerFormbgColor}
-                      onClick={() =>
-                        setExpandedIndex(index === expandedIndex ? -1 : index)
-                      }
-                    />
-                  ))}
-                </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
 
-                <div className="flex flex-col flex-1 gap-4 p-4 text-center border-2 md:mb-8 rounded-xl">
+            {/* Frequently asked questions */}
+            <motion.div
+              ref={faqRef}
+              initial="hidden"
+              animate={faqInView ? "visible" : "hidden"}
+              variants={fadeIn}
+              className="p-8 md:px-28"
+            >
+              <motion.h2
+                variants={fadeInUp}
+                className="pb-6 text-2xl font-semibold"
+              >
+                Frequently asked questions
+              </motion.h2>
+              <motion.div variants={fadeInUp} className="md:flex md:gap-8">
+                <motion.div
+                  variants={staggerContainer}
+                  className="flex flex-col flex-1 gap-4 mb-8"
+                >
+                  {WORKSHOP_FAQ.map((faq, index) => (
+                    <motion.div
+                      key={faq.id}
+                      variants={fadeInUp}
+                      custom={index}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <FAQCard
+                        faq={faq}
+                        isExpanded={expandedIndex === index}
+                        color={workshop.registerFormbgColor}
+                        onClick={() =>
+                          setExpandedIndex(index === expandedIndex ? -1 : index)
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div
+                  variants={scaleIn}
+                  className="flex flex-col flex-1 gap-4 p-4 text-center border-2 md:mb-8 rounded-xl"
+                >
                   <div className="w-[80%] mx-auto ">
                     <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
-                      <BiSolidMessage
-                        className="text-5xl "
-                        style={{ color: workshop.registerFormbgColor }}
-                      />
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 10 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <BiSolidMessage
+                          className="text-5xl"
+                          style={{ color: workshop.registerFormbgColor }}
+                        />
+                      </motion.div>
                     </div>
                     <div>
                       <h3
@@ -382,7 +595,9 @@ const Workshopv2 = () => {
                           }}
                         ></textarea>
 
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
                           className="w-full py-3 mt-4 text-xl font-semibold text-white transition-all duration-200 rounded-lg shadow-lg text-ellipsist-white"
                           style={{
                             backgroundColor: workshop.registerFormbgColor,
@@ -390,13 +605,13 @@ const Workshopv2 = () => {
                           type="submit"
                         >
                           Submit
-                        </button>
+                        </motion.button>
                       </form>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           </div>
         )
       )}

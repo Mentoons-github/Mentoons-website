@@ -1,40 +1,47 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
-import { getAllProducts } from "@/redux/cardProductSlice";
 import { getCart } from "@/redux/cartSlice";
+import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import CartItemCard from "../components/MentoonsStore/CartItemCard";
+
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const { getToken, userId } = useAuth();
+  console.log("User ID", userId);
 
+  // Updated selector for cart structure
   const { cart, loading, error } = useSelector(
     (state: RootState) => state.cart
   );
-  const { cardProducts } = useSelector((state: RootState) => state.cardProduct);
+
+  console.log("Cart", cart);
+
+  // Get products from the productSlice
+  const { items: products } = useSelector((state: RootState) => state.products);
 
   const handleCheckout = () => {
     navigate("/order-summary");
   };
 
   useEffect(() => {
-    const fetchCart = async () => {
+    const loadCartData = async () => {
       const token = await getToken();
       if (token && userId) {
+        // Fetch cart data
         dispatch(getCart({ token, userId }));
-        const response = await dispatch(
-          getAllProducts({ search: "", filtercategory: "" })
-        );
-        console.log("Response", response.payload);
+
+        // Fetch product recommendations with empty filters
+        dispatch(fetchProducts({}));
       }
     };
-    fetchCart();
-  }, [dispatch, getToken, userId, cart.totalItemCount]);
+    loadCartData();
+  }, [dispatch, getToken, userId]);
 
   if (loading) {
     return (
@@ -66,28 +73,33 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className=" p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto  ">
-      <div className="pb-3 text-start ">
-        <div className="text-5xl lg:text-7xl w-full  border-b-4 border-black font-extrabold leading-[1.10] pb-4">
+    <div className="p-10 lg:py-20 space-y-10 md:w-[90%] mx-auto">
+      <div className="pb-3 text-start">
+        <div className="text-5xl lg:text-7xl w-full border-b-4 border-black font-extrabold leading-[1.10] pb-4">
           Checkout Your Cart
         </div>
       </div>
 
       {error || cart?.items?.length > 0 ? (
-        <div className="flex flex-wrap gap-4 bg-transparent ">
+        <div className="flex flex-wrap gap-4 bg-transparent">
           <div className="flex flex-col w-full gap-4 lg:flex-row-reverse">
             <div className="w-full lg:w-[40%] flex flex-col items-start justify-between rounded-3xl border-4 bg-white shadow-xl h-fit text-2xl font-semibold p-4">
-              <div className="w-full text-lg ">
+              <div className="w-full text-lg">
                 <div className="flex justify-between">
                   <span className="text-lg font-medium text-gray-600">
                     Subtotal
                   </span>
-                  <span>₹{cart.totalPrice.toFixed(2)}</span>
+                  <span>₹{cart.totalPrice?.toFixed(2) || "0.00"}</span>
                 </div>
                 <div className="pt-4 border-t">
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
-                    <span>₹{cart.totalPrice.toFixed(2)}</span>
+                    <span>
+                      ₹
+                      {cart.discountedPrice?.toFixed(2) ||
+                        cart.totalPrice?.toFixed(2) ||
+                        "0.00"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -100,30 +112,13 @@ const Cart: React.FC = () => {
               </button>
             </div>
             <div className="flex flex-col items-center w-full gap-4">
-              {cart.items && cart.items.length > 0 ? (
-                cart.items.map((item) => {
-                  // Ensure product data exists before rendering
-                  console.log("Item", item);
-                  if (item.productId && item.productId._id) {
-                    return (
-                      <CartItemCard
-                        key={item.productId._id + "_" + Date.now()} // Add timestamp to ensure unique key
-                        cartItem={{
-                          ...item,
-                          productId: {
-                            ...item.productId,
-                            productImages:
-                              item?.productId?.productImages[0].imageSrc || "", // Changed productImages to productImage
-                          },
-                        }}
-                      />
-                    );
-                  }
-                  return null; // Skip rendering if product data is incomplete
-                })
+              {cart?.items && cart.items.length > 0 ? (
+                cart.items.map((item) => (
+                  <CartItemCard key={item.productId} cartItem={item} />
+                ))
               ) : (
                 <div className="flex flex-col items-center justify-center gap-6 text-center">
-                  <p className="text-xl font-semibold md:text-4xl ">
+                  <p className="text-xl font-semibold md:text-4xl">
                     Your cart is empty
                   </p>
                   <Link
@@ -136,14 +131,21 @@ const Cart: React.FC = () => {
               )}
             </div>
           </div>
+
           <div className="w-full p-4 mt-4 ">
             <h2 className="mb-8 text-4xl font-semibold">People also bought</h2>
 
-            <div className="flex flex-wrap gap-4">
-              {cardProducts?.length > 0 ? (
-                cardProducts.map((product) => (
-                  <ProductCard key={product._id} productDetails={product} />
-                ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto">
+              {products?.length > 0 ? (
+                products.map((product) => {
+                  // Ensure all required properties are present before passing to ProductCard
+
+                  return (
+                    <div className="flex justify-center w-full">
+                      <ProductCard key={product._id} productDetails={product} />
+                    </div>
+                  );
+                })
               ) : (
                 <div>No Product found</div>
               )}
@@ -152,7 +154,7 @@ const Cart: React.FC = () => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-6 text-center">
-          <p className="text-xl font-semibold md:text-4xl ">
+          <p className="text-xl font-semibold md:text-4xl">
             Your cart is empty
           </p>
           <Link

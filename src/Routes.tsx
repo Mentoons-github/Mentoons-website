@@ -9,8 +9,6 @@ import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
 import OrderSummary from "@/components/OrderSummary";
-import PaymentForm from "@/components/PaymentForm";
-import Product from "./components/MentoonsStore/Products";
 // import Career from "./components/shared/CareerPage/Career.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 import AssesmentPage from "./pages/AssesmentPage";
@@ -18,14 +16,12 @@ import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
-import ComicPdfPage from "./pages/ComicPdfPage";
+// import ComicPdfPage from "./pages/ComicPdfPage";
 import Home from "./pages/Home";
-import LandingPage from "./pages/LandingPage";
 import Membership from "./pages/Membership";
-import MentoonsAdda from "./pages/MentoonsAdda";
 import MentoonsStore from "./pages/MentoonsStore";
+import PaymentStatusPage from "./pages/PaymentStatusPage";
 import PolicyPage from "./pages/PolicyPage";
-import ProductCategory from "./pages/ProductCategory";
 import ProductDetails from "./pages/ProductDetails";
 import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
@@ -35,9 +31,9 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 // Lazy load the pages
 // const Home = lazy(() => import("./pages/Home"));
 
-const Wishlist = lazy(() => import("./pages/Wishlist"));
+// const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Cart = lazy(() => import("./pages/Cart"));
-const ComicsPage = lazy(() => import("./pages/ComicsPage"));
+// const ComicsPage = lazy(() => import("./pages/ComicsPage"));
 // const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -45,8 +41,8 @@ const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
-const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
-const SearchPage = lazy(() => import("./pages/SearchPage"));
+// const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
+// const SearchPage = lazy(() => import("./pages/SearchPage"));
 // const Career = lazy(() => import("./components/shared/CareerPage/Career"));
 // const PodCast = lazy(() => import("./pages/PodCast"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
@@ -60,7 +56,6 @@ const routes = [
     element: (
       <MainLayout>
         <Home />
-        {/* <LandingPage /> */}
       </MainLayout>
     ),
   },
@@ -92,14 +87,14 @@ const routes = [
     ),
   },
 
-  {
-    path: "/wishlist",
-    element: (
-      <MainLayout>
-        <Wishlist />
-      </MainLayout>
-    ),
-  },
+  // {
+  //   path: "/wishlist",
+  //   element: (
+  //     <MainLayout>
+  //       <Wishlist />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/cart",
     element: (
@@ -121,83 +116,44 @@ const routes = [
     ),
   },
   {
-    path: "/mentoons-comics/free-download",
+    path: "/free-download",
     element: (
       <MainLayout>
         <FreeDownload />
       </MainLayout>
     ),
   },
-  {
-    path: "/mentoons-comics/audio-comics",
-    element: (
-      <MainLayout>
-        <ComicsPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-comics/comics",
-    element: (
-      <MainLayout>
-        <ComicsPage />
 
-        <ComicsPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-comics/comics",
-    element: (
-      <MainLayout>
-        <ComicsPage />
-      </MainLayout>
-    ),
-  },
+  
+ 
   {
     path: "/mentoons-workshops",
     element: (
       <MainLayout>
-        {/* <LandingPage /> */}
         <Workshopv2 />
       </MainLayout>
     ),
   },
-  {
-    path: "/mentoons-comics/comics-list",
-    element: (
-      <MainLayout>
-        <ComicsPage />
-        <ComicsPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-comics/audio-comics/:comic",
-    element: (
-      <ProtectedRoute>
-        <MainLayout>
-          <AudioComicPage />
-        </MainLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/search",
-    element: (
-      <MainLayout>
-        <SearchPage />
-      </MainLayout>
-    ),
-  },
+  
   // {
-  //   path: "/hiring",
+  //   path: "/mentoons-comics/audio-comics/:comic",
+  //   element: (
+  //     <ProtectedRoute>
+  //       <MainLayout>
+  //         <AudioComicPage />
+  //       </MainLayout>
+  //     </ProtectedRoute>
+  //   ),
+  // },
+  // {
+  //   path: "/search",
   //   element: (
   //     <MainLayout>
-  //       <Career />
+  //       <SearchPage />
   //     </MainLayout>
   //   ),
   // },
+ 
   {
     path: "/mentoons-podcast",
     element: (
@@ -222,14 +178,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/mentoons-comics/comics/:comic",
-    element: (
-      <MainLayout>
-        <ComicPdfPage />
-      </MainLayout>
-    ),
-  },
+ 
   {
     path: "/mentoons-store",
     element: (
@@ -238,27 +187,27 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/mentoons-store/:category",
-    element: (
-      <MainLayout>
-        <ProductCategory />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-store/:category/:productId",
-    element: (
-      <MainLayout>
-        <ProductDetails />
-      </MainLayout>
-    ),
-  },
+  // {
+  //   path: "/mentoons-store/:category",
+  //   element: (
+  //     <MainLayout>
+  //       <ProductCategory />
+  //     </MainLayout>
+  //   ),
+  // },
+  // {
+  //   path: "/mentoons-store/:category/:productId",
+  //   element: (
+  //     <MainLayout>
+  //       <ProductDetails />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/mentoons-store/product/:productId",
     element: (
       <MainLayout>
-        <Product />
+        <ProductDetails />
       </MainLayout>
     ),
   },
@@ -302,14 +251,14 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/landing-page",
-    element: (
-      <MainLayout>
-        <LandingPage />
-      </MainLayout>
-    ),
-  },
+  // {
+  //   path: "/landing-page",
+  //   element: (
+  //     <MainLayout>
+  //       <LandingPage />
+  //     </MainLayout>
+  //   ),
+  // },
   {
     path: "/assesment-page",
     element: (
@@ -326,10 +275,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  {
-    path: "/mentoons-adda",
-    element: <MentoonsAdda />,
-  },
+ 
   {
     path: "/order-summary",
     element: (
@@ -338,11 +284,19 @@ const routes = [
       </MainLayout>
     ),
   },
+  // {
+  //   path: "/payment",
+  //   element: (
+  //     <MainLayout>
+  //       <PaymentForm />
+  //     </MainLayout>
+  //   ),
+  // },
   {
-    path: "/payment",
+    path: "/payment-status",
     element: (
       <MainLayout>
-        <PaymentForm />
+        <PaymentStatusPage />
       </MainLayout>
     ),
   },

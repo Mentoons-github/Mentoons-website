@@ -1,29 +1,33 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Define types to match backend model
+interface CartItem {
+  productId: string; // Just the ID, not the full product
+  productType: string;
+  title: string;
+  ageCategory?: string;
+  productImage?: string;
+  cardType?: string;
+  quantity: number;
+  price: number;
+  productDetails?: any;
+}
+
+interface AppliedCoupon {
+  code: string;
+  discountAmount: number;
+  discountType: "percentage" | "fixed";
+}
+
 interface Cart {
   userId: string;
-  items: [
-    {
-      productId: {
-        _id: string;
-        productTitle: string;
-        productSummary: string;
-        productImages: [
-          {
-            imageSrc: string;
-          }
-        ];
-        productCategory: string;
-      };
-      quantity: number;
-      stock: "In Stock" | "Out of Stock";
-      price: number;
-    }
-  ];
+  items: CartItem[];
   totalPrice: number;
   totalItemCount: number;
-  status: "idle" | "loading" | "succeeded" | "failed";
+  cartStatus: "active" | "completed" | "cancelled";
+  appliedCoupon?: AppliedCoupon;
+  discountedPrice: number;
 }
 
 const initialState: {
@@ -31,33 +35,19 @@ const initialState: {
   error: string | null;
   success: boolean;
   cart: Cart;
+  apiStatus: "idle" | "loading" | "succeeded" | "failed";
 } = {
   loading: false,
   error: null,
   success: false,
+  apiStatus: "idle",
   cart: {
     userId: "",
-    items: [
-      {
-        productId: {
-          _id: "",
-          productTitle: "",
-          productSummary: "",
-          productImages: [
-            {
-              imageSrc: "",
-            },
-          ],
-          productCategory: "",
-        },
-        stock: "In Stock",
-        quantity: 0,
-        price: 0,
-      },
-    ],
+    items: [],
     totalPrice: 0,
     totalItemCount: 0,
-    status: "idle",
+    cartStatus: "active",
+    discountedPrice: 0,
   },
 };
 
@@ -88,24 +78,38 @@ export const addItemCart = createAsyncThunk(
     token,
     userId,
     productId,
+    productType,
+    title,
     quantity,
     price,
+    ageCategory,
+    productImage,
+    productDetails,
   }: {
     token: string;
     userId: string;
     productId: string;
+    productType: string;
+    title: string;
     quantity: number;
     price: number;
+    ageCategory?: string;
+    productImage?: string;
+    productDetails?: any;
   }) => {
-    console.log();
     try {
       const response = await axios.post(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/add`,
         {
           userId,
           productId,
+          productType,
+          title,
           quantity,
           price,
+          ageCategory,
+          productImage,
+          productDetails,
         },
         {
           headers: {
@@ -115,6 +119,7 @@ export const addItemCart = createAsyncThunk(
         }
       );
       return response.data;
+      console.log("ThunkActionResult Add", response.data);
     } catch (error) {
       throw new Error("Failed to add the product to the Cart");
     }
@@ -134,11 +139,15 @@ export const removeItemFromCart = createAsyncThunk(
   }) => {
     try {
       const response = await axios.delete(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove/${userId}/${productId}`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove`,
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+          },
+          data: {
+            userId,
+            productId,
           },
         }
       );
@@ -150,24 +159,26 @@ export const removeItemFromCart = createAsyncThunk(
 );
 
 export const updateItemQuantity = createAsyncThunk(
-  "cart/updateItemQuantity",
+  "cart/updateQuantity",
   async ({
     token,
     userId,
     productId,
-    flag,
+    quantity,
   }: {
     token: string;
     userId: string;
     productId: string;
-    flag: string;
+    quantity: number;
   }) => {
     try {
       const response = await axios.patch(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update/${productId}`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
+        
         {
           userId,
-          flag,
+          productId,
+          quantity,
         },
         {
           headers: {
@@ -178,7 +189,65 @@ export const updateItemQuantity = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      throw new Error("Failed to update the product quantity in the Cart");
+      throw new Error("Failed to update item quantity in the Cart");
+    }
+  }
+);
+
+// New thunk for applying a coupon
+export const applyCoupon = createAsyncThunk(
+  "cart/applyCoupon",
+  async ({
+    token,
+    userId,
+    couponCode,
+  }: {
+    token: string;
+    userId: string;
+    couponCode: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/apply-coupon`, // Restore the API endpoint
+
+        {
+          userId,
+          couponCode,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to apply coupon");
+    }
+  }
+);
+
+// New thunk for removing a coupon
+export const removeCoupon = createAsyncThunk(
+  "cart/removeCoupon",
+  async ({ token, userId }: { token: string; userId: string }) => {
+    try {
+      const response = await axios.post(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove-coupon`,
+        {
+          userId,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to remove coupon");
     }
   }
 );
@@ -186,42 +255,72 @@ export const updateItemQuantity = createAsyncThunk(
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {},
+  reducers: {
+    clearCart: (state) => {
+      state.cart = {
+        userId: "",
+        items: [],
+        totalPrice: 0,
+        totalItemCount: 0,
+        cartStatus: "active",
+        discountedPrice: 0,
+      };
+      state.loading = false;
+      state.error = null;
+      state.success = false;
+      state.apiStatus = "idle";
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getCart.pending, (state) => {
       state.loading = true;
       state.error = null;
       state.success = false;
+      state.apiStatus = "loading";
     });
 
     builder.addCase(getCart.fulfilled, (state, action) => {
       state.loading = false;
       state.success = true;
+      state.apiStatus = "succeeded";
       state.cart.items = action.payload?.items;
       state.cart.totalPrice = action.payload?.totalPrice;
       state.cart.totalItemCount = action.payload?.totalItemCount;
-      state.cart.status = action.payload?.status;
+      state.cart.cartStatus = action.payload?.status || "active";
+      state.cart.appliedCoupon = action.payload?.appliedCoupon;
+      state.cart.discountedPrice =
+        action.payload?.discountedPrice || action.payload?.totalPrice;
     });
 
     builder.addCase(getCart.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message || "Failed to fetch the Cart";
       state.success = false;
+      state.apiStatus = "failed";
     });
 
+    // Handle addItemCart, removeItemFromCart, updateItemQuantity similarly
+    // Make sure to update all the fields from the response
+
+    // Example for addItemCart:
     builder.addCase(addItemCart.pending, (state) => {
       state.loading = true;
       state.error = null;
       state.success = false;
+      state.apiStatus = "loading";
     });
 
     builder.addCase(addItemCart.fulfilled, (state, action) => {
       state.loading = false;
       state.success = true;
+      state.apiStatus = "succeeded";
       state.cart.items = action.payload?.items;
       state.cart.totalPrice = action.payload?.totalPrice;
       state.cart.totalItemCount = action.payload?.totalItemCount;
-      state.cart.status = action.payload?.status;
+      state.cart.cartStatus = action.payload?.status || "active";
+      state.cart.appliedCoupon = action.payload?.appliedCoupon;
+      state.cart.discountedPrice =
+        action.payload?.discountedPrice || action.payload?.totalPrice;
     });
 
     builder.addCase(addItemCart.rejected, (state, action) => {
@@ -229,53 +328,117 @@ export const cartSlice = createSlice({
       state.error =
         action.error.message || "Failed to add the product to the Cart";
       state.success = false;
+      state.apiStatus = "failed";
     });
 
+    // Handle applyCoupon
+    builder.addCase(applyCoupon.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.apiStatus = "loading";
+    });
+
+    builder.addCase(applyCoupon.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.apiStatus = "succeeded";
+      state.cart.appliedCoupon = action.payload?.appliedCoupon;
+      state.cart.discountedPrice = action.payload?.discountedPrice;
+      state.cart.totalPrice = action.payload?.totalPrice;
+    });
+
+    builder.addCase(applyCoupon.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "Failed to apply coupon";
+      state.success = false;
+      state.apiStatus = "failed";
+    });
+
+    // Handle removeCoupon
+    builder.addCase(removeCoupon.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.apiStatus = "loading";
+    });
+
+    builder.addCase(removeCoupon.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.apiStatus = "succeeded";
+      state.cart.appliedCoupon = undefined;
+      state.cart.discountedPrice = action.payload?.totalPrice;
+      state.cart.totalPrice = action.payload?.totalPrice;
+    });
+
+    builder.addCase(removeCoupon.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "Failed to remove coupon";
+      state.success = false;
+      state.apiStatus = "failed";
+    });
+
+    // Additional handlers for other actions (removeItemFromCart, updateItemQuantity)
+    // Handle removeItemFromCart
     builder.addCase(removeItemFromCart.pending, (state) => {
       state.loading = true;
       state.error = null;
       state.success = false;
+      state.apiStatus = "loading";
     });
 
     builder.addCase(removeItemFromCart.fulfilled, (state, action) => {
       state.loading = false;
       state.success = true;
+      state.apiStatus = "succeeded";
       state.cart.items = action.payload?.items;
       state.cart.totalPrice = action.payload?.totalPrice;
       state.cart.totalItemCount = action.payload?.totalItemCount;
-      state.cart.status = action.payload?.status;
+      state.cart.cartStatus = action.payload?.status || "active";
+      state.cart.appliedCoupon = action.payload?.appliedCoupon;
+      state.cart.discountedPrice =
+        action.payload?.discountedPrice || action.payload?.totalPrice;
     });
 
     builder.addCase(removeItemFromCart.rejected, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error =
         action.error.message || "Failed to remove the product from the Cart";
       state.success = false;
+      state.apiStatus = "failed";
     });
 
+    // Handle updateItemQuantity
     builder.addCase(updateItemQuantity.pending, (state) => {
       state.loading = true;
       state.error = null;
       state.success = false;
+      state.apiStatus = "loading";
     });
 
     builder.addCase(updateItemQuantity.fulfilled, (state, action) => {
       state.loading = false;
       state.success = true;
+      state.apiStatus = "succeeded";
       state.cart.items = action.payload?.items;
       state.cart.totalPrice = action.payload?.totalPrice;
       state.cart.totalItemCount = action.payload?.totalItemCount;
-      state.cart.status = action.payload?.status;
+      state.cart.cartStatus = action.payload?.status || "active";
+      state.cart.appliedCoupon = action.payload?.appliedCoupon;
+      state.cart.discountedPrice =
+        action.payload?.discountedPrice || action.payload?.totalPrice;
     });
 
     builder.addCase(updateItemQuantity.rejected, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error =
-        action.error.message ||
-        "Failed to update the product quantity in the Cart";
+        action.error.message || "Failed to update item quantity in the Cart";
       state.success = false;
+      state.apiStatus = "failed";
     });
+
+    // would follow the same pattern, updating all cart fields from the response
   },
 });
 
+export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
