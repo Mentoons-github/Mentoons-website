@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { FaChevronDown, FaChevronRight, FaYoutube } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { FAQ } from "../../constant/home/faq";
+import { FAQ } from "../../constant/faq";
 import AddaTV from "./addaTV";
 
 const AddaSection = () => {
@@ -63,7 +63,7 @@ const AddaSection = () => {
           <AddaTV />
         </div>
 
-        <div className="w-full relative flex justify-center items-center sm:justify-start sm:items-center gap-5 pt-10">
+        <div className="w-full relative flex justify-center items-center md:justify-start sm:items-center gap-5 pt-10">
           <Link to="/adda">
             <motion.button
               initial={{ opacity: 0, rotate: -10, y: 20 }}
@@ -73,7 +73,7 @@ const AddaSection = () => {
               transition={{ duration: 0.9, ease: "easeOut", delay: 0.9 }}
               whileHover={{ scale: 1.05, rotate: 2 }}
               whileTap={{ scale: 1, rotate: 0 }}
-              className="akshar px-5 py-2 sm:py-2 lg:py-4 bg-[#EC9600] font-extrabold text-[10px] sm:text-[12px] md:text-[15px] lg:text-[20px] xl:text-[28px] text-white rounded-full sm:rounded-xl lg:rounded-full shadow-lg active:shadow-none"
+              className="font-akshar px-5 py-2 sm:py-2 lg:py-4 bg-[#EC9600] font-extrabold text-[10px] sm:text-[12px] md:text-[15px] lg:text-[20px] xl:text-[28px] text-white rounded-full sm:rounded-xl lg:rounded-full shadow-lg active:shadow-none"
             >
               VISIT MENTOONS ADDA
             </motion.button>
@@ -88,7 +88,7 @@ const AddaSection = () => {
               whileHover={{ scale: 1.05, rotate: 2 }}
               whileTap={{ scale: 1, rotate: 0 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center gap-2 px-5 py-2 sm:py-2 lg:py-4 bg-[#EC9600] font-extrabold text-[10px] sm:text-[12px] md:text-[15px] lg:text-[20px] xl:text-[28px] text-white rounded-full sm:rounded-xl lg:rounded-full shadow-lg active:shadow-none"
+              className="font-akshar flex items-center gap-2 px-5 py-2 sm:py-2 lg:py-4 bg-[#EC9600] font-extrabold text-[10px] sm:text-[12px] md:text-[15px] lg:text-[20px] xl:text-[28px] text-white rounded-full sm:rounded-xl lg:rounded-full shadow-lg active:shadow-none"
             >
               FAQ
               <motion.div
