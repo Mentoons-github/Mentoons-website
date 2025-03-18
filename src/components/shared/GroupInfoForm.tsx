@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React from "react";
 import { useForm } from "react-hook-form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 type FormValues = {
   fullName: string;
   email: string;
   contactNumber: string;
   whatsappNumber: string;
+  useWhatsappNumber: boolean;
   country: string;
   state: string;
   age: string;
@@ -23,7 +23,9 @@ const GroupInfoForm: React.FC = () => {
     formState: { errors },
   } = useForm<FormValues>();
 
-const useWhatsappNumber = watch("useWhatsappNumber") ? watch("whatsappNumber") : watch("contactNumber");
+  const useWhatsappNumber = watch("useWhatsappNumber")
+    ? watch("whatsappNumber")
+    : watch("contactNumber");
 
   const onSubmit = (data: FormValues) => {
     console.log(data);
