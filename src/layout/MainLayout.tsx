@@ -3,6 +3,8 @@ import { ReactNode } from "react";
 // import { useLocation, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";
+import PrimaryHeader from "./primaryHeader";
+import TopUpArrow from "@/components/common/topUpArrow/upArrow";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -30,9 +32,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {/* <div className="absolute top-24 left-10 z-[99] hidden lg:block">
           <Breadcrumbs />
         </div> */}
+        <PrimaryHeader />
         <Header />
 
-        <div className="pt-[64px] ">{children}</div>
+        <div className="">{children}</div>
+        <TopUpArrow />
         {!isAuthRoute && <Footer />}
       </div>
     </>
