@@ -22,7 +22,7 @@ const AuthButton = () => {
         <SignedOut>
           <SignInButton>
             <NavLink to="/sign-in">
-              <button className="font-medium text-[10px]">
+              <button className="font-medium text-[12px]">
                 LOG IN / SIGN UP
               </button>
             </NavLink>
