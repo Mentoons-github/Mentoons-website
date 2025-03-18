@@ -1,8 +1,8 @@
-import { GamesData } from "@/pages/FreeDownload";
-import { AudioComic, Comic } from "@/redux/comicSlice";
 import workshopImg4 from "@/assets/imgs/Workshops_Page_ 8.png";
 import workshopImg5 from "@/assets/imgs/Workshops_Page_ 9.png";
+import { GamesData } from "@/pages/FreeDownload";
 import { WorkshopItems } from "@/pages/WorkshopsPage";
+import { AudioComic, Comic } from "@/redux/comicSlice";
 
 export const gamesData: GamesData[] = [
   {
@@ -314,9 +314,9 @@ export const jokes: { setup: string; punchline: string }[] = [
 ];
 
 export enum Category {
-  sm = "groupSmall",
-  md = "groupMedium",
-  lg = "groupLarge",
+  sm = "Small",
+  md = "Medium",
+  lg = "Large",
 }
 
 export enum ComicType {

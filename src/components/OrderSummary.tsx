@@ -1,14 +1,20 @@
 import { RootState } from "@/redux/store";
-import { useAuth } from "@clerk/clerk-react";
+
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
+
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "sonner";
 // import { useNavigate } from "react-router-dom";
 
 const OrderSummary: React.FC = () => {
   const { cart } = useSelector((state: RootState) => state.cart);
   const { userId } = useAuth();
+  const { user } = useUser();
+  console.log("UserObject", user);
+
   const [formData] = useState({
     merchant_id: "3545043",
     order_id: `#ORD-${Date.now()}`,
@@ -17,15 +23,23 @@ const OrderSummary: React.FC = () => {
     redirect_url: "https://www.mentoons.com/mentons-store",
     cancel_url: "https://www.mentoons.com/mentons-store",
     language: "EN",
-    billing_name: "Peter",
+    billing_name:
+      user?.firstName && user?.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user?.fullName || "",
     billing_address: "Santacruz",
     billing_city: "Mumbai",
     billing_state: "MH",
     billing_zip: "400054",
     billing_country: "India",
-    billing_tel: "9876543210",
-    billing_email: "testing@domain.com",
-    delivery_name: "Sam",
+    billing_tel: user?.phoneNumbers?.[0]?.phoneNumber
+      ? user.phoneNumbers[0].phoneNumber.replace(/^\+\d+\s*/, "") // Remove country code
+      : "0123456789",
+    billing_email: user?.emailAddresses?.[0]?.emailAddress || "",
+    delivery_name:
+      user?.firstName && user?.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user?.fullName || "Sam",
     delivery_address: "Vile Parle",
     delivery_city: "Mumbai",
     delivery_state: "Maharashtra",
@@ -42,7 +56,6 @@ const OrderSummary: React.FC = () => {
   });
   // const navigate = useNavigate();
 
-  console.log("OrderSummary -> cart", cart);
   const { getToken } = useAuth();
 
   const containerVariants = {
@@ -102,15 +115,13 @@ const OrderSummary: React.FC = () => {
 
       // Original payment gateway fields that might be needed
       orderId: formData.order_id,
-      redirectUrl: formData.redirect_url,
-      cancelUrl: formData.cancel_url,
-      merchantId: formData.merchant_id,
     };
 
     try {
       console.log("Sending order data:", orderData);
+      console.log("UserObjectClerk", user);
       const response = await axios.post(
-        "http://localhost:4000/api/v1/payment/initiate",
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
         orderData,
         {
           headers: {
@@ -119,26 +130,25 @@ const OrderSummary: React.FC = () => {
           },
         }
       );
-
       console.log("response", response);
       console.log("response.data", response.data);
-      // Assuming the response contains the HTML string for the form
-      // const formHtml = response.data; // This should be the HTML string
 
-      // // Create a temporary container to hold the form HTML
-      // const tempDiv = document.createElement("div");
-      // tempDiv.innerHTML = formHtml;
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = response.data;
 
-      // // Append the form to the body and submit it
-      // const form = tempDiv.querySelector("form");
-      // if (form) {
-      //   document.body.appendChild(form);
-      //   form.submit(); // Submit the form
-      // } else {
-      //   console.error("Form not found in the response HTML.");
-      // }
-    } catch (error) {
-      console.error("Error submitting form:", error);
+      // Append the form to the body and submit it
+      const form = tempDiv.querySelector("form");
+      if (form) {
+        document.body.appendChild(form);
+        form.submit(); // Submit the form
+      } else {
+        console.error("Form not found in the response HTML.");
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(
+        error.message || "Failed to process payment. Please try again later."
+      );
     }
   };
 
