@@ -97,12 +97,12 @@ const ProductDetails = () => {
       // If no change in quantity (trying to decrease below 1), return early
       if (newQuantity === quantity) return;
 
-      if (userId) {
+      if (userId && product?._id) {
         const result = await dispatch(
           updateItemQuantity({
             token,
             userId,
-            productId: product?._id,
+            productId: product._id,
             quantity: newQuantity, // Pass the new quantity to the action
           })
         );

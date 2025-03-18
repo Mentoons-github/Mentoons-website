@@ -1,330 +1,57 @@
+import ProductCard from "@/components/MentoonsStore/ProductCard";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { ISSUES_FACED_BY_USERS, WORKSHOP_FAQ } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch } from "@/redux/store";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { WORKSHOPS } from "../constant";
-// interface IPRODUCT {
-//   id: string;
-//   title: string;
-//   description: string;
-
-//   imageUrl: string;
-//   price: number;
-//   accentColor: string;
-// }
-// const Store = () => {
-//   const [isAtStart, setIsAtStart] = useState(true);
-//   const [isAtEnd, setIsAtEnd] = useState(false);
-//   const carouselRef = useRef<HTMLDivElement>(null);
-//   const navigate = useNavigate();
-
-//   const handleScroll = () => {
-//     const carousel = carouselRef.current;
-//     if (carousel) {
-//       setIsAtStart(carousel.scrollLeft === 0);
-//       setIsAtEnd(
-//         carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1
-//       );
-//     }
-//   };
-//   // useEffect(() => {
-//   //   const scrollCarousel = () => {
-//   //     const carousel = carouselRef.current;
-//   //     if (carousel) {
-//   //       carousel.scrollBy({
-//   //         left: 300, // Adjust scroll amount as needed
-//   //         behavior: "smooth",
-//   //       });
-//   //     }
-//   //   };
-//   //   const intervalId = setInterval(scrollCarousel, 3000); // Auto scroll every 3 seconds
-//   //   return () => clearInterval(intervalId); // Cleanup on unmount
-//   // }, []);
-
-//   useEffect(() => {
-//     const carousel = carouselRef.current;
-//     if (carousel) {
-//       carousel.addEventListener("scroll", handleScroll);
-//       return () => carousel.removeEventListener("scroll", handleScroll);
-//     }
-//   }, []);
-//   return (
-//     <div className="">
-//       <div className="w-[90%] mx-auto my-20">
-//         <div className="overflow-hidden w-full">
-//           <div
-//             className="flex overflow-x-auto gap-4 snap-x snap-mandatory"
-//             ref={carouselRef}
-//           >
-//             {PRODUCT_DATA.map((product) => (
-//               <div key={product.id} className="flex-none w-full snap-center">
-//                 <ProductCarouselCard product={product} />
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//         {/* Category section */}
-//         <div className="flex flex-col justify-between mt-10">
-//           <h1 className="text-2xl font-semibold text-center text-primary/80">
-//             Find Products For All Age Categories
-//           </h1>
-//           <div className="grid grid-cols-2 gap-4 mt-4">
-//             <button className="py-4 text-xl font-semibold border border-neutral-800 rounded-full bg-[#FCE83E]">
-//               6-12
-//             </button>
-//             <button className="py-4 text-xl font-semibold border border-neutral-800 rounded-full bg-[#EF4444]">
-//               13-16
-//             </button>
-//           </div>
-//           <div className="grid grid-cols-2 gap-4 mt-4">
-//             <button className="py-4 text-xl font-semibold border border-neutral-800 rounded-full bg-[#4E90FF]">
-//               17-19
-//             </button>
-//             <button className="py-4 text-xl font-semibold border border-neutral-800 rounded-full bg-[#34A853]">
-//               20+
-//             </button>
-//           </div>
-//         </div>
-
-// {/* Trending Product Card */}
-// <div className="relative my-12">
-//   <h3 className="pb-6 text-4xl font-semibold">Trending Products</h3>
-//   <div
-//     className="flex overflow-x-auto gap-8 scroll-smooth"
-//     ref={carouselRef}
-//   >
-//     {PRODUCT_DATA.map((product) => (
-//       <div
-//         className="flex flex-col h-[500px] cursor-pointer "
-//         key={product.id}
-//         onClick={() =>
-//           navigate(
-//             `/mentoons-store/${product.title.toLowerCase()}/${
-//               product.id
-//             }`
-//           )
-//         }
-//       >
-//         <div
-//           style={{
-//             backgroundColor: `${product.accentColor}40`,
-//           }}
-//           className=""
-//         >
-//           <img
-//             src={product.imageUrl}
-//             alt="comic 1"
-//             className="object-cover  rounded-lg w-96 h-[300px] "
-//           />
-//         </div>
-//         <h3 className="pt-4 text-xl font-medium">{product.title}</h3>
-//         <p className="text-gray-500 w-[30ch]">{product.description}</p>
-//         <button
-//           className="px-6 py-2 mt-auto w-full font-semibold text-white bg-primary"
-//           // style={{ backgroundColor: `${product.accentColor}` }}
-//         >
-//           Add to Cart
-//         </button>
-//       </div>
-//     ))}
-//   </div>
-//   {/* Navigation buttons */}
-//   <button
-//     onClick={() => {
-//       const carousel = carouselRef.current;
-//       if (carousel) {
-//         carousel.scrollBy({ left: -300, behavior: "smooth" });
-//       }
-//     }}
-//     className="absolute left-0 top-1/2 p-2 rounded-full shadow-lg transition-colors -translate-y-1/2 bg-white/80 hover:bg-white"
-//     style={{ display: isAtStart ? "none" : "block" }}
-//   >
-//     <IoIosArrowBack className="text-2xl" />
-//   </button>
-//   <button
-//     onClick={() => {
-//       const carousel = carouselRef.current;
-//       if (carousel) {
-//         carousel.scrollBy({ left: 300, behavior: "smooth" });
-//       }
-//     }}
-//     className="absolute right-0 top-1/2 p-2 rounded-full shadow-lg transition-colors -translate-y-1/2 bg-white/80 hover:bg-white"
-//     style={{ display: isAtEnd ? "none" : "block" }}
-//   >
-//     <IoIosArrowForward className="text-2xl" />
-//   </button>
-// </div>
-
-//         {/* Normal Product card */}
-
-//         <div>
-//           <h3 className="pb-6 text-4xl font-semibold">
-//             Browse More Products here
-//           </h3>
-//           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-//             {PRODUCT_DATA.map((product) => (
-//               <div
-//                 className="flex flex-col h-[500px] cursor-pointer"
-//                 key={product.id}
-//                 onClick={() =>
-//                   navigate(
-//                     `/mentoons-store/${product.title.toLowerCase()}/${
-//                       product.id
-//                     }`
-//                   )
-//                 }
-//               >
-//                 <div
-//                   style={{
-//                     backgroundColor: `${product.accentColor}40`,
-//                   }}
-//                   className="h-[300px] w-full"
-//                 >
-//                   <img
-//                     src={product.imageUrl}
-//                     alt="comic 1"
-//                     className="object-cover w-full h-full rounded-lg border"
-//                   />
-//                 </div>
-//                 <h3 className="pt-4 text-xl font-medium">{product.title}</h3>
-//                 <p className="text-gray-500">{product.description}</p>
-//                 <button
-//                   className="px-6 py-2 mt-auto w-full font-semibold text-white bg-primary"
-//                   // style={{ backgroundColor: `${product.accentColor}` }}
-//                 >
-//                   Add to Cart
-//                 </button>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//       <Store2 />
-//     </div>
-//   );
-// };
-
-// export default Store;
-
-// const ProductCarouselCard = ({ product }: { product: IPRODUCT }) => {
-//   const navigate = useNavigate();
-
-//   return (
-//     <div
-//       className="flex h-[240px] sm:h-[500px] md:h-[600px] p-4 sm:p-8 md:p-12 rounded-2xl"
-//       style={{ backgroundColor: product.accentColor }}
-//     >
-//       <div className="flex flex-col flex-1 pb-3 pl-1">
-//         <h1 className="pb-2 text-3xl font-bold sm:text-4xl md:text-6xl lg:text-8xl leading-wider line-clamp-2">
-//           {product.title}
-//         </h1>
-//         <p className="pb-4 text-sm sm:text-lg leading-tight w-[90%] line-clamp-3">
-//           {product.description}
-//         </p>
-//         <button
-//           className="px-6 py-2 mt-2 font-semibold bg-white rounded-full shadow-xl tex1t-lg text-primary w-fit"
-//           onClick={() =>
-//             navigate(`/mentoons-store/${product.title.toLowerCase()}`)
-//           }
-//         >
-//           Shop Now
-//         </button>
-//       </div>
-//       <div className="flex flex-1 justify-center items-center w-full">
-//         <img
-//           src={product.imageUrl}
-//           alt=""
-//           className="object-contain max-h-full"
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-import ProductCard from "@/components/MentoonsStore/ProductCard";
-// import { useAuth } from "@clerk/clerk-react";
-import { useSelector } from "react-redux";
+import { toast } from "sonner";
 import { setFilter } from "../redux/productSlice";
 import { RootState } from "../redux/store";
 
 const Store = () => {
   const [selecteCategory, setSelecteCategory] = useState("6-12");
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
-  // const [cardType, setCardType] = useState("Conversation Starter Cards");
+
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
-  // const handleCardType = (type: string) => {
-  //   setCardType(type);
-  // };
-
-  // const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  // const { userId, getToken } = useAuth();
-  // const handleClick = () => {
-  //   setIsExpanded(!isExpanded);
-  // };
+  const [message, setMessage] = useState<string>("");
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+  };
+
+  const handleSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    try {
+      const queryResponse = await axios.post(
+        "http://localhost:4000/api/v1/query",
+        {
+          message: message,
+        }
+      );
+      console.log(queryResponse);
+      if (queryResponse.status === 201) {
+        toast.success("Message Submitted Successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to submit message");
+    }
+  };
+
   const {
     items: products,
     loading,
     error,
-    total,
-    page: currentPage,
-    search,
-    filter,
   } = useSelector((state: RootState) => state.products);
-  // const handleAddtoCart = async (
-  //   e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  //   product: ProductBase
-  // ) => {
-  //   e.stopPropagation();
-  //   try {
-  //     const token = await getToken();
-  //     if (!token) {
-  //       toast.error("Please login to add to cart");
-  //       return;
-  //     }
-
-  //     if (userId) {
-  //       // Using the updated addItemCart action
-  //       await dispatch(
-  //         addItemCart({
-  //           token,
-  //           userId,
-  //           productId: product._id,
-  //           productType: product.type,
-  //           title: product.title,
-  //           quantity: 1,
-  //           price: product.price,
-  //           ageCategory: product.ageCategory,
-  //           productImage: product.productImages?.[0].imageUrl,
-  //           cardType,
-  //           productDetails: product.details,
-  //           // Remove token and userId if they're now handled internally by the cartSlice
-  //           // Add any new required parameters based on the updated cartSlice
-  //         })
-  //       );
-
-  //       toast.success("Item Added to cart");
-  //       navigate("/cart");
-  //     } else {
-  //       toast.error("User ID is missing");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error while adding to cart", error);
-  //     toast.error("Error while adding to cart");
-  //   }
-  // };
-
-  console.log("Product", products);
-  console.log("total", total);
-  console.log("page", currentPage);
-  console.log("search", search);
-  console.log("filter", filter);
 
   const handleSelectedCategory = (category: string) => {
     setSelecteCategory(category);
@@ -346,8 +73,6 @@ const Store = () => {
     fetchMentoonsCard();
   }, [dispatch, selecteCategory]);
 
-
-
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -355,7 +80,7 @@ const Store = () => {
         <div className="relative bg-gray-200 md:min-h-[600px]">
           <div className="flex md:min-h-[600px] relative flex-col gap-4 md:gap-6 justify-end items-center py-6 md:py-10">
             <div className="h-16 bg-gray-300 rounded w-3/4 mb-8"></div>
-            <div className="flex flex-col md:flex-row gap-3 w-full px-4">
+            <div className="flex flex-col md:flex-row gap-3 w-full px-4 items-center justify-center ">
               <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
               <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
               <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
@@ -526,7 +251,7 @@ const Store = () => {
             </button>
             <button
               className={`flex items-center justify-start gap-2 text-rose-600 w-full md:w-32 px-3 py-[7px] rounded-full bg-red-200 border border-red-500 hover:ring-4 hover:ring-red-500 transition-all duration-200 mb-2 md:mb-0 ${
-                selecteCategory === "13-19" && "ring-4 ring-red-500 "
+                selecteCategory === "13-16" && "ring-4 ring-red-500 "
               }`}
               onClick={() => handleSelectedCategory("13-16")}
             >
@@ -554,12 +279,12 @@ const Store = () => {
             </button>
             <button
               className={`flex items-center justify-start gap-2 text-green-500 w-full md:w-32 px-3 py-[7px] rounded-full bg-green-200 border border-green-500 hover:ring-4 hover:ring-green-500 transition-all duration-200 ${
-                selecteCategory === "parent" && "ring-4 ring-green-500 "
+                selecteCategory === "parents" && "ring-4 ring-green-500 "
               }`}
               onClick={() => handleSelectedCategory("parents")}
             >
               <span className="w-4 md:w-5 h-4 md:h-5 bg-green-500 rounded-full" />
-              Parent
+              Parents
             </button>
           </div>
         </div>
@@ -599,12 +324,15 @@ const Store = () => {
           ))}
         </div>
       </div>
-      
 
       <div className="bg-gradient-to-t from-[#F7941D] to-[#FFE18B] flex flex-col items-center justify-center p-12 md:flex-row md:justify-around px-4 gap-12 md:px-24">
         <div className="flex-1">
           <img
-            src="/assets/productv2/mentoons-product-wheel.png"
+            src={
+              selecteCategory === "6-12"
+                ? "/assets/productv2/6-12-productWheel.png"
+                : "/assets/productv2/13-16-productWheel.png"
+            }
             alt="Mentoons Product wheel"
           />
         </div>
@@ -703,7 +431,7 @@ const Store = () => {
 
       <div className="pb-16">
         <div className="flex gap-4 items-start p-4  md:items-center ">
-          <span className="py-0 pl-0 text-2xl font-semibold  md:py-12 md:text-3xl">
+          <span className="py-0 pl-0 text-2xl font-semibold  md:py-12 md:px-12 md:text-3xl">
             {" "}
             Product Specifically designed for
           </span>
@@ -744,32 +472,13 @@ const Store = () => {
               ${selecteCategory === "13-16" && "bg-rose-500"}
               ${selecteCategory === "17-19" && "bg-purple-500"}
               ${selecteCategory === "20+" && "bg-blue-500"}
-              ${selecteCategory === "parent" && "bg-green-500"}
+              ${selecteCategory === "parents" && "bg-green-500"}
             `}
             />
             {selecteCategory.toUpperCase()}
           </button>
         </div>
-        {/* <div className="flex gap-4 justify-center items-center">
-          <div className="flex flex-col gap-0 items-center p-4">
-            <img
-              src="/assets/productv2/conversation-starter-cards-6-12.png"
-              alt=""
-            />
-            <span className="text-xl font-semibold">Stage I</span>
-          </div>
-          <div className="flex flex-col gap-0 items-center p-4">
-            <img
-              src="/assets/productv2/story-re-teller-cards-6-12.png"
-              alt=""
-            />
-            <span className="text-xl font-semibold">Stage II</span>
-          </div>{" "}
-          <div className="flex flex-col gap-0 items-center p-4">
-            <img src="/assets/productv2/silent-stories-6-12.png" alt="" />
-            <span className="text-xl font-semibold">Stage III</span>
-          </div>
-        </div> */}
+
         <div className="w-full p-4 mt-4 ">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-12 auto-rows-auto mx-20">
             {products?.length > 0 ? (
@@ -777,7 +486,10 @@ const Store = () => {
                 // Ensure all required properties are present before passing to ProductCard
 
                 return (
-                  <div className="flex justify-center w-full">
+                  <div
+                    className="flex justify-center w-full"
+                    key={product._id + Date.now()}
+                  >
                     <ProductCard
                       key={product._id + Date.now()}
                       productDetails={product}
@@ -791,60 +503,6 @@ const Store = () => {
           </div>
         </div>
       </div>
-
-      {/* <div className="bg-[#FABB05] flex flex-col items-center justify-center p-24  md:justify-around">
-        <div className="flex gap-12 justify-center items-start pb-6">
-          <div className="px-6 py-3 text-2xl font-semibold rounded-full border-2 border-black">
-            Conversation starter cards
-          </div>
-          <div className="px-6 py-3 text-2xl font-semibold rounded-full border-2 border-black">
-            How Kids will Benefit?
-          </div>
-          <div className="px-6 py-3 text-2xl font-semibold rounded-full border-2 border-black">
-            How Parents will Benefit?
-          </div>
-        </div>
-        <div className="flex gap-4 justify-center items-center w-full">
-          <ul className="flex flex-col gap-4 p-12 w-[70%] bg-white">
-            <li className="flex gap-8 items-center">
-              <span className="w-[64px] h-[64px] pt-1 border-4 flex items-center justify-center text-4xl font-semibold   border-black rounded-full">
-                {" "}
-                01
-              </span>
-              <span className="text-4xl font-semibold">
-                Learn easily oldest format of communication
-              </span>
-            </li>
-            <li className="flex gap-8 items-center">
-              <span className="w-[64px] h-[64px] pt-1 border-4 flex items-center justify-center text-4xl font-semibold   border-black rounded-full">
-                {" "}
-                02
-              </span>
-              <span className="text-4xl font-semibold">
-                Developed by Psychologists and Educators
-              </span>
-            </li>
-            <li className="flex gap-8 items-center">
-              <span className="w-[64px] h-[64px] pt-1 border-4 flex items-center justify-center text-4xl font-semibold   border-black rounded-full">
-                {" "}
-                03
-              </span>
-              <span className="text-4xl font-semibold">
-                Age appropriate content
-              </span>
-            </li>
-            <li className="flex gap-8 items-center">
-              <span className="w-[64px] h-[64px] pt-1 border-4 flex items-center justify-center text-4xl font-semibold   border-black rounded-full">
-                {" "}
-                04
-              </span>
-              <span className="text-4xl font-semibold">
-                Beautifully illustrated
-              </span>
-            </li>
-          </ul>
-        </div>
-      </div> */}
 
       <div className="p-8 md:px-28">
         <h2 className="pb-6 text-2xl font-semibold">
@@ -892,16 +550,12 @@ const Store = () => {
                     id="doubt"
                     placeholder="Enter your doubt here"
                     className="box-border p-3 w-full rounded-lg border-2 shadow-xl border-primary"
-                    // style={{
-                    //   border: `2px solid ${workshop.registerFormbgColor}`,
-                    // }}
+                    onChange={(e) => handleMessageChange(e)}
                   ></textarea>
 
                   <button
                     className="py-3 mt-4 w-full text-xl font-semibold text-white rounded-lg shadow-lg transition-all duration-200 bg-primary"
-                    // style={{
-                    //   backgroundColor: workshop.registerFormbgColor,
-                    // }}
+                    onClick={(e) => handleSubmit(e)}
                     type="submit"
                   >
                     Submit

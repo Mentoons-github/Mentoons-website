@@ -1,13 +1,13 @@
-import React from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { IoMdClose } from "react-icons/io";
 import MiniLogo from "@/assets/imgs/logo mini.png";
-import { motion } from "framer-motion";
-import emailjs from "emailjs-com";
-import { toast } from "sonner";
 import { date } from "@/constant/websiteConstants";
 import { SelectedComicType } from "@/pages/FreeDownload";
+import emailjs from "emailjs-com";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { motion } from "framer-motion";
+import React from "react";
+import { IoMdClose } from "react-icons/io";
+import { toast } from "sonner";
+import * as Yup from "yup";
 import WorkshopForm from "../common/WorkshopForm";
 
 interface FormType {

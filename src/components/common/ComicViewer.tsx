@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
+import React, { useEffect, useRef, useState } from "react";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.mjs",
-  import.meta.url,
+  import.meta.url
 ).toString();
 
 interface ComicViewerProps {
@@ -12,6 +12,7 @@ interface ComicViewerProps {
 
 const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
@@ -32,11 +33,23 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
     loadPDF();
   }, [pdfUrl]);
 
+  useEffect(() => {
+    // Add resize event listener to handle window resizing
+    const handleResize = () => {
+      if (pdfDoc) {
+        renderPage(currentPage, pdfDoc);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [currentPage, pdfDoc]);
+
   const renderPage = async (
     pageNum: number,
-    pdf: pdfjsLib.PDFDocumentProxy,
+    pdf: pdfjsLib.PDFDocumentProxy
   ) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !containerRef.current) return;
 
     const page = await pdf.getPage(pageNum);
     const canvas = canvasRef.current;
@@ -44,9 +57,19 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
 
     if (!context) return;
 
-    const viewport = page.getViewport({ scale: 1.0 });
-    const containerHeight = window.innerHeight - 100;
-    const scale = containerHeight / viewport.height;
+    // Get container dimensions
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+
+    // Get the original viewport
+    const originalViewport = page.getViewport({ scale: 1.0 });
+
+    // Calculate scale to fit width and height
+    const scaleX = containerWidth / originalViewport.width;
+    const scaleY = containerHeight / originalViewport.height;
+
+    // Use the smaller scale to ensure the entire page fits
+    const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 to add a small margin
 
     const scaledViewport = page.getViewport({ scale });
     canvas.height = scaledViewport.height;
@@ -126,17 +149,28 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 h-full max-w-fit p-6">
-      <h1 className="text-2xl font-bold">View comic</h1>
-      <div className="relative flex-1 max-w-fit bg-neutral-50 rounded-lg shadow-md overflow-hidden">
-        <canvas ref={canvasRef} className="max-h-full mx-auto" />
+    <div className="flex flex-col p-6 w-full h-full">
+      <h1 className="mb-4 text-2xl font-bold text-center">
+        {pdfUrl
+          .split("/")
+          .pop()
+          ?.split(".")[0]
+          ?.split("+")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ") || "View comic"}
+      </h1>
+      <div
+        ref={containerRef}
+        className="flex overflow-hidden relative flex-1 justify-center items-center rounded-lg shadow-md bg-neutral-50"
+      >
+        <canvas ref={canvasRef} className="max-h-full" />
       </div>
 
-      <div className="flex items-center gap-6 font-light">
+      <div className="flex gap-6 justify-center items-center mt-4 font-light">
         <button
           onClick={() => changePage(-1)}
           disabled={currentPage <= 1}
-          className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 transition-colors text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Previous page"
         >
           <svg
@@ -161,7 +195,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
         <button
           onClick={() => changePage(1)}
           disabled={currentPage >= numPages}
-          className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 transition-colors text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Next page"
         >
           <svg
@@ -183,7 +217,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
 
         <button
           onClick={handlePrint}
-          className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+          className="p-2 transition-colors text-neutral-600 hover:text-neutral-900"
           aria-label="Print document"
         >
           <svg

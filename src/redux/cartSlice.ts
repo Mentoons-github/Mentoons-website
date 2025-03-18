@@ -56,8 +56,7 @@ export const getCart = createAsyncThunk(
   async ({ token, userId }: { token: string; userId: string }) => {
     try {
       const response = await axios.get(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/${userId}`,
-        `http://localhost:4000/api/v1/cart/${userId}`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -100,8 +99,7 @@ export const addItemCart = createAsyncThunk(
   }) => {
     try {
       const response = await axios.post(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/add`,
-        `http://localhost:4000/api/v1/cart/add`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/add`,
         {
           userId,
           productId,
@@ -141,8 +139,7 @@ export const removeItemFromCart = createAsyncThunk(
   }) => {
     try {
       const response = await axios.delete(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove`,
-        `http://localhost:4000/api/v1/cart/remove`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -176,8 +173,8 @@ export const updateItemQuantity = createAsyncThunk(
   }) => {
     try {
       const response = await axios.patch(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
-        `http://localhost:4000/api/v1/cart/update-quantity`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
+        
         {
           userId,
           productId,

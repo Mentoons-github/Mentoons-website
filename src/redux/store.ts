@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import cardProductReducer from "./cardProductSlice";
+// import cardProductReducer from "./cardProductSlice";
 import careerReducer from "./careerSlice";
 import cartReducer from "./cartSlice";
 import comicsReducer from "./comicSlice";
@@ -18,7 +18,7 @@ export const store = configureStore<{
   career: ReturnType<typeof careerReducer>;
   fileUpload: ReturnType<typeof fileUploadReducer>;
   podcast: ReturnType<typeof podcastReducer>;
-  cardProduct: ReturnType<typeof cardProductReducer>;
+  // cardProduct: ReturnType<typeof cardProductReducer>;
   cart: ReturnType<typeof cartReducer>;
   products: ReturnType<typeof productsReducer>;
 }>({
@@ -30,7 +30,7 @@ export const store = configureStore<{
     career: careerReducer,
     fileUpload: fileUploadReducer,
     podcast: podcastReducer,
-    cardProduct: cardProductReducer,
+    // cardProduct: cardProductReducer,
     cart: cartReducer,
     products: productsReducer,
   },
