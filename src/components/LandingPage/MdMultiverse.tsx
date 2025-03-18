@@ -1,70 +1,7 @@
-import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-// import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const MdMultiverse = () => {
-  //   const navigate = useNavigate();
-
-  // Animation controls and in-view hooks for each section
-  const [titleRef, titleInView] = useInView({ threshold: 0.2 });
-  const titleControls = useAnimation();
-  //   const [offeringsRef, offeringsInView] = useInView({ threshold: 0.2 });
-  const offeringsControls = useAnimation();
-
-  // Trigger animations when sections come into view
-  useEffect(() => {
-    if (titleInView) {
-      titleControls.start("visible");
-    } else {
-      titleControls.start("hidden"); // Reset animation on scroll out
-    }
-
-    // if (offeringsInView) {
-    //   offeringsControls.start("visible");
-    // } else {
-    //   offeringsControls.start("hidden"); // Reset animation on scroll out
-    // }
-  }, [titleInView, titleControls, offeringsControls]);
-
-  //   const OfferingData = [
-  //     {
-  //       title: "Comics",
-  //       description:
-  //         "Our flagship comics feature beautifully illustrated stories that explore mentoring themes, covering topics like history, science, social skills, and personal growth.",
-  //       image: "/assets/LandingPage/com.png",
-  //       color: "#FFF27E",
-  //       signImage: "/assets/LandingPage/com-si.png",
-  //       link: "/mentoons-comics",
-  //     },
-  //     {
-  //       title: "Audio Comics",
-  //       description:
-  //         "Audio comics blend traditional comics with voice acting, sound effects, and music, creating an immersive, on-the-go storytelling experience",
-  //       image: "/assets/LandingPage/audio.png",
-  //       color: "#4FE5FF",
-  //       signImage: "/assets/LandingPage/aud-si.png",
-  //       link: "/mentoons-comics/audio-comics",
-  //     },
-  //     {
-  //       title: "Podcasts",
-  //       description:
-  //         '"Mentor Moments," our weekly podcast series, introduces young listeners to inspiring conversations with mentors across various fields, making learning fun and accessible',
-  //       image: "/assets/LandingPage/pod.png",
-  //       color: "#C0FFA0",
-  //       signImage: "/assets/LandingPage/pod-si.png",
-  //       link: "/mentoons-podcast",
-  //     },
-  //     {
-  //       title: "Workshops",
-  //       description:
-  //         "Our workshops, led by industry pros, boost mentoring skills, teamwork, and personal growth in comic creation, storytelling, and character design",
-  //       image: "/assets/LandingPage/works.png",
-  //       color: "#FBB13E",
-  //       signImage: "/assets/LandingPage/work-si.png",
-  //       link: "/mentoons-workshops",
-  //     },
-  //   ];
+  
 
   return (
     <div

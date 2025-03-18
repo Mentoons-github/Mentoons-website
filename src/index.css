@@ -7,7 +7,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
 @font-face {
   font-family: "Futura Std";
-  src: url("/font/FuturaStdBook.woff") format("woff");
+  src: url("/assets/font/FuturaStdBook.woff") format("woff");
 }
 
 @tailwind base;
@@ -16,7 +16,7 @@
 
 html,
 body {
-  font-family: "Futura Std", sans-serif !important;
+  font-family: "Futura Std", sans-serif;
 }
 
 .luckiest-guy-regular {

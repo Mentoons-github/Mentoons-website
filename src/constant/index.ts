@@ -1,3 +1,14 @@
+import { IconType } from "react-icons/lib";
+import {
+  FaChalkboard,
+  FaCreditCard,
+  FaMoon,
+  FaPhone,
+  FaShoppingCart,
+} from "react-icons/fa";
+import { MdAssessment } from "react-icons/md";
+import { FaUsers } from "react-icons/fa6";
+
 export const CATEGORIES = [
   "Comedy",
   "History",
@@ -1025,7 +1036,7 @@ export const PRODUT_CAROUSEL_ITEM = [
 export interface NavLink {
   id: string;
   label: string;
-  icon: string;
+  icon?: string | IconType;
   url: string;
   items?: NavLink[];
 }
@@ -1040,7 +1051,7 @@ export const NAV_LINKS: NavLink[] = [
   {
     id: "NL_02",
     label: "Call us",
-    icon: "phone",
+    icon: FaPhone,
     url: "",
   },
   {
@@ -1076,7 +1087,7 @@ export const NAV_LINKS: NavLink[] = [
   {
     id: "NL_08",
     label: "Workshops",
-    icon: "work",
+    icon: FaChalkboard,
     url: "/mentoons-workshops",
   },
   {
@@ -1110,6 +1121,85 @@ export const NAV_LINKS: NavLink[] = [
     label: "User",
     icon: "User",
     url: "/user",
+  },
+  {
+    id: "NL_12",
+    label: "Mythos",
+    icon: FaMoon,
+    url: "/mythos",
+  },
+  {
+    id: "NL_13",
+    label: "Products",
+    icon: FaShoppingCart,
+    url: "",
+    items: [
+      {
+        id: "AC_01",
+        label: "6-12",
+        url: "/mentoons-store/6-12",
+      },
+      {
+        id: "AC_01",
+        label: "13-16",
+        url: "/mentoons-store/13-16",
+      },
+      {
+        id: "AC_01",
+        label: "17-19",
+        url: "/mentoons-store/17-19",
+      },
+      {
+        id: "AC_01",
+        label: "20+",
+        url: "/mentoons-store/20",
+      },
+    ],
+  },
+  {
+    id: "NL_14",
+    label: "Assessments",
+    icon: MdAssessment,
+    url: "/assesment-page",
+  },
+  {
+    id: "NL_15",
+    label: "Browse Plans",
+    icon: FaCreditCard,
+    url: "#subscription",
+  },
+];
+
+export const ADDA_NAV_LINKS: NavLink[] = [
+  {
+    id: "NL_01",
+    label: "Assessments",
+    icon: FaUsers,
+    url: "/assesment-page",
+  },
+  {
+    id: "NL_02",
+    label: "Community",
+    icon: FaUsers,
+    url: "/community",
+  },
+  {
+    id: "NL_13",
+    label: "Products",
+    icon: FaShoppingCart,
+    url: "/mythos",
+  },
+  {
+    id: "NL_15",
+    label: "Browse Plans",
+    icon: FaCreditCard,
+    url: "#subscription",
+  },
+  {
+    id: "NL_08",
+    label: "Workshops",
+    icon: FaChalkboard,
+    url: "/mentoons-workshops",
   },
 ];
 
