@@ -33,7 +33,7 @@ const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
-const FreeDownload = lazy(() => import("./pages/FreeDownload"));
+const FreeDownload = lazy(() => import("./pages/FreeDownload"))
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -70,7 +70,7 @@ const routes = [
   { path: "/payment-status", element: <PaymentStatusPage /> },
   { path: "*", element: <NotFound /> },
   { path: "/adda/*", element: <AddaRouter /> },
-];
+]
 
 const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(true);

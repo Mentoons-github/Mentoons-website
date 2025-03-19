@@ -878,13 +878,13 @@ const WorkshopMain = () => {
 
   const handleNextTestimonial = () => {
     setCurrentTestimonialIndex((prev) =>
-      prev === content.testimonials.length - 1 ? 0 : prev + 1,
+      prev === content.testimonials.length - 1 ? 0 : prev + 1
     );
   };
 
   const handlePrevTestimonial = () => {
     setCurrentTestimonialIndex((prev) =>
-      prev === 0 ? content.testimonials.length - 1 : prev - 1,
+      prev === 0 ? content.testimonials.length - 1 : prev - 1
     );
   };
 
@@ -893,7 +893,7 @@ const WorkshopMain = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTextIndex((prevIndex) =>
-        prevIndex === content.texts.length - 1 ? 0 : prevIndex + 1,
+        prevIndex === content.texts.length - 1 ? 0 : prevIndex + 1
       );
     }, 3000);
 

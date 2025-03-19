@@ -1,5 +1,6 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
+import GroupInfoForm from "@/components/shared/GroupInfoForm";
 import { ISSUES_FACED_BY_USERS, WORKSHOP_FAQ } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch } from "@/redux/store";
@@ -19,6 +20,8 @@ const Store = () => {
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const [message, setMessage] = useState<string>("");
@@ -33,7 +36,7 @@ const Store = () => {
     e.preventDefault();
     try {
       const queryResponse = await axios.post(
-        "http://localhost:4000/api/v1/query",
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/query", // Fixed the endpoint URL
         {
           message: message,
         }
@@ -79,25 +82,25 @@ const Store = () => {
         {/* Hero Skeleton */}
         <div className="relative bg-gray-200 md:min-h-[600px]">
           <div className="flex md:min-h-[600px] relative flex-col gap-4 md:gap-6 justify-end items-center py-6 md:py-10">
-            <div className="h-16 bg-gray-300 rounded w-3/4 mb-8"></div>
-            <div className="flex flex-col md:flex-row gap-3 w-full px-4 items-center justify-center ">
-              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
-              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
-              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
-              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32 mb-2"></div>
-              <div className="h-10 bg-gray-300 rounded-full w-full md:w-32"></div>
+            <div className="mb-8 w-3/4 h-16 bg-gray-300 rounded"></div>
+            <div className="flex flex-col gap-3 justify-center items-center px-4 w-full md:flex-row">
+              <div className="mb-2 w-full h-10 bg-gray-300 rounded-full md:w-32"></div>
+              <div className="mb-2 w-full h-10 bg-gray-300 rounded-full md:w-32"></div>
+              <div className="mb-2 w-full h-10 bg-gray-300 rounded-full md:w-32"></div>
+              <div className="mb-2 w-full h-10 bg-gray-300 rounded-full md:w-32"></div>
+              <div className="w-full h-10 bg-gray-300 rounded-full md:w-32"></div>
             </div>
           </div>
         </div>
 
         {/* Challenges Section Skeleton */}
         <div className="flex flex-col p-12 py-16">
-          <div className="h-10 bg-gray-300 rounded w-1/2 mx-auto mb-16"></div>
+          <div className="mx-auto mb-16 w-1/2 h-10 bg-gray-300 rounded"></div>
           <div className="flex flex-col gap-4 items-center md:flex-row md:justify-around">
             {[1, 2, 3].map((item) => (
               <div key={item} className="flex flex-col gap-6 items-center">
                 <div className="w-72 h-72 bg-gray-300 rounded-xl"></div>
-                <div className="h-8 bg-gray-300 rounded w-40"></div>
+                <div className="w-40 h-8 bg-gray-300 rounded"></div>
               </div>
             ))}
           </div>
@@ -106,11 +109,11 @@ const Store = () => {
         {/* Products Section Skeleton */}
         <div className="pb-16">
           <div className="flex gap-4 items-start p-4 md:items-center">
-            <div className="h-8 bg-gray-300 rounded w-64"></div>
-            <div className="h-8 bg-gray-300 rounded-full w-32"></div>
+            <div className="w-64 h-8 bg-gray-300 rounded"></div>
+            <div className="w-32 h-8 bg-gray-300 rounded-full"></div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 justify-around items-center p-4">
+          <div className="flex flex-col gap-8 justify-around items-center p-4 md:flex-row">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
@@ -118,11 +121,11 @@ const Store = () => {
               >
                 <div className="bg-gray-300 rounded-lg h-[300px] w-full"></div>
                 <div className="flex justify-between items-center pt-4">
-                  <div className="h-6 bg-gray-300 rounded w-40"></div>
-                  <div className="h-6 bg-gray-300 rounded w-16"></div>
+                  <div className="w-40 h-6 bg-gray-300 rounded"></div>
+                  <div className="w-16 h-6 bg-gray-300 rounded"></div>
                 </div>
-                <div className="h-4 bg-gray-300 rounded w-full mt-3"></div>
-                <div className="h-4 bg-gray-300 rounded w-3/4 mt-2"></div>
+                <div className="mt-3 w-full h-4 bg-gray-300 rounded"></div>
+                <div className="mt-2 w-3/4 h-4 bg-gray-300 rounded"></div>
                 <div className="flex gap-1 mt-4">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <div
@@ -131,7 +134,7 @@ const Store = () => {
                     ></div>
                   ))}
                 </div>
-                <div className="h-10 bg-gray-300 rounded w-full mt-auto"></div>
+                <div className="mt-auto w-full h-10 bg-gray-300 rounded"></div>
               </div>
             ))}
           </div>
@@ -151,7 +154,7 @@ const Store = () => {
           <img
             src="/assets/error-icon.png"
             alt="Error"
-            className="w-32 h-32 mb-6 mx-auto opacity-80"
+            className="mx-auto mb-6 w-32 h-32 opacity-80"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src =
@@ -161,7 +164,7 @@ const Store = () => {
         </motion.div>
 
         <motion.h2
-          className="text-3xl font-bold text-gray-800 mb-4"
+          className="mb-4 text-3xl font-bold text-gray-800"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
@@ -170,7 +173,7 @@ const Store = () => {
         </motion.h2>
 
         <motion.p
-          className="text-lg text-gray-600 mb-8 max-w-md"
+          className="mb-8 max-w-md text-lg text-gray-600"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
@@ -180,7 +183,7 @@ const Store = () => {
 
         <motion.button
           onClick={() => navigate("/")}
-          className="px-8 py-3 font-semibold text-white rounded-lg bg-primary hover:bg-primary/90 transition-all duration-200 flex items-center gap-2"
+          className="flex gap-2 items-center px-8 py-3 font-semibold text-white rounded-lg transition-all duration-200 bg-primary hover:bg-primary/90"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}
@@ -189,7 +192,7 @@ const Store = () => {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
+            className="w-5 h-5"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -217,7 +220,7 @@ const Store = () => {
         <div className="absolute inset-0 bg-gradient-to-t via-transparent from-neutral-800" />
         <div className="flex md:min-h-[600px] relative flex-col gap-4 md:gap-6 justify-end items-center py-6 md:py-10">
           <motion.h1
-            className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-bold text-center px-4 mb-4 text-white"
+            className="px-4 mb-4 text-2xl font-bold text-center text-white sm:text-3xl md:text-5xl lg:text-7xl"
             initial={{ opacity: 0, y: -20 }}
             animate={{
               opacity: 1,
@@ -239,14 +242,14 @@ const Store = () => {
           >
             Mentoons Store
           </motion.h1>
-          <div className="flex flex-col md:flex-row gap-3 md:gap-6 justify-center items-center text-lg md:text-xl lg:text-2xl font-semibold w-full px-4">
+          <div className="flex flex-col gap-3 justify-center items-center px-4 w-full text-lg font-semibold md:flex-row md:gap-6 md:text-xl lg:text-2xl">
             <button
               className={`flex items-center justify-start text-yellow-500 px-3 gap-2 w-full md:w-32 py-[7px] rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 mb-2 md:mb-0 ${
                 selecteCategory === "6-12" && "ring-4 ring-yellow-400 "
               }`}
               onClick={() => handleSelectedCategory("6-12")}
             >
-              <span className="w-4 md:w-5 h-4 md:h-5 bg-yellow-500 rounded-full" />
+              <span className="w-4 h-4 bg-yellow-500 rounded-full md:w-5 md:h-5" />
               6-12
             </button>
             <button
@@ -255,7 +258,7 @@ const Store = () => {
               }`}
               onClick={() => handleSelectedCategory("13-16")}
             >
-              <span className="w-4 md:w-5 h-4 md:h-5 bg-rose-500 rounded-full" />
+              <span className="w-4 h-4 bg-rose-500 rounded-full md:w-5 md:h-5" />
               13-16
             </button>
             <button
@@ -264,7 +267,7 @@ const Store = () => {
               }`}
               onClick={() => handleSelectedCategory("17-19")}
             >
-              <span className="w-4 md:w-5 h-4 md:h-5 bg-purple-500 rounded-full" />
+              <span className="w-4 h-4 bg-purple-500 rounded-full md:w-5 md:h-5" />
               17-19
             </button>
 
@@ -274,7 +277,7 @@ const Store = () => {
               }`}
               onClick={() => handleSelectedCategory("20+")}
             >
-              <span className="w-4 md:w-5 h-4 md:h-5 bg-blue-500 rounded-full" />
+              <span className="w-4 h-4 bg-blue-500 rounded-full md:w-5 md:h-5" />
               20+
             </button>
             <button
@@ -283,7 +286,7 @@ const Store = () => {
               }`}
               onClick={() => handleSelectedCategory("parents")}
             >
-              <span className="w-4 md:w-5 h-4 md:h-5 bg-green-500 rounded-full" />
+              <span className="w-4 h-4 bg-green-500 rounded-full md:w-5 md:h-5" />
               Parents
             </button>
           </div>
@@ -326,18 +329,58 @@ const Store = () => {
       </div>
 
       <div className="bg-gradient-to-t from-[#F7941D] to-[#FFE18B] flex flex-col items-center justify-center p-12 md:flex-row md:justify-around px-4 gap-12 md:px-24">
-        <div className="flex-1">
+        <div
+          className={`flex-1 ${
+            selecteCategory === "parents" ? "cursor-pointer" : ""
+          }`}
+          onClick={() => selecteCategory === "parents" && setIsModalOpen(true)}
+        >
           <img
             src={
               selecteCategory === "6-12"
                 ? "/assets/productv2/6-12-productWheel.png"
-                : "/assets/productv2/13-16-productWheel.png"
+                : selecteCategory === "13-16"
+                ? "/assets/productv2/13-16-productWheel.png"
+                : selecteCategory === "17-19"
+                ? "/assets/productv2/17-19-productWheel.png"
+                : selecteCategory === "20+"
+                ? "/assets/productv2/20-plus-productWheel.png"
+                : "/assets/productv2/parents-products-illustration.png"
             }
             alt="Mentoons Product wheel"
+            className={`transition-transform ${
+              selecteCategory === "parents" ? "hover:scale-105" : ""
+            }`}
           />
         </div>
-        <div className="flex-1 flex flex-col">
-          <div className="relative overflow-hidden border rounded-xl group">
+
+        {isModalOpen && (
+          <div className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+            <div className="relative p-4 w-full max-w-4xl bg-white rounded-lg">
+              <button
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <GroupInfoForm />
+            </div>
+          </div>
+        )}
+        <div className="flex flex-col flex-1">
+          <div className="overflow-hidden relative rounded-xl border group">
             {products.map((product, index) => (
               <div
                 key={product._id}
@@ -367,12 +410,12 @@ const Store = () => {
                       prev === 0 ? products.length - 1 : prev - 1
                     )
                   }
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-opacity opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute left-2 top-1/2 z-10 p-2 text-white rounded-full opacity-0 transition-opacity transform -translate-y-1/2 bg-black/50 hover:bg-black/70 group-hover:opacity-100"
                   aria-label="Previous video"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -389,12 +432,12 @@ const Store = () => {
                   onClick={() =>
                     setCurrentVideoIndex((prev) => (prev + 1) % products.length)
                   }
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-opacity opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute right-2 top-1/2 z-10 p-2 text-white rounded-full opacity-0 transition-opacity transform -translate-y-1/2 bg-black/50 hover:bg-black/70 group-hover:opacity-100"
                   aria-label="Next video"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -413,7 +456,7 @@ const Store = () => {
 
           {/* Indicators */}
           {products.length > 1 && (
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex gap-2 justify-center mt-4">
               {products.map((_, index) => (
                 <button
                   key={index}
@@ -430,8 +473,8 @@ const Store = () => {
       </div>
 
       <div className="pb-16">
-        <div className="flex gap-4 items-start p-4  md:items-center ">
-          <span className="py-0 pl-0 text-2xl font-semibold  md:py-12 md:px-12 md:text-3xl">
+        <div className="flex gap-4 items-start p-4 md:items-center">
+          <span className="py-0 pl-0 text-2xl font-semibold md:py-12 md:px-12 md:text-3xl">
             {" "}
             Product Specifically designed for
           </span>
@@ -479,8 +522,8 @@ const Store = () => {
           </button>
         </div>
 
-        <div className="w-full p-4 mt-4 ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-12 auto-rows-auto mx-20">
+        <div className="p-4 mt-4 w-full">
+          <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
             {products?.length > 0 ? (
               products.map((product) => {
                 // Ensure all required properties are present before passing to ProductCard
