@@ -9,14 +9,12 @@ import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
 import OrderSummary from "@/components/OrderSummary";
-// import Career from "./components/shared/CareerPage/Career.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 import AssesmentPage from "./pages/AssesmentPage";
 import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
-// import ComicPdfPage from "./pages/ComicPdfPage";
 import Home from "./pages/Home";
 import Membership from "./pages/Membership";
 import MentoonsStore from "./pages/MentoonsStore";
@@ -27,287 +25,51 @@ import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import AddaRouter from "./routes/adda/addaRouter.tsx";
 
-// Lazy load the pages
-// const Home = lazy(() => import("./pages/Home"));
-
-// const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Cart = lazy(() => import("./pages/Cart"));
-// const ComicsPage = lazy(() => import("./pages/ComicsPage"));
-// const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
-// const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
-// const SearchPage = lazy(() => import("./pages/SearchPage"));
-// const Career = lazy(() => import("./components/shared/CareerPage/Career"));
-// const PodCast = lazy(() => import("./pages/PodCast"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-// const WorkshopsPage = lazy(() => import("./pages/WorkshopsPage"));
 
 const routes = [
-  {
-    path: "/",
-    element: (
-      <MainLayout>
-        <Home />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/sign-up",
-
-    element: (
-      <MainLayout>
-        <Register />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/sign-in",
-
-    element: (
-      <MainLayout>
-        <LogIn />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/about-mentoons",
-
-    element: (
-      <MainLayout>
-        <AboutMentoons />
-      </MainLayout>
-    ),
-  },
-
-  // {
-  //   path: "/wishlist",
-  //   element: (
-  //     <MainLayout>
-  //       <Wishlist />
-  //     </MainLayout>
-  //   ),
-  // },
+  { path: "/", element: <Home /> },
+  { path: "/sign-up", element: <Register /> },
+  { path: "/sign-in", element: <LogIn /> },
+  { path: "/about-mentoons", element: <AboutMentoons /> },
   {
     path: "/cart",
     element: (
       <ProtectedRoute>
-        <MainLayout>
-          <Cart />
-        </MainLayout>
+        <Cart />
       </ProtectedRoute>
     ),
   },
-  {
-    path: "/mentoons-comics",
-    element: (
-      <MainLayout>
-        {/* <ComicsHome /> */}
-
-        <ComicsPageV2 />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/free-download",
-    element: (
-      <MainLayout>
-        <FreeDownload />
-      </MainLayout>
-    ),
-  },
-
-  
- 
-  {
-    path: "/mentoons-workshops",
-    element: (
-      <MainLayout>
-        <Workshopv2 />
-      </MainLayout>
-    ),
-  },
-  
-  // {
-  //   path: "/mentoons-comics/audio-comics/:comic",
-  //   element: (
-  //     <ProtectedRoute>
-  //       <MainLayout>
-  //         <AudioComicPage />
-  //       </MainLayout>
-  //     </ProtectedRoute>
-  //   ),
-  // },
-  // {
-  //   path: "/search",
-  //   element: (
-  //     <MainLayout>
-  //       <SearchPage />
-  //     </MainLayout>
-  //   ),
-  // },
- 
-  {
-    path: "/mentoons-podcast",
-    element: (
-      <MainLayout>
-        <Podcastv2 />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/faq",
-    element: (
-      <MainLayout>
-        <FAQ />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/website-plans",
-    element: (
-      <MainLayout>
-        <Plans />
-      </MainLayout>
-    ),
-  },
- 
-  {
-    path: "/mentoons-store",
-    element: (
-      <MainLayout>
-        <MentoonsStore />
-      </MainLayout>
-    ),
-  },
-  // {
-  //   path: "/mentoons-store/:category",
-  //   element: (
-  //     <MainLayout>
-  //       <ProductCategory />
-  //     </MainLayout>
-  //   ),
-  // },
-  // {
-  //   path: "/mentoons-store/:category/:productId",
-  //   element: (
-  //     <MainLayout>
-  //       <ProductDetails />
-  //     </MainLayout>
-  //   ),
-  // },
-  {
-    path: "/mentoons-store/product/:productId",
-    element: (
-      <MainLayout>
-        <ProductDetails />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/product-management",
-    element: (
-      <MainLayout>
-        <ProductManagement />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-privacy-policy",
-    element: (
-      <MainLayout>
-        <PolicyPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-term-conditions",
-    element: (
-      <MainLayout>
-        <TermsAndConditions />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/membership",
-    element: (
-      <MainLayout>
-        <Membership />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/hiring",
-    element: (
-      <MainLayout>
-        <CareerPage />
-      </MainLayout>
-    ),
-  },
-  // {
-  //   path: "/landing-page",
-  //   element: (
-  //     <MainLayout>
-  //       <LandingPage />
-  //     </MainLayout>
-  //   ),
-  // },
-  {
-    path: "/assesment-page",
-    element: (
-      <MainLayout>
-        <AssesmentPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/assesment-questions",
-    element: (
-      <MainLayout>
-        <AssesmentQuestions />
-      </MainLayout>
-    ),
-  },
- 
-  {
-    path: "/order-summary",
-    element: (
-      <MainLayout>
-        <OrderSummary />
-      </MainLayout>
-    ),
-  },
-  // {
-  //   path: "/payment",
-  //   element: (
-  //     <MainLayout>
-  //       <PaymentForm />
-  //     </MainLayout>
-  //   ),
-  // },
-  {
-    path: "/payment-status",
-    element: (
-      <MainLayout>
-        <PaymentStatusPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "*",
-    element: (
-      <MainLayout>
-        <NotFound />
-      </MainLayout>
-    ),
-  },
+  { path: "/mentoons-comics", element: <ComicsPageV2 /> },
+  { path: "/free-download", element: <FreeDownload /> },
+  { path: "/mentoons-workshops", element: <Workshopv2 /> },
+  { path: "/mentoons-podcast", element: <Podcastv2 /> },
+  { path: "/faq", element: <FAQ /> },
+  { path: "/website-plans", element: <Plans /> },
+  { path: "/mentoons-store", element: <MentoonsStore /> },
+  { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
+  { path: "/product-management", element: <ProductManagement /> },
+  { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
+  { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
+  { path: "/membership", element: <Membership /> },
+  { path: "/hiring", element: <CareerPage /> },
+  { path: "/assesment-page", element: <AssesmentPage /> },
+  { path: "/assesment-questions", element: <AssesmentQuestions /> },
+  { path: "/order-summary", element: <OrderSummary /> },
+  { path: "/payment-status", element: <PaymentStatusPage /> },
+  { path: "*", element: <NotFound /> },
+  { path: "/adda/*", element: <AddaRouter /> },
 ];
 
 const Router = () => {
@@ -328,7 +90,11 @@ const Router = () => {
       <Suspense fallback={<Loader />}>
         <Routes>
           {routes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
+            <Route
+              key={index}
+              path={route.path}
+              element={<MainLayout>{route.element}</MainLayout>}
+            />
           ))}
         </Routes>
       </Suspense>
