@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PHOTO_POST } from "../../../../constants";
+import { PHOTO_POST } from "@/constant/constants";
 import PostUpload from "../modal/postUpload";
 
 const AddPosts = () => {
@@ -16,7 +16,7 @@ const AddPosts = () => {
         <div className="flex justify-center items-center gap-5 py-5 w-full ">
           <div className="w-20 h-18 rounded-full overflow-hidden border-2 border-white">
             <img
-              src="/profilePictures/pexels-simon-robben-55958-614810.jpg"
+              src="/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg"
               alt="userProfilePicture"
               className="w-full h-full object-cover rounded-full"
             />

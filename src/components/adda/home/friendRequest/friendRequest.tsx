@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FRIEND_REQUEST } from "@/constant/constants";
-import { RequestInterface } from "../../../../types";
+import { RequestInterface } from "@/types";
 import "./friendRequest.css";
 
 const FriendRequest = () => {
@@ -16,7 +16,7 @@ const FriendRequest = () => {
     <div className="flex flex-col items-center p-0 md:p-5 w-full">
       <h1 className="flex justify-start items-start gap-5 text-start w-full text-sm md:text-md figtree">
         <img
-          src="/characters/dd917c3b5f69868482390319c6a80c25.png"
+          src="/assets/adda/sidebar/dd917c3b5f69868482390319c6a80c25.png"
           alt="klem-friend"
           className="w-5"
         />

@@ -4,7 +4,7 @@ import Likes from "../likes/likes";
 import { FaRegBookmark } from "react-icons/fa6";
 import Share from "../share/share";
 import { motion } from "framer-motion";
-import Highlight from "../../../../common/modal/highlight";
+import Highlight from "@/components/common/modal/highlight";
 
 const Posts = () => {
   const [showComments, setShowComments] = useState(false);
@@ -22,7 +22,7 @@ const Posts = () => {
     description:
       "Showing anger, frustration, insecurity in situations does not have good impression on the child. Parents should think before they react to any situation specially in front of their children learn from there behavior and so parents have to be good role models for them.",
     postUrl: "https://example.com/posts/123",
-    imageUrl: "/adda/post/8.jpg",
+    imageUrl: "/assets/adda/post/8.jpg",
     author: "Hardik",
     role: "Teacher at Divim Technology",
     timestamp: "25 Nov at 12:24 PM",
@@ -45,7 +45,7 @@ const Posts = () => {
         <div className="flex justify-start items-center gap-3 w-full">
           <div className="w-14 h-14 rounded-full overflow-hidden">
             <img
-              src="/profilePictures/pexels-stefanstefancik-91227.jpg"
+              src="/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
               alt="user-profile-picture"
               className="h-full w-full object-cover rounded-full"
             />
@@ -133,7 +133,7 @@ const Posts = () => {
                     className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-md border border-gray-200 w-full"
                   >
                     <img
-                      src="/profilePictures/pexels-stefanstefancik-91227.jpg"
+                      src="/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
                       alt="profile-picture"
                       className="w-10 h-10 rounded-full object-cover border border-gray-300"
                     />

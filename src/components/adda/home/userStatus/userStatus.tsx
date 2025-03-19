@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { UserStatusInterface } from "../../../../types";
+import { UserStatusInterface } from "@/types";
 import { FaPlus } from "react-icons/fa";
-import { STATUSES } from "../../../../constants";
+import { STATUSES } from "@/constant/adda/status";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { FreeMode } from "swiper/modules";
-import Status from "../../../common/modal/status";
+import Status from "@/components/common/modal/status";
 // import axios, { AxiosError } from "axios";
 
 const UserStatus = () => {

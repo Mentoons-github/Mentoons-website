@@ -6,7 +6,7 @@ const Influencer = () => {
       </h1>
       <div className="w-full h-auto rounded-lg pt-4 overflow-hidden">
         <img
-          src="/icons/Become influencer.png"
+          src="/assets/adda/sidebar/Become influencer.png"
           alt="influencer"
           className="w-full object-cover"
         />
