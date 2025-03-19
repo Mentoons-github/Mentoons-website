@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import tailwindAnimate from "tailwindcss-animate";
+
+export default {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -9,16 +11,7 @@ module.exports = {
   ],
   prefix: "",
   theme: {
-    container: {
-      //   center: true,
-      //   padding: {
-      //     DEFAULT: "1rem",
-      //     sm: "1.5rem",
-      //     md: "3rem",
-      //     lg: "5rem",
-      //     xl: "7.5rem",
-      //   },
-    },
+    container: {},
     screens: {
       xxs: "300px",
       xs: "475px",
@@ -33,6 +26,23 @@ module.exports = {
     extend: {
       fontFamily: {
         montserrat: "Montserrat",
+        akshar: ["Akshar", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        fredoka: ["Fredoka", "sans-serif"],
+        epilogue: ["Epilogue", "sans-serif"],
+        figtree: ["Figtree", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
+        mulish: ["Mulish", "sans-serif"],
+        forum: ["Forum", "sans-serif"],
+        outfit: ["Outfit", "sans-serif"],
+        cormorant: ["Cormorant", "sans-serif"],
+        dmsans: ["DM Sans", "sans-serif"],
+        firasans: ["Fira Sans", "sans-serif"],
+        manrope: ["Manrope", "sans-serif"],
+        inconsolata: ["Inconsolata", "sans-serif"],
+        jost: ["Jost", "sans-serif"],
+        futura: ["Futura Std", "sans-serif"],
       },
       colors: {
         "men-blue": "#003366",
@@ -96,7 +106,6 @@ module.exports = {
         "custom-complex":
           "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
       },
-
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -143,5 +152,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindAnimate],
 };

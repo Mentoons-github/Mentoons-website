@@ -1,20 +1,68 @@
-import { NAV_LINKS } from "@/constant";
+import Sidebar from "@/components/common/sidebar";
+import { NAV_LINKS, ADDA_NAV_LINKS } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
+import { ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppDispatch, RootState } from "@/redux/store";
-import { SignedIn, SignedOut, useAuth, UserButton } from "@clerk/clerk-react";
-
+import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
-import { IoCart, IoClose, IoMenu } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { FaBars, FaPhone } from "react-icons/fa6";
+import { DropDownInterface } from "@/types";
+import NavButton from "@/components/common/nav/navButton";
+import DropDown from "@/components/common/nav/dropdown";
+import { FaTimes } from "react-icons/fa";
 const Header = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  const title = location.pathname.startsWith("/adda") ? "adda" : "home";
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [sidebarOpen, setSideBarOpen] = useState(false);
+  const [dropdown, setDropDown] = useState<DropDownInterface>({
+    games: false,
+    comics: false,
+    products: false,
+    services: false,
+    subscription: false,
+  });
+
   const { cart } = useSelector((state: RootState) => state.cart);
   const { getToken, userId } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
+
+  const navLeft =
+    title === "adda"
+      ? ADDA_NAV_LINKS.filter((link) =>
+          ["Mythos", "Community"].includes(link.label)
+        )
+      : NAV_LINKS.filter((link) => ["Mythos", "Products"].includes(link.label));
+
+  const handleBrowsePlansClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => scrollToSubscription(), 500);
+    } else {
+      scrollToSubscription();
+    }
+  };
+  const scrollToSubscription = () =>
+    document
+      .getElementById("subscription")
+      ?.scrollIntoView({ behavior: "smooth" });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -28,217 +76,161 @@ const Header = () => {
 
     fetchCart();
   }, [dispatch, getToken, userId]);
-  // const [audioDropdownOpen, setAudioDropdownOpen] = useState<boolean>(false);
 
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
+  const handleHover = (menu: string) => {
+    setDropDown((prev) => ({ ...prev, [menu]: true }));
   };
 
-  const controlHeaderVisibility = () => {
-    if (window.scrollY > lastScrollY) {
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-    }
-    setLastScrollY(window.scrollY);
+  const handleMouseLeave = (menu: string) => {
+    setDropDown((prev) => ({ ...prev, [menu]: false }));
   };
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    const handleScroll = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(controlHeaderVisibility, 0);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(timeoutId);
-    };
-  }, [lastScrollY]);
-
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [menuOpen]);
 
   return (
-    <div
-      className={`h-16 bg-primary border-b-[.5px] border-gray-200 shadow-2xl fixed top-0 w-full z-[999] transition-transform duration-300 ${
-        isVisible || lastScrollY < 64 ? "translate-y-0" : "-translate-y-full"
-      }`}
+    <header
+      className={`${
+        isScrolled ? "fixed w-full top-0 left-0 shadow-md" : "relative"
+      } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto`}
     >
-      <div className="flex items-center justify-between h-full px-4 ">
-        {/* Left Section - Hidden on mobile */}
-        <div className="items-center flex-1 hidden pl-6 space-x-6 font-semibold text-black lg:flex md:hidden">
-          {NAV_LINKS.filter((link) =>
-            ["Date", "Call us", "Join Us", "Plans", "Store"].includes(
-              link.label
-            )
-          ).map((link) => (
-            <div key={link.id} className="text-white whitespace-nowrap">
-              {link.label === "Date" ? (
-                <span className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap ">
-                  {new Date().toDateString()}
-                </span>
-              ) : link.label === "Call us" ? (
-                <a
-                  href="tel:+91 90360 33300"
-                  className="px-3 py-2 bg-white rounded-full text-primary whitespace-nowrap "
-                >
-                  Call us: +91 90360 33300
-                </a>
-              ) : (
-                <NavLink
-                  to={link.url}
-                  className="px-3 py-2 text-white transition-all duration-200 border rounded-full hover:text-gray-200 border-primary hover:border-white/20 hover:bg-white/10"
-                >
-                  {link.label}{" "}
-                </NavLink>
-              )}
-            </div>
-          ))}
+      <a
+        href="tel:+919036033300"
+        className={`no-underline ${
+          title === "adda" ? "lg:hidden block" : "md:hidden block"
+        } whitespace-nowrap`}
+      >
+        <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+          <FaPhone /> <span> +91 90360 33300</span>
         </div>
-
-        {/* Middle Section - Logo */}
-        <div
-          className="items-center hidden lg:flex"
-          onClick={() => navigate("/")}
-        >
-          <img
-            src="/assets/images/mentoons-logo.png"
-            alt="Company Logo"
-            className="relative z-50 pt-4 pb-2 pr-1 border-b rounded-full max-h-24 bg-primary"
-          />
-        </div>
-
-        {/* Right Section */}
-        <div className="items-center justify-end flex-1 hidden font-semibold lg:flex md:hidden">
-          {/* Desktop Menu */}
-          <div className="items-center hidden space-x-6 text-white md:flex justify-betwee">
-            {/* <NavLink
-              to="/mentoons-store"
-              className="text-white hover:text-gray-200"
-            >
-              {" "}
-              Store
-            </NavLink> */}
-            <NavLink
-              to="/mentoons-comics"
-              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200 whitespace-nowrap"
-            >
-              {" "}
-              Comics and Audio Comics
-            </NavLink>
-
-            <NavLink
-              to="/mentoons-podcast"
-              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
-            >
-              Podcasts
-            </NavLink>
-            <NavLink
-              to="/mentoons-workshops"
-              className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
-            >
-              Workshops
-            </NavLink>
-            <SignedIn>
-              <NavLink
-                to="/cart"
-                className="text-white hover:text-gray-200 border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200"
+      </a>
+      <nav
+        className={`w-auto lg:w-1/2 ${
+          title === "adda"
+            ? "hidden lg:flex gap-3 md:gap-10"
+            : "hidden lg:flex gap-3 md:gap-20"
+        } justify-start lg:justify-center items-center `}
+      >
+        <a href="tel:+919036033300" className="no-underline hidden xl:block">
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+            <FaPhone /> <span> +91 90360 33300</span>
+          </div>
+        </a>
+        {navLeft.map(({ icon: Icon, id, label, url, items }) => (
+          <div key={id} className="relative">
+            {items && items?.length ? (
+              <NavButton
+                label={label}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
               >
-                <div className="relative ">
-                  <span className="absolute px-1 text-xs font-medium bg-red-600 rounded-sm -top-3 -right-3">
-                    {cart.totalItemCount}
-                  </span>
-                  <IoCart className="text-2xl font-bold " />
-                </div>
-              </NavLink>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <NavLink to="/sign-in">
-                <button className="text-white hover:text-gray-200 whitespace-nowrap border border-primary hover:border-white/20  px-3 py-[5px] rounded-full hover:bg-white/10 transition-all duration-200">
-                  Sign In
-                </button>
-              </NavLink>
-            </SignedOut>
-            <button className="text-white">
-              <i className="fas fa-user" />
-            </button>
-          </div>
-        </div>
-        {/* Mobile Menu */}
-        <div className="flex items-center justify-between w-full sm:flex md:flex lg:hidden">
-          <figure className="w-6 h-6">
-            <img
-              src="/assets/home/home-icn.png"
-              alt="home icon"
-              className="object-contain w-full h-full "
-            />
-          </figure>
-          <div
-            className="flex items-center lg:hidden"
-            onClick={() => navigate("/")}
-          >
-            <img
-              src="/assets/images/mentoons-logo.png"
-              alt="Company Logo"
-              className="max-h-24 pr-1 pt-4 pb-2 bg-primary rounded-full relative z-[999] border-b"
-            />
-          </div>
-          <div className="w-6 h-6" onClick={handleMenuToggle}>
-            {menuOpen ? (
-              <IoClose className="w-full h-full font-semibold text-white" />
+                {dropdown.products && <DropDown items={items} />}
+              </NavButton>
             ) : (
-              <IoMenu className="w-full h-full text-white" />
+              <NavLink
+                to={url}
+                className="relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1"
+              >
+                {typeof Icon === "function" ? (
+                  <Icon className="sm:text-sm md:text-lg" />
+                ) : null}
+                {label}
+
+                {label === "Mythos" && (
+                  <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[12px] leading-none">
+                    Introducing
+                  </span>
+                )}
+              </NavLink>
             )}
           </div>
-          {isVisible && menuOpen && (
-            <div className=" absolute bg-amber-50 border border-gray-200 top-16 left-0 w-full text-center h-[calc(100vh-64px)]  z-50  pt-[100px]">
-              <ul>
-                {NAV_LINKS.filter(
-                  (link) => !["Date", "Call us", "User"].includes(link.label)
-                ).map((link) => (
-                  <li
-                    key={link.id}
-                    className="py-2 text-2xl font-semibold text-gray-700 cursor-pointer"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(link.url);
-                    }}
-                  >
-                    {link.label}
-                  </li>
-                ))}
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-                <SignedOut>
-                  <li
-                    className="py-2 text-2xl font-semibold text-gray-700 cursor-pointer"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate("/sign-in");
-                    }}
-                  >
-                    Sign In
-                  </li>
-                </SignedOut>
-              </ul>
-            </div>
-          )}
-        </div>
+        ))}
+      </nav>
+      <div className="flex justify-center">
+        <NavLink to="/">
+          <img
+            src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+            alt="mentoons-logo"
+            className="w-[120px] md:w-[130px] lg:w-[150px] mx-auto"
+          />
+        </NavLink>
       </div>
-    </div>
+      <motion.div
+        className={`${
+          title === "adda" ? "lg:hidden block" : "lg:hidden block"
+        } cursor-pointer z-50`}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ rotate: 90, scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        onClick={() => setSideBarOpen(!sidebarOpen)}
+      >
+        {sidebarOpen ? (
+          <FaTimes
+            size={26}
+            className="text-white transition-colors hover:text-gray-300"
+          />
+        ) : (
+          <FaBars
+            size={26}
+            className="text-white transition-colors hover:text-gray-300"
+          />
+        )}
+      </motion.div>
+
+      <nav
+        className={`w-fit lg:w-1/2 ${
+          title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
+        } justify-evenly items-center gap-2 md:gap-5`}
+      >
+        {ADDA_NAV_LINKS.filter((data) =>
+          ["Browse Plans", "Workshops", "Assessments"].includes(data.label)
+        ).map(({ id, label, url, icon: Icon }) =>
+          label === "Browse Plans" ? (
+            <a
+              key={id}
+              href={url}
+              onClick={handleBrowsePlansClick}
+              className="text-white px-4 py-2 rounded-md font-semibold text-[12px] sm:text-sm md:text-base flex items-center gap-1 whitespace-nowrap"
+            >
+              {Icon && typeof Icon === "function" ? (
+                <Icon className="sm:text-sm md:text-lg" />
+              ) : null}
+              {label}
+            </a>
+          ) : (
+            <NavLink
+              key={id}
+              to={url}
+              className="bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1"
+            >
+              {Icon && typeof Icon === "function" ? (
+                <Icon className="sm:text-sm md:text-lg" />
+              ) : null}
+              {label}
+            </NavLink>
+          )
+        )}
+        <SignedIn>
+          <div className="relative cursor-pointer">
+            <NavLink to="/cart">
+              <ShoppingCart className="w-6 h-6 text-white" />
+              {cart.totalItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  {cart.totalItemCount}
+                </span>
+              )}
+            </NavLink>
+          </div>
+        </SignedIn>
+      </nav>
+      <Sidebar
+        token={userId ?? null}
+        isOpen={sidebarOpen}
+        title={title}
+        dropdown={dropdown}
+        handleHover={handleHover}
+        handleMouseLeave={handleMouseLeave}
+        setIsOpen={setSideBarOpen}
+        handlePlans={handleBrowsePlansClick}
+      />
+    </header>
   );
 };
 

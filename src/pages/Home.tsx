@@ -5,11 +5,12 @@ import { IoCloseOutline } from "react-icons/io5";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { AxiosError } from "axios";
-import Struggles from "@/components/LandingPage/Struggles";
-import HeroSection from "@/components/LandingPage/HeroSection";
-import MdMultiverse from "@/components/LandingPage/MdMultiverse";
+import AddaSection from "@/components/LandingPage/addaSection";
+import HeroSection from "@/components/LandingPage/hero/HeroSection";
+import Community from "@/components/LandingPage/benefits/community/community";
 // import NewSection from "@/components/LandingPage/NewSection";
-import MeetMentors from "@/components/LandingPage/MeetMentors";
+import Membership from "@/components/LandingPage/membership/membership";
+import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
 
 const Home = () => {
   const { user } = useUser();
@@ -44,9 +45,10 @@ const Home = () => {
       <HeroSection />
 
       {[
-        { Component: Struggles, key: "struggles" },
-        { Component: MdMultiverse, key: "multiverse" },
-        { Component: MeetMentors, key: "meet mentors" },
+        { Component: AddaSection, key: "adda" },
+        { Component: Community, key: "benefits" },
+        { Component: Membership, key: "membership" },
+        { Component: NewsAndMentor, key: "newsSubscription" },
         // { Component: NewSection, key: 'new section' }
       ].map(({ Component, key }) => (
         <motion.div key={key}>
