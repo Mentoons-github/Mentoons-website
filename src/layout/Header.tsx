@@ -187,7 +187,7 @@ const Header = () => {
               key={id}
               href={url}
               onClick={handleBrowsePlansClick}
-              className="text-white px-4 py-2 rounded-md font-semibold text-[12px] sm:text-sm md:text-base flex items-center gap-1"
+              className="text-white px-4 py-2 rounded-md font-semibold text-[12px] sm:text-sm md:text-base flex items-center gap-1 whitespace-nowrap"
             >
               {Icon && typeof Icon === "function" ? (
                 <Icon className="sm:text-sm md:text-lg" />
