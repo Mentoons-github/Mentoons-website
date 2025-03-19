@@ -9,14 +9,12 @@ import MainLayout from "./layout/MainLayout";
 import Popup from "./layout/Popup";
 
 import OrderSummary from "@/components/OrderSummary";
-// import Career from "./components/shared/CareerPage/Career.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 import AssesmentPage from "./pages/AssesmentPage";
 import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
-// import ComicPdfPage from "./pages/ComicPdfPage";
 import Home from "./pages/Home";
 import Membership from "./pages/Membership";
 import MentoonsStore from "./pages/MentoonsStore";
@@ -28,27 +26,17 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
 
-// Lazy load the pages
-// const Home = lazy(() => import("./pages/Home"));
-
-// const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Cart = lazy(() => import("./pages/Cart"));
-// const ComicsPage = lazy(() => import("./pages/ComicsPage"));
-// const ComicsHome = lazy(() => import("@/pages/ComicsHome"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
-// const AudioComicPage = lazy(() => import("./pages/AudioComicPage"));
-// const SearchPage = lazy(() => import("./pages/SearchPage"));
-// const Career = lazy(() => import("./components/shared/CareerPage/Career"));
-// const PodCast = lazy(() => import("./pages/PodCast"));
+
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-// const WorkshopsPage = lazy(() => import("./pages/WorkshopsPage"));
 
 const routes = [
   {
@@ -87,14 +75,6 @@ const routes = [
     ),
   },
 
-  // {
-  //   path: "/wishlist",
-  //   element: (
-  //     <MainLayout>
-  //       <Wishlist />
-  //     </MainLayout>
-  //   ),
-  // },
   {
     path: "/cart",
     element: (
@@ -124,8 +104,6 @@ const routes = [
     ),
   },
 
-  
- 
   {
     path: "/mentoons-workshops",
     element: (
@@ -134,26 +112,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  
-  // {
-  //   path: "/mentoons-comics/audio-comics/:comic",
-  //   element: (
-  //     <ProtectedRoute>
-  //       <MainLayout>
-  //         <AudioComicPage />
-  //       </MainLayout>
-  //     </ProtectedRoute>
-  //   ),
-  // },
-  // {
-  //   path: "/search",
-  //   element: (
-  //     <MainLayout>
-  //       <SearchPage />
-  //     </MainLayout>
-  //   ),
-  // },
- 
+
   {
     path: "/mentoons-podcast",
     element: (
@@ -178,7 +137,7 @@ const routes = [
       </MainLayout>
     ),
   },
- 
+
   {
     path: "/mentoons-store",
     element: (
@@ -187,22 +146,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/mentoons-store/:category",
-  //   element: (
-  //     <MainLayout>
-  //       <ProductCategory />
-  //     </MainLayout>
-  //   ),
-  // },
-  // {
-  //   path: "/mentoons-store/:category/:productId",
-  //   element: (
-  //     <MainLayout>
-  //       <ProductDetails />
-  //     </MainLayout>
-  //   ),
-  // },
+
   {
     path: "/mentoons-store/product/:productId",
     element: (
@@ -251,14 +195,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/landing-page",
-  //   element: (
-  //     <MainLayout>
-  //       <LandingPage />
-  //     </MainLayout>
-  //   ),
-  // },
+
   {
     path: "/assesment-page",
     element: (
@@ -275,7 +212,7 @@ const routes = [
       </MainLayout>
     ),
   },
- 
+
   {
     path: "/order-summary",
     element: (
@@ -284,14 +221,7 @@ const routes = [
       </MainLayout>
     ),
   },
-  // {
-  //   path: "/payment",
-  //   element: (
-  //     <MainLayout>
-  //       <PaymentForm />
-  //     </MainLayout>
-  //   ),
-  // },
+
   {
     path: "/payment-status",
     element: (
@@ -300,6 +230,7 @@ const routes = [
       </MainLayout>
     ),
   },
+
   {
     path: "*",
     element: (
