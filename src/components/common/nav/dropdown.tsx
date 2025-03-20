@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BiChevronRight } from "react-icons/bi";
 import { NavLink } from "@/constant";
 
@@ -7,11 +7,24 @@ const DropDown = ({
   items = [],
   alignLeft,
   isOpen,
+  labelType,
 }: {
   items: NavLink[];
   alignLeft?: boolean;
   isOpen?: (val: boolean) => void;
+  labelType?: "products" | "games";
 }) => {
+  const navigate = useNavigate();
+
+  console.log("got itms: ", items);
+  const handleClick = (category: string) => {
+    console.log("selectedCategory : ", category);
+    if (isOpen) isOpen(false);
+    const basePath =
+      labelType === "products" ? "/mentoons-store" : "/mentoons-games";
+    navigate(`${basePath}?category=${encodeURIComponent(category)}`);
+  };
+
   return (
     <div className="relative font-akshar">
       <motion.ul
@@ -33,13 +46,12 @@ const DropDown = ({
             }}
             className="p-2 transform transition-all duration-200 border-b border-gray-300 hover:border-yellow-400 hover:bg-gray-100 rounded-md flex justify-between items-center"
           >
-            <Link
-              to={data.url}
-              onClick={() => isOpen && isOpen(false)}
+            <button
+              onClick={() => handleClick(data.label)}
               className="text-gray-800 text-sm md:text-base hover:text-black font-medium flex-1"
             >
               {data.label}
-            </Link>
+            </button>
             <BiChevronRight
               className="text-gray-500 text-sm md:text-base group-hover:text-gray-800 transition duration-200"
               size={18}
