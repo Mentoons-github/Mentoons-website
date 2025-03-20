@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
 import FounderNote from "@/components/common/founderNote";
-import { FaTelegram } from "react-icons/fa6";
 import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
+import { FaTelegram } from "react-icons/fa6";
 
 const NewsAndMentor = () => {
   const { ref: sectionRef, isInView } = useInView(0.3, false);

@@ -1,7 +1,7 @@
-import axiosInstance from "@/api/axios";
 import { Membership } from "@/types/home/membership";
 import { errorToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { FaCheck, FaStar, FaTimes } from "react-icons/fa";
@@ -15,6 +15,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
   const { user } = useUser();
 
   const handleMembership = async (membership: Membership) => {
+    console.log("Membership handling initiated");
     try {
       const token = await getToken();
       if (!token) {
@@ -50,8 +51,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         },
         sameAsShipping: true,
       };
-
-      const response = await axiosInstance.post(
+      console.log("subscriptionData", subscriptionData);
+      const response = await axios.post(
         "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
         subscriptionData,
         {
@@ -75,10 +76,10 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       } else {
         throw new Error("Payment form not found in response");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Membership payment error:", error);
       errorToast(
-        error.message ||
+        error instanceof Error ? error.message : 
           "Failed to process membership payment. Please try again later."
       );
     }
