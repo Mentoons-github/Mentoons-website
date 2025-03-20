@@ -7,7 +7,7 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 import { MdAssessment } from "react-icons/md";
-import { FaUsers } from "react-icons/fa6";
+import { FaCoins, FaUsers } from "react-icons/fa6";
 
 export const CATEGORIES = [
   "Comedy",
@@ -50,8 +50,8 @@ export const PODCAST_DETAILS = [
     age: "",
     author: "Haaris Rueben",
     duration: "",
-    },
-    {
+  },
+  {
     id: 3,
     topic: "How does it feel to be an teenager",
     description:
@@ -65,8 +65,8 @@ export const PODCAST_DETAILS = [
     age: "",
     author: "Haaris Rueben",
     duration: "",
-    },
-    {
+  },
+  {
     id: 4,
     topic: "Performance Addiction",
     description:
@@ -80,7 +80,7 @@ export const PODCAST_DETAILS = [
     age: "",
     author: "Haaris Rueben",
     duration: "",
-    },
+  },
   // todo change the content
   {
     id: 5,
@@ -1132,27 +1132,27 @@ export const NAV_LINKS: NavLink[] = [
     id: "NL_13",
     label: "Products",
     icon: FaShoppingCart,
-    url: "",
+    url: "/mentoons-store",
     items: [
       {
         id: "AC_01",
         label: "6-12",
-        url: "/mentoons-store/6-12",
+        url: "/mentoons-store",
       },
       {
         id: "AC_01",
         label: "13-16",
-        url: "/mentoons-store/13-16",
+        url: "/mentoons-store",
       },
       {
         id: "AC_01",
         label: "17-19",
-        url: "/mentoons-store/17-19",
+        url: "/mentoons-store",
       },
       {
         id: "AC_01",
         label: "20+",
-        url: "/mentoons-store/20",
+        url: "/mentoons-store",
       },
     ],
   },
@@ -1200,6 +1200,12 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     label: "Workshops",
     icon: FaChalkboard,
     url: "/mentoons-workshops",
+  },
+  {
+    id: "NL_09",
+    label: "Collect Coins",
+    icon: FaCoins,
+    url: "#",
   },
 ];
 

@@ -14,7 +14,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // const navigate = useNavigate();
   const location = useLocation();
   const isAuthRoute =
-    location.pathname === "/sign-up" || location.pathname === "/sign-in";
+    location.pathname === "/sign-up" ||
+    location.pathname === "/sign-in" ||
+    location.pathname === "/adda";
 
   return (
     <>

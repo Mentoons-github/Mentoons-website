@@ -35,7 +35,7 @@ const Header = () => {
   const navLeft =
     title === "adda"
       ? ADDA_NAV_LINKS.filter((link) =>
-          ["Mythos", "Community"].includes(link.label)
+          ["Mythos", "Community", "Collect Coins"].includes(link.label)
         )
       : NAV_LINKS.filter((link) => ["Mythos", "Products"].includes(link.label));
 
@@ -121,7 +121,12 @@ const Header = () => {
                 onMouseEnter={() => handleHover(label.toLowerCase())}
                 onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
               >
-                {dropdown.products && <DropDown items={items} />}
+                {dropdown.products && (
+                  <DropDown
+                    labelType={label.toLowerCase() as "products" | "games"}
+                    items={items}
+                  />
+                )}
               </NavButton>
             ) : (
               <NavLink

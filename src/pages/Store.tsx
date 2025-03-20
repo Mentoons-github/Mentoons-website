@@ -9,13 +9,19 @@ import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { setFilter } from "../redux/productSlice";
 import { RootState } from "../redux/store";
 
 const Store = () => {
-  const [selecteCategory, setSelecteCategory] = useState("6-12");
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  let category = searchParams.get("category") || "6-12";
+
+  if (category === "20+") category = "parents";
+
+  const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -25,6 +31,10 @@ const Store = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const [message, setMessage] = useState<string>("");
+
+  useEffect(() => {
+    setSelecteCategory(category);
+  }, [category]);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
@@ -57,6 +67,7 @@ const Store = () => {
   } = useSelector((state: RootState) => state.products);
 
   const handleSelectedCategory = (category: string) => {
+    console.log(category);
     setSelecteCategory(category);
 
     dispatch(setFilter({ ageCategory: category }));

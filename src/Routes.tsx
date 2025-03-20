@@ -25,6 +25,8 @@ import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import AddaRouter from "./routes/addaRouter.tsx";
+import MythosRouter from "./routes/mythosRouter.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -33,212 +35,43 @@ const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
 const FreeDownload = lazy(() => import("./pages/FreeDownload"));
-
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const routes = [
-  {
-    path: "/",
-    element: (
-      <MainLayout>
-        <Home />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/sign-up",
-
-    element: (
-      <MainLayout>
-        <Register />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/sign-in",
-
-    element: (
-      <MainLayout>
-        <LogIn />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/about-mentoons",
-
-    element: (
-      <MainLayout>
-        <AboutMentoons />
-      </MainLayout>
-    ),
-  },
-
+  { path: "/", element: <Home /> },
+  { path: "/sign-up", element: <Register /> },
+  { path: "/sign-in", element: <LogIn /> },
+  { path: "/about-mentoons", element: <AboutMentoons /> },
   {
     path: "/cart",
     element: (
       <ProtectedRoute>
-        <MainLayout>
-          <Cart />
-        </MainLayout>
+        <Cart />
       </ProtectedRoute>
     ),
   },
-  {
-    path: "/mentoons-comics",
-    element: (
-      <MainLayout>
-        {/* <ComicsHome /> */}
-
-        <ComicsPageV2 />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/free-download",
-    element: (
-      <MainLayout>
-        <FreeDownload />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/mentoons-workshops",
-    element: (
-      <MainLayout>
-        <Workshopv2 />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/mentoons-podcast",
-    element: (
-      <MainLayout>
-        <Podcastv2 />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/faq",
-    element: (
-      <MainLayout>
-        <FAQ />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/website-plans",
-    element: (
-      <MainLayout>
-        <Plans />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/mentoons-store",
-    element: (
-      <MainLayout>
-        <MentoonsStore />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/mentoons-store/product/:productId",
-    element: (
-      <MainLayout>
-        <ProductDetails />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/product-management",
-    element: (
-      <MainLayout>
-        <ProductManagement />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-privacy-policy",
-    element: (
-      <MainLayout>
-        <PolicyPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/mentoons-term-conditions",
-    element: (
-      <MainLayout>
-        <TermsAndConditions />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/membership",
-    element: (
-      <MainLayout>
-        <Membership />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/hiring",
-    element: (
-      <MainLayout>
-        <CareerPage />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/assesment-page",
-    element: (
-      <MainLayout>
-        <AssesmentPage />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/assesment-questions",
-    element: (
-      <MainLayout>
-        <AssesmentQuestions />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/order-summary",
-    element: (
-      <MainLayout>
-        <OrderSummary />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "/payment-status",
-    element: (
-      <MainLayout>
-        <PaymentStatusPage />
-      </MainLayout>
-    ),
-  },
-
-  {
-    path: "*",
-    element: (
-      <MainLayout>
-        <NotFound />
-      </MainLayout>
-    ),
-  },
+  { path: "/mentoons-comics", element: <ComicsPageV2 /> },
+  { path: "/free-download", element: <FreeDownload /> },
+  { path: "/mentoons-workshops", element: <Workshopv2 /> },
+  { path: "/mentoons-podcast", element: <Podcastv2 /> },
+  { path: "/faq", element: <FAQ /> },
+  { path: "/website-plans", element: <Plans /> },
+  { path: "/mentoons-store", element: <MentoonsStore /> },
+  { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
+  { path: "/product-management", element: <ProductManagement /> },
+  { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
+  { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
+  { path: "/membership", element: <Membership /> },
+  { path: "/hiring", element: <CareerPage /> },
+  { path: "/assesment-page", element: <AssesmentPage /> },
+  { path: "/assesment-questions", element: <AssesmentQuestions /> },
+  { path: "/order-summary", element: <OrderSummary /> },
+  { path: "/payment-status", element: <PaymentStatusPage /> },
+  { path: "*", element: <NotFound /> },
+  { path: "/adda/*", element: <AddaRouter /> },
+  { path: "/mythos/*", element: <MythosRouter /> },
 ];
 
 const Router = () => {
@@ -259,7 +92,17 @@ const Router = () => {
       <Suspense fallback={<Loader />}>
         <Routes>
           {routes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
+            <Route
+              key={index}
+              path={route.path}
+              element={
+                route.path.startsWith("/mythos") ? (
+                  route.element
+                ) : (
+                  <MainLayout>{route.element}</MainLayout>
+                )
+              }
+            />
           ))}
         </Routes>
       </Suspense>
