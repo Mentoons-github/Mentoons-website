@@ -25,7 +25,8 @@ import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import AddaRouter from "./routes/adda/addaRouter.tsx";
+import AddaRouter from "./routes/addaRouter.tsx";
+import MythosRouter from "./routes/mythosRouter.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -70,6 +71,7 @@ const routes = [
   { path: "/payment-status", element: <PaymentStatusPage /> },
   { path: "*", element: <NotFound /> },
   { path: "/adda/*", element: <AddaRouter /> },
+  { path: "/mythos/*", element: <MythosRouter /> },
 ];
 
 const Router = () => {
@@ -93,7 +95,13 @@ const Router = () => {
             <Route
               key={index}
               path={route.path}
-              element={<MainLayout>{route.element}</MainLayout>}
+              element={
+                route.path.startsWith("/mythos") ? (
+                  route.element
+                ) : (
+                  <MainLayout>{route.element}</MainLayout>
+                )
+              }
             />
           ))}
         </Routes>

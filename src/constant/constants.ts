@@ -7,6 +7,9 @@ import {
   ANIMATION_TEXTS_HOME,
 } from "./common/animationText";
 import { NAV_LINKS, ADDA_NAV_LINKS } from ".";
+import { PROBLEMS_FACED } from "./mythos/problemsFaced";
+import { BLOGS, NEWS } from "./mythos/blogs";
+import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 
 export {
   FAQ,
@@ -20,4 +23,10 @@ export {
   ADDA_NAV_LINKS,
   FRIEND_REQUEST,
   PHOTO_POST,
+  PROBLEMS_FACED,
+  BLOGS,
+  NEWS,
+  CONTACT_INFO,
+  CAREER,
+  PLANET,
 };
