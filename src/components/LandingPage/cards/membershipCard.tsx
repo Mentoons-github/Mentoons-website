@@ -1,11 +1,88 @@
-import { FaCheck, FaStar, FaTimes } from "react-icons/fa";
+import axiosInstance from "@/api/axios";
 import { Membership } from "@/types/home/membership";
+import { errorToast } from "@/utils/toastResposnse";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { FaCheck, FaStar, FaTimes } from "react-icons/fa";
+import { toast } from "sonner";
 
 const MembershipCard = ({ membership }: { membership: Membership }) => {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: false, amount: 0.3 });
+  const { getToken, userId } = useAuth();
+
+  const { user } = useUser();
+
+  const handleMembership = async (membership: Membership) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to continue");
+        return;
+      }
+
+      const subscriptionData = {
+        orderId: `#ORD-${Date.now()}`,
+        totalAmount: membership.price,
+        amount: membership.price,
+        currency: "INR",
+        productInfo: `Mentoons ${membership.type} Membership`,
+        customerName:
+          user?.firstName && user?.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user?.fullName || "Unknown",
+        email: user?.emailAddresses[0].emailAddress,
+        phone: user?.phoneNumbers?.[0]?.phoneNumber || "",
+        status: "PENDING",
+        user: userId,
+        items: [
+          {
+            name: membership.type,
+            price: membership.price,
+            quantity: 1,
+          },
+        ],
+        orderStatus: "pending",
+        paymentDetails: {
+          paymentMethod: "credit_card",
+          paymentStatus: "initiated",
+        },
+        sameAsShipping: true,
+      };
+
+      const response = await axiosInstance.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+        subscriptionData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("response", response);
+      console.log("response.data", response.data);
+
+      // Handle HTML form response
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = response.data;
+
+      const form = tempDiv.querySelector("form");
+      if (form) {
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        throw new Error("Payment form not found in response");
+      }
+    } catch (error: any) {
+      console.error("Membership payment error:", error);
+      errorToast(
+        error.message ||
+          "Failed to process membership payment. Please try again later."
+      );
+    }
+  };
 
   return (
     <motion.div
@@ -96,6 +173,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
                 ? "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
                 : "bg-gray-500 hover:bg-gray-600"
             }`}
+            onClick={() => handleMembership(membership)}
           >
             Buy Now
           </motion.button>
