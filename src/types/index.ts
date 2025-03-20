@@ -2,6 +2,7 @@ import { RequestInterface, UserStatusInterface } from "./adda/home";
 import { Membership, Color } from "./home/membership";
 import { DropDownInterface } from "./common/header";
 import { Status, StatusState } from "./adda/status";
+import { Groups } from "./groups/groups";
 import {
   JoinCardsProps,
   FooterLists,
@@ -12,6 +13,7 @@ import {
 export type {
   Membership,
   Color,
+  Groups,
   DropDownInterface,
   RequestInterface,
   UserStatusInterface,
@@ -19,6 +21,6 @@ export type {
   Status,
   JoinCardsProps,
   FooterLists,
-  MythosCardProps, 
-  MythosPlan
+  MythosCardProps,
+  MythosPlan,
 };

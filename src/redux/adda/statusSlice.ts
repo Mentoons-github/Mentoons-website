@@ -51,9 +51,9 @@ const statusSlice = createSlice({
       );
       if (status) {
         status.status = "watched";
-        if (!state.watchedStatus.includes(action.payload.id)) {
-          state.watchedStatus.push(action.payload.id);
-        }
+      }
+      if (!state.watchedStatus.includes(action.payload.id)) {
+        state.watchedStatus.push(action.payload.id);
       }
     },
   },
