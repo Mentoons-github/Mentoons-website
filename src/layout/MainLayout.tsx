@@ -1,10 +1,10 @@
 import Footer from "@/components/comics/Footer";
 import { ReactNode } from "react";
 // import { useLocation, useNavigate } from "react-router-dom";
+import TopUpArrow from "@/components/common/topUpArrow/upArrow";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
-import TopUpArrow from "@/components/common/topUpArrow/upArrow";
 
 interface MainLayoutProps {
   children: ReactNode;

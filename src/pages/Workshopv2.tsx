@@ -1,9 +1,11 @@
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ, WORKSHOP_MATTERS_POINTS, WORKSHOPS } from "@/constant";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 export type TPOSITION = {
   _id: string;
@@ -21,6 +23,72 @@ const Workshopv2 = () => {
   };
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
+
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    message: "",
+    workshop:
+      selecteCategory === "6-12"
+        ? "Buddy Camp"
+        : selecteCategory === "13-19"
+        ? "Teen Camp"
+        : selecteCategory === "20+"
+        ? "Career Corner"
+        : selecteCategory === "parent"
+        ? "Parent Camp"
+        : "",
+    doubt: "",
+  });
+
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleRegisterationForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const workshopRegistrationResponse = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/workshop/submit-form",
+        formData
+      );
+      if (workshopRegistrationResponse.status === 200) {
+        toast.success("Registration Successful");
+      } else {
+        toast.error("Registration Failed");
+      }
+
+      setFormData({
+        firstname: "",
+        lastname: "",
+        email: "",
+        phone: "",
+        message: "",
+        workshop:
+          selecteCategory === "6-12"
+            ? "Buddy Camp"
+            : selecteCategory === "13-19"
+            ? "Teen Camp"
+            : selecteCategory === "20+"
+            ? "Career Corner"
+            : selecteCategory === "parent"
+            ? "Parent Camp"
+            : "",
+        doubt: "",
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Registration Failed");
+    }
+  };
 
   // Animation variants
   const fadeInUp = {
@@ -414,7 +482,10 @@ const Workshopv2 = () => {
                   />
                 </figure>
                 <motion.div variants={scaleIn} className="flex-1 px-6 md:px-36">
-                  <form className="flex flex-col w-full gap-4">
+                  <form
+                    className="flex flex-col w-full gap-4"
+                    onSubmit={handleRegisterationForm}
+                  >
                     <div className="box-border flex gap-4">
                       <div className="flex-1 ">
                         <label
@@ -427,6 +498,8 @@ const Workshopv2 = () => {
                           type="text"
                           placeholder="first name"
                           className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
+                          onChange={handleFormChange}
+                          name="firstname"
                           style={{
                             border: `2px solid ${workshop.registerFormbgColor}`,
                           }}
@@ -443,6 +516,8 @@ const Workshopv2 = () => {
                           type="text"
                           placeholder="last name"
                           className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
+                          onChange={handleFormChange}
+                          name="lastname"
                           style={{
                             border: `2px solid ${workshop.registerFormbgColor}`,
                           }}
@@ -464,6 +539,8 @@ const Workshopv2 = () => {
                           style={{
                             border: `2px solid ${workshop.registerFormbgColor}`,
                           }}
+                          onChange={handleFormChange}
+                          name="email"
                         />
                       </div>
                       <div className="flex-1">
@@ -480,6 +557,8 @@ const Workshopv2 = () => {
                           style={{
                             border: `2px solid ${workshop.registerFormbgColor}`,
                           }}
+                          onChange={handleFormChange}
+                          name="phone"
                         />
                       </div>
                     </div>
@@ -498,6 +577,7 @@ const Workshopv2 = () => {
                         style={{
                           border: `2px solid ${workshop.registerFormbgColor}`,
                         }}
+                        onChange={handleFormChange}
                       ></textarea>
                     </div>
 

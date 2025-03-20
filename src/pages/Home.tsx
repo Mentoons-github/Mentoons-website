@@ -1,13 +1,13 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { useUser } from "@clerk/clerk-react";
-import { IoCloseOutline } from "react-icons/io5";
 import axiosInstance from "@/api/axios";
-import { errorToast, successToast } from "@/utils/toastResposnse";
-import { AxiosError } from "axios";
 import AddaSection from "@/components/LandingPage/addaSection";
-import HeroSection from "@/components/LandingPage/hero/HeroSection";
 import Community from "@/components/LandingPage/benefits/community/community";
+import HeroSection from "@/components/LandingPage/hero/HeroSection";
+import { errorToast, successToast } from "@/utils/toastResposnse";
+import { useUser } from "@clerk/clerk-react";
+import { AxiosError } from "axios";
+import { motion } from "framer-motion";
+import React from "react";
+import { IoCloseOutline } from "react-icons/io5";
 // import NewSection from "@/components/LandingPage/NewSection";
 import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
@@ -15,6 +15,7 @@ import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor"
 const Home = () => {
   const { user } = useUser();
   const [showPopup, setShowPopup] = React.useState(false);
+  
 
   // Comic sending function
   const sendComic = async () => {
@@ -39,6 +40,9 @@ const Home = () => {
       errorToast(errorMessage);
     }
   };
+
+
+ 
 
   return (
     <div className="w-full">

@@ -1,14 +1,13 @@
+import AuthButton from "@/components/common/authButton";
+import {
+  ANIMATION_TEXTS_ADDA,
+  ANIMATION_TEXTS_HOME,
+} from "@/constant/constants";
+import { SignedIn } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { FaClock } from "react-icons/fa";
 import { FaMessage } from "react-icons/fa6";
-import { Link } from "react-router-dom";
-import {
-  ANIMATION_TEXTS_HOME,
-  ANIMATION_TEXTS_ADDA,
-} from "@/constant/constants";
-import { useLocation } from "react-router-dom";
-import { SignedIn } from "@clerk/clerk-react";
-import AuthButton from "@/components/common/authButton";
+import { Link, useLocation } from "react-router-dom";
 
 const PrimaryHeader = () => {
   const location = useLocation();

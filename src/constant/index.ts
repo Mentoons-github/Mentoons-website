@@ -1,4 +1,3 @@
-import { IconType } from "react-icons/lib";
 import {
   FaChalkboard,
   FaCreditCard,
@@ -6,8 +5,9 @@ import {
   FaPhone,
   FaShoppingCart,
 } from "react-icons/fa";
-import { MdAssessment } from "react-icons/md";
 import { FaCoins, FaUsers } from "react-icons/fa6";
+import { IconType } from "react-icons/lib";
+import { MdAssessment } from "react-icons/md";
 
 export const CATEGORIES = [
   "Comedy",
