@@ -7,7 +7,7 @@ const Contests = () => {
         {CONSTESTS.length > 0 ? (
           CONSTESTS.map(({ image, title, text }, index) => (
             <div
-              className="flex w-full max-w-4xl items-center justify-between border-b pb-6 gap-6"
+              className="flex w-full max-w-4xl items-center justify-between border-b pb-6 gap-6 bg-blue-200 bg-opacity-50 p-4"
               key={index}
             >
               <div className="flex flex-col gap-4 flex-1 text-left">
@@ -16,7 +16,7 @@ const Contests = () => {
                   {text}
                 </button>
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end bg-white">
                 <img
                   src={image}
                   alt={title}
