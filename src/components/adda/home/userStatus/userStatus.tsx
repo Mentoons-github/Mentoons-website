@@ -45,7 +45,7 @@ const UserStatus = () => {
         <div className="flex flex-col justify-center items-center gap-1 flex-shrink-0">
           <label
             htmlFor="upload"
-            className="w-24 h-24 relative bg-[#FFDC9F] border-dotted border-3 border-[#EC9600] rounded-full flex justify-center items-center cursor-pointer"
+            className="w-20 h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer"
           >
             <FaPlus className="absolute text-[#EC9600] text-3xl p-1 border-3 border-[#EC9600] rounded-full" />
             <input
@@ -79,8 +79,8 @@ const UserStatus = () => {
                   style={{ justifyItems: "center" }}
                 >
                   <div
-                    className={`w-24 h-24 rounded-full border-3 flex justify-center items-center ${
-                      user.isWatched ? "border-gray-400" : "border-blue-500"
+                    className={`w-24 h-24 rounded-full outline flex justify-center items-center ${
+                      user.isWatched ? "outline-gray-400" : "outline-[#EC9600]"
                     }`}
                   >
                     <img

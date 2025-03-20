@@ -9,6 +9,7 @@ import podcastReducer from "./Podcastslice";
 import productsReducer from "./productSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
+import userStatusReducer from "./adda/statusSlice";
 
 export const store = configureStore<{
   comics: ReturnType<typeof comicsReducer>;
@@ -21,6 +22,7 @@ export const store = configureStore<{
   // cardProduct: ReturnType<typeof cardProductReducer>;
   cart: ReturnType<typeof cartReducer>;
   products: ReturnType<typeof productsReducer>;
+  userStatus: ReturnType<typeof userStatusReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -33,6 +35,7 @@ export const store = configureStore<{
     // cardProduct: cardProductReducer,
     cart: cartReducer,
     products: productsReducer,
+    userStatus: userStatusReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
