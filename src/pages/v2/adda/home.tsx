@@ -9,6 +9,7 @@ import Influencer from "@/components/adda/home/influencer/influencer";
 import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
 import Notification from "@/components/adda/home/notifications/notification";
 import { Link } from "react-router-dom";
+import FounderNote from "@/components/common/founderNote";
 
 const AddaHome = () => {
   const [mobile, setMobile] = useState(window.innerWidth < 768);
@@ -50,8 +51,7 @@ const AddaHome = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 w-full">
             <div className="hidden lg:flex col-span-1 items-start justify-start p-4 bg-white rounded-lg shadow-xl h-fit">
-              {/* <FounderNote scroll={true} /> */}{" "}
-              {/*Add founders note here after merging*/}
+              <FounderNote scroll={true} />
             </div>
             {mobile ? (
               <>
