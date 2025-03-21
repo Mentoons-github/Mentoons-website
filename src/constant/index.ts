@@ -745,7 +745,7 @@ export const FOOTER_PAGELINKS = [
       {
         id: "AB_2",
         label: "Free Downloads",
-        url: "/mentoons-comics/free-download",
+        url: "/free-download",
       },
       {
         id: "AB_3",
@@ -1892,38 +1892,34 @@ export const ISSUES_FACED_BY_USERS = [
   },
   {
     id: "IFU_09",
-    title: "Interviewing Skills",
+    title: "Alcoholism",
     ageCategory: "17-19",
     description:
       "Learn how to prepare for interviews and make a lasting impression",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/interview-skill.png",
+    imageUrl: "/assets/issues/Alcholism.png",
   },
   {
     id: "IFU_10",
-    title: "Professional Image",
+    title: "Gaming Addiction",
     ageCategory: "17-19",
     description: "Learn how to present yourself professionally",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/professional-image.png",
+    imageUrl: "/assets/issues/gaming-addiction.png",
   },
   {
     id: "IFU_11",
-    title: "Portfolio Management",
+    title: "Puberty",
     ageCategory: "17-19",
     description:
       "Learn how to create a professional portfolio that showcases your skills and experiences",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/portfolio-managment.png",
+    imageUrl: "/assets/issues/puberty.png",
   },
   {
     id: "IFU_12",
-    title: "Lack of career support",
+    title: "Relationships",
     ageCategory: "17-19",
     description:
       "Get access to top career advice, guidance on trending domains, and expert insights",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/lack-of-career-support.png",
+    imageUrl: "/assets/issues/relationship.png",
   },
   {
     id: "IFU_09",

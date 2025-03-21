@@ -1,6 +1,6 @@
 import MythosLayout from "@/layout/mythos";
 import { lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 const MythosHome = lazy(() => import("@/pages/v2/mythos/home"));
 
 const MythosRouter = () => {
