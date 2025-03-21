@@ -24,9 +24,9 @@ import ProductDetails from "./pages/ProductDetails";
 import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { RootState } from "./redux/store";
-import ProtectedRoute from "./utils/ProtectedRoute";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
