@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Groups } from "../../../types";
+import CreateGroupModal from "@/components/common/modal/createGroup";
 
 const GroupCards = ({
   cardData,
@@ -7,6 +9,10 @@ const GroupCards = ({
   cardData: Groups[];
   type: "parents" | "specializedRole";
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
       {cardData.map((data, index) => (
@@ -47,7 +53,7 @@ const GroupCards = ({
         </div>
       ))}
       {type === "parents" && (
-        <div className="p-5 rounded-4xl border border-black shadow-lg w-3/4 h-fit flex flex-col justify-end self-end mx-auto">
+        <div className="p-5 rounded-4xl border border-black shadow-lg w-3/4 h-fit flex flex-col justify-end self-end mx-auto rounded-xl">
           <h1 className="font-semibold text-5xl leading-10">
             Create your
             <span className="text-[#EC9600]">own group and invite Friends</span>
@@ -57,10 +63,14 @@ const GroupCards = ({
             our existing groups? Build your own group!
           </p>
           <div className="flex justify-center items-center my-12">
-            <button className="rounded-full px-5 py-2 bg-[#652D90] roboto font-extrabold text-lg text-white cursor-pointer">
+            <button
+              className="rounded-full px-5 py-2 bg-[#652D90] roboto font-extrabold text-lg text-white cursor-pointer"
+              onClick={handleOpenModal}
+            >
               CREATE GROUP
             </button>
           </div>
+          <CreateGroupModal isOpen={isModalOpen} onClose={handleCloseModal} />
         </div>
       )}
     </div>

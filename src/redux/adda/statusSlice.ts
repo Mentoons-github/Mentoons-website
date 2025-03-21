@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-import { StatusState, Status } from "@/types/adda/status";
+import { StatusState, StatusInterface } from "@/types/adda/status";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: StatusState = {
@@ -22,7 +22,7 @@ export const fetchStatus = createAsyncThunk(
     }
 
     const response = axiosInstance.get("/user/statuses");
-    return (await response).data as Status[];
+    return (await response).data as StatusInterface[];
   }
 );
 
@@ -49,8 +49,10 @@ const statusSlice = createSlice({
       const status = state.statuses.find(
         (item) => item.id === action.payload.id
       );
+
       if (status) {
         status.status = "watched";
+        console.log(status);
       }
       if (!state.watchedStatus.includes(action.payload.id)) {
         state.watchedStatus.push(action.payload.id);
@@ -65,7 +67,22 @@ const statusSlice = createSlice({
       .addCase(fetchStatus.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.lastFetchedTime = Date.now();
-        state.statuses = action.payload;
+        const fetchedWatchedStatus = action.payload
+          .filter((status) => status.status === "watched")
+          .map((status) => status.id);
+
+        state.watchedStatus = [
+          ...new Set([...state.watchedStatus, ...fetchedWatchedStatus]),
+        ];
+
+        const unwatchedStatus = action.payload.filter(
+          (status) => !state.watchedStatus.includes(status.id)
+        );
+        const watchedStatus = action.payload.filter((status) =>
+          state.watchedStatus.includes(status.id)
+        );
+
+        state.statuses = [...unwatchedStatus, ...watchedStatus];
       })
       .addCase(fetchStatus.rejected, (state, action) => {
         state.status = "failed";

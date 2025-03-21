@@ -1,11 +1,16 @@
+import AddaOverlay from "@/layout/addaOverlay";
 import { lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
+const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 
 const AddaRouter = () => {
   return (
     <Routes>
-      <Route path="/" element={<AddaHome />} />
+      <Route element={<AddaOverlay />}>
+        <Route path="/" element={<AddaHome />} />
+        <Route path="/community" element={<AddaGroups />} />
+      </Route>
     </Routes>
   );
 };
