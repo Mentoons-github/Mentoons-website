@@ -131,7 +131,9 @@ const Header = () => {
             ) : (
               <NavLink
                 to={url}
-                className="relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1"
+                className="group relative bg-transparent outline-none cursor-pointer text-center 
+             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
+             items-center gap-1 transition-all duration-300 ease-in-out"
               >
                 {typeof Icon === "function" ? (
                   <Icon className="sm:text-sm md:text-lg" />
@@ -139,10 +141,14 @@ const Header = () => {
                 {label}
 
                 {label === "Mythos" && (
-                  <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[12px] leading-none">
+                  <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[12px] leading-none text-white">
                     Introducing
                   </span>
                 )}
+                <span
+                  className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                   transition-all duration-300 ease-in-out group-hover:w-full"
+                ></span>
               </NavLink>
             )}
           </div>
@@ -192,23 +198,33 @@ const Header = () => {
               key={id}
               href={url}
               onClick={handleBrowsePlansClick}
-              className="text-white px-4 py-2 rounded-md font-semibold text-[12px] sm:text-sm md:text-base flex items-center gap-1 whitespace-nowrap"
+              className="group relative bg-transparent outline-none cursor-pointer text-center 
+             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
+             items-center gap-1 transition-all duration-300 ease-in-out"
             >
               {Icon && typeof Icon === "function" ? (
                 <Icon className="sm:text-sm md:text-lg" />
               ) : null}
               {label}
+              <span
+                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                   transition-all duration-300 ease-in-out group-hover:w-full"
+              ></span>
             </a>
           ) : (
             <NavLink
               key={id}
               to={url}
-              className="bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1"
+              className="group relative bg-transparent outline-none cursor-pointer text-center 
+             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
+             items-center gap-1 transition-all duration-300 ease-in-out"
             >
-              {Icon && typeof Icon === "function" ? (
-                <Icon className="sm:text-sm md:text-lg" />
-              ) : null}
+              {Icon && <Icon className="sm:text-sm md:text-lg" />}
               {label}
+              <span
+                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                   transition-all duration-300 ease-in-out group-hover:w-full"
+              ></span>
             </NavLink>
           )
         )}

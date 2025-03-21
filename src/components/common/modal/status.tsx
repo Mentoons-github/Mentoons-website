@@ -31,19 +31,19 @@ const Status = ({
 
         <div className="flex items-center gap-3 sm:gap-4">
           <img
-            src={status.userProfilePic}
-            alt={status.userName}
+            src={status.userProfilePicture}
+            alt={status.username}
             className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-full border-2 border-blue-500"
           />
           <p className="text-base sm:text-lg font-semibold">
-            {status.userName}
+            {status.username}
           </p>
         </div>
 
         <div className="w-full flex justify-center">
-          {isVideo(status.status) ? (
+          {isVideo(status.url) ? (
             <video
-              src={status.status}
+              src={status.url}
               autoPlay
               loop
               muted
@@ -52,7 +52,7 @@ const Status = ({
             />
           ) : (
             <img
-              src={status.status}
+              src={status.url}
               alt="status"
               className="w-[90%] max-w-sm h-[50vh] object-cover rounded-lg"
             />

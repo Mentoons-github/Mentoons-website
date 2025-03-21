@@ -1181,7 +1181,7 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     id: "NL_02",
     label: "Community",
     icon: FaUsers,
-    url: "/community",
+    url: "/adda/community",
   },
   {
     id: "NL_13",

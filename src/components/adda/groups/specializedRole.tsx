@@ -3,14 +3,14 @@ import GroupCards from "../cards/cards";
 const Specialized = () => {
   const specializedRole = [
     {
-      img: "/groups/explore/Man helping friend to stand up.png",
+      img: "/assets/adda/groups/explore/Man helping friend to stand up.png",
       mainTitle: "NGOs",
       subTitle: "NGOs",
       description: "Collaborate on social impact projects and initiatives.",
       bg: "#F7941D",
     },
     {
-      img: "/groups/explore/Psychologist.png",
+      img: "/assets/adda/groups/explore/Psychologist.png",
       mainTitle: "Psychologists",
       subTitle: "Psychologists Group",
       description:
@@ -18,7 +18,7 @@ const Specialized = () => {
       bg: "#4285F4",
     },
     {
-      img: "/groups/explore/teachers.png",
+      img: "/assets/adda/groups/explore/teachers.png",
       mainTitle: "Academic Teachers",
       subTitle: "Academic Teachers",
       description: "Discuss teaching strategies and educational trends.",

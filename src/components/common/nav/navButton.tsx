@@ -43,7 +43,7 @@ const NavButton = ({
       onMouseLeave={() => onMouseLeave(menuKey)}
     >
       <button
-        className={`bg-transparent outline-none cursor-pointer ${className} flex items-center gap-1`}
+        className={`bg-transparent outline-none cursor-pointer ${className} flex items-center gap-1 group relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out`}
       >
         {icon && <span className="hidden sm:block">{ICONS[menuKey]}</span>}
         {label}
@@ -52,6 +52,7 @@ const NavButton = ({
             Free
           </span>
         )}
+        <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full"></span>
       </button>
       <AnimatePresence>{children}</AnimatePresence>
     </div>

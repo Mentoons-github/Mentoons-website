@@ -1,48 +1,62 @@
 import { useEffect, useState } from "react";
-import { UserStatusInterface } from "@/types";
+import { StatusInterface } from "@/types";
 import { FaPlus } from "react-icons/fa";
 import { STATUSES } from "@/constant/adda/status";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { FreeMode } from "swiper/modules";
 import Status from "@/components/common/modal/status";
-// import axios, { AxiosError } from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import {
+  markAsWatched,
+  fetchStatus,
+  sendWatchedStatus,
+} from "@/redux/adda/statusSlice";
 
 const UserStatus = () => {
-  const [statuses, setStatuses] = useState<UserStatusInterface[]>(STATUSES);
-  const [selectedUser, setSelectedUser] = useState<UserStatusInterface | null>(
-    null
+  const dispatch = useDispatch<AppDispatch>();
+  const fetchedStatus = useSelector(
+    (state: RootState) => state.userStatus.statuses
   );
 
+  const [statuses, setStatuses] = useState<StatusInterface[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<StatusInterface | null>(
+    null
+  );
+  const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    setStatuses(STATUSES); //remove
-  }, []);
+    setStatuses(STATUSES);
+    dispatch(fetchStatus);
+  }, [dispatch]);
 
-  // useEffect(() => {
-  //   const fetchUserStatus = async () => {
-  //     try {
-  //       const userData = await axios.get(
-  //         `${import.meta.env.VITE_BASE_URL}/api/user/status`
-  //       );
+  useEffect(() => {
+    if (fetchedStatus.length > 0) {
+      setStatuses(fetchedStatus);
+    } else {
+      setStatuses(STATUSES); //remove it this is static
+    }
+  }, [fetchedStatus]);
 
-  //       console.log(userData);
-  //       // setStatuses(userData.data);
-  //     } catch (error: unknown) {
-  //       if (error instanceof AxiosError) {
-  //         console.log(error.message);
-  //       } else {
-  //         console.log(error);
-  //       }
-  //     }
-  //   };
+  const handleStatus = (status: StatusInterface) => {
+    console.log(status);
+    setSelectedStatus(status);
+    dispatch(markAsWatched({ id: status.id }));
+    console.log("dispatched");
 
-  //   fetchUserStatus();
-  // }, []);
+    if (timeOutId) clearTimeout(timeOutId);
+    const id = setTimeout(() => {
+      dispatch(sendWatchedStatus);
+    }, 10000);
+
+    setTimeOutId(id);
+  };
 
   return (
     <section className="relative w-[95%] sm:max-w-[83%]">
-      <div className="flex justify-center items-center gap-5 overflow-x-auto scrollbar-hide">
-        <div className="flex flex-col justify-center items-center gap-1 flex-shrink-0">
+      <div className="flex justify-center items-center gap-10 overflow-x-auto scrollbar-hide">
+        <div className="flex flex-col justify-center items-center gap-1">
           <label
             htmlFor="upload"
             className="w-20 h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer"
@@ -71,34 +85,37 @@ const UserStatus = () => {
               1280: { slidesPerView: "auto", spaceBetween: 20 },
             }}
           >
-            {statuses.map((user, index) => (
-              <>
-                <SwiperSlide
-                  key={index + 1}
-                  className="!w-fit flex flex-col gap-1 flex-shrink-0"
-                  style={{ justifyItems: "center" }}
+            {statuses.map((status) => (
+              <SwiperSlide
+                key={status.id}
+                className="!w-fit flex flex-col gap-1"
+                style={{ justifyItems: "center" }}
+              >
+                <div
+                  className={`w-24 h-24 rounded-full outline flex justify-center items-center ${
+                    status.status === "unwatched"
+                      ? "outline-gray-400"
+                      : "outline-[#EC9600]"
+                  }`}
                 >
-                  <div
-                    className={`w-24 h-24 rounded-full outline flex justify-center items-center ${
-                      user.isWatched ? "outline-gray-400" : "outline-[#EC9600]"
-                    }`}
-                  >
-                    <img
-                      src={user.userProfilePic}
-                      alt={user.userName}
-                      className="w-full h-full object-cover rounded-full"
-                      onClick={() => setSelectedUser(user)}
-                    />
-                  </div>
-                  <span className="text-center text-sm">{user.userName}</span>
-                </SwiperSlide>
-              </>
+                  <img
+                    src={status.userProfilePicture}
+                    alt={status.username}
+                    className="w-full h-full object-cover rounded-full"
+                    onClick={() => handleStatus(status)}
+                  />
+                </div>
+                <span className="text-center text-sm">{status.username}</span>
+              </SwiperSlide>
             ))}
           </Swiper>
         </div>
       </div>
-      {selectedUser && (
-        <Status status={selectedUser} setStatus={() => setSelectedUser(null)} />
+      {selectedStatus && (
+        <Status
+          status={selectedStatus}
+          setStatus={() => setSelectedStatus(null)}
+        />
       )}
     </section>
   );
