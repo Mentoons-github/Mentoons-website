@@ -1,18 +1,18 @@
+import DropDown from "@/components/common/nav/dropdown";
+import NavButton from "@/components/common/nav/navButton";
 import Sidebar from "@/components/common/sidebar";
-import { NAV_LINKS, ADDA_NAV_LINKS } from "@/constant";
+import { ADDA_NAV_LINKS, NAV_LINKS } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
-import { ShoppingCart } from "lucide-react";
-import { motion } from "framer-motion";
 import { AppDispatch, RootState } from "@/redux/store";
+import { DropDownInterface } from "@/types";
 import { SignedIn, useAuth } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
+import { ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaTimes } from "react-icons/fa";
+import { FaBars, FaPhone } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { FaBars, FaPhone } from "react-icons/fa6";
-import { DropDownInterface } from "@/types";
-import NavButton from "@/components/common/nav/navButton";
-import DropDown from "@/components/common/nav/dropdown";
-import { FaTimes } from "react-icons/fa";
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -138,6 +138,7 @@ const Header = () => {
                 {typeof Icon === "function" ? (
                   <Icon className="sm:text-sm md:text-lg" />
                 ) : null}
+
                 {label}
 
                 {label === "Mythos" && (

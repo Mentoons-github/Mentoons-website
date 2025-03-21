@@ -1,7 +1,7 @@
 import { PLATINUM, PRIME } from "@/constant/constants";
+import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
 import MembershipCard from "../cards/membershipCard";
-import useInView from "@/hooks/useInView";
 
 const Membership = () => {
   const isMobile = window.innerWidth < 768;
