@@ -1,20 +1,19 @@
 import React from "react";
-import Wordbreak from "./Wordbreak";
-import { FaRegEye } from "react-icons/fa";
-import { FaHeart } from "react-icons/fa";
+import { FaHeart, FaRegEye } from "react-icons/fa";
 import { FaCartShopping } from "react-icons/fa6";
 import { useSelector } from "react-redux";
+import Wordbreak from "./Wordbreak";
 // import { addToCartReducer, addToWishlistReducer } from "@/redux/comicSlice";
-import { v4 as uuidv4 } from "uuid";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { motion } from "framer-motion";
 import { RootState } from "@/redux/store";
+import { motion } from "framer-motion";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import ComingSoonModal from "../common/ComingSoonModal";
 const NewComics: React.FC = () => {
   // const dispatch = useDispatch();

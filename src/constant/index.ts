@@ -745,7 +745,7 @@ export const FOOTER_PAGELINKS = [
       {
         id: "AB_2",
         label: "Free Downloads",
-        url: "/mentoons-comics/free-download",
+        url: "/free-download",
       },
       {
         id: "AB_3",
@@ -1902,25 +1902,24 @@ export const ISSUES_FACED_BY_USERS = [
     id: "IFU_10",
     title: "Gaming Addiction",
     ageCategory: "17-19",
-    description:
-      "Recognize the signs of gaming addiction and find a balance between gaming and real life.",
-    imageUrl: "/assets/home/challenges/gaming addiction.png",
+    description: "Learn how to present yourself professionally",
+    imageUrl: "/assets/issues/gaming-addiction.png",
   },
   {
     id: "IFU_11",
     title: "Puberty",
     ageCategory: "17-19",
     description:
-      "Navigate the physical and emotional changes of puberty with confidence and knowledge.",
-    imageUrl: "/assets/home/challenges/puberty.png",
+      "Learn how to create a professional portfolio that showcases your skills and experiences",
+    imageUrl: "/assets/issues/puberty.png",
   },
   {
     id: "IFU_12",
     title: "Relationships",
     ageCategory: "17-19",
     description:
-      "Build healthy relationships with family, friends, and partners through effective communication and trust.",
-    imageUrl: "/assets/home/challenges/relation ships.png",
+      "Get access to top career advice, guidance on trending domains, and expert insights",
+    imageUrl: "/assets/issues/relationship.png",
   },
   {
     id: "IFU_09",
