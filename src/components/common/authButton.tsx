@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import {
   SignedIn,
   SignedOut,
-  SignInButton,
   SignOutButton,
   UserButton,
 } from "@clerk/clerk-react";
@@ -20,13 +19,11 @@ const AuthButton = () => {
 
       <div className="text-[10px] sm:text-xs tracking-wider text-start inter">
         <SignedOut>
-          <SignInButton>
-            <NavLink to="/sign-in">
-              <button className="font-medium text-[12px]">
-                LOG IN / SIGN UP
-              </button>
-            </NavLink>
-          </SignInButton>
+          <NavLink to="/sign-in">
+            <button className="font-medium text-[12px]">
+              LOG IN / SIGN UP
+            </button>
+          </NavLink>
         </SignedOut>
 
         <SignedIn>

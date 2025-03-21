@@ -44,6 +44,9 @@ const FreeComics = ({ comicType }: { comicType: "picture" | "audio" }) => {
                   href={`${
                     "comicLink" in comic ? comic.comicLink : comic.videoLink
                   }`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+                    e.stopPropagation()
+                  }
                   className="block w-full h-full"
                 >
                   {comicType === "picture" ? "Read Comic" : "Watch Comic"}

@@ -17,9 +17,8 @@ import { RootState } from "../redux/store";
 const Store = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  let category = searchParams.get("category") || "6-12";
-
-  if (category === "20+") category = "parents";
+  const category = searchParams.get("category") || "6-12";
+  console.log("category selected : ", category);
 
   const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);

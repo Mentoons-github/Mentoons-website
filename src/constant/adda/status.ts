@@ -2,100 +2,122 @@ import { UserStatusInterface } from "../../types";
 
 export const STATUSES: UserStatusInterface[] = [
   {
-    status: "/background/Frame_937-removebg-preview.png",
-    isWatched: false,
-    userName: "Sam Wilson",
-    userProfilePic:
+    id: "1",
+    url: "/background/Frame_937-removebg-preview.png",
+    status: "unwatched",
+    username: "Sam Wilson",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
+    createdAt: "",
+    type: "image",
+    userId: "12345",
+    viewCount: 30,
   },
   {
-    status: "/video/addiction/We know THE STRUGGLES our youth is facing_03.mp4",
-    isWatched: true,
-    userName: "Sita",
-    userProfilePic: "/assets/adda/profilePictures/pexels-olly-733872.jpg",
+    id: "2",
+    url: "/video/addiction/We_know_THE_STRUGGLES.mp4",
+    status: "watched",
+    username: "Sita",
+    userProfilePicture: "/assets/adda/profilePictures/pexels-olly-733872.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "67890",
+    viewCount: 20,
   },
   {
-    status: "./status3.mp4",
-    isWatched: false,
-    userName: "Vishnu",
-    userProfilePic:
+    id: "3",
+    url: "https://www.w3schools.com/html/mov_bbb.mp4",
+    status: "unwatched",
+    username: "Vishnu",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "23456",
+    viewCount: 15,
   },
   {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Xavier",
-    userProfilePic:
+    id: "4",
+    url: "https://www.w3schools.com/html/movie.mp4",
+    status: "watched",
+    username: "Xavier",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "34567",
+    viewCount: 25,
   },
   {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Zabeen",
-    userProfilePic:
+    id: "5",
+    url: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    status: "watched",
+    username: "Zabeen",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "45678",
+    viewCount: 18,
   },
   {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Rahul",
-    userProfilePic:
+    id: "6",
+    url: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+    status: "watched",
+    username: "Rahul",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "56789",
+    viewCount: 22,
   },
   {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Rahul",
-    userProfilePic:
+    id: "7",
+    url: "https://www.w3schools.com/html/mov_bbb.mp4",
+    status: "watched",
+    username: "Rahul",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "56789",
+    viewCount: 22,
   },
   {
-    status: "./status1.mp4",
-    isWatched: false,
-    userName: "Rajesh",
-    userProfilePic:
+    id: "8",
+    url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+    status: "unwatched",
+    username: "Rajesh",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "67891",
+    viewCount: 28,
   },
   {
-    status: "./status1.mp4",
-    isWatched: false,
-    userName: "Rajesh",
-    userProfilePic:
-      "/assets/adda/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
-  },
-  {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Zabeen",
-    userProfilePic:
+    id: "9",
+    url: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+    status: "watched",
+    username: "Rahul",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "56789",
+    viewCount: 22,
   },
   {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Rahul",
-    userProfilePic:
+    id: "10",
+    url: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+    status: "watched",
+    username: "Rahul",
+    userProfilePicture:
       "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-  },
-  {
-    status: "./status4.mp4",
-    isWatched: true,
-    userName: "Rahul",
-    userProfilePic:
-      "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-  },
-  {
-    status: "./status1.mp4",
-    isWatched: false,
-    userName: "Rajesh",
-    userProfilePic:
-      "/assets/adda/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
-  },
-  {
-    status: "./status1.mp4",
-    isWatched: false,
-    userName: "Rajesh",
-    userProfilePic:
-      "/assets/adda/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
+    createdAt: "",
+    type: "video",
+    userId: "56789",
+    viewCount: 22,
   },
 ];

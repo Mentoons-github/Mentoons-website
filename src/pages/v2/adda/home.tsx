@@ -10,10 +10,10 @@ import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
 import Notification from "@/components/adda/home/notifications/notification";
 import { Link } from "react-router-dom";
 import FounderNote from "@/components/common/founderNote";
-import ComingSoon from "@/components/common/comingSoon/comingSoon";
 
 const AddaHome = () => {
   const [mobile, setMobile] = useState(window.innerWidth < 768);
+
   const [activeSection, setActiveSection] = useState<
     "home" | "notification" | "memeBanner" | "friendRequest"
   >("home");
@@ -37,8 +37,7 @@ const AddaHome = () => {
   }, [mobile]);
 
   return (
-    <div className="relative">
-      <ComingSoon />
+    <>
       <div className="flex justify-center items-start w-full p-4 sm:p-6 gap-4 sm:gap-8">
         <div className="flex flex-col w-full gap-6 sm:gap-8">
           <div className="flex justify-between items-center">
@@ -47,7 +46,7 @@ const AddaHome = () => {
               <img
                 src="/assets/adda/sidebar/Introducing poster.png"
                 alt="mentoons-mythos"
-                className="w-full"
+                className="max-w-[180px]"
               />
             </Link>
           </div>
@@ -95,7 +94,7 @@ const AddaHome = () => {
         </div>
       </div>
       <BottomNav setActive={setActiveSection} />
-    </div>
+    </>
   );
 };
 

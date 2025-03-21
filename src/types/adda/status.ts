@@ -1,4 +1,4 @@
-export interface Status {
+export interface StatusInterface {
   id: string;
   userId: string;
   userProfilePicture: string;
@@ -11,7 +11,7 @@ export interface Status {
 }
 
 export interface StatusState {
-  statuses: Status[];
+  statuses: StatusInterface[];
   lastFetchedTime: number | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;

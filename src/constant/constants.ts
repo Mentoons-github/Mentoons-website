@@ -10,6 +10,7 @@ import { NAV_LINKS, ADDA_NAV_LINKS } from ".";
 import { PROBLEMS_FACED } from "./mythos/problemsFaced";
 import { BLOGS, NEWS } from "./mythos/blogs";
 import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
+import { PARENTS } from "./adda/groups";
 
 export {
   FAQ,
@@ -29,4 +30,5 @@ export {
   CONTACT_INFO,
   CAREER,
   PLANET,
+  PARENTS,
 };

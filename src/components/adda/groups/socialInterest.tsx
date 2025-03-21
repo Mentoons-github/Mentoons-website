@@ -3,21 +3,21 @@ import GroupCards from "../cards/cards";
 const SocialInterest = () => {
   const interests = [
     {
-      img: "/groups/socialInterests/Social media on different devices.png",
+      img: "/assets/adda/groups/socialInterests/Social media on different devices.png",
       mainTitle: "Social Media Enthusiasts",
       subTitle: "Social Media Enthusiasts",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       bg: "#F7941D",
     },
     {
-      img: "/groups/socialInterests/Gaming .png",
+      img: "/assets/adda/groups/socialInterests/Gaming .png",
       mainTitle: "Gamers and Influencers",
       subTitle: "Gamers and Influencers",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       bg: "#652D90",
     },
     {
-      img: "/groups/socialInterests/flavors exploration illustration.png",
+      img: "/assets/adda/groups/socialInterests/flavors exploration illustration.png",
       mainTitle: "Cooking Enthusiasts",
       subTitle: "Cooking Enthusiasts",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",

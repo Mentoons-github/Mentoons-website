@@ -2,51 +2,24 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import { motion } from "framer-motion";
 import "swiper/swiper-bundle.css";
+import { toast } from "sonner";
+import { PARENTS } from "@/constant/constants";
+import { AxiosError, AxiosResponse } from "axios";
+import { AddaApi } from "@/api/endpoints";
 
 const Parents = () => {
-  const parents = [
-    {
-      name: "Rahul",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-olly-733872.jpg",
-    },
-    {
-      name: "Ram",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-olly-733872.jpg",
-    },
-    {
-      name: "Leela",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-stefanstefancik-91227.jpg",
-    },
-    {
-      name: "Malathi",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
-    },
-    {
-      name: "Rahul",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-olly-733872.jpg",
-    },
-    {
-      name: "Ram",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-olly-733872.jpg",
-    },
-    {
-      name: "Leela",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-stefanstefancik-91227.jpg",
-    },
-    {
-      name: "Malathi",
-      kidsAge: 12,
-      img: "/profilePictures/pexels-justin-shaifer-501272-1222271.jpg",
-    },
-  ];
-
+  const handleConnect = async (receiverId: string) => {
+    try {
+      const response: AxiosResponse = await AddaApi.connectFriends(receiverId);
+      toast(response.data.message);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast(error.response?.data.message || "Something went wrong");
+      } else {
+        toast("Unexpected error occured");
+      }
+    }
+  };
   return (
     <div className="flex flex-col items-center p-6 space-y-6 w-full">
       <h1 className="text-2xl font-bold text-left w-full">
@@ -63,13 +36,15 @@ const Parents = () => {
           .swiper-button-next {
             width: 30px;
             height: 30px;
-            top:45%
+            top:35%;
+            background:transparent
           }
 
           .swiper-button-prev {
             width: 30px;
             height: 30px;
-            top:45%
+            top:35%;
+            background:transparent
           }
         `}
       </style>
@@ -90,7 +65,7 @@ const Parents = () => {
         pagination={{ clickable: true }}
         className="w-full"
       >
-        {parents.map((data, index) => (
+        {PARENTS.map((data, index) => (
           <SwiperSlide key={index}>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden p-4 flex flex-col items-center text-center">
               <img
@@ -100,7 +75,7 @@ const Parents = () => {
               />
               <div className="mt-3">
                 <h2 className="text-lg font-semibold">{data.name}</h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   Parent of {data.kidsAge} Years old
                 </p>
               </div>
@@ -114,6 +89,7 @@ const Parents = () => {
                   transition: { duration: 0.3, ease: "easeOut" },
                 }}
                 className="border border-[#EC9600] rounded-lg px-5 py-1 mt-2 cursor-pointer"
+                onClick={() => handleConnect(data.id)}
               >
                 Connect
               </motion.button>

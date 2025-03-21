@@ -3,7 +3,7 @@ import GroupCards from "../cards/cards";
 const ExAddicts = () => {
   const ExAddicts = [
     {
-      img: "/groups/support/Ex addict 1.png",
+      img: "/assets/adda/groups/support/Ex addict 1.png",
       mainTitle: "EX-ADDICTS SUPPORT",
       subTitle: "Ex-Addicts Support Groups",
       description:
@@ -11,7 +11,7 @@ const ExAddicts = () => {
       bg: "#652D90",
     },
     {
-      img: "/groups/support/Professional growth 1.png",
+      img: "/assets/adda/groups/support/Professional growth 1.png",
       mainTitle: "PROFESSIONAL GROWTH",
       subTitle: "Professional Growth",
       description:
@@ -19,7 +19,7 @@ const ExAddicts = () => {
       bg: "#FF9414",
     },
     {
-      img: "/groups/support/parentGuidance.png",
+      img: "/assets/adda/groups/support/parentGuidance.png",
       mainTitle: "PARENTING GUIDANCE",
       subTitle: "Parenting Guidance",
       description:

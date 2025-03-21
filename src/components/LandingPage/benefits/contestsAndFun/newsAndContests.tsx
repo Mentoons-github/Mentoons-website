@@ -54,11 +54,12 @@ const NewsAndContests = () => {
         {activeTab === "Mentoons Comics" && (
           <div className="flex justify-start items-start gap-2">
             <button
+              type="button"
               onClick={() => setSelectedComicType("picture")}
               className={`flex items-center justify-center px-3 py-2 w-1/4 text-xs sm:text-sm md:text-lg lg:text-xs xl:text-md font-semibold shadow-md transition-all duration-300 h-16 p-4 ${
                 selectedComicType === "picture"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-gray-800"
+                  ? "bg-purple-600 text-white"
+                  : "bg-blue-100 text-blue-800"
               }`}
             >
               <span className="text-center leading-tight">
@@ -69,8 +70,8 @@ const NewsAndContests = () => {
               onClick={() => setSelectedComicType("audio")}
               className={`flex items-center justify-center px-3 py-2 w-1/4 text-xs sm:text-sm md:text-lg lg:text-xs font-semibold shadow-md transition-all duration-300 h-16 ${
                 selectedComicType === "audio"
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-300 text-gray-800"
+                  ? "bg-orange-500 text-white"
+                  : "bg-green-100 text-green-800"
               }`}
             >
               <span className="text-center leading-tight">
@@ -80,7 +81,7 @@ const NewsAndContests = () => {
           </div>
         )}
       </div>
-      <div className="relative w-full h-[445px] z-999 bg-gradient-to-b from-sky-400 via-blue-300 to-blue-500 rounded-lg shadow-md overflow-hidden">
+      <div className="relative w-full h-[445px] z-999 bg-gradient-to-b from-[#87CEFA] via-[#64B5F6] to-[#42A5F5] rounded-lg shadow-md overflow-hidden">
         <img
           src="/assets/home/background/Vector.png"
           alt="cloud"
