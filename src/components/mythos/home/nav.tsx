@@ -32,7 +32,7 @@ const MythosHeader = () => {
       <nav className="max-w-full px-6 md:px-10 flex justify-between items-center">
         <Link to="/mythos">
           <img
-            src="/logo/mythos/Logo 2.png"
+            src="/assets/mythos/logo/Logo 2.png"
             alt="company logo"
             className="h-14 md:h-20 w-auto"
           />
@@ -63,7 +63,7 @@ const MythosHeader = () => {
             className="flex justify-center items-center rounded-full w-10 h-10 sm:w-12 sm:h-12 outline-dashed outline-2 outline-gray-600 cursor-pointer"
           >
             <img
-              src="/icons/mythos/Vector.png"
+              src="/assets/mythos/icons/Vector.png"
               alt="search-icon"
               className="w-5 sm:w-6 h-5 sm:h-6"
             />
@@ -75,7 +75,7 @@ const MythosHeader = () => {
             className="relative flex justify-center items-center rounded-full w-10 h-10 sm:w-12 sm:h-12 outline-dashed outline-2 outline-gray-600 cursor-pointer"
           >
             <img
-              src="/icons/mythos/Vector (1).png"
+              src="/assets/mythos/icons/Vector (1).png"
               alt="cart-icon"
               className="w-5 sm:w-6 h-5 sm:h-6"
             />
@@ -90,7 +90,7 @@ const MythosHeader = () => {
             className="flex justify-center items-center rounded-full w-10 h-10 sm:w-12 sm:h-12 outline-dashed outline-2 outline-gray-600 cursor-pointer"
           >
             <img
-              src="/icons/mythos/Vector (2).png"
+              src="/assets/mythos/icons/Vector (2).png"
               alt="view-icon"
               className="w-6 sm:w-8 h-6 sm:h-8"
             />

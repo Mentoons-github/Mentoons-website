@@ -7,11 +7,17 @@ const MythosFooter = () => {
   return (
     <footer className="w-full py-10 px-5 md:px-20 flex justify-center items-center bg-[#E39712]">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 w-full max-w-7xl">
-        <FooterLinks Links={CONTACT_INFO} label="CONTACT INFO" />
-        <FooterLinks Links={CAREER} label="CAREER" />
-        <FooterLinks Links={PLANET} label="PLANET" />
+        {[CONTACT_INFO, CAREER, PLANET].map((items, index) => (
+          <FooterLinks
+            key={index}
+            Links={items}
+            label={
+              index === 0 ? "CONTACT INFO" : index === 1 ? "CAREER" : "PLANET"
+            }
+          />
+        ))}
         <div className="w-full space-y-6 text-center sm:text-left">
-          <h1 className="forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
+          <h1 className="font-forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
             SIGN-UP FOR OUR NEWSLETTER
           </h1>
           <div className="flex flex-col items-center sm:items-start gap-2 w-full">
@@ -23,7 +29,7 @@ const MythosFooter = () => {
               />
               <button className="border border-l-0 flex items-center gap-2 bg-white px-4 py-3">
                 <span>✦</span>
-                <span className="text-[#E39712] mulish text-[13px]">
+                <span className="text-[#E39712] font-mulish text-[13px]">
                   SUBMIT
                 </span>
               </button>
@@ -33,7 +39,7 @@ const MythosFooter = () => {
             </span>
           </div>
           <div>
-            <h1 className="forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
+            <h1 className="font-forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
               SOCIAL MEDIA
             </h1>
             <div className="flex justify-center sm:justify-start items-center gap-3 flex-wrap">

@@ -8,7 +8,7 @@ const ProblemFaced = () => {
   return (
     <section ref={ref} className="py-10 px-4 md:px-20 bg-[#E39712]">
       <motion.h1
-        className="text-[#1A1D3B] font-bold text-3xl sm:text-4xl md:text-[36px] montserrat mb-6 tracking-[2.5px] montserrat"
+        className="text-[#1A1D3B] font-bold text-3xl sm:text-4xl md:text-[36px] font-montserrat mb-6 tracking-[2.5px] montserrat"
         initial={{ opacity: 0, y: -50 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -50 }}
         transition={{ duration: 0.6, ease: "easeOut" }}

@@ -11,6 +11,7 @@ import { PROBLEMS_FACED } from "./mythos/problemsFaced";
 import { BLOGS, NEWS } from "./mythos/blogs";
 import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 import { PARENTS } from "./adda/groups";
+import { MYTHOS_PLANS } from "./mythos/membershipPlans";
 
 export {
   FAQ,
@@ -31,4 +32,5 @@ export {
   CAREER,
   PLANET,
   PARENTS,
+  MYTHOS_PLANS,
 };

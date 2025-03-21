@@ -52,7 +52,7 @@ const ProblemCard = () => {
               />
             </div>
             <div className="mt-6 w-full max-w-md mx-auto">
-              <h1 className="inter font-bold text-2xl text-white text-center px-2 leading-tight">
+              <h1 className="font-inter font-bold text-2xl text-white text-center px-2 leading-tight">
                 {data.text}
               </h1>
             </div>

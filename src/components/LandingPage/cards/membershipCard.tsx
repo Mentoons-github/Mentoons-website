@@ -10,6 +10,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
   return (
     <motion.div
       ref={sectionRef}
+      id={`membership-${membership.type}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       whileHover={{ scale: 1.03 }}

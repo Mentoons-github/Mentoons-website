@@ -10,9 +10,13 @@ const Discover = ({
 }) => {
   return (
     <Link to="#" className="flex items-center gap-2  text-white w-fit group">
-      <img src="/icons/mythos/star.png" alt="star-icon" className="h-3 w-3" />
+      <img
+        src="/assets/mythos/icons/star.png"
+        alt="star-icon"
+        className="h-3 w-3"
+      />
       <span
-        className="font-bold text-[13px] tracking-[1.3px] mulish"
+        className="font-bold text-[13px] tracking-[1.3px] font-mulish"
         style={{ color: text }}
       >
         {label}

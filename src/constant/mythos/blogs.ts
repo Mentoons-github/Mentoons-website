@@ -3,22 +3,22 @@ import { JoinCardsProps } from "../../types";
 export const BLOGS: JoinCardsProps[] = [
   {
     name: "How your Birth Sign can help you in Career",
-    img: "/cards/mythos/blogs/shakeHands.png",
+    img: "/assets/mythos/cards/blogs/shakeHands.png",
     date: "November 2024",
   },
   {
     name: "How Planets can Guide Us To Success",
-    img: "/cards/mythos/blogs/moon.png",
+    img: "/assets/mythos/cards/blogs/moon.png",
     date: "November 2024",
   },
   {
     name: "Get Your Life In Track With These Steps",
-    img: "/cards/mythos/blogs/happy.png",
+    img: "/assets/mythos/cards/blogs/happy.png",
     date: "November 2024",
   },
   {
     name: "What happens to the when Saturn & Career",
-    img: "/cards/mythos/blogs/ManSiting.png",
+    img: "/assets/mythos/cards/blogs/ManSiting.png",
     date: "November 2024",
   },
 ];

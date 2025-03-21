@@ -1,6 +1,9 @@
+import MembershipModal from "@/components/common/modal/membershipModal";
 import { CONSTESTS } from "@/constant/constants";
+import { useState } from "react";
 
 const Contests = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div className="flex flex-col items-center gap-6">
@@ -12,7 +15,10 @@ const Contests = () => {
             >
               <div className="flex flex-col gap-4 flex-1 text-left">
                 <h1 className="text-lg font-semibold">{title}</h1>
-                <button className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-42">
+                <button
+                  className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-42"
+                  onClick={() => setIsModalOpen(true)}
+                >
                   {text}
                 </button>
               </div>
@@ -31,6 +37,7 @@ const Contests = () => {
           </h1>
         )}
       </div>
+      {isModalOpen && <MembershipModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };

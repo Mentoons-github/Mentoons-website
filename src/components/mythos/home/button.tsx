@@ -27,14 +27,14 @@ const MythosButton = ({
         </div>
       ) : (
         <img
-          src="/icons/mythos/star.png"
+          src="/assets/mythos/icons/star.png"
           alt="star-icon"
           className="h-3 w-3 sm:h-4 sm:w-4"
         />
       )}
 
       <span
-        className="font-extrabold text-xs sm:text-sm tracking-[1px] sm:tracking-[1.3px] mulish"
+        className="font-extrabold text-xs sm:text-sm tracking-[1px] sm:tracking-[1.3px] font-mulish"
         style={{ color: textClr }}
       >
         {label}
