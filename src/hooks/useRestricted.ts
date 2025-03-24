@@ -19,7 +19,7 @@ export const useDailyAccess = () => {
     }
 
     const intervalId = setInterval(() => {
-      let currentData = JSON.parse(
+      const currentData = JSON.parse(
         localStorage.getItem("accessData") || "null",
       );
       console.log("Current time spent:", currentData?.timeSpentToday);

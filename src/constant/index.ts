@@ -1859,7 +1859,7 @@ export const ISSUES_FACED_BY_USERS = [
   },
   {
     id: "IFU_06",
-    title: "Dipression",
+    title: "Depression",
     ageCategory: "13-16",
     description: "Developing empathy and understanding towards others",
     imageUrl:
@@ -1892,38 +1892,35 @@ export const ISSUES_FACED_BY_USERS = [
   },
   {
     id: "IFU_09",
-    title: "Interviewing Skills",
+    title: "Alcoholism",
     ageCategory: "17-19",
     description:
-      "Learn how to prepare for interviews and make a lasting impression",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/interview-skill.png",
+      "Understand the risks of alcohol abuse and learn strategies for responsible choices.",
+    imageUrl: "/assets/home/challenges/Alcoholism.png",
   },
   {
     id: "IFU_10",
-    title: "Professional Image",
+    title: "Gaming Addiction",
     ageCategory: "17-19",
-    description: "Learn how to present yourself professionally",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/professional-image.png",
+    description:
+      "Recognize the signs of gaming addiction and find a balance between gaming and real life.",
+    imageUrl: "/assets/home/challenges/gaming addiction.png",
   },
   {
     id: "IFU_11",
-    title: "Portfolio Management",
+    title: "Puberty",
     ageCategory: "17-19",
     description:
-      "Learn how to create a professional portfolio that showcases your skills and experiences",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/portfolio-managment.png",
+      "Navigate the physical and emotional changes of puberty with confidence and knowledge.",
+    imageUrl: "/assets/home/challenges/puberty.png",
   },
   {
     id: "IFU_12",
-    title: "Lack of career support",
+    title: "Relationships",
     ageCategory: "17-19",
     description:
-      "Get access to top career advice, guidance on trending domains, and expert insights",
-    imageUrl:
-      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/lack-of-career-support.png",
+      "Build healthy relationships with family, friends, and partners through effective communication and trust.",
+    imageUrl: "/assets/home/challenges/relation ships.png",
   },
   {
     id: "IFU_09",
