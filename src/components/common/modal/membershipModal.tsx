@@ -1,8 +1,17 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Crown, Star, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const MembershipModal = ({ onClose }: { onClose: () => void }) => {
+  useEffect(() => {
+    document.body.classList.add("overflow-hidden");
+
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, []);
+
   const handleSubscriptionClick = (membershipType: "Prime" | "Platinum") => {
     document
       .getElementById("subscription")
