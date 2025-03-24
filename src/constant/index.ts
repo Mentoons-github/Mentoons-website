@@ -1895,8 +1895,8 @@ export const ISSUES_FACED_BY_USERS = [
     title: "Alcoholism",
     ageCategory: "17-19",
     description:
-      "Understand the risks of alcohol abuse and learn strategies for responsible choices.",
-    imageUrl: "/assets/home/challenges/Alcoholism.png",
+      "Learn how to prepare for interviews and make a lasting impression",
+    imageUrl: "/assets/issues/Alcholism.png",
   },
   {
     id: "IFU_10",
