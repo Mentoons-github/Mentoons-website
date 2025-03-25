@@ -8,10 +8,11 @@ import {
 } from "./common/animationText";
 import { NAV_LINKS, ADDA_NAV_LINKS } from ".";
 import { PROBLEMS_FACED } from "./mythos/problemsFaced";
-import { BLOGS, NEWS } from "./mythos/blogs";
+import { BLOGS, NEWS, MYTHOS_NEWS } from "./mythos/blogs";
 import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 import { PARENTS } from "./adda/groups";
 import { MYTHOS_PLANS } from "./mythos/membershipPlans";
+import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
 
 export {
   FAQ,
@@ -33,4 +34,6 @@ export {
   PLANET,
   PARENTS,
   MYTHOS_PLANS,
+  MYTHOS_PODCASTS,
+  MYTHOS_NEWS,
 };

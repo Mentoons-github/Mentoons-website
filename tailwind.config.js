@@ -43,6 +43,7 @@ export default {
         inconsolata: ["Inconsolata", "sans-serif"],
         jost: ["Jost", "sans-serif"],
         futura: ["Futura Std", "sans-serif"],
+        proza: ["Proza Libre", "sans-serif"],
       },
       colors: {
         "men-blue": "#003366",

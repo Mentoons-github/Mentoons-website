@@ -1,3 +1,4 @@
+import { News } from "@/types/mythos/interface";
 import { JoinCardsProps } from "../../types";
 
 export const BLOGS: JoinCardsProps[] = [
@@ -21,9 +22,36 @@ export const BLOGS: JoinCardsProps[] = [
     img: "/assets/mythos/cards/blogs/ManSiting.png",
     date: "November 2024",
   },
+  {
+    name: "Rahu Enters Cancer and Ketu Enters Capricorn",
+    img: "/assets/mythos/background/blogs/image-38-copyright-min-800x508.jpg.png",
+    description:
+      "I am searching for Tarot card meanings which I can apply to love, business and more!",
+    date: "Feb 28, 2024",
+  },
+  {
+    name: "Become the Transit or Moon Suffer",
+    img: "/assets/mythos/background/blogs/image-64-copyright-min-800x508.jpg.png",
+    description:
+      "I am searching for Tarot card meanings which I can apply to love, business and more!",
+    date: "Mar 27, 2024",
+  },
+  {
+    name: "A Libra Season Meditation to Collaborate, Cooperate & Co-Create",
+    img: "/assets/mythos/background/blogs/image-74-copyright-min-800x508.jpg.png",
+    description:
+      "You can now benefit from extensive analysis from an expert in astrology. I will put all my professionalism and talents at your service to provide you with exhaustive and totally personal analysis of your current situation.",
+    date: "Mar 25, 2024",
+  },
+  {
+    name: "How to Use the Current Planetary Positions",
+    description:
+      "You can now benefit from extensive analysis from an expert in astrology. I will put all my professionalism and talents at your service to provide you with exhaustive and totally personal analysis of your current situation.",
+    date: "Mar 25, 2024",
+  },
 ];
 
-export const NEWS = [
+export const NEWS: News[] = [
   {
     category: "FAMILY",
     date: "May 1, 2024",
@@ -63,5 +91,23 @@ export const NEWS = [
     category: "CAREER",
     date: "September 12, 2024",
     news: "How to Switch Careers Without Starting Over",
+  },
+];
+
+export const MYTHOS_NEWS: JoinCardsProps[] = [
+  {
+    name: "Rahu Enters Cancer and Ketu Enters Capricorn",
+    img: "/assets/mythos/background/blogs/image-74-copyright-min-800x508.jpg.png",
+    date: "Mar 28, 2019",
+  },
+  {
+    name: "Become the Transit or Moon Suffer",
+    img: "/assets/mythos/background/blogs/image-41-copyright-min-90x90.jpg.png",
+    date: "Mar 27, 2019",
+  },
+  {
+    name: "How to Read Your Personal Weekly Horoscope",
+    img: "/assets/mythos/background/blogs/image-38-copyright-min-800x508.jpg.png",
+    date: "Mar 25, 2019",
   },
 ];

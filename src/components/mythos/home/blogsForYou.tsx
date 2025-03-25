@@ -38,7 +38,7 @@ const BlogsForYou = () => {
           ref={ref}
           className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full lg:w-3/5"
         >
-          {BLOGS.map((blog, index) => (
+          {BLOGS.slice(0, 4).map((blog, index) => (
             <motion.div
               className="w-full max-w-[350px] mx-auto h-fit space-y-1"
               key={index}
