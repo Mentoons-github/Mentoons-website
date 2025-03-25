@@ -7,7 +7,7 @@ export interface MythosCardProps {
 
 export interface JoinCardsProps {
   name: string;
-  img: string;
+  img?: string;
   description?: string;
   date?: string;
 }
@@ -21,4 +21,12 @@ export interface MythosPlan {
 export interface FooterLists {
   icon: IconType;
   value: string;
+}
+
+export interface News {
+  category: string;
+  date: string;
+  news: string;
+  name?: string;
+  img?: string;
 }

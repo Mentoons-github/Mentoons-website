@@ -1859,7 +1859,7 @@ export const ISSUES_FACED_BY_USERS = [
   },
   {
     id: "IFU_06",
-    title: "Dipression",
+    title: "Depression",
     ageCategory: "13-16",
     description: "Developing empathy and understanding towards others",
     imageUrl:
@@ -1896,7 +1896,7 @@ export const ISSUES_FACED_BY_USERS = [
     ageCategory: "17-19",
     description:
       "Learn how to prepare for interviews and make a lasting impression",
-    imageUrl: "/assets/issues/Alcholism.png",
+    imageUrl: "/assets/home/challenges/Alcoholism.png",
   },
   {
     id: "IFU_10",

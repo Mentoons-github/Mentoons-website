@@ -59,11 +59,15 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
     }
   };
 
-  const handleBuyNow = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    handleAddtoCart(event);
-    navigate("/cart");
+  const handleBuyNow = async (productDetail: ProductBase) => {
+    const token = await getToken();
+    if (!token) {
+      toast.error("Please login to add to cart");
+      setIsLoading(false);
+      return;
+    }
+    // handleAddtoCart(event)
+    navigate("/order-summary", { state: productDetail });
   };
 
   return (
@@ -114,7 +118,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
 
             <button
               className="flex justify-center items-center px-4 py-2 w-full font-medium text-white bg-primary rounded hover:bg-primary-dark transition-colors"
-              onClick={(e) => handleBuyNow(e)}
+              onClick={() => handleBuyNow(productDetails)}
               disabled={isLoading}
             >
               Buy Now

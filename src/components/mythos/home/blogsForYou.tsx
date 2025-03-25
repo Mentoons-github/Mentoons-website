@@ -9,11 +9,11 @@ const BlogsForYou = () => {
   return (
     <section
       ref={ref}
-      className="px-4 sm:px-8 md:px-30 py-10 bg-[#1A1D3B] overflow-hidden"
+      className="px-4 lg:px-16 xl:px-24 py-10 bg-[#1A1D3B] overflow-hidden w-full"
     >
       <div className="flex flex-col md:flex-row justify-center md:justify-between items-center gap-6 text-center md:text-left">
         <motion.h1
-          className="text-[#E39712] montserrat font-semibold text-2xl sm:text-3xl md:text-4xl max-w-xl leading-tight md:leading-10"
+          className="text-[#E39712] font-montserrat font-semibold text-2xl sm:text-3xl md:text-4xl max-w-xl leading-tight md:leading-10"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -38,7 +38,7 @@ const BlogsForYou = () => {
           ref={ref}
           className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full lg:w-3/5"
         >
-          {BLOGS.map((blog, index) => (
+          {BLOGS.slice(0, 4).map((blog, index) => (
             <motion.div
               className="w-full max-w-[350px] mx-auto h-fit space-y-1"
               key={index}
@@ -54,10 +54,10 @@ const BlogsForYou = () => {
                 alt="blog-post1"
                 className="w-full h-auto object-cover rounded-xl"
               />
-              <span className="text-[#9FE9FF] font-semibold text-md sm:text-sm md:text-base montserrat">
+              <span className="text-[#9FE9FF] font-semibold text-md sm:text-sm md:text-base font-montserrat">
                 {blog.date}
               </span>
-              <h1 className="mt-1 cormorant font-semibold text-xl sm:text-lg md:text-xl lg:text-xl text-white">
+              <h1 className="mt-1 font-cormorant font-semibold text-xl sm:text-lg md:text-xl lg:text-xl text-white">
                 {blog.name}
               </h1>
               <Discover label="READ MORE" />
@@ -76,7 +76,7 @@ const BlogsForYou = () => {
               className="w-full lg:max-w-2xs mx-auto lg:mx-0 p-3"
               key={index}
             >
-              <div className="flex justify-center items-center w-full jost font-semibold text-xs">
+              <div className="flex justify-center items-center w-full font-jost font-semibold text-xs">
                 <h1 className="bg-white whitespace-nowrap z-10 pr-3">
                   {data.category}
                 </h1>
@@ -86,7 +86,7 @@ const BlogsForYou = () => {
                 </span>
                 <div className="w-[30px] border-t border-gray-900"></div>
               </div>
-              <h1 className="outfit font-semibold text-lg text-[#111111] mt-3">
+              <h1 className="font-outfit font-semibold text-lg text-[#111111] mt-3">
                 {data.news}
               </h1>
             </div>

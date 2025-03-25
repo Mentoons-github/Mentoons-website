@@ -89,7 +89,7 @@ const Header = () => {
     <header
       className={`${
         isScrolled ? "fixed w-full top-0 left-0 shadow-md" : "relative"
-      } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto`}
+      } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto font-akshar`}
     >
       <a
         href="tel:+919036033300"

@@ -228,7 +228,7 @@ const Workshopv2 = () => {
                     <span className="w-5 h-5 bg-blue-500 rounded-full" />
                     20+
                   </button>
-                  <button
+                  {/* <button
                     className={`flex items-center justify-start gap-3 text-green-500 w-32 px-3 py-2  rounded-full bg-green-200 border border-green-500  hover:ring-4 hover:ring-green-500 transition-all duration-200  ${
                       selecteCategory === "parent" &&
                       "ring-4 ring-green-500 shadow-xl shadow-green-200"
@@ -237,7 +237,7 @@ const Workshopv2 = () => {
                   >
                     <span className="w-5 h-5 bg-green-500 rounded-full" />
                     Parent
-                  </button>
+                  </button> */}
                 </div>
               </motion.div>
               <motion.img

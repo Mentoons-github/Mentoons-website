@@ -36,6 +36,11 @@ export const CONSTESTS = [
     image: "/assets/home/contests/Psychology 3.png",
     text: "Apply",
   },
+  {
+    title: "Astrologer",
+    image: "/assets/home/contests/Astrologer.png",
+    text: "Apply",
+  },
 ];
 
 export const COMMUNITY = [

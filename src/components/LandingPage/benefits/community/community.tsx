@@ -17,7 +17,7 @@ const Community = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="pt-4"
         >
-          <h1 className="akshar text-[50px] sm:text-5xl lg:text-[48px] text-start font-semibold">
+          <h1 className="font-akshar text-[50px] sm:text-5xl lg:text-[48px] text-start font-semibold">
             Benefits
           </h1>
           <motion.div
