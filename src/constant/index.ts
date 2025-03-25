@@ -1,3 +1,4 @@
+import { CardType, ProductType } from "@/utils/enum";
 import {
   FaChalkboard,
   FaCreditCard,
@@ -757,6 +758,11 @@ export const FOOTER_PAGELINKS = [
         label: "Mentoons Privacy Policy",
         url: "/mentoons-privacy-policy",
       },
+      {
+        id: "AB_6",
+        label: "Hiring",
+        url: "/hiring",
+      },
     ],
   },
   {
@@ -767,22 +773,22 @@ export const FOOTER_PAGELINKS = [
       {
         id: "S_1",
         label: "Conversation Starter Cards",
-        url: "/mentoons-store/",
+        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}`,
       },
       {
         id: "S_2",
         label: "Story Re-Teller Cards",
-        url: "/mentoons-store",
+        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}`,
       },
       {
         id: "S_3",
         label: "Silent Stories",
-        url: "/mentoons-store",
+        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}`,
       },
       {
         id: "S_4",
-        label: "Assesments",
-        url: "/assesment-page",
+        label: "Conversataion Story Card",
+        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}`,
       },
     ],
   },
@@ -1896,7 +1902,7 @@ export const ISSUES_FACED_BY_USERS = [
     ageCategory: "17-19",
     description:
       "Learn how to prepare for interviews and make a lasting impression",
-    imageUrl: "/assets/home/challenges/Alcoholism.png",
+    imageUrl: "/assets/issues/Alcoholism.png",
   },
   {
     id: "IFU_10",
