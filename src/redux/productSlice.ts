@@ -69,7 +69,7 @@ export const fetchProducts = createAsyncThunk<
         },
       }
     );
-    console.log("Product Response", response.data.data);
+    console.log("Product Response data : ", response.data.data);
     return { items: response.data.data, total: response.data.total };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

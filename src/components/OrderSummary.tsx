@@ -6,6 +6,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 // import { useNavigate } from "react-router-dom";
 
@@ -13,13 +14,15 @@ const OrderSummary: React.FC = () => {
   const { cart } = useSelector((state: RootState) => state.cart);
   const { userId } = useAuth();
   const { user } = useUser();
-  console.log("UserObject", user);
+
+  const location = useLocation();
+  const productDetail = location.state;
 
   const [formData] = useState({
     merchant_id: "3545043",
     order_id: `#ORD-${Date.now()}`,
     currency: "INR",
-    amount: cart.totalPrice,
+    amount: productDetail ? productDetail.price : cart.totalPrice,
     redirect_url: "https://www.mentoons.com/mentons-store",
     cancel_url: "https://www.mentoons.com/mentons-store",
     language: "EN",
@@ -80,19 +83,30 @@ const OrderSummary: React.FC = () => {
     const token = await getToken();
 
     // Format cart items to match the orderItemSchema
-    const formattedItems = cart.items.map((item) => ({
-      product: item.productId, // Assuming productId maps to MongoDB _id
-      quantity: item.quantity,
-      price: item.price,
-      productName: item.title,
-      productType: item.productType || "merchandise", // Default to merchandise if type is not specified
-    }));
+    const formattedItems = productDetail
+      ? {
+          product: productDetail.productId,
+          quantity: 1,
+          price: productDetail.price,
+          productName: productDetail.title,
+          productType: productDetail.productType || "merchandise",
+        }
+      : cart.items.map((item) => ({
+          product: item.productId, // Assuming productId maps to MongoDB _id
+          quantity: item.quantity,
+          price: item.price,
+          productName: item.title,
+          productType: item.productType || "merchandise", // Default to merchandise if type is not specified
+        }));
 
     // Concatenate product names for product info
-    const productInfo = cart.items
-      .map((item) => `${item.title} (${item.quantity})`)
-      .join(", ");
+    const productInfo = productDetail
+      ? `${productDetail.title} (1)`
+      : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
 
+    const totalAmount = productDetail
+      ? productDetail.price
+      : cart.totalPrice || 0;
     // Prepare complete order data according to the backend schema
     const orderData = {
       user: userId,
@@ -102,8 +116,8 @@ const OrderSummary: React.FC = () => {
         paymentStatus: "initiated",
       },
       orderStatus: "pending",
-      totalAmount: cart.totalPrice,
-      amount: cart.totalPrice, // Duplicate amount field as per schema
+      totalAmount,
+      amount: totalAmount, // Duplicate amount field as per schema
       currency: formData.currency,
 
       // Additional required fields from schema
@@ -171,9 +185,39 @@ const OrderSummary: React.FC = () => {
         variants={itemVariants}
       >
         <h2 className="text-2xl font-semibold mb-4 text-black">
-          Cart Products
+          {productDetail ? "Review Your Purchase" : "Cart Products"}
         </h2>
-        {cart.items && cart.items.length > 0 ? (
+        {productDetail ? (
+          <motion.div
+            className="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                className="w-10 h-10 rounded-full order text-white flex items-center justify-center font-medium"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.5 }}
+              >
+                {productDetail.productImages ? (
+                  <img
+                    src={productDetail?.productImages?.[0]?.imageUrl}
+                    alt={productDetail.title}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                    ?
+                  </div>
+                )}
+              </motion.div>
+              <span className="text-lg text-black">{productDetail.title}</span>
+            </div>
+            <span className="text-lg font-semibold text-black whitespace-nowrap">
+              ₹ {productDetail.price}
+            </span>
+          </motion.div>
+        ) : cart.items && cart.items.length > 0 ? (
           <ul className="space-y-3">
             {cart.items.map((item, index) => (
               <motion.li
@@ -231,7 +275,7 @@ const OrderSummary: React.FC = () => {
           animate={{ scale: 1 }}
           transition={{ yoyo: Infinity, duration: 1.5 }}
         >
-          ₹ {cart.totalPrice || 0}
+          ₹ {productDetail ? productDetail.price : cart.totalPrice || 0}
         </motion.p>
       </motion.div>
 

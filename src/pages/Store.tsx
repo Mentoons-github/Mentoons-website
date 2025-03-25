@@ -18,7 +18,6 @@ const Store = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const category = searchParams.get("category") || "6-12";
-  console.log("category selected : ", category);
 
   const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
@@ -281,15 +280,25 @@ const Store = () => {
               17-19
             </button>
 
-            <button
-              className={`flex items-center justify-start gap-2 text-blue-500 w-full md:w-32 px-3 py-[7px] rounded-full bg-blue-200 border border-blue-500 hover:ring-4 hover:ring-blue-500 transition-all duration-200 mb-2 md:mb-0 ${
-                selecteCategory === "20+" && "ring-4 ring-blue-500 "
-              }`}
-              onClick={() => handleSelectedCategory("20+")}
-            >
-              <span className="w-4 h-4 bg-blue-500 rounded-full md:w-5 md:h-5" />
-              20+
-            </button>
+            <div className="relative w-fit">
+              <span className="absolute -top-8 right-3 text-blue-300">20+</span>
+
+              <button
+                className={`relative flex items-center justify-start gap-3 w-fit px-4 py-2 pr-12 rounded-full border transition-all duration-200 overflow-hidden bg-blue-200 border-blue-500 text-blue-500 hover:ring-2 hover:ring-blue-500 
+              ${selecteCategory === "20+" ? "ring-4 ring-blue-500" : ""}`}
+                onClick={() => handleSelectedCategory("20+")}
+              >
+                <span className="w-5 h-5 bg-blue-500 rounded-full md:w-6 md:h-6" />
+                <span>Career Corner</span>
+
+                <img
+                  src="/assets/workshopv2/careercorner/career-corner-logo.png"
+                  alt="Career Corner Logo"
+                  className="absolute top-0 right-0 w-12 h-12 translate-x-1/4"
+                />
+              </button>
+            </div>
+
             {/* <button
               className={`flex items-center justify-start gap-2 text-green-500 w-full md:w-32 px-3 py-[7px] rounded-full bg-green-200 border border-green-500 hover:ring-4 hover:ring-green-500 transition-all duration-200 ${
                 selecteCategory === "parents" && "ring-4 ring-green-500 "

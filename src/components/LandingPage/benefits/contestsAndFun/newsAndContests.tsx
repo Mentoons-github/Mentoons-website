@@ -21,7 +21,7 @@ const NewsAndContests = () => {
   };
 
   return (
-    <div className="w-full h-[500px] border border-transparent border-t-0 bg-white rounded-xl overflow-hidden shadow-xl z-10">
+    <div className="w-full h-[500px] border border-transparent border-t-0 bg-white rounded-xl shadow-xl z-10">
       <div className="flex w-full relative flex-col">
         <div className="flex w-full">
           {["Mentoons Comics", "Contests | Fun Section"].map((tab) => (
