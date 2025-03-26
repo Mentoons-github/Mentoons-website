@@ -8,7 +8,7 @@ import MainLayout from "./layout/MainLayout";
 
 import OrderSummary from "@/components/OrderSummary";
 import AboutMentoons from "./pages/AboutMentoons";
-import AssesmentPage from "./pages/AssesmentPage";
+// import AssesmentPage from "./pages/AssesmentPage";
 import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
@@ -25,6 +25,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import Assessment from "./pages/v2/user/assessment.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -63,10 +64,11 @@ const routes = [
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   { path: "/membership", element: <Membership /> },
   { path: "/hiring", element: <CareerPage /> },
-  { path: "/assesment-page", element: <AssesmentPage /> },
+  { path: "/assesment-page", element: <Assessment /> },
   { path: "/assesment-questions", element: <AssesmentQuestions /> },
   { path: "/order-summary", element: <OrderSummary /> },
   { path: "/payment-status", element: <PaymentStatusPage /> },
+  { path: "/sampleAssessment", element: <Assessment /> },
   { path: "*", element: <NotFound /> },
   { path: "/adda/*", element: <AddaRouter /> },
   { path: "/mythos/*", element: <MythosRouter /> },

@@ -39,6 +39,12 @@ const Postings = ({ onClick, title }: PostingsProps) => {
           image: "/assets/Career/video.png",
           subText: "Shaping stories with every frame",
         };
+      case "ASTROLOGER":
+        return {
+          image:
+            "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/123/Astrologer.png",
+          subText: "Guiding destinies through the stars",
+        };
       default:
         return {
           image: "",

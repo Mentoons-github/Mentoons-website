@@ -1,6 +1,6 @@
 import { FRIEND_REQUEST } from "./adda/friendRequest";
 import { PHOTO_POST } from "./adda/posts";
-import { FAQ } from "./faq";
+import { FAQ, FAQ_PRODUCT } from "./faq";
 import { CONSTESTS, COMMUNITY, PLATINUM, PRIME } from "./home/home";
 import {
   ANIMATION_TEXTS_ADDA,
@@ -13,6 +13,7 @@ import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 import { PARENTS } from "./adda/groups";
 import { MYTHOS_PLANS } from "./mythos/membershipPlans";
 import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
+import { ASSESSMENTS, HIRING } from "./assessments/assesments";
 
 export {
   FAQ,
@@ -35,5 +36,8 @@ export {
   PARENTS,
   MYTHOS_PLANS,
   MYTHOS_PODCASTS,
+  FAQ_PRODUCT,
   MYTHOS_NEWS,
+  ASSESSMENTS,
+  HIRING,
 };

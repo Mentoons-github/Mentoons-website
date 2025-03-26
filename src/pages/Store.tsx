@@ -69,6 +69,8 @@ const Store = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
+  console.log("product state :", products);
+
   const handleSelectedCategory = (category: string) => {
     console.log(category);
     setSelecteCategory(category);
@@ -440,18 +442,29 @@ const Store = () => {
                 key={product._id}
                 className="w-full transition-opacity duration-500"
                 style={{
-                  display: index === currentVideoIndex ? "block" : "none",
+                  display:
+                    product.ageCategory !== "20+" && index !== currentVideoIndex
+                      ? "none"
+                      : "block",
                 }}
               >
-                <video
-                  src={product?.productVideos?.[0]?.videoUrl}
-                  autoPlay
-                  controls
-                  muted
-                  playsInline
-                  webkit-playsinline
-                  className="w-full rounded-xl"
-                ></video>
+                {product.ageCategory === "20+" ? (
+                  <img
+                    src={product?.productImages?.[0]?.imageUrl ?? ""}
+                    alt="Product"
+                    className="w-full h-[400px] object-contain rounded-xl shadow-lg bg-gray-900 p-4"
+                  />
+                ) : (
+                  <video
+                    src={product?.productVideos?.[0]?.videoUrl}
+                    autoPlay
+                    controls
+                    muted
+                    playsInline
+                    webkit-playsinline
+                    className="w-full h-[400px] object-cover rounded-xl"
+                  ></video>
+                )}
               </div>
             ))}
 

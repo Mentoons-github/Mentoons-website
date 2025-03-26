@@ -1,10 +1,21 @@
+import { Contests } from "@/types";
 import { Membership } from "@/types/home/membership";
 
-export const CONSTESTS = [
+export const CONSTESTS: Contests[] = [
   {
     title: "Menu Mania",
     image: "/assets/home/contests/menu_mania_contest.png",
     text: "Participate",
+  },
+  {
+    title: "Make Your Own Comic Workshop",
+    image: "/assets/comics/home/createYourOwnComics.jpg",
+    text: "Join",
+  },
+  {
+    title: " Learn To Draw Our Characters",
+    image: "/assets/comics/home/learToDrawOurComics.png",
+    text: "Join",
   },
   {
     title: "Collect 6 Free Cards",
@@ -20,11 +31,13 @@ export const CONSTESTS = [
     title: "Anchor/Model",
     image: "/assets/home/contests/anchor 2.png",
     text: "Apply",
+    url: "/hiring",
   },
   {
     title: "Voice Actors",
     image: "/assets/home/contests/Voice actor.png",
     text: "Apply",
+    url: "/hiring",
   },
   {
     title: "Schools/College",
@@ -35,11 +48,13 @@ export const CONSTESTS = [
     title: "Psychologists",
     image: "/assets/home/contests/Psychology 3.png",
     text: "Apply",
+    url: "/hiring",
   },
   {
     title: "Astrologer",
     image: "/assets/home/contests/Astrologer.png",
     text: "Apply",
+    url: "/hiring",
   },
 ];
 
