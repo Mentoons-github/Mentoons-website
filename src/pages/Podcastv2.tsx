@@ -24,6 +24,7 @@ const Podcastv2 = () => {
   const [showMembershipModal, setShowMembershipModal] =
     useState<boolean>(false);
   const { isSignedIn, user } = useUser();
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const filteredPodcast = PODCAST_DETAILS.filter(
     (podcast) => podcast.category === selectedCategory
@@ -75,6 +76,30 @@ const Podcastv2 = () => {
       toast.error("Failed to submit message");
     }
   };
+  const handleBrowsePlansClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => scrollToSubscription(), 500);
+    } else {
+      scrollToSubscription();
+    }
+  };
+  const scrollToSubscription = () =>
+    document
+      .getElementById("subscription")
+      ?.scrollIntoView({ behavior: "smooth" });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Animation variants
   const fadeInUp = {
@@ -889,8 +914,8 @@ const Podcastv2 = () => {
           </div>
         </motion.div>
       </div>
-
       {/* Membership Modal */}
+
       {showMembershipModal && (
         <div
           className="fixed inset-0 z-[999] bg-black bg-opacity-50 flex items-center justify-center"
@@ -915,15 +940,16 @@ const Podcastv2 = () => {
                 and exclusive features.
               </p>
             </div>
-            <button
-              className="px-4 py-2 w-full text-white rounded transition-all duration-300 bg-primary hover:scale-105"
-              onClick={() => {
+            <a
+              href={"#subscription"}
+              className="block px-4 py-3 w-full text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
+              onClick={(e) => {
                 setShowMembershipModal(false);
-                navigate("/membership-plans");
+                handleBrowsePlansClick(e);
               }}
             >
               View Membership Plans
-            </button>
+            </a>
           </div>
         </div>
       )}

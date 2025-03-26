@@ -23,8 +23,10 @@ const Register = () => {
       //   method: 'POST',
       //   body: JSON.stringify({ email: signUp.emailAddress }),
       // });
-      console.log("hello world");
+      console.log("User registration complete");
       localStorage.setItem("Signed up", "true");
+      // Redirect to home with openModal parameter
+      window.location.href = "/?openModal=true";
     } catch (error) {
       console.error("Error sending PDF:", error);
     }
