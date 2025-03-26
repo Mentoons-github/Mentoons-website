@@ -4,6 +4,7 @@ import GroupInfoForm from "@/components/shared/GroupInfoForm";
 import { ISSUES_FACED_BY_USERS, WORKSHOP_FAQ } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch } from "@/redux/store";
+import { ProductBase } from "@/types/productTypes";
 import axios from "axios";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
@@ -18,13 +19,17 @@ const Store = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const category = searchParams.get("category") || "6-12";
-
+  const productType = searchParams.get("productType") ?? "all";
+  const cardType = searchParams.get("cardType") ?? "all";
+  console.log("category selected : ", category);
   const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [filteredProducts, setFilteredProducts] = useState<any[]>();
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -70,11 +75,38 @@ const Store = () => {
 
     dispatch(setFilter({ ageCategory: category }));
   };
+
   useEffect(() => {
-    const fetchMentoonsCard = async () => {
+    const filterProductType = (type: string) => {
+      if (type === "all") {
+        return products;
+      }
+      return products.filter((product) => product.type === type);
+    };
+
+    const filtered = filterProductType(productType);
+    const filteredByCardType =
+      cardType === "all"
+        ? filtered
+        : filtered.filter((product: ProductBase) => {
+            if ("cardType" in product.details) {
+              return product.details.cardType === cardType;
+            }
+            return false;
+          });
+
+    setFilteredProducts(filteredByCardType);
+  }, [products, cardType, productType]);
+  console.log("categogryFilteredaProducts", filteredProducts);
+  useEffect(() => {
+    const fetchMentoonsProduct = async () => {
       try {
         dispatch(
-          setFilter({ type: "mentoons cards", ageCategory: selecteCategory })
+          setFilter({
+            type: "",
+            ageCategory: selecteCategory,
+            cardType: "",
+          })
         );
         const cards = await dispatch(fetchProducts() as any);
         console.log(cards.payload);
@@ -82,8 +114,11 @@ const Store = () => {
         console.error(error);
       }
     };
-    fetchMentoonsCard();
-  }, [dispatch, selecteCategory]);
+
+    fetchMentoonsProduct();
+
+    //
+  }, [dispatch, selecteCategory, productType, cardType]);
 
   if (loading) {
     return (
@@ -281,7 +316,7 @@ const Store = () => {
             </button>
 
             <div className="relative w-fit">
-              <span className="absolute -top-8 right-3 text-blue-300">20+</span>
+              <span className="absolute right-3 -top-8 text-blue-300">20+</span>
 
               <button
                 className={`relative flex items-center justify-start gap-3 w-fit px-4 py-2 pr-12 rounded-full border transition-all duration-200 overflow-hidden bg-blue-200 border-blue-500 text-blue-500 hover:ring-2 hover:ring-blue-500 
@@ -495,7 +530,9 @@ const Store = () => {
         <div className="flex gap-4 items-start p-4 md:items-center">
           <span className="py-0 pl-0 text-2xl font-semibold md:py-12 md:px-12 md:text-3xl">
             {" "}
-            Product Specifically designed for
+            {cardType !== "all"
+              ? cardType.toLocaleUpperCase()
+              : "Product Specifically designed for"}
           </span>
           <button
             className={`flex items-center justify-start px-2 pr-3 gap-2 w-fit md:w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl whitespace-nowrap
@@ -541,29 +578,48 @@ const Store = () => {
           </button>
         </div>
 
-        <div className="p-4 mt-4 w-full">
-          <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-            {products?.length > 0 ? (
-              products.map((product) => {
-                // Ensure all required properties are present before passing to ProductCard
+        {!cardType && (
+          <div className="p-4 mt-4 w-full">
+            <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+              {products?.length > 0 ? (
+                products.map((product) => {
+                  // Ensure all required properties are present before passing to ProductCard
 
-                return (
-                  <div
-                    className="flex justify-center w-full"
-                    key={product._id + Date.now()}
-                  >
-                    <ProductCard
+                  return (
+                    <div
+                      className="flex justify-center w-full"
                       key={product._id + Date.now()}
-                      productDetails={product}
-                    />
-                  </div>
-                );
-              })
+                    >
+                      <ProductCard
+                        key={product._id + Date.now()}
+                        productDetails={product}
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <div>No Product found</div>
+              )}
+            </div>
+          </div>
+        )}
+        {cardType && (
+          <div className="p-4 mt-4 w-full">
+            {filteredProducts?.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-lg text-gray-600">
+                  No products found in this category
+                </p>
+              </div>
             ) : (
-              <div>No Product found</div>
+              <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+                {filteredProducts?.map((product) => (
+                  <ProductCard key={product._id} productDetails={product} />
+                ))}
+              </div>
             )}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="p-8 md:px-28">

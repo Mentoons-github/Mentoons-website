@@ -1,12 +1,10 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
-import { Toaster } from "sonner";
 import ComicCard from "./components/comics/HoverCardComic";
 import ScrollToTop from "./components/comics/ScrollToTop";
 import Loader from "./components/common/Loader";
 import MainLayout from "./layout/MainLayout";
-import Popup from "./layout/Popup";
 
 import OrderSummary from "@/components/OrderSummary";
 import AboutMentoons from "./pages/AboutMentoons";
@@ -75,16 +73,20 @@ const routes = [
 ];
 
 const Router = () => {
-  const [showPopup, setShowPopup] = useState<boolean>(true);
+  //get the openModal from urlsearch
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const openModal = urlSearchParams.get("openModal");
+  console.log(openModal);
+
+  // const [showPopup, setShowPopup] = useState<boolean>(true);
+
   const hoverComicCard = useSelector(
     (store: RootState) => store.comics.currentHoverComic
   );
 
-  const userLoggedIn = useSelector(
-    (store: RootState) => store.user.userLoggedIn
-  );
-
-  console.log(showPopup + " " + userLoggedIn);
+  // const handlePopup = (value: boolean) => {
+  //   setShowPopup(!value);
+  // };
 
   return (
     <>
@@ -106,19 +108,19 @@ const Router = () => {
           ))}
         </Routes>
       </Suspense>
-      <Toaster position="top-right" />
+
       {hoverComicCard !== null && <ComicCard item={hoverComicCard} />}
       {/* <ProgressScroller /> */}
-      {showPopup && localStorage.getItem("phoneNumber") && (
+      {/* {showPopup &&  (
         <Popup
           item={{
             name: "Electronic Gadgets And Kids",
             image:
               "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-13.jpg",
           }}
-          setShowPopup={setShowPopup}
+          handlePopUp={handlePopup}
         />
-      )}
+      )} */}
     </>
   );
 };

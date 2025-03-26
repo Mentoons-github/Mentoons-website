@@ -1,28 +1,48 @@
+import axiosInstance from "@/api/axios";
+import { useUser } from "@clerk/clerk-react";
+import { easeInOut, motion } from "framer-motion";
 import React from "react";
 import { IoCloseOutline } from "react-icons/io5";
-import { easeInOut, motion } from "framer-motion";
-import axiosInstance from "@/api/axios";
 import { toast } from "sonner";
 
 export interface PopupProps {
-  setShowPopup: React.Dispatch<React.SetStateAction<boolean>>;
+  handlePopUp: (vlaue: boolean) => void;
   item: {
     name: string;
     image: string;
   };
 }
-const Popup: React.FC<PopupProps> = ({ setShowPopup, item }) => {
+
+const Popup: React.FC<PopupProps> = ({ handlePopUp, item }) => {
+  const { user } = useUser();
+
   const sendComic = async () => {
     try {
-      const data = await axiosInstance.post("whatsapp/sendComic", {
-        number: localStorage.getItem("phoneNumber") || "+918777328451",
+      // Get user email from Clerk
+      localStorage.removeItem("hasVisitedBefore");
+      const userEmail = user?.emailAddresses[0].emailAddress;
+
+      if (!userEmail) {
+        toast.error("User email not found");
+        return;
+      }
+
+      // Send comic to user's email
+      const response = await axiosInstance.post("/email/sendEmail", {
+        email: userEmail,
+        data: {
+          pdf: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Book+2+-+Electronic+gadgets+and+kids.pdf",
+          thumbnail: item.image,
+        },
       });
-      console.log(data);
-      setShowPopup(false);
-      toast("Comic sent successfully on whatsapp!");
+
+      console.log(response);
+      toast.success("Comic sent successfully to your email!");
+      handlePopUp(true);
     } catch (err) {
-      setShowPopup(false);
-      console.log(err);
+      console.error(err);
+      toast.error("Error sending comic to email");
+      handlePopUp(true);
     }
   };
 
@@ -34,10 +54,10 @@ const Popup: React.FC<PopupProps> = ({ setShowPopup, item }) => {
         transition={{ delay: 1, duration: 0.5, ease: easeInOut }}
         className="max-w-[25rem] px-2 pt-2 pb-3 rounded-md bg-white backdrop-blur-sm z-[9999] transition-all ease-in-out space-y-2"
       >
-        <div className="flex items-center justify-end">
+        <div className="flex justify-end items-center">
           <IoCloseOutline
-            onClick={() => setShowPopup(false)}
-            className="cursor-pointer text-2xl text-black hover:text-red-500 duration-300 active:scale-75"
+            onClick={() => handlePopUp(true)}
+            className="text-2xl text-black duration-300 cursor-pointer hover:text-red-500 active:scale-75"
           />
         </div>
         <div className="px-4 space-y-3">
@@ -45,22 +65,22 @@ const Popup: React.FC<PopupProps> = ({ setShowPopup, item }) => {
             <img
               className="w-full h-full rounded-2xl"
               src={item.image}
-              alt=""
+              alt={`${item.name} comic preview`}
             />
           </div>
-          <div className="font-semibold text-lg text-center space-y-2">
-            <p className="font-bold text-2xl">Congratulations 🎉</p>
+          <div className="space-y-2 text-lg font-semibold text-center">
+            <p className="text-2xl font-bold">Congratulations 🎉</p>
             <p className="text-sm font-medium">
               You have received {item.name} for free!
             </p>
-            <p className="text-sm">Kindly check your mail</p>
+            <p className="text-sm">Kindly check your email</p>
           </div>
-          <div
-            onClick={() => sendComic()}
-            className="bg-primary text-white rounded-full border border-primary text-center cursor-pointer px-4 py-2 duration-300 hover:bg-white hover:text-primary"
+          <button
+            onClick={sendComic}
+            className="px-4 py-2 w-full text-center text-white rounded-full border duration-300 cursor-pointer bg-primary border-primary hover:bg-white hover:text-primary"
           >
             Claim Your Comic
-          </div>
+          </button>
         </div>
       </motion.div>
     </div>

@@ -20,7 +20,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       layout: {
         unsafe_disableDevelopmentModeWarnings: true,
       },
-
       variables: {
         colorPrimary: "#EC9700",
         colorText: "black",

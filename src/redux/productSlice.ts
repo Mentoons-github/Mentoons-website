@@ -13,6 +13,7 @@ interface ProductState {
   filter: {
     type: string;
     ageCategory: string;
+    cardType: string;
     tags: string[];
   };
   sortBy: string;
@@ -30,6 +31,7 @@ const initialState: ProductState = {
   filter: {
     type: "",
     ageCategory: "",
+    cardType: "",
     tags: [],
   },
   sortBy: "createdAt",
@@ -39,6 +41,7 @@ const initialState: ProductState = {
 // Define filter params interface
 interface FilterParams {
   type?: string;
+  cardType?: string;
   ageCategory?: string;
   tags?: string[];
 }
@@ -58,6 +61,7 @@ export const fetchProducts = createAsyncThunk<
   try {
     const response = await axios.get(
       "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+
       {
         params: {
           search,

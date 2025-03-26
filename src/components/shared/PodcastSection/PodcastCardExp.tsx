@@ -4,6 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useUser } from "@clerk/clerk-react";
 
 import React from "react";
 import { FaAlignCenter, FaCirclePause, FaCirclePlay } from "react-icons/fa6";
@@ -41,6 +42,7 @@ const PodcastCardExp = ({
 }: PodcastCardProps) => {
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
+  const { user } = useUser();
 
   const handleSamplePlay = (event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent the click event from propagating to the document
@@ -58,7 +60,7 @@ const PodcastCardExp = ({
         setCurrentlyPlaying(null);
       } else {
         if (!isSignedIn) {
-          // Check if the user is not subscribed (not logged in)
+          // Check if the user is not logged in
           audioRef.current.play();
           setIsPlaying(true);
           setCurrentlyPlaying(audioRef.current);
@@ -66,17 +68,38 @@ const PodcastCardExp = ({
           setTimeout(() => {
             if (currentAudioRef) {
               // Check if currentAudioRef is not null
-              currentAudioRef.pause(); // Pause after 30 seconds
+              currentAudioRef.pause(); // Pause after 45 seconds
               currentAudioRef.currentTime = 0; // Reset to start
               setIsPlaying(false);
               setCurrentlyPlaying(null);
               setShowModal(true);
             }
-          }, 30000); // 30 seconds
+          }, 45000); // 45 seconds
         } else {
+          // User is logged in, check membership type
+          const hasPaidMembership =
+            isSignedIn &&
+            user?.publicMetadata?.membershipType &&
+            user.publicMetadata.membershipType !== "free";
+
           audioRef.current.play();
           setIsPlaying(true);
           setCurrentlyPlaying(audioRef.current);
+
+          // If user has a free membership, restrict to 45 seconds
+          if (!hasPaidMembership) {
+            const currentAudioRef = audioRef.current;
+            setTimeout(() => {
+              if (currentAudioRef && currentAudioRef === audioRef.current) {
+                currentAudioRef.pause();
+                currentAudioRef.currentTime = 0;
+                setIsPlaying(false);
+                setCurrentlyPlaying(null);
+                setShowModal(true);
+              }
+            }, 45000); // 45 seconds
+          }
+          // Paid members get full audio
         }
       }
     }
@@ -116,14 +139,11 @@ const PodcastCardExp = ({
 
   return (
     <>
-      <div className="relative  bg-white w-full border border-zinc-100/20 rounded-3xl   p-4 transition-all text-black  hover:scale-105  duration-300">
-        <div className="text-2xl font-bold text-black mb-1 line-clamp-1 flex items-center justify-between ">
-          <span className="truncate pb-2 ">{podcast.topic}</span>
+      <div className="relative p-4 w-full text-black bg-white rounded-3xl border transition-all duration-300 border-zinc-100/20 hover:scale-105">
+        <div className="flex justify-between items-center mb-1 text-2xl font-bold text-black line-clamp-1">
+          <span className="pb-2 truncate">{podcast.topic}</span>
           {currentlyPlaying === audioRef.current && isPlaying && (
-            <span
-              className=" px-2 h-6 text-xs text-black bg-red-500 leading-tight font-medium flex gap-2 items-center justify-between
-            rounded-full whitespace-nowrap"
-            >
+            <span className="flex gap-2 justify-between items-center px-2 h-6 text-xs font-medium leading-tight text-black whitespace-nowrap bg-red-500 rounded-full">
               <div className="rotate-90">
                 <FaAlignCenter />
               </div>
@@ -134,17 +154,17 @@ const PodcastCardExp = ({
           <img
             src={podcast.thumbnail}
             alt="Podcast thumbnail"
-            className="w-full object-cover"
+            className="object-cover w-full"
           />
         </div>
 
         <p className="text-sm text-black line-clamp-3">{podcast.description}</p>
-        <div className=" flex gap-3 items-center  justify-between text-xs my-2 mb-0">
-          <div className="flex items-center gap-2 ">
+        <div className="flex gap-3 justify-between items-center my-2 mb-0 text-xs">
+          <div className="flex gap-2 items-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-6 h-6 rounded-full bg-red-600 border-2 border-primary  flex gap-3 items-center ">
+                  <div className="flex gap-3 items-center w-6 h-6 bg-red-600 rounded-full border-2 border-primary">
                     <img
                       src={
                         podcast.author === "Kisha Kothari"
@@ -152,15 +172,15 @@ const PodcastCardExp = ({
                           : "/assets/images/harris-illustration.jpg"
                       }
                       alt="Author image"
-                      className=" rounded-full"
+                      className="rounded-full"
                     />
-                    <span className="text-primary font-bold  text-base whitespace-nowrap">
+                    <span className="text-base font-bold whitespace-nowrap text-primary">
                       {podcast.author}
                     </span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="overflow-visible flex items-start gap-2   ">
-                  <div className="w-12 rounded-full bg-red-600 border-2 border-primary ">
+                <TooltipContent className="flex overflow-visible gap-2 items-start">
+                  <div className="w-12 bg-red-600 rounded-full border-2 border-primary">
                     <img
                       src={
                         podcast.author === "Kisha Kothari"
@@ -168,11 +188,11 @@ const PodcastCardExp = ({
                           : "/assets/images/harris-illustration.jpg"
                       }
                       alt="Author image"
-                      className=" rounded-full"
+                      className="rounded-full"
                     />
                   </div>
-                  <div className="flex flex-col gap-0  items-center">
-                    <span className="text-primary text-base tracking-tighter leading-none">
+                  <div className="flex flex-col gap-0 items-center">
+                    <span className="text-base tracking-tighter leading-none text-primary">
                       {podcast.author}
                     </span>
                   </div>
@@ -180,10 +200,10 @@ const PodcastCardExp = ({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="flex items-center justify-between ">
+          <div className="flex justify-between items-center">
             <button
               onClick={handleSamplePlay}
-              className=" bg-rose-600  rounded-full px-4 py-2 text-white  flex gap-2 items-center justify-center whitespace-nowrap hover:bg-rose-700 transition-all duration-300"
+              className="flex gap-2 justify-center items-center px-4 py-2 text-white whitespace-nowrap bg-rose-600 rounded-full transition-all duration-300 hover:bg-rose-700"
             >
               {isPlaying ? "Pause" : "Listen Now"}
               {currentlyPlaying === audioRef.current && isPlaying ? (
