@@ -9,17 +9,20 @@ import {
 
 const AuthButton = () => {
   return (
-    <div className="w-36 md:w-40 flex justify-center items-center bg-gray-700 py-1 gap-5 cursor-pointer">
+    <div className="flex gap-5 justify-center items-center py-1 w-36 bg-gray-700 cursor-pointer md:w-40">
       <SignedIn>
         <UserButton />
       </SignedIn>
       <SignedOut>
-        <FaUser className="bg-gray-300 rounded-full p-1 w-5 h-5 md:w-8 md:h-8" />
+        <FaUser className="p-1 w-5 h-5 bg-gray-300 rounded-full md:w-8 md:h-8" />
       </SignedOut>
 
       <div className="text-[10px] sm:text-xs tracking-wider text-start inter">
         <SignedOut>
-          <NavLink to="/sign-in">
+          <NavLink 
+            to="/sign-in"
+            state={{ from: window.location.pathname }}
+          >
             <button className="font-medium text-[12px]">
               LOG IN / SIGN UP
             </button>

@@ -1,8 +1,12 @@
 import { SignUp, useSignUp } from "@clerk/clerk-react";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const Register = () => {
   const { signUp } = useSignUp();
+  const location = useLocation();
+  const previousUrl = location.state?.from || "/";
+  console.log("previousUrl", previousUrl);
 
   // Handle successful signup
   useEffect(() => {
@@ -23,8 +27,10 @@ const Register = () => {
       //   method: 'POST',
       //   body: JSON.stringify({ email: signUp.emailAddress }),
       // });
-      console.log("hello world");
+      console.log("User registration complete");
       localStorage.setItem("Signed up", "true");
+      // Redirect to home with openModal parameter
+      window.location.href = "/?openModal=true";
     } catch (error) {
       console.error("Error sending PDF:", error);
     }
@@ -38,11 +44,12 @@ const Register = () => {
       <div className="flex flex-1 justify-center items-center">
         <SignUp
           signInUrl="/sign-in"
-          redirectUrl={
-            window.location.search
-              ? window.location.pathname + window.location.search
-              : "/?openModal=true"
-          }
+          // redirectUrl={
+          //   window.location.search
+          //     ? window.location.pathname + window.location.search
+          //     : "/?openModal=true"
+          // }
+          forceRedirectUrl={previousUrl + "?openModal=true"}
         />
       </div>
     </div>
