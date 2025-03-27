@@ -42,8 +42,8 @@ const DiscoverYourself = () => {
   ];
 
   return (
-    <section className="w-full px-5 md:px-10 py-10 mt-10 space-y-6">
-      <div ref={ref} className="text-center md:text-left">
+    <section ref={ref} className="w-full px-5 md:px-10 py-10 mt-10 space-y-6">
+      <div className="text-center md:text-left">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

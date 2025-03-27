@@ -1,10 +1,13 @@
-import { ASSESSMENTS } from "@/constant/constants";
+import { ASSESSMENT_DATA } from "@/constant/constants";
 import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const AssessmentCards = () => {
   const isMobile = window.innerWidth < 768;
   const { ref, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
+
+  const navigate = useNavigate();
 
   const getIcon = (key: string) => {
     switch (key) {
@@ -22,7 +25,7 @@ const AssessmentCards = () => {
   return (
     <motion.div
       ref={ref}
-      className="grid grid-cols-1 md:grid-cols-2 gap-5 place-items-start"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 place-items-center"
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={{
@@ -30,9 +33,9 @@ const AssessmentCards = () => {
         visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
       }}
     >
-      {ASSESSMENTS.map((data, index) => (
+      {ASSESSMENT_DATA.map((data, index) => (
         <motion.div
-          className="min-h-[550px] h-fit w-full max-w-[450px] p-5 shadow-xl rounded-xl space-y-3 bg-white"
+          className="h-[600px] w-full max-w-[400px] p-5 shadow-xl rounded-xl space-y-3 bg-white flex flex-col justify-between"
           key={index}
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -50,35 +53,22 @@ const AssessmentCards = () => {
             style={{ background: data.color }}
           >
             <img
-              src={data.img}
+              src={data.thumbnail}
               alt="card-img"
-              className="w-full h-52 md:h-64 object-contain"
+              className="w-full h-52 md:h-56 object-cover"
             />
           </motion.div>
-          <motion.h1
-            className="font-semibold text-xl md:text-2xl tracking-[0.5px]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            {data.title}
+          <motion.h1 className="font-semibold text-xl lg:text-2xl tracking-[0.5px]">
+            {data.name}
           </motion.h1>
-          <motion.p
-            className="font-inter text-sm md:text-md tracking-[0.35px] w-full"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-          >
-            {data.description}
+          <motion.p className="text-sm lg:text-md tracking-[0.35px]">
+            {data.desc}
           </motion.p>
           <ul className="font-inter space-y-2">
             {Object.entries(data.details).map(([key, value]) => (
               <motion.li
                 key={key}
-                className="flex items-center gap-2 md:gap-3 text-sm md:text-md"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
+                className="flex items-center gap-2 text-sm lg:text-md"
               >
                 {getIcon(key)}
                 <h5 className="font-semibold">{key}:</h5>
@@ -86,17 +76,12 @@ const AssessmentCards = () => {
               </motion.li>
             ))}
           </ul>
-          <motion.div
-            className="flex flex-col md:flex-row justify-between items-center w-full p-3 space-y-3 md:space-y-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
-          >
+          <motion.div className="flex flex-col md:flex-row justify-between items-center w-full p-3 space-y-3 md:space-y-0">
             <p className="text-sm">
               <span className="font-medium text-2xl md:text-3xl">
                 ₹ {data.price}/
-              </span>
-              assessment
+              </span>{" "}
+              Report
             </p>
             <motion.button
               className="px-4 py-2 bg-[#EC9600] rounded-full font-extrabold text-white"
@@ -105,6 +90,14 @@ const AssessmentCards = () => {
                 boxShadow: "0px 5px 15px rgba(255,153,31,0.5)",
               }}
               whileTap={{ scale: 0.95 }}
+              onClick={() =>
+                navigate(`/assesment-questions`, {
+                  state: {
+                    questionGallery: data.questionGallery,
+                    assessment: data.name,
+                  },
+                })
+              }
             >
               START TEST
             </motion.button>

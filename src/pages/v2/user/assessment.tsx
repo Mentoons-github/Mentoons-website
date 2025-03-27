@@ -7,6 +7,7 @@ import WeAreHiring from "@/components/assessment/weAreHiring";
 import { useEffect, useState } from "react";
 import { HIRING } from "@/constant/constants";
 import { Hiring } from "@/types";
+import { NavLink } from "react-router-dom";
 
 const Assessment = () => {
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
@@ -41,9 +42,12 @@ const Assessment = () => {
               BOOK for Rs 499/hr
             </span>
             <div className="flex justify-center mt-4">
-              <button className="px-6 py-2 rounded-full bg-[#652D90] text-white font-roboto font-extrabold shadow-xl">
+              <NavLink
+                to="/bookings"
+                className="px-6 py-2 rounded-full bg-[#652D90] text-white font-roboto font-extrabold shadow-xl"
+              >
                 Book A Call
-              </button>
+              </NavLink>
             </div>
           </div>
           <WeAreHiring hiring={hiring} />

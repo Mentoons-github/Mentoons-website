@@ -6,7 +6,7 @@ import {
   FaPhone,
   FaShoppingCart,
 } from "react-icons/fa";
-import { FaCoins, FaUsers } from "react-icons/fa6";
+import { FaCalendarCheck, FaCoins, FaUsers } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 import { MdAssessment } from "react-icons/md";
 
@@ -1173,6 +1173,12 @@ export const NAV_LINKS: NavLink[] = [
     label: "Browse Plans",
     icon: FaCreditCard,
     url: "#subscription",
+  },
+  {
+    id: "NL_16",
+    label: "Book Sessions",
+    icon: FaCalendarCheck,
+    url: "/bookings",
   },
 ];
 

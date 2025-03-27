@@ -1,4 +1,5 @@
 import { Hiring } from "@/types";
+import { NavLink } from "react-router-dom";
 
 const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
   return (
@@ -21,9 +22,12 @@ const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
             className="w-48 h-auto mx-auto mt-3"
           />
           <div className="flex justify-center mt-4">
-            <button className="px-6 py-2 bg-white text-[#EC9600] rounded-full shadow-md border border-[#652D90] font-roboto font-extrabold">
+            <NavLink
+              to="/hiring"
+              className="px-6 py-2 bg-white text-[#EC9600] rounded-full shadow-md border border-[#652D90] font-roboto font-extrabold"
+            >
               APPLY HERE
-            </button>
+            </NavLink>
           </div>
         </div>
       ))}

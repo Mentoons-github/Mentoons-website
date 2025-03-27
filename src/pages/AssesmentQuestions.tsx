@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Confetti from "react-confetti";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import Report from "@/components/assessment/sampleReport";
+
 interface QuestionGallery {
   id: string;
   imageUrl: string;
@@ -8,7 +10,7 @@ interface QuestionGallery {
   correctAnswer: string;
 }
 
-interface ASSESSMENT_RESULTS {
+export interface ASSESSMENT_RESULTS {
   responses: Array<{
     questionNumber: number;
     selectedAnswer: string;
@@ -21,9 +23,19 @@ interface ASSESSMENT_RESULTS {
     percentage: string;
     performance: string;
   };
+  assessmentName: string;
 }
 
 const AssesmentQuestions: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const {
+    questionGallery,
+    assessment,
+  }: { questionGallery: QuestionGallery[]; assessment: string } =
+    location.state || {};
+
+  const [isOpen, setIsOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [showModal, setShowModal] = useState(false);
   const [assessmentResults, setAssessmentResults] =
@@ -35,16 +47,11 @@ const AssesmentQuestions: React.FC = () => {
         percentage: "0.0",
         performance: "",
       },
+      assessmentName: assessment,
     });
   const [selectedAnswers, setSelectedAnswers] = useState<{
     [key: number]: string;
   }>({}); // { 0: "Paris", 1: "Mars" }
-
-  const location = useLocation();
-  const { questionGallery }: { questionGallery: QuestionGallery[] } =
-    location.state || {};
-
-  console.log("questionGallery", questionGallery);
 
   const handleNext = () => {
     if (currentQuestion < questionGallery.length - 1) {
@@ -106,15 +113,26 @@ const AssesmentQuestions: React.FC = () => {
         percentage: percentageScore.toFixed(1),
         performance: performanceLevel,
       },
+      assessmentName: assessment,
     });
-
-    console.log("assessmentResults", assessmentResults);
   };
 
-  // Function to handle the assessment payment
-
   const handleAssessmentPayment = () => {
-    alert(" Thank you for your Interest.This Feature is under devlopment!");
+    setIsOpen(true);
+  };
+
+  const handleAssesmentNav = () => {
+    setAssessmentResults({
+      responses: [],
+      score: {
+        correct: 0,
+        total: 0,
+        percentage: "0.0",
+        performance: "",
+      },
+      assessmentName: "",
+    });
+    navigate("/assesment-page");
   };
   return (
     <div className="flex justify-center items-center p-4 min-h-screen bg-white sm:p-6">
@@ -196,7 +214,7 @@ const AssesmentQuestions: React.FC = () => {
               </button>
 
               {showModal && (
-                <div className="fixed inset-0 bg-black  backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-[999999]">
+                <div className="fixed inset-0 bg-black  backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-[50]">
                   <div className="p-6 w-full max-w-md bg-white rounded-lg">
                     <h2 className="mb-4 text-xl font-semibold">Thank you!</h2>
                     <div className="mb-6 space-y-4">
@@ -308,12 +326,12 @@ const AssesmentQuestions: React.FC = () => {
                     >
                       Get your assessment report @ ₹15
                     </button>
-                    <a
-                      href="/assesment-page"
+                    <button
+                      onClick={handleAssesmentNav}
                       className="block px-6 py-2 w-full text-center text-black rounded border border-orange-500 transition-opacity hover:bg-orange-200"
                     >
                       Take another assessment
-                    </a>
+                    </button>
                   </div>
 
                   <Confetti className="w-full" />
@@ -330,6 +348,9 @@ const AssesmentQuestions: React.FC = () => {
           )}
         </div>
       </div>
+      {isOpen && (
+        <Report onClose={() => setIsOpen(false)} result={assessmentResults} />
+      )}
     </div>
   );
 };
