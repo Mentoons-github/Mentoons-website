@@ -15,15 +15,7 @@ const LogIn = () => {
         />
       </div>
       <div className="flex flex-1 justify-center items-center">
-<<<<<<< HEAD
-        <SignIn
-          signUpUrl="/sign-up"
-          redirectUrl={window.location.href}
-          afterSignInUrl={window.location.href}
-        />
-=======
         <SignIn signUpUrl="/sign-up" forceRedirectUrl={previousUrl} />
->>>>>>> upstream/main
       </div>
     </div>
   );
