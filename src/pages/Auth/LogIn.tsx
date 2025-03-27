@@ -11,11 +11,11 @@ const LogIn = () => {
         />
       </div>
       <div className="flex flex-1 justify-center items-center">
-<SignIn 
-  signUpUrl="/sign-up"
-  redirectUrl={window.location.href} 
-  afterSignInUrl={window.location.href}
-/>
+        <SignIn
+          signUpUrl="/sign-up"
+          redirectUrl={window.location.href}
+          afterSignInUrl={window.location.href}
+        />
       </div>
     </div>
   );

@@ -13,7 +13,12 @@ import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 import { PARENTS } from "./adda/groups";
 import { MYTHOS_PLANS } from "./mythos/membershipPlans";
 import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
-import { ASSESSMENTS, HIRING } from "./assessments/assesments";
+import {
+  ASSESSMENTS,
+  HIRING,
+  ASSESSMENT_DATA,
+  REPORTS,
+} from "./assessments/assesments";
 
 export {
   FAQ,
@@ -40,4 +45,6 @@ export {
   MYTHOS_NEWS,
   ASSESSMENTS,
   HIRING,
+  ASSESSMENT_DATA,
+  REPORTS,
 };
