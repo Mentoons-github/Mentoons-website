@@ -6,7 +6,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { toast } from "sonner";
 
 export interface PopupProps {
-  handlePopUp: (vlaue: boolean) => void;
+  handlePopUp: (flag: boolean) => void;
   item: {
     name: string;
     image: string;
@@ -18,8 +18,6 @@ const Popup: React.FC<PopupProps> = ({ handlePopUp, item }) => {
 
   const sendComic = async () => {
     try {
-      // Get user email from Clerk
-      localStorage.removeItem("hasVisitedBefore");
       const userEmail = user?.emailAddresses[0].emailAddress;
 
       if (!userEmail) {
@@ -38,11 +36,11 @@ const Popup: React.FC<PopupProps> = ({ handlePopUp, item }) => {
 
       console.log(response);
       toast.success("Comic sent successfully to your email!");
-      handlePopUp(true);
+      handlePopUp(false);
     } catch (err) {
       console.error(err);
       toast.error("Error sending comic to email");
-      handlePopUp(true);
+      handlePopUp(false);
     }
   };
 
@@ -56,7 +54,7 @@ const Popup: React.FC<PopupProps> = ({ handlePopUp, item }) => {
       >
         <div className="flex justify-end items-center">
           <IoCloseOutline
-            onClick={() => handlePopUp(true)}
+            onClick={() => handlePopUp(false)}
             className="text-2xl text-black duration-300 cursor-pointer hover:text-red-500 active:scale-75"
           />
         </div>

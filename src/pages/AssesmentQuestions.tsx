@@ -1,6 +1,10 @@
+import { errorToast } from "@/utils/toastResposnse";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 import React, { useState } from "react";
 import Confetti from "react-confetti";
 import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 interface QuestionGallery {
   id: string;
   imageUrl: string;
@@ -45,6 +49,9 @@ const AssesmentQuestions: React.FC = () => {
     location.state || {};
 
   console.log("questionGallery", questionGallery);
+
+  const { getToken, userId } = useAuth();
+  const { user } = useUser();
 
   const handleNext = () => {
     if (currentQuestion < questionGallery.length - 1) {
@@ -113,8 +120,82 @@ const AssesmentQuestions: React.FC = () => {
 
   // Function to handle the assessment payment
 
-  const handleAssessmentPayment = () => {
-    alert(" Thank you for your Interest.This Feature is under devlopment!");
+  const handleAssessmentPayment = async () => {
+    console.log("Assessment payment handling initiated");
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to continue");
+        return;
+      }
+
+      const paymentData = {
+        orderId: `#ASM-${Date.now()}`,
+        totalAmount: 15,
+        amount: 15,
+        currency: "INR",
+        productInfo: "Mentoons Assessment Report",
+        customerName:
+          user?.firstName && user?.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user?.fullName || "Unknown",
+        email: user?.emailAddresses[0].emailAddress,
+        phone: user?.phoneNumbers?.[0]?.phoneNumber || "",
+        status: "PENDING",
+        user: userId,
+        items: [
+          {
+            name: "Assessment Report",
+            price: 15,
+            quantity: 1,
+          },
+        ],
+        orderStatus: "pending",
+        paymentDetails: {
+          paymentMethod: "credit_card",
+          paymentStatus: "initiated",
+        },
+        assessmentDetails: {
+          score: assessmentResults.score,
+          responses: assessmentResults.responses,
+          completedAt: new Date().toISOString(),
+        },
+        sameAsShipping: true,
+      };
+
+      console.log("paymentData", paymentData);
+      const response = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+        paymentData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("response", response);
+      console.log("response.data", response.data);
+
+      // Handle HTML form response
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = response.data;
+
+      const form = tempDiv.querySelector("form");
+      if (form) {
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        throw new Error("Payment form not found in response");
+      }
+    } catch (error: unknown) {
+      console.error("Assessment payment error:", error);
+      errorToast(
+        error instanceof Error
+          ? error.message
+          : "Failed to process assessment payment. Please try again later."
+      );
+    }
   };
   return (
     <div className="flex justify-center items-center p-4 min-h-screen bg-white sm:p-6">

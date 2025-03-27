@@ -39,7 +39,7 @@ const Header = () => {
         )
       : NAV_LINKS.filter((link) => ["Mythos", "Products"].includes(link.label));
 
-  const handleBrowsePlansClick = (
+   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
@@ -88,7 +88,7 @@ const Header = () => {
   return (
     <header
       className={`${
-        isScrolled ? "fixed w-full top-0 left-0 shadow-md" : "relative"
+        isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
       } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto font-akshar`}
     >
       <a
@@ -108,7 +108,7 @@ const Header = () => {
             : "hidden lg:flex gap-3 md:gap-20"
         } justify-start lg:justify-center items-center `}
       >
-        <a href="tel:+919036033300" className="no-underline hidden xl:block">
+        <a href="tel:+919036033300" className="hidden no-underline xl:block">
           <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
             <FaPhone /> <span> +91 90360 33300</span>
           </div>

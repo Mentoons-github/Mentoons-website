@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import ComicCard from "./components/comics/HoverCardComic";
@@ -7,6 +7,7 @@ import Loader from "./components/common/Loader";
 import MainLayout from "./layout/MainLayout";
 
 import OrderSummary from "@/components/OrderSummary";
+import Popup from "./layout/Popup.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 import AssesmentPage from "./pages/AssesmentPage";
 import AssesmentQuestions from "./pages/AssesmentQuestions";
@@ -77,16 +78,18 @@ const Router = () => {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const openModal = urlSearchParams.get("openModal");
   console.log(openModal);
-
-  // const [showPopup, setShowPopup] = useState<boolean>(true);
+    // Check if user is newly registered
+  const isNewUser = openModal === "true" || localStorage.getItem("Signed up") === "true";
+  const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(
     (store: RootState) => store.comics.currentHoverComic
   );
 
-  // const handlePopup = (value: boolean) => {
-  //   setShowPopup(!value);
-  // };
+  const handlePopup = (value: boolean) => {
+    localStorage.removeItem("isNewUser");
+    setShowPopup(value);
+  };
 
   return (
     <>
@@ -111,7 +114,7 @@ const Router = () => {
 
       {hoverComicCard !== null && <ComicCard item={hoverComicCard} />}
       {/* <ProgressScroller /> */}
-      {/* {showPopup &&  (
+      {showPopup && (
         <Popup
           item={{
             name: "Electronic Gadgets And Kids",
@@ -120,7 +123,7 @@ const Router = () => {
           }}
           handlePopUp={handlePopup}
         />
-      )} */}
+      )}
     </>
   );
 };

@@ -39,6 +39,11 @@ const Postings = ({ onClick, title }: PostingsProps) => {
           image: "/assets/Career/video.png",
           subText: "Shaping stories with every frame",
         };
+      case "ASTROLOGER":
+        return {
+          image: "/assets/Career/Astrologer.png",
+          subText: "Guiding paths through celestial wisdom",
+        };
       default:
         return {
           image: "",
