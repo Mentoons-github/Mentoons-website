@@ -78,10 +78,8 @@ const Router = () => {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const openModal = urlSearchParams.get("openModal");
   console.log(openModal);
-
-  // Check if user is newly registered
-  const isNewUser =
-    openModal === "true" || localStorage.getItem("Signed up") === "true";
+    // Check if user is newly registered
+  const isNewUser = openModal === "true" || localStorage.getItem("Signed up") === "true";
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(
@@ -89,13 +87,7 @@ const Router = () => {
   );
 
   const handlePopup = (value: boolean) => {
-    // Remove both flags to ensure popup doesn't appear again
     localStorage.removeItem("isNewUser");
-    localStorage.removeItem("Signed up");
-    // Remove search params from URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete("openModal");
-    window.history.replaceState({}, "", url.toString());
     setShowPopup(value);
   };
 

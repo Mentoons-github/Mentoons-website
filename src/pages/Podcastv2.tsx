@@ -25,6 +25,7 @@ const Podcastv2 = () => {
     useState<boolean>(false);
   const { isSignedIn, user } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
+  console.log(isScrolled);
 
   const filteredPodcast = PODCAST_DETAILS.filter(
     (podcast) => podcast.category === selectedCategory
