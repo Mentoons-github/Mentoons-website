@@ -18,6 +18,7 @@ import Home from "./pages/Home";
 import Membership from "./pages/Membership";
 import MentoonsStore from "./pages/MentoonsStore";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
+// import PodCast from "./pages/PodCast.tsx";
 import PolicyPage from "./pages/PolicyPage";
 import ProductDetails from "./pages/ProductDetails";
 import ProductManagement from "./pages/ProductManagement.tsx";
@@ -78,8 +79,9 @@ const Router = () => {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const openModal = urlSearchParams.get("openModal");
   console.log(openModal);
-    // Check if user is newly registered
-  const isNewUser = openModal === "true" || localStorage.getItem("Signed up") === "true";
+  // Check if user is newly registered
+  const isNewUser =
+    openModal === "true" || localStorage.getItem("Signed up") === "true";
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(

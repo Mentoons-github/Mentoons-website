@@ -601,14 +601,14 @@ const Footer = () => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const handleSubmit = async (
     values: FormValues,
-    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>
   ) => {
     try {
       const response = await axiosInstance.post<ApiResponse>(
         "email/subscribeToNewsletter",
         {
           email: values.email,
-        },
+        }
       );
 
       // The data from the response is in response.data
@@ -655,8 +655,49 @@ const Footer = () => {
       return;
     }
 
-    // For regular URLs, use the url property
-    window.location.href = url;
+    // For regular URLs, check if it's an internal link with a section
+    if (url.includes("#")) {
+      const [path, section] = url.split("#");
+      console.log(section);
+      const element = document.getElementById(section);
+      if (location.pathname !== path) {
+        // First navigate to the path
+        navigate(path);
+        setTimeout(() => {
+          if (element) {
+            const yOffset = -80;
+            const y =
+              element.getBoundingClientRect().top +
+              window.pageYOffset +
+              yOffset;
+            window.scrollTo({
+              top: y,
+              behavior: "smooth",
+            });
+          }
+        }, 1000);
+      } else {
+        // If already on correct path, just scroll
+        const element = document.getElementById(section);
+        if (element) {
+          const headerOffset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }
+      return;
+    }
+
+    // For regular URLs without sections
+    if (location.pathname !== url) {
+      navigate(url);
+    }
   };
 
   return (
@@ -677,7 +718,7 @@ const Footer = () => {
           />
         </div>
 
-        <div className="flex flex-[0.4] items-center justify-between relative border-spacing-3  ">
+        <div className="flex flex-[0.4] items-center justify-between relative border-spacing-3   ">
           {FOOTER_NAVLINKS.map((navItem, index) => (
             <div
               className="flex justify-center items-center transition-all duration-300 hover:underline"
@@ -721,7 +762,7 @@ const Footer = () => {
           </div>
         )}
       </div>
-      <div className="relative gap-10 px-16  lg:flex">
+      <div className="relative gap-10 px-16 lg:flex">
         <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-10 lg:justify-end   ">
           {FOOTER_PAGELINKS.map((item) => (
             <div key={item.id} className="text-center lg:text-start">
@@ -751,7 +792,7 @@ const Footer = () => {
             onSubmit={handleSubmit} // Correctly passing the handleSubmit
           >
             {(
-              { isSubmitting, isValid, dirty }, // Added isValid and dirty
+              { isSubmitting, isValid, dirty } // Added isValid and dirty
             ) => (
               <Form className="flex flex-col gap-4 w-full">
                 <div className="box-border w-full">
