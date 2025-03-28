@@ -30,14 +30,6 @@ const MythosHeader = () => {
       }`}
     >
       <nav className="max-w-full px-6 md:px-10 flex justify-between items-center">
-        <Link to="/mythos">
-          <img
-            src="/assets/mythos/logo/Logo 2.png"
-            alt="company logo"
-            className="h-14 md:h-20 w-auto"
-          />
-        </Link>
-
         <ul className="hidden lg:flex items-center gap-6 xl:gap-8 mulish text-white">
           {headerText.map((text, index) => (
             <li
@@ -54,6 +46,14 @@ const MythosHeader = () => {
             </li>
           ))}
         </ul>
+
+        <Link to="/" className="absolute left-1/2 transform -translate-x-1/2">
+          <img
+            src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png "
+            alt="company logo"
+            className="w-[120px] md:w-[130px] lg:w-[150px] mx-auto"
+          />
+        </Link>
 
         <div className="flex items-center gap-3 sm:gap-5">
           <motion.button

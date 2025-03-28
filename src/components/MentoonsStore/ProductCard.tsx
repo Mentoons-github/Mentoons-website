@@ -14,6 +14,10 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
   const { getToken, userId } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  console.log(
+    "id contain : ",
+    `product-${productDetails.title.replace(/\s*\(\d+-\d+\)\s*years/, "")}`
+  );
 
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -73,6 +77,10 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
   return (
     <div
       className="  overflow-hidden hover:shadow-xl transition-shadow duration-300 p-2"
+      id={`product-${productDetails.title.replace(
+        /\s*\(\d+-\d+\)\s*years/,
+        ""
+      )}`}
       onClick={() => navigate(`/mentoons-store/product/${productDetails._id}`)}
     >
       <motion.div

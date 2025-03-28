@@ -7,9 +7,6 @@ import "./index.css";
 import { store } from "./redux/store.ts";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// scan({
-//   enabled: true,
-// });
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }

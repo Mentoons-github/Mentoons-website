@@ -37,7 +37,9 @@ const Header = () => {
       ? ADDA_NAV_LINKS.filter((link) =>
           ["Mythos", "Community", "Collect Coins"].includes(link.label)
         )
-      : NAV_LINKS.filter((link) => ["Mythos", "Products"].includes(link.label));
+      : NAV_LINKS.filter((link) =>
+          ["Mythos", "Products", "Book Sessions"].includes(link.label)
+        );
 
    const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -155,7 +157,7 @@ const Header = () => {
           </div>
         ))}
       </nav>
-      <div className="flex justify-center">
+      <div className="flex justify-center px-10">
         <NavLink to="/">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"

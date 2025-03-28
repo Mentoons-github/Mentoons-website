@@ -655,6 +655,13 @@ const Footer = () => {
       return;
     }
 
+
+    //uncomment it==================>
+
+
+    // sessionStorage.setItem("scrollToLabel", label);
+
+    // window.location.href = url;
     // For regular URLs, check if it's an internal link with a section
     if (url.includes("#")) {
       const [path, section] = url.split("#");

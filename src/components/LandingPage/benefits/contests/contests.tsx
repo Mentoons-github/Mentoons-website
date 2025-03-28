@@ -1,9 +1,12 @@
 import MembershipModal from "@/components/common/modal/membershipModal";
 import { CONSTESTS } from "@/constant/constants";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Contests = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div className="flex flex-col items-center gap-6">
@@ -17,7 +20,11 @@ const Contests = () => {
                 <h1 className="text-lg font-semibold">{title}</h1>
                 <button
                   className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-42"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={
+                    text === "Apply"
+                      ? () => navigate("/hiring")
+                      : () => setIsModalOpen(true)
+                  }
                 >
                   {text}
                 </button>

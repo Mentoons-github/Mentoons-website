@@ -104,6 +104,10 @@ const OrderSummary: React.FC = () => {
       ? `${productDetail.title} (1)`
       : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
 
+    // const productIds = productDetail
+    //   ? productDetail.productId
+    //   : cart.items.map((item) => item.productId);
+
     const totalAmount = productDetail
       ? productDetail.price
       : cart.totalPrice || 0;
@@ -126,7 +130,9 @@ const OrderSummary: React.FC = () => {
       email: formData.billing_email,
       phone: formData.billing_tel,
       status: "PENDING",
-
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      // products: productIds,
       // Original payment gateway fields that might be needed
       orderId: formData.order_id,
     };
@@ -168,128 +174,143 @@ const OrderSummary: React.FC = () => {
 
   return (
     <motion.div
-      className="p-4 sm:p-6 md:p-10 max-w-4xl mx-auto bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl my-8"
+      className="max-w-6xl mx-auto my-8 flex flex-col md:flex-row items-center justify-between gap-10 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl p-4 sm:p-6 md:p-10"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <motion.h1
-        className="text-3xl sm:text-4xl font-bold mb-8 text-center text-black"
-        variants={itemVariants}
-      >
-        Order Summary
-      </motion.h1>
-
-      <motion.div
-        className="mb-8 p-6 bg-white rounded-lg shadow-md"
-        variants={itemVariants}
-      >
-        <h2 className="text-2xl font-semibold mb-4 text-black">
-          {productDetail ? "Review Your Purchase" : "Cart Products"}
-        </h2>
-        {productDetail ? (
-          <motion.div
-            className="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="flex items-center gap-3">
-              <motion.div
-                className="w-10 h-10 rounded-full order text-white flex items-center justify-center font-medium"
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.5 }}
-              >
-                {productDetail.productImages ? (
-                  <img
-                    src={productDetail?.productImages?.[0]?.imageUrl}
-                    alt={productDetail.title}
-                    className="w-12 h-12 object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                    ?
-                  </div>
-                )}
-              </motion.div>
-              <span className="text-lg text-black">{productDetail.title}</span>
-            </div>
-            <span className="text-lg font-semibold text-black whitespace-nowrap">
-              ₹ {productDetail.price}
-            </span>
-          </motion.div>
-        ) : cart.items && cart.items.length > 0 ? (
-          <ul className="space-y-3">
-            {cart.items.map((item, index) => (
-              <motion.li
-                key={item.productId}
-                className="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="flex items-center gap-3">
-                  <motion.div
-                    className="w-10 h-10 rounded-full order text-white flex items-center justify-center font-medium"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {item.productImage ? (
-                      <img
-                        src={item.productImage}
-                        alt={item.title}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        {index + 1}
-                      </div>
-                    )}
-                  </motion.div>
-                  <span className="text-lg text-black">
-                    {item.title} x {item.quantity}
-                  </span>
-                </div>
-                <span className="text-lg font-semibold text-black whitespace-nowrap">
-                  ₹ {item.price}
-                </span>
-              </motion.li>
-            ))}
-          </ul>
-        ) : (
-          <motion.p
-            className="text-lg text-gray-600 text-center py-6"
-            variants={itemVariants}
-          >
-            Your cart is empty.
-          </motion.p>
-        )}
-      </motion.div>
-
-      <motion.div
-        className="mb-8 p-6 bg-white rounded-lg shadow-md"
-        variants={itemVariants}
-      >
-        <h2 className="text-2xl font-semibold mb-4 text-black">Subtotal</h2>
-        <motion.p
-          className="text-2xl text-black font-bold"
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ yoyo: Infinity, duration: 1.5 }}
+      <motion.div className="w-full md:w-1/2">
+        <motion.h1
+          className="text-3xl sm:text-4xl font-bold mb-8 text-center text-black"
+          variants={itemVariants}
         >
-          ₹ {productDetail ? productDetail.price : cart.totalPrice || 0}
-        </motion.p>
+          Order Summary
+        </motion.h1>
+
+        <motion.div
+          className="mb-8 p-6 bg-white rounded-lg shadow-md"
+          variants={itemVariants}
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-black">
+            {productDetail ? "Review Your Purchase" : "Cart Products"}
+          </h2>
+          {productDetail ? (
+            <motion.div
+              className="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  className="w-10 h-10 rounded-full order text-white flex items-center justify-center font-medium"
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {productDetail.productImages ? (
+                    <img
+                      src={productDetail?.productImages?.[0]?.imageUrl}
+                      alt={productDetail.title}
+                      className="w-12 h-12 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                      ?
+                    </div>
+                  )}
+                </motion.div>
+                <span className="text-lg text-black">
+                  {productDetail.title}
+                </span>
+              </div>
+              <span className="text-lg font-semibold text-black whitespace-nowrap">
+                ₹ {productDetail.price}
+              </span>
+            </motion.div>
+          ) : cart.items && cart.items.length > 0 ? (
+            <ul className="space-y-3">
+              {cart.items.map((item, index) => (
+                <motion.li
+                  key={item.productId}
+                  className="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      className="w-10 h-10 rounded-full order text-white flex items-center justify-center font-medium"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {item.productImage ? (
+                        <img
+                          src={item.productImage}
+                          alt={item.title}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                      )}
+                    </motion.div>
+                    <span className="text-lg text-black">
+                      {item.title} x {item.quantity}
+                    </span>
+                  </div>
+                  <span className="text-lg font-semibold text-black whitespace-nowrap">
+                    ₹ {item.price}
+                  </span>
+                </motion.li>
+              ))}
+            </ul>
+          ) : (
+            <motion.p
+              className="text-lg text-gray-600 text-center py-6"
+              variants={itemVariants}
+            >
+              Your cart is empty.
+            </motion.p>
+          )}
+        </motion.div>
+
+        <motion.div
+          className="mb-8 p-6 bg-white rounded-lg shadow-md"
+          variants={itemVariants}
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-black">Subtotal</h2>
+          <motion.p
+            className="text-2xl text-black font-bold"
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ yoyo: Infinity, duration: 1.5 }}
+          >
+            ₹ {productDetail ? productDetail.price : cart.totalPrice || 0}
+          </motion.p>
+        </motion.div>
+
+        <motion.button
+          onClick={handleProceedToPay}
+          type="button"
+          className="w-full px-5 py-4 bg-black text-white rounded-lg font-medium text-lg shadow-lg"
+          variants={itemVariants}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        >
+          Proceed to Pay
+        </motion.button>
       </motion.div>
 
-      <motion.button
-        onClick={handleProceedToPay}
-        type="button"
-        className="w-full px-5 py-4 bg-black text-white rounded-lg font-medium text-lg shadow-lg"
+      <motion.div
+        className="hidden md:block md:w-1/2 flex items-center justify-center"
         variants={itemVariants}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
-        Proceed to Pay
-      </motion.button>
+        <img
+          src="/assets/store/orderSummary/Instruction.png"
+          alt="Order Illustration"
+          className="rounded-lg w-full h-auto"
+        />
+      </motion.div>
     </motion.div>
   );
 };

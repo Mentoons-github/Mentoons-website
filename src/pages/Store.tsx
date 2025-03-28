@@ -21,7 +21,7 @@ const Store = () => {
   const category = searchParams.get("category") || "6-12";
   const productType = searchParams.get("productType") ?? "all";
   const cardType = searchParams.get("cardType") ?? "all";
-  console.log("category selected : ", category);
+
   const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
@@ -69,6 +69,44 @@ const Store = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
+  //uncomment it
+
+  // useEffect(() => {
+  //   if (!loading) {
+  //     const label = sessionStorage.getItem("scrollToLabel");
+
+  //     if (label) {
+  //       const observer = new MutationObserver(() => {
+  //         const allSections =
+  //           document.querySelectorAll<HTMLElement>("[id^='product-']");
+
+  //         let matchedSection: HTMLElement | null = null;
+
+  //         allSections.forEach((section) => {
+  //           if (section.id.includes(label)) {
+  //             matchedSection = section;
+  //           }
+  //         });
+
+  //         if (matchedSection) {
+  //           (matchedSection as HTMLElement).scrollIntoView({
+  //             behavior: "smooth",
+  //           });
+
+  //           sessionStorage.removeItem("scrollToLabel");
+  //           console.log("🗑️ Removed sessionStorage entry.");
+
+  //           observer.disconnect();
+  //         }
+  //       });
+
+  //       observer.observe(document.body, { childList: true, subtree: true });
+
+  //       return () => observer.disconnect();
+  //     }
+  //   }
+  // }, [loading]);
+
   const handleSelectedCategory = async (category: string) => {
     try {
       console.log(category);
@@ -107,7 +145,7 @@ const Store = () => {
 
     setFilteredProducts(filteredByCardType);
   }, [products, cardType, productType]);
-  console.log("categogryFilteredaProducts", filteredProducts);
+
   useEffect(() => {
     const fetchMentoonsProduct = async () => {
       try {
@@ -481,18 +519,32 @@ const Store = () => {
                 key={product._id}
                 className="w-full transition-opacity duration-500"
                 style={{
-                  display: index === currentVideoIndex ? "block" : "none",
+                  display:
+                    (product.ageCategory === "20+" &&
+                      index !== currentVideoIndex) ||
+                    (product.ageCategory !== "20+" &&
+                      index !== currentVideoIndex)
+                      ? "none"
+                      : "block",
                 }}
               >
-                <video
-                  src={product?.productVideos?.[0]?.videoUrl}
-                  autoPlay
-                  controls
-                  muted
-                  playsInline
-                  webkit-playsinline
-                  className="w-full rounded-xl"
-                ></video>
+                {product.ageCategory === "20+" ? (
+                  <img
+                    src={product?.productImages?.[0]?.imageUrl ?? ""}
+                    alt="Product"
+                    className="w-full h-[400px] object-contain rounded-xl shadow-lg bg-gradient-to-r from-blue-100 to-purple-200 p-4"
+                  />
+                ) : (
+                  <video
+                    src={product?.productVideos?.[0]?.videoUrl}
+                    autoPlay
+                    controls
+                    muted
+                    playsInline
+                    webkit-playsinline
+                    className="w-full h-[400px] object-cover rounded-xl"
+                  ></video>
+                )}
               </div>
             ))}
 
@@ -621,31 +673,30 @@ const Store = () => {
           )}
         </div>
 
-        
-          <div className="p-4 mt-4 w-full">
-            <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-              {products?.length > 0 ? (
-                products.map((product) => {
-                  // Ensure all required properties are present before passing to ProductCard
+        <div className="p-4 mt-4 w-full">
+          <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+            {products?.length > 0 ? (
+              products.map((product) => {
+                // Ensure all required properties are present before passing to ProductCard
 
-                  return (
-                    <div
-                      className="flex justify-center w-full"
+                return (
+                  <div
+                    className="flex justify-center w-full"
+                    key={product._id + Date.now()}
+                  >
+                    <ProductCard
                       key={product._id + Date.now()}
-                    >
-                      <ProductCard
-                        key={product._id + Date.now()}
-                        productDetails={product}
-                      />
-                    </div>
-                  );
-                })
-              ) : (
-                <div>No Product found</div>
-              )}
-            </div>
+                      productDetails={product}
+                    />
+                  </div>
+                );
+              })
+            ) : (
+              <div>No Product found</div>
+            )}
           </div>
-        
+        </div>
+
         {cardType && (
           <div className="p-4 mt-4 w-full">
             {filteredProducts?.length === 0 ? (
@@ -656,9 +707,11 @@ const Store = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-                {filteredProducts?.map((product) => (
-                  <ProductCard key={product._id} productDetails={product} />
-                ))}
+                {filteredProducts
+                  ?.filter((product) => product.type !== "podcast")
+                  .map((product) => (
+                    <ProductCard key={product._id} productDetails={product} />
+                  ))}
               </div>
             )}
           </div>
