@@ -18,7 +18,7 @@ const HiringHeroSection = () => {
             <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-300 group-hover:scale-[1.02]">
               <video
                 src={`${
-                  import.meta.env.VITE_STATIC_URL_VIDEO
+                  import.meta.env.VITE_STATIC_URL
                 }static/Mentoons Team Video_03.mp4`}
                 autoPlay
                 loop

@@ -104,6 +104,10 @@ const OrderSummary: React.FC = () => {
       ? `${productDetail.title} (1)`
       : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
 
+    // const productIds = productDetail
+    //   ? productDetail.productId
+    //   : cart.items.map((item) => item.productId);
+
     const totalAmount = productDetail
       ? productDetail.price
       : cart.totalPrice || 0;
@@ -126,7 +130,9 @@ const OrderSummary: React.FC = () => {
       email: formData.billing_email,
       phone: formData.billing_tel,
       status: "PENDING",
-
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      // products: productIds,
       // Original payment gateway fields that might be needed
       orderId: formData.order_id,
     };
