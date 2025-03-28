@@ -9,7 +9,6 @@ import MainLayout from "./layout/MainLayout";
 import OrderSummary from "@/components/OrderSummary";
 import Popup from "./layout/Popup.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
-// import AssesmentPage from "./pages/AssesmentPage";
 import AssesmentQuestions from "./pages/AssesmentQuestions";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";

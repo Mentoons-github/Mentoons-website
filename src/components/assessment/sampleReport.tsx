@@ -75,11 +75,20 @@ const Report = ({
           <FaTimes size={24} />
         </button>
         <div ref={reportRef} className="p-6">
-          <h1 className="text-xl font-semibold text-center border-b border-black pb-2">
-            {result
-              ? `${result.assessmentName} Report`
-              : "Emotions Assessment Report"}
-          </h1>
+          <div className="flex items-center justify-between border-b border-black pb-2">
+            <img
+              src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+              alt="Logo"
+              className="h-10 w-25"
+            />
+            <h1 className="text-xl font-semibold text-center flex-1">
+              {result
+                ? `${result.assessmentName} Report`
+                : "Emotions Assessment Report"}
+            </h1>
+            <div className="w-10" />
+          </div>
+
           <p className="text-center text-gray-400 mt-2">{formattedDate}</p>
 
           <div className="flex justify-between items-start">
