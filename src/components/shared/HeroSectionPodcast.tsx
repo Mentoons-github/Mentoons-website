@@ -49,34 +49,6 @@ const HeroSectionPodcast = () => {
 
   return (
     <section className="relative bg-primary">
-      {/* <nav className='flex justify-between items-center px-4 pb-0'>
-    <div className='w-28 sm:w-40 md:w-60 lg:w-40'>
-      <img
-        src='/assets/mentoons-logo.png'
-        alt='Mentoons Logo'
-        className='object-cover w-full'
-      />
-    </div>
-    <div className='flex gap-3 justify-center items-center'>
-      <div className='gap-2 justify-center items-center text-xs text-white sm:text-sm md:text-base md:flex animate-blink'>
-        <span className='flex gap-1 justify-center items-center whitespace-nowrap'>
-          <LuPhoneCall fill='white' />
-          Call us <a href='tel:9036033300'>9036033300</a>
-        </span>
-        <span className='flex gap-1 justify-center items-center'>
-          <MdEmail />
-          <a href='mailto:metalmahesh@gmail.com'>metalmahesh@gmail.com</a>
-        </span>
-      </div>
-      <div className='text-lg sm:text-2xl border-[1.5px] border-white rounded-[4px] hover:scale-110 transition-all duration-300 mt-1 mr-1  '>
-        <IoMenu color='white' />
-      </div>
-    </div>
-  </nav> */}
-      {/* <Navbar /> */}
-      {/* <audio autoPlay>
-    <source src='mentoons-intro-audio.mp3' />
-  </audio> */}
       {/* Hero Section */}
       <div className="relative">
         <div className="absolute left-1/2 -translate-x-1/2 xxs:top-4 sm:top-8 md:top-4 lg:top-8 2xl:top-24 md:w-[400px] lg:w-[600px] ">

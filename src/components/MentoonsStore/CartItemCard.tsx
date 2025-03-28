@@ -10,6 +10,7 @@ import { useState } from "react";
 import { MdDelete } from "react-icons/md";
 // import { MdDelete } from "react-icons/md";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface CartItem {
@@ -29,6 +30,7 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
   console.log("Cart Item", cartItem);
+  const navigate = useNavigate();
 
   const handleRemoveItemFromCart = async () => {
     console.log("Remove Item from Cart", cartItem);
@@ -96,7 +98,10 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
   };
 
   return (
-    <div className="p-4 bg-white shadow-2xl rounded-3xl w-full border-4">
+    <div
+      className="p-4 bg-white shadow-2xl rounded-3xl w-full border-4"
+      onClick={() => navigate(`/mentoons-store/product/${cartItem.productId}`)}
+    >
       {/* <!-- Product Card --> */}
       <div className="flex flex-col md:flex-row gap-4 items-start w-full">
         <div className="relative border rounded-lg overflow-hidden flex items-center">
