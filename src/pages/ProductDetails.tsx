@@ -10,6 +10,7 @@ import {
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
+
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
@@ -58,9 +59,11 @@ const ProductDetails = () => {
     fetchProduct();
   }, [dispatch, productId]);
 
-  const { items: recommendedProducts } = useSelector(
-    (state: RootState) => state.products
-  );
+  const {
+    items: recommendedProducts,
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.products);
 
   useEffect(() => {
     const RecommendedProducts = async () => {
@@ -173,6 +176,65 @@ const ProductDetails = () => {
     handleAddtoCart(event);
     navigate("/cart");
   };
+
+  if (loading || !product) {
+    return (
+      <div className="w-[90%] mx-auto my-20 animate-pulse">
+        <div className="flex flex-col md:flex-row h-auto md:h-[600px] gap-4 md:gap-8">
+          <div className="flex flex-col flex-1 pb-3">
+            <div className="w-32 h-8 bg-gray-200 rounded-full mb-2"></div>
+            <div className="h-16 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-20 w-[90%] bg-gray-200 rounded-lg"></div>
+          </div>
+          <div className="flex-1 h-[300px] bg-gray-200 rounded-lg"></div>
+        </div>
+
+        <div className="mt-8">
+          <div className="w-24 h-6 bg-gray-200 rounded mb-4"></div>
+          <div className="flex gap-4 items-center mb-4">
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-8 h-8 bg-gray-200 rounded-full"></div>
+              ))}
+            </div>
+            <div className="w-12 h-6 bg-gray-200 rounded"></div>
+          </div>
+          <div className="w-24 h-8 bg-gray-200 rounded mb-8"></div>
+
+          <div className="flex gap-4 mb-8">
+            <div className="h-12 flex-1 bg-gray-200 rounded"></div>
+            <div className="h-12 flex-1 bg-gray-200 rounded"></div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-[90%] mx-auto my-20 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <h2 className="text-2xl font-bold text-red-600">
+            Error Loading Product
+          </h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 text-white bg-primary rounded-lg hover:bg-primary-dark"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-[90%] mx-auto my-20 ">
       <div className="flex flex-col md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">

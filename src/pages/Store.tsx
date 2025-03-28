@@ -69,46 +69,55 @@ const Store = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
-  useEffect(() => {
-    if (!loading) {
-      const label = sessionStorage.getItem("scrollToLabel");
+  //uncomment it
 
-      if (label) {
-        const observer = new MutationObserver(() => {
-          const allSections =
-            document.querySelectorAll<HTMLElement>("[id^='product-']");
+  // useEffect(() => {
+  //   if (!loading) {
+  //     const label = sessionStorage.getItem("scrollToLabel");
 
-          let matchedSection: HTMLElement | null = null;
+  //     if (label) {
+  //       const observer = new MutationObserver(() => {
+  //         const allSections =
+  //           document.querySelectorAll<HTMLElement>("[id^='product-']");
 
-          allSections.forEach((section) => {
-            if (section.id.includes(label)) {
-              matchedSection = section;
-            }
-          });
+  //         let matchedSection: HTMLElement | null = null;
 
-          if (matchedSection) {
-            (matchedSection as HTMLElement).scrollIntoView({
-              behavior: "smooth",
-            });
+  //         allSections.forEach((section) => {
+  //           if (section.id.includes(label)) {
+  //             matchedSection = section;
+  //           }
+  //         });
 
-            sessionStorage.removeItem("scrollToLabel");
-            console.log("🗑️ Removed sessionStorage entry.");
+  //         if (matchedSection) {
+  //           (matchedSection as HTMLElement).scrollIntoView({
+  //             behavior: "smooth",
+  //           });
 
-            observer.disconnect();
-          }
-        });
+  //           sessionStorage.removeItem("scrollToLabel");
+  //           console.log("🗑️ Removed sessionStorage entry.");
 
-        observer.observe(document.body, { childList: true, subtree: true });
+  //           observer.disconnect();
+  //         }
+  //       });
 
-        return () => observer.disconnect();
-      }
+  //       observer.observe(document.body, { childList: true, subtree: true });
+
+  //       return () => observer.disconnect();
+  //     }
+  //   }
+  // }, [loading]);
+
+  const handleSelectedCategory = async (category: string) => {
+    try {
+      console.log(category);
+      setSelecteCategory(category);
+
+      // dispatch(setFilter({ ageCategory: category }));
+      // const products = await dispatch(fetchProducts() as any);
+      console.log(products);
+    } catch (error) {
+      console.error(error);
     }
-  }, [loading]);
-
-  const handleSelectedCategory = (category: string) => {
-    setSelecteCategory(category);
-
-    dispatch(setFilter({ ageCategory: category }));
   };
 
   useEffect(() => {
@@ -120,15 +129,19 @@ const Store = () => {
     };
 
     const filtered = filterProductType(productType);
-    const filteredByCardType =
-      cardType === "all"
-        ? filtered
-        : filtered.filter((product: ProductBase) => {
-            if ("cardType" in product.details) {
-              return product.details.cardType === cardType;
-            }
-            return false;
-          });
+    let filteredByCardType = filtered.filter((product: ProductBase) => {
+      if (cardType === "all") {
+        return true;
+      }
+      if ("cardType" in product.details) {
+        return product.details.cardType === cardType;
+      }
+      return false;
+    });
+    if (!cardType || cardType === "all")
+      filteredByCardType = filteredByCardType.filter(
+        (product: ProductBase) => product.ageCategory === selecteCategory
+      );
 
     setFilteredProducts(filteredByCardType);
   }, [products, cardType, productType]);
@@ -139,7 +152,7 @@ const Store = () => {
         dispatch(
           setFilter({
             type: "",
-            ageCategory: selecteCategory,
+            ageCategory: "",
             cardType: "",
           })
         );
@@ -154,6 +167,37 @@ const Store = () => {
 
     //
   }, [dispatch, selecteCategory, productType, cardType]);
+
+  // useEffect(() => {
+  //   const fetchFilteredProducts = async () => {
+  //     console.log("Runing again for age category")
+  //     try {
+  //       const filters: any = {};
+
+  //       if (category && category !== "all") {
+  //         filters.ageCategory = category;
+  //       }
+
+  //       if (productType && productType !== "all") {
+  //         filters.type = productType;
+  //       }
+
+  //       if (cardType && cardType !== "all") {
+  //         filters.cardType = cardType;
+  //       }
+
+  //       console.log(filters);
+
+  //       dispatch(setFilter(filters));
+  //       await dispatch(fetchProducts() as any);
+  //       console.log(products);
+  //     } catch (error) {
+  //       console.error("Error fetching filtered products:", error);
+  //     }
+  //   };
+
+  //   fetchFilteredProducts();
+  // }, [category, productType, cardType, dispatch]);
 
   if (loading) {
     return (
@@ -575,7 +619,7 @@ const Store = () => {
         </div>
       </div>
 
-      <div className="pb-16">
+      <div className="pb-16" id="product">
         <div className="flex gap-4 items-start p-4 md:items-center">
           <span className="py-0 pl-0 text-2xl font-semibold md:py-12 md:px-12 md:text-3xl">
             {" "}
@@ -583,8 +627,9 @@ const Store = () => {
               ? cardType.toLocaleUpperCase()
               : "Product Specifically designed for"}
           </span>
-          <button
-            className={`flex items-center justify-start px-2 pr-3 gap-2 w-fit md:w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl whitespace-nowrap
+          {!cardType && (
+            <button
+              className={`flex items-center justify-start px-2 pr-3 gap-2 w-fit md:w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl whitespace-nowrap
               ${
                 selecteCategory === "6-12" &&
                 "text-yellow-500 bg-yellow-100 border-yellow-400 ring-4 ring-yellow-400"
@@ -612,46 +657,46 @@ const Store = () => {
               ${selecteCategory === "20+" && "hover:ring-blue-300"}
               ${selecteCategory === "parents" && "hover:ring-green-300"}
             `}
-            onClick={() => handleSelectedCategory(selecteCategory)}
-          >
-            <span
-              className={`w-5 h-5 rounded-full
+              onClick={() => handleSelectedCategory(selecteCategory)}
+            >
+              <span
+                className={`w-5 h-5 rounded-full
               ${selecteCategory === "6-12" && "bg-yellow-500"}
               ${selecteCategory === "13-16" && "bg-rose-500"}
               ${selecteCategory === "17-19" && "bg-purple-500"}
               ${selecteCategory === "20+" && "bg-blue-500"}
               ${selecteCategory === "parents" && "bg-green-500"}
             `}
-            />
-            {selecteCategory.toUpperCase()}
-          </button>
+              />
+              {selecteCategory.toUpperCase()}
+            </button>
+          )}
         </div>
 
-        {!cardType && (
-          <div className="p-4 mt-4 w-full">
-            <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-              {products?.length > 0 ? (
-                products.map((product) => {
-                  // Ensure all required properties are present before passing to ProductCard
+        <div className="p-4 mt-4 w-full">
+          <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+            {products?.length > 0 ? (
+              products.map((product) => {
+                // Ensure all required properties are present before passing to ProductCard
 
-                  return (
-                    <div
-                      className="flex justify-center w-full"
+                return (
+                  <div
+                    className="flex justify-center w-full"
+                    key={product._id + Date.now()}
+                  >
+                    <ProductCard
                       key={product._id + Date.now()}
-                    >
-                      <ProductCard
-                        key={product._id + Date.now()}
-                        productDetails={product}
-                      />
-                    </div>
-                  );
-                })
-              ) : (
-                <div>No Product found</div>
-              )}
-            </div>
+                      productDetails={product}
+                    />
+                  </div>
+                );
+              })
+            ) : (
+              <div>No Product found</div>
+            )}
           </div>
-        )}
+        </div>
+
         {cardType && (
           <div className="p-4 mt-4 w-full">
             {filteredProducts?.length === 0 ? (
