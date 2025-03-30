@@ -17,6 +17,10 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
 
   useEffect(() => {
     // Extract data from URL params
+    console.log(
+      "params recieved=========================================================================================> : ",
+      searchParams
+    );
     const status = searchParams.get("status") || "UNKNOWN";
     const orderId = searchParams.get("orderId") || "";
     const trackingId = searchParams.get("trackingId") || "";
@@ -105,8 +109,6 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
   };
 
   const theme = getStatusTheme();
-
-  
 
   return (
     <motion.div
