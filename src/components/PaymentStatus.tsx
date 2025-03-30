@@ -17,10 +17,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
 
   useEffect(() => {
     // Extract data from URL params
-    console.log(
-      "params recieved=========================================================================================> : ",
-      searchParams
-    );
+    console.log("params recieved : ", searchParams);
     const status = searchParams.get("status") || "UNKNOWN";
     const orderId = searchParams.get("orderId") || "";
     const trackingId = searchParams.get("trackingId") || "";
@@ -71,7 +68,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
           title: "Payment Failed",
           message: "We couldn't process your payment. Please try again.",
         };
-      case "ABORTED":
+      case "Aborted":
         return {
           color: "text-amber-600",
           bgColor: "bg-amber-100",
