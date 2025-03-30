@@ -14,6 +14,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
 
   const { user } = useUser();
 
+  console.log(user?.fullName);
+
   const handleMembership = async (membership: Membership) => {
     console.log("Membership handling initiated");
     try {
@@ -53,7 +55,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       };
       console.log("subscriptionData", subscriptionData);
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate?type=subscrpition",
         subscriptionData,
         {
           headers: {
@@ -79,8 +81,9 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
     } catch (error: unknown) {
       console.error("Membership payment error:", error);
       errorToast(
-        error instanceof Error ? error.message : 
-          "Failed to process membership payment. Please try again later."
+        error instanceof Error
+          ? error.message
+          : "Failed to process membership payment. Please try again later."
       );
     }
   };
