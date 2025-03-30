@@ -52,7 +52,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
   // Determine status theme and icon
   const getStatusTheme = () => {
     switch (statusData.status) {
-      case "SUCCESS":
+      case "Success":
         return {
           color: "text-green-600",
           bgColor: "bg-green-100",
@@ -60,7 +60,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
           title: "Payment Successful",
           message: "Thank you for your purchase!",
         };
-      case "FAILURE":
+      case "Failure":
         return {
           color: "text-red-600",
           bgColor: "bg-red-100",
