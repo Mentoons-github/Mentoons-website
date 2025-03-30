@@ -1,18 +1,21 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import SubscriptionModal from "./common/modal/subscrptionModal";
 
 interface PaymentStatusProps {
   // Optional props can be added here
 }
 
 const PaymentStatus: React.FC<PaymentStatusProps> = () => {
+  const [open, setOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const [statusData, setStatusData] = useState({
     status: searchParams.get("status") || "UNKNOWN",
     orderId: searchParams.get("orderId") || "",
     trackingId: searchParams.get("trackingId") || "",
     message: searchParams.get("message") || "",
+    subscriptionType: searchParams.get("subscription") || "",
   });
 
   useEffect(() => {
@@ -22,16 +25,21 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
     const orderId = searchParams.get("orderId") || "";
     const trackingId = searchParams.get("trackingId") || "";
     const message = searchParams.get("message") || "";
+    const subscriptionType = searchParams.get("subscription") || "";
 
     setStatusData({
       status,
       orderId,
       trackingId,
       message,
+      subscriptionType,
     });
+
+    if (subscriptionType === "platinum" || subscriptionType === "prime") {
+      setOpen(true);
+    }
   }, [searchParams]);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -214,6 +222,11 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
           </motion.div>
         )}
       </div>
+      <SubscriptionModal
+        open={open}
+        onClose={() => setOpen(false)}
+        subscriptionType={statusData.subscriptionType}
+      />
     </motion.div>
   );
 };
