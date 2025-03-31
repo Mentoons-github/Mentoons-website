@@ -1,7 +1,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product, ProductBase } from "../types/productTypes";
+// Fetch multiple products with pagination, search, and sort.
+interface FetchProductsParams {
+  type?: string;
+  cardType?: string;
+  ageCategory?: string;
+  token?: string;
+}
 
+// Add these to the ProductState interface
 interface ProductState {
   items: ProductBase[];
   total: number;
@@ -10,80 +18,79 @@ interface ProductState {
   loading: boolean;
   error: string | null;
   search: string;
-  filter: {
-    type: string;
-    ageCategory: string;
-    cardType: string;
-    tags: string[];
-  };
   sortBy: string;
   order: "asc" | "desc";
+  type: string | null; // Add this
+  cardType: string | null; // Add this
+  ageCategory: string | null;
+  token: string | null; // Add this
 }
 
+// Update initialState to include new fields
 const initialState: ProductState = {
   items: [],
   total: 0,
   page: 1,
-  limit: 10,
+  limit: 20,
   loading: false,
   error: null,
   search: "",
-  filter: {
-    type: "",
-    ageCategory: "",
-    cardType: "",
-    tags: [],
-  },
   sortBy: "createdAt",
   order: "desc",
+  type: null, // Add this
+  cardType: null, // Add this
+  ageCategory: null, // Add this
+  token: null,
 };
 
-// Define filter params interface
-interface FilterParams {
-  type?: string;
-  cardType?: string;
-  ageCategory?: string;
-  tags?: string[];
+interface FetchProductsResponse {
+  items: ProductBase[];
+  total: number;
 }
 
-// Fetch multiple products with pagination, search, and sort.
 export const fetchProducts = createAsyncThunk<
-  { items: ProductBase[]; total: number },
-  FilterParams | undefined,
+  FetchProductsResponse,
+  FetchProductsParams,
   { state: { products: ProductState }; rejectValue: string }
->("products/fetchProducts", async (filterParams, thunkAPI) => {
-  const state = thunkAPI.getState().products;
-  const { search, sortBy, order, page, limit } = state;
+>(
+  "products/fetchProducts",
+  async ({ type, cardType, ageCategory, token }, thunkAPI) => {
+    const state = thunkAPI.getState().products;
+    const { search, sortBy, order, page, limit } = state;
 
-  // Use passed filter params or default to state
-  const filter = filterParams || state.filter;
-
-  try {
-    const response = await axios.get(
-      "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
-
-      {
-        params: {
-          search,
-          sortBy,
-          order,
-          page,
-          limit,
-          ...filter, // Spread filter params into request
-        },
-      }
-    );
-    console.log("Product Response data : ", response.data.data);
-    return { items: response.data.data, total: response.data.total };
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+    try {
+      const response = await axios.get<{ data: ProductBase[]; total: number }>(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+        
+        {
+          params: {
+            search,
+            sortBy,
+            order,
+            page,
+            limit,
+            type,
+            ageCategory,
+            cardType,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      console.log("Product Response data : ", response.data.data);
+      return { items: response.data.data, total: response.data.total };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message || error.message
+        );
+      }
+      return thunkAPI.rejectWithValue("An unknown error occurred");
     }
-    return thunkAPI.rejectWithValue("An unknown error occurred");
   }
-});
+);
 
 // Fetch a single product by ID.
 export const fetchProductById = createAsyncThunk<
@@ -94,6 +101,7 @@ export const fetchProductById = createAsyncThunk<
   try {
     const response = await axios.get(
       `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
+      
     );
     return response.data;
   } catch (error: unknown) {
@@ -274,11 +282,6 @@ const productSlice = createSlice({
     setLimit(state, action: PayloadAction<number>) {
       state.limit = action.payload;
     },
-    // Add reducer for filter
-    setFilter(state, action: PayloadAction<Partial<ProductState["filter"]>>) {
-      state.filter = { ...state.filter, ...action.payload };
-      state.page = 1; // Reset to first page when filter changes
-    },
   },
   extraReducers: (builder) => {
     // fetchProducts
@@ -396,6 +399,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { setSearch, setSort, setPage, setLimit, setFilter } =
-  productSlice.actions;
+export const { setSearch, setSort, setPage, setLimit } = productSlice.actions;
 export default productSlice.reducer;

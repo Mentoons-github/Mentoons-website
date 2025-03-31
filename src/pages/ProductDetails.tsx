@@ -1,12 +1,9 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
+import AddToCartModal from "@/components/modals/AddToCartModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ } from "@/constant";
 import { addItemCart, getCart, updateItemQuantity } from "@/redux/cartSlice";
-import {
-  fetchProductById,
-  fetchProducts,
-  setFilter,
-} from "@/redux/productSlice";
+import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
@@ -26,6 +23,7 @@ const ProductDetails = () => {
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
 
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductBase>();
@@ -68,14 +66,7 @@ const ProductDetails = () => {
   useEffect(() => {
     const RecommendedProducts = async () => {
       try {
-        dispatch(
-          setFilter({
-            type: "mentoons cards",
-            ageCategory: product?.ageCategory,
-          })
-        );
-        const recommendedProducts = await dispatch(fetchProducts());
-
+        const recommendedProducts = await dispatch(fetchProducts({}));
         console.log("Recommended Products", recommendedProducts.payload);
       } catch (error) {
         console.error("Error fetching recommended products", error);
@@ -155,8 +146,7 @@ const ProductDetails = () => {
           })
         );
         if (response.payload) {
-          toast.success("Item Added to cart");
-          navigate("/cart");
+          setShowAddToCartModal(true);
         }
         setIsLoading(false);
       } else {
@@ -170,14 +160,7 @@ const ProductDetails = () => {
     }
   };
 
-  // const handleBuyNow = (
-  //   event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  // ) => {
-  //   handleAddtoCart(event);
-  //   navigate("/cart");
-  // };
-
-  const handleBuyNow = async (productDetail: ProductBase) => {
+  const handleBuyNow = async (product: ProductBase) => {
     const token = await getToken();
     if (!token) {
       toast.error("Please login to add to cart");
@@ -185,7 +168,7 @@ const ProductDetails = () => {
       return;
     }
     // handleAddtoCart(event)
-    navigate("/order-summary", { state: productDetail });
+    navigate("/order-summary", { state: product });
   };
 
   if (loading || !product) {
@@ -445,6 +428,13 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      {showAddToCartModal && (
+        <AddToCartModal
+          onClose={() => setShowAddToCartModal(false)}
+          isOpen={showAddToCartModal}
+          productName={product.title}
+        />
+      )}
     </div>
   );
 };

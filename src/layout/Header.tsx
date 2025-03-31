@@ -1,6 +1,7 @@
 import DropDown from "@/components/common/nav/dropdown";
 import NavButton from "@/components/common/nav/navButton";
 import Sidebar from "@/components/common/sidebar";
+import ShareModal from "@/components/modals/ShareModal";
 import { ADDA_NAV_LINKS, NAV_LINKS } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -20,6 +21,7 @@ const Header = () => {
   const title = location.pathname.startsWith("/adda") ? "adda" : "home";
   const [isScrolled, setIsScrolled] = useState(false);
   const [sidebarOpen, setSideBarOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [dropdown, setDropDown] = useState<DropDownInterface>({
     games: false,
     comics: false,
@@ -41,7 +43,7 @@ const Header = () => {
           ["Mythos", "Products", "Book Sessions"].includes(link.label)
         );
 
-   const handleBrowsePlansClick = (
+  const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
@@ -194,7 +196,9 @@ const Header = () => {
         } justify-evenly items-center gap-2 md:gap-5`}
       >
         {ADDA_NAV_LINKS.filter((data) =>
-          ["Browse Plans", "Workshops", "Assessments"].includes(data.label)
+          ["Browse Plans", "Workshops", "Assessments", "Share"].includes(
+            data.label
+          )
         ).map(({ id, label, url, icon: Icon }) =>
           label === "Browse Plans" ? (
             <a
@@ -214,6 +218,35 @@ const Header = () => {
                    transition-all duration-300 ease-in-out group-hover:w-full"
               ></span>
             </a>
+          ) : label === "Share" ? (
+            <div
+              key={id}
+              onClick={() => setShowShareModal(true)}
+              className="group relative bg-transparent outline-none cursor-pointer text-center 
+             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
+             items-center gap-1 transition-all duration-300 ease-in-out"
+            >
+              {Icon && <Icon className="sm:text-sm md:text-lg" />}
+              {label}
+              <span
+                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                   transition-all duration-300 ease-in-out group-hover:w-full"
+              ></span>
+              {showShareModal && (
+                <ShareModal
+                  onClose={() => setShowShareModal((prev) => !prev)}
+                  isOpen={showShareModal}
+                  link={window.location.href}
+                />
+              )}
+              {/* {showShareModal && (
+                <ThankyouModal
+                  onClose={() => setShowShareModal(false)}
+                  isOpen={showShareModal}
+                  message={ModalMessage.ENQUIRY_MESSAGE}
+                />
+              )} */}
+            </div>
           ) : (
             <NavLink
               key={id}

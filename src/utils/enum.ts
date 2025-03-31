@@ -23,3 +23,23 @@ export const ProductType = {
   MENTOONS_BOOKS: "metnoons books",
   //Any other product type
 };
+
+export const ModalMessage = {
+  ENQUIRY_MESSAGE:
+    "We will get back to you shortly with the query you have given us, till then enjoy the exlusive contents and workshops we have for you! ",
+  NEWSLETTER_MESSAGE:
+    "You're all set! Get ready to receive the latest updates, exclusive insights, and special offers straight to your inbox. Stay tuned for exciting product news!",
+};
+
+export const workshop = {
+  BUDDY_CAMP: "Buddy Camp",
+  TEEN_CAMP: "Teen Camp",
+  CAREER_CORNER: "Career Carner",
+};
+
+export const ORDER_TYPE = {
+  PRODUCT_PURCHASE: "product_purcahse",
+  SUBSCRIPTION_PURCHASE: "subscription_purchase",
+  CONSULTANCY_PURCHASE: "consultancy_purchase",
+  ASSESSMENT_PURCHASE: "assessment_purchase",
+};

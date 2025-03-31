@@ -1,4 +1,5 @@
 import { Membership } from "@/types/home/membership";
+import { ORDER_TYPE } from "@/utils/enum";
 import { errorToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -41,6 +42,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         phone: user?.phoneNumbers?.[0]?.phoneNumber || "",
         status: "PENDING",
         user: userId,
+        order_type: ORDER_TYPE.SUBSCRIPTION_PURCHASE,
         items: [
           {
             name: membership.type,

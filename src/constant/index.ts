@@ -4,6 +4,7 @@ import {
   FaCreditCard,
   FaMoon,
   FaPhone,
+  FaShare,
   FaShoppingCart,
 } from "react-icons/fa";
 import { FaCalendarCheck, FaCoins, FaUsers } from "react-icons/fa6";
@@ -1217,6 +1218,12 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     id: "NL_09",
     label: "Collect Coins",
     icon: FaCoins,
+    url: "#",
+  },
+  {
+    id: "NL_10",
+    label: "Share",
+    icon: FaShare,
     url: "#",
   },
 ];

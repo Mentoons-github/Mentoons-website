@@ -1,10 +1,12 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
+import EnquiryModal from "@/components/modals/EnquiryModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import GroupInfoForm from "@/components/shared/GroupInfoForm";
 import { ISSUES_FACED_BY_USERS, WORKSHOP_FAQ } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch } from "@/redux/store";
-import { ProductBase } from "@/types/productTypes";
+import { ModalMessage } from "@/utils/enum";
+import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
@@ -12,25 +14,23 @@ import { BiSolidMessage } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { setFilter } from "../redux/productSlice";
 import { RootState } from "../redux/store";
 
 const Store = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const category = searchParams.get("category") || "6-12";
-  const productType = searchParams.get("productType") ?? "all";
-  const cardType = searchParams.get("cardType") ?? "all";
-
+  const category = searchParams.get("category") || undefined;
+  const productType = searchParams.get("productType") || undefined;
+  const cardType = searchParams.get("cardType") || undefined;
   const [selecteCategory, setSelecteCategory] = useState(category);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [filteredProducts, setFilteredProducts] = useState<any[]>();
-
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const [message, setMessage] = useState<string>("");
@@ -56,7 +56,7 @@ const Store = () => {
       );
       console.log(queryResponse);
       if (queryResponse.status === 201) {
-        toast.success("Message Submitted Successfully");
+        setShowEnquiryModal(true);
       }
     } catch (error) {
       toast.error("Failed to submit message");
@@ -69,47 +69,14 @@ const Store = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
-  //uncomment it
-
-  // useEffect(() => {
-  //   if (!loading) {
-  //     const label = sessionStorage.getItem("scrollToLabel");
-
-  //     if (label) {
-  //       const observer = new MutationObserver(() => {
-  //         const allSections =
-  //           document.querySelectorAll<HTMLElement>("[id^='product-']");
-
-  //         let matchedSection: HTMLElement | null = null;
-
-  //         allSections.forEach((section) => {
-  //           if (section.id.includes(label)) {
-  //             matchedSection = section;
-  //           }
-  //         });
-
-  //         if (matchedSection) {
-  //           (matchedSection as HTMLElement).scrollIntoView({
-  //             behavior: "smooth",
-  //           });
-
-  //           sessionStorage.removeItem("scrollToLabel");
-  //           console.log("🗑️ Removed sessionStorage entry.");
-
-  //           observer.disconnect();
-  //         }
-  //       });
-
-  //       observer.observe(document.body, { childList: true, subtree: true });
-
-  //       return () => observer.disconnect();
-  //     }
-  //   }
-  // }, [loading]);
-
   const handleSelectedCategory = async (category: string) => {
     try {
       console.log(category);
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("category", category);
+      navigate({
+        search: searchParams.toString(),
+      });
       setSelecteCategory(category);
 
       // dispatch(setFilter({ ageCategory: category }));
@@ -121,83 +88,30 @@ const Store = () => {
   };
 
   useEffect(() => {
-    const filterProductType = (type: string) => {
-      if (type === "all") {
-        return products;
-      }
-      return products.filter((product) => product.type === type);
-    };
-
-    const filtered = filterProductType(productType);
-    let filteredByCardType = filtered.filter((product: ProductBase) => {
-      if (cardType === "all") {
-        return true;
-      }
-      if ("cardType" in product.details) {
-        return product.details.cardType === cardType;
-      }
-      return false;
-    });
-    if (!cardType || cardType === "all")
-      filteredByCardType = filteredByCardType.filter(
-        (product: ProductBase) => product.ageCategory === selecteCategory
-      );
-
-    setFilteredProducts(filteredByCardType);
-  }, [products, cardType, productType]);
-
-  useEffect(() => {
     const fetchMentoonsProduct = async () => {
       try {
-        dispatch(
-          setFilter({
-            type: "",
-            ageCategory: "",
-            cardType: "",
-          })
-        );
-        const cards = await dispatch(fetchProducts() as any);
-        console.log(cards.payload);
+        // Fetch products with the current filters
+        const token = await getToken();
+        if (productType || cardType || category) {
+          const cards = await dispatch(
+            fetchProducts({
+              type: productType,
+              cardType,
+              ageCategory: category,
+              token: token!,
+            }) as any
+          );
+          console.log(cards.payload);
+        }
       } catch (error: unknown) {
-        console.error(error);
+        console.error("Error fetching products:", error);
       }
     };
 
     fetchMentoonsProduct();
-
-    //
   }, [dispatch, selecteCategory, productType, cardType]);
 
-  // useEffect(() => {
-  //   const fetchFilteredProducts = async () => {
-  //     console.log("Runing again for age category")
-  //     try {
-  //       const filters: any = {};
-
-  //       if (category && category !== "all") {
-  //         filters.ageCategory = category;
-  //       }
-
-  //       if (productType && productType !== "all") {
-  //         filters.type = productType;
-  //       }
-
-  //       if (cardType && cardType !== "all") {
-  //         filters.cardType = cardType;
-  //       }
-
-  //       console.log(filters);
-
-  //       dispatch(setFilter(filters));
-  //       await dispatch(fetchProducts() as any);
-  //       console.log(products);
-  //     } catch (error) {
-  //       console.error("Error fetching filtered products:", error);
-  //     }
-  //   };
-
-  //   fetchFilteredProducts();
-  // }, [category, productType, cardType, dispatch]);
+  // Dependencies
 
   if (loading) {
     return (
@@ -623,11 +537,12 @@ const Store = () => {
         <div className="flex gap-4 items-start p-4 md:items-center">
           <span className="py-0 pl-0 text-2xl font-semibold md:py-12 md:px-12 md:text-3xl">
             {" "}
-            {cardType !== "all"
-              ? cardType.toLocaleUpperCase()
-              : "Product Specifically designed for"}
+            {}
+            {!cardType
+              ? "Product Specifically designed for"
+              : cardType !== "all" && cardType?.toLocaleUpperCase()}
           </span>
-          {!cardType && (
+          {category && (
             <button
               className={`flex items-center justify-start px-2 pr-3 gap-2 w-fit md:w-30 py-[5px] rounded-full transition-all duration-200 font-semibold text-xl whitespace-nowrap
               ${
@@ -657,7 +572,7 @@ const Store = () => {
               ${selecteCategory === "20+" && "hover:ring-blue-300"}
               ${selecteCategory === "parents" && "hover:ring-green-300"}
             `}
-              onClick={() => handleSelectedCategory(selecteCategory)}
+              onClick={() => handleSelectedCategory(selecteCategory!)}
             >
               <span
                 className={`w-5 h-5 rounded-full
@@ -668,7 +583,7 @@ const Store = () => {
               ${selecteCategory === "parents" && "bg-green-500"}
             `}
               />
-              {selecteCategory.toUpperCase()}
+              {selecteCategory?.toUpperCase()}
             </button>
           )}
         </div>
@@ -697,7 +612,7 @@ const Store = () => {
           </div>
         </div>
 
-        {cardType && (
+        {/* {cardType && (
           <div className="p-4 mt-4 w-full">
             {filteredProducts?.length === 0 ? (
               <div className="py-8 text-center">
@@ -715,7 +630,7 @@ const Store = () => {
               </div>
             )}
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="p-8 md:px-28">
@@ -780,6 +695,13 @@ const Store = () => {
           </div>
         </div>
       </div>
+      {showEnquiryModal && (
+        <EnquiryModal
+          isOpen={showEnquiryModal}
+          onClose={() => setShowEnquiryModal(false)}
+          message={ModalMessage.ENQUIRY_MESSAGE}
+        />
+      ) }
     </div>
   );
 };
