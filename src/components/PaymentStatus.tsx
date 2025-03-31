@@ -226,6 +226,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
         open={open}
         onClose={() => setOpen(false)}
         subscriptionType={statusData.subscriptionType}
+        status={statusData.status}
       />
     </motion.div>
   );
