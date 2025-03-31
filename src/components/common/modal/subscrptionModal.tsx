@@ -28,9 +28,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   });
 
   useEffect(() => {
+    console.log("membership going to check");
     const updateMembership = async () => {
+      console.log("status checking");
+      console.log("status :", status.toLowerCase());
+      console.log("user exists :", user);
       if (status.toLowerCase() === "success" && user) {
         try {
+          console.log("membership upating", subscriptionType.toLowerCase());
           const userv = await user.update({
             publicMetadata: {
               membershipType: subscriptionType.toLowerCase(),
