@@ -68,7 +68,6 @@ const Workshopv2 = () => {
         formData
       );
       if (workshopRegistrationResponse.status === 200) {
-        toast.success("Registration Successful");
         setShowRegistrationModal(true);
       } else {
         toast.error("Registration Failed");
