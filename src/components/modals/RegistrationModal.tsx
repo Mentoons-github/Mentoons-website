@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from "react";
 
 import { IoClose } from "react-icons/io5";
-interface RegirstrationModalProps {
+interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   message?: string;
   regirsterFor?: string;
 }
 
-const RegirstrationModal: React.FC<RegirstrationModalProps> = ({
+const RegistrationModal: React.FC<RegistrationModalProps> = ({
   isOpen,
   onClose,
   regirsterFor,
@@ -88,7 +88,7 @@ const RegirstrationModal: React.FC<RegirstrationModalProps> = ({
           />
         </div>
 
-        <div className="w-[80%] mx-auto text-neutral-600 font-normal  text-xl text-center leading-2 ">
+        <div className="w-[80%] mx-auto text-neutral-600 font-normal  text-xl text-center leading-2  py-6">
           <p>
             `You have Successfully registered for the{" "}
             <span className="text-neutral-800 font-bold">{regirsterFor}</span>{" "}
@@ -100,4 +100,4 @@ const RegirstrationModal: React.FC<RegirstrationModalProps> = ({
   );
 };
 
-export default RegirstrationModal;
+export default RegistrationModal;

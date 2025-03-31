@@ -259,6 +259,21 @@ const ProductDetails = () => {
         <p className="my-2 text-lg font-semibold text-neutral-800">
           {" "}
           ₹ {product?.price}{" "}
+          {(product?.title === "Conversation Starter Cards (6-12) years" ||
+            product?.title === "Silent Stories (6-12) years") &&
+            product?.ageCategory === "6-12" && (
+              <a
+                href={`${
+                  product?.title === "Conversation Starter Cards (6-12) years"
+                    ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
+                    : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
+                }`}
+                download
+                className="bg-orange-500 text-white px-4 py-3 hover:opacity-55 rounded-full ml-4 transition-all duration-200"
+              >
+                Download Free Sample
+              </a>
+            )}
         </p>
 
         {/* <p>{product?.description}</p> */}

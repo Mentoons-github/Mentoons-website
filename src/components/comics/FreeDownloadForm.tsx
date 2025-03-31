@@ -1,7 +1,6 @@
+import axiosInstance from "@/api/axios";
 import MiniLogo from "@/assets/imgs/logo mini.png";
-import { date } from "@/constant/websiteConstants";
 import { SelectedComicType } from "@/pages/FreeDownload";
-import emailjs from "emailjs-com";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { motion } from "framer-motion";
 import React from "react";
@@ -31,7 +30,7 @@ const validationSchema = Yup.object({
     .required("Phone number is required!")
     .matches(
       /^\+?\d{10,15}$/,
-      "Invalid phone number format (e.g., +918777328451)",
+      "Invalid phone number format (e.g., +918777328451)"
     ),
 });
 
@@ -42,46 +41,33 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
   selectedComic,
   page,
 }) => {
-  const sendEmail = (values: FormType) => {
-    emailjs
-      .send(
-        import.meta.env.VITE_EMAIL_JS_SERVICE_ID_FREE_DOWNLOAD,
-        import.meta.env.VITE_EMAIL_JS_TEMPLATE_ID_FREE_DOWNLOAD,
-        {
-          from_name: "Mentoons",
-          to_name: values.name,
-          to_email: values.email,
-          message: `Hello ${values.name}, thank you for choosing us. Here's your free comic 🥳`,
-          pdf_url: selectedComic?.pdf_url,
-          thumbnail_url: selectedComic?.thumbnail_url,
+  // /free-downloads
+
+  const sendEmail = async (value: FormType) => {
+    try {
+      const userEmail = value.email;
+
+      if (!userEmail) {
+        toast.error("User email not found");
+        return;
+      }
+
+      // Send comic to user's email
+      const response = await axiosInstance.post("/email/free-downloads", {
+        email: userEmail,
+        data: {
+          pdf: selectedComic?.pdf_url,
+          thumbnail: selectedComic?.thumbnail_url,
         },
-        import.meta.env.VITE_EMAIL_JS_USER_ID,
-      )
-      .then(
-        (response) => {
-          console.log(
-            "Email sent successfully!",
-            response.status,
-            response.text,
-          );
-          toast("Comic sent successfully 🥳", {
-            description: date,
-            action: {
-              label: <span className="text-white font-semibold">success</span>,
-              onClick: () => {},
-            },
-          });
-        },
-        (error) => {
-          toast("Please try again later! 🚫", {
-            description: date,
-          });
-          console.error("Failed to send email.", error);
-        },
-      )
-      .finally(() => {
-        setShowFreeDownloadForm(false);
       });
+
+      if (response.status === 201) {
+        toast.success("Comic sent successfully to your email!");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error sending comic to email");
+    }
   };
 
   return (
@@ -90,7 +76,11 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className={`relative text-black ${page === "freedownload" ? "w-[90%] md:max-w-md py-8 px-10" : "w-full h-full"} space-y-4 rounded-md bg-white shadow shadow-white`}
+        className={`relative text-black ${
+          page === "freedownload"
+            ? "w-[90%] md:max-w-md py-8 px-10"
+            : "w-full h-full"
+        } space-y-4 rounded-md bg-white shadow shadow-white`}
       >
         <button
           onClick={() => setShowFreeDownloadForm(false)}
