@@ -27,8 +27,10 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
 
       const subscriptionData = {
         orderId: `#ORD-${Date.now()}`,
-        totalAmount: membership.price,
-        amount: membership.price,
+        // totalAmount: membership.price,
+        // amount: membership.price,
+        totalAmount: 1, //remove it 
+        amount: 1,
         currency: "INR",
         productInfo: `Mentoons ${membership.type} Membership`,
         customerName:
