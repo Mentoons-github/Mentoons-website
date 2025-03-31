@@ -45,9 +45,20 @@ const HeroSection = () => {
       </motion.div>
 
       <motion.img
-        src="/assets/home/banner/fillers/SVG (1).png"
+        src="/assets/home/homepage fillers/sun.png"
         alt="filler"
-        className="absolute hidden sm:block -top-5 lg:top-10 lg:left-44 lg:w-auto z-[-1]"
+        initial={{ opacity: 1, scale: 0.9 }}
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [0, 10, -10, 0],
+        }}
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "mirror",
+        }}
+        className="absolute hidden sm:block -top-5 lg:top-10 lg:left-24 sm:w-28 md:w-32 lg:w-40 xl:w-48 sm:h-28 md:h-32 lg:h-40 xl:h-48 z-[-1]"
       />
 
       <div className="relative flex justify-center w-full">
@@ -57,7 +68,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="absolute top-[95%] sm:top-[93%] md:top-[90%] lg:top-[59%] w-full sm:w-[80%] lg:w-auto z-20"
+          className="absolute top-[110%] xxs:top-[100%] xs:top-[95%] sm:top-[93%] md:top-[90%] lg:top-[59%] w-full sm:w-[80%] lg:w-auto z-20"
         />
 
         <motion.img
@@ -84,33 +95,66 @@ const HeroSection = () => {
       </div>
 
       <motion.img
-        src="/assets/home/banner/Online zoom meeting of several people.png"
-        alt="people-icon"
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.5 }}
-        className="absolute right-2 sm:right-10 md:right-16 lg:right-20 xl:right-24 
-             top-[45%] sm:top-1/4 md:top-1/3 lg:top-1/3 xl:top-30 
-             w-[60px] md:w-[80px] lg:w-[100px] xl:w-[120px] 
-             max-w-full h-auto"
+        src="/assets/home/homepage fillers/planet 1.png"
+        alt="planet-one"
+        initial={{ scale: 0.8, rotate: 0 }}
+        animate={{
+          scale: [0.9, 1, 0.9],
+          y: [-10, 10, -10],
+          rotate: [0, 5, -5, 0],
+        }}
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "mirror",
+        }}
+        className="absolute right-2 sm:right-24 md:right-36 lg:right-40 xl:right-[15rem]
+  top-[45%] sm:top-1/4 md:top-1/3 lg:top-1/3 xl:top-30
+  w-[100px] md:w-[120px] lg:w-[160px] xl:w-[220px]
+  max-w-full h-auto"
       />
 
       <motion.img
-        src="/assets/home/banner/Blue smartphone's screen with online meeting.png"
-        alt="people-icon"
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
-        className="absolute bottom-1/2 left-5 sm:left-auto right-10 xl:right-40 md:right-0 md:bottom-1/5 lg:bottom-40 w-20 sm:w-24 md:w-36 lg:w-auto"
+        src="/assets/home/homepage fillers/planet 4.png"
+        alt="planet-four"
+        initial={{ scale: 0.9 }}
+        animate={{
+          scale: [1, 1.05, 1],
+          x: [0, 10, -10, 0],
+          rotate: [-5, 5, -5],
+        }}
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "mirror",
+        }}
+        className="absolute bottom-1/2 left-5 sm:left-auto right-10 xl:right-40 md:right-0 md:bottom-1/5 lg:bottom-26 xl:bottom-32 w-32 sm:w-20 md:w-28 xl:w-48"
       />
 
       <motion.img
-        src="/assets/home/banner/Figure → psyco.png.png"
-        alt="people-icon"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.7 }}
-        className="absolute bottom-40 left-10 lg:bottom-20 lg:left-0 hidden sm:block sm:w-48 lg:w-auto"
+        src="/assets/home/homepage fillers/crafted illustrations.png"
+        alt="sun-illustration"
+        className="absolute bottom-72 left-10 md:bottom-48 md:lg-12 lg:left-16 lg:bottom-56 xl:left-72 hidden sm:block sm:w-32 md:w-40 lg:w-48 xl:w-56"
+      />
+
+      <motion.img
+        src="/assets/home/homepage fillers/planet 3.png"
+        alt="planet-three"
+        initial={{ scale: 0.9 }}
+        animate={{
+          scale: [1, 1.05, 1],
+          y: [-15, 15, -15],
+          rotate: [0, 5, -5, 0],
+        }}
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "mirror",
+        }}
+        className="absolute bottom-40 right-5 lg:bottom-1/3 lg:right-0 hidden sm:block sm:w-28 md:w-36 lg:w-40 xl:w-48"
       />
     </motion.section>
   );

@@ -108,7 +108,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
           initial={{ y: -20, opacity: 0 }}
           animate={isInView ? { y: 0, opacity: 1 } : {}}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="absolute -top-5 left-1/3 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-blue-700 px-3 py-1.5 rounded-md shadow-lg border border-blue-800 z-20"
+          className="absolute -top-5 left-1/3 -translate-x-1/2 bg-gradient-to-r from-blue-400 to-blue-500 px-3 py-1.5 rounded-md shadow-lg border border-blue-800 z-20"
         >
           <h1 className="text-xs font-medium flex items-center gap-2 text-white">
             Recommended Plan <FaStar className="text-yellow-400" />
@@ -132,7 +132,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
               ₹{membership.price}
               <span className="text-sm text-gray-500"> / annum</span>
             </strong>
-            <p className="text-xs md:text-sm font-medium text-gray-500">
+            <p className="text-xs md:text-sm font-medium text-green-500">
               (~₹{(membership.price / 12).toFixed(0)} per month)
             </p>
           </div>
@@ -180,8 +180,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
             className={`px-4 py-1.5 text-white text-sm rounded-md transition-all duration-300 shadow-md 
             ${
               membership.type === "Platinum"
-                ? "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
-                : "bg-gray-500 hover:bg-gray-600"
+                ? "bg-orange-500 hover:from-orange-300 hover:to-orange-800"
+                : "bg-orange-500 hover:bg-orange-900"
             }`}
             onClick={() => handleMembership(membership)}
           >

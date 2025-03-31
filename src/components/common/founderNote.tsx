@@ -33,7 +33,7 @@ const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
 
           <div className="flex justify-center">
             <img
-              src="/assets/common/founder/image 28.png"
+              src="/assets/home/homepage fillers/sir Illustration.png"
               alt="founder image"
               className="rounded-lg shadow-lg max-w-xs w-50 h-50"
             />
