@@ -94,6 +94,25 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
             alt={productDetails.title}
             className="object-contain w-full h-full"
           />
+          <div className="absolute top-1 right-1">
+            {(productDetails?.title ===
+              "Conversation Starter Cards (6-12) years" ||
+              productDetails?.title === "Silent Stories (6-12) years") &&
+              productDetails?.ageCategory === "6-12" && (
+                <a
+                  href={`${
+                    productDetails?.title ===
+                    "Conversation Starter Cards (6-12) years"
+                      ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
+                      : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
+                  }`}
+                  download
+                  className="bg-green-200 text-green-700 border border-green-300 px-2 py-1 hover:opacity-55 rounded-xl ml-4 transition-all duration-200 text-xs  shadow-lg"
+                >
+                  Download Free Sample
+                </a>
+              )}
+          </div>
         </div>
 
         <div className="p-4 flex flex-col flex-grow">
@@ -101,6 +120,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
             <h3 className="text-lg font-semibold line-clamp-1">
               {productDetails.title}
             </h3>
+
             <span className="text-primary font-bold">
               ₹{productDetails.price}
             </span>
@@ -146,6 +166,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
 };
 
 export default ProductCard;
+//Should i add free Sample tag int he
 
 const Rating = ({ ratings }: { ratings: number }) => {
   return (

@@ -60,8 +60,8 @@ export const fetchProducts = createAsyncThunk<
 
     try {
       const response = await axios.get<{ data: ProductBase[]; total: number }>(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
-        // "http://localhost:4000/api/v1/products",
+        // "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+        "http://localhost:4000/api/v1/products",
 
         {
           params: {
