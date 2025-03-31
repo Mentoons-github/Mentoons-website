@@ -29,7 +29,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         orderId: `#ORD-${Date.now()}`,
         // totalAmount: membership.price,
         // amount: membership.price,
-        totalAmount: 1, //remove it 
+        totalAmount: 1,
         amount: 1,
         currency: "INR",
         productInfo: `Mentoons ${membership.type} Membership`,
@@ -44,7 +44,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         items: [
           {
             name: membership.type,
-            price: membership.price,
+            // price: membership.price,
+            price: 1,
             quantity: 1,
           },
         ],
