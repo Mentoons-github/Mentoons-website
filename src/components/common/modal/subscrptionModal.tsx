@@ -117,6 +117,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showRenewalDate: true,
           showPaymentMethod: true,
           showManageButton: true,
+          additionalText: "",
         };
       case "CANCELLED":
       case "CANCELED":
@@ -143,6 +144,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showRenewalDate: false,
           showPaymentMethod: false,
           showManageButton: false,
+          additionalText:
+            "Your subscription has been cancelled. You can resubscribe at any time to restore your premium benefits.",
         };
       case "ABORTED":
         return {
@@ -168,6 +171,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showRenewalDate: false,
           showPaymentMethod: false,
           showManageButton: false,
+          additionalText:
+            "Your subscription process was aborted. Please try again or contact customer support if you continue to experience issues.",
         };
       case "FAILURE":
       case "ERROR":
@@ -195,6 +200,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showRenewalDate: false,
           showPaymentMethod: false,
           showManageButton: false,
+          additionalText:
+            "We couldn't process your payment. Please check your payment details and try again, or contact your bank for assistance.",
         };
       case "UNKNOWN":
       default:
@@ -221,6 +228,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showRenewalDate: false,
           showPaymentMethod: false,
           showManageButton: false,
+          additionalText: "",
         };
     }
   };
@@ -291,6 +299,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     •••• •••• •••• 4242
                   </p>
                 </div>
+              </div>
+            )}
+
+            {statusInfo.additionalText && (
+              <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-800 dark:text-gray-200">
+                  {statusInfo.additionalText}
+                </p>
               </div>
             )}
           </div>
