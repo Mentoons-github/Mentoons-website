@@ -58,17 +58,32 @@ const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
             </h4>
             <div className="flex gap-4 pt-5">
               {[
-                { icon: <FaFacebookF />, label: "Facebook" },
-                { icon: <FaLinkedinIn />, label: "LinkedIn" },
-                { icon: <BiLogoInstagramAlt />, label: "Instagram" },
+                {
+                  icon: <FaFacebookF />,
+                  label: "Facebook",
+                  url: "https://facebook.com",
+                },
+                {
+                  icon: <FaLinkedinIn />,
+                  label: "LinkedIn",
+                  url: "https://linkedin.com/in/metalmahesh",
+                },
+                {
+                  icon: <BiLogoInstagramAlt />,
+                  label: "Instagram",
+                  url: "https://www.instagram.com/toonmentoons",
+                },
               ].map((social, index) => (
-                <div
+                <a
                   key={index}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-12 h-12 flex items-center justify-center bg-[#EC9600] text-white text-2xl rounded-full transition-all duration-300 hover:bg-[#c77f00] shadow-md"
                   aria-label={social.label}
                 >
                   {social.icon}
-                </div>
+                </a>
               ))}
             </div>
           </div>

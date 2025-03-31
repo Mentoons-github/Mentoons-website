@@ -10,10 +10,16 @@ const Membership = () => {
   return (
     <section className="relative p-6 md:p-10 flex flex-col justify-center overflow-hidden items-center bg-white">
       <motion.div
-        className="absolute -top-[25%] -left-[10%] translate-x-[25%] translate-y-[33%] w-[500px] h-[500px] bg-[#FFF4CC] rounded-full"
+        className="absolute -top-[25%] -left-[10%] translate-x-[25%] translate-y-[33%] w-[500px] h-[500px] bg-yellow-200 rounded-full"
         animate={{ y: [0, 15, 0], scale: [1, 1.1, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-      />
+      >
+        <motion.img
+          src="/assets/home/homepage fillers/klement Homepage Illustration.png"
+          alt="klement"
+          className="absolute top-2/4 right-0 w-[20rem]"
+        />
+      </motion.div>
 
       <motion.div
         className="absolute top-[40%] -left-[3%] w-32 h-32 bg-[#FFD89C] rounded-full shadow-[inset_-1px_-5px_7px_rgba(0,0,0,0.2)]"
@@ -64,7 +70,7 @@ const Membership = () => {
       />
 
       <motion.div
-        className="absolute -bottom-[20%] -right-[5%] translate-y-[5%] w-[28%] h-[40%] bg-[#FF9C33] rounded-full"
+        className="absolute -bottom-[20%] -right-[5%] translate-y-[5%] w-[28%] h-[40%] bg-yellow-200 rounded-full"
         animate={{ y: [0, 14, 0], rotate: [-4, 4, -4] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
       />
