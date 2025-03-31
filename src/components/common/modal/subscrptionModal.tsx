@@ -93,7 +93,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const getStatusInfo = () => {
     switch (status.toUpperCase()) {
-      case "Success":
+      case "SUCCESS":
         return {
           statusText: "Active",
           statusColor: "text-green-600 dark:text-green-500",
@@ -118,7 +118,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showPaymentMethod: true,
           showManageButton: true,
         };
-      case "Cancelled":
+      case "CANCELLED":
       case "CANCELED":
         return {
           statusText: "Cancelled",
@@ -144,7 +144,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showPaymentMethod: false,
           showManageButton: false,
         };
-      case "Aborted":
+      case "ABORTED":
         return {
           statusText: "Aborted",
           statusColor: "text-amber-600 dark:text-amber-500",
@@ -169,9 +169,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showPaymentMethod: false,
           showManageButton: false,
         };
-      case "Failure":
+      case "FAILURE":
       case "ERROR":
-      case "Invalid":
+      case "INVALID":
         return {
           statusText: "Failed",
           statusColor: "text-red-600 dark:text-red-500",
@@ -196,7 +196,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           showPaymentMethod: false,
           showManageButton: false,
         };
-      case "Unknown":
+      case "UNKNOWN":
       default:
         return {
           statusText: "Unknown",
