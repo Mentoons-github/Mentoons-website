@@ -78,7 +78,9 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({
             <IoClose className="text-2xl" />
           </button>
         </div>
-        <h1 className="text-4xl text-black py-4">Thank You for Subscribing to our Newsletter</h1>
+        <h1 className="text-4xl text-black  text-center py-6">
+          Thank You for Subscribing to our Newsletter
+        </h1>
         <div className="w-[80%] mx-auto text-neutral-600 font-normal  text-xl text-center leading-2 ">
           <p>{message}</p>
         </div>

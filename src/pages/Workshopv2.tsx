@@ -1,5 +1,5 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
-import RegirstrationModal from "@/components/modals/RegirstrationModal";
+import RegirstrationModal from "@/components/modals/RegistrationModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ, WORKSHOP_MATTERS_POINTS, WORKSHOPS } from "@/constant";
 import { ModalMessage, workshop } from "@/utils/enum";
@@ -729,7 +729,7 @@ const Workshopv2 = () => {
       {showRegistrationModal && (
         <RegirstrationModal
           onClose={() => setShowRegistrationModal(false)}
-          isOpen={showEnquiryModal}
+          isOpen={showRegistrationModal}
           message={ModalMessage.ENQUIRY_MESSAGE}
           regirsterFor={
             selecteCategory === "6-12"

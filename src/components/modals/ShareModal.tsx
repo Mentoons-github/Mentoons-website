@@ -95,7 +95,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, link }) => {
         </p>
         <div className="mt-3 flex space-x-3">
           <a
-            href={`https://www.facebook.com/profile.php?id=100078693769495`}
+            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+              "https://www.facebook.com/profile.php?id=100078693769495"
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2  bg-blue-100 border border-blue-200 rounded-lg"
@@ -103,7 +105,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, link }) => {
             <FaFacebook className="text-blue-600 text-3xl " />
           </a>
           <a
-            href={`https://wa.me/+919036033300`}
+            href={
+              "https://api.whatsapp.com/send?text=Check%20out%20Mentoons%20on%20Facebook:%20https://www.facebook.com/profile.php?id=100078693769495"
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="p-2  bg-green-100  border border-green-200 rounded-lg"
@@ -111,7 +115,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, link }) => {
             <FaWhatsapp className="text-green-600 text-3xl" />
           </a>
           <a
-            href={`https://www.linkedin.com/company/mentoons`}
+            href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+              "https://www.linkedin.com/company/mentoons"
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 bg-blue-100 border border-blue-200 rounded-lg"

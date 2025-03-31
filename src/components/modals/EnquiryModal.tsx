@@ -78,7 +78,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({
             <IoClose className="text-2xl" />
           </button>
         </div>
-        <h1 className="text-4xl text-black py-4">Thank You</h1>
+        <h1 className="text-4xl text-black py-6 text-center">Thank You</h1>
         <div className="w-[80%] mx-auto text-neutral-600 font-normal  text-xl text-center leading-2 ">
           <p>{message}</p>
         </div>

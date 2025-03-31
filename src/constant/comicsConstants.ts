@@ -58,7 +58,7 @@ export const gamesData: GamesData[] = [
     thumbnail_url:
       "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/board-games/thumbnail/emergency+numbers.png",
     pdf_url:
-      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/board-games/pdf/emergency++contact+numbers.pdf",
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/emergency++contact+numbers.pdf",
   },
 ];
 
