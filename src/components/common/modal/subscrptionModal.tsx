@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -18,11 +19,30 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const renewalDate = new Date();
   renewalDate.setFullYear(renewalDate.getFullYear() + 1);
   const navigate = useNavigate();
+  const { user } = useUser();
   const formattedRenewalDate = renewalDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
   });
+
+  useEffect(() => {
+    const updateMembership = async () => {
+      if (status.toLowerCase() === "success" && user) {
+        try {
+          await user.update({
+            publicMetadata: {
+              membershipType: subscriptionType.toLowerCase(),
+            },
+          } as any);
+        } catch (error) {
+          console.error("Error updating membership:", error);
+        }
+      }
+    };
+
+    updateMembership();
+  }, [status, user]);
 
   useEffect(() => {
     if (open) {
