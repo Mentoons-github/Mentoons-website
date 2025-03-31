@@ -1,5 +1,5 @@
-import Store from "./Store";
 
+import Store from "./Store";
 const MentoonsStore = () => {
   return (
     <Store />

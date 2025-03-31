@@ -1,4 +1,5 @@
 import { RootState } from "@/redux/store";
+import { ORDER_TYPE } from "@/utils/enum";
 
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -123,6 +124,7 @@ const OrderSummary: React.FC = () => {
       totalAmount,
       amount: totalAmount, // Duplicate amount field as per schema
       currency: formData.currency,
+      order_type: ORDER_TYPE.PRODUCT_PURCHASE,
 
       // Additional required fields from schema
       productInfo: productInfo,

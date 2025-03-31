@@ -31,7 +31,7 @@
 //   //   "Don't Fade Away",
 //   //   "Hungry For Likes not Life",
 //   //   "Choose Wisely",
-//   // ];
+//   // ];;
 //   const companyImg = [
 //     { image: "/activeListeners.png", url: "https://www.activelisteners.in/" },
 //     { image: "/toonland.png", url: "https://toonland.in/" },
@@ -574,10 +574,14 @@ import {
   SiWhatsapp,
   SiYoutube,
 } from "react-icons/si";
+
+import { ModalMessage } from "@/utils/enum";
+import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
+import NewsletterModal from "../modals/NewsletterModal";
 import MapComponent from "./MapComponent";
 
 interface ApiResponse {
@@ -599,6 +603,7 @@ const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ maxWidth: 767 });
+  const [showNewletterModal, setShowNewsletterModal] = useState(false);
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, resetForm }: FormikHelpers<FormValues>
@@ -614,7 +619,7 @@ const Footer = () => {
       // The data from the response is in response.data
       const res: ApiResponse = response.data;
       if (res.success) {
-        toast(`✅ ${res.message}`);
+        setShowNewsletterModal(true);
       } else {
         throw new Error("Something went wrong");
       }
@@ -655,9 +660,7 @@ const Footer = () => {
       return;
     }
 
-
     //uncomment it==================>
-
 
     // sessionStorage.setItem("scrollToLabel", label);
 
@@ -670,6 +673,7 @@ const Footer = () => {
       if (location.pathname !== path) {
         // First navigate to the path
         navigate(path);
+        // document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
         setTimeout(() => {
           if (element) {
             const yOffset = -80;
@@ -872,6 +876,13 @@ const Footer = () => {
           </div>
         ))}
       </div>
+      {showNewletterModal && (
+        <NewsletterModal
+          isOpen={showNewletterModal}
+          onClose={() => setShowNewsletterModal(false)}
+          message={ModalMessage.NEWSLETTER_MESSAGE}
+        />
+      )}
     </footer>
   );
 };

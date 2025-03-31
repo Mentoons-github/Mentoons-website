@@ -1,5 +1,8 @@
+import EnquiryModal from "@/components/modals/EnquiryModal";
+import RegirstrationModal from "@/components/modals/RegirstrationModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ, WORKSHOP_MATTERS_POINTS, WORKSHOPS } from "@/constant";
+import { ModalMessage, workshop } from "@/utils/enum";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -21,6 +24,10 @@ const Workshopv2 = () => {
   const handleSelectedCategory = (category: string) => {
     setSelectedCategory(category);
   };
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+
+  const [enquiryMessag, setEquiryMessage] = useState("");
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
@@ -62,6 +69,7 @@ const Workshopv2 = () => {
       );
       if (workshopRegistrationResponse.status === 200) {
         toast.success("Registration Successful");
+        setShowRegistrationModal(true);
       } else {
         toast.error("Registration Failed");
       }
@@ -162,6 +170,24 @@ const Workshopv2 = () => {
     triggerOnce: true,
   });
   const [faqRef, faqInView] = useInView({ threshold: 0.2, triggerOnce: true });
+
+  const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const queryResponse = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/query", // Fixed the endpoint URL
+        {
+          message: enquiryMessag,
+        }
+      );
+      console.log(queryResponse);
+      if (queryResponse.status === 201) {
+        setShowEnquiryModal(true);
+      }
+    } catch (error) {
+      toast.error("Failed to submit message");
+    }
+  };
 
   return (
     <div>
@@ -664,10 +690,15 @@ const Workshopv2 = () => {
                       </p>
                     </div>
                     <div className="">
-                      <form action=" w-full flex flex-col gap-10">
+                      <form
+                        className=" w-full flex flex-col gap-10"
+                        onSubmit={(e) => handleDoubtSubmission(e)}
+                      >
                         <textarea
                           name="doubt"
                           id="doubt"
+                          value={enquiryMessag}
+                          onChange={(e) => setEquiryMessage(e.target.value)}
                           placeholder="Enter your doubt here"
                           className="box-border w-full p-3 rounded-lg shadow-xl"
                           style={{
@@ -694,6 +725,29 @@ const Workshopv2 = () => {
             </motion.div>
           </div>
         )
+      )}
+      {showRegistrationModal && (
+        <RegirstrationModal
+          onClose={() => setShowRegistrationModal(false)}
+          isOpen={showEnquiryModal}
+          message={ModalMessage.ENQUIRY_MESSAGE}
+          regirsterFor={
+            selecteCategory === "6-12"
+              ? workshop.BUDDY_CAMP
+              : selecteCategory === "13-19"
+              ? workshop.TEEN_CAMP
+              : selecteCategory === "20+"
+              ? workshop.CAREER_CORNER
+              : ""
+          }
+        />
+      )}
+      {showEnquiryModal && (
+        <EnquiryModal
+          isOpen={showEnquiryModal}
+          onClose={() => setShowEnquiryModal(false)}
+          message={ModalMessage.ENQUIRY_MESSAGE}
+        />
       )}
     </div>
   );

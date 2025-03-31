@@ -20,14 +20,14 @@ import PaymentStatusPage from "./pages/PaymentStatusPage";
 // import PodCast from "./pages/PodCast.tsx";
 import PolicyPage from "./pages/PolicyPage";
 import ProductDetails from "./pages/ProductDetails";
-import ProductManagement from "./pages/ProductManagement.tsx";
+// import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import Assessment from "./pages/v2/user/assessment.tsx";
+import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
 import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import Assessment from "./pages/v2/user/assessment.tsx";
-import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -61,7 +61,7 @@ const routes = [
   { path: "/website-plans", element: <Plans /> },
   { path: "/mentoons-store", element: <MentoonsStore /> },
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
-  { path: "/product-management", element: <ProductManagement /> },
+  // { path: "/product-management", element: <ProductManagement /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   { path: "/membership", element: <Membership /> },

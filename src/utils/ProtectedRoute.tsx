@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuthHook } from "@/hooks/useAuth";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useAuthHook } from "@/hooks/useAuth";
+import React, { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 // import MiniLogo from "@/assets/imgs/logo mini.png";
 import { useDailyAccess } from "@/hooks/useRestricted";
 

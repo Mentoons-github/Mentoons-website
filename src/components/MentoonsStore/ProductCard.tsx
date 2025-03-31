@@ -8,8 +8,10 @@ import { IoIosCart } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import AddToCartModal from "../modals/AddToCartModal";
 
 const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
   const navigate = useNavigate();
@@ -48,8 +50,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           })
         );
         if (response.payload) {
-          toast.success(" Item Added to cart");
-          navigate("/cart");
+          setShowAddToCartModal(true);
         }
         setIsLoading(false);
       } else {
@@ -133,6 +134,13 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           </div>
         </div>
       </motion.div>
+      {showAddToCartModal && (
+        <AddToCartModal
+          onClose={() => setShowAddToCartModal(false)}
+          isOpen={showAddToCartModal}
+          productName={productDetails.title}
+        />
+      )}
     </div>
   );
 };

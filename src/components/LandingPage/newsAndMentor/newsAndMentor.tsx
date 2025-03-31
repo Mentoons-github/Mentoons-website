@@ -1,8 +1,11 @@
 import axiosInstance from "@/api/axios";
 import FounderNote from "@/components/common/founderNote";
+import NewsletterModal from "@/components/modals/NewsletterModal";
 import useInView from "@/hooks/useInView";
+import { ModalMessage } from "@/utils/enum";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 import { toast } from "sonner";
 import * as Yup from "yup";
@@ -23,6 +26,7 @@ const validationSchema = Yup.object({
 });
 const NewsAndMentor = () => {
   const { ref: sectionRef, isInView } = useInView(0.3, false);
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, resetForm }: FormikHelpers<FormValues>
@@ -38,7 +42,7 @@ const NewsAndMentor = () => {
       // The data from the response is in response.data
       const res: ApiResponse = response.data;
       if (res.success) {
-        toast(`✅ ${res.message}`);
+        setShowNewsletterModal(true);
       } else {
         throw new Error("Something went wrong");
       }
@@ -164,6 +168,13 @@ const NewsAndMentor = () => {
           className="pt-5 rounded-xl border-none shadow-xl"
         />
       </motion.div>
+      {showNewsletterModal && (
+        <NewsletterModal
+          isOpen={showNewsletterModal}
+          onClose={() => setShowNewsletterModal(false)}
+          message={ModalMessage.NEWSLETTER_MESSAGE}
+        />
+      )}
     </motion.section>
   );
 };

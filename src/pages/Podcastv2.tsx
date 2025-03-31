@@ -1,9 +1,11 @@
+import EnquiryModal from "@/components/modals/EnquiryModal";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import {
   PODCAST_DETAILS,
   PODCAST_OFFERINGS,
   PODCAST_V2_CATEGORY,
 } from "@/constant";
+import { ModalMessage } from "@/utils/enum";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -32,6 +34,7 @@ const Podcastv2 = () => {
   );
 
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const handleScroll = () => {
     const carousel = carouselRef.current;
     if (carousel) {
@@ -71,7 +74,7 @@ const Podcastv2 = () => {
       );
       console.log(queryResponse);
       if (queryResponse.status === 201) {
-        toast.success("Message Submitted Successfully");
+        setShowEnquiryModal(true);
       }
     } catch (error) {
       toast.error("Failed to submit message");
@@ -323,43 +326,18 @@ const Podcastv2 = () => {
 
                         <div className="p-4 rounded-xl border backdrop-blur-sm audio-player bg-white/10 border-white/20">
                           <audio
-                            controlsList="nodownload"
                             className="w-full"
-                            src={
-                              filteredPodcast[currentPodcastIndex]
-                                ?.audioPodcastSrc || "#"
-                            }
-                            ref={(audio) => {
-                              if (audio) {
-                                if (!isSignedIn) {
-                                  // Not logged in users get 45 seconds
-                                  setTimeout(() => {
-                                    audio.pause();
-                                    audio.currentTime = 0;
-                                    setPlayingPodcastId(null);
-                                    setShowMembershipModal(true);
-                                  }, 45000);
-                                } else {
-                                  // Check if user has a free membership
-                                  const hasPaidMembership =
-                                    user?.publicMetadata?.membershipType &&
-                                    user.publicMetadata.membershipType !==
-                                      "free";
-
-                                  if (!hasPaidMembership) {
-                                    // Free members get 45 seconds
-                                    setTimeout(() => {
-                                      audio.pause();
-                                      audio.currentTime = 0;
-                                      setPlayingPodcastId(null);
-                                      setShowMembershipModal(true);
-                                    }, 45000);
-                                  }
-                                  // Paid members get full audio
-                                }
-                              }
-                            }}
+                            controls
+                            controlsList="nodownloads
+                          "
                           >
+                            <source
+                              src={
+                                filteredPodcast[currentPodcastIndex]
+                                  ?.audioPodcastSrc || "#"
+                              }
+                              type="audio/mpeg"
+                            />
                             Your browser does not support the audio element.
                           </audio>
                         </div>
@@ -953,6 +931,13 @@ const Podcastv2 = () => {
             </a>
           </div>
         </div>
+      )}
+      {showEnquiryModal && (
+        <EnquiryModal
+          isOpen={showEnquiryModal}
+          onClose={() => setShowEnquiryModal(false)}
+          message={ModalMessage.ENQUIRY_MESSAGE}
+        />
       )}
     </>
   );
