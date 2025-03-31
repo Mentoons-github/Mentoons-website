@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
-
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+
 interface AddToCartModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +14,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
   productName,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,6 +58,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
 
   const handleClick = () => {
     onClose();
+    navigate("/cart");
   };
   return (
     <div
