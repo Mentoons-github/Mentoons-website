@@ -25,11 +25,11 @@ const MythosHeader = () => {
 
   return (
     <header
-      className={`w-full p-2 bg-[#E39712] z-50 ${
+      className={`w-full p-5 bg-[#E39712] z-50 font-akshar ${
         isScrolled ? "fixed top-0 left-0 shadow-lg" : "relative"
       }`}
     >
-      <nav className="max-w-full px-6 md:px-10 flex justify-between items-center">
+      <nav className="max-w-full px-2 space-x-4 md:space-x-0 sm:px-6 md:px-10 flex justify-between items-center">
         <ul className="hidden lg:flex items-center gap-6 xl:gap-8 mulish text-white">
           {headerText.map((text, index) => (
             <li
@@ -47,13 +47,15 @@ const MythosHeader = () => {
           ))}
         </ul>
 
-        <Link to="/" className="absolute left-1/2 transform -translate-x-1/2">
-          <img
-            src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png "
-            alt="company logo"
-            className="w-[120px] md:w-[130px] lg:w-[150px] mx-auto"
-          />
-        </Link>
+        <div className="flex-1 flex justify-center md:justify-center">
+          <Link to="/">
+            <img
+              src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+              alt="company logo"
+              className="w-[100px] sm:w-[120px] md:w-[140px] lg:w-[160px] xl:w-[180px]"
+            />
+          </Link>
+        </div>
 
         <div className="flex items-center gap-3 sm:gap-5">
           <motion.button
@@ -87,7 +89,7 @@ const MythosHeader = () => {
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
             aria-label="View more"
-            className="flex justify-center items-center rounded-full w-10 h-10 sm:w-12 sm:h-12 outline-dashed outline-2 outline-gray-600 cursor-pointer"
+            className="hidden md:flex justify-center items-center rounded-full w-10 h-10 sm:w-12 sm:h-12 outline-dashed outline-2 outline-gray-600 cursor-pointer"
           >
             <img
               src="/assets/mythos/icons/Vector (2).png"

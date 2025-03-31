@@ -36,18 +36,18 @@ const Contests = () => {
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden p-4">
       <div className="flex flex-col items-center gap-6">
         {CONSTESTS.length > 0 ? (
           CONSTESTS.map(({ image, title, text, url, comingSoon }, index) => (
             <div
-              className="flex w-full max-w-4xl items-center justify-between border-b pb-6 gap-6 bg-blue-200 bg-opacity-50 p-4"
+              className="flex flex-col md:flex-row w-full max-w-4xl items-center justify-between border-b pb-6 gap-6 bg-blue-200 bg-opacity-50 p-4 rounded-lg shadow-sm"
               key={index}
             >
-              <div className="flex flex-col gap-4 flex-1 text-left">
+              <div className="flex flex-col gap-4 flex-1 text-center md:text-left">
                 <h1 className="text-lg font-semibold">{title}</h1>
                 <button
-                  className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-42"
+                  className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-full md:w-42"
                   onClick={() => {
                     if (comingSoon) {
                       setSoon(true);
@@ -63,11 +63,11 @@ const Contests = () => {
                   {text}
                 </button>
               </div>
-              <div className="flex justify-end bg-white">
+              <div className="flex justify-center md:justify-end bg-white">
                 <img
                   src={image}
                   alt={title}
-                  className="w-[150px] h-[150px] object-cover rounded-lg shadow-md"
+                  className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] object-cover rounded-lg shadow-md"
                 />
               </div>
             </div>

@@ -57,7 +57,7 @@ const NewsAndMentor = () => {
   return (
     <motion.section
       ref={sectionRef}
-      className="w-full flex flex-col lg:flex-row justify-between lg:justify-start items-center gap-10 py-10 px-5 lg:px-0 bg-[#F2C6DE]"
+      className="w-full flex flex-col lg:flex-row justify-between lg:justify-start items-center gap-10 py-10 px-5 lg:px-0 bg-gradient-to-r from-green-300 to-emerald-400"
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : { opacity: 0 }}
       exit={{ opacity: 0 }}
