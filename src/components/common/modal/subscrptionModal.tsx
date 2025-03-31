@@ -19,6 +19,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const renewalDate = new Date();
   renewalDate.setFullYear(renewalDate.getFullYear() + 1);
   const navigate = useNavigate();
+  console.log("status recieved : ", status);
   const { user } = useUser();
   const formattedRenewalDate = renewalDate.toLocaleDateString("en-US", {
     month: "long",

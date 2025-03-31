@@ -40,6 +40,8 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
     }
   }, [searchParams]);
 
+  console.log("statusData Recieved : ", statusData);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
