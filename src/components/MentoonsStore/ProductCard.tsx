@@ -70,7 +70,6 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
       setIsLoading(false);
       return;
     }
-    // handleAddtoCart(event)
     navigate("/order-summary", { state: productDetail });
   };
 
