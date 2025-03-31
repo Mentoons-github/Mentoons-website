@@ -71,7 +71,7 @@ const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
                 {
                   icon: <BiLogoInstagramAlt />,
                   label: "Instagram",
-                  url: "https://facebook.com",
+                  url: "https://www.instagram.com/toonmentoons",
                 },
               ].map((social, index) => (
                 <a
