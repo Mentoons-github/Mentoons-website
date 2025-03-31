@@ -2,16 +2,44 @@ import MembershipModal from "@/components/common/modal/membershipModal";
 import { CONSTESTS } from "@/constant/constants";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ComingSoonModal from "@/components/common/ComingSoonModal";
+import { useAuth } from "@clerk/clerk-react";
+import { toast } from "sonner";
 
 const Contests = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [soon, setSoon] = useState(false);
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
+
+  const handleClick = async (url: string | string[]) => {
+    const token = await getToken();
+
+    if (!token) {
+      toast.error("Please login to Download");
+      return;
+    }
+
+    const urls = Array.isArray(url) ? url : [url];
+
+    urls.forEach((fileUrl) => {
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.target = "_blank";
+      link.download = fileUrl.split("/").pop() || "download.pdf";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  };
 
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div className="flex flex-col items-center gap-6">
         {CONSTESTS.length > 0 ? (
-          CONSTESTS.map(({ image, title, text }, index) => (
+          CONSTESTS.map(({ image, title, text, url, comingSoon }, index) => (
             <div
               className="flex w-full max-w-4xl items-center justify-between border-b pb-6 gap-6 bg-blue-200 bg-opacity-50 p-4"
               key={index}
@@ -20,11 +48,17 @@ const Contests = () => {
                 <h1 className="text-lg font-semibold">{title}</h1>
                 <button
                   className="px-6 py-2 bg-yellow-400 text-black font-medium rounded-lg shadow-md hover:bg-yellow-500 transition-all w-42"
-                  onClick={
-                    text === "Apply"
-                      ? () => navigate("/hiring")
-                      : () => setIsModalOpen(true)
-                  }
+                  onClick={() => {
+                    if (comingSoon) {
+                      setSoon(true);
+                    } else if (text === "Apply") {
+                      navigate("/hiring");
+                    } else if (text === "Download" && url) {
+                      handleClick(url);
+                    } else {
+                      setIsModalOpen(true);
+                    }
+                  }}
                 >
                   {text}
                 </button>
@@ -45,6 +79,7 @@ const Contests = () => {
         )}
       </div>
       {isModalOpen && <MembershipModal onClose={() => setIsModalOpen(false)} />}
+      {soon && <ComingSoonModal setIsModalOpen={setSoon} />}
     </div>
   );
 };

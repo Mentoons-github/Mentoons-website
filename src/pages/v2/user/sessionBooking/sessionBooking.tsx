@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import BookedSession from "./bookedSession";
 import SessionBookingForm from "@/components/forms/sessionBooking";
 import { errorToast } from "@/utils/toastResposnse";
-import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 
 const SessionBooking: React.FC = () => {
@@ -17,8 +16,7 @@ const SessionBooking: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
 
-  const { getToken, userId } = useAuth();
-  const { user } = useUser();
+  const { getToken } = useAuth();
 
   const handleCancelBooking = (id: string): void => {
     setBookingToCancel(id);
@@ -50,91 +48,81 @@ const SessionBooking: React.FC = () => {
       const { name, email, phone, selectedDate, selectedTime, description } =
         values;
 
+      console.log(name, email, phone, selectedDate, selectedTime, description);
+
       const token = await getToken();
       if (!token) {
         toast.error("Please login to continue");
         return;
       }
 
-      const paymentData = {
-        orderId: `#ASM-${Date.now()}`,
-        totalAmount: 499,
-        amount: 499,
-        currency: "INR",
-        productInfo: "Mentoons One-On-One Session",
-        customerName:
-          user?.firstName && user?.lastName
-            ? `${user.firstName} ${user.lastName}`
-            : user?.fullName || "Unknown",
-        email: user?.emailAddresses?.[0]?.emailAddress || email,
-        phone: user?.phoneNumbers?.[0]?.phoneNumber || phone,
-        status: "PENDING",
-        user: userId,
-        items: [
-          {
-            name: "One-On-One Session",
-            price: 499,
-            quantity: 1,
-            date: selectedDate,
-            time: selectedTime,
-            description: description || "No additional details provided",
-          },
-        ],
-        orderStatus: "pending",
-        paymentDetails: {
-          paymentMethod: "credit_card",
-          paymentStatus: "initiated",
-        },
-        bookingDetails: {
-          name,
-          email,
-          phone,
-          date: selectedDate,
-          time: selectedTime,
-          description: description || "No additional details provided",
-        },
-        sameAsShipping: true,
-      };
-
-      console.log("Initiating payment with:", paymentData);
-
-      const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
-        paymentData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = response.data;
-
-      const form = tempDiv.querySelector("form");
-      if (form) {
-        document.body.appendChild(form);
-        form.submit();
-      } else {
-        throw new Error("Payment form not found in response");
-      }
-
-      // const newBooking: Booking = {
-      //   id: Date.now().toString(),
-      //   name,
-      //   email,
-      //   phone,
-      //   date: selectedDate,
-      //   time: selectedTime,
-      //   status: "Confirmed",
-      //   description: description || "No additional details provided",
+      // const paymentData = {
+      //   orderId: `#ASM-${Date.now()}`,
+      //   totalAmount: 499,
+      //   amount: 499,
+      //   currency: "INR",
+      //   productInfo: "Mentoons One-On-One Session",
+      //   customerName:
+      //     user?.firstName && user?.lastName
+      //       ? `${user.firstName} ${user.lastName}`
+      //       : user?.fullName || "Unknown",
+      //   email: user?.emailAddresses?.[0]?.emailAddress || email,
+      //   phone: user?.phoneNumbers?.[0]?.phoneNumber || phone,
+      //   status: "PENDING",
+      //   user: userId,
+      //   items: [
+      //     {
+      //       name: "One-On-One Session",
+      //       price: 499,
+      //       quantity: 1,
+      //       date: selectedDate,
+      //       time: selectedTime,
+      //       description: description || "No additional details provided",
+      //     },
+      //   ],
+      //   orderStatus: "pending",
+      //   paymentDetails: {
+      //     paymentMethod: "credit_card",
+      //     paymentStatus: "initiated",
+      //   },
+      //   bookingDetails: {
+      //     name,
+      //     email,
+      //     phone,
+      //     date: selectedDate,
+      //     time: selectedTime,
+      //     description: description || "No additional details provided",
+      //   },
+      //   sameAsShipping: true,
       // };
 
-      // setBookedCalls((prevBookings) => [...prevBookings, newBooking]);
-      // setBookedDates((prevDates) => [...prevDates, selectedDate]);
+      // console.log("Initiating payment with:", paymentData);
 
-      // toast.success("Booking confirmed! Proceed with the payment.");    make redux code here
+      // const response = await axios.post(
+      //   "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+      //   paymentData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   }
+      // );
+
+      // const tempDiv = document.createElement("div");
+      // tempDiv.innerHTML = response.data;
+
+      // const form = tempDiv.querySelector("form");
+      // if (form) {
+      //   document.body.appendChild(form);
+      //   form.submit();
+      // } else {
+      //   throw new Error("Payment form not found in response");
+      // }
+
+      toast.error(
+        "Psychologists are currently unavailable. Please try again later."
+      );
     } catch (error) {
       console.error("Payment error:", error);
       errorToast(

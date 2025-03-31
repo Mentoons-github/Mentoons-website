@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
+import { useUser } from "@clerk/clerk-react";
 
 const ComicsPageV2 = () => {
   const [selectedOption, setSelectedOption] = useState("e-comics");
@@ -19,6 +20,14 @@ const ComicsPageV2 = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
+  const { user } = useUser();
+
+  const membershipType = user?.publicMetadata?.membershipType || "free";
+
+  const maxComicsToRead = membershipType === "platinum" ? 5 : comicsData.length;
+  const accessibleComics = comicsData.slice(0, maxComicsToRead);
+
+  console.log(accessibleComics);
   // Add refs for scroll animations
   const heroRef = useRef(null);
   const trendingRef = useRef(null);

@@ -30,11 +30,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     const updateMembership = async () => {
       if (status.toLowerCase() === "success" && user) {
         try {
-          await user.update({
+          const userv = await user.update({
             publicMetadata: {
               membershipType: subscriptionType.toLowerCase(),
             },
           } as any);
+          console.log("membershipUpdated : ", userv);
         } catch (error) {
           console.error("Error updating membership:", error);
         }
