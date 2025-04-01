@@ -52,6 +52,7 @@ const OrderSummary: React.FC = () => {
     delivery_zip: "400038",
     delivery_country: "India",
     delivery_tel: "0123456789",
+    order_type: ORDER_TYPE.PRODUCT_PURCHASE,
     merchant_param1: "additional Info.",
     merchant_param2: "additional Info.",
     merchant_param3: "additional Info.",
@@ -94,18 +95,16 @@ const OrderSummary: React.FC = () => {
           productType: productDetail.productType || "merchandise",
         }
       : cart.items.map((item) => ({
-          product: item.productId, 
+          product: item.productId,
           quantity: item.quantity,
           price: item.price,
           productName: item.title,
-          productType: item.productType || "merchandise", 
+          productType: item.productType || "merchandise",
         }));
-
 
     const productInfo = productDetail
       ? `${productDetail.title} (1)`
       : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
-
 
     const totalAmount = productDetail
       ? productDetail.price

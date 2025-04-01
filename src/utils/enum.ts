@@ -38,7 +38,7 @@ export const workshop = {
 };
 
 export const ORDER_TYPE = {
-  PRODUCT_PURCHASE: "product_purcahse",
+  PRODUCT_PURCHASE: "product_purchase",
   SUBSCRIPTION_PURCHASE: "subscription_purchase",
   CONSULTANCY_PURCHASE: "consultancy_purchase",
   ASSESSMENT_PURCHASE: "assessment_purchase",
