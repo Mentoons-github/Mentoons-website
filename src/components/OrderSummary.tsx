@@ -19,6 +19,8 @@ const OrderSummary: React.FC = () => {
   const location = useLocation();
   const productDetail = location.state;
 
+  console.log("productDetail :", productDetail);
+
   const [formData] = useState({
     merchant_id: "3545043",
     order_id: `#ORD-${Date.now()}`,
@@ -83,36 +85,32 @@ const OrderSummary: React.FC = () => {
     e.preventDefault();
     const token = await getToken();
 
-    // Format cart items to match the orderItemSchema
     const formattedItems = productDetail
       ? {
-          product: productDetail.productId,
+          product: productDetail._id,
           quantity: 1,
           price: productDetail.price,
           productName: productDetail.title,
           productType: productDetail.productType || "merchandise",
         }
       : cart.items.map((item) => ({
-          product: item.productId, // Assuming productId maps to MongoDB _id
+          product: item.productId, 
           quantity: item.quantity,
           price: item.price,
           productName: item.title,
-          productType: item.productType || "merchandise", // Default to merchandise if type is not specified
+          productType: item.productType || "merchandise", 
         }));
 
-    // Concatenate product names for product info
+
     const productInfo = productDetail
       ? `${productDetail.title} (1)`
       : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
 
-    // const productIds = productDetail
-    //   ? productDetail.productId
-    //   : cart.items.map((item) => item.productId);
 
     const totalAmount = productDetail
       ? productDetail.price
       : cart.totalPrice || 0;
-    // Prepare complete order data according to the backend schema
+
     const orderData = {
       user: userId,
       items: formattedItems,
