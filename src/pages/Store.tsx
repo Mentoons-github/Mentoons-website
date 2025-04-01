@@ -430,6 +430,7 @@ const Store = () => {
         )}
         <div className="flex flex-col flex-1">
           <div className="overflow-hidden relative rounded-xl border group">
+            {/* This filter the the books product which dont have videos */}
             {products
               .filter(
                 (p) =>
