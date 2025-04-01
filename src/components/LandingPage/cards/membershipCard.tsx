@@ -60,7 +60,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       };
       console.log("subscriptionData", subscriptionData);
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate?type=subscrpition",
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate?type=subscription",
         subscriptionData,
         {
           headers: {
