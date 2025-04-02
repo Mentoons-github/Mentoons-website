@@ -20,14 +20,14 @@ const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
                 scroll ? "text-[#FF4500]" : "text-[#0C0A09]"
               }`}
             >
-              Mahesh
+              Mentor Mahesh
             </h1>
             <h2
               className={`text-2xl font-medium ${
                 scroll ? "text-[#008080]" : "text-[#131315]"
               }`}
             >
-              Founder & CEO
+              Mentoons Founder
             </h2>
           </div>
 

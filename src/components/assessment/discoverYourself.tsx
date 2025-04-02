@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import useInView from "@/hooks/useInView";
+import { NavLink } from "react-router-dom";
 
 const DiscoverYourself = () => {
   const { isInView, ref } = useInView(0.3, false);
@@ -42,13 +43,16 @@ const DiscoverYourself = () => {
   ];
 
   return (
-    <section ref={ref} className="w-full px-5 md:px-10 py-10 mt-10 space-y-6">
-      <div className="text-center md:text-left">
+    <section
+      ref={ref}
+      className="flex flex-col md:flex-row items-center w-full px-5 md:px-10 py-10 mt-10 space-y-10 md:space-y-0 md:space-x-10"
+    >
+      <div className="w-full md:w-2/3 flex flex-col items-center md:items-start text-center md:text-left">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-[#EC9600] font-medium text-4xl md:text-7xl"
+          className="text-[#EC9600] font-medium text-4xl md:text-6xl"
         >
           Discover Yourself
         </motion.h1>
@@ -56,46 +60,74 @@ const DiscoverYourself = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-          className="inter text-md md:text-xl text-[#0C0A09] mt-5 md:w-4/5 mx-auto md:mx-0"
+          className="inter text-md md:text-xl text-[#0C0A09] mt-5 max-w-lg md:max-w-none"
         >
           Uncover your unique traits, strengths, and preferences with our
           psychologist-designed personality assessments. Gain deeper
           self-awareness to make informed decisions, improve relationships, and
           unlock your full potential.
         </motion.p>
+        <div className="p-5 w-full mt-5 lg:mt-0">
+          <motion.h4
+            initial={{ opacity: 0, y: -20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            className="font-medium text-2xl md:text-[28px]"
+          >
+            What will you get with this assessment?
+          </motion.h4>
+          <ul className="flex flex-col justify-center md:justify-start items-center md:items-start gap-5 mt-5">
+            {assessmentBenefit.map((data, index) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -30 }}
+                animate={isInView ? { opacity: 1, x: 0 } : {}}
+                transition={{
+                  duration: 0.6,
+                  ease: "easeOut",
+                  delay: 0.2 * index,
+                }}
+                className="flex flex-col md:flex-row items-center md:items-start gap-4 inter"
+              >
+                {data.icon}
+                <p className="text-lg md:text-xl text-center md:text-left">
+                  {data.title && (
+                    <span className="font-semibold">{data.title}: </span>
+                  )}
+                  <span className="font-medium">{data.description}</span>
+                </p>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <div className="p-5">
-        <motion.h4
-          initial={{ opacity: 0, y: -20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
-          className="font-medium text-2xl md:text-[28px] text-center md:text-left"
-        >
-          What will you get with this assessment?
-        </motion.h4>
-        <ul className="flex flex-col justify-start items-center md:items-start gap-5 mt-5">
-          {assessmentBenefit.map((data, index) => (
-            <motion.li
-              key={index}
-              initial={{ opacity: 0, x: -30 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{
-                duration: 0.6,
-                ease: "easeOut",
-                delay: 0.2 * index,
-              }}
-              className="flex flex-col md:flex-row justify-center items-center md:items-start gap-4 inter text-center md:text-left"
+      <div className="w-full md:w-1/3 flex justify-center">
+        <div className="p-6 rounded-xl border border-black shadow-xl w-full max-w-md text-center">
+          <img
+            src="/assets/assesments/One one one call.png"
+            alt="book a call"
+            className="w-32 sm:w-40 mx-auto"
+          />
+          <h1 className="text-2xl sm:text-3xl font-semibold mt-3 font-akshar">
+            Book a <span className="text-[#EC9600]">one-on-one</span> Call with
+            us!
+          </h1>
+          <p className="text-sm mt-2 font-inter tracking-[0.3px]">
+            Want to find out a detailed report of your assessment and get the
+            right guidance? Book a one-on-one session with us!
+          </p>
+          <span className="block font-akshar text-[#EC9600] mt-2">
+            BOOK for Rs 499/hr
+          </span>
+          <div className="flex justify-center mt-4">
+            <NavLink
+              to="/bookings"
+              className="px-6 py-2 rounded-full bg-[#652D90] text-white font-roboto font-extrabold shadow-xl"
             >
-              {data.icon}
-              <p className="text-lg md:text-xl">
-                {data.title && (
-                  <span className="font-semibold">{data.title}: </span>
-                )}
-                <span className="font-medium">{data.description}</span>
-              </p>
-            </motion.li>
-          ))}
-        </ul>
+              Book A Call
+            </NavLink>
+          </div>
+        </div>
       </div>
     </section>
   );

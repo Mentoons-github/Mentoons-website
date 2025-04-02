@@ -26,7 +26,6 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      // Prevent scrolling when modal is open
       document.body.style.overflow = "hidden";
     }
 
@@ -36,7 +35,7 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  // Close on escape key press
+
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

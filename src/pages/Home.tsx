@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-import AddaSection from "@/components/LandingPage/addaSection";
+// import AddaSection from "@/components/LandingPage/addaSection";
 import Community from "@/components/LandingPage/benefits/community/community";
 import HeroSection from "@/components/LandingPage/hero/HeroSection";
 import { errorToast, successToast } from "@/utils/toastResposnse";
@@ -15,7 +15,6 @@ import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor"
 const Home = () => {
   const { user } = useUser();
   const [showPopup, setShowPopup] = React.useState(false);
-  
 
   // Comic sending function
   const sendComic = async () => {
@@ -41,15 +40,12 @@ const Home = () => {
     }
   };
 
-
- 
-
   return (
     <div className="w-full">
       <HeroSection />
 
       {[
-        { Component: AddaSection, key: "adda" },
+        // { Component: AddaSection, key: "adda" },
         { Component: Community, key: "benefits" },
         { Component: Membership, key: "membership" },
         { Component: NewsAndMentor, key: "newsSubscription" },
