@@ -79,14 +79,19 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
             token,
             userId,
             productId: cartItem.productId,
-            quantity: newQuantity, // Pass the new quantity to the action
+            quantity: newQuantity,
           })
-        );
+        ).unwrap();
 
-        console.log("Update Quantity Result", result);
-        dispatch(getCart({ token, userId }));
-        setQuantity(newQuantity);
-        toast.success("Cart updated successfully");
+        // Check if the update was successful
+        if (result.payload) {
+          // Refresh cart data
+          await dispatch(getCart({ token, userId }));
+          setQuantity(newQuantity);
+          toast.success("Cart updated successfully");
+        } else {
+          toast.error("Failed to update cart");
+        }
       } else {
         toast.error("Please login to update the cart");
       }
@@ -97,24 +102,24 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
   };
 
   return (
-    <div className="p-4 bg-white shadow-2xl rounded-3xl w-full border-4">
+    <div className="w-full p-4 bg-white border-4 shadow-2xl rounded-3xl">
       {/* <!-- Product Card --> */}
-      <div className="flex flex-col md:flex-row gap-4 items-start w-full">
-        <div className="relative border rounded-lg overflow-hidden flex items-center">
+      <div className="flex flex-col items-start w-full gap-4 md:flex-row">
+        <div className="relative flex items-center overflow-hidden border rounded-lg">
           <img
             src={cartItem?.productImage}
             alt="product"
-            className="w-48 h-40 object-cover"
+            className="object-cover w-48 h-40"
           />
         </div>
-        <div className="flex flex-col gap-2 w-full">
-          <div className="text-2xl font-bold text-gray-800 flex flex-col items-start">
+        <div className="flex flex-col w-full gap-2">
+          <div className="flex flex-col items-start text-2xl font-bold text-gray-800">
             <div className="flex items-center justify-between w-full">
               <p>{cartItem?.title}</p>
 
               <button
-                className=" p-2 text-gray-400 border rounded-xl hover:bg-black hover:text-white transition duration-300"
-                onClick={ handleRemoveItemFromCart}
+                className="p-2 text-gray-400 transition duration-300 border rounded-xl hover:bg-black hover:text-white"
+                onClick={handleRemoveItemFromCart}
               >
                 <MdDelete />
               </button>
@@ -125,12 +130,12 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex items-center justify-between mt-4">
               <div className="flex items-center space-x-2">
                 <button
                   disabled={quantity === 1}
                   onClick={() => handleUpdateQuantity("-")}
-                  className="p-2 rounded-full border hover:bg-black hover:text-white transition all duration-300 disabled:opacity-50  "
+                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
                 >
                   <Minus
                     className={`w-4 h-4 ${
@@ -141,13 +146,13 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
                 <span className="w-8 text-center">{quantity}</span>
                 <button
                   onClick={() => handleUpdateQuantity("+")}
-                  className="p-2 rounded-full border hover:bg-black hover:text-white transition all duration-300"
+                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <p className="self-end font-bold text-xl">₹ {cartItem.price}</p>
+            <p className="self-end text-xl font-bold">₹ {cartItem.price}</p>
           </div>
         </div>
       </div>

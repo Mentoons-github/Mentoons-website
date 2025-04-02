@@ -1,12 +1,15 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
 import AddToCartModal from "@/components/modals/AddToCartModal";
+import EnquiryModal from "@/components/modals/EnquiryModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ } from "@/constant";
 import { addItemCart, getCart, updateItemQuantity } from "@/redux/cartSlice";
 import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
+import { ModalMessage } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -24,6 +27,8 @@ const ProductDetails = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [message, setMessage] = useState<string>("");
 
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductBase>();
@@ -76,7 +81,7 @@ const ProductDetails = () => {
     RecommendedProducts();
   }, [product, dispatch]);
 
-  const handleUpdateQuantity = async (flag: string) => {
+  const handleUpdateQuantity = async (flag: string, id: string) => {
     try {
       const token = await getToken();
       if (!token) {
@@ -91,20 +96,25 @@ const ProductDetails = () => {
       // If no change in quantity (trying to decrease below 1), return early
       if (newQuantity === quantity) return;
 
-      if (userId && product?._id) {
+      if (userId) {
         const result = await dispatch(
           updateItemQuantity({
             token,
             userId,
-            productId: product._id,
-            quantity: newQuantity, // Pass the new quantity to the action
+            productId: id,
+            quantity: newQuantity,
           })
-        );
+        ).unwrap();
 
-        console.log("Update Quantity Result", result);
-        dispatch(getCart({ token, userId }));
-        setQuantity(newQuantity);
-        toast.success("Cart updated successfully");
+        // Check if the update was successful
+        if (result.payload) {
+          // Refresh cart data
+          await dispatch(getCart({ token, userId }));
+          setQuantity(newQuantity);
+          toast.success("Cart updated successfully");
+        } else {
+          toast.error("Failed to update cart");
+        }
       } else {
         toast.error("Please login to update the cart");
       }
@@ -168,7 +178,24 @@ const ProductDetails = () => {
       return;
     }
     // handleAddtoCart(event)
-    navigate("/order-summary", { state: product });
+    navigate(`/order-summary?productId=${product._id}`, { replace: true });
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const queryResponse = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/query", // Fixed the endpoint URL
+        {
+          message: message,
+        }
+      );
+      console.log(queryResponse);
+      if (queryResponse.status === 201) {
+        setShowEnquiryModal(true);
+      }
+    } catch (error) {
+      toast.error("Failed to submit message");
+    }
   };
 
   if (loading || !product) {
@@ -176,16 +203,16 @@ const ProductDetails = () => {
       <div className="w-[90%] mx-auto my-20 animate-pulse">
         <div className="flex flex-col md:flex-row h-auto md:h-[600px] gap-4 md:gap-8">
           <div className="flex flex-col flex-1 pb-3">
-            <div className="w-32 h-8 bg-gray-200 rounded-full mb-2"></div>
-            <div className="h-16 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="w-32 h-8 mb-2 bg-gray-200 rounded-full"></div>
+            <div className="h-16 mb-4 bg-gray-200 rounded-lg"></div>
             <div className="h-20 w-[90%] bg-gray-200 rounded-lg"></div>
           </div>
           <div className="flex-1 h-[300px] bg-gray-200 rounded-lg"></div>
         </div>
 
         <div className="mt-8">
-          <div className="w-24 h-6 bg-gray-200 rounded mb-4"></div>
-          <div className="flex gap-4 items-center mb-4">
+          <div className="w-24 h-6 mb-4 bg-gray-200 rounded"></div>
+          <div className="flex items-center gap-4 mb-4">
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="w-8 h-8 bg-gray-200 rounded-full"></div>
@@ -193,14 +220,14 @@ const ProductDetails = () => {
             </div>
             <div className="w-12 h-6 bg-gray-200 rounded"></div>
           </div>
-          <div className="w-24 h-8 bg-gray-200 rounded mb-8"></div>
+          <div className="w-24 h-8 mb-8 bg-gray-200 rounded"></div>
 
           <div className="flex gap-4 mb-8">
-            <div className="h-12 flex-1 bg-gray-200 rounded"></div>
-            <div className="h-12 flex-1 bg-gray-200 rounded"></div>
+            <div className="flex-1 h-12 bg-gray-200 rounded"></div>
+            <div className="flex-1 h-12 bg-gray-200 rounded"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
             ))}
@@ -220,7 +247,7 @@ const ProductDetails = () => {
           <p className="text-gray-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 text-white bg-primary rounded-lg hover:bg-primary-dark"
+            className="px-6 py-2 text-white rounded-lg bg-primary hover:bg-primary-dark"
           >
             Try Again
           </button>
@@ -233,10 +260,10 @@ const ProductDetails = () => {
     <div className="w-[90%] mx-auto my-20 ">
       <div className="flex flex-col md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
         <div className="flex flex-col flex-1 pb-3">
-          <span className="px-4 sm:px-6 py-1 sm:py-2 mb-2 text-sm sm:text-lg md:text-2xl font-bold text-white rounded-full bg-primary w-fit">
+          <span className="px-4 py-1 mb-2 text-sm font-bold text-white rounded-full sm:px-6 sm:py-2 sm:text-lg md:text-2xl bg-primary w-fit">
             For {product?.ageCategory}
           </span>
-          <h1 className="pb-2 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
+          <h1 className="pb-2 text-2xl font-bold leading-tight sm:text-3xl md:text-5xl lg:text-6xl">
             {product?.title}
           </h1>
           <p className="pb-4 text-xs sm:text-sm md:text-base lg:text-lg w-full md:w-[90%]">
@@ -269,7 +296,7 @@ const ProductDetails = () => {
                     : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
                 }`}
                 download
-                className="bg-orange-500 text-white px-4 py-3 hover:opacity-55 rounded-full ml-4 transition-all duration-200"
+                className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-orange-500 rounded-full hover:opacity-55"
               >
                 Download Free Sample
               </a>
@@ -284,7 +311,7 @@ const ProductDetails = () => {
             <div className="flex items-center space-x-2">
               <button
                 disabled={quantity === 1}
-                onClick={() => handleUpdateQuantity("-")}
+                onClick={() => handleUpdateQuantity("-", product._id)}
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
               >
                 <Minus
@@ -293,9 +320,9 @@ const ProductDetails = () => {
                   } `}
                 />
               </button>
-              <span className="w-8 text-center font-bold">{quantity}</span>
+              <span className="w-8 font-bold text-center">{quantity}</span>
               <button
-                onClick={() => handleUpdateQuantity("+")}
+                onClick={() => handleUpdateQuantity("+", product._id)}
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all"
               >
                 <Plus className="w-4 h-4 font-bold" />
@@ -305,18 +332,18 @@ const ProductDetails = () => {
         </div>
 
         {/* Buy Now Button */}
-        <div className="w-full flex flex-col gap-4 mt-4">
+        <div className="flex flex-col w-full gap-4 mt-4">
           <button
-            className="flex justify-center items-center px-4 py-2 w-full font-medium text-primary border border-primary rounded hover:bg-primary/10 transition-colors"
+            className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
             onClick={(e) => handleAddtoCart(e)}
             disabled={isLoading}
           >
-            <IoIosCart className="mr-2 w-5 h-5" />
+            <IoIosCart className="w-5 h-5 mr-2" />
             {isLoading ? "Adding..." : "Add to Cart"}
           </button>
 
           <button
-            className="flex justify-center items-center px-4 py-2 w-full font-medium text-white bg-primary rounded hover:bg-primary-dark transition-colors"
+            className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
             onClick={() => handleBuyNow(product)}
             disabled={isLoading}
           >
@@ -359,7 +386,7 @@ const ProductDetails = () => {
             You will also like this -
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
             {recommendedProducts?.length > 0 ? (
               recommendedProducts.map((product) => {
                 // Ensure all required properties are present before passing to ProductCard
@@ -416,19 +443,24 @@ const ProductDetails = () => {
                   </p>
                 </div>
                 <div className="">
-                  <form action=" w-full flex flex-col gap-10">
+                  <form
+                    className="flex flex-col w-full gap-10"
+                    onSubmit={(e) => handleSubmit(e)}
+                  >
                     <textarea
                       name="doubt"
                       id="doubt"
                       placeholder="Enter your doubt here"
-                      className="box-border w-full p-3 rounded-lg shadow-xl"
+                      className="box-border w-full p-3 rounded-lg shadow-xl border-2 border-[#60C6E6]"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       // style={{
                       //   border: `2px solid ${workshop.registerFormbgColor}`,
                       // }}
                     ></textarea>
 
                     <button
-                      className="w-full py-3 mt-4 text-xl font-semibold transition-all duration-200 rounded-lg shadow-lg text- text-ellipsist-white "
+                      className="w-full py-3 mt-4 text-xl font-semibold text-white transition-all duration-200 rounded-lg shadow-lg text- text-ellipsist-white bg-primary "
                       // style={{
                       //   backgroundColor: workshop.registerFormbgColor,
                       // }}
@@ -448,6 +480,13 @@ const ProductDetails = () => {
           onClose={() => setShowAddToCartModal(false)}
           isOpen={showAddToCartModal}
           productName={product.title}
+        />
+      )}
+      {showEnquiryModal && (
+        <EnquiryModal
+          isOpen={showEnquiryModal}
+          onClose={() => setShowEnquiryModal(false)}
+          message={ModalMessage.ENQUIRY_MESSAGE}
         />
       )}
     </div>

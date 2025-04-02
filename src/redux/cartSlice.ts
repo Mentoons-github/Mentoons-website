@@ -57,7 +57,7 @@ export const getCart = createAsyncThunk(
     try {
       const response = await axios.get(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/${userId}`,
-        
+
         {
           headers: {
             "Content-Type": "application/json",
@@ -101,7 +101,6 @@ export const addItemCart = createAsyncThunk(
     try {
       const response = await axios.post(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/add`,
-       
 
         {
           userId,
@@ -177,7 +176,6 @@ export const updateItemQuantity = createAsyncThunk(
     try {
       const response = await axios.patch(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
-
         {
           userId,
           productId,
