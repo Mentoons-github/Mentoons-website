@@ -64,19 +64,20 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
     }
   };
 
-  const handleBuyNow = async (productDetail: ProductBase) => {
+  const handleBuyNow = async (product: ProductBase) => {
     const token = await getToken();
     if (!token) {
       toast.error("Please login to add to cart");
       setIsLoading(false);
       return;
     }
-    navigate("/order-summary", { state: productDetail });
+    // handleAddtoCart(event)
+    navigate(`/order-summary?productId=${product._id}`, { replace: true });
   };
 
   return (
     <div
-      className="  overflow-hidden hover:shadow-xl transition-shadow duration-300 p-2"
+      className="p-2 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
       id={`product-${productDetails.title.replace(
         /\s*\(\d+-\d+\)\s*years/,
         ""
@@ -88,7 +89,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300 }}
       >
-        <div className="relative overflow-hidden h-64">
+        <div className="relative h-64 overflow-hidden">
           <img
             src={productDetails?.productImages?.[0]?.imageUrl}
             alt={productDetails.title}
@@ -107,7 +108,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
                       : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
                   }`}
                   download
-                  className="bg-green-200 text-green-700 border border-green-300 px-2 py-1 hover:opacity-55 rounded-xl ml-4 transition-all duration-200 text-xs  shadow-lg"
+                  className="px-2 py-1 ml-4 text-xs text-green-700 transition-all duration-200 bg-green-200 border border-green-300 shadow-lg hover:opacity-55 rounded-xl"
                 >
                   Download Free Sample
                 </a>
@@ -115,18 +116,18 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           </div>
         </div>
 
-        <div className="p-4 flex flex-col flex-grow">
-          <div className="flex justify-between items-center mb-2">
+        <div className="flex flex-col flex-grow p-4">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold line-clamp-1">
               {productDetails.title}
             </h3>
 
-            <span className="text-primary font-bold">
+            <span className="font-bold text-primary">
               ₹{productDetails.price}
             </span>
           </div>
 
-          <p className="text-gray-500 text-sm mb-2 line-clamp-2">
+          <p className="mb-2 text-sm text-gray-500 line-clamp-2">
             {productDetails?.description}
           </p>
 
@@ -136,16 +137,16 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
 
           <div className="flex flex-col gap-2 mt-auto">
             <button
-              className="flex justify-center items-center px-4 py-2 w-full font-medium text-primary border border-primary rounded hover:bg-primary/10 transition-colors"
+              className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
               onClick={(e) => handleAddtoCart(e)}
               disabled={isLoading}
             >
-              <IoIosCart className="mr-2 w-5 h-5" />
+              <IoIosCart className="w-5 h-5 mr-2" />
               {isLoading ? "Adding..." : "Add to Cart"}
             </button>
 
             <button
-              className="flex justify-center items-center px-4 py-2 w-full font-medium text-white bg-primary rounded hover:bg-primary-dark transition-colors"
+              className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
               onClick={() => handleBuyNow(productDetails)}
               disabled={isLoading}
             >
@@ -170,7 +171,7 @@ export default ProductCard;
 
 const Rating = ({ ratings }: { ratings: number }) => {
   return (
-    <div className="flex gap-4 justify-between items-center mt-2">
+    <div className="flex items-center justify-between gap-4 mt-2">
       <div className="flex">
         {[1, 2, 3, 4, 5].map((star) => {
           const rating = ratings; // This can be passed as a prop
@@ -192,7 +193,7 @@ const Rating = ({ ratings }: { ratings: number }) => {
 
               {/* Filled star (overlay) */}
               <div
-                className="overflow-hidden absolute top-0 left-0"
+                className="absolute top-0 left-0 overflow-hidden"
                 style={{ width: filled ? "100%" : `${percentage}%` }}
               >
                 <svg
