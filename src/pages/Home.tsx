@@ -6,16 +6,30 @@ import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useUser } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
 // import NewSection from "@/components/LandingPage/NewSection";
 import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
+import ComicViewer from "@/components/common/ComicViewer";
+import { MdClose } from "react-icons/md";
 
 const Home = () => {
   const { user } = useUser();
   const [showPopup, setShowPopup] = React.useState(false);
+  const [showComicModal, setShowComicModal] = useState(false);
+  const [comicToView, setComicToView] = useState<string>("");
 
+  const openComicModal = (comicLink: string) => {
+    setComicToView(comicLink);
+    setShowComicModal(true);
+    document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+  };
+
+  const closeComicModal = () => {
+    setShowComicModal(false);
+    document.body.style.overflow = "auto"; // Re-enable scrolling
+  };
   // Comic sending function
   const sendComic = async () => {
     try {
@@ -43,13 +57,12 @@ const Home = () => {
   return (
     <div className="w-full">
       <HeroSection />
-
+      <motion.div>
+        <Community openComicModal={openComicModal} />
+      </motion.div>
       {[
-        // { Component: AddaSection, key: "adda" },
-        { Component: Community, key: "benefits" },
         { Component: Membership, key: "membership" },
         { Component: NewsAndMentor, key: "newsSubscription" },
-        // { Component: NewSection, key: 'new section' }
       ].map(({ Component, key }) => (
         <motion.div key={key}>
           <Component />
@@ -60,12 +73,12 @@ const Home = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-md bg-white rounded-lg shadow-xl p-6"
+            className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl"
           >
             <div className="flex justify-end">
               <button
@@ -76,7 +89,7 @@ const Home = () => {
               </button>
             </div>
 
-            <div className="text-center space-y-4">
+            <div className="space-y-4 text-center">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Congratulations! 🎉
               </h2>
@@ -87,11 +100,38 @@ const Home = () => {
 
               <button
                 onClick={sendComic}
-                className="bg-green-500 text-white px-5 py-2 rounded-md hover:bg-green-600 transition-colors"
+                className="px-5 py-2 text-white transition-colors bg-green-500 rounded-md hover:bg-green-600"
               >
                 Claim Your Comic
               </button>
             </div>
+          </motion.div>
+        </motion.div>
+      )}
+      {showComicModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative w-[95%] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden items-center"
+          >
+            <button
+              onClick={closeComicModal}
+              className="absolute z-50 p-2 text-gray-600 transition-colors top-4 right-4 hover:text-gray-900"
+            >
+              <MdClose className="text-2xl" />
+            </button>
+
+            <ComicViewer pdfUrl={comicToView} />
           </motion.div>
         </motion.div>
       )}
