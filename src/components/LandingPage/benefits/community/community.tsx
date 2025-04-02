@@ -8,7 +8,7 @@ const Community = () => {
   const { ref: sectionRef, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
 
   return (
-    <section className="w-full h-auto relative z-0 bg-gradient-to-r from-[rgba(255,187,68,0.7)] to-[rgba(253,185,147,0.7)]">
+    <section className="mt-3 w-full h-auto relative z-0 bg-gradient-to-b from-[rgba(255,187,68,0.8)] via-[rgba(255,165,75,0.9)] to-[rgba(253,185,147,0.8)]">
       <div className="p-10 lg:p-3 xl:p-20 relative z-0">
         <motion.div
           ref={sectionRef}

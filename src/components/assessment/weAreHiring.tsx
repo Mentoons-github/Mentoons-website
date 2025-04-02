@@ -1,12 +1,21 @@
 import { Hiring } from "@/types";
-import { NavLink } from "react-router-dom";
+import ResumeSubmissionModal from "../common/modal/jobApplyModel";
+import { useState } from "react";
 
 const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
+  const [position, setPosition] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const handleClick = (job: string) => {
+    setPosition(job);
+    setIsOpen(true);
+  };
+
   return (
     <div className="flex flex-col items-center gap-10">
       {hiring.map((job, index) => (
-        <div
+        <button
           key={index}
+          onClick={() => handleClick(job.job)}
           className="p-5 rounded-xl border border-black shadow-xl bg-[#4285F4] font-akshar"
           style={{ background: job.bg }}
         >
@@ -22,15 +31,15 @@ const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
             className="w-48 h-auto mx-auto mt-3"
           />
           <div className="flex justify-center mt-4">
-            <NavLink
-              to="/hiring"
-              className="px-6 py-2 bg-white text-[#EC9600] rounded-full shadow-md border border-[#652D90] font-roboto font-extrabold"
-            >
+            <button className="px-6 py-2 bg-white text-[#EC9600] rounded-full shadow-md border border-[#652D90] font-roboto font-extrabold">
               APPLY HERE
-            </NavLink>
+            </button>
           </div>
-        </div>
+        </button>
       ))}
+      {isOpen && (
+        <ResumeSubmissionModal setIsOpen={setIsOpen} position={position} />
+      )}
     </div>
   );
 };

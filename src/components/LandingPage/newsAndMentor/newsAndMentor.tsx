@@ -12,8 +12,8 @@ import * as Yup from "yup";
 
 interface ApiResponse {
   success: boolean;
-  data?: unknown; // You can replace 'any' with the actual data type you expect
-  message?: string; // Optional error or success message
+  data?: unknown;
+  message?: string;
 }
 
 interface FormValues {
@@ -57,7 +57,7 @@ const NewsAndMentor = () => {
   return (
     <motion.section
       ref={sectionRef}
-      className="w-full flex flex-col lg:flex-row justify-between lg:justify-start items-center gap-10 py-10 px-5 lg:px-0 bg-gradient-to-r from-green-300 to-emerald-400"
+      className="w-full flex flex-col lg:flex-row justify-between lg:justify-start items-center gap-10 py-10 px-5 lg:px-0 bg-gradient-to-b from-green-200 via-emerald-400 to-teal-500"
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : { opacity: 0 }}
       exit={{ opacity: 0 }}
@@ -92,7 +92,44 @@ const NewsAndMentor = () => {
         transition={{ duration: 1 }}
       >
         <h1 className="text-2xl font-semibold leading-tight text-center text-gray-800 sm:text-4xl md:text-5xl lg:text-6xl">
-          Guidance for tomorrow, balance for today
+          Guidance for tomorrow, balance for{" "}
+          <motion.span
+            animate={{
+              color: [
+                "#ff0000",
+                "#ff8000",
+                "#ffff00",
+                "#0000ff",
+                "#00ff00",
+                "#ffffff",
+                "#000000",
+              ],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            className="inline-block"
+          >
+            today{" "}
+            <motion.span
+              animate={{
+                rotate: [-25, 0, 25, 0],
+                scale: [1, 1.2, 1, 1.2],
+                y: [0, -4, 0, -4],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: [0.6, 0.05, -0.01, 0.9],
+              }}
+              className="inline-block font-bold origin-bottom"
+            >
+              !
+            </motion.span>
+          </motion.span>
         </h1>
         <div className="absolute top-0 left-0 w-16 sm:top-10 md:top-20 lg:top-0 sm:w-20 sm:h-20">
           <img
@@ -109,14 +146,6 @@ const NewsAndMentor = () => {
           />
         </div>
 
-        {/* <input
-            type="text"
-            placeholder="Enter your email"
-            className="flex-grow px-3 py-2 text-sm rounded-l-full border outline-none md:text-base"
-          />
-          <button className="flex justify-center items-center gap-2 sm:gap-3 bg-[#EC9600] cursor-pointer py-2 px-4 sm:px-5 rounded-r-full text-white h-full text-sm md:text-base">
-            <FaTelegram /> Subscribe
-          </button> */}
         <Formik
           initialValues={{ email: "" }}
           validationSchema={validationSchema}
