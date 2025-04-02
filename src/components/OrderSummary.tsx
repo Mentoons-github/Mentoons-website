@@ -92,14 +92,14 @@ const OrderSummary: React.FC = () => {
           quantity: 1,
           price: productDetail.price,
           productName: productDetail.title,
-          productType: productDetail.productType || "merchandise",
+          productType: productDetail.productType || "printable",
         }
       : cart.items.map((item) => ({
           product: item.productId,
           quantity: item.quantity,
           price: item.price,
           productName: item.title,
-          productType: item.productType || "merchandise",
+          productType: item.productType || "printable", // Default to merchandise if type is not specified
         }));
 
     const productInfo = productDetail
@@ -135,6 +135,8 @@ const OrderSummary: React.FC = () => {
       // Original payment gateway fields that might be needed
       orderId: formData.order_id,
     };
+
+    console.log("order Date", orderData);
 
     try {
       console.log("Sending order data:", orderData);

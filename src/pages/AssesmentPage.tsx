@@ -1,7 +1,7 @@
 import FilterComics from "@/components/comics/FilterComics";
+import { ASSESSMENT_DATA } from "@/constant/assessments/assesments";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ASSESSMENT_DATA } from "@/constant/assessments/assesments";
 
 const AssesmentPage: React.FC = () => {
   const navigate = useNavigate();

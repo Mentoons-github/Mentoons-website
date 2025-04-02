@@ -102,7 +102,7 @@ export const fetchProductById = createAsyncThunk<
   try {
     const response = await axios.get(
       `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
-      // `http://localhost:4000/api/v1/products/${id}`
+    
     );
     return response.data;
   } catch (error: unknown) {

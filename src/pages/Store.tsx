@@ -99,9 +99,11 @@ const Store = () => {
               cardType,
               ageCategory: category,
               token: token!,
-            }) as any
+            })
           );
           console.log(cards.payload);
+        } else {
+          await dispatch(fetchProducts({}));
         }
       } catch (error: unknown) {
         console.error("Error fetching products:", error);
@@ -428,39 +430,44 @@ const Store = () => {
         )}
         <div className="flex flex-col flex-1">
           <div className="overflow-hidden relative rounded-xl border group">
-            {products.map((product, index) => (
-              <div
-                key={product._id}
-                className="w-full transition-opacity duration-500"
-                style={{
-                  display:
-                    (product.ageCategory === "20+" &&
-                      index !== currentVideoIndex) ||
-                    (product.ageCategory !== "20+" &&
-                      index !== currentVideoIndex)
-                      ? "none"
-                      : "block",
-                }}
-              >
-                {product.ageCategory === "20+" ? (
-                  <img
-                    src={product?.productImages?.[0]?.imageUrl ?? ""}
-                    alt="Product"
-                    className="w-full h-[400px] object-contain rounded-xl shadow-lg bg-gradient-to-r from-blue-100 to-purple-200 p-4"
-                  />
-                ) : (
-                  <video
-                    src={product?.productVideos?.[0]?.videoUrl}
-                    autoPlay
-                    controls
-                    muted
-                    playsInline
-                    webkit-playsinline
-                    className="w-full h-[400px] object-cover rounded-xl"
-                  ></video>
-                )}
-              </div>
-            ))}
+            {/* This filter the the books product which dont have videos */}
+            {products
+              .filter(
+                (p) =>
+                  p.productVideos?.[0]?.videoUrl?.endsWith(".mp4") ||
+                  p.ageCategory === "20+"
+              )
+              .map((product, index) => (
+                <div
+                  key={product._id}
+                  className="w-full transition-opacity duration-500"
+                  style={{
+                    display: index !== currentVideoIndex ? "none" : "block",
+                  }}
+                >
+                  {product.ageCategory === "20+" && (
+                    <img
+                      src={
+                        product?.productImages?.[0]?.imageUrl ??
+                        "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/Conversation_Story_Cards_20%2B/Conversation+Story+Cards+20%2B.png"
+                      }
+                      alt="Product"
+                      className="w-full h-[400px] object-contain rounded-xl shadow-lg bg-gradient-to-r from-blue-100 to-purple-200 p-4"
+                    />
+                  )}
+                  {product?.productVideos?.[0]?.videoUrl?.endsWith(".mp4") && (
+                    <video
+                      src={product?.productVideos?.[0]?.videoUrl}
+                      autoPlay
+                      controls
+                      muted
+                      playsInline
+                      webkit-playsinline
+                      className="w-full h-[400px] object-cover rounded-xl"
+                    ></video>
+                  )}
+                </div>
+              ))}
 
             {/* Navigation buttons */}
             {products.length > 1 && (
@@ -518,16 +525,22 @@ const Store = () => {
           {/* Indicators */}
           {products.length > 1 && (
             <div className="flex gap-2 justify-center mt-4">
-              {products.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentVideoIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentVideoIndex ? "bg-primary" : "bg-gray-300"
-                  }`}
-                  aria-label={`Go to video ${index + 1}`}
-                />
-              ))}
+              {products
+                .filter(
+                  (product) =>
+                    product.productVideos?.[0]?.videoUrl?.endsWith(".mp4") ||
+                    product.ageCategory === "20+"
+                )
+                .map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentVideoIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      index === currentVideoIndex ? "bg-primary" : "bg-gray-300"
+                    }`}
+                    aria-label={`Go to video ${index + 1}`}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -701,7 +714,7 @@ const Store = () => {
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
-      ) }
+      )}
     </div>
   );
 };
