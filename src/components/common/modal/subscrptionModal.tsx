@@ -27,7 +27,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     year: "numeric",
   });
 
+  console.log("userData :", user);
+
   useEffect(() => {
+    console.log("user data :", user);
     console.log("User Metadata:", user?.publicMetadata);
     console.log("Subscription Data:", user?.publicMetadata?.subscriptionData);
   }, [user]);
