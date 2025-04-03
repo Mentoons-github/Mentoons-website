@@ -1,11 +1,15 @@
-import { useState, lazy } from "react";
 import { motion } from "framer-motion";
+import { lazy, useState } from "react";
 import { ClipLoader } from "react-spinners";
 
 const Contests = lazy(() => import("../contests/contests"));
 const FreeComics = lazy(() => import("../freeComics/freeComics"));
 
-const NewsAndContests = () => {
+const NewsAndContests = ({
+  openComicModal,
+}: {
+  openComicModal: (comicLink: string) => void;
+}) => {
   const [activeTab, setActiveTab] = useState("Mentoons Comics");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedComicType, setSelectedComicType] = useState<
@@ -22,7 +26,7 @@ const NewsAndContests = () => {
 
   return (
     <div className="w-full h-[500px] border border-transparent border-t-0 bg-white rounded-xl shadow-xl z-10">
-      <div className="flex w-full relative flex-col">
+      <div className="relative flex flex-col w-full">
         <div className="flex w-full">
           {["Mentoons Comics", "Contests | Fun Section"].map((tab) => (
             <motion.button
@@ -44,7 +48,7 @@ const NewsAndContests = () => {
             >
               {tab}
               {tab === "Mentoons Comics" && (
-                <span className="absolute top-1/6 right-1/6 text-white px-3 text-xs bg-red-600 rounded-full">
+                <span className="absolute px-3 text-xs text-white bg-red-600 rounded-full top-1/6 right-1/6">
                   Free
                 </span>
               )}
@@ -52,7 +56,7 @@ const NewsAndContests = () => {
           ))}
         </div>
         {activeTab === "Mentoons Comics" && (
-          <div className="flex justify-start items-start gap-2">
+          <div className="flex items-start justify-start gap-2">
             <button
               type="button"
               onClick={() => setSelectedComicType("picture")}
@@ -62,7 +66,7 @@ const NewsAndContests = () => {
                   : "bg-blue-100 text-blue-800"
               }`}
             >
-              <span className="text-center leading-tight">
+              <span className="leading-tight text-center">
                 Illustrated <br /> Comic
               </span>
             </button>
@@ -74,7 +78,7 @@ const NewsAndContests = () => {
                   : "bg-green-100 text-green-800"
               }`}
             >
-              <span className="text-center leading-tight">
+              <span className="leading-tight text-center">
                 Illustrated Audio <br /> Comic
               </span>
             </button>
@@ -85,7 +89,7 @@ const NewsAndContests = () => {
         <img
           src="/assets/home/background/Vector.png"
           alt="cloud"
-          className="absolute top-10 left-10 w-1/5"
+          className="absolute w-1/5 top-10 left-10"
         />
         <img
           src="/assets/home/background/rb_35675 copy 1.png"
@@ -95,27 +99,30 @@ const NewsAndContests = () => {
         <img
           src="/assets/home/background/Group 566.png"
           alt="cloud"
-          className="absolute top-10 right-5 w-24"
+          className="absolute w-24 top-10 right-5"
         />
         <img
           src="/assets/home/background/Vector.png"
           alt="cloud"
-          className="absolute bottom-10 left-10 w-1/5"
+          className="absolute w-1/5 bottom-10 left-10"
         />
         <img
           src="/assets/home/background/Group 566.png"
           alt="cloud"
-          className="absolute bottom-10 right-5 w-24"
+          className="absolute w-24 bottom-10 right-5"
         />
         {isLoading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md rounded-lg">
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-white/80 backdrop-blur-md">
             <ClipLoader color="#36d7b7" loading={true} size={50} />
-            <p className="akshar text-gray-700">Loading ...</p>
+            <p className="text-gray-700 akshar">Loading ...</p>
           </div>
         ) : (
-          <div className="w-full p-5 max-h-full overflow-auto bg-white/90 rounded-md shadow-inner">
+          <div className="w-full max-h-full p-5 overflow-auto rounded-md shadow-inner bg-white/90">
             {activeTab === "Mentoons Comics" ? (
-              <FreeComics comicType={selectedComicType} />
+              <FreeComics
+                comicType={selectedComicType}
+                openComicModal={openComicModal}
+              />
             ) : (
               <Contests />
             )}
