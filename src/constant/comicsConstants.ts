@@ -51,12 +51,13 @@ export const gamesData: GamesData[] = [
   },
   {
     name: "Emergency Contact Numbers",
-    desc: "Emergency Contact Numbers is a game",
-    image: "/wordQuest.png",
+    desc: "Emergency Contact Numbers form",
+    image:
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/emergency+numbers+cover-02.png",
     imgStyling: "bg-gradient-to-r from from-green-200 to-white",
     cardStyling: "bg-amber-200",
     thumbnail_url:
-      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/board-games/thumbnail/emergency+numbers.png",
+      "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/emergency+numbers+cover-02.png",
     pdf_url:
       "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/emergency++contact+numbers.pdf",
   },

@@ -81,9 +81,9 @@ export const COMMUNITY = [
     color: "#FAEDCB",
   },
   {
-    title: "Mentoring and Collaboration",
+    title: "Personality Assessment",
     description:
-      "Our interactive platform allows parents and children to engage in mentoring relationships, where experienced individuals can guide and support others.",
+      "Our platform offers personality assessments to help individuals understand traits and make informed decisions.",
     color: "#F2C6DE",
   },
   {
@@ -93,9 +93,9 @@ export const COMMUNITY = [
     color: "#C6DEF1",
   },
   {
-    title: "Personality Assessment",
+    title: "Mentoring and Collaboration",
     description:
-      "Our platform offers personality assessments to help individuals understand traits and make informed decisions.",
+      "Our interactive platform allows parents and children to engage in mentoring relationships, where experienced individuals can guide and support others.",
     color: "#F2C6DE",
   },
 ];
