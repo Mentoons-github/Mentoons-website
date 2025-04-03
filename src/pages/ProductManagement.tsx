@@ -110,7 +110,7 @@
 //       <h1 className="mb-4 text-2xl font-bold">Product Management</h1>
 
 //       {error && (
-//         <div className="px-4 py-3 mb-4 text-red-700 bg-red-100 rounded border border-red-400">
+//         <div className="px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
 //           {error}
 //         </div>
 //       )}
@@ -122,13 +122,13 @@
 //           placeholder="Search products..."
 //           value={search}
 //           onChange={handleSearch}
-//           className="p-2 rounded border"
+//           className="p-2 border rounded"
 //         />
 //         <select
 //           name="type"
 //           value={filter.type}
 //           onChange={handleFilterChange}
-//           className="p-2 rounded border"
+//           className="p-2 border rounded"
 //         >
 //           <option value="">All Types</option>
 //           <option value="COMIC">Comic</option>
@@ -139,7 +139,7 @@
 //           name="ageCategory"
 //           value={filter.ageCategory}
 //           onChange={handleFilterChange}
-//           className="p-2 rounded border"
+//           className="p-2 border rounded"
 //         >
 //           <option value="">All Ages</option>
 //           {Object.entries(AgeCategory).map(([key, value]) => (
@@ -158,7 +158,7 @@
 //             <label className="block mb-1">Title</label>
 //             <input
 //               {...register("title", { required: true })}
-//               className="p-2 w-full rounded border"
+//               className="w-full p-2 border rounded"
 //             />
 //           </div>
 
@@ -169,7 +169,7 @@
 //               min="0"
 //               step="0.01"
 //               {...register("price", { required: true, min: 0 })}
-//               className="p-2 w-full rounded border"
+//               className="w-full p-2 border rounded"
 //             />
 //           </div>
 
@@ -177,7 +177,7 @@
 //             <label className="block mb-1">Age Category</label>
 //             <select
 //               {...register("ageCategory", { required: true })}
-//               className="p-2 w-full rounded border"
+//               className="w-full p-2 border rounded"
 //             >
 //               <option value="CHILD">Children</option>
 //               <option value="TEEN">Teen</option>
@@ -190,7 +190,7 @@
 //             <label className="block mb-1">Product Type</label>
 //             <select
 //               {...register("type", { required: true })}
-//               className="p-2 w-full rounded border"
+//               className="w-full p-2 border rounded"
 //             >
 //               <option value="COMIC">Comic</option>
 //               <option value="AUDIO_COMIC">Audio Comic</option>
@@ -205,7 +205,7 @@
 //             <label className="block mb-1">Description</label>
 //             <textarea
 //               {...register("description", { required: true })}
-//               className="p-2 w-full rounded border"
+//               className="w-full p-2 border rounded"
 //               rows={3}
 //             />
 //           </div>
@@ -233,7 +233,7 @@
 //         <>
 //           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 //             {products.map((product) => (
-//               <div key={product._id} className="p-4 rounded border">
+//               <div key={product._id} className="p-4 border rounded">
 //                 <h2 className="text-xl font-bold">
 //                   {product.title ?? "Untitled Product"}
 //                 </h2>
@@ -284,3 +284,4 @@
 // };
 
 // export default ProductManagement;
+// Import your placeholder image

@@ -83,14 +83,14 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
           })
         ).unwrap();
 
+        console.log("Update Result", result);
+
         // Check if the update was successful
-        if (result.payload) {
+        if (result) {
           // Refresh cart data
           await dispatch(getCart({ token, userId }));
           setQuantity(newQuantity);
           toast.success("Cart updated successfully");
-        } else {
-          toast.error("Failed to update cart");
         }
       } else {
         toast.error("Please login to update the cart");

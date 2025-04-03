@@ -71,15 +71,11 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
   };
 
   return (
-    <div
-      className="flex items-center justify-center bg-black bg-opacity-50 fixed inset-0 z-[9999]"
-      onClick={() => setShowFreeDownloadForm(false)}
-    >
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        onClick={(e) => e.stopPropagation()}
         className={`relative text-black ${
           page === "freedownload"
             ? "w-[90%] md:max-w-md py-8 px-10"
@@ -88,14 +84,14 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
       >
         <button
           onClick={() => setShowFreeDownloadForm(false)}
-          className="absolute top-2 right-2 z-10"
+          className="absolute z-10 top-2 right-2"
         >
-          <IoMdClose className="text-2xl hover:text-red-400 active:scale-50 transition-all ease-in-out duration-300" />
+          <IoMdClose className="text-2xl transition-all duration-300 ease-in-out hover:text-red-400 active:scale-50" />
         </button>
 
         {page === "freedownload" ? (
           <>
-            <h1 className="font-semibold text-xl flex justify-center gap-2">
+            <h1 className="flex justify-center gap-2 text-xl font-semibold">
               Free <img className="w-20" src={MiniLogo} alt="mentoons logo" />{" "}
               Gifts
             </h1>
@@ -110,12 +106,12 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
                     type="text"
                     placeholder="Your Name"
                     name="name"
-                    className="cta-input w-full "
+                    className="w-full cta-input "
                   />
                   <ErrorMessage
                     name="name"
                     component="div"
-                    className="text-red-500 text-sm mt-3 ml-4"
+                    className="mt-3 ml-4 text-sm text-red-500"
                   />
                 </div>
                 <div className="w-full">
@@ -123,12 +119,12 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
                     type="email"
                     placeholder="Your Email"
                     name="email"
-                    className="cta-input w-full"
+                    className="w-full cta-input"
                   />
                   <ErrorMessage
                     name="email"
                     component="div"
-                    className="text-red-500 text-sm mt-3 ml-4"
+                    className="mt-3 ml-4 text-sm text-red-500"
                   />
                 </div>
                 <div className="w-full">
@@ -136,12 +132,12 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
                     type="tel"
                     placeholder="Your Phone"
                     name="phone"
-                    className="cta-input w-full"
+                    className="w-full cta-input"
                   />
                   <ErrorMessage
                     name="phone"
                     component="div"
-                    className="text-red-500 text-sm mt-3 ml-4"
+                    className="mt-3 ml-4 text-sm text-red-500"
                   />
                 </div>
                 <button type="submit" className="cta-button-footer">
