@@ -178,7 +178,7 @@ const ProductDetails = () => {
       return;
     }
     // handleAddtoCart(event)
-    navigate(`/order-summary?productId=${product._id}`, { replace: true });
+    navigate(`/order-summary?productId=${product._id}`);
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

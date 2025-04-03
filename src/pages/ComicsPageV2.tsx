@@ -1,12 +1,12 @@
 import ComicViewer from "@/components/common/ComicViewer";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
 import { audioComicsData, comicsData } from "@/constant/comicsConstants";
+import { useUser } from "@clerk/clerk-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
-import { useUser } from "@clerk/clerk-react";
 
 const ComicsPageV2 = () => {
   const [selectedOption, setSelectedOption] = useState("e-comics");
@@ -88,7 +88,7 @@ const ComicsPageV2 = () => {
     <div>
       {/* Progress bar */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-primary z-50 origin-left"
+        className="fixed top-0 left-0 right-0 z-50 h-1 origin-left bg-primary"
         style={{ scaleX }}
       />
 
@@ -105,7 +105,7 @@ const ComicsPageV2 = () => {
           <h1 className="py-2 text-2xl font-semibold text-center text-primary md:text-6xl md:py-8 md:pb-6">
             E-Comics & Audio Comics
           </h1>
-          <p className="px-4 py-4 mx-auto w-3/4 text-lg font-medium text-center md:text-left md:text-2xl">
+          <p className="w-3/4 px-4 py-4 mx-auto text-lg font-medium text-center md:text-left md:text-2xl">
             Dive into colorful worlds and exciting stories that teach valuable
             lessons while entertaining young readers. Our diverse range of
             comics covers various subjects, from history and science to social
@@ -136,7 +136,7 @@ const ComicsPageV2 = () => {
         <h2 className="py-6 text-4xl font-bold text-center">
           Re-Discover the <br /> Passion of Reading
         </h2>
-        <div className="flex gap-6 justify-center items-center pb-6">
+        <div className="flex items-center justify-center gap-6 pb-6">
           <button
             className={`flex items-center justify-center gap-3 px-5 py-2  rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 font-medium ${
               selectedOption === "e-comics" &&
@@ -201,14 +201,14 @@ const ComicsPageV2 = () => {
             <h2 className="py-4 text-4xl font-semibold">
               {selectedComic.name}
             </h2>
-            <p className="pr-24 pb-6 text-xl">{selectedComic.desc}</p>
+            <p className="pb-6 pr-24 text-xl">{selectedComic.desc}</p>
             <button
-              className="px-7 py-3 text-xl font-semibold text-white rounded-full bg-primary"
+              className="py-3 text-xl font-semibold text-white rounded-full px-7 bg-primary"
               onClick={() => openComicModal(selectedComic.comicLink)}
             >
               Read More
             </button>
-            <div className="flex gap-4 justify-end items-center pt-4">
+            <div className="flex items-center justify-end gap-4 pt-4">
               <button
                 className="p-3 text-xl font-semibold text-white rounded-full bg-primary"
                 onClick={() => {
@@ -323,7 +323,7 @@ const ComicsPageV2 = () => {
                 >
                   {comic.videoLink ? (
                     <video
-                      className="object-cover py-6 w-full h-full rounded-2xl"
+                      className="object-cover w-full h-full py-6 rounded-2xl"
                       src={comic.videoLink}
                       poster={comic.thumbnail || "/placeholder-image.jpg"}
                       onEnded={(e) => {
@@ -363,7 +363,7 @@ const ComicsPageV2 = () => {
                   )}
 
                   {/* Hover Overlay */}
-                  <div className="flex absolute inset-0 flex-col justify-center items-center p-8 rounded-2xl opacity-0 transition-opacity duration-300 bg-black/70 group-hover:opacity-100">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-300 opacity-0 rounded-2xl bg-black/70 group-hover:opacity-100">
                     <h3 className="mb-4 text-3xl font-bold text-center text-white">
                       {comic.name || "Untitled Comic"}
                     </h3>
@@ -373,7 +373,7 @@ const ComicsPageV2 = () => {
 
                     {comic.videoLink && (
                       <button
-                        className="flex justify-center items-center w-16 h-16 rounded-full transition-colors bg-white/20 hover:bg-white/30"
+                        className="flex items-center justify-center w-16 h-16 transition-colors rounded-full bg-white/20 hover:bg-white/30"
                         onClick={(e) => {
                           e.stopPropagation();
                           const video = e.currentTarget.parentElement
@@ -423,13 +423,13 @@ const ComicsPageV2 = () => {
 
             {/* Playing indicator */}
             {isPlaying && (
-              <div className="flex absolute top-4 right-4 gap-1 items-center px-3 py-1 text-sm text-white rounded-full bg-black/50">
+              <div className="absolute flex items-center gap-1 px-3 py-1 text-sm text-white rounded-full top-4 right-4 bg-black/50">
                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 Playing
               </div>
             )}
           </div>
-          <div className="flex absolute bottom-4 right-12 gap-2 pt-4">
+          <div className="absolute flex gap-2 pt-4 bottom-4 right-12">
             <button
               onClick={() => {
                 pauseAllVideos();
@@ -469,22 +469,22 @@ const ComicsPageV2 = () => {
           Trending Comics For You!
         </h2>
         <div
-          className="flex overflow-x-auto gap-8 scroll-smooth"
+          className="flex gap-8 overflow-x-auto scroll-smooth"
           ref={carouselRef}
         >
           {comicsData.map((comic, index) => (
             <div
-              className="flex-shrink-0 p-4 rounded-lg border border-gray-300 transition-all duration-300 cursor-pointer hover:shadow-lg"
+              className="flex-shrink-0 p-4 transition-all duration-300 border border-gray-300 rounded-lg cursor-pointer hover:shadow-lg"
               key={comic.name + index}
               onClick={() => openComicModal(comic.comicLink)}
             >
-              <div className="overflow-hidden relative rounded-lg">
+              <div className="relative overflow-hidden rounded-lg">
                 <img
                   src={comic.thumbnail}
                   alt={comic.name}
                   className="object-contain h-[25rem] rounded-lg transition-transform duration-300 hover:scale-105"
                 />
-                <div className="absolute right-0 bottom-0 left-0 p-3 bg-gradient-to-t to-transparent from-black/70">
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t to-transparent from-black/70">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/80 text-gray-900 ring-1 ring-inset ring-gray-200/20 backdrop-blur-2xl">
                     {comic.category}
                   </span>
@@ -509,7 +509,7 @@ const ComicsPageV2 = () => {
               carousel.scrollBy({ left: -300, behavior: "smooth" });
             }
           }}
-          className="absolute left-0 top-1/2 p-2 rounded-full shadow-lg transition-colors -translate-y-1/2 bg-white/80 hover:bg-white"
+          className="absolute left-0 p-2 transition-colors -translate-y-1/2 rounded-full shadow-lg top-1/2 bg-white/80 hover:bg-white"
           style={{ display: isAtStart ? "none" : "block" }}
         >
           <IoIosArrowBack className="text-2xl" />
@@ -521,7 +521,7 @@ const ComicsPageV2 = () => {
               carousel.scrollBy({ left: 300, behavior: "smooth" });
             }
           }}
-          className="absolute right-0 top-1/2 p-2 rounded-full shadow-lg transition-colors -translate-y-1/2 bg-white/80 hover:bg-white"
+          className="absolute right-0 p-2 transition-colors -translate-y-1/2 rounded-full shadow-lg top-1/2 bg-white/80 hover:bg-white"
           style={{ display: isAtEnd ? "none" : "block" }}
         >
           <IoIosArrowForward className="text-2xl" />
@@ -535,7 +535,7 @@ const ComicsPageV2 = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-75"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -546,7 +546,7 @@ const ComicsPageV2 = () => {
           >
             <button
               onClick={closeComicModal}
-              className="absolute top-4 right-4 z-50 p-2 text-gray-600 transition-colors hover:text-gray-900"
+              className="absolute z-50 p-2 text-gray-600 transition-colors top-4 right-4 hover:text-gray-900"
             >
               <MdClose className="text-2xl" />
             </button>
@@ -565,8 +565,8 @@ const ComicsPageV2 = () => {
         transition={{ duration: 0.6 }}
         className="w-[90%] mx-auto mb-20 md:flex gap-8"
       >
-        <div className="flex relative flex-1 justify-center items-center h-full">
-          <div className="flex flex-col justify-center items-center py-16 text-6xl font-semibold text-center md:py-32 md:text-7xl lg:text-9xl text-nuetural-800 luckiest-guy-regular">
+        <div className="relative flex items-center justify-center flex-1 h-full">
+          <div className="flex flex-col items-center justify-center py-16 text-6xl font-semibold text-center md:py-32 md:text-7xl lg:text-9xl text-nuetural-800 luckiest-guy-regular">
             <span>FEATURE</span>
             <span>OF THE</span>
             <span>MONTH</span>
@@ -579,11 +579,11 @@ const ComicsPageV2 = () => {
           <img
             src="/assets/comic-V2/star-2.png"
             alt=""
-            className="absolute right-0 bottom-0 w-16 md:w-24"
+            className="absolute bottom-0 right-0 w-16 md:w-24"
           />
         </div>
         <div className="flex-1 p-6 mt-12">
-          <div className="flex gap-10 items-start pb-4">
+          <div className="flex items-start gap-10 pb-4">
             <div>
               <img
                 src={comicsData[0].thumbnail}
@@ -604,14 +604,14 @@ const ComicsPageV2 = () => {
               JAN 13TH &#x2022; 12 MIN
             </div>
             <p className="text-lg font-medium">{comicsData[0].desc}</p>
-            <div className="flex justify-between items-center pt-10">
+            <div className="flex items-center justify-between pt-10">
               <button
-                className="px-7 py-4 font-semibold text-white rounded-full shadow-xl bg-primary"
+                className="py-4 font-semibold text-white rounded-full shadow-xl px-7 bg-primary"
                 onClick={() => openComicModal(comicsData[0].comicLink)}
               >
                 READ MORE
               </button>
-              <button className="p-2 rounded-full border border-black">
+              <button className="p-2 border border-black rounded-full">
                 <BsThreeDots className="text-4xl" />
               </button>
             </div>
@@ -635,7 +635,7 @@ const ComicsPageV2 = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="flex gap-4 items-start p-4 md:items-center"
+              className="flex items-start gap-4 p-4 md:items-center"
             >
               <figure className="">
                 <img src={point.icon} alt="icon" className="w-24 md:w-24" />
@@ -649,11 +649,11 @@ const ComicsPageV2 = () => {
             </motion.div>
           ))}
         </div>
-        <div className="relative flex-1 justify-center items-start">
+        <div className="relative items-start justify-center flex-1">
           <h2 className="pt-8 text-7xl md:text-8xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_black]">
             Why our workshops matter?
           </h2>
-          {/* <figure className="flex justify-end items-center p-4 pt-0 w-full">
+          {/* <figure className="flex items-center justify-end w-full p-4 pt-0">
             <img src="/assets/workshopv2/man-thinking.png" alt="" />
           </figure> */}
         </div>
