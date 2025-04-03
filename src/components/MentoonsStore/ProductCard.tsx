@@ -9,9 +9,11 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AddToCartModal from "../modals/AddToCartModal";
+import LoginModal from "../common/modal/loginModal";
 
 const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
   const navigate = useNavigate();
@@ -29,8 +31,8 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
     try {
       const token = await getToken();
       if (!token) {
-        toast.error("Please login to add to cart");
         setIsLoading(false);
+        setShowLoginModal(true);
         return;
       }
 
@@ -64,11 +66,15 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
     }
   };
 
-  const handleBuyNow = async (product: ProductBase) => {
+  const handleBuyNow = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    product: ProductBase
+  ) => {
+    e.stopPropagation();
     const token = await getToken();
     if (!token) {
-      toast.error("Please login to add to cart");
       setIsLoading(false);
+      setShowLoginModal(true);
       return;
     }
     // handleAddtoCart(event)
@@ -147,7 +153,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
 
             <button
               className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
-              onClick={() => handleBuyNow(productDetails)}
+              onClick={(e) => handleBuyNow(e, productDetails)}
               disabled={isLoading}
             >
               Buy Now
@@ -162,26 +168,30 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           productName={productDetails.title}
         />
       )}
+      {
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
+      }
     </div>
   );
 };
 
 export default ProductCard;
-//Should i add free Sample tag int he
 
 const Rating = ({ ratings }: { ratings: number }) => {
   return (
     <div className="flex items-center justify-between gap-4 mt-2">
       <div className="flex">
         {[1, 2, 3, 4, 5].map((star) => {
-          const rating = ratings; // This can be passed as a prop
+          const rating = ratings;
           const filled = star <= Math.floor(rating);
           const partial = !filled && star <= Math.ceil(rating);
           const percentage = partial ? (rating % 1) * 100 : 0;
 
           return (
             <div key={star} className="relative">
-              {/* Empty star (background) */}
               <svg
                 className="w-8 h-8 text-gray-300"
                 fill="currentColor"
@@ -191,7 +201,6 @@ const Rating = ({ ratings }: { ratings: number }) => {
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
 
-              {/* Filled star (overlay) */}
               <div
                 className="absolute top-0 left-0 overflow-hidden"
                 style={{ width: filled ? "100%" : `${percentage}%` }}

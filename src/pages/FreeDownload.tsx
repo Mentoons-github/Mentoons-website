@@ -90,10 +90,18 @@ const FreeDownload: React.FC = () => {
                 </div>
                 <div className=" text-sm tracking-wide">{item?.desc}</div>
               </div>
-              <a href="" className="text-end flex items-center justify-end gap-2 border-t border-gray-200 group-hover:text-red-500 group-hover:underline text-xl pt-4 cursor-pointer">
-                Download Now{" "}
-                <MdCloudDownload className="text-2xl text-red-700 group-hover:text-500" />
-              </a>
+              <div className="w-full flex justify-end items-center">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  className="text-end flex items-center justify-end gap-2 border-t border-gray-200 group-hover:text-red-500 group-hover:underline text-xl pt-4 cursor-pointer"
+                >
+                  Download Now{" "}
+                  <MdCloudDownload className="text-2xl text-red-700 group-hover:text-500" />
+                </button>
+              </div>
             </motion.div>
           );
         })}

@@ -1,14 +1,16 @@
-import MythosFooter from "@/components/mythos/home/footer";
-import { lazy } from "react";
+// import MythosFooter from "@/components/mythos/home/footer";
+import Footer from "@/components/comics/Footer";
 import { Outlet } from "react-router-dom";
-const Header = lazy(() => import("@/components/mythos/home/nav"));
+import Header from "./Header";
+import PrimaryHeader from "./primaryHeader";
 
 const MythosLayout = () => {
   return (
     <main>
+      <PrimaryHeader />
       <Header />
       <Outlet />
-      <MythosFooter />
+      <Footer />
     </main>
   );
 };

@@ -71,11 +71,15 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center bg-black bg-opacity-50 fixed inset-0">
+    <div
+      className="flex items-center justify-center bg-black bg-opacity-50 fixed inset-0 z-[9999]"
+      onClick={() => setShowFreeDownloadForm(false)}
+    >
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
+        onClick={(e) => e.stopPropagation()}
         className={`relative text-black ${
           page === "freedownload"
             ? "w-[90%] md:max-w-md py-8 px-10"
