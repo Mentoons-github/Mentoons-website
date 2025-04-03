@@ -20,7 +20,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   renewalDate.setFullYear(renewalDate.getFullYear() + 1);
   const navigate = useNavigate();
   console.log("status recieved : ", status);
-  const { user } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const formattedRenewalDate = renewalDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -28,9 +28,16 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   });
 
   useEffect(() => {
-    console.log("User Metadata:", user?.publicMetadata);
-    console.log("Subscription Data:", user?.publicMetadata?.subscriptionData);
-  }, [user]);
+    const reloadUserData = async () => {
+      if (isLoaded && isSignedIn && user) {
+        console.log("Before reload:", user.publicMetadata);
+        await user.reload();
+        console.log("After reload:", user.publicMetadata);
+      }
+    };
+
+    reloadUserData();
+  }, [user, isLoaded, isSignedIn]);
 
   useEffect(() => {
     if (open) {
