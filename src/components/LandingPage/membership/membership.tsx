@@ -17,7 +17,7 @@ const Membership = () => {
         <motion.img
           src="/assets/home/homepage fillers/klement Homepage Illustration.png"
           alt="klement"
-          className="absolute top-2/4 right-0 w-[20rem]"
+          className="absolute top-2/4 right-0 w-[20rem] hidden xl:block"
         />
       </motion.div>
 
@@ -38,6 +38,13 @@ const Membership = () => {
         animate={{ y: [0, 12, 0], rotate: [-5, 5, -5] }}
         transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
       />
+      <div className="absolute -bottom-[8%] -left-[5%] translate-y-[5%] w-[28%] h-[40%] bg-[#FFAB40] rounded-full flex justify-center items-start">
+        <img
+          src="/assets/payments/payments logo.png"
+          alt="payments"
+          className="lg:block w-[60%] max-w-[450px] hidden xl:block"
+        />
+      </div>
 
       <motion.div
         className="absolute -top-[12%] -right-[9%] w-80 h-80 bg-[#FFF1B3] rounded-full z-3"
@@ -96,7 +103,7 @@ const Membership = () => {
             <MembershipCard membership={data} key={index} />
           ))}
         </div>
-        <div className="p-6 md:p-10">
+        {/* <div className="p-6 md:p-10">
           <h1 className="text-center text-lg md:text-xl font-normal epilogue">
             Pay Through
           </h1>
@@ -121,7 +128,7 @@ const Membership = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
       </motion.div>
     </section>
   );
