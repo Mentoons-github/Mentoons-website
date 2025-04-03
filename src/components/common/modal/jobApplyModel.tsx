@@ -27,7 +27,7 @@ const ResumeSubmissionModal = ({
     console.log("form Submitted : ", values);
     setTimeout(() => {
       setIsSuccess(true);
-    }, 2000);
+    }, 1000);
   });
 
   const gradientStyle = "bg-gradient-to-r from-red-600 to-orange-500";
