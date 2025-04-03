@@ -61,12 +61,12 @@ const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
                 {
                   icon: <FaFacebookF />,
                   label: "Facebook",
-                  url: "https://facebook.com",
+                  url: "https://www.facebook.com/mentor.mahesh",
                 },
                 {
                   icon: <FaLinkedinIn />,
                   label: "LinkedIn",
-                  url: "https://linkedin.com/in/metalmahesh",
+                  url: "https://www.linkedin.com/in/metalmahesh/",
                 },
                 {
                   icon: <BiLogoInstagramAlt />,

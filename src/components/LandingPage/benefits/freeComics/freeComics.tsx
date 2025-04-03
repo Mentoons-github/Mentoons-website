@@ -82,7 +82,7 @@ const FreeComics = ({
                       }
                       className="block w-full h-full"
                     >
-                      "Watch Comic"
+                      Watch Comic
                     </a>
                   )}
                 </motion.div>

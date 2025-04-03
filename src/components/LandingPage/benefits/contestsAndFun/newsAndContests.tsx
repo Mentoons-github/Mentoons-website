@@ -16,7 +16,12 @@ const NewsAndContests = ({
     "picture" | "audio"
   >("picture");
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    tab: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (activeTab !== tab) {
       setIsLoading(true);
       setActiveTab(tab);
@@ -31,7 +36,7 @@ const NewsAndContests = ({
           {["Mentoons Comics", "Contests | Fun Section"].map((tab) => (
             <motion.button
               key={tab}
-              onClick={() => handleTabChange(tab)}
+              onClick={(e) => handleTabChange(e, tab)}
               className={`relative px-5 py-3 w-1/2 text-lg font-semibold tracking-wide transition-all duration-300 ${
                 activeTab === tab
                   ? "text-white"

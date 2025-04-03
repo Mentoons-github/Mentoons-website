@@ -20,7 +20,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   renewalDate.setFullYear(renewalDate.getFullYear() + 1);
   const navigate = useNavigate();
   console.log("status recieved : ", status);
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user } = useUser();
   const formattedRenewalDate = renewalDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -28,16 +28,29 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   });
 
   useEffect(() => {
-    const reloadUserData = async () => {
-      if (isLoaded && isSignedIn && user) {
-        console.log("Before reload:", user.publicMetadata);
-        await user.reload();
-        console.log("After reload:", user.publicMetadata);
-      }
-    };
+    if (open && user) {
+      const publicMetadata = user.publicMetadata as {
+        update?: (data: Record<string, unknown>) => Promise<void>;
+      };
 
-    reloadUserData();
-  }, [user, isLoaded, isSignedIn]);
+      if (publicMetadata.update) {
+        publicMetadata
+          .update({
+            subscriptionType,
+            renewalDate: renewalDate.toISOString(),
+            subscriptionStatus: status,
+          })
+          .then(async () => {
+            console.log("User subscription updated successfully");
+            await user.reload();
+            console.log("Updated user data:", user);
+          })
+          .catch((err) => console.error("Error updating subscription:", err));
+      } else {
+        console.error("publicMetadata.update is not available");
+      }
+    }
+  }, [open, user, subscriptionType, status]);
 
   useEffect(() => {
     if (open) {
