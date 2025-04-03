@@ -1,11 +1,13 @@
 import BookingCalender from "@/components/session/calender";
-import { Booking } from "@/types";
-import React, { useState } from "react";
+import { Booking, Hiring } from "@/types";
+import React, { useEffect, useState } from "react";
 import BookedSession from "./bookedSession";
 import SessionBookingForm from "@/components/forms/sessionBooking";
 import { errorToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import { HIRING } from "@/constant/constants";
+import WeAreHiring from "@/components/assessment/weAreHiring";
 
 const SessionBooking: React.FC = () => {
   const [bookedCalls, setBookedCalls] = useState<Booking[]>([]);
@@ -15,6 +17,10 @@ const SessionBooking: React.FC = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
+  const [hiring, setHiring] = useState<Hiring[] | []>([]);
+  useEffect(() => {
+    setHiring(HIRING);
+  }, []);
 
   const { getToken } = useAuth();
 
@@ -140,36 +146,40 @@ const SessionBooking: React.FC = () => {
         cancelBooking={handleCancelBooking}
         selectedDateBookings={selectedDateBookings}
       />
+      <div className="flex justify-between items-star">
+        <div className="w-2/3 p-8 space-y-8">
+          <div className="bg-white shadow-lg rounded-lg p-8 max-w-xl mx-auto">
+            <h1 className="text-5xl font-extrabold text-center text-orange-600 mb-4 font-akshar">
+              Schedule Your Personalized One-on-One Call
+            </h1>
 
-      <div className="w-2/3 p-8 space-y-8">
-        <div className="bg-white shadow-lg rounded-lg p-8 max-w-xl mx-auto">
-          <h1 className="text-5xl font-extrabold text-center text-orange-600 mb-4 font-akshar">
-            Schedule Your Personalized One-on-One Call
-          </h1>
+            <p className="text-gray-700 text-lg text-center mb-6 font-inter leading-relaxed">
+              Curious about your assessment results? Get a personalized,
+              in-depth analysis and expert guidance tailored just for you. Book
+              a one-on-one session now!
+            </p>
 
-          <p className="text-gray-700 text-lg text-center mb-6 font-inter leading-relaxed">
-            Curious about your assessment results? Get a personalized, in-depth
-            analysis and expert guidance tailored just for you. Book a
-            one-on-one session now!
-          </p>
+            <div className="flex items-center justify-center gap-2 text-green-600 font-semibold text-2xl">
+              <span>₹</span>
+              <span>Rs 499/hr</span>
+            </div>
 
-          <div className="flex items-center justify-center gap-2 text-green-600 font-semibold text-2xl">
-            <span>₹</span>
-            <span>Rs 499/hr</span>
+            <SessionBookingForm handleSubmit={handleSubmit} />
           </div>
 
-          <SessionBookingForm handleSubmit={handleSubmit} />
+          <div className="bg-white shadow-lg rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-blue-600">
+              Booked Dates Calendar
+            </h2>
+            <BookingCalender
+              bookedCalls={bookedCalls}
+              bookedDates={bookedDates}
+              setSelectedDateBookings={setSelectedDateBookings}
+            />
+          </div>
         </div>
-
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-blue-600">
-            Booked Dates Calendar
-          </h2>
-          <BookingCalender
-            bookedCalls={bookedCalls}
-            bookedDates={bookedDates}
-            setSelectedDateBookings={setSelectedDateBookings}
-          />
+        <div className="w-full lg:w-1/3 p-3 flex flex-col justify-start items-center gap-10">
+          <WeAreHiring hiring={hiring} />
         </div>
       </div>
 

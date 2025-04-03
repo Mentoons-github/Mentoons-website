@@ -131,14 +131,14 @@ const NewsAndMentor = () => {
             </motion.span>
           </motion.span>
         </h1>
-        <div className="absolute top-0 left-0 w-16 sm:top-10 md:top-20 lg:top-0 sm:w-20 sm:h-20">
+        <div className="absolute top-0 left-0 w-16 sm:top-10 md:top-20 lg:-top-12 sm:w-20 sm:h-20">
           <img
             src="/assets/home/newsAndMentor/folded newspaper.png"
             alt="newspaper"
             className="object-cover w-auto"
           />
         </div>
-        <div className="absolute top-0 right-0 w-20 sm:w-32">
+        <div className="absolute top-8 right-0 w-20 sm:w-32">
           <img
             src="/assets/home/newsAndMentor/Messaging with paper airplanes, envelope and speech bubble.png"
             alt="newspaper"
