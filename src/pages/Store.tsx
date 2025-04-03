@@ -9,7 +9,7 @@ import { ModalMessage } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -69,6 +69,8 @@ const Store = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
+  const productSectionRef = useRef<HTMLDivElement | null>(null);
+
   const handleSelectedCategory = async (category: string) => {
     try {
       console.log(category);
@@ -102,6 +104,14 @@ const Store = () => {
             })
           );
           console.log(cards.payload);
+          setTimeout(() => {
+            if (productSectionRef.current) {
+              productSectionRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }
+          }, 100);
         } else {
           await dispatch(fetchProducts({}));
         }
@@ -546,7 +556,7 @@ const Store = () => {
         </div>
       </div>
 
-      <div className="pb-16" id="product">
+      <div className="pb-16" id="product" ref={productSectionRef}>
         <div className="flex gap-4 items-start p-4 md:items-center">
           <span className="py-0 pl-0 text-2xl font-semibold md:py-12 md:px-12 md:text-3xl">
             {" "}
@@ -605,11 +615,10 @@ const Store = () => {
           <div className="grid grid-cols-1 auto-rows-auto gap-12 mx-20 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
             {products?.length > 0 ? (
               products.map((product) => {
-                // Ensure all required properties are present before passing to ProductCard
-
                 return (
                   <div
                     className="flex justify-center w-full"
+                    id={`product-${product.ageCategory}`}
                     key={product._id + Date.now()}
                   >
                     <ProductCard
