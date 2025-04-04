@@ -3,7 +3,7 @@ import AddToCartModal from "@/components/modals/AddToCartModal";
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ } from "@/constant";
-import { addItemCart, getCart, updateItemQuantity } from "@/redux/cartSlice";
+import { addItemCart } from "@/redux/cartSlice";
 import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
@@ -81,47 +81,9 @@ const ProductDetails = () => {
     RecommendedProducts();
   }, [product, dispatch]);
 
-  const handleUpdateQuantity = async (flag: string, id: string) => {
-    try {
-      const token = await getToken();
-      if (!token) {
-        toast.error("Please login to update cart");
-        return;
-      }
-
-      // Calculate new quantity
-      const newQuantity =
-        flag === "+" ? quantity + 1 : Math.max(1, quantity - 1);
-
-      // If no change in quantity (trying to decrease below 1), return early
-      if (newQuantity === quantity) return;
-
-      if (userId) {
-        const result = await dispatch(
-          updateItemQuantity({
-            token,
-            userId,
-            productId: id,
-            quantity: newQuantity,
-          })
-        ).unwrap();
-
-        // Check if the update was successful
-        if (result.payload) {
-          // Refresh cart data
-          await dispatch(getCart({ token, userId }));
-          setQuantity(newQuantity);
-          toast.success("Cart updated successfully");
-        } else {
-          toast.error("Failed to update cart");
-        }
-      } else {
-        toast.error("Please login to update the cart");
-      }
-    } catch (error) {
-      console.error("Error while updating the cart", error);
-      toast.error("Error while updating the quantity");
-    }
+  const handleUpdateQuantity = (flag: string) => {
+    const newQuantity = flag === "+" ? quantity + 1 : Math.max(1, quantity - 1);
+    setQuantity(newQuantity);
   };
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -148,7 +110,7 @@ const ProductDetails = () => {
             productId: product._id,
             productType: product.type,
             title: product.title,
-            quantity: 1,
+            quantity: quantity || 1,
             price: product.price,
             ageCategory: product.ageCategory,
             productImage: product.productImages?.[0].imageUrl,
@@ -311,18 +273,18 @@ const ProductDetails = () => {
             <div className="flex items-center space-x-2">
               <button
                 disabled={quantity === 1}
-                onClick={() => handleUpdateQuantity("-", product._id)}
+                onClick={() => handleUpdateQuantity("-")}
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
               >
                 <Minus
-                  className={`w-4 h-4  font-bold flex${
+                  className={`w-4 h-4  font-bold flex ${
                     quantity === 1 ? "text-gray-400" : ""
                   } `}
                 />
               </button>
               <span className="w-8 font-bold text-center">{quantity}</span>
               <button
-                onClick={() => handleUpdateQuantity("+", product._id)}
+                onClick={() => handleUpdateQuantity("+")}
                 className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all"
               >
                 <Plus className="w-4 h-4 font-bold" />

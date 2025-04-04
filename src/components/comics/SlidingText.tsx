@@ -7,74 +7,74 @@ const SlidingText: React.FC = () => {
     <div className="marquee">
       <span className="marquee1">
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <Link to="/comic-workshop">
-          <span className="text cursor-pointer">
+          <span className="cursor-pointer text">
             Comic making Workshop
             <img className="w-[15%]" src={Star} alt="star" />
           </span>
         </Link>
         <span className="marquee2">
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>
           </Link>
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>
           </Link>
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>
           </Link>
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>
           </Link>
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>
           </Link>
           <Link to="/comic-workshop">
-            <span className="text cursor-pointer">
+            <span className="cursor-pointer text">
               Comic making Workshop
               <img className="w-[15%]" src={Star} alt="star" />
             </span>

@@ -176,6 +176,7 @@ export const updateItemQuantity = createAsyncThunk(
     try {
       const response = await axios.patch(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
+        // "http://localhost:4000/api/v1/cart/update-quantity",
         {
           userId,
           productId,

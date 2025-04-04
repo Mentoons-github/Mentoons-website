@@ -35,13 +35,13 @@ const FreeDownload: React.FC = () => {
         initial={{ opacity: 0.5 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 2 }}
-        className="space-y-5 pb-8 text-center lg:text-start"
+        className="pb-8 space-y-5 text-center lg:text-start"
       >
         <motion.div
           initial={{ opacity: 0.5 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 2 }}
-          className=" text-3xl text-red-500 lineBefore uppercase"
+          className="text-3xl text-red-500 uppercase lineBefore"
         >
           Free Download{" "}
         </motion.div>
@@ -88,20 +88,12 @@ const FreeDownload: React.FC = () => {
                 <div className="text-xl font-semibold tracking-wide">
                   {item?.name}
                 </div>
-                <div className=" text-sm tracking-wide">{item?.desc}</div>
+                <div className="text-sm tracking-wide ">{item?.desc}</div>
               </div>
-              <div className="w-full flex justify-end items-center">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  className="text-end flex items-center justify-end gap-2 border-t border-gray-200 group-hover:text-red-500 group-hover:underline text-xl pt-4 cursor-pointer"
-                >
-                  Download Now{" "}
-                  <MdCloudDownload className="text-2xl text-red-700 group-hover:text-500" />
-                </button>
-              </div>
+              <a href="" className="flex items-center justify-end gap-2 pt-4 text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline">
+                Download Now{" "}
+                <MdCloudDownload className="text-2xl text-red-700 group-hover:text-500" />
+              </a>
             </motion.div>
           );
         })}
