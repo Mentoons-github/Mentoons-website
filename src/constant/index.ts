@@ -801,7 +801,7 @@ export const FOOTER_PAGELINKS = [
     items: [
       {
         id: "AB_1",
-        label: "metalmahesh@gmail.com",
+        label: "info@mentoons.com",
         url: "#",
       },
       {
