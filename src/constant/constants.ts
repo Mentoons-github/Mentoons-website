@@ -13,6 +13,7 @@ import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
 import { PARENTS } from "./adda/groups";
 import { MYTHOS_PLANS } from "./mythos/membershipPlans";
 import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
+import { COMIC_COLOR, PRODUCTS_BENEFITS } from "./products";
 import {
   ASSESSMENTS,
   HIRING,
@@ -47,4 +48,6 @@ export {
   HIRING,
   ASSESSMENT_DATA,
   REPORTS,
+  COMIC_COLOR,
+  PRODUCTS_BENEFITS,
 };

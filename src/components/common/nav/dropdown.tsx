@@ -21,7 +21,7 @@ const DropDown = ({
     console.log("selectedCategory : ", category);
     if (isOpen) isOpen(false);
     const basePath =
-      labelType === "products" ? "/mentoons-store" : "/mentoons-games";
+      labelType === "products" ? "/product-page" : "/mentoons-games";
     navigate(`${basePath}?category=${encodeURIComponent(category)}`);
   };
 

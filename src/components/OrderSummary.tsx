@@ -9,7 +9,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 // import { useNavigate } from "react-router-dom";
 
@@ -331,11 +331,13 @@ const OrderSummary: React.FC = () => {
         className="flex items-center justify-center hidden md:block md:w-1/2"
         variants={itemVariants}
       >
-        <img
-          src="/assets/store/orderSummary/Instruction.png"
-          alt="Order Illustration"
-          className="w-full h-auto rounded-lg"
-        />
+        <NavLink to="/assesment-page">
+          <img
+            src="/assets/assesments/assessment/Assessment .png"
+            alt="Order Illustration"
+            className="w-full max-h-[500px] h-auto object-contain rounded-lg"
+          />
+        </NavLink>
       </motion.div>
     </motion.div>
   );

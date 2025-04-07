@@ -58,7 +58,7 @@ const HeroSection = () => {
           repeat: Infinity,
           repeatType: "mirror",
         }}
-        className="absolute hidden sm:block -top-5 lg:top-10 lg:left-24 sm:w-28 md:w-32 lg:w-40 xl:w-48 sm:h-28 md:h-32 lg:h-40 xl:h-48 z-[-1]"
+        className="absolute hidden sm:block top-40 sm:left-10 md:top-40 lg:top-20 xl:top-10 lg:left-10 xl:left-24 sm:w-28 md:w-32 lg:w-40 xl:w-48 sm:h-28 md:h-32 lg:h-40 xl:h-48 z-[-1]"
       />
 
       <div className="relative flex justify-center w-full">
