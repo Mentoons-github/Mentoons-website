@@ -270,7 +270,7 @@ const ProductsPage = () => {
             isInView={true}
             selectedCategory={selectedCategory}
             setSelectedCategory={handleSelectedCategory}
-            className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 md:gap-16 lg:gap-20 w-full mx-auto lg:mx-0 mt-10"
+            className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-10 md:gap-16 lg:gap-20 w-full mx-auto lg:mx-0 mt-10"
           />
         </>
       )}
