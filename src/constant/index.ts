@@ -7,9 +7,8 @@ import {
   FaShare,
   FaShoppingCart,
 } from "react-icons/fa";
-import { FaCalendarCheck, FaCoins, FaUsers } from "react-icons/fa6";
+import { FaCalendarCheck, FaChartBar, FaCoins, FaUsers } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
-import { MdAssessment } from "react-icons/md";
 
 export const CATEGORIES = [
   "Comedy",
@@ -1149,7 +1148,7 @@ export const NAV_LINKS: NavLink[] = [
   {
     id: "NL_14",
     label: "Assessments",
-    icon: MdAssessment,
+    icon: FaChartBar,
     url: "/assesment-page",
   },
   {

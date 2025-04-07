@@ -40,9 +40,13 @@ const Sidebar = ({
           ].includes(data.label)
         )
       : NAV_LINKS.filter((data) =>
-          ["Mythos", "Products", "Browse Plans", "Workshops"].includes(
-            data.label
-          )
+          [
+            "Mythos",
+            "Products",
+            "Browse Plans",
+            "Workshops",
+            "Assessments",
+          ].includes(data.label)
         );
 
   useEffect(() => {
@@ -94,7 +98,11 @@ const Sidebar = ({
               onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
             >
               {label === "Products" && dropdown.products && (
-                <DropDown isOpen={setIsOpen} items={items} />
+                <DropDown
+                  isOpen={setIsOpen}
+                  items={items}
+                  labelType="products"
+                />
               )}
             </NavButton>
           ) : (
@@ -106,7 +114,7 @@ const Sidebar = ({
                   ? (e) => handleClick(e)
                   : () => setIsOpen(false)
               }
-              className="text-white text-2xl sm:text-3xl md:text-4xl flex items-center gap-2"
+              className="text-white text-2xl sm:text-3xl md:text-4xl flex items-center gap-2 transition duration-300 ease-in-out hover:text-yellow-500"
             >
               {label}
             </Link>
