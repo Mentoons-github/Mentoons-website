@@ -103,7 +103,7 @@ const Store = () => {
               token: token!,
             })
           );
-          console.log(cards.payload);
+          console.log("data found : ", cards.payload);
           setTimeout(() => {
             if (productSectionRef.current) {
               productSectionRef.current.scrollIntoView({

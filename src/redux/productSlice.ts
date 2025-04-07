@@ -93,6 +93,26 @@ export const fetchProducts = createAsyncThunk<
   }
 );
 
+export const fetchAllProducts = createAsyncThunk<
+  ProductBase[],
+  void,
+  { rejectValue: string }
+>("products/fetchAllProducts", async (_, thunkAPI) => {
+  try {
+    const response = await axios.get(
+      "https://mentoons-backend-zlx3.onrender.com/api/v1/products/all"
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+    return thunkAPI.rejectWithValue("An unknown error occurred");
+  }
+});
+
 // Fetch a single product by ID.
 export const fetchProductById = createAsyncThunk<
   Product,
@@ -332,6 +352,23 @@ const productSlice = createSlice({
       state.error = "An error occurred";
     });
 
+    //fetchAllProducts
+    builder.addCase(fetchAllProducts.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(
+      fetchAllProducts.fulfilled,
+      (state, action: PayloadAction<ProductBase[]>) => {
+        state.loading = false;
+        state.items = action.payload;
+      }
+    );
+    builder.addCase(fetchAllProducts.rejected, (state, action) => {
+      state.loading = false;
+      state.error = (action.payload as string) || "An error occurred";
+    });
+
     // createProduct
     builder.addCase(createProduct.pending, (state) => {
       state.loading = true;
@@ -381,6 +418,7 @@ const productSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
+
     builder.addCase(
       deleteProduct.fulfilled,
       (state, action: PayloadAction<string>) => {

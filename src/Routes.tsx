@@ -28,6 +28,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import ProductsPage from "./pages/v2/user/products/products.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -45,6 +46,10 @@ const routes = [
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },
+  {
+    path: "/product-page",
+    element: <ProductsPage />,
+  },
   {
     path: "/cart",
     element: (
