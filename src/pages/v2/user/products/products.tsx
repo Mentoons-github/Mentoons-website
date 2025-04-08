@@ -116,7 +116,7 @@ const ProductsPage = () => {
 
   const handleSelectedCategory = async (category: string) => {
     try {
-      const searchParams = new URLSearchParams(window.location.search);
+      const searchParams = new URLSearchParams(window.location.pathname);
       if (category === "all") {
         if (sectionRef.current) {
           sectionRef.current.scrollIntoView({
@@ -163,6 +163,12 @@ const ProductsPage = () => {
               token: token!,
             })
           );
+          if (sectionRef.current) {
+            sectionRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
         } else {
           await dispatch(fetchProducts({}));
         }
@@ -264,7 +270,7 @@ const ProductsPage = () => {
       </div>
       {!searchTerm && (
         <>
-          <ProductsSlider shopNow={handleSelectedCategory} />
+          <ProductsSlider shopNow={setSearchTerm} />
           <AgeButton
             showAll={true}
             isInView={true}

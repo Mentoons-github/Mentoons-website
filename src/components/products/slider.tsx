@@ -224,11 +224,7 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
               </p>
               <button
                 className="mt-5 bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-opacity-80 transition-colors"
-                onClick={() =>
-                  shopNow(
-                    product.title === "Conversation Story Cards" ? "20+" : "all"
-                  )
-                }
+                onClick={() => shopNow(product.title)}
               >
                 Shop Now
               </button>

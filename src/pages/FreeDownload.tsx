@@ -90,7 +90,7 @@ const FreeDownload: React.FC = () => {
                 </div>
                 <div className="text-sm tracking-wide ">{item?.desc}</div>
               </div>
-              <a href="" className="flex items-center justify-end gap-2 pt-4 text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline">
+              <a href="#" onClick={(e)=>e.preventDefault()} className="flex items-center justify-end gap-2 pt-4 text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline">
                 Download Now{" "}
                 <MdCloudDownload className="text-2xl text-red-700 group-hover:text-500" />
               </a>

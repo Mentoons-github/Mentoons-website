@@ -768,27 +768,27 @@ export const FOOTER_PAGELINKS = [
   {
     id: "FP_2",
     title: "Mentoons Products",
-    url: "/mentoons-store",
+    url: "/product-page",
     items: [
       {
         id: "S_1",
         label: "Conversation Starter Cards",
-        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
+        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
       },
       {
         id: "S_2",
         label: "Story Re-Teller Cards",
-        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
+        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
       },
       {
         id: "S_3",
         label: "Silent Stories",
-        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
+        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
       },
       {
         id: "S_4",
         label: "Conversataion Story Card",
-        url: `/mentoons-store?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
+        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
     ],
   },
