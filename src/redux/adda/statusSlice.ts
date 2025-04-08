@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-import { StatusState, StatusInterface } from "@/types/adda/status";
+import { StatusInterface, StatusState } from "@/types/adda/status";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: StatusState = {

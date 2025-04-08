@@ -8,8 +8,8 @@ import { IoIosCart } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import AddToCartModal from "../modals/AddToCartModal";
 import LoginModal from "../common/modal/loginModal";
+import AddToCartModal from "../modals/AddToCartModal";
 
 const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
@@ -101,7 +101,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
             alt={productDetails.title}
             className="object-contain w-full h-full"
           />
-          <div className="absolute top-1 right-1">
+          <div className="absolute bottom-0 right-1">
             {(productDetails?.title ===
               "Conversation Starter Cards (6-12) years" ||
               productDetails?.title === "Silent Stories (6-12) years") &&
@@ -114,11 +114,22 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
                       : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
                   }`}
                   download
-                  className="px-2 py-1 ml-4 text-xs text-green-700 transition-all duration-200 bg-green-200 border border-green-300 shadow-lg hover:opacity-55 rounded-xl"
+                  className="px-2 py-1 ml-4 text-xs font-bold text-green-700 transition-all duration-200 bg-green-200 border border-green-300 rounded-sm shadow-lg hover:opacity-55"
                 >
                   Download Free Sample
                 </a>
               )}
+            {productDetails.type === "comic" ? (
+              <span className="px-2 py-1 text-sm text-yellow-700 bg-yellow-300 rounded w-fit">
+                E-comic
+              </span>
+            ) : (
+              productDetails.type === "audio comic" && (
+                <span className="px-2 py-1 text-sm rounded bg-rose-300 text-rose-700 w-fit">
+                  Audio comic
+                </span>
+              )
+            )}
           </div>
         </div>
 
@@ -128,9 +139,15 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
               {productDetails.title}
             </h3>
 
-            <span className="font-bold text-primary">
-              ₹{productDetails.price}
-            </span>
+            <p className="font-bold text-primary whitespace-nowrap">
+              {productDetails.price === 0 ? (
+                <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
+                  Free
+                </span>
+              ) : (
+                `₹ ${productDetails.price}`
+              )}
+            </p>
           </div>
 
           <p className="mb-2 text-sm text-gray-500 line-clamp-2">
@@ -141,24 +158,37 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
             <Rating ratings={productDetails.rating || 4.5} />
           </div>
 
-          <div className="flex flex-col gap-2 mt-auto">
+          {productDetails.price === 0 ? (
             <button
-              className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-              onClick={(e) => handleAddtoCart(e)}
-              disabled={isLoading}
+              onClick={() => {
+                if ('sampleUrl' in productDetails.details) {
+                  window.open(productDetails.details.sampleUrl, "_blank");
+                }
+              }}
+              className="flex justify-center w-full py-2 mt-20 font-medium text-white transition-colors bg-green-500 rounded items-cnerter pcenterx-4 hover:bg-primary-dark"
             >
-              <IoIosCart className="w-5 h-5 mr-2" />
-              {isLoading ? "Adding..." : "Add to Cart"}
+              Download For Free
             </button>
+          ) : (
+            <div className="flex flex-col gap-2 mt-auto">
+              <button
+                className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                onClick={(e) => handleAddtoCart(e)}
+                disabled={isLoading}
+              >
+                <IoIosCart className="w-5 h-5 mr-2" />
+                {isLoading ? "Adding..." : "Add to Cart"}
+              </button>
 
-            <button
-              className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
-              onClick={(e) => handleBuyNow(e, productDetails)}
-              disabled={isLoading}
-            >
-              Buy Now
-            </button>
-          </div>
+              <button
+                className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
+                onClick={(e) => handleBuyNow(e, productDetails)}
+                disabled={isLoading}
+              >
+                Buy Now
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
       {showAddToCartModal && (

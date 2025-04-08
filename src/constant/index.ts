@@ -718,7 +718,7 @@ export const FOOTER_NAVLINKS = [
   {
     id: "L_2",
     title: "Comics",
-    url: "/mentoons-comics",
+    url: "/mentoons-comics?option=comic",
   },
   {
     id: "L_3",

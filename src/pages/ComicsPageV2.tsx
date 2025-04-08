@@ -1,33 +1,55 @@
 import ComicViewer from "@/components/common/ComicViewer";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
-import { audioComicsData, comicsData } from "@/constant/comicsConstants";
-import { useUser } from "@clerk/clerk-react";
+// import { comicsData } from "@/constant/comicsConstants";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch, RootState } from "@/redux/store";
+import {
+  AudioComicProduct,
+  ComicProduct,
+  ProductBase,
+} from "@/types/productTypes";
+import { formatDateString } from "@/utils/formateDate";
+
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
 
 const ComicsPageV2 = () => {
-  const [selectedOption, setSelectedOption] = useState("e-comics");
+  const {
+    items: products,
+    // loading,
+    // error,
+  } = useSelector((state: RootState) => state.products);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [selectedComic, setSelectedComic] = useState(comicsData[0]);
+  const [selectedComic, setSelectedComic] = useState<ProductBase>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showComicModal, setShowComicModal] = useState(false);
   const [comicToView, setComicToView] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  // const [ageCategory, setAgeCategory] = useState<string>("");
+  const option =
+    new URLSearchParams(window.location.search).get("option") || "comic";
+  const [selectedOption, setSelectedOption] = useState(option);
 
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { getToken } = useAuth();
   const { user } = useUser();
 
   const membershipType = user?.publicMetadata?.membershipType || "free";
 
-  const maxComicsToRead = membershipType === "platinum" ? 5 : comicsData.length;
-  const accessibleComics = comicsData.slice(0, maxComicsToRead);
+  const maxComicsToRead = membershipType === "platinum" ? 5 : products.length;
+  const accessibleComics = products.slice(0, maxComicsToRead);
 
   console.log(accessibleComics);
+  console.log(selectedComic);
   // Add refs for scroll animations
   const heroRef = useRef(null);
   const trendingRef = useRef(null);
@@ -42,8 +64,15 @@ const ComicsPageV2 = () => {
   });
 
   const handleSelectedOption = (option: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("option", option);
+    window.history.pushState(null, "", `?${searchParams.toString()}`);
     setSelectedOption(option);
   };
+
+  // const handleAgeCategory = (category: string) => {
+  //   setAgeCategory(category);
+  // };
 
   const handleScroll = () => {
     const carousel = carouselRef.current;
@@ -84,6 +113,43 @@ const ComicsPageV2 = () => {
     setIsPlaying(false);
   };
 
+  console.log(selectedComic);
+
+  useEffect(() => {
+    const fetchComics = async () => {
+      try {
+        // Fetch products with the current filters
+        const token = await getToken();
+        if (selectedOption ) {
+          const cards = await dispatch(
+            fetchProducts({
+              type: selectedOption,
+              // ageCategory: ageCategory,
+              token: token!,
+            })
+          );
+          console.log(cards.payload);
+          console.log("Product", products);
+          setSelectedComic(products[0]);
+          // setTimeout(() => {
+          //   if (productSectionRef.current) {
+          //     productSectionRef.current.scrollIntoView({
+          //       behavior: "smooth",
+          //       block: "start",
+          //     });
+          //   }
+          // }, 100);
+        } else {
+          await dispatch(fetchProducts({}));
+        }
+      } catch (error: unknown) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchComics();
+  }, [dispatch, selectedOption, option, getToken]);
+
   return (
     <div>
       {/* Progress bar */}
@@ -116,10 +182,11 @@ const ComicsPageV2 = () => {
           <h2 className="py-4 text-3xl text-center luckiest-guy-regular">
             CHOOSE COMICS BEST FOR YOU!
           </h2>
-          <div>
+          <div className="flex items-center justify-center w-full p-4 pr-24">
             <img
               src="/assets/comic-V2/comic-hero-v2.png"
               alt="comic page hero Image"
+              className="w-full h-auto "
             />
           </div>
         </div>
@@ -139,20 +206,20 @@ const ComicsPageV2 = () => {
         <div className="flex items-center justify-center gap-6 pb-6">
           <button
             className={`flex items-center justify-center gap-3 px-5 py-2  rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 font-medium ${
-              selectedOption === "e-comics" &&
+              selectedOption === "comic" &&
               "ring-4 ring-yellow-400 shadow-xl shadow-yellow-100"
             }`}
-            onClick={() => handleSelectedOption("e-comics")}
+            onClick={() => handleSelectedOption("comic")}
           >
             <span className="w-1 h-1 bg-black rounded-full" />
             E-Comics
           </button>
           <button
             className={`flex items-center justify-center gap-3 px-5 py-2  rounded-full bg-rose-200 border border-rose-500  hover:ring-4 hover:ring-rose-500 transition-all duration-200  font-medium ${
-              selectedOption === "audio-comics" &&
+              selectedOption === "audio comic" &&
               "ring-4 ring-rose-500 shadow-xl shadow-rose-100"
             }`}
-            onClick={() => handleSelectedOption("audio-comics")}
+            onClick={() => handleSelectedOption("audio comic")}
           >
             <span className="w-1 h-1 bg-black rounded-full" />
             Audio Comic
@@ -164,168 +231,104 @@ const ComicsPageV2 = () => {
       </motion.div>
 
       {/* //dynamic content section */}
-      {selectedOption === "e-comics" && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.4 }}
-          className="h-[600px] flex items-center justify-center w-[80%] mx-auto mb-20 bg-[#FFE9C1]"
-        >
-          <div className="flex-[0.4] h-full relative  overflow-hidden ">
-            <div
-              className="bg-primary rounded-full absolute -top-[200px] -left-[700px]  w-[1000px] h-[1000px]  "
-              id="circle"
-            >
-              <div className="w-[1000px] h-[1000px] relative">
-                {comicsData.map((comic, index) => (
-                  <img
-                    key={comic.name}
-                    src={comic.thumbnail}
-                    alt={comic.name}
-                    className={`object-cover absolute w-64 ${
-                      index === 0
-                        ? "top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                        : index === 1
-                        ? "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
-                        : index === 2
-                        ? "left-0 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                        : "right-0 top-1/2 translate-x-1/2 -translate-y-1/2"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex-[0.6] px-12 py-4">
-            <h2 className="py-4 text-4xl font-semibold">
-              {selectedComic.name}
-            </h2>
-            <p className="pb-6 pr-24 text-xl">{selectedComic.desc}</p>
-            <button
-              className="py-3 text-xl font-semibold text-white rounded-full px-7 bg-primary"
-              onClick={() => openComicModal(selectedComic.comicLink)}
-            >
-              Read More
-            </button>
-            <div className="flex items-center justify-end gap-4 pt-4">
-              <button
-                className="p-3 text-xl font-semibold text-white rounded-full bg-primary"
-                onClick={() => {
-                  const circle = document.getElementById("circle");
-                  const images = circle?.getElementsByTagName("img");
-                  if (circle && images) {
-                    let currentRotation = parseInt(
-                      circle.getAttribute("data-rotation") || "0"
-                    );
-                    currentRotation -= 90;
-                    circle.style.transform = `rotate(${currentRotation}deg)`;
-                    circle.style.transition = "transform 0.5s ease";
-                    circle.setAttribute(
-                      "data-rotation",
-                      currentRotation.toString()
-                    );
-                    setSelectedComic(
-                      comicsData[
-                        (currentIndex - 1 + comicsData.length) %
-                          comicsData.length
-                      ]
-                    );
-                    setCurrentIndex(
-                      (prevIndex) =>
-                        (prevIndex - 1 + comicsData.length) % comicsData.length
-                    );
+      {selectedOption === "comic" && (
+        <div className="flex items-center justify-center gap-6 pb-6 w-[95%] md:w-[90%] mx-auto  h-[700px] bg-yellow-100 mb-16 relative overflow-hidden ">
+          <div className="absolute  w-[1000px] h-[1000px] rounded-full bg-primary bottom-[10] -left-96 "></div>
+          <div className="absolute  w-[200px] h-[200px] rounded-full bg-primary -top-16 -right-16 "></div>
+          <div className="relative   w-[95%] md:w-[90%] mx-auto flex flex-col items-center justify-between  overflow-y-scroll  gap-20 h-[700px] py-20">
+            {products.map((product, index) => {
+              return (
+                <div
+                  className="flex flex-col items-start justify-between w-full gap-20 p-4 mt-8 rounded-lg md:flex-row"
+                  key={product.title + index}
+                >
+                  <div className="flex-1 ">
+                    <img
+                      src={product?.productImages?.[0].imageUrl}
+                      alt={product?.title}
+                      className="object-cover w-full"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div>
+                      <h2
+                        className="py-4 font-bold leading-none text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute after:animate-[sparkle_2s_ease-in-out_infinite] [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)]"
+                        data-badge={product.price !== 0 ? "Premium" : "Free"}
+                      >
+                        {product.title}
+                      </h2>
 
-                    // Counter-rotate images to maintain orientation
-                    Array.from(images).forEach((img) => {
-                      const position = img.className.includes("top-0")
-                        ? "translate(-50%, -50%)"
-                        : img.className.includes("bottom-0")
-                        ? "translate(-50%, 50%)"
-                        : img.className.includes("left-0")
-                        ? "translate(-50%, -50%)"
-                        : "translate(50%, -50%)";
-                      img.style.transform = `${position} rotate(${-currentRotation}deg)`;
-                      img.style.transition = "transform 0.5s ease";
-                    });
-                  }
-                }}
-              >
-                <IoIosArrowBack className="text-3xl" />
-              </button>
-              <button
-                className="p-3 text-xl font-semibold text-white rounded-full bg-primary"
-                onClick={() => {
-                  const circle = document.getElementById("circle");
-                  const images = circle?.getElementsByTagName("img");
-                  if (circle && images) {
-                    let currentRotation = parseInt(
-                      circle.getAttribute("data-rotation") || "0"
-                    );
-                    currentRotation += 90;
-                    circle.style.transform = `rotate(${currentRotation}deg)`;
-                    circle.style.transition = "transform 0.5s ease";
-                    circle.setAttribute(
-                      "data-rotation",
-                      currentRotation.toString()
-                    );
-                    setSelectedComic(
-                      comicsData[(currentIndex + 1) % comicsData.length]
-                    );
-                    setCurrentIndex(
-                      (prevIndex) => (prevIndex + 1) % comicsData.length
-                    );
-
-                    // Counter-rotate images to maintain orientation
-                    Array.from(images).forEach((img) => {
-                      const position = img.className.includes("top-0")
-                        ? "translate(-50%, -50%)"
-                        : img.className.includes("bottom-0")
-                        ? "translate(-50%, 50%)"
-                        : img.className.includes("left-0")
-                        ? "translate(-50%, -50%)"
-                        : "translate(50%, -50%)";
-                      img.style.transform = `${position} rotate(${-currentRotation}deg)`;
-                      img.style.transition = "transform 0.5s ease";
-                    });
-                  }
-                }}
-              >
-                <IoIosArrowForward className="text-3xl" />
-              </button>
-            </div>
+                      {/* <h2
+                        className="py-4 font-bold leading-none text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)]"
+                        data-badge={product.price !== 0 ? "Premium" : "Free"}
+                      >
+                        {product.title}
+                      </h2> */}
+                      <p className="pb-4 text-xl tracking-wide text-neutral-500">
+                        {product.description}
+                      </p>
+                    </div>
+                    <div>
+                      <button
+                        className="px-8 py-3 text-xl font-bold text-white rounded-full bg-primary "
+                        onClick={() => {
+                          return openComicModal(
+                            (product.details as ComicProduct["details"])
+                              ?.sampleUrl || ""
+                          );
+                        }}
+                      >
+                        Read More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </motion.div>
+        </div>
       )}
-
       {/* Audio comics video */}
-      {selectedOption === "audio-comics" && (
+      {selectedOption === "audio comic" && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.4 }}
-          className="bg-[#FFBABA] relative h-[800px] w-[80%] mx-auto overflow-hidden p-12 mb-20"
+          className="bg-[#FFBABA] relative h-[800px] w-[90%] mx-auto overflow-hidden p-12 mb-20"
         >
           <div className="w-[600px] h-[800px] rounded-full bg-[#EF4444] absolute top-[40px] -left-40 z-9" />
           <div className="w-32 h-32 rounded-full bg-[#EF4444] absolute -top-10 -right-10 z-9" />
 
           <div className="relative h-[800px] rounded-xl overflow-hidden ">
             <div className="h-full" ref={carouselRef}>
-              {audioComicsData.map((comic, index) => (
+              {products.map((comic, index) => (
                 <div
-                  key={comic.name + index}
+                  key={comic.title + index}
                   className={`absolute inset-0 w-full h-[680px] bg-white rounded-2xl  group transition-opacity duration-300 ${
                     currentIndex === index
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none"
                   }`}
                 >
-                  {comic.videoLink ? (
+                  {(
+                    comic.details as
+                      | ComicProduct["details"]
+                      | AudioComicProduct["details"]
+                  )?.sampleUrl ? (
                     <video
                       className="object-cover w-full h-full py-6 rounded-2xl"
-                      src={comic.videoLink}
-                      poster={comic.thumbnail || "/placeholder-image.jpg"}
+                      src={
+                        (
+                          comic.details as
+                            | ComicProduct["details"]
+                            | AudioComicProduct["details"]
+                        )?.sampleUrl
+                      }
+                      poster={
+                        comic.productImages?.[0].imageUrl ||
+                        "/placeholder-image.jpg"
+                      }
                       onEnded={(e) => {
                         e.currentTarget.load();
                         setIsPlaying(false);
@@ -352,8 +355,11 @@ const ComicsPageV2 = () => {
                     />
                   ) : (
                     <img
-                      src={comic.thumbnail || "/placeholder-image.jpg"}
-                      alt={comic.name}
+                      src={
+                        comic.productImages?.[0].imageUrl ||
+                        "/placeholder-image.jpg"
+                      }
+                      alt={comic.title}
                       className="object-cover w-full h-full rounded-2xl"
                       onError={(e) => {
                         e.currentTarget.src = "/placeholder-image.jpg";
@@ -365,13 +371,13 @@ const ComicsPageV2 = () => {
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-300 opacity-0 rounded-2xl bg-black/70 group-hover:opacity-100">
                     <h3 className="mb-4 text-3xl font-bold text-center text-white">
-                      {comic.name || "Untitled Comic"}
+                      {comic?.title || "Untitled Comic"}
                     </h3>
                     <p className="mb-8 text-center text-white line-clamp-3">
-                      {comic.desc || "No description available"}
+                      {comic?.description || "No description available"}
                     </p>
 
-                    {comic.videoLink && (
+                    {(comic?.details as ComicProduct["details"])?.sampleUrl && (
                       <button
                         className="flex items-center justify-center w-16 h-16 transition-colors rounded-full bg-white/20 hover:bg-white/30"
                         onClick={(e) => {
@@ -434,7 +440,7 @@ const ComicsPageV2 = () => {
               onClick={() => {
                 pauseAllVideos();
                 setCurrentIndex((prevIndex) =>
-                  prevIndex === 0 ? audioComicsData.length - 1 : prevIndex - 1
+                  prevIndex === 0 ? products.length - 1 : prevIndex - 1
                 );
               }}
               className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
@@ -445,7 +451,7 @@ const ComicsPageV2 = () => {
               onClick={() => {
                 pauseAllVideos();
                 setCurrentIndex(
-                  (prevIndex) => (prevIndex + 1) % audioComicsData.length
+                  (prevIndex) => (prevIndex + 1) % products.length
                 );
               }}
               className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
@@ -463,39 +469,44 @@ const ComicsPageV2 = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="w-[90%] mx-auto mb-20 relative"
+        className="w-[95%] md:w-[90%] mx-auto mb-20 relative"
       >
-        <h2 className="pb-6 text-4xl font-semibold">
+        <h2 className="pb-6 text-3xl font-semibold md:text-4xl">
           Trending Comics For You!
         </h2>
         <div
-          className="flex gap-8 overflow-x-auto scroll-smooth"
+          className="flex gap-4 overflow-x-auto md:gap-8 scroll-smooth"
           ref={carouselRef}
         >
-          {comicsData.map((comic, index) => (
+          {products.map((comic: ProductBase, index) => (
             <div
               className="flex-shrink-0 p-4 transition-all duration-300 border border-gray-300 rounded-lg cursor-pointer hover:shadow-lg"
-              key={comic.name + index}
-              onClick={() => openComicModal(comic.comicLink)}
+              key={comic.title + index}
+              onClick={() => {
+                if ("sampleUrl" in comic.details) {
+                  openComicModal(comic.details.sampleUrl || "");
+                }
+              }}
             >
               <div className="relative overflow-hidden rounded-lg">
                 <img
-                  src={comic.thumbnail}
-                  alt={comic.name}
+                  src={comic.productImages?.[0].imageUrl}
+                  alt={comic.title}
                   className="object-contain h-[25rem] rounded-lg transition-transform duration-300 hover:scale-105"
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t to-transparent from-black/70">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/80 text-gray-900 ring-1 ring-inset ring-gray-200/20 backdrop-blur-2xl">
-                    {comic.category}
+                    {comic?.ageCategory}
                   </span>
+                  <span>{comic?.type}</span>
                 </div>
               </div>
               <div className="pt-4">
                 <h3 className="text-xl font-medium line-clamp-1">
-                  {comic.name}
+                  {comic?.title}
                 </h3>
                 <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                  {comic.desc}
+                  {comic?.description}
                 </p>
               </div>
             </div>
@@ -563,7 +574,7 @@ const ComicsPageV2 = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="w-[90%] mx-auto mb-20 md:flex gap-8"
+        className="w-[95%] md:w-[90%] mx-auto mb-20 flex flex-col md:flex-row gap-8"
       >
         <div className="relative flex items-center justify-center flex-1 h-full">
           <div className="flex flex-col items-center justify-center py-16 text-6xl font-semibold text-center md:py-32 md:text-7xl lg:text-9xl text-nuetural-800 luckiest-guy-regular">
@@ -586,28 +597,41 @@ const ComicsPageV2 = () => {
           <div className="flex items-start gap-10 pb-4">
             <div>
               <img
-                src={comicsData[0].thumbnail}
-                alt={comicsData[0].name}
-                className="w-44"
+                src={
+                  products?.[0]?.productImages?.[0].imageUrl ||
+                  "/placeholder-image.jpg"
+                }
+                alt={products?.[0]?.title}
+                className="w-96"
               />
             </div>
             <div>
               <h2 className="pb-1 text-4xl font-semibold">
-                {comicsData[0].name}
+                {products?.[0]?.title}
               </h2>
-              <h3 className="text-lg font-semibold">For Teenagers</h3>
+              <h3 className="text-lg font-semibold">
+                For {products?.[0]?.ageCategory}
+              </h3>
             </div>
           </div>
           <div className="pt-4">
             <div className="pb-2 font-semibold text-gray-500 text-md">
               {" "}
-              JAN 13TH &#x2022; 12 MIN
+              {formatDateString(
+                (products?.[0]?.details as ComicProduct["details"])
+                  ?.releaseDate || ""
+              )}
             </div>
-            <p className="text-lg font-medium">{comicsData[0].desc}</p>
+            <p className="text-lg font-medium">{products[0]?.description}</p>
             <div className="flex items-center justify-between pt-10">
               <button
                 className="py-4 font-semibold text-white rounded-full shadow-xl px-7 bg-primary"
-                onClick={() => openComicModal(comicsData[0].comicLink)}
+                onClick={() =>
+                  openComicModal(
+                    (products[0].details as ComicProduct["details"])
+                      ?.sampleUrl || ""
+                  )
+                }
               >
                 READ MORE
               </button>

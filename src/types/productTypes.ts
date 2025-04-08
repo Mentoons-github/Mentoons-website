@@ -8,7 +8,7 @@ export enum AgeCategory {
 
 export enum ProductType {
   COMIC = "comic",
-  AUDIO_COMIC = "audio_comic",
+  AUDIO_COMIC = "audio comic",
   PODCAST = "podcast",
   WORKSHOP = "workshop",
   ASSESSMENT = "assessment",
@@ -59,10 +59,11 @@ export interface ProductBase {
 export interface ComicProduct extends ProductBase {
   type: ProductType.COMIC;
   details: {
-    pages: number;
-    author: string;
+    pages?: number;
+    author?: string;
     publisher?: string;
     language?: string;
+    sampleUrl?: string | undefined; // URL to a sample comic page
     releaseDate?: string;
     series?: string;
   };
@@ -71,23 +72,25 @@ export interface ComicProduct extends ProductBase {
 export interface AudioComicProduct extends ProductBase {
   type: ProductType.AUDIO_COMIC;
   details: {
-    duration: number; // in seconds
-    narrator: string;
+    duration?: number; // in seconds
+    narrator?: string;
     language?: string;
+    format: string;
+    sampleDuration?: string;
+    sampleUrl?: string | undefined;
     releaseDate?: string; // ISO date string
-    sampleUrl?: string; // URL to a sample audio clip
   };
 }
 
 export interface PodcastProduct extends ProductBase {
   type: ProductType.PODCAST;
   details: {
-    episodeNumber: number;
+    episodeNumber?: number;
     host?: string;
     language?: string;
     releaseDate?: string; // ISO date string
     duration?: number; // Duration of the episode in minutes
-    sampleUrl?: string; // URL to a sample audio clip
+    sampleUrl?: string | undefined; // URL to a sample audio clip
   };
 }
 
