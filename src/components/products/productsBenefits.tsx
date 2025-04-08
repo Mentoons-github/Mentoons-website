@@ -15,7 +15,7 @@ const ProductsBenefits = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="h-screen flex flex-col items-center justify-center py-20 px-5"
+      className="h-fit flex flex-col items-center justify-center px-5"
     >
       <div className="bg-white w-full">
         <div className="py-7 px-4 sm:px-10 rounded-lg">
