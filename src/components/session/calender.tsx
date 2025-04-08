@@ -82,7 +82,9 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     for (let i = 0; i < firstDay; i++) {
-      calendar.push(<div key={`empty-${i}`} className="p-2 bg-sky-50"></div>);
+      calendar.push(
+        <div key={`empty-${i}`} className="p-1 sm:p-2 bg-sky-50"></div>
+      );
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -102,13 +104,13 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
         <div
           key={day}
           onClick={() => handleDateClick(currentDateString)}
-          className={`p-2 text-center rounded relative cursor-pointer transition-all duration-300 hover:scale-105 ${
+          className={`p-1 sm:p-2 text-center rounded relative cursor-pointer transition-all duration-300 hover:scale-105 ${
             isBooked
               ? "bg-yellow-100 text-yellow-800 font-bold"
               : "bg-green-100 text-green-600"
           } ${isPastDate ? "opacity-50" : ""}`}
         >
-          {day}
+          <span className="text-xs sm:text-sm md:text-base">{day}</span>
           {bookingsOnDay.length > 0 && (
             <div
               className={`absolute bottom-0 left-0 right-0 h-1 ${
@@ -118,18 +120,20 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
           )}
           {bookingsOnDay.length > 0 && (
             <div
-              className="absolute top-0 right-0 bg-rainbow text-white rounded-full w-5 h-5 
+              className="absolute top-0 right-0 bg-rainbow text-white rounded-full w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 
                          flex items-center justify-center text-xs animate-bounce"
             >
-              {bookingsOnDay.length}
+              <span className="text-xxs sm:text-xs">
+                {bookingsOnDay.length}
+              </span>
             </div>
           )}
           {isCompletedBooking && (
             <div
-              className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full w-4 h-4 
-                         flex items-center justify-center text-xs"
+              className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full w-3 h-3 sm:w-4 sm:h-4 
+                         flex items-center justify-center"
             >
-              ✓
+              <span className="text-xxs sm:text-xs">✓</span>
             </div>
           )}
         </div>
@@ -142,15 +146,16 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
   return (
     <div className="min-h-fit bg-gradient-to-br from-sky-100 via-white to-green-100 flex relative overflow-hidden border shadow-xl">
       <div className="w-full relative z-10">
-        <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
+        <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-2 sm:p-4 md:p-6">
+          <div className="flex justify-between items-center mb-2 sm:mb-4">
             <button
               onClick={goToPreviousMonth}
-              className="text-blue-600 hover:bg-blue-100 p-2 rounded-full transition-all"
+              className="text-blue-600 hover:bg-blue-100 p-1 sm:p-2 rounded-full transition-all text-xs sm:text-sm md:text-base"
             >
-              ◀️ Previous
+              <span className="hidden sm:inline">◀️ Previous</span>
+              <span className="sm:hidden">◀️</span>
             </button>
-            <h2 className="text-2xl font-bold text-blue-600">
+            <h2 className="text-base sm:text-xl md:text-2xl font-bold text-blue-600 truncate px-1">
               {currentDate.toLocaleString("default", {
                 month: "long",
                 year: "numeric",
@@ -158,31 +163,42 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
             </h2>
             <button
               onClick={goToNextMonth}
-              className="text-blue-600 hover:bg-blue-100 p-2 rounded-full transition-all"
+              className="text-blue-600 hover:bg-blue-100 p-1 sm:p-2 rounded-full transition-all text-xs sm:text-sm md:text-base"
             >
-              Next ▶️
+              <span className="hidden sm:inline">Next ▶️</span>
+              <span className="sm:hidden">▶️</span>
             </button>
           </div>
-          <div className="grid grid-cols-7 gap-2 text-center">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-              <div key={day} className="font-bold text-gray-600">
-                {day}
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
+            {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+              <div
+                key={day + index}
+                className="font-bold text-gray-600 text-xs sm:text-sm"
+              >
+                <span className="hidden sm:inline">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][index]}
+                </span>
+                <span className="sm:hidden">{day}</span>
               </div>
             ))}
             {generateCalendar()}
           </div>
-          <div className="mt-4 flex items-center justify-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-200 rounded"></div>
-              <span className="text-sm text-gray-600">Available Days</span>
+          <div className="mt-2 sm:mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-200 rounded"></div>
+              <span className="text-xs sm:text-sm text-gray-600">
+                Available
+              </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-rainbow rounded-full"></div>
-              <span className="text-sm text-gray-600">Bookings</span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-rainbow rounded-full"></div>
+              <span className="text-xs sm:text-sm text-gray-600">Bookings</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Completed</span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+              <span className="text-xs sm:text-sm text-gray-600">
+                Completed
+              </span>
             </div>
           </div>
         </div>
