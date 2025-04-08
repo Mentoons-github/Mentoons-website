@@ -1715,7 +1715,7 @@ export const WORKSHOP_MATTERS_POINTS = [
   },
   {
     id: "WM_02",
-    lable: "Caharacter Development",
+    lable: "Character Development",
     description: "Stories that inspire positive behavior and values.",
     icon: "/assets/workshopv2/character-development.png",
   },

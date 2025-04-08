@@ -21,7 +21,7 @@ const SessionBookingForm = ({
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-4 mt-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label
             htmlFor="name"
@@ -67,7 +67,7 @@ const SessionBookingForm = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label
             htmlFor="phone"

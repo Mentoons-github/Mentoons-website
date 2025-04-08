@@ -10,6 +10,7 @@ import productsReducer from "./productSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
 import userStatusReducer from "./adda/statusSlice";
+import sessionReducer from "./sessionSlice";
 
 export const store = configureStore<{
   comics: ReturnType<typeof comicsReducer>;
@@ -23,6 +24,7 @@ export const store = configureStore<{
   cart: ReturnType<typeof cartReducer>;
   products: ReturnType<typeof productsReducer>;
   userStatus: ReturnType<typeof userStatusReducer>;
+  session: ReturnType<typeof sessionReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -36,6 +38,7 @@ export const store = configureStore<{
     cart: cartReducer,
     products: productsReducer,
     userStatus: userStatusReducer,
+    session: sessionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
