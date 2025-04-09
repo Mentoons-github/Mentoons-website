@@ -1,14 +1,21 @@
 import axiosInstance from "@/api/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { IUser } from "@/types";
 
-type SessionDetails = {
-  id: string;
+export type SessionDetails = {
+  _id: string;
+  user: IUser;
+  date: string;
+  time: string;
   name: string;
-  email: string;
   phone: string;
-  selectedDate: string;
-  selectedTime: string;
-  description?: string;
+  email: string;
+  psychologistId: string;
+  description: string;
+  status: "booked" | "completed" | "cancelled" | "pending" | "aborted";
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type SessionState = {
@@ -23,17 +30,24 @@ const initialState: SessionState = {
   error: null,
 };
 
-export const addSesion = createAsyncThunk(
-  "sesion/addSession",
-  async (sessionData: SessionDetails, { rejectWithValue }) => {
+export const fetchSessions = createAsyncThunk(
+  "session/fetchSessions",
+  async (token: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/api/v1/sessionBooking",
-        sessionData
+      const response = await axiosInstance.get(
+        "/api/v1/sessionbookings/getbookings",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      return response.data;
+
+      console.log("sesion response from backend :", response.data);
+      return response.data.session;
     } catch (error) {
-      return rejectWithValue("Failed to book session");
+      return rejectWithValue("Failed to fetch sessions");
     }
   }
 );
@@ -43,17 +57,17 @@ const sessionSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(addSesion.pending, (state) => {
+    builder.addCase(fetchSessions.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
-
-    builder.addCase(addSesion.rejected, (state, action) => {
+    builder.addCase(fetchSessions.fulfilled, (state, action) => {
+      state.loading = false;
+      state.sessions = action.payload;
+    });
+    builder.addCase(fetchSessions.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
-    });
-
-    builder.addCase(addSesion.fulfilled, (state, action) => {
-      state.sessions.push(action.payload);
     });
   },
 });

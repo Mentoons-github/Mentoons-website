@@ -1,10 +1,12 @@
-import { Booking } from "@/types";
+import { SessionDetails } from "@/redux/sessionSlice";
 import React, { useState, useEffect } from "react";
 
 interface BookingCalendarProps {
   bookedDates: string[];
-  bookedCalls: Booking[];
-  setSelectedDateBookings: React.Dispatch<React.SetStateAction<Booking[]>>;
+  bookedCalls: SessionDetails[];
+  setSelectedDateBookings: React.Dispatch<
+    React.SetStateAction<SessionDetails[]>
+  >;
 }
 
 const BookingCalender: React.FC<BookingCalendarProps> = ({
@@ -14,7 +16,7 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const sendEmailReminder = (booking: Booking): void => {
+  const sendEmailReminder = (booking: SessionDetails): void => {
     console.log(
       `Sending reminder email to ${booking.email} for booking on ${booking.date}`
     );
@@ -28,7 +30,7 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      bookedCalls.forEach((booking: Booking) => {
+      bookedCalls.forEach((booking: SessionDetails) => {
         const bookingDate = new Date(booking.date);
 
         if (
@@ -97,7 +99,7 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
       const isBooked = bookedDates.includes(currentDateString);
       const isPastDate = new Date(year, month, day) < new Date();
       const isCompletedBooking = bookingsOnDay.some(
-        (booking) => booking.status === "Completed"
+        (booking) => booking.status === "completed"
       );
 
       calendar.push(
