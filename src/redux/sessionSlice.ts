@@ -1,14 +1,21 @@
 import axiosInstance from "@/api/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { IUser } from "@/types";
 
-type SessionDetails = {
-  id: string;
+export type SessionDetails = {
+  _id: string;
+  user: IUser;
+  date: string;
+  time: string;
   name: string;
-  email: string;
   phone: string;
-  selectedDate: string;
-  selectedTime: string;
-  description?: string;
+  email: string;
+  psychologistId: string;
+  description: string;
+  status: "booked" | "completed" | "cancelled" | "pending" | "aborted";
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type SessionState = {
@@ -25,10 +32,20 @@ const initialState: SessionState = {
 
 export const fetchSessions = createAsyncThunk(
   "session/fetchSessions",
-  async (_, { rejectWithValue }) => {
+  async (token: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/api/v1/sessionBooking");
-      return response.data;
+      const response = await axiosInstance.get(
+        "/api/v1/sessionbookings/getbookings",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("sesion response from backend :", response.data);
+      return response.data.session;
     } catch (error) {
       return rejectWithValue("Failed to fetch sessions");
     }

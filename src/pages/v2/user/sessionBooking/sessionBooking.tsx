@@ -1,21 +1,24 @@
 import BookingCalender from "@/components/session/calender";
-import { Booking, Hiring } from "@/types";
+import { Hiring } from "@/types";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import BookedSession from "./bookedSession";
 import SessionBookingForm from "@/components/forms/sessionBooking";
+import { fetchSessions, SessionDetails } from "@/redux/sessionSlice";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { HIRING } from "@/constant/constants";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { AppDispatch, RootState } from "@/redux/store";
 
 const SessionBooking: React.FC = () => {
-  const [bookedCalls, setBookedCalls] = useState<Booking[]>([]);
+  const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
   const [bookedDates, setBookedDates] = useState<string[]>([]);
-  const [selectedDateBookings, setSelectedDateBookings] = useState<Booking[]>(
-    []
-  );
+  const [selectedDateBookings, setSelectedDateBookings] = useState<
+    SessionDetails[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
@@ -23,11 +26,32 @@ const SessionBooking: React.FC = () => {
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { error, loading, sessions } = useSelector(
+    (root: RootState) => root.session
+  );
+
   const { user } = useUser();
 
   useEffect(() => {
     setHiring(HIRING);
+
+    const fetchData = async () => {
+      const token = await getToken();
+      if (token) {
+        dispatch(fetchSessions(token));
+      }
+    };
+
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (sessions && sessions.length > 0) {
+      setBookedCalls(sessions);
+      setBookedDates(sessions.map((session) => session.date));
+    }
+  }, [sessions]);
 
   const { getToken } = useAuth();
 
@@ -39,7 +63,7 @@ const SessionBooking: React.FC = () => {
   const confirmCancelBooking = () => {
     if (bookingToCancel) {
       const updatedBookings = bookedCalls.filter(
-        (booking) => booking.id !== bookingToCancel
+        (booking) => booking._id !== bookingToCancel
       );
       setBookedCalls(updatedBookings);
       setBookedDates(updatedBookings.map((booking) => booking.date));
@@ -190,6 +214,8 @@ const SessionBooking: React.FC = () => {
 
         <div id="bookedSessions" className="hidden mt-4">
           <BookedSession
+            error={error}
+            loading={loading}
             bookedCalls={bookedCalls}
             cancelBooking={handleCancelBooking}
             selectedDateBookings={selectedDateBookings}
@@ -200,6 +226,8 @@ const SessionBooking: React.FC = () => {
       <div className="flex flex-col lg:flex-row">
         <div className="hidden lg:block lg:w-1/4 sticky top-0 h-screen">
           <BookedSession
+            error={error}
+            loading={loading}
             bookedCalls={bookedCalls}
             cancelBooking={handleCancelBooking}
             selectedDateBookings={selectedDateBookings}
@@ -292,27 +320,83 @@ const SessionBooking: React.FC = () => {
             onClick={() => setErrorModalOpen(false)}
           >
             <motion.div
-              className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full m-4"
+              className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full m-4"
               initial={{ scale: 0.5, y: -50 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.5, y: -50, opacity: 0 }}
               transition={{
                 type: "spring",
-                damping: 12,
+                damping: 15,
                 stiffness: 150,
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center justify-center mb-5">
                 <motion.div
-                  className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600"
-                  initial={{ rotate: -90 }}
-                  animate={{ rotate: 0 }}
-                  transition={{ duration: 0.5, type: "spring" }}
+                  className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center"
+                  initial={{ rotate: 0, scale: 0.5 }}
+                  animate={{
+                    rotate: [0, -10, 10, -10, 10, 0],
+                    scale: 1,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                    type: "spring",
+                  }}
                 >
+                  <motion.svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-amber-600"
+                    viewBox="0 0 24 24"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <motion.path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      fill="none"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                    />
+                  </motion.svg>
+                </motion.div>
+              </div>
+              <motion.h2
+                className="text-2xl font-bold mb-3 text-center text-amber-600"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                Oops!
+              </motion.h2>
+              <motion.p
+                className="text-gray-700 text-center mb-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {errorMessage}
+              </motion.p>
+              <motion.div
+                className="flex justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <button
+                  onClick={() => setErrorModalOpen(false)}
+                  className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg flex items-center gap-2"
+                >
+                  <span>Dismiss</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -321,38 +405,9 @@ const SessionBooking: React.FC = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                </motion.div>
-              </div>
-              <motion.h2
-                className="text-xl font-bold mb-2 text-center text-red-600"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Error
-              </motion.h2>
-              <motion.p
-                className="text-gray-700 text-center mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                {errorMessage}
-              </motion.p>
-              <motion.div
-                className="flex justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <button
-                  onClick={() => setErrorModalOpen(false)}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-md"
-                >
-                  Close
                 </button>
               </motion.div>
             </motion.div>

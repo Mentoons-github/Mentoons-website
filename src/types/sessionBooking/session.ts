@@ -5,6 +5,8 @@ export interface Booking {
   phone: string;
   date: string;
   time: string;
-  status: string;
+  status: "booked" | "completed" | "cancelled" | "pending" | "aborted";
   description?: string;
+  psychologistId?: string;
+  completedAt?: string | null;
 }

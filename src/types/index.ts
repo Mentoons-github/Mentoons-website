@@ -12,6 +12,7 @@ import {
   MythosPlan,
 } from "./mythos/interface";
 import { Contests } from "./home/contests";
+import { IUser } from "./user";
 
 export type {
   Color,
@@ -29,4 +30,5 @@ export type {
   StatusState,
   UserStatusInterface,
   Booking,
+  IUser,
 };
