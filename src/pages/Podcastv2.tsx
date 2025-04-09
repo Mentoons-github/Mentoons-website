@@ -1,17 +1,17 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
-import {
-  PODCAST_DETAILS,
-  PODCAST_OFFERINGS,
-  PODCAST_V2_CATEGORY,
-} from "@/constant";
-import { ModalMessage } from "@/utils/enum";
-import { useUser } from "@clerk/clerk-react";
+import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch, RootState } from "@/redux/store";
+import { PodcastProduct } from "@/types/productTypes";
+import { ModalMessage, ProductType } from "@/utils/enum";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { IoCloseCircleOutline, IoPlay } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -28,10 +28,6 @@ const Podcastv2 = () => {
   const { isSignedIn, user } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
   console.log(isScrolled);
-
-  const filteredPodcast = PODCAST_DETAILS.filter(
-    (podcast) => podcast.category === selectedCategory
-  );
 
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
@@ -145,6 +141,31 @@ const Podcastv2 = () => {
 
   // Scroll based animations
   const { scrollYProgress } = useScroll();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: products } = useSelector((state: RootState) => state.products);
+  useEffect(() => {
+    const fetchPodcast = async () => {
+      try {
+        const token = await getToken();
+        const podcast = await dispatch(
+          fetchProducts({ type: ProductType.PODCAST, token: token! })
+        );
+
+        console.log("Podcast", podcast);
+      } catch (error) {
+        console.error("Error fetching podcast data:", error);
+      }
+    };
+    fetchPodcast();
+  }, [dispatch, getToken]);
+
+  const filteredPodcast = products.filter(
+    (podcast) =>
+      (podcast?.details as PodcastProduct["details"])?.category ===
+      selectedCategory
+  );
+  console.log(filteredPodcast);
 
   return (
     <>
@@ -153,7 +174,7 @@ const Podcastv2 = () => {
         {/* Hero section */}
 
         <motion.div
-          className="gap-8 items-start md:flex"
+          className="items-start gap-8 md:flex"
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, margin: "-100px" }}
@@ -169,7 +190,7 @@ const Podcastv2 = () => {
               thought-provoking discussions, our podcasts make learning fun and
               accessible.
             </p>
-            <div className="flex justify-center items-center">
+            <div className="flex items-center justify-center">
               <img
                 src="/assets/podcastv2/hero-image.png"
                 alt="Left side hero Image"
@@ -185,7 +206,7 @@ const Podcastv2 = () => {
             <img
               src="/assets/podcastv2/hero-image-2.png"
               alt="Right side hero image"
-              className="flex justify-center items-center w-full"
+              className="flex items-center justify-center w-full"
             />
           </motion.div>
         </motion.div>
@@ -206,7 +227,7 @@ const Podcastv2 = () => {
           </motion.h2>
 
           <motion.div
-            className="flex flex-col gap-4 items-center md:flex-row md:justify-around"
+            className="flex flex-col items-center gap-4 md:flex-row md:justify-around"
             variants={staggerContainer}
           >
             {PODCAST_OFFERINGS.map((podcast) => (
@@ -245,7 +266,7 @@ const Podcastv2 = () => {
             <h2 className="py-8 text-2xl font-semibold text-center text-primary">
               CATEGORIES TO CHOOSE FROM
             </h2>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap justify-center gap-4">
               {PODCAST_V2_CATEGORY.map((category) => (
                 <div
                   key={category.id}
@@ -282,34 +303,35 @@ const Podcastv2 = () => {
                 <div className="relative">
                   <div className="relative overflow-hidden rounded-3xl shadow-lg bg-gradient-to-br from-orange-400 via-[#FF6C6C] to-pink-500 transition-all duration-300">
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-300 rounded-full opacity-20 translate-x-1/2 -translate-y-1/2 md:w-64 md:h-64"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-300 rounded-full opacity-20 -translate-x-1/2 translate-y-1/2 md:w-48 md:h-48"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 translate-x-1/2 -translate-y-1/2 bg-orange-300 rounded-full opacity-20 md:w-64 md:h-64"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-1/2 translate-y-1/2 bg-pink-300 rounded-full opacity-20 md:w-48 md:h-48"></div>
 
                     <div className="flex flex-col items-start p-5 md:flex-row md:p-8">
                       <div className="relative flex-1 p-2 md:p-4 group">
                         <img
                           src={
-                            filteredPodcast[currentPodcastIndex]?.thumbnail ||
+                            filteredPodcast[currentPodcastIndex]
+                              ?.productImages?.[0].imageUrl ||
                             "/assets/podcastv2/podcast-thumbnail-social.png"
                           }
                           alt={
-                            filteredPodcast[currentPodcastIndex]?.topic ||
+                            filteredPodcast[currentPodcastIndex]?.title ||
                             "Podcast Thumbnail"
                           }
-                          className="object-cover relative z-10 w-full rounded-2xl shadow-xl transition-transform duration-300 transform max-w- group-hover:scale-95"
+                          className="relative z-10 object-cover w-full transition-transform duration-300 transform shadow-xl rounded-2xl max-w- group-hover:scale-95"
                         />
                       </div>
 
                       <div className="flex-1 p-4 text-white md:p-6">
                         <div className="flex items-center mb-3">
-                          <div className="mr-2 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                          <div className="w-2 h-2 mr-2 bg-white rounded-full animate-pulse"></div>
                           <span className="text-sm font-medium tracking-wider uppercase opacity-80">
                             {selectedCategory.toUpperCase()}
                           </span>
                         </div>
 
                         <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
-                          {filteredPodcast[currentPodcastIndex]?.topic ||
+                          {filteredPodcast[currentPodcastIndex]?.title ||
                             "Negative impact of Mobile phone"}
                         </h2>
 
@@ -319,12 +341,14 @@ const Podcastv2 = () => {
                         </p>
                         <div className="flex items-center mb-3">
                           <span className="font-medium tracking-wider opacity-80 text-md text-italic luckiest-guy-regular">
-                            {filteredPodcast[currentPodcastIndex]?.author ||
-                              "Mentoons"}
+                            {(
+                              filteredPodcast[currentPodcastIndex]
+                                ?.details as PodcastProduct["details"]
+                            )?.host || "Mentoons"}
                           </span>
                         </div>
 
-                        <div className="p-4 rounded-xl border backdrop-blur-sm audio-player bg-white/10 border-white/20">
+                        <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20">
                           <audio
                             className="w-full"
                             controls
@@ -333,8 +357,10 @@ const Podcastv2 = () => {
                           >
                             <source
                               src={
-                                filteredPodcast[currentPodcastIndex]
-                                  ?.audioPodcastSrc || "#"
+                                (
+                                  filteredPodcast[currentPodcastIndex]
+                                    .details as PodcastProduct["details"]
+                                )?.sampleUrl || "#"
                               }
                               type="audio/mpeg"
                             />
@@ -345,14 +371,14 @@ const Podcastv2 = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 justify-center mt-6">
+                  <div className="flex justify-center gap-4 mt-6">
                     <button
                       onClick={() => {
                         setCurrentPodcastIndex((prev) =>
                           prev > 0 ? prev - 1 : filteredPodcast.length - 1
                         );
                       }}
-                      className="p-3 bg-white rounded-full shadow-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-orange-200/50 hover:-translate-x-1"
+                      className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:-translate-x-1"
                       aria-label="Previous podcast"
                     >
                       <IoIosArrowBack className="text-2xl text-orange-500" />
@@ -363,7 +389,7 @@ const Podcastv2 = () => {
                           prev < filteredPodcast.length - 1 ? prev + 1 : 0
                         );
                       }}
-                      className="p-3 bg-white rounded-full shadow-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-orange-200/50 hover:translate-x-1"
+                      className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:translate-x-1"
                       aria-label="Next podcast"
                     >
                       <IoIosArrowForward className="text-2xl text-orange-500" />
@@ -391,7 +417,7 @@ const Podcastv2 = () => {
             <span className="relative ml-2">
               For You!
               <svg
-                className="absolute left-0 -bottom-2 w-full"
+                className="absolute left-0 w-full -bottom-2"
                 viewBox="0 0 100 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -406,19 +432,19 @@ const Podcastv2 = () => {
           </h2>
 
           {/* Fun decorative elements */}
-          <div className="absolute -top-10 -left-10 w-20 h-20 bg-orange-200 rounded-full opacity-70 blur-xl"></div>
-          <div className="absolute right-20 top-40 w-16 h-16 bg-pink-200 rounded-full opacity-70 blur-xl"></div>
+          <div className="absolute w-20 h-20 bg-orange-200 rounded-full -top-10 -left-10 opacity-70 blur-xl"></div>
+          <div className="absolute w-16 h-16 bg-pink-200 rounded-full right-20 top-40 opacity-70 blur-xl"></div>
 
           <div
-            className="flex overflow-x-auto gap-6 p-16 -mx-2 scroll-smooth snap-x"
+            className="flex gap-6 p-16 -mx-2 overflow-x-auto scroll-smooth snap-x"
             ref={carouselRef}
             style={{ scrollbarWidth: "none" }} /* Hide scrollbar for Firefox */
           >
-            {PODCAST_DETAILS.map((podcast) => {
-              const isPlaying = playingPodcastId === String(podcast.id);
+            {products.map((podcast) => {
+              const isPlaying = playingPodcastId === String(podcast._id);
               return (
                 <div
-                  key={podcast.id}
+                  key={podcast._id}
                   className={`p-4 rounded-2xl group transition-all duration-300 min-w-[380px] max-w-[280px] snap-start
                   transform hover:-translate-y-2 hover:shadow-2xl ${
                     isPlaying
@@ -426,13 +452,13 @@ const Podcastv2 = () => {
                       : "bg-white border border-gray-100 shadow-lg hover:bg-orange-50"
                   }`}
                 >
-                  <div className="overflow-hidden relative mb-4 rounded-xl">
+                  <div className="relative mb-4 overflow-hidden rounded-xl">
                     <img
                       src={
-                        podcast.thumbnail ||
+                        podcast?.productImages?.[0].imageUrl ||
                         "/assets/podcastv2/default-podcast.png"
                       }
-                      alt={podcast.topic}
+                      alt={podcast.title}
                       className={`w-full h-[280px] object-cover transition-transform duration-500 ${
                         isPlaying ? "scale-105" : "group-hover:scale-105"
                       }`}
@@ -446,11 +472,11 @@ const Podcastv2 = () => {
                     <button
                       onClick={() => {
                         // If this is already playing, stop it
-                        if (playingPodcastId === String(podcast.id)) {
+                        if (playingPodcastId === String(podcast._id)) {
                           setPlayingPodcastId(null);
                         } else {
                           // Otherwise stop the current one (if any) and play this one
-                          setPlayingPodcastId(String(podcast.id));
+                          setPlayingPodcastId(String(podcast._id));
                         }
                       }}
                       className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
@@ -463,10 +489,10 @@ const Podcastv2 = () => {
                       aria-label={isPlaying ? "Pause podcast" : "Play podcast"}
                     >
                       {isPlaying ? (
-                        <div className="flex gap-1 justify-center items-center">
+                        <div className="flex items-center justify-center gap-1">
                           <span className="w-1 h-5 bg-orange-500 rounded-full animate-pulse"></span>
                           <span
-                            className="w-1 h-7 bg-orange-500 rounded-full animate-pulse"
+                            className="w-1 bg-orange-500 rounded-full h-7 animate-pulse"
                             style={{ animationDelay: "0.2s" }}
                           ></span>
                           <span
@@ -482,7 +508,10 @@ const Podcastv2 = () => {
                     {/* Audio player (hidden) */}
                     {isPlaying && (
                       <audio
-                        src={podcast.audioPodcastSrc}
+                        src={
+                          (podcast.details as PodcastProduct["details"])
+                            .sampleUrl || "#"
+                        }
                         autoPlay
                         controlsList="nodownload"
                         onEnded={() => setPlayingPodcastId(null)}
@@ -492,7 +521,7 @@ const Podcastv2 = () => {
                             if (!isSignedIn) {
                               // Not logged in users get 45 seconds
                               setTimeout(() => {
-                                if (playingPodcastId === String(podcast.id)) {
+                                if (playingPodcastId === String(podcast._id)) {
                                   audio.pause();
                                   audio.currentTime = 0;
                                   setPlayingPodcastId(null);
@@ -508,7 +537,9 @@ const Podcastv2 = () => {
                               if (!hasPaidMembership) {
                                 // Free members also get 45 seconds
                                 setTimeout(() => {
-                                  if (playingPodcastId === String(podcast.id)) {
+                                  if (
+                                    playingPodcastId === String(podcast._id)
+                                  ) {
                                     audio.pause();
                                     audio.currentTime = 0;
                                     setPlayingPodcastId(null);
@@ -524,8 +555,9 @@ const Podcastv2 = () => {
                     )}
 
                     {/* Category badge */}
-                    <div className="absolute top-3 left-3 px-3 py-1 text-xs font-medium capitalize rounded-full backdrop-blur-sm bg-white/80">
-                      {podcast.category}
+                    <div className="absolute px-3 py-1 text-xs font-medium capitalize rounded-full top-3 left-3 backdrop-blur-sm bg-white/80">
+                      {(podcast.details as PodcastProduct["details"])
+                        ?.category || "Category"}
                     </div>
                   </div>
 
@@ -535,7 +567,7 @@ const Podcastv2 = () => {
                         isPlaying ? "text-white" : "text-gray-800"
                       }`}
                     >
-                      {podcast.topic}
+                      {podcast.title}
                     </h3>
 
                     <div
@@ -543,22 +575,30 @@ const Podcastv2 = () => {
                         isPlaying ? "text-white/90" : "text-gray-500"
                       }`}
                     >
-                      <div className="flex overflow-hidden justify-center items-center w-6 h-6 bg-orange-200 rounded-full">
+                      <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
                         <span className="text-xs font-bold text-orange-500">
-                          {podcast.author?.charAt(0)}
+                          {(
+                            podcast.details as PodcastProduct["details"]
+                          )?.host?.charAt(0)}
                         </span>
                       </div>
-                      <p className="text-xs">{podcast.author}</p>
-                      {podcast.duration && (
+                      <p className="text-xs">
+                        {(podcast.details as PodcastProduct["details"])?.host}
+                      </p>
+                      {(podcast.details as PodcastProduct["details"])
+                        ?.duration && (
                         <p className="flex items-center text-xs">
-                          <span className="mx-1 w-1 h-1 bg-current rounded-full"></span>
-                          {podcast.duration}
+                          <span className="w-1 h-1 mx-1 bg-current rounded-full"></span>
+                          {
+                            (podcast.details as PodcastProduct["details"])
+                              ?.duration
+                          }
                         </p>
                       )}
                     </div>
 
                     {isPlaying && (
-                      <div className="flex gap-1 justify-center pt-2">
+                      <div className="flex justify-center gap-1 pt-2">
                         <span className="w-1 h-3 bg-white rounded-full animate-bounce"></span>
                         <span
                           className="w-1 h-3 bg-white rounded-full animate-bounce"
@@ -588,7 +628,7 @@ const Podcastv2 = () => {
                 carousel.scrollBy({ left: -310, behavior: "smooth" });
               }
             }}
-            className="absolute left-0 top-1/2 p-3 bg-white rounded-full shadow-xl transition-all duration-300 -translate-y-1/2 hover:bg-orange-100 hover:scale-110 hover:-translate-x-1"
+            className="absolute left-0 p-3 transition-all duration-300 -translate-y-1/2 bg-white rounded-full shadow-xl top-1/2 hover:bg-orange-100 hover:scale-110 hover:-translate-x-1"
             style={{ display: isAtStart ? "none" : "block" }}
             aria-label="Scroll left"
           >
@@ -601,7 +641,7 @@ const Podcastv2 = () => {
                 carousel.scrollBy({ left: 310, behavior: "smooth" });
               }
             }}
-            className="absolute right-0 top-1/2 p-3 bg-white rounded-full shadow-xl transition-all duration-300 -translate-y-1/2 hover:bg-orange-100 hover:scale-110 hover:translate-x-1"
+            className="absolute right-0 p-3 transition-all duration-300 -translate-y-1/2 bg-white rounded-full shadow-xl top-1/2 hover:bg-orange-100 hover:scale-110 hover:translate-x-1"
             style={{ display: isAtEnd ? "none" : "block" }}
             aria-label="Scroll right"
           >
@@ -611,17 +651,17 @@ const Podcastv2 = () => {
 
         {/* New Release Section */}
         <motion.div
-          className="overflow-hidden relative my-24 bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl shadow-2xl"
+          className="relative my-24 overflow-hidden shadow-2xl bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl"
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           {/* Decorative Elements */}
-          <div className="absolute -top-20 right-20 w-40 h-40 bg-pink-200 rounded-full opacity-50 blur-xl"></div>
-          <div className="absolute left-10 bottom-40 w-32 h-32 bg-orange-200 rounded-full opacity-40 blur-xl"></div>
+          <div className="absolute w-40 h-40 bg-pink-200 rounded-full opacity-50 -top-20 right-20 blur-xl"></div>
+          <div className="absolute w-32 h-32 bg-orange-200 rounded-full left-10 bottom-40 opacity-40 blur-xl"></div>
           <svg
-            className="absolute left-0 top-10 w-24 h-24 text-orange-300 opacity-20"
+            className="absolute left-0 w-24 h-24 text-orange-300 top-10 opacity-20"
             viewBox="0 0 100 100"
             fill="none"
           >
@@ -635,7 +675,7 @@ const Podcastv2 = () => {
             />
           </svg>
           <svg
-            className="absolute right-10 bottom-10 w-32 h-32 text-pink-400 opacity-20"
+            className="absolute w-32 h-32 text-pink-400 right-10 bottom-10 opacity-20"
             viewBox="0 0 100 100"
             fill="none"
           >
@@ -654,16 +694,16 @@ const Podcastv2 = () => {
                 <div className="w-full h-[350px] rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
                   <img
                     src={
-                      filteredPodcast[0]?.thumbnail ||
+                      filteredPodcast[0]?.productImages?.[0].imageUrl ||
                       "/assets/podcastv2/electronic-gadgets-and-kids-large.jpg"
                     }
-                    alt={filteredPodcast[0]?.topic || "Podcast Thumbnail"}
+                    alt={filteredPodcast[0]?.title || "Podcast Thumbnail"}
                     className="object-cover object-center w-full h-full"
                   />
                 </div>
 
                 <div className="mt-6">
-                  <div className="flex gap-2 items-center mb-3">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="px-3 py-1 text-xs font-bold text-green-600 bg-green-200 rounded-full backdrop-blur-sm">
                       NEW RELEASE
                     </span>
@@ -673,7 +713,7 @@ const Podcastv2 = () => {
                   </div>
 
                   <h3 className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl">
-                    {filteredPodcast[0]?.topic || "Electronic gadgets and Kids"}
+                    {filteredPodcast[0]?.title || "Electronic gadgets and Kids"}
                   </h3>
 
                   <p className="mb-4 text-lg text-white/90 line-clamp-3">
@@ -682,9 +722,15 @@ const Podcastv2 = () => {
                   </p>
 
                   <div className="flex items-center mb-6 text-sm text-white/80">
-                    <span>{filteredPodcast[0]?.author || "Mentoons"}</span>
+                    <span>
+                      {(filteredPodcast[0].details as PodcastProduct["details"])
+                        ?.host || "Mentoons"}
+                    </span>
                     <span className="mx-2">•</span>
-                    <span>{filteredPodcast[0]?.duration || "06 MIN"}</span>
+                    <span>
+                      {(filteredPodcast[0].details as PodcastProduct["details"])
+                        ?.duration || "05 MIN"}
+                    </span>
                   </div>
 
                   <button
@@ -704,7 +750,7 @@ const Podcastv2 = () => {
                     {playingPodcastId === "new-release" ? (
                       <>
                         <span className="font-semibold">Pause</span>
-                        <div className="flex gap-1 justify-center items-center">
+                        <div className="flex items-center justify-center gap-1">
                           <span className="w-1 h-4 rounded-full animate-pulse bg-primary"></span>
                           <span
                             className="w-1 h-6 rounded-full animate-pulse bg-primary"
@@ -726,7 +772,12 @@ const Podcastv2 = () => {
 
                   {playingPodcastId === "new-release" && (
                     <audio
-                      src={filteredPodcast[0]?.audioPodcastSrc || "#"}
+                      src={
+                        (
+                          filteredPodcast[0]
+                            .details as PodcastProduct["details"]
+                        )?.sampleUrl || "#"
+                      }
                       autoPlay
                       onEnded={() => setPlayingPodcastId(null)}
                       className="hidden"
@@ -775,7 +826,7 @@ const Podcastv2 = () => {
                 </span>
               </h2>
 
-              <div className="flex relative justify-center items-center">
+              <div className="relative flex items-center justify-center">
                 <div className="absolute w-48 h-48 rounded-full blur-xl bg-orange-400/30"></div>
                 <img
                   src="/assets/podcastv2/new-headphones.png"
@@ -846,7 +897,7 @@ const Podcastv2 = () => {
 
         {/* Podcast Contribution */}
         <motion.div
-          className="flex flex-col gap-8 items-start p-12 mb-16 text-white rounded-3xl bg-primary md:flex-row"
+          className="flex flex-col items-start gap-8 p-12 mb-16 text-white rounded-3xl bg-primary md:flex-row"
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -856,15 +907,15 @@ const Podcastv2 = () => {
             <p className="tracking-wide">
               FOR THE PEOPLE WHO WANT TO BE HEARD...
             </p>
-            <p className="pt-2 pb-4 text-7xl font-semibold luckiest-guy-regular">
+            <p className="pt-2 pb-4 font-semibold text-7xl luckiest-guy-regular">
               WANT YOUR VOICE TO BE HEARD
             </p>
             <p className="pb-8">
               If you want to create podcast on a particular topic, Join Us! Be
               the voice of change.
             </p>
-            <div className="flex gap-4 items-center w-full">
-              <form className="flex flex-col gap-4 w-full">
+            <div className="flex items-center w-full gap-4">
+              <form className="flex flex-col w-full gap-4">
                 <div className="w-full md:pr-36">
                   <textarea
                     name="message"
@@ -921,7 +972,7 @@ const Podcastv2 = () => {
             </div>
             <a
               href={"#subscription"}
-              className="block px-4 py-3 w-full text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
+              className="block w-full px-4 py-3 text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
               onClick={(e) => {
                 setShowMembershipModal(false);
                 handleBrowsePlansClick(e);

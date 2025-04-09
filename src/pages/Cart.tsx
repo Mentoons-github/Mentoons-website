@@ -133,15 +133,23 @@ const Cart: React.FC = () => {
           </div>
 
           <div className="w-full p-4 mt-4 ">
-            <h2 className="mb-8 text-4xl font-semibold">People also bought</h2>
+            <div>
+              <h2 className="mb-8 text-4xl font-semibold">
+                People also bought
+              </h2>
+              //TODO:{/*  Add the filter buttons */}
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
               {products?.length > 0 ? (
                 products.map((product) => {
                   // Ensure all required properties are present before passing to ProductCard
 
                   return (
-                    <div className="flex justify-center w-full">
+                    <div
+                      className="flex justify-center w-full"
+                      key={product._id}
+                    >
                       <ProductCard key={product._id} productDetails={product} />
                     </div>
                   );

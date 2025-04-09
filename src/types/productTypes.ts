@@ -85,6 +85,7 @@ export interface AudioComicProduct extends ProductBase {
 export interface PodcastProduct extends ProductBase {
   type: ProductType.PODCAST;
   details: {
+    category?: string;
     episodeNumber?: number;
     host?: string;
     language?: string;

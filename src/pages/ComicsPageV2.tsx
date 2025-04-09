@@ -120,7 +120,7 @@ const ComicsPageV2 = () => {
       try {
         // Fetch products with the current filters
         const token = await getToken();
-        if (selectedOption ) {
+        if (selectedOption) {
           const cards = await dispatch(
             fetchProducts({
               type: selectedOption,
@@ -232,45 +232,38 @@ const ComicsPageV2 = () => {
 
       {/* //dynamic content section */}
       {selectedOption === "comic" && (
-        <div className="flex items-center justify-center gap-6 pb-6 w-[95%] md:w-[90%] mx-auto  h-[700px] bg-yellow-100 mb-16 relative overflow-hidden ">
-          <div className="absolute  w-[1000px] h-[1000px] rounded-full bg-primary bottom-[10] -left-96 "></div>
-          <div className="absolute  w-[200px] h-[200px] rounded-full bg-primary -top-16 -right-16 "></div>
-          <div className="relative   w-[95%] md:w-[90%] mx-auto flex flex-col items-center justify-between  overflow-y-scroll  gap-20 h-[700px] py-20">
+        <div className="flex items-center justify-center pb-6 w-[95%] md:w-[90%] mx-auto h-[700px] md:h-[800px] bg-yellow-100 mb-16 relative overflow-hidden">
+          <div className="absolute w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] rounded-full bg-primary bottom-0 -left-[300px] md:-left-96"></div>
+          <div className="absolute w-[150px] h-[150px] md:w-[200px] md:h-[200px] rounded-full bg-primary -top-8 -right-8 md:-top-16 md:-right-16"></div>
+          <div className="relative w-[95%] md:w-[90%] mx-auto flex flex-col items-center justify-between overflow-y-scroll overflow-x-hidden gap-10 md:gap-20 h-full py-10 md:py-20">
             {products.map((product, index) => {
               return (
                 <div
-                  className="flex flex-col items-start justify-between w-full gap-20 p-4 mt-8 rounded-lg md:flex-row"
+                  className="flex flex-col items-start justify-between w-full gap-8 p-4 mt-4 rounded-lg md:gap-20 md:mt-8 md:flex-row"
                   key={product.title + index}
                 >
-                  <div className="flex-1 ">
+                  <div className="flex-1 w-full">
                     <img
                       src={product?.productImages?.[0].imageUrl}
                       alt={product?.title}
-                      className="object-cover w-full"
+                      className="object-cover w-full h-auto"
                     />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 w-full">
                     <div>
                       <h2
-                        className="py-4 font-bold leading-none text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute after:animate-[sparkle_2s_ease-in-out_infinite] [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)]"
+                        className="py-4 font-bold leading-none text-4xl sm:text-5xl md:text-6xl lg:text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute after:animate-[sparkle_2s_ease-in-out_infinite] [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)] pr-2"
                         data-badge={product.price !== 0 ? "Premium" : "Free"}
                       >
                         {product.title}
                       </h2>
-
-                      {/* <h2
-                        className="py-4 font-bold leading-none text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)]"
-                        data-badge={product.price !== 0 ? "Premium" : "Free"}
-                      >
-                        {product.title}
-                      </h2> */}
-                      <p className="pb-4 text-xl tracking-wide text-neutral-500">
+                      <p className="pb-4 text-base md:text-xl tracking-wide text-neutral-500 w-full md:w-[80%]">
                         {product.description}
                       </p>
                     </div>
                     <div>
                       <button
-                        className="px-8 py-3 text-xl font-bold text-white rounded-full bg-primary "
+                        className="px-6 py-2 text-lg font-bold text-white rounded-full md:px-8 md:py-3 md:text-xl bg-primary"
                         onClick={() => {
                           return openComicModal(
                             (product.details as ComicProduct["details"])
@@ -494,12 +487,6 @@ const ComicsPageV2 = () => {
                   alt={comic.title}
                   className="object-contain h-[25rem] rounded-lg transition-transform duration-300 hover:scale-105"
                 />
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t to-transparent from-black/70">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/80 text-gray-900 ring-1 ring-inset ring-gray-200/20 backdrop-blur-2xl">
-                    {comic?.ageCategory}
-                  </span>
-                  <span>{comic?.type}</span>
-                </div>
               </div>
               <div className="pt-4">
                 <h3 className="text-xl font-medium line-clamp-1">

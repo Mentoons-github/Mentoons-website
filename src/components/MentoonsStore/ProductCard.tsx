@@ -1,6 +1,6 @@
 import { addItemCart } from "@/redux/cartSlice";
 import type { AppDispatch } from "@/redux/store";
-import { ProductBase } from "@/types/productTypes";
+import { ProductBase, ProductType } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -130,6 +130,9 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
                 </span>
               )
             )}
+            {productDetails.type === ProductType.PODCAST && (
+              <span className="px-2 py-1 text-sm text-orange-600 bg-orange-200 rounded w-fit">Podcast</span>
+            )}
           </div>
         </div>
 
@@ -161,7 +164,7 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           {productDetails.price === 0 ? (
             <button
               onClick={() => {
-                if ('sampleUrl' in productDetails.details) {
+                if ("sampleUrl" in productDetails.details) {
                   window.open(productDetails.details.sampleUrl, "_blank");
                 }
               }}
