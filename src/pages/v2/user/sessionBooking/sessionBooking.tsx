@@ -1,30 +1,57 @@
 import BookingCalender from "@/components/session/calender";
-import { Booking, Hiring } from "@/types";
+import { Hiring } from "@/types";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import BookedSession from "./bookedSession";
 import SessionBookingForm from "@/components/forms/sessionBooking";
-import { errorToast } from "@/utils/toastResposnse";
+import { fetchSessions, SessionDetails } from "@/redux/sessionSlice";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { HIRING } from "@/constant/constants";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { AppDispatch, RootState } from "@/redux/store";
 
 const SessionBooking: React.FC = () => {
-  const [bookedCalls, setBookedCalls] = useState<Booking[]>([]);
+  const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
   const [bookedDates, setBookedDates] = useState<string[]>([]);
-  const [selectedDateBookings, setSelectedDateBookings] = useState<Booking[]>(
-    []
-  );
+  const [selectedDateBookings, setSelectedDateBookings] = useState<
+    SessionDetails[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
+
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { error, loading, sessions } = useSelector(
+    (root: RootState) => root.session
+  );
 
   const { user } = useUser();
 
   useEffect(() => {
     setHiring(HIRING);
+
+    const fetchData = async () => {
+      const token = await getToken();
+      if (token) {
+        dispatch(fetchSessions(token));
+      }
+    };
+
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (sessions && sessions.length > 0) {
+      setBookedCalls(sessions);
+      setBookedDates(sessions.map((session) => session.date));
+    }
+  }, [sessions]);
 
   const { getToken } = useAuth();
 
@@ -36,7 +63,7 @@ const SessionBooking: React.FC = () => {
   const confirmCancelBooking = () => {
     if (bookingToCancel) {
       const updatedBookings = bookedCalls.filter(
-        (booking) => booking.id !== bookingToCancel
+        (booking) => booking._id !== bookingToCancel
       );
       setBookedCalls(updatedBookings);
       setBookedDates(updatedBookings.map((booking) => booking.date));
@@ -44,6 +71,11 @@ const SessionBooking: React.FC = () => {
     }
     setIsModalOpen(false);
     setBookingToCancel(null);
+  };
+
+  const showErrorModal = (message: string) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
   };
 
   const handleSubmit = async (values: {
@@ -62,7 +94,7 @@ const SessionBooking: React.FC = () => {
 
       const token = await getToken();
       if (!token) {
-        toast.error("Please login to continue");
+        showErrorModal("Please login to continue");
         return;
       }
 
@@ -117,8 +149,10 @@ const SessionBooking: React.FC = () => {
         }
       );
 
+      console.log("response data :", response.data);
+
       if (response.data.success === false) {
-        toast.error(response.data.message || "Failed to initiate payment");
+        showErrorModal(response.data.message || "Failed to initiate payment");
         return;
       }
 
@@ -138,7 +172,6 @@ const SessionBooking: React.FC = () => {
       if (axios.isAxiosError(error) && error.response) {
         const errorMessage =
           error.response.data.message || "Failed to process payment";
-        errorToast(errorMessage);
 
         if (
           error.response.status === 400 &&
@@ -146,12 +179,14 @@ const SessionBooking: React.FC = () => {
             "psychologists are fully booked"
           )
         ) {
-          toast.error(
+          showErrorModal(
             "All psychologists are fully booked at the selected date and time. Please choose another slot."
           );
+        } else {
+          showErrorModal(errorMessage);
         }
       } else {
-        errorToast(
+        showErrorModal(
           error instanceof Error
             ? error.message
             : "Failed to process payment. Please try again later."
@@ -179,6 +214,8 @@ const SessionBooking: React.FC = () => {
 
         <div id="bookedSessions" className="hidden mt-4">
           <BookedSession
+            error={error}
+            loading={loading}
             bookedCalls={bookedCalls}
             cancelBooking={handleCancelBooking}
             selectedDateBookings={selectedDateBookings}
@@ -189,6 +226,8 @@ const SessionBooking: React.FC = () => {
       <div className="flex flex-col lg:flex-row">
         <div className="hidden lg:block lg:w-1/4 sticky top-0 h-screen">
           <BookedSession
+            error={error}
+            loading={loading}
             bookedCalls={bookedCalls}
             cancelBooking={handleCancelBooking}
             selectedDateBookings={selectedDateBookings}
@@ -232,28 +271,149 @@ const SessionBooking: React.FC = () => {
           </div>
         </div>
       </div>
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full m-4">
-            <h2 className="text-lg font-semibold mb-4">Confirm Cancellation</h2>
-            <p>Are you sure you want to cancel this booking?</p>
-            <div className="flex justify-end mt-4 space-x-2">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full m-4"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 15 }}
+            >
+              <h2 className="text-lg font-semibold mb-4">
+                Confirm Cancellation
+              </h2>
+              <p>Are you sure you want to cancel this booking?</p>
+              <div className="flex justify-end mt-4 space-x-2">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors"
+                >
+                  No
+                </button>
+                <button
+                  onClick={confirmCancelBooking}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {errorModalOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setErrorModalOpen(false)}
+          >
+            <motion.div
+              className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full m-4"
+              initial={{ scale: 0.5, y: -50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.5, y: -50, opacity: 0 }}
+              transition={{
+                type: "spring",
+                damping: 15,
+                stiffness: 150,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-center mb-5">
+                <motion.div
+                  className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center"
+                  initial={{ rotate: 0, scale: 0.5 }}
+                  animate={{
+                    rotate: [0, -10, 10, -10, 10, 0],
+                    scale: 1,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                    type: "spring",
+                  }}
+                >
+                  <motion.svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-amber-600"
+                    viewBox="0 0 24 24"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <motion.path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      fill="none"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                    />
+                  </motion.svg>
+                </motion.div>
+              </div>
+              <motion.h2
+                className="text-2xl font-bold mb-3 text-center text-amber-600"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
               >
-                No
-              </button>
-              <button
-                onClick={confirmCancelBooking}
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                Oops!
+              </motion.h2>
+              <motion.p
+                className="text-gray-700 text-center mb-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
               >
-                Yes, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                {errorMessage}
+              </motion.p>
+              <motion.div
+                className="flex justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <button
+                  onClick={() => setErrorModalOpen(false)}
+                  className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg flex items-center gap-2"
+                >
+                  <span>Dismiss</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

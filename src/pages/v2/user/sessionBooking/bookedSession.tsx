@@ -1,15 +1,20 @@
-import { Booking } from "@/types";
+import React from "react";
+import { SessionDetails } from "@/redux/sessionSlice";
 
 type BookedSessionProps = {
-  bookedCalls: Booking[];
+  bookedCalls: SessionDetails[];
   cancelBooking: (id: string) => void;
-  selectedDateBookings: Booking[];
+  selectedDateBookings: SessionDetails[];
+  loading: boolean;
+  error: string | null;
 };
 
 const BookedSession: React.FC<BookedSessionProps> = ({
   selectedDateBookings,
   bookedCalls,
   cancelBooking,
+  loading,
+  error,
 }) => {
   return (
     <div className="w-full bg-white p-4 lg:p-6 lg:border-r overflow-y-auto max-h-96 lg:max-h-screen lg:sticky lg:top-0">
@@ -19,16 +24,31 @@ const BookedSession: React.FC<BookedSessionProps> = ({
           : "Booked Sessions"}
       </h2>
 
-      {selectedDateBookings.length === 0 && bookedCalls.length === 0 ? (
+      {loading && (
+        <p className="text-gray-500 font-inter animate-pulse">
+          Loading sessions...
+        </p>
+      )}
+
+      {error && !loading && (
+        <p className="text-red-500 font-inter">Error: {error}</p>
+      )}
+
+      {!loading &&
+      !error &&
+      selectedDateBookings.length === 0 &&
+      bookedCalls.length === 0 ? (
         <p className="text-gray-500 font-inter">No booked sessions yet</p>
-      ) : (
+      ) : null}
+
+      {!loading && !error && (
         <div className="space-y-3 lg:space-y-4">
           {(selectedDateBookings.length > 0
             ? selectedDateBookings
             : bookedCalls
-          ).map((booking: Booking) => (
+          ).map((booking: SessionDetails) => (
             <div
-              key={booking.id}
+              key={booking._id}
               className="bg-gray-50 p-3 lg:p-4 rounded-lg shadow-sm"
             >
               <div className="flex justify-between items-start mb-2">
@@ -44,7 +64,7 @@ const BookedSession: React.FC<BookedSessionProps> = ({
                   </p>
                 </div>
                 <button
-                  onClick={() => cancelBooking(booking.id)}
+                  onClick={() => cancelBooking(booking._id)}
                   className="text-red-500 hover:bg-red-50 p-1 lg:p-2 rounded-full"
                 >
                   ✖
