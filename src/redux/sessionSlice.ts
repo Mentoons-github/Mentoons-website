@@ -23,17 +23,14 @@ const initialState: SessionState = {
   error: null,
 };
 
-export const addSesion = createAsyncThunk(
-  "sesion/addSession",
-  async (sessionData: SessionDetails, { rejectWithValue }) => {
+export const fetchSessions = createAsyncThunk(
+  "session/fetchSessions",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/api/v1/sessionBooking",
-        sessionData
-      );
+      const response = await axiosInstance.get("/api/v1/sessionBooking");
       return response.data;
     } catch (error) {
-      return rejectWithValue("Failed to book session");
+      return rejectWithValue("Failed to fetch sessions");
     }
   }
 );
@@ -43,17 +40,17 @@ const sessionSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(addSesion.pending, (state) => {
+    builder.addCase(fetchSessions.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
-
-    builder.addCase(addSesion.rejected, (state, action) => {
+    builder.addCase(fetchSessions.fulfilled, (state, action) => {
+      state.loading = false;
+      state.sessions = action.payload;
+    });
+    builder.addCase(fetchSessions.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
-    });
-
-    builder.addCase(addSesion.fulfilled, (state, action) => {
-      state.sessions.push(action.payload);
     });
   },
 });
