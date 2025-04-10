@@ -1,5 +1,17 @@
+import LoginModal from "@/components/common/modal/loginModal";
+import AddToCartModal from "@/components/modals/AddToCartModal";
+import AgeButton from "@/components/products/ageButton";
+import ProductDetailCards from "@/components/products/cards";
+import ProductsBenefits from "@/components/products/productsBenefits";
 import ProductsSlider from "@/components/products/slider";
+import { FAQ_PRODUCT } from "@/constant/faq";
+import { useProductActions } from "@/hooks/useProductAction";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch, RootState } from "@/redux/store";
 import { ProductType } from "@/utils/enum";
+import { useAuth } from "@clerk/clerk-react";
+import { useEffect, useRef, useState } from "react";
+import { FaShoppingCart } from "react-icons/fa";
 import {
   FaBolt,
   FaChevronDown,
@@ -7,54 +19,42 @@ import {
   FaMagnifyingGlass,
   FaStar,
 } from "react-icons/fa6";
-import FAQ from "../faq/faq";
-import { FAQ_PRODUCT } from "@/constant/faq";
-import { fetchProducts } from "@/redux/productSlice";
-import AgeButton from "@/components/products/ageButton";
-import { useEffect, useRef, useState } from "react";
-import ProductDetailCards from "@/components/products/cards";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
-import { AppDispatch, RootState } from "@/redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import { FaShoppingCart } from "react-icons/fa";
-import ProductsBenefits from "@/components/products/productsBenefits";
-import AddToCartModal from "@/components/modals/AddToCartModal";
-import LoginModal from "@/components/common/modal/loginModal";
-import { useProductActions } from "@/hooks/useProductAction";
+import { useLocation, useNavigate } from "react-router-dom";
+import FAQ from "../faq/faq";
 
 const ProductsSkeletonCard = () => (
-  <div className="animate-pulse w-full">
+  <div className="w-full animate-pulse">
     <div className="flex justify-center w-full">
-      <div className="bg-gray-200 h-60 w-full rounded-lg mb-4"></div>
+      <div className="w-full mb-4 bg-gray-200 rounded-lg h-60"></div>
     </div>
-    <div className="bg-gray-200 h-8 w-3/4 rounded mb-2"></div>
-    <div className="bg-gray-200 h-6 w-1/2 rounded mb-4"></div>
-    <div className="flex space-x-2 mb-3">
+    <div className="w-3/4 h-8 mb-2 bg-gray-200 rounded"></div>
+    <div className="w-1/2 h-6 mb-4 bg-gray-200 rounded"></div>
+    <div className="flex mb-3 space-x-2">
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="bg-gray-200 h-4 w-4 rounded-full"></div>
+        <div key={i} className="w-4 h-4 bg-gray-200 rounded-full"></div>
       ))}
     </div>
-    <div className="bg-gray-200 h-20 w-full rounded mb-4"></div>
-    <div className="flex justify-between items-center">
-      <div className="bg-gray-200 h-8 w-24 rounded"></div>
-      <div className="bg-gray-200 h-10 w-32 rounded"></div>
+    <div className="w-full h-20 mb-4 bg-gray-200 rounded"></div>
+    <div className="flex items-center justify-between">
+      <div className="w-24 h-8 bg-gray-200 rounded"></div>
+      <div className="w-32 h-10 bg-gray-200 rounded"></div>
     </div>
   </div>
 );
 
 const ProductsLoadingSkeleton = () => (
   <>
-    <div className="animate-pulse p-4 relative rounded-full shadow-lg mb-6">
-      <div className="bg-gray-200 h-10 w-full rounded-full"></div>
+    <div className="relative p-4 mb-6 rounded-full shadow-lg animate-pulse">
+      <div className="w-full h-10 bg-gray-200 rounded-full"></div>
     </div>
-    <div className="bg-gray-200 h-60 w-full rounded-lg mb-10"></div>
-    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 md:gap-16 lg:gap-20 w-full mx-auto lg:mx-0 mt-10">
+    <div className="w-full mb-10 bg-gray-200 rounded-lg h-60"></div>
+    <div className="grid w-full grid-cols-1 gap-6 mx-auto mt-10 xs:grid-cols-2 lg:grid-cols-4 sm:gap-10 md:gap-16 lg:gap-20 lg:mx-0">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="bg-gray-200 h-16 rounded-full"></div>
+        <div key={i} className="h-16 bg-gray-200 rounded-full"></div>
       ))}
     </div>
-    <div className="mt-20 grid grid-cols-1 gap-8">
+    <div className="grid grid-cols-1 gap-8 mt-20">
       {[...Array(3)].map((_, i) => (
         <ProductsSkeletonCard key={i} />
       ))}
@@ -63,8 +63,8 @@ const ProductsLoadingSkeleton = () => (
 );
 
 const ErrorDisplay = ({ message }: { message: string }) => (
-  <div className="mt-10 p-8 border border-red-300 bg-red-50 rounded-lg text-center">
-    <h3 className="text-xl font-semibold text-red-700 mb-2">
+  <div className="p-8 mt-10 text-center border border-red-300 rounded-lg bg-red-50">
+    <h3 className="mb-2 text-xl font-semibold text-red-700">
       Oops! Something went wrong
     </h3>
     <p className="text-red-600">
@@ -72,7 +72,7 @@ const ErrorDisplay = ({ message }: { message: string }) => (
     </p>
     <button
       onClick={() => window.location.reload()}
-      className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+      className="px-6 py-2 mt-4 text-white transition bg-red-600 rounded-lg hover:bg-red-700"
     >
       Retry
     </button>
@@ -242,7 +242,7 @@ const ProductsPage = () => {
 
   if (loading) {
     return (
-      <div className="h-auto px-4 sm:px-8 md:px-12 lg:px-20 py-8 sm:py-10 md:py-15">
+      <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
         <ProductsLoadingSkeleton />
       </div>
     );
@@ -250,22 +250,22 @@ const ProductsPage = () => {
 
   if (error) {
     return (
-      <div className="h-auto px-4 sm:px-8 md:px-12 lg:px-20 py-8 sm:py-10 md:py-15">
+      <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
         <ErrorDisplay message={error} />
       </div>
     );
   }
 
   return (
-    <div className="h-auto px-4 sm:px-8 md:px-12 lg:px-20 py-8 sm:py-10 md:py-15">
-      <div className="p-4 relative rounded-full shadow-lg">
-        <FaMagnifyingGlass className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+    <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
+      <div className="relative p-4 rounded-full shadow-lg">
+        <FaMagnifyingGlass className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 top-1/2 left-4" />
         <input
           type="text"
           placeholder="search here...."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border border-transparent pl-10 outline-none"
+          className="w-full pl-10 border border-transparent outline-none"
         />
       </div>
       {!searchTerm && (
@@ -276,7 +276,7 @@ const ProductsPage = () => {
             isInView={true}
             selectedCategory={selectedCategory}
             setSelectedCategory={handleSelectedCategory}
-            className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-10 md:gap-16 lg:gap-20 w-full mx-auto lg:mx-0 mt-10"
+            className="grid w-full grid-cols-1 gap-6 mx-auto mt-10 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-10 md:gap-16 lg:gap-20 lg:mx-0"
           />
         </>
       )}
@@ -301,7 +301,7 @@ const ProductsPage = () => {
             ))
           : filteredProducts.length === 0 &&
             products20Plus.length === 0 && (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <div className="py-12 text-center rounded-lg bg-gray-50">
                 <img
                   src="/assets/productv2/ChatGPT Image Apr 7, 2025, 04_09_38 PM.png"
                   alt="No products found"
@@ -310,7 +310,7 @@ const ProductsPage = () => {
                 <h3 className="text-xl font-medium text-gray-600">
                   No products found
                 </h3>
-                <p className="text-gray-500 mt-2">
+                <p className="mt-2 text-gray-500">
                   We couldn't find anything matching your filters. Try searching
                   with different keywords.
                 </p>
@@ -319,23 +319,23 @@ const ProductsPage = () => {
       </div>
       {should20PlusBeShown && products20Plus.length > 0 && (
         <div className="mt-20" ref={section20Ref}>
-          <h1 className="font-akshar font-medium text-3xl sm:text-4xl md:text-5xl mb-8 text-center sm:text-left">
+          <h1 className="mb-8 text-3xl font-medium text-center font-akshar sm:text-4xl md:text-5xl sm:text-left">
             Explore Products for 20+
           </h1>
           {products20Plus.map((product) => (
             <div key={product._id} className="mb-12">
-              <div className="relative flex flex-col md:flex-row items-center justify-center px-4 sm:px-6 md:px-12 py-8 sm:py-10 bg-white">
+              <div className="relative flex flex-col items-center justify-center px-4 py-8 bg-white md:flex-row sm:px-6 md:px-12 sm:py-10">
                 <div className="absolute -left-40 top-1/2 w-0 h-0 border-t-[200px] sm:border-t-[250px] md:border-t-[300px] border-t-transparent border-l-[250px] sm:border-l-[300px] md:border-l-[380px] border-l-red-400 border-b-[200px] sm:border-b-[250px] md:border-b-[300px] border-b-transparent -translate-y-1/2 hidden md:block"></div>
 
                 <div className="relative flex items-start justify-start w-full md:w-1/2">
                   <button className="absolute top-[10%] -left-20 hidden md:block">
-                    <FaChevronUp className="text-white w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 font-extrabold" />
+                    <FaChevronUp className="w-12 h-12 font-extrabold text-white md:w-16 md:h-16 lg:w-20 lg:h-20" />
                   </button>
 
                   <button className="absolute bottom-[10%] -left-20 hidden md:block">
-                    <FaChevronDown className="text-white w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 font-extrabold" />
+                    <FaChevronDown className="w-12 h-12 font-extrabold text-white md:w-16 md:h-16 lg:w-20 lg:h-20" />
                   </button>
-                  <div className="flex justify-center md:justify-start items-center w-full">
+                  <div className="flex items-center justify-center w-full md:justify-start">
                     <img
                       src={product?.productImages?.[0]?.imageUrl}
                       alt="Conversation Story Cards"
@@ -344,14 +344,14 @@ const ProductsPage = () => {
                   </div>
                 </div>
 
-                <div className="w-full md:w-1/2 mt-6 md:mt-0 px-2 sm:px-4 space-y-4 sm:space-y-5">
+                <div className="w-full px-2 mt-6 space-y-4 md:w-1/2 md:mt-0 sm:px-4 sm:space-y-5">
                   <span className="bg-red-500 text-white text-sm sm:text-md px-4 sm:px-5 py-1.5 sm:py-2 rounded-full">
                     {product.ageCategory}
                   </span>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mt-1">
+                  <h1 className="mt-1 text-xl font-semibold sm:text-2xl md:text-3xl">
                     Conversation Story Cards for Age {product.ageCategory}
                   </h1>
-                  <div className="flex text-yellow-400 my-1 sm:my-2">
+                  <div className="flex my-1 text-yellow-400 sm:my-2">
                     <FaStar />
                     <FaStar />
                     <FaStar />
@@ -359,15 +359,15 @@ const ProductsPage = () => {
                     <FaStar className="text-gray-400" />
                   </div>
 
-                  <p className="text-gray-600 text-base sm:text-lg mb-3">
+                  <p className="mb-3 text-base text-gray-600 sm:text-lg">
                     {product.description}
                   </p>
 
-                  <div className="flex flex-col md:flex-row items-center justify-between font-bold gap-4">
+                  <div className="flex flex-col items-center justify-between gap-4 font-bold md:flex-row">
                     <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#ff9800] text-inter whitespace-nowrap mr-5">
                       Rs {product.price}
                     </span>
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row">
                       <button
                         className="flex items-center gap-2 bg-white border border-[#ff9800] text-[#ff9800] text-sm sm:text-md md:text-lg px-3 py-2 rounded-lg hover:bg-[#fff3e0] transition whitespace-nowrap w-full sm:w-auto"
                         onClick={(e) => handleBuyNow(e, product)}
@@ -390,10 +390,10 @@ const ProductsPage = () => {
       )}
       {selectedCategory === "20+" && products20Plus.length === 0 && (
         <div className="mt-20">
-          <h1 className="font-akshar font-medium text-5xl mb-8">
+          <h1 className="mb-8 text-5xl font-medium font-akshar">
             Explore Products for 20+
           </h1>
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <div className="py-12 text-center rounded-lg bg-gray-50">
             <img
               src="/no-products.svg"
               alt="No products found"
@@ -402,7 +402,7 @@ const ProductsPage = () => {
             <h3 className="text-xl font-medium text-gray-600">
               No 20+ products found
             </h3>
-            <p className="text-gray-500 mt-2">
+            <p className="mt-2 text-gray-500">
               Check back later for new products
             </p>
           </div>

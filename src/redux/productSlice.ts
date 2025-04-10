@@ -31,7 +31,7 @@ const initialState: ProductState = {
   items: [],
   total: 0,
   page: 1,
-  limit: 20,
+  limit: 50,
   loading: false,
   error: null,
   search: "",

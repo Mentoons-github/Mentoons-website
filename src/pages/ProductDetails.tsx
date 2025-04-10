@@ -6,8 +6,15 @@ import { WORKSHOP_FAQ } from "@/constant";
 import { addItemCart } from "@/redux/cartSlice";
 import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { ProductBase } from "@/types/productTypes";
+import {
+  AudioComicProduct,
+  ComicProduct,
+  PodcastProduct,
+  ProductBase,
+  ProductType,
+} from "@/types/productTypes";
 import { ModalMessage } from "@/utils/enum";
+import { formatDateString } from "@/utils/formateDate";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 
@@ -218,6 +225,8 @@ const ProductDetails = () => {
     );
   }
 
+  console.log("Product", product);
+
   return (
     <div className="w-[90%] mx-auto my-20 ">
       <div className="flex flex-col md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
@@ -245,9 +254,15 @@ const ProductDetails = () => {
         <span className="font-semibold text-gray-500">Mentoons</span>
 
         <Rating ratings={Number(product?.rating)} />
-        <p className="my-2 text-lg font-semibold text-neutral-800">
+        <p className={`my-2 text-lg font-semibold text-neutral-800 `}>
           {" "}
-          ₹ {product?.price}{" "}
+          {product?.price === 0 ? (
+            <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
+              Free
+            </span>
+          ) : (
+            `₹ ${product?.price}`
+          )}
           {(product?.title === "Conversation Starter Cards (6-12) years" ||
             product?.title === "Silent Stories (6-12) years") &&
             product?.ageCategory === "6-12" && (
@@ -258,7 +273,7 @@ const ProductDetails = () => {
                     : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
                 }`}
                 download
-                className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-orange-500 rounded-full hover:opacity-55"
+                className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
               >
                 Download Free Sample
               </a>
@@ -285,7 +300,8 @@ const ProductDetails = () => {
               <span className="w-8 font-bold text-center">{quantity}</span>
               <button
                 onClick={() => handleUpdateQuantity("+")}
-                className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all"
+                disabled={product?.price === 0}
+                className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50"
               >
                 <Plus className="w-4 h-4 font-bold" />
               </button>
@@ -294,24 +310,50 @@ const ProductDetails = () => {
         </div>
 
         {/* Buy Now Button */}
-        <div className="flex flex-col w-full gap-4 mt-4">
+        {product?.price === 0 ? (
           <button
-            className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-            onClick={(e) => handleAddtoCart(e)}
-            disabled={isLoading}
+            onClick={() => {
+              if (product?.type === ProductType.COMIC) {
+                window.open(
+                  (product.details as ComicProduct["details"]).sampleUrl,
+                  "_blank"
+                );
+              } else if (product?.type === ProductType.AUDIO_COMIC) {
+                window.open(
+                  (product.details as AudioComicProduct["details"]).sampleUrl,
+                  "_blank"
+                );
+              } else if (product?.type === ProductType.PODCAST) {
+                window.open(
+                  (product.details as PodcastProduct["details"]).sampleUrl,
+                  "_blank"
+                );
+              }
+            }}
+            className="w-full px-4 py-3 ml-4 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
           >
-            <IoIosCart className="w-5 h-5 mr-2" />
-            {isLoading ? "Adding..." : "Add to Cart"}
+            Download For Free
           </button>
+        ) : (
+          <div className="flex flex-col w-full gap-4 mt-4">
+            <button
+              className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+              onClick={(e) => handleAddtoCart(e)}
+              disabled={isLoading}
+            >
+              <IoIosCart className="w-5 h-5 mr-2" />
+              {isLoading ? "Adding..." : "Add to Cart"}
+            </button>
 
-          <button
-            className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
-            onClick={() => handleBuyNow(product)}
-            disabled={isLoading}
-          >
-            Buy Now
-          </button>
-        </div>
+            <button
+              className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
+              onClick={() => handleBuyNow(product)}
+              disabled={isLoading}
+            >
+              Buy Now
+            </button>
+          </div>
+        )}
 
         {/* Separator */}
         <div className="w-full h-[1.25px] my-12 mb-8 bg-primary" />
@@ -321,19 +363,43 @@ const ProductDetails = () => {
           {/* use map here */}
           <div className="flex ">
             <div className="flex-1 ">Language:</div>
-            <div className="flex-1">English</div>
+            <div className="flex-1">
+              {(product.type === ProductType.COMIC ||
+                product.type === ProductType.AUDIO_COMIC) &&
+                (
+                  product.details as
+                    | ComicProduct["details"]
+                    | AudioComicProduct["details"]
+                )?.language === "en" &&
+                "English"}
+            </div>
           </div>
           <div className="flex pt-2 ">
             <div className="flex-1">Print Length:</div>
-            <div className="flex-1">10 pages</div>
+            <div className="flex-1">
+              {product.type === ProductType.COMIC
+                ? (product.details as ComicProduct["details"])?.pages
+                : "Not Available"}
+            </div>
           </div>
           <div className="flex pt-2 ">
             <div className="flex-1">Launch date:</div>
-            <div className="flex-1">January 3, 2025</div>
+            <div className="flex-1">
+              {product.type === ProductType.COMIC ||
+              product.type === ProductType.AUDIO_COMIC
+                ? formatDateString(
+                    (
+                      product.details as
+                        | ComicProduct["details"]
+                        | AudioComicProduct["details"]
+                    )?.releaseDate ?? ""
+                  ) || "Not Available"
+                : "Not Available"}
+            </div>
           </div>
           <div className="flex pt-2 ">
             <div className="flex-1 ">Reading age:</div>
-            <div className="flex-1">17 - 19</div>
+            <div className="flex-1">{product.ageCategory}</div>
           </div>
           <div className="flex py-2">
             <div className="flex-1">Dimensions:</div>

@@ -718,7 +718,7 @@ export const FOOTER_NAVLINKS = [
   {
     id: "L_2",
     title: "Comics",
-    url: "/mentoons-comics",
+    url: "/mentoons-comics?option=comic",
   },
   {
     id: "L_3",
@@ -1990,3 +1990,37 @@ export const ISSUES_FACED_BY_USERS = [
       "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/online-safety.png",
   },
 ];
+
+export const PRODUCT_TYPE = [
+  {
+    id: "PT_01",
+    lable: "Mentoons Cards",
+    value: ProductType.MENTOONS_CARDS,
+  },
+  {
+    id: "PT_02",
+    lable: "Mentoons Books",
+    value: ProductType.MENTOONS_BOOKS,
+  },
+  {
+    id: "PT_03",
+    lable: "E-comics",
+    value: ProductType.COMIC,
+  },
+  {
+    id: "PT_04",
+    lable: "Audio Comics",
+    value: ProductType.AUDIO_COMIC,
+
+  },
+  {
+    id: "PT_05",
+    lable: "Podcasts",
+    value: ProductType.PODCAST,
+  },
+  {
+    id: "PT_05",
+    lable: "Assessments",
+    value: ProductType.ASSESSMENT,
+  }
+]

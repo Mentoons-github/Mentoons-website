@@ -23,12 +23,12 @@ import ProductDetails from "./pages/ProductDetails";
 // import ProductManagement from "./pages/ProductManagement.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Assessment from "./pages/v2/user/assessment.tsx";
+import ProductsPage from "./pages/v2/user/products/products.tsx";
 import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
 import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import ProductsPage from "./pages/v2/user/products/products.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 

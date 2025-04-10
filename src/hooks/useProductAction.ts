@@ -1,11 +1,11 @@
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { toast } from "sonner";
 import { addItemCart } from "@/redux/cartSlice";
+import { AppDispatch } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
-import { AppDispatch } from "@/redux/store";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export const useProductActions = ({
   setShowLoginModal,
