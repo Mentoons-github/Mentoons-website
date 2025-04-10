@@ -1993,32 +1993,32 @@ export const ISSUES_FACED_BY_USERS = [
 export const PRODUCT_TYPE = [
   {
     id: "PT_01",
-    lable: "Mentoons Cards",
+    label: "Mentoons Cards",
     value: ProductType.MENTOONS_CARDS,
   },
   {
     id: "PT_02",
-    lable: "Mentoons Books",
+    label: "Mentoons Books",
     value: ProductType.MENTOONS_BOOKS,
   },
   {
     id: "PT_03",
-    lable: "E-comics",
+    label: "E-comics",
     value: ProductType.COMIC,
   },
   {
     id: "PT_04",
-    lable: "Audio Comics",
+    label: "Audio Comics",
     value: ProductType.AUDIO_COMIC,
   },
   {
     id: "PT_05",
-    lable: "Podcasts",
+    label: "Podcasts",
     value: ProductType.PODCAST,
   },
   {
     id: "PT_05",
-    lable: "Assessments",
+    label: "Assessments",
     value: ProductType.ASSESSMENT,
   },
 ];

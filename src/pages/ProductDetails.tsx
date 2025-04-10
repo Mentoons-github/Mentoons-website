@@ -2,7 +2,7 @@ import ProductCard from "@/components/MentoonsStore/ProductCard";
 import AddToCartModal from "@/components/modals/AddToCartModal";
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
-import { WORKSHOP_FAQ } from "@/constant";
+import { PRODUCT_TYPE, WORKSHOP_FAQ } from "@/constant";
 import { addItemCart } from "@/redux/cartSlice";
 import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -19,7 +19,7 @@ import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 
 import { Minus, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { IoIosCart } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +31,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
@@ -39,6 +40,25 @@ const ProductDetails = () => {
 
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductBase>();
+  const [recommendationsFilter, setRecommendationFilter] = useState<string>("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const scrollAmount = direction === "left" ? -400 : 400;
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+
+    // Update scroll position after scroll
+    setScrollPosition(container.scrollLeft + scrollAmount);
+  };
+
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    setScrollPosition(container.scrollLeft);
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -54,6 +74,7 @@ const ProductDetails = () => {
           productResponse.payload !== null
         ) {
           setProduct(productResponse.payload as ProductBase);
+          setRecommendationFilter(productResponse.payload?.type);
         } else {
           console.error(
             "Invalid product data received",
@@ -224,7 +245,6 @@ const ProductDetails = () => {
       </div>
     );
   }
-
   console.log("Product", product);
 
   return (
@@ -410,24 +430,122 @@ const ProductDetails = () => {
         {/* You may also like this section */}
 
         <div className="w-full p-4 mt-4 ">
-          <h2 className="mb-8 text-4xl font-semibold">
-            You will also like this -
-          </h2>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
+          <div>
+            <h2 className="mb-8 text-4xl font-semibold">
+              You will also like this -
+            </h2>
+            <div className="flex items-center justify-start gap-6 rounded-sm flex-wrap mb-8">
+              {PRODUCT_TYPE.map((type) => (
+                <button
+                  key={type.id}
+                  className={`border border-primary text-primary
+                          w-fit leading-none py-3 px-7 rounded  ${
+                            recommendationsFilter === type.value &&
+                            "bg-primary text-white shadow-sm shadow-primary/50"
+                          }`}
+                  onClick={() => setRecommendationFilter(type.value)}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
             {recommendedProducts?.length > 0 ? (
-              recommendedProducts.map((product) => {
-                // Ensure all required properties are present before passing to ProductCard
-
-                return (
-                  <div className="flex justify-center w-full" key={product._id}>
-                    <ProductCard productDetails={product} />
-                  </div>
-                );
-              })
+              recommendedProducts
+                .filter((item) => item.type === recommendationsFilter)
+                .map((product) => {
+                  return (
+                    <div
+                      className="flex justify-center w-full"
+                      key={product._id}
+                    >
+                      <ProductCard productDetails={product} />
+                    </div>
+                  );
+                })
             ) : (
               <div>No Product found</div>
             )}
+          </div> */}
+
+          <div className="relative">
+            {scrollPosition > 0 && (
+              <button
+                onClick={() => handleScroll("left")}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            )}
+
+            <div
+              ref={scrollContainerRef}
+              onScroll={checkScrollPosition}
+              className="flex overflow-x-scroll scrollbar-hide py-16"
+            >
+              {recommendedProducts?.length > 0 ? (
+                recommendedProducts
+                  .filter((item) => item.type === recommendationsFilter)
+                  .map((product) => {
+                    return (
+                      <div
+                        className="min-w-[400px] flex justify-center"
+                        key={product._id}
+                      >
+                        <ProductCard productDetails={product} />
+                      </div>
+                    );
+                  })
+              ) : (
+                <div className="w-full text-center p-8 rounded-lg bg-gray-50 border border-gray-200">
+                  <p className="text-lg text-gray-600 font-medium">
+                    No products found in this category
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Try selecting a different category
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {scrollContainerRef.current &&
+              scrollPosition <
+                scrollContainerRef.current.scrollWidth -
+                  scrollContainerRef.current.clientWidth && (
+                <button
+                  onClick={() => handleScroll("right")}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              )}
           </div>
         </div>
 

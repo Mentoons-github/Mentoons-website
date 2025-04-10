@@ -1,11 +1,38 @@
 import FilterComics from "@/components/comics/FilterComics";
 import { ASSESSMENT_DATA } from "@/constant/assessments/assesments";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch } from "@/redux/store";
+import { ProductType } from "@/utils/enum";
+import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const AssesmentPage: React.FC = () => {
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        // Fetch products with the current filters
+        const token = await getToken();
 
+        const assesment = await dispatch(
+          fetchProducts({
+            type: ProductType.ASSESSMENT,
+            token: token!,
+          })
+        );
+        console.log("Assessment", assesment.payload);
+      } catch (error: unknown) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchAssessments();
+  }, [dispatch, getToken]);
   return (
     <motion.div
       className="px-4 py-8 space-y-6 md:py-16 md:px-5 lg:py-20 md:space-y-8"

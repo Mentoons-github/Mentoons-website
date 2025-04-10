@@ -14,6 +14,7 @@ export enum ProductType {
   ASSESSMENT = "assessment",
   MERCHANDISE = "merchandise",
   MENTOONS_CARDS = "mentoons cards",
+  MENTOONS_BOOKS = "metnoons books",
 }
 
 export interface ISSUES {
@@ -52,7 +53,8 @@ export interface ProductBase {
     | WorkshopProduct["details"]
     | AssessmentProduct["details"]
     | MerchandiseProduct["details"]
-    | MentoonsCardProduct["details"];
+    | MentoonsCardProduct["details"]
+    | MentoonsBookProduct["details"];
 }
 
 // Discriminator interfaces for specific product types:
@@ -117,18 +119,18 @@ export interface WorkshopProduct extends ProductBase {
 export interface AssessmentProduct extends ProductBase {
   type: ProductType.ASSESSMENT;
   details: {
-    questions: {
-      questionText: string;
-      options?: string[];
-      correctAnswer?: string;
-      explanation?: string; // Explanation for the correct answer
-    }[];
-    passingScore: number;
-    duration: number; // in minutes
-    difficulty?: "easy" | "medium" | "hard"; // Enum for difficulty levels
-    totalQuestions?: number; // Total number of questions in the assessment
-    createdBy?: string; // Creator of the assessment
-    createdDate?: string; // ISO date string for when the assessment was created
+    color: string;
+    duration: number;
+    difficulty: string;
+    credits: string;
+    questionGallery: [
+      {
+        _id: string;
+        imageUrl: string;
+        options: string[];
+        correctAnswer: string;
+      }
+    ];
   };
 }
 
@@ -169,6 +171,21 @@ export interface MentoonsCardProduct {
   }[];
 }
 
+export interface MentoonsBookProduct {
+  type: ProductType.MENTOONS_BOOKS;
+  details: {
+    pages: number;
+    author: string;
+    publisher?: string;
+    language: string;
+    releaseDate?: string;
+    series?: string;
+    bookType?: string;
+    isbn?: string;
+    edition?: string;
+  };
+}
+
 // Union type representing any product.
 export type Product =
   | ComicProduct
@@ -177,4 +194,5 @@ export type Product =
   | WorkshopProduct
   | AssessmentProduct
   | MerchandiseProduct
-  | MentoonsCardProduct;
+  | MentoonsCardProduct
+  | MentoonsBookProduct;
