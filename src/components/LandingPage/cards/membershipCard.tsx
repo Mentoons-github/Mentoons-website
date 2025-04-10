@@ -22,6 +22,10 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
     null
   );
 
+  const minLoadingDuration = 1500;
+
+  const [loadingDuration, setLoadingDuration] = useState(minLoadingDuration);
+
   const startGatewayTimeoutCheck = () => {
     if (gatewayTimeout) {
       clearTimeout(gatewayTimeout);
@@ -58,6 +62,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       setIsProcessingPayment(true);
 
       startGatewayTimeoutCheck();
+
+      const requestStartTime = Date.now();
 
       const subscriptionData = {
         orderId: `#ORD-${Date.now()}`,
@@ -103,6 +109,14 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
           }
         );
 
+        const requestDuration = Date.now() - requestStartTime;
+
+        const calculatedDuration = Math.max(
+          minLoadingDuration,
+          requestDuration * 1.5
+        );
+        setLoadingDuration(calculatedDuration);
+
         clearGatewayTimeoutCheck();
 
         console.log("response", response);
@@ -121,6 +135,13 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
           );
         }
       } catch (error) {
+        const requestDuration = Date.now() - requestStartTime;
+        const calculatedDuration = Math.max(
+          minLoadingDuration,
+          requestDuration * 1.2
+        );
+        setLoadingDuration(calculatedDuration);
+
         clearGatewayTimeoutCheck();
         if (axios.isAxiosError(error) && error.response) {
           setPaymentError(
@@ -271,7 +292,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         error={paymentError}
         onRetry={handlePaymentRetry}
         onCancel={handlePaymentCancel}
-        initialLoadTime={1200}
+        loadingDuration={loadingDuration}
       />
     </>
   );

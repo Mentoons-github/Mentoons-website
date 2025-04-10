@@ -1,6 +1,6 @@
-import axiosInstance from "@/api/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { IUser } from "@/types";
+import axios, { AxiosError } from "axios";
 
 export type SessionDetails = {
   _id: string;
@@ -34,8 +34,8 @@ export const fetchSessions = createAsyncThunk(
   "session/fetchSessions",
   async (token: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(
-        "/api/v1/sessionbookings/getbookings",
+      const response = await axios.get(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/getbookings",
         {
           headers: {
             "Content-Type": "application/json",
@@ -44,10 +44,15 @@ export const fetchSessions = createAsyncThunk(
         }
       );
 
-      console.log("sesion response from backend :", response.data);
       return response.data.session;
-    } catch (error) {
-      return rejectWithValue("Failed to fetch sessions");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        return rejectWithValue(
+          error?.response?.data.message || "unexpected error occured"
+        );
+      } else {
+        return rejectWithValue("An unexpected error occurred");
+      }
     }
   }
 );

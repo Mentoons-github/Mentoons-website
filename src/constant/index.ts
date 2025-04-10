@@ -7,7 +7,7 @@ import {
   FaShare,
   FaShoppingCart,
 } from "react-icons/fa";
-import { FaCalendarCheck, FaChartBar, FaCoins, FaUsers } from "react-icons/fa6";
+import { FaChartBar, FaCoins, FaUsers } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 
 export const CATEGORIES = [
@@ -1160,7 +1160,6 @@ export const NAV_LINKS: NavLink[] = [
   {
     id: "NL_16",
     label: "Book Sessions",
-    icon: FaCalendarCheck,
     url: "/bookings",
   },
 ];
@@ -2011,7 +2010,6 @@ export const PRODUCT_TYPE = [
     id: "PT_04",
     lable: "Audio Comics",
     value: ProductType.AUDIO_COMIC,
-
   },
   {
     id: "PT_05",
@@ -2022,5 +2020,5 @@ export const PRODUCT_TYPE = [
     id: "PT_05",
     lable: "Assessments",
     value: ProductType.ASSESSMENT,
-  }
-]
+  },
+];
