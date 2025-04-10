@@ -12,10 +12,12 @@ import WeAreHiring from "@/components/assessment/weAreHiring";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppDispatch, RootState } from "@/redux/store";
+import SelectedDateBookings from "@/components/session/selectedBookings";
 
 const SessionBooking: React.FC = () => {
   const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
   const [bookedDates, setBookedDates] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDateBookings, setSelectedDateBookings] = useState<
     SessionDetails[]
   >([]);
@@ -47,6 +49,8 @@ const SessionBooking: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log("Redux sessions:", sessions);
+    console.log("Local state before setting:", bookedCalls, bookedDates);
     if (sessions && sessions.length > 0) {
       setBookedCalls(sessions);
       setBookedDates(sessions.map((session) => session.date));
@@ -100,8 +104,8 @@ const SessionBooking: React.FC = () => {
 
       const paymentData = {
         orderId: `#ASM-${Date.now()}`,
-        totalAmount: 499,
-        amount: 499,
+        totalAmount: 1, //change to 499
+        amount: 1,
         currency: "INR",
         productInfo: "Mentoons One-On-One Session",
         customerName: name,
@@ -113,7 +117,7 @@ const SessionBooking: React.FC = () => {
         items: [
           {
             productName: "One-On-One Session",
-            price: 499,
+            price: 1,
             quantity: 1,
             date: selectedDate,
             time: selectedTime,
@@ -224,7 +228,7 @@ const SessionBooking: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row">
-        <div className="hidden lg:block lg:w-1/4 sticky top-0 h-screen">
+        <div className="hidden lg:block lg:w-1/4 sticky top-20 h-screen">
           <BookedSession
             error={error}
             loading={loading}
@@ -263,11 +267,20 @@ const SessionBooking: React.FC = () => {
                 bookedCalls={bookedCalls}
                 bookedDates={bookedDates}
                 setSelectedDateBookings={setSelectedDateBookings}
+                setSelectedDate={setSelectedDate}
               />
             </div>
           </div>
-          <div className="w-full md:w-1/3 p-3 flex flex-col justify-start items-center gap-6 md:gap-10">
+          <div className="w-full md:w-1/3 p-3 flex flex-col-reverse md:flex-col justify-start items-center gap-6 md:gap-10">
             <WeAreHiring hiring={hiring} />
+            {selectedDate && (
+              <div className="w-full md:sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+                <SelectedDateBookings
+                  date={selectedDate}
+                  bookings={selectedDateBookings}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

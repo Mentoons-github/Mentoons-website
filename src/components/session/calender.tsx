@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 interface BookingCalendarProps {
   bookedDates: string[];
   bookedCalls: SessionDetails[];
+  setSelectedDate: (val: string) => void;
   setSelectedDateBookings: React.Dispatch<
     React.SetStateAction<SessionDetails[]>
   >;
@@ -11,6 +12,7 @@ interface BookingCalendarProps {
 
 const BookingCalender: React.FC<BookingCalendarProps> = ({
   bookedDates,
+  setSelectedDate,
   bookedCalls,
   setSelectedDateBookings,
 }) => {
@@ -32,7 +34,6 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
 
       bookedCalls.forEach((booking: SessionDetails) => {
         const bookingDate = new Date(booking.date);
-
         if (
           bookingDate.getFullYear() === tomorrow.getFullYear() &&
           bookingDate.getMonth() === tomorrow.getMonth() &&
@@ -47,17 +48,17 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
       checkUpcomingBookings,
       24 * 60 * 60 * 1000
     );
-
     checkUpcomingBookings();
-
     return () => clearInterval(reminderInterval);
   }, [bookedCalls]);
 
   const handleDateClick = (clickedDate: string) => {
     const bookingsOnDay = bookedCalls.filter(
-      (booking) => booking.date === clickedDate
+      (booking) =>
+        new Date(booking.date).toISOString().split("T")[0] === clickedDate
     );
     setSelectedDateBookings(bookingsOnDay);
+    setSelectedDate(clickedDate);
   };
 
   const goToPreviousMonth = () => {
@@ -77,67 +78,62 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
   };
 
   const generateCalendar = () => {
-    const calendar: JSX.Element[] = [];
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const startDay = new Date(currentYear, currentMonth, 1).getDay();
 
-    for (let i = 0; i < firstDay; i++) {
-      calendar.push(
-        <div key={`empty-${i}`} className="p-1 sm:p-2 bg-sky-50"></div>
-      );
+    const normalizedBookedDates = bookedDates.map(
+      (date) => new Date(date).toISOString().split("T")[0]
+    );
+
+    const calendar = [];
+    for (let i = 0; i < startDay; i++) {
+      calendar.push(<div key={`empty-${i}`} className="h-20"></div>);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const currentDateString = new Date(year, month, day)
-        .toISOString()
-        .split("T")[0];
+      const dayDate = new Date(currentYear, currentMonth, day);
+      const dateString = dayDate.toISOString().split("T")[0];
+      const isBooked = normalizedBookedDates.includes(dateString);
+
       const bookingsOnDay = bookedCalls.filter(
-        (booking) => booking.date === currentDateString
-      );
-      const isBooked = bookedDates.includes(currentDateString);
-      const isPastDate = new Date(year, month, day) < new Date();
-      const isCompletedBooking = bookingsOnDay.some(
-        (booking) => booking.status === "completed"
+        (booking) =>
+          new Date(booking.date).toISOString().split("T")[0] === dateString
       );
 
       calendar.push(
         <div
           key={day}
-          onClick={() => handleDateClick(currentDateString)}
-          className={`p-1 sm:p-2 text-center rounded relative cursor-pointer transition-all duration-300 hover:scale-105 ${
-            isBooked
-              ? "bg-yellow-100 text-yellow-800 font-bold"
-              : "bg-green-100 text-green-600"
-          } ${isPastDate ? "opacity-50" : ""}`}
+          className={`relative border p-2 rounded-lg flex items-center justify-center flex-col cursor-pointer transition-all duration-150 ${
+            isBooked ? "bg-orange-100 border-orange-400" : "bg-white"
+          } hover:bg-orange-200`}
+          onClick={() => handleDateClick(dateString)}
         >
-          <span className="text-xs sm:text-sm md:text-base">{day}</span>
-          {bookingsOnDay.length > 0 && (
-            <div
-              className={`absolute bottom-0 left-0 right-0 h-1 ${
-                isCompletedBooking ? "bg-green-500" : "bg-rainbow"
-              }`}
-            ></div>
-          )}
-          {bookingsOnDay.length > 0 && (
-            <div
-              className="absolute top-0 right-0 bg-rainbow text-white rounded-full w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 
-                         flex items-center justify-center text-xs animate-bounce"
-            >
-              <span className="text-xxs sm:text-xs">
-                {bookingsOnDay.length}
+          <span className="font-semibold text-lg">{day}</span>
+
+          <div className="flex flex-wrap justify-center gap-1 mt-1">
+            {bookingsOnDay.map((booking, index) => (
+              <span
+                key={index}
+                className={`text-[10px] px-1 py-[1px] rounded-full font-semibold uppercase ${
+                  booking.status?.toLowerCase() === "booked"
+                    ? "bg-green-100 text-green-700"
+                    : booking.status?.toLowerCase() === "completed"
+                    ? "bg-blue-100 text-blue-700"
+                    : booking.status?.toLowerCase() === "pending"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : booking.status?.toLowerCase() === "cancelled"
+                    ? "bg-red-100 text-red-700"
+                    : booking.status?.toLowerCase() === "aborted"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {booking.status}
               </span>
-            </div>
-          )}
-          {isCompletedBooking && (
-            <div
-              className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full w-3 h-3 sm:w-4 sm:h-4 
-                         flex items-center justify-center"
-            >
-              <span className="text-xxs sm:text-xs">✓</span>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       );
     }
@@ -188,18 +184,22 @@ const BookingCalender: React.FC<BookingCalendarProps> = ({
           <div className="mt-2 sm:mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-4">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-200 rounded"></div>
+              <span className="text-xs sm:text-sm text-gray-600">Booked</span>
+            </div>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-300 rounded-full"></div>
               <span className="text-xs sm:text-sm text-gray-600">
-                Available
+                Completed
               </span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-rainbow rounded-full"></div>
-              <span className="text-xs sm:text-sm text-gray-600">Bookings</span>
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-yellow-300 rounded-full"></div>
+              <span className="text-xs sm:text-sm text-gray-600">Pending</span>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-300 rounded-full"></div>
               <span className="text-xs sm:text-sm text-gray-600">
-                Completed
+                Cancelled / Aborted
               </span>
             </div>
           </div>

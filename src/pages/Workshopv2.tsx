@@ -457,7 +457,7 @@ const Workshopv2 = () => {
                 variants={fadeInUp}
                 className="relative items-center justify-center flex-1"
               >
-                <h2 className="pt-4 text-8xl font-semibold text-center luckiest-guy-regular text-primary [-webkit-text-stroke:_2px_black]">
+                <h2 className="pt-4 text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold text-center luckiest-guy-regular text-primary [-webkit-text-stroke:_2px_black]">
                   Why our workshops matter?
                 </h2>
                 <figure className="flex items-center justify-end w-full p-4 pt-0 ">
