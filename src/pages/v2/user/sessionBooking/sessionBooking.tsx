@@ -151,7 +151,7 @@ const SessionBooking: React.FC = () => {
 
       console.log("response data :", response.data);
 
-      if (response.data.success === false) {
+      if (!response.data) {
         showErrorModal(response.data.message || "Failed to initiate payment");
         return;
       }

@@ -116,7 +116,7 @@ export const HIRING: Hiring[] = [
     bg: "#EC9600",
   },
   {
-    job: "Psychologist",
+    job: "Psychologists",
     description:
       "Are you a passionate Psychologist ready to guide others toward self-discovery? We’re looking for talented professionals to be a part of Mentoons Mythos!",
     image: "/assets/home/contests/Psychology 3.png",
