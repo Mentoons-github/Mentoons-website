@@ -103,32 +103,6 @@ const Membership = () => {
             <MembershipCard membership={data} key={index} />
           ))}
         </div>
-        {/* <div className="p-6 md:p-10">
-          <h1 className="text-center text-lg md:text-xl font-normal epilogue">
-            Pay Through
-          </h1>
-          <div className="grid grid-cols-2 sm:grid-cols-4 place-items-center gap-6 md:gap-10 mx-auto pt-5">
-            {[
-              "google-pay-icon",
-              "paytm-icon",
-              "razorpay-icon",
-              "master-card-icon",
-            ].map((icon, index) => (
-              <motion.img
-                key={index}
-                initial={{ opacity: 0, y: "-100%" }}
-                animate={{
-                  opacity: isInView ? 1 : 0,
-                  y: isInView ? 0 : "-100%",
-                }}
-                transition={{ duration: 0.8 + index * 0.1, ease: "easeInOut" }}
-                src={`/assets/home/membership/payment/${icon}.svg`}
-                alt={icon}
-                className="w-8 h-8 md:w-10 md:h-10"
-              />
-            ))}
-          </div>
-        </div> */}
       </motion.div>
     </section>
   );
