@@ -1,4 +1,4 @@
-import { SessionDetails } from "@/redux/sessionSlice";
+import { Psychologist, SessionDetails } from "@/redux/sessionSlice";
 import { useSessionPostpone } from "@/utils/formik/sessionForm";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,9 +20,41 @@ const PostPone = ({
     null
   );
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [updateComplete, setUpdateComplete] = useState(false);
+  const [updatedSessionData, setUpdatedSessionData] =
+    useState<SessionDetails | null>(null);
+  const [psychologistData, setPsychologistData] = useState<Psychologist | null>(
+    null
+  );
 
-  const formik = useSessionPostpone((values, formik) => {
-    formik.resetForm();
+  const formik = useSessionPostpone(async (values, formik) => {
+    const token = await getToken();
+
+    try {
+      const response = await axios.get(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${values.time}&date=${values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("response after update : ", response.data);
+
+      if (response.data?.success) {
+        console.log("Postpone successful:", response.data);
+        setUpdatedSessionData(response.data.updatedSession);
+        setPsychologistData(response.data.updatedSession.psychologistId);
+        setUpdateComplete(true);
+      } else {
+        console.log("Postpone failed:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Postpone error:", error);
+    } finally {
+      formik.setSubmitting(false);
+    }
   });
 
   const formatDate = (dateStr: string) => {
@@ -61,7 +93,7 @@ const PostPone = ({
 
     try {
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/availability?time=${formik.values.time}&date=${formik.values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=check`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${formik.values.time}&date=${formik.values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=check`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,9 +116,14 @@ const PostPone = ({
     }
   };
 
+  const closeSuccessModal = () => {
+    setUpdateComplete(false);
+    setIsPostponeModal(false);
+  };
+
   return (
     <AnimatePresence>
-      {isModalOpen && (
+      {isModalOpen && !updateComplete && (
         <motion.div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           initial={{ opacity: 0 }}
@@ -207,6 +244,7 @@ const PostPone = ({
 
               <div className="flex justify-end space-x-3">
                 <button
+                  type="button"
                   onClick={() => setIsPostponeModal(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                 >
@@ -223,6 +261,124 @@ const PostPone = ({
                 </button>
               </div>
             </motion.form>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {updateComplete && updatedSessionData && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full m-4"
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 15 }}
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-green-100 p-2 rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold ml-2 text-green-600 font-figtree">
+                Session Postponed Successfully!
+              </h2>
+            </div>
+
+            <div className="border-t border-b py-4 mb-5">
+              <h3 className="font-semibold text-gray-800 mb-3 font-figtree">
+                Updated Session Details
+              </h3>
+
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm text-gray-600">Name</p>
+                    <p className="font-medium">{updatedSessionData.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Email</p>
+                    <p className="font-medium">{updatedSessionData.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Phone</p>
+                    <p className="font-medium">{updatedSessionData.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <p className="font-medium capitalize">
+                      {updatedSessionData.status}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h4 className="text-gray-700 font-medium mb-2">New Schedule</h4>
+                <div className="flex items-center mb-1">
+                  <span className="text-blue-500 mr-2">📅</span>
+                  <span>{formatDate(updatedSessionData.date || "")}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-blue-500 mr-2">🕒</span>
+                  <span>{formatTime(updatedSessionData.time || "")}</span>
+                </div>
+              </div>
+
+              {psychologistData && (
+                <div className="mt-4">
+                  <h4 className="text-gray-700 font-medium mb-2">
+                    Psychologist Details
+                  </h4>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <span className="text-blue-500 mr-2">👩‍⚕️</span>
+                      <span className="font-medium">
+                        {psychologistData.name}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-gray-600">Department</p>
+                        <p>{psychologistData.department}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Location</p>
+                        <p>
+                          {psychologistData.place?.city},{" "}
+                          {psychologistData.place?.state}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={closeSuccessModal}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}

@@ -2,6 +2,29 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { IUser } from "@/types";
 import axios, { AxiosError } from "axios";
 
+interface Place {
+  houseName: string;
+  street: string;
+  city: string;
+  district: string;
+  state: string;
+  pincode: string;
+  country: string;
+}
+
+export interface Psychologist {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  department: string;
+  joinDate: string;
+  isActive: boolean;
+  salary: number;
+  place: Place;
+}
+
 export type SessionDetails = {
   _id: string;
   user: IUser;
@@ -10,7 +33,7 @@ export type SessionDetails = {
   name: string;
   phone: string;
   email: string;
-  psychologistId: string;
+  psychologistId: string | Psychologist;
   description: string;
   status: "booked" | "completed" | "cancelled" | "pending" | "aborted";
   completedAt: string | null;
