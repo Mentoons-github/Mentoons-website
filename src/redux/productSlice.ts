@@ -31,7 +31,7 @@ const initialState: ProductState = {
   items: [],
   total: 0,
   page: 1,
-  limit: 50,
+  limit: 500, //change this after adding pagination
   loading: false,
   error: null,
   search: "",

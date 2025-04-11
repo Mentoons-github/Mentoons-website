@@ -1,9 +1,11 @@
 import ProductCard from "@/components/MentoonsStore/ProductCard";
+import { PRODUCT_TYPE } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
+import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import CartItemCard from "../components/MentoonsStore/CartItemCard";
@@ -11,9 +13,14 @@ import CartItemCard from "../components/MentoonsStore/CartItemCard";
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const { getToken, userId } = useAuth();
   console.log("User ID", userId);
+
+  const [recommendationsFilter, setRecommendationFilter] = useState(
+    ProductType.MENTOONS_CARDS
+  );
 
   // Updated selector for cart structure
   const { cart, loading, error } = useSelector(
@@ -24,6 +31,25 @@ const Cart: React.FC = () => {
 
   // Get products from the productSlice
   const { items: products } = useSelector((state: RootState) => state.products);
+
+  console.log("Product", products);
+
+  const handleScroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const scrollAmount = direction === "left" ? -400 : 400;
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+
+    // Update scroll position after scroll
+    setScrollPosition(container.scrollLeft + scrollAmount);
+  };
+
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    setScrollPosition(container.scrollLeft);
+  };
 
   const handleCheckout = () => {
     navigate("/order-summary");
@@ -134,29 +160,125 @@ const Cart: React.FC = () => {
 
           <div className="w-full p-4 mt-4 ">
             <div>
-              <h2 className="mb-8 text-4xl font-semibold">
+              <h2 className="mb-4 text-4xl font-semibold">
                 People also bought
               </h2>
-              //TODO:{/*  Add the filter buttons */}
+              <div className="flex items-center justify-start gap-6 rounded-sm flex-wrap mb-8">
+                {PRODUCT_TYPE.map((type) => (
+                  <button
+                    key={type.id}
+                    className={`border border-primary text-primary
+                w-fit leading-none py-3 px-7 rounded  ${
+                  recommendationsFilter === type.value &&
+                  "bg-primary text-white shadow-sm shadow-primary/50"
+                }`}
+                    onClick={() => setRecommendationFilter(type.value)}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
+            {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
               {products?.length > 0 ? (
-                products.map((product) => {
-                  // Ensure all required properties are present before passing to ProductCard
-
-                  return (
-                    <div
-                      className="flex justify-center w-full"
-                      key={product._id}
-                    >
-                      <ProductCard key={product._id} productDetails={product} />
-                    </div>
-                  );
-                })
+                products
+                  .filter((product) => product.type === recommendationsFilter)
+                  .map((product) => {
+                    return (
+                      <div
+                        className="flex justify-center w-full"
+                        key={product._id}
+                      >
+                        <ProductCard
+                          key={product._id}
+                          productDetails={product}
+                        />
+                      </div>
+                    );
+                  })
               ) : (
                 <div>No Product found</div>
               )}
+            </div> */}
+
+            <div className="relative">
+              {scrollPosition > 0 && (
+                <button
+                  onClick={() => handleScroll("left")}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              <div
+                ref={scrollContainerRef}
+                onScroll={checkScrollPosition}
+                className="flex overflow-x-scroll scrollbar-hide py-16"
+              >
+                {products?.length > 0 ? (
+                  products
+                    .filter((product) => product.type === recommendationsFilter)
+                    .map((product) => {
+                      return (
+                        <div
+                          className="min-w-[400px] flex justify-center"
+                          key={product._id}
+                        >
+                          <ProductCard productDetails={product} />
+                        </div>
+                      );
+                    })
+                ) : (
+                  <div className="w-full text-center p-8 rounded-lg bg-gray-50 border border-gray-200">
+                    <p className="text-lg text-gray-600 font-medium">
+                      No products found in this category
+                    </p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Try selecting a different category
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {scrollContainerRef.current &&
+                scrollPosition <
+                  scrollContainerRef.current.scrollWidth -
+                    scrollContainerRef.current.clientWidth && (
+                  <button
+                    onClick={() => handleScroll("right")}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                )}
             </div>
           </div>
         </div>
