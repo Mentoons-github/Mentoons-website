@@ -1,6 +1,6 @@
-import { useState } from "react";
 import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import Report from "./sampleReport";
 
 const SampleReport = () => {

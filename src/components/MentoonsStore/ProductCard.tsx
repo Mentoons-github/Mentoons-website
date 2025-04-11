@@ -131,7 +131,9 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
               )
             )}
             {productDetails.type === ProductType.PODCAST && (
-              <span className="px-2 py-1 text-sm text-orange-600 bg-orange-200 rounded w-fit">Podcast</span>
+              <span className="px-2 py-1 text-sm text-orange-600 bg-orange-200 rounded w-fit">
+                Podcast
+              </span>
             )}
           </div>
         </div>
