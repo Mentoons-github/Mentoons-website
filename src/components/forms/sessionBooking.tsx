@@ -1,5 +1,8 @@
 import { useSessionForm } from "@/utils/formik/sessionForm";
 import { motion } from "framer-motion";
+import axios, { AxiosError } from "axios";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type HandleSubmit = (values: {
   name: string;
@@ -7,18 +10,57 @@ type HandleSubmit = (values: {
   phone: string;
   selectedDate: string;
   selectedTime: string;
+  state: string;
   description?: string;
 }) => void;
+
+type IndianState = {
+  name: string;
+  state_code: string;
+};
 
 const SessionBookingForm = ({
   handleSubmit,
 }: {
   handleSubmit: HandleSubmit;
 }) => {
+  const [indianStates, setInidanStates] = useState<IndianState[]>([]);
+
   const formik = useSessionForm((values, formikHelpers) => {
     handleSubmit(values);
     formikHelpers.resetForm();
   });
+
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await axios.post(
+          "https://countriesnow.space/api/v0.1/countries/states",
+          {
+            country: "India",
+          }
+        );
+
+        const stateDetail = response.data.data.states;
+
+        const states: IndianState[] = stateDetail.map(
+          (state: IndianState) => state
+        );
+
+        console.table(states);
+        setInidanStates(states);
+      } catch (error: unknown) {
+        console.error("error in fetching states :", error);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.msg || "Failed to fetch states.");
+        } else {
+          toast.error("Something went wrong");
+        }
+      }
+    };
+
+    fetchStates();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -265,6 +307,70 @@ const SessionBookingForm = ({
             transition={{ duration: 0.2 }}
           >
             {formik.errors.selectedTime}
+          </motion.p>
+        )}
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="group">
+        <label
+          htmlFor="state"
+          className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+        >
+          <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+            🏙️
+          </span>{" "}
+          Select State
+        </label>
+        <div className="relative">
+          <select
+            id="state"
+            name="state"
+            value={formik.values.state || ""}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none"
+            required
+          >
+            <option value="" disabled>
+              Select your state
+            </option>
+            {indianStates.map((state) => (
+              <option key={state.state_code} value={state.state_code}>
+                {state.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </div>
+          <motion.div
+            className="absolute bottom-0 left-0 h-0.5 bg-blue-500"
+            initial={{ width: 0 }}
+            whileInView={{ width: formik.values.state ? "100%" : 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+        {formik.touched.state && formik.errors.state && (
+          <motion.p
+            className="text-red-500 text-sm mt-1"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {formik.errors.state}
           </motion.p>
         )}
       </motion.div>

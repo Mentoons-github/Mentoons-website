@@ -16,6 +16,7 @@ export type SessionDetails = {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  state: string;
 };
 
 type SessionState = {

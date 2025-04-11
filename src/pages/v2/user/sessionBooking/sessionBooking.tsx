@@ -6,13 +6,14 @@ import BookedSession from "./bookedSession";
 import SessionBookingForm from "@/components/forms/sessionBooking";
 import { fetchSessions, SessionDetails } from "@/redux/sessionSlice";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { toast } from "sonner";
+
 import { HIRING } from "@/constant/constants";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppDispatch, RootState } from "@/redux/store";
 import SelectedDateBookings from "@/components/session/selectedBookings";
+import PostPone from "@/components/common/modal/postPone";
 
 const SessionBooking: React.FC = () => {
   const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
@@ -22,7 +23,8 @@ const SessionBooking: React.FC = () => {
     SessionDetails[]
   >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
+  const [bookingToPostpone, setBookingToPostpone] =
+    useState<SessionDetails | null>(null);
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
 
   const [errorModalOpen, setErrorModalOpen] = useState(false);
@@ -49,8 +51,6 @@ const SessionBooking: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Redux sessions:", sessions);
-    console.log("Local state before setting:", bookedCalls, bookedDates);
     if (sessions && sessions.length > 0) {
       setBookedCalls(sessions);
       setBookedDates(sessions.map((session) => session.date));
@@ -59,23 +59,23 @@ const SessionBooking: React.FC = () => {
 
   const { getToken } = useAuth();
 
-  const handleCancelBooking = (id: string): void => {
-    setBookingToCancel(id);
+  const handlePostponeBooking = (data: SessionDetails): void => {
+    setBookingToPostpone(data);
     setIsModalOpen(true);
   };
 
-  const confirmCancelBooking = () => {
-    if (bookingToCancel) {
-      const updatedBookings = bookedCalls.filter(
-        (booking) => booking._id !== bookingToCancel
-      );
-      setBookedCalls(updatedBookings);
-      setBookedDates(updatedBookings.map((booking) => booking.date));
-      toast.success("Booking canceled successfully");
-    }
-    setIsModalOpen(false);
-    setBookingToCancel(null);
-  };
+  // const confirmCancelBooking = () => {
+  //   if (bookingToCancel) {
+  //     const updatedBookings = bookedCalls.filter(
+  //       (booking) => booking._id !== bookingToCancel
+  //     );
+  //     setBookedCalls(updatedBookings);
+  //     setBookedDates(updatedBookings.map((booking) => booking.date));
+  //     toast.success("Booking canceled successfully");
+  //   }
+  //   setIsModalOpen(false);
+  //   setBookingToCancel(null);
+  // };
 
   const showErrorModal = (message: string) => {
     setErrorMessage(message);
@@ -87,14 +87,20 @@ const SessionBooking: React.FC = () => {
     email: string;
     phone: string;
     selectedDate: string;
+    state: string;
     selectedTime: string;
     description?: string;
   }) => {
     try {
-      const { name, email, phone, selectedDate, selectedTime, description } =
-        values;
-
-      console.log(name, email, phone, selectedDate, selectedTime, description);
+      const {
+        name,
+        email,
+        phone,
+        selectedDate,
+        selectedTime,
+        description,
+        state,
+      } = values;
 
       const token = await getToken();
       if (!token) {
@@ -122,6 +128,7 @@ const SessionBooking: React.FC = () => {
             date: selectedDate,
             time: selectedTime,
             description: description || "No additional details provided",
+            state,
           },
         ],
         orderStatus: "pending",
@@ -136,11 +143,10 @@ const SessionBooking: React.FC = () => {
           date: selectedDate,
           time: selectedTime,
           description: description || "No additional details provided",
+          state,
         },
         sameAsShipping: true,
       };
-
-      console.log("Initiating payment with:", paymentData);
 
       const response = await axios.post(
         "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
@@ -221,7 +227,7 @@ const SessionBooking: React.FC = () => {
             error={error}
             loading={loading}
             bookedCalls={bookedCalls}
-            cancelBooking={handleCancelBooking}
+            postponeBooking={handlePostponeBooking}
             selectedDateBookings={selectedDateBookings}
           />
         </div>
@@ -233,7 +239,7 @@ const SessionBooking: React.FC = () => {
             error={error}
             loading={loading}
             bookedCalls={bookedCalls}
-            cancelBooking={handleCancelBooking}
+            postponeBooking={handlePostponeBooking}
             selectedDateBookings={selectedDateBookings}
           />
         </div>
@@ -285,43 +291,11 @@ const SessionBooking: React.FC = () => {
         </div>
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full m-4"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: "spring", damping: 15 }}
-            >
-              <h2 className="text-lg font-semibold mb-4">
-                Confirm Cancellation
-              </h2>
-              <p>Are you sure you want to cancel this booking?</p>
-              <div className="flex justify-end mt-4 space-x-2">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors"
-                >
-                  No
-                </button>
-                <button
-                  onClick={confirmCancelBooking}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                >
-                  Yes, Cancel
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PostPone
+        isModalOpen={isModalOpen}
+        setIsPostponeModal={setIsModalOpen}
+        postponeBooking={bookingToPostpone}
+      />
 
       <AnimatePresence>
         {errorModalOpen && (
