@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-react";
 import * as pdfjsLib from "pdfjs-dist";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,15 +10,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 interface ComicViewerProps {
   pdfUrl: string;
+  productType?: string;
 }
 
-const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
+const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const navigate = useNavigate();
+
+  const { user } = useUser();
+
+  console.log("User:", user);
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -168,7 +174,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
 
   return (
     <>
-      {pdfUrl ? (
+      {pdfUrl && pdfUrl.toLowerCase().endsWith(".pdf") ? (
         <div className="flex flex-col w-full h-full p-6">
           <h1 className="mb-4 text-2xl font-bold text-center">
             {pdfUrl
@@ -258,30 +264,41 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
             </button>
           </div>
         </div>
+      ) : pdfUrl &&
+        pdfUrl.toLowerCase().endsWith(".mp4") &&
+        productType === "Free" ? (
+        <div className="flex items-center justify-center w-full h-full p-6">
+          <video
+            controls
+            className="w-full h-full rounded-lg shadow-md"
+            src={pdfUrl}
+          />
+        </div>
       ) : (
         <div className="relative flex flex-col items-center justify-center h-full p-8 overflow-hidden text-center">
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 -translate-x-12 -translate-y-16 rounded-full bg-primary/10" />
           <div className="absolute bottom-0 left-0 w-40 h-40 translate-x-8 translate-y-20 rounded-full bg-primary/10" />
-          <img 
+          <img
             src="/assets/comic-V2/star-1.png"
             alt=""
             className="absolute w-16 top-8 left-8 animate-pulse"
           />
           <img
-            src="/assets/comic-V2/star-2.png" 
+            src="/assets/comic-V2/star-2.png"
             alt=""
             className="absolute w-16 bottom-8 right-8 animate-pulse"
           />
 
           <div className="relative z-10 max-w-2xl mx-auto">
             <h3 className="mb-6 text-4xl font-bold text-primary luckiest-guy-regular">
-              Subscribe to Access Premium Content
+              Subscribe to Access Premium Content or Explore Mentoons store for
+              individual purchases!
             </h3>
             <p className="mb-10 text-xl leading-relaxed text-gray-600">
               Join Mentoons to unlock our full library of educational comics and
               engaging content designed to help children learn and grow. Get
-              access to exclusive comics, audio stories, and more!
+              access to exclusive comics, audio stories, and more
             </p>
             <button
               onClick={(e) => handleBrowsePlansClick(e)}
@@ -289,14 +306,28 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl }) => {
             >
               Subscribe Now
             </button>
+            <button
+              onClick={() => navigate("/product-page")}
+              className="px-10 py-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg ml-4"
+            >
+              Explore Mentoons Store
+            </button>
           </div>
 
           {/* Additional decorative illustrations */}
           <div className="absolute w-24 h-24 left-12 top-1/2 opacity-20">
-            <img src="/assets/comic-V2/comic-doodle.png" alt="" className="object-contain w-full h-full" />
+            <img
+              src="/assets/comic-V2/comic-doodle.png"
+              alt=""
+              className="object-contain w-full h-full"
+            />
           </div>
           <div className="absolute w-24 h-24 right-12 top-1/3 opacity-20">
-            <img src="/assets/comic-V2/comic-doodle-2.png" alt="" className="object-contain w-full h-full" />
+            <img
+              src="/assets/comic-V2/comic-doodle-2.png"
+              alt=""
+              className="object-contain w-full h-full"
+            />
           </div>
         </div>
       )}

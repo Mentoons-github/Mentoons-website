@@ -3,7 +3,7 @@ import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { PodcastProduct } from "@/types/productTypes";
+import { PodcastProduct, ProductBase } from "@/types/productTypes";
 import { ModalMessage, ProductType } from "@/utils/enum";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -26,8 +26,11 @@ const Podcastv2 = () => {
   const [showMembershipModal, setShowMembershipModal] =
     useState<boolean>(false);
   const { isSignedIn, user } = useUser();
+
   const [isScrolled, setIsScrolled] = useState(false);
   console.log(isScrolled);
+
+  const [filteredPodcast, setFilteredPodcast] = useState<ProductBase[]>([]);
 
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
@@ -160,12 +163,15 @@ const Podcastv2 = () => {
     fetchPodcast();
   }, [dispatch, getToken]);
 
-  const filteredPodcast = products.filter(
-    (podcast) =>
-      (podcast?.details as PodcastProduct["details"])?.category ===
-      selectedCategory
-  );
-  console.log(filteredPodcast);
+  useEffect(() => {
+    const filteredPodcast = products.filter(
+      (podcast) =>
+        (podcast?.details as PodcastProduct["details"])?.category ===
+        selectedCategory
+    );
+    console.log(filteredPodcast);
+    setFilteredPodcast(filteredPodcast);
+  }, [products, selectedCategory]);
 
   return (
     <>
@@ -348,22 +354,48 @@ const Podcastv2 = () => {
                           </span>
                         </div>
 
-                        <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20">
+                        <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20 ">
                           <audio
-                            className="w-full"
+                            key={currentPodcastIndex}
+                            className="w-full border border-red-600"
                             controls
-                            controlsList="nodownloads
-                          "
-                          >
-                            <source
-                              src={
-                                (
-                                  filteredPodcast[currentPodcastIndex]
-                                    .details as PodcastProduct["details"]
-                                )?.sampleUrl || "#"
+                            controlsList="nodownload"
+                            preload="metadata"
+                            src={
+                              (
+                                filteredPodcast[currentPodcastIndex]
+                                  ?.details as PodcastProduct["details"]
+                              )?.sampleUrl || "#"
+                            }
+                            ref={(audio) => {
+                              // Set up time restriction for non-subscribed users or free members
+                              if (audio) {
+                                if (!isSignedIn) {
+                                  // Not logged in users get 45 seconds
+                                  setTimeout(() => {
+                                    audio.pause();
+                                    audio.currentTime = 0;
+                                    setShowMembershipModal(true);
+                                  }, 45000); // 45 seconds
+                                } else {
+                                  // Check if user has a free membership
+                                  const hasPaidMembership = 
+                                    user?.publicMetadata?.membershipType && 
+                                    user.publicMetadata.membershipType !== "Free";
+                                  
+                                  if (!hasPaidMembership) {
+                                    // Free members also get 45 seconds
+                                    setTimeout(() => {
+                                      audio.pause();
+                                      audio.currentTime = 0;
+                                      setShowMembershipModal(true);
+                                    }, 45000); // 45 seconds
+                                  }
+                                  // Paid members get full audio
+                                }
                               }
-                              type="audio/mpeg"
-                            />
+                            }}
+                          >
                             Your browser does not support the audio element.
                           </audio>
                         </div>
@@ -532,8 +564,7 @@ const Podcastv2 = () => {
                               // Check if user has a free membership
                               const hasPaidMembership =
                                 user?.publicMetadata?.membershipType &&
-                                user.publicMetadata.membershipType !== "free";
-
+                                user.publicMetadata.membershipType !== "Free";
                               if (!hasPaidMembership) {
                                 // Free members also get 45 seconds
                                 setTimeout(() => {

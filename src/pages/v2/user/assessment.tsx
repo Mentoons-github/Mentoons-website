@@ -3,7 +3,7 @@ import DiscoverYourself from "@/components/assessment/discoverYourself";
 import SampleReport from "@/components/assessment/sampleRepoert";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import { HIRING } from "@/constant/constants";
-import { FAQ_PRODUCT } from "@/constant/faq";
+import { FAQ_ASSESSMENT } from "@/constant/faq";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { Hiring } from "@/types";
@@ -21,7 +21,7 @@ const Assessment = () => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
-const { items: products } = useSelector((state: RootState) => state.products);
+  const { items: products } = useSelector((state: RootState) => state.products);
 
   useEffect(() => {
     const fetchAssessments = async () => {
@@ -36,7 +36,6 @@ const { items: products } = useSelector((state: RootState) => state.products);
           })
         );
         console.log("Assessment", assesment.payload);
-        
       } catch (error: unknown) {
         console.error("Error fetching products:", error);
       }
@@ -57,7 +56,7 @@ const { items: products } = useSelector((state: RootState) => state.products);
           <WeAreHiring hiring={hiring} />
         </div>
       </div>
-      <FAQ data={FAQ_PRODUCT} />
+      <FAQ data={FAQ_ASSESSMENT} />
     </>
   );
 };

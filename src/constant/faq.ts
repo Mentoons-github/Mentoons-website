@@ -28,3 +28,16 @@ export const FAQ_PRODUCT = {
   "Can experts contribute to the platform?":
     "Yes, we welcome contributions from experts in various fields. If you are an expert and would like to share your knowledge and insights with our community, please contact us for more information.",
 };
+
+export const FAQ_ASSESSMENT = {
+  "What is included in each category?":
+    "Each category assessment includes 10 multiple-choice questions designed to provide insights into the specific area (e.g., self-awareness, addiction, skills, emotions).",
+  "What kind of results will I receive?":
+    "After completing the assessment, you'll receive a detailed report with scores, interpretations, and personalized recommendations for improvement in each category.",
+  "Who can take these assessments?":
+    "These assessments are designed for individuals aged 13 and above. Parents can help younger children complete the assessments, ensuring accurate and meaningful results.",
+  "How do I purchase an assessment?":
+    "You can purchase assessments directly through our website. Simply select the assessment you want, complete the payment process, and you'll get immediate access.",
+  "What if I need help understanding my results?":
+    "Our expert counselors and mentors are available to help you interpret your results and provide guidance on your personal development journey. You can schedule a one-on-one consultation through our platform.",
+};
