@@ -1,5 +1,8 @@
 import ComicViewer from "@/components/common/ComicViewer";
+import LoginModal from "@/components/common/modal/loginModal";
+import AddToCartModal from "@/components/modals/AddToCartModal";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
+import { addItemCart } from "@/redux/cartSlice";
 // import { comicsData } from "@/constant/comicsConstants";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -9,6 +12,8 @@ import {
   ProductBase,
 } from "@/types/productTypes";
 import { formatDateString } from "@/utils/formateDate";
+import { FaShoppingCart } from "react-icons/fa";
+import { FaBolt } from "react-icons/fa6";
 
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -16,6 +21,8 @@ import { useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const ComicsPageV2 = () => {
   const {
@@ -37,10 +44,12 @@ const ComicsPageV2 = () => {
   const option =
     new URLSearchParams(window.location.search).get("option") || "comic";
   const [selectedOption, setSelectedOption] = useState(option);
-
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { getToken, userId } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-
-  const { getToken } = useAuth();
+  const navigate = useNavigate();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { user } = useUser();
 
   const membershipType = user?.publicMetadata?.membershipType || "free";
@@ -82,6 +91,65 @@ const ComicsPageV2 = () => {
         carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1
       );
     }
+  };
+
+  const handleAddtoCart = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    comic: ProductBase
+  ) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setIsLoading(false);
+        setShowLoginModal(true);
+        return;
+      }
+
+      if (userId) {
+        const response = await dispatch(
+          addItemCart({
+            token,
+            userId,
+            productId: comic._id,
+            productType: comic.type,
+            title: comic.title,
+            quantity: 1,
+            price: comic.price,
+            ageCategory: comic.ageCategory,
+            productImage: comic.productImages?.[0].imageUrl,
+            productDetails: comic.details,
+          })
+        );
+        if (response.payload) {
+          setShowAddToCartModal(true);
+        }
+        setIsLoading(false);
+      } else {
+        toast.error("User ID is missing");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+      setIsLoading(false);
+    }
+  };
+
+  const handleBuyNow = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    product: ProductBase
+  ) => {
+    e.stopPropagation();
+    const token = await getToken();
+    if (!token) {
+      setIsLoading(false);
+      setShowLoginModal(true);
+      return;
+    }
+    // handleAddtoCart(event)
+    navigate(`/order-summary?productId=${product._id}`, { replace: true });
   };
 
   const openComicModal = (comicLink: string, productType?: string) => {
@@ -639,17 +707,34 @@ const ComicsPageV2 = () => {
                     {!comic.product_type && (
                       <>
                         <button
-                          onClick={() => {}}
-                          className="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+                          onClick={(e) => handleAddtoCart(e, comic)}
+                          disabled={isLoading}
+                          className="flex-1 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
                         >
-                          Add to cart
+                          <FaShoppingCart className="w-4 h-4 inline-block self-center " />
+                          {isLoading ? "Adding..." : "Add to Cart"}
                         </button>
                         <button
-                          onClick={() => {}}
-                          className="flex-1 px-4 py-2 border  text-primary rounded-lg font-medium hover:bg-primary/30 transition-colors whitespace-nowrap border-primary"
+                          onClick={(e) => handleBuyNow(e, comic)}
+                          disabled={isLoading}
+                          className="flex-1 flex items-center gap-2 px-4 py-2 border  text-primary rounded-lg font-medium hover:bg-primary/30 transition-colors whitespace-nowrap border-primary"
                         >
-                          Buy now
+                          <FaBolt className="w-4 h-4 inline-block self-center " />
+                          {isLoading ? "Buying..." : "Buy Now"}
                         </button>
+                        {showAddToCartModal && (
+                          <AddToCartModal
+                            onClose={() => setShowAddToCartModal(false)}
+                            isOpen={showAddToCartModal}
+                            productName={comic.title}
+                          />
+                        )}
+                        {
+                          <LoginModal
+                            isOpen={showLoginModal}
+                            onClose={() => setShowLoginModal(false)}
+                          />
+                        }
                       </>
                     )}
                   </div>
