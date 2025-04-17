@@ -357,7 +357,7 @@ const Podcastv2 = () => {
                         <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20 ">
                           <audio
                             key={currentPodcastIndex}
-                            className="w-full border border-red-600"
+                            className="w-full "
                             controls
                             controlsList="nodownload"
                             preload="metadata"
@@ -379,10 +379,11 @@ const Podcastv2 = () => {
                                   }, 45000); // 45 seconds
                                 } else {
                                   // Check if user has a free membership
-                                  const hasPaidMembership = 
-                                    user?.publicMetadata?.membershipType && 
-                                    user.publicMetadata.membershipType !== "Free";
-                                  
+                                  const hasPaidMembership =
+                                    user?.publicMetadata?.membershipType &&
+                                    user.publicMetadata.membershipType !==
+                                      "Free";
+
                                   if (!hasPaidMembership) {
                                     // Free members also get 45 seconds
                                     setTimeout(() => {

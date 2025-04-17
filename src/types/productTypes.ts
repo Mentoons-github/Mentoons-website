@@ -14,7 +14,7 @@ export enum ProductType {
   ASSESSMENT = "assessment",
   MERCHANDISE = "merchandise",
   MENTOONS_CARDS = "mentoons cards",
-  MENTOONS_BOOKS = "metnoons books",
+  MENTOONS_BOOKS = "mentoons books",
 }
 
 export interface ISSUES {
@@ -36,7 +36,6 @@ export interface ProductBase {
   product_type?: "Free" | "Prime" | "Platinum";
   tags?: string[];
   rating: number;
-  accentColor?: string;
   productImages?: {
     _id: string;
     imageUrl: string;

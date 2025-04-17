@@ -7,6 +7,12 @@ interface FetchProductsParams {
   cardType?: string;
   ageCategory?: string;
   token?: string;
+  search?: string;
+  sortBy?: string;
+  order?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+  [key: string]: any; // Allow other properties
 }
 
 // Add these to the ProductState interface

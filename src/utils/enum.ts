@@ -20,7 +20,7 @@ export const ProductType = {
   ASSESSMENT: "assessment",
   MERCHANDISE: "merchandise",
   MENTOONS_CARDS: "mentoons cards",
-  MENTOONS_BOOKS: "metnoons books",
+  MENTOONS_BOOKS: "mentoons books",
   //Any other product type
 };
 
