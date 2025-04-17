@@ -30,8 +30,10 @@ export interface ProductBase {
   title: string;
   description?: string;
   price: number;
+  orignalProductSrc?: string;
   ageCategory: AgeCategory;
   type: ProductType;
+  product_type?: "Free" | "Prime" | "Platinum";
   tags?: string[];
   rating: number;
   accentColor?: string;

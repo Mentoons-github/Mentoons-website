@@ -370,6 +370,71 @@ export const workshopDetails: WorkshopItems[] = [
 
 export const audioComicsData: AudioComic[] = [
   {
+    name: "Rishi and Rohit",
+    desc: "A heartwarming tale of friendship, understanding, and personal growth between two friends.",
+    duration: "2:20",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+29.jpg",
+    videoLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/RISHI+AND+ROHIT.mp4",
+    category: Category.md,
+    type: ComicType.audioComic,
+  },
+  {
+    name: "Rohan and the Puppies",
+    desc: "A touching story about compassion, responsibility, and the joy of caring for animals.",
+    duration: "2:09",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+28.jpg",
+    videoLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Rohan+and+the+Puppies_01.mp4",
+    category: Category.md,
+    type: ComicType.audioComic,
+  },
+  {
+    name: "Think Before You Act",
+    desc: "An engaging narrative that teaches the importance of considering consequences before taking action.",
+    duration: "3:45",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Think_Before_You_Act!.jpg",
+    videoLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Think+Before+You+Act.mp4",
+    category: Category.md,
+    type: ComicType.audioComic,
+  },
+  {
+    name: "Tanya's Downfall",
+    desc: "A cautionary tale about the consequences of poor choices and the path to redemption.",
+    duration: "1:53",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+26.jpg",
+    videoLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/TANYA_DOWN-FALL_02.mp4",
+    category: Category.md,
+    type: ComicType.audioComic,
+  },
+  {
+    name: "Comic on Divorce",
+    desc: "A sensitive exploration of family changes, helping children understand and cope with divorce.",
+    duration: "2:04",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+1+4.jpg",
+    videoLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/COMIC_ON_DIVORCE_01.mp4",
+    category: Category.md,
+    type: ComicType.audioComic,
+  },
+  {
     name: "Bet Your Life",
     desc: "A cautionary tale about the dangers of gambling and making risky life choices that can impact your future.",
     duration: "2:17",
@@ -421,19 +486,7 @@ export const audioComicsData: AudioComic[] = [
     category: Category.md,
     type: ComicType.audioComic,
   },
-  {
-    name: "Comic on Divorce",
-    desc: "A sensitive exploration of family changes, helping children understand and cope with divorce.",
-    duration: "2:04",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+1+4.jpg",
-    videoLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/COMIC_ON_DIVORCE_01.mp4",
-    category: Category.md,
-    type: ComicType.audioComic,
-  },
+
   {
     name: "Don't Fade Away",
     desc: "A powerful story about maintaining your identity and standing strong in the face of peer pressure.",
@@ -470,58 +523,6 @@ export const audioComicsData: AudioComic[] = [
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+38.jpg",
     videoLink:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/ONE-WAY-TRIP_1.mp4",
-    category: Category.md,
-    type: ComicType.audioComic,
-  },
-  {
-    name: "Rishi and Rohit",
-    desc: "A heartwarming tale of friendship, understanding, and personal growth between two friends.",
-    duration: "2:20",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+29.jpg",
-    videoLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/RISHI+AND+ROHIT.mp4",
-    category: Category.md,
-    type: ComicType.audioComic,
-  },
-  {
-    name: "Rohan and the Puppies",
-    desc: "A touching story about compassion, responsibility, and the joy of caring for animals.",
-    duration: "2:09",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+28.jpg",
-    videoLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Rohan+and+the+Puppies_01.mp4",
-    category: Category.md,
-    type: ComicType.audioComic,
-  },
-  {
-    name: "Think Before You Act",
-    desc: "An engaging narrative that teaches the importance of considering consequences before taking action.",
-    duration: "3:45",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Think_Before_You_Act!.jpg",
-    videoLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/Think+Before+You+Act.mp4",
-    category: Category.md,
-    type: ComicType.audioComic,
-  },
-  {
-    name: "Tanya's Downfall",
-    desc: "A cautionary tale about the consequences of poor choices and the path to redemption.",
-    duration: "1:53",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+26.jpg",
-    videoLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/AGES+13+-+19/TANYA_DOWN-FALL_02.mp4",
     category: Category.md,
     type: ComicType.audioComic,
   },
@@ -685,6 +686,66 @@ export const audioComicsData: AudioComic[] = [
 
 export const comicsData: Comic[] = [
   {
+    name: "Rohan and the Puppies",
+    desc: "A heartwarming tale about responsibility, compassion, and caring for animals.",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+28.jpg",
+    comicLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/rohan+and+the+puppies.pdf",
+    category: Category.md,
+    type: ComicType.comic,
+  },
+  {
+    name: "Rishi and Rohit",
+    desc: "A story celebrating friendship, understanding, and personal growth.",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+29.jpg",
+    comicLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/rohit+and+rishi.pdf",
+    category: Category.md,
+    type: ComicType.comic,
+  },
+  {
+    name: "Tanya's Downfall",
+    desc: "A compelling story about facing consequences and finding the strength to change.",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+26.jpg",
+    category: Category.md,
+    comicLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/tanya_s+downfall.pdf",
+    type: ComicType.comic,
+  },
+  {
+    name: "Comic on Divorce",
+    desc: "A sensitive approach to helping children understand and cope with family changes.",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+1+4.jpg",
+    comicLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Divorce.pdf",
+    category: Category.md,
+    type: ComicType.comic,
+  },
+  {
+    name: "Think Before You Act",
+    desc: "Understanding the importance of careful consideration before taking action.",
+    mini_thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
+    thumbnail:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Think_Before_You_Act!.jpg",
+    comicLink:
+      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Preppers+Story+(Think+Before+You+Act)+(1).pdf",
+    category: Category.md,
+    type: ComicType.comic,
+  },
+  {
     name: "Don't Fade Away",
     desc: "A touching story about staying true to yourself and not losing your identity in the crowd.",
     mini_thumbnail:
@@ -744,18 +805,7 @@ export const comicsData: Comic[] = [
     category: Category.md,
     type: ComicType.comic,
   },
-  {
-    name: "Tanya's Downfall",
-    desc: "A compelling story about facing consequences and finding the strength to change.",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-06.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+26.jpg",
-    category: Category.md,
-    comicLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/tanya_s+downfall.pdf",
-    type: ComicType.comic,
-  },
+
   {
     name: "Live and Let Live",
     desc: "An inspiring message about acceptance, tolerance, and celebrating differences.",
@@ -793,30 +843,6 @@ export const comicsData: Comic[] = [
     type: ComicType.comic,
   },
   {
-    name: "Rohan and the Puppies",
-    desc: "A heartwarming tale about responsibility, compassion, and caring for animals.",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-17.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+28.jpg",
-    comicLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/rohan+and+the+puppies.pdf",
-    category: Category.md,
-    type: ComicType.comic,
-  },
-  {
-    name: "Rishi and Rohit",
-    desc: "A story celebrating friendship, understanding, and personal growth.",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-16.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+29.jpg",
-    comicLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/rohit+and+rishi.pdf",
-    category: Category.md,
-    type: ComicType.comic,
-  },
-  {
     name: "My Daily Routine",
     desc: "A guide to building productive habits and maintaining a balanced lifestyle.",
     mini_thumbnail:
@@ -828,18 +854,7 @@ export const comicsData: Comic[] = [
     category: Category.sm,
     type: ComicType.comic,
   },
-  {
-    name: "Comic on Divorce",
-    desc: "A sensitive approach to helping children understand and cope with family changes.",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/1-07.jpg",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+1+4.jpg",
-    comicLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Divorce.pdf",
-    category: Category.md,
-    type: ComicType.comic,
-  },
+
   {
     name: "Say Sorry",
     desc: "Learning about the importance of apologizing and making things right.",
@@ -873,18 +888,6 @@ export const comicsData: Comic[] = [
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Untitled_Artwork+34.jpg",
     comicLink:
       "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Hungry+for+likes+not+life.pdf",
-    category: Category.md,
-    type: ComicType.comic,
-  },
-  {
-    name: "Think Before You Act",
-    desc: "Understanding the importance of careful consideration before taking action.",
-    mini_thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/mini_images/Think_Before_You_Act!.png",
-    thumbnail:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/thumbnail/Audio+comics+thumbnails/Think_Before_You_Act!.jpg",
-    comicLink:
-      "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Preppers+Story+(Think+Before+You+Act)+(1).pdf",
     category: Category.md,
     type: ComicType.comic,
   },

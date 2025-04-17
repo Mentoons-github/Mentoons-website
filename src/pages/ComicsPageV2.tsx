@@ -1,5 +1,8 @@
 import ComicViewer from "@/components/common/ComicViewer";
+import LoginModal from "@/components/common/modal/loginModal";
+import AddToCartModal from "@/components/modals/AddToCartModal";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
+import { addItemCart } from "@/redux/cartSlice";
 // import { comicsData } from "@/constant/comicsConstants";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -9,14 +12,17 @@ import {
   ProductBase,
 } from "@/types/productTypes";
 import { formatDateString } from "@/utils/formateDate";
+import { FaShoppingCart } from "react-icons/fa";
+import { FaBolt } from "react-icons/fa6";
 
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { BsThreeDots } from "react-icons/bs";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const ComicsPageV2 = () => {
   const {
@@ -34,13 +40,16 @@ const ComicsPageV2 = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   // const [ageCategory, setAgeCategory] = useState<string>("");
+  const [productType, setProductType] = useState<string>("");
   const option =
     new URLSearchParams(window.location.search).get("option") || "comic";
   const [selectedOption, setSelectedOption] = useState(option);
-
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { getToken, userId } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-
-  const { getToken } = useAuth();
+  const navigate = useNavigate();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { user } = useUser();
 
   const membershipType = user?.publicMetadata?.membershipType || "free";
@@ -84,14 +93,75 @@ const ComicsPageV2 = () => {
     }
   };
 
-  const openComicModal = (comicLink: string) => {
+  const handleAddtoCart = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    comic: ProductBase
+  ) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setIsLoading(false);
+        setShowLoginModal(true);
+        return;
+      }
+
+      if (userId) {
+        const response = await dispatch(
+          addItemCart({
+            token,
+            userId,
+            productId: comic._id,
+            productType: comic.type,
+            title: comic.title,
+            quantity: 1,
+            price: comic.price,
+            ageCategory: comic.ageCategory,
+            productImage: comic.productImages?.[0].imageUrl,
+            productDetails: comic.details,
+          })
+        );
+        if (response.payload) {
+          setShowAddToCartModal(true);
+        }
+        setIsLoading(false);
+      } else {
+        toast.error("User ID is missing");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+      setIsLoading(false);
+    }
+  };
+
+  const handleBuyNow = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    product: ProductBase
+  ) => {
+    e.stopPropagation();
+    const token = await getToken();
+    if (!token) {
+      setIsLoading(false);
+      setShowLoginModal(true);
+      return;
+    }
+    // handleAddtoCart(event)
+    navigate(`/order-summary?productId=${product._id}`, { replace: true });
+  };
+
+  const openComicModal = (comicLink: string, productType?: string) => {
     setComicToView(comicLink);
     setShowComicModal(true);
+    if (productType) setProductType(productType);
     document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
   };
 
   const closeComicModal = () => {
     setShowComicModal(false);
+    setProductType("");
     document.body.style.overflow = "auto"; // Re-enable scrolling
   };
 
@@ -252,11 +322,40 @@ const ComicsPageV2 = () => {
                   <div className="flex-1 w-full">
                     <div>
                       <h2
-                        className="py-4 font-bold leading-none text-4xl sm:text-5xl md:text-6xl lg:text-8xl relative after:content-[attr(data-badge)] after:py-[4px] after:px-[6px] after:leading-none after:bg-[var(--badge-bg)] after:text-[var(--badge-text)] after:text-sm after:font-semibold after:rounded after:ml-2 after:shadow-md after:absolute after:animate-[sparkle_2s_ease-in-out_infinite] [--badge-bg:theme(colors.yellow.300)] [--badge-text:theme(colors.yellow.800)] data-[badge=Free]:[--badge-bg:theme(colors.green.300)] data-[badge=Free]:[--badge-text:theme(colors.green.800)] pr-2"
-                        data-badge={product.price !== 0 ? "Premium" : "Free"}
+                        className="py-4 font-bold leading-none text-4xl sm:text-5xl md:text-6xl lg:text-7xl relative pr-2 after:content-[attr(data-badge)]
+              after:hidden
+              data-[badge]:after:inline-block
+              after:py-[4px]
+              after:px-[6px]
+              after:leading-none
+              after:text-white
+              after:text-sm
+              after:font-semibold
+              after:rounded
+              after:ml-2
+              after:shadow-md
+              after:absolute
+              after:animate-[sparkle_2s_ease-in-out_infinite]
+              [--badge-bg:theme(colors.yellow.300)]
+              [--badge-text:theme(colors.yellow.800)]
+
+              data-[badge=Free]:after:bg-gradient-to-r
+              data-[badge=Free]:after:from-green-400
+              data-[badge=Free]:after:to-green-500
+              
+
+              data-[badge=Prime]:after:bg-gradient-to-r
+              data-[badge=Prime]:after:from-yellow-400
+              data-[badge=Prime]:after:to-orange-500
+
+              data-[badge=Platinum]:after:bg-gradient-to-r
+              data-[badge=Platinum]:after:from-gray-400
+              data-[badge=Platinum]:after:to-gray-500"
+                        data-badge={product.product_type || undefined}
                       >
                         {product.title}
                       </h2>
+
                       <p className="pb-4 text-base md:text-xl tracking-wide text-neutral-500 w-full md:w-[80%]">
                         {product.description}
                       </p>
@@ -377,7 +476,7 @@ const ComicsPageV2 = () => {
                           e.stopPropagation();
                           const video = e.currentTarget.parentElement
                             ?.previousElementSibling as HTMLVideoElement;
-                          if (video) {
+                          if (video && comic.product_type === "Free") {
                             if (video.paused) {
                               video.play();
                               setIsPlaying(true);
@@ -385,6 +484,11 @@ const ComicsPageV2 = () => {
                               video.pause();
                               setIsPlaying(false);
                             }
+                          } else {
+                            openComicModal(
+                              (comic.details as ComicProduct["details"])
+                                ?.sampleUrl || ""
+                            );
                           }
                         }}
                       >
@@ -468,35 +572,175 @@ const ComicsPageV2 = () => {
           Trending Comics For You!
         </h2>
         <div
-          className="flex gap-4 overflow-x-auto md:gap-8 scroll-smooth"
+          className="flex gap-4 overflow-x-auto md:gap-8 scroll-smooth pb-20 px-6"
           ref={carouselRef}
         >
           {products.map((comic: ProductBase, index) => (
-            <div
-              className="flex-shrink-0 p-4 transition-all duration-300 border border-gray-300 rounded-lg cursor-pointer hover:shadow-lg"
+            <motion.div
+              className="flex-shrink-0 w-[320px] h-full relative group"
               key={comic.title + index}
-              onClick={() => {
-                if ("sampleUrl" in comic.details) {
-                  openComicModal(comic.details.sampleUrl || "");
-                }
-              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <div className="relative overflow-hidden rounded-lg">
-                <img
-                  src={comic.productImages?.[0].imageUrl}
-                  alt={comic.title}
-                  className="object-contain h-[25rem] rounded-lg transition-transform duration-300 hover:scale-105"
-                />
+              <div className="relative w-full h-full overflow-hidden bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl">
+                {/* Main Image with Gradient Overlay */}
+                <div className="relative h-[60%] overflow-hidden">
+                  <img
+                    src={
+                      comic.productImages?.[0].imageUrl ||
+                      "/placeholder-image.jpg"
+                    }
+                    alt={comic.title}
+                    className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+
+                  {/* Product Type Badge */}
+                  <div className="absolute bottom-4 left-4 flex gap-2">
+                    {comic.product_type && (
+                      <span
+                        className={`
+    inline-block py-[4px] px-[6px] text-sm font-semibold rounded-lg ml-2 shadow-md text-white animate-[sparkle_2s_ease-in-out_infinite]
+    ${
+      comic.product_type === "Free"
+        ? "bg-gradient-to-r from-green-400 to-green-500"
+        : comic.product_type === "Prime"
+        ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+        : comic.product_type === "Platinum"
+        ? "bg-gradient-to-r from-gray-400 to-gray-500"
+        : "bg-gray-700"
+    }
+  `}
+                      >
+                        {comic.product_type}
+                      </span>
+                    )}
+                    {/* Release Date Badge */}
+                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-white/90">
+                      {formatDateString(
+                        (comic.details as ComicProduct["details"])
+                          ?.releaseDate || ""
+                      )}
+                    </span>
+                    {/* Rating Badge */}
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="p-5">
+                  <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2 ">
+                    {comic?.title}
+                  </h3>
+
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                    {comic?.description}
+                  </p>
+
+                  {/* Stats Row */}
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center gap-1">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      {comic.type === "comic" && (
+                        <span>
+                          {(comic.details as ComicProduct["details"]).pages}{" "}
+                          pages
+                        </span>
+                      )}
+                      {comic.type === "audio comic" && (
+                        <span>
+                          {
+                            (comic.details as AudioComicProduct["details"])
+                              .duration
+                          }{" "}
+                          duration
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>{Math.floor(Math.random() * 20)}+ views</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                      </svg>
+                      <span>{comic.rating}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 ">
+                    {comic.product_type && (
+                      <button
+                        onClick={() => {
+                          if ("sampleUrl" in comic.details) {
+                            openComicModal(
+                              comic.details.sampleUrl || "",
+                              comic.product_type
+                            );
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors  "
+                      >
+                        {comic.type === "comic" ? "Read Now" : "Listen Now"}
+                      </button>
+                    )}
+
+                    {!comic.product_type && (
+                      <>
+                        <button
+                          onClick={(e) => handleAddtoCart(e, comic)}
+                          disabled={isLoading}
+                          className="flex-1 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+                        >
+                          <FaShoppingCart className="w-4 h-4 inline-block self-center " />
+                          {isLoading ? "Adding..." : "Add to Cart"}
+                        </button>
+                        <button
+                          onClick={(e) => handleBuyNow(e, comic)}
+                          disabled={isLoading}
+                          className="flex-1 flex items-center gap-2 px-4 py-2 border  text-primary rounded-lg font-medium hover:bg-primary/30 transition-colors whitespace-nowrap border-primary"
+                        >
+                          <FaBolt className="w-4 h-4 inline-block self-center " />
+                          {isLoading ? "Buying..." : "Buy Now"}
+                        </button>
+                        {showAddToCartModal && (
+                          <AddToCartModal
+                            onClose={() => setShowAddToCartModal(false)}
+                            isOpen={showAddToCartModal}
+                            productName={comic.title}
+                          />
+                        )}
+                        {
+                          <LoginModal
+                            isOpen={showLoginModal}
+                            onClose={() => setShowLoginModal(false)}
+                          />
+                        }
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="pt-4">
-                <h3 className="text-xl font-medium line-clamp-1">
-                  {comic?.title}
-                </h3>
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                  {comic?.description}
-                </p>
-              </div>
-            </div>
+            </motion.div>
           ))}
         </div>
         {/* Navigation buttons */}
@@ -549,7 +793,7 @@ const ComicsPageV2 = () => {
               <MdClose className="text-2xl" />
             </button>
 
-            <ComicViewer pdfUrl={comicToView} />
+            <ComicViewer pdfUrl={comicToView} productType={productType} />
           </motion.div>
         </motion.div>
       )}
@@ -596,9 +840,6 @@ const ComicsPageV2 = () => {
               <h2 className="pb-1 text-4xl font-semibold">
                 {products?.[0]?.title}
               </h2>
-              <h3 className="text-lg font-semibold">
-                For {products?.[0]?.ageCategory}
-              </h3>
             </div>
           </div>
           <div className="pt-4">
@@ -621,9 +862,6 @@ const ComicsPageV2 = () => {
                 }
               >
                 READ MORE
-              </button>
-              <button className="p-2 border border-black rounded-full">
-                <BsThreeDots className="text-4xl" />
               </button>
             </div>
           </div>
