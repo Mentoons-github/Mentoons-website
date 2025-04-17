@@ -93,7 +93,7 @@ const Header = () => {
     <header
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-      } flex justify-between items-center bg-[#EC9600] max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto font-akshar`}
+      } flex justify-between items-center bg-primary max-w-screen-full h-20 px-4 md:px-10 transition-all duration-300 z-50 w-auto font-akshar`}
     >
       <a
         href="tel:+919036033300"
@@ -101,7 +101,7 @@ const Header = () => {
           title === "adda" ? "lg:hidden block" : "md:hidden block"
         } whitespace-nowrap`}
       >
-        <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+        <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-primary">
           <FaPhone /> <span> +91 90360 33300</span>
         </div>
       </a>
@@ -113,7 +113,7 @@ const Header = () => {
         } justify-start lg:justify-center items-center `}
       >
         <a href="tel:+919036033300" className="hidden no-underline xl:block">
-          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-[#EC9600]">
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-primary">
             <FaPhone /> <span> +91 90360 33300</span>
           </div>
         </a>

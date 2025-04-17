@@ -61,7 +61,7 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: "#EC9600",
+        primary: "#ff9800",
         home: "#f0ebe5",
         "custom-gray": "rgba(219,219,219,1)",
         secondary: {
@@ -140,7 +140,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "float-delayed": "float 6s ease-in-out 3s infinite",
         "float-reverse": "float 7s ease-in-out infinite reverse",
         "float-slow": "float 8s ease-in-out infinite",

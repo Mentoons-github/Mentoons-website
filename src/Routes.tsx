@@ -21,6 +21,7 @@ import PaymentStatusPage from "./pages/PaymentStatusPage";
 import PolicyPage from "./pages/PolicyPage";
 import ProductDetails from "./pages/ProductDetails";
 // import ProductManagement from "./pages/ProductManagement.tsx";
+
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Assessment from "./pages/v2/user/assessment.tsx";
 import ProductsPage from "./pages/v2/user/products/products.tsx";
@@ -66,7 +67,6 @@ const routes = [
   { path: "/website-plans", element: <Plans /> },
   { path: "/mentoons-store", element: <MentoonsStore /> },
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
-  // { path: "/product-management", element: <ProductManagement /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   { path: "/membership", element: <Membership /> },
