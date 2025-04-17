@@ -1,8 +1,8 @@
 import { Psychologist, SessionDetails } from "@/redux/sessionSlice";
 import { useSessionPostpone } from "@/utils/formik/sessionForm";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 
 const PostPone = ({
@@ -21,6 +21,7 @@ const PostPone = ({
   );
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [updateComplete, setUpdateComplete] = useState(false);
+  const [isPostponing, setIsPostponing] = useState(false);
   const [updatedSessionData, setUpdatedSessionData] =
     useState<SessionDetails | null>(null);
   const [psychologistData, setPsychologistData] = useState<Psychologist | null>(
@@ -28,11 +29,15 @@ const PostPone = ({
   );
 
   const formik = useSessionPostpone(async (values, formik) => {
+    console.log(values);
     const token = await getToken();
+
+    console.log("making api call");
+    setIsPostponing(true);
 
     try {
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${values.time}&date=${values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}`,
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${values.time}&date=${values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=update`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -53,9 +58,16 @@ const PostPone = ({
     } catch (error) {
       console.error("Postpone error:", error);
     } finally {
+      setIsPostponing(false);
       formik.setSubmitting(false);
     }
   });
+
+  useEffect(() => {
+    if (availabilityStatus !== null) {
+      setAvailabilityStatus(null);
+    }
+  }, [formik.values.date, formik.values.time]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -91,6 +103,7 @@ const PostPone = ({
     setIsCheckingAvailability(true);
     setAvailabilityStatus(null);
 
+    console.log("postponed booking :", postponeBooking);
     try {
       const response = await axios.get(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${formik.values.time}&date=${formik.values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=check`,
@@ -109,8 +122,17 @@ const PostPone = ({
         setAvailabilityStatus("❌ This slot is not available");
       }
     } catch (error: unknown) {
-      console.log(error);
-      setAvailabilityStatus("Error checking availability");
+      if (error instanceof AxiosError) {
+        const isAvailable = error.response?.data?.isAvailable;
+
+        if (isAvailable === false) {
+          setAvailabilityStatus("❌ This slot is not available");
+        } else {
+          setAvailabilityStatus("Error checking availability");
+        }
+      } else {
+        setAvailabilityStatus("Error checking availability");
+      }
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -121,9 +143,18 @@ const PostPone = ({
     setIsPostponeModal(false);
   };
 
+  const LoadingSpinner = () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-700 font-medium">Postponing session...</p>
+      </div>
+    </div>
+  );
+
   return (
     <AnimatePresence>
-      {isModalOpen && !updateComplete && (
+      {isModalOpen && !updateComplete && !isPostponing && (
         <motion.div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           initial={{ opacity: 0 }}
@@ -235,6 +266,7 @@ const PostPone = ({
                     }`}
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.2 }}
                   >
                     {availabilityStatus}
@@ -264,6 +296,8 @@ const PostPone = ({
           </motion.div>
         </motion.div>
       )}
+
+      {isPostponing && <LoadingSpinner />}
 
       {updateComplete && updatedSessionData && (
         <motion.div

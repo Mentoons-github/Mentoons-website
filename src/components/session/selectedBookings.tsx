@@ -4,11 +4,13 @@ import { SessionDetails } from "@/redux/sessionSlice";
 interface SelectedBookingsProps {
   bookings: SessionDetails[];
   date: string;
+  scrollToBookingForm?: () => void;
 }
 
 const SelectedDateBookings: React.FC<SelectedBookingsProps> = ({
   bookings,
   date,
+  scrollToBookingForm,
 }) => {
   const formatDate = (dateString: string) => {
     try {
@@ -44,6 +46,19 @@ const SelectedDateBookings: React.FC<SelectedBookingsProps> = ({
         return "bg-yellow-100 text-yellow-800 border border-yellow-300";
     }
   };
+  const handleBookAgain = () => {
+    if (scrollToBookingForm) {
+      scrollToBookingForm();
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        const nameInput = document.getElementById("name");
+        if (nameInput) {
+          nameInput.focus();
+        }
+      }, 500);
+    }
+  };
 
   if (bookings.length === 0) {
     return (
@@ -69,25 +84,39 @@ const SelectedDateBookings: React.FC<SelectedBookingsProps> = ({
         {bookings.map((booking, index) => (
           <div
             key={index}
-            className="border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-white hover:shadow-md transition-all duration-200 flex justify-between items-center"
+            className="border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-white hover:shadow-md transition-all duration-200"
           >
-            <div className="space-y-1">
-              <h4 className="text-md font-semibold text-gray-800">
-                {booking.name}
-              </h4>
-              <p className="text-sm text-gray-500">{booking.email}</p>
-              <p className="text-sm text-gray-400">
-                Time: {formatTime(booking.date)}
-              </p>
+            <div className="flex justify-between items-center">
+              <div className="space-y-1">
+                <h4 className="text-md font-semibold text-gray-800">
+                  {booking.name}
+                </h4>
+                <p className="text-sm text-gray-500">{booking.email}</p>
+                <p className="text-sm text-gray-400">
+                  Time: {formatTime(booking.date)}
+                </p>
+              </div>
+
+              <span
+                className={`text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
+                  booking.status
+                )}`}
+              >
+                {booking.status}
+              </span>
             </div>
 
-            <span
-              className={`text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
-                booking.status
-              )}`}
-            >
-              {booking.status}
-            </span>
+            {(booking.status === "cancelled" ||
+              booking.status === "aborted") && (
+              <div className="mt-3 text-right">
+                <button
+                  onClick={handleBookAgain}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  Book Again
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
