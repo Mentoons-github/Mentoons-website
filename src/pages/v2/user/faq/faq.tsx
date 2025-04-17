@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { MdMessage } from "react-icons/md";
 import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { MdMessage } from "react-icons/md";
 
 const FAQ = ({ data }: { data: object }) => {
   const { isInView, ref } = useInView(0.3, false);
