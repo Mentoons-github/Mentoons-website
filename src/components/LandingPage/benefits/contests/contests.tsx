@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ComingSoonModal from "@/components/common/ComingSoonModal";
 import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
+import LoginModal from "@/components/common/modal/loginModal";
 
 const Contests = () => {
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [soon, setSoon] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const Contests = () => {
     const token = await getToken();
 
     if (!token) {
-      toast.error("Please login to Download");
+      setLoginModalOpen(true);
       return;
     }
 
@@ -80,6 +81,10 @@ const Contests = () => {
       </div>
       {isModalOpen && <MembershipModal onClose={() => setIsModalOpen(false)} />}
       {soon && <ComingSoonModal setIsModalOpen={setSoon} />}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
     </div>
   );
 };

@@ -96,12 +96,15 @@ const BookedSession: React.FC<BookedSessionProps> = ({
             <p className="text-xs lg:text-sm">{booking.email}</p>
             <p className="text-xs lg:text-sm">{booking.phone}</p>
           </div>
-          <button
-            onClick={() => postponeBooking(booking)}
-            className="text-red-500 hover:bg-red-50 p-1 lg:p-2 rounded-full"
-          >
-            Postpone Session
-          </button>
+          {booking.status !== "cancelled" && (
+            <button
+              onClick={() => postponeBooking(booking)}
+              className="text-red-500 hover:bg-red-50 p-1 lg:p-2 rounded-full"
+            >
+              {booking.status}
+              Postpone Session
+            </button>
+          )}
         </div>
         <div className="flex items-center text-xs lg:text-sm space-x-2 z-20 relative">
           <span>📅</span>

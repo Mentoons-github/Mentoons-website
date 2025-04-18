@@ -6,15 +6,14 @@ interface JobFormValues {
   email: string;
   phone: string;
   resume: File | null;
-  age: number;
+  gender: string;
 }
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full Name is required"),
-  age: Yup.number()
-    .min(18, "Must be at least 18")
-    .max(100, "Must be below 100")
-    .required("Age is required"),
+  gender: Yup.string()
+    .oneOf(["Male", "Female", "Other"], "Select a valid gender")
+    .required("Gender is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phone: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Invalid phone number")
@@ -41,7 +40,7 @@ export const useJobForm = (onSubmit: OnSubmitFunction) => {
       email: "",
       phone: "",
       resume: null,
-      age: 18,
+      gender: "",
     },
     validationSchema,
     onSubmit: async (values, formikHelpers) => {
