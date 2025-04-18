@@ -13,7 +13,7 @@ const Testimonial = () => {
         <div className="text-start space-y-4">
           <div className="text-4xl text-center lg:text-5xl w-full font-extrabold tracking-wide leading-[1.10]">
             See what other has to say <Wordbreak />
-            about Metnoons
+            about Mentoons
           </div>
         </div>
         <div className="w-[80%] mx-auto ">

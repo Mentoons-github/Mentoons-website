@@ -336,7 +336,42 @@ const Podcastv2 = () => {
                           </span>
                         </div>
 
-                        <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+                        {/* <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl"></h2> */}
+                        <h2
+                          className="py-4 font-bold leading-none text-4xl sm:text-4xl md:text-5xl lg:text-6xl relative pr-2 after:content-[attr(data-badge)]
+              after:hidden
+              data-[badge]:after:inline-block
+              after:py-[4px]
+              after:px-[6px]
+              after:leading-none
+              after:text-white
+              after:text-sm
+              after:font-semibold
+              after:rounded
+              after:ml-2
+              after:shadow-md
+              after:absolute
+              after:animate-[sparkle_2s_ease-in-out_infinite]
+              [--badge-bg:theme(colors.yellow.300)]
+              [--badge-text:theme(colors.yellow.800)]
+
+              data-[badge=Free]:after:bg-gradient-to-r
+              data-[badge=Free]:after:from-green-400
+              data-[badge=Free]:after:to-green-500
+              
+
+              data-[badge=Prime]:after:bg-gradient-to-r
+              data-[badge=Prime]:after:from-yellow-400
+              data-[badge=Prime]:after:to-orange-500
+
+              data-[badge=Platinum]:after:bg-gradient-to-r
+              data-[badge=Platinum]:after:from-gray-400
+              data-[badge=Platinum]:after:to-gray-500"
+                          data-badge={
+                            filteredPodcast[currentPodcastIndex].product_type ||
+                            undefined
+                          }
+                        >
                           {filteredPodcast[currentPodcastIndex]?.title ||
                             "Negative impact of Mobile phone"}
                         </h2>
@@ -357,7 +392,7 @@ const Podcastv2 = () => {
                         <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20 ">
                           <audio
                             key={currentPodcastIndex}
-                            className="w-full border border-red-600"
+                            className="w-full "
                             controls
                             controlsList="nodownload"
                             preload="metadata"
@@ -373,22 +408,28 @@ const Podcastv2 = () => {
                                 if (!isSignedIn) {
                                   // Not logged in users get 45 seconds
                                   setTimeout(() => {
-                                    audio.pause();
-                                    audio.currentTime = 0;
+                                    if (audio) {
+                                      audio.pause();
+                                      audio.currentTime = 0;
+                                    }
                                     setShowMembershipModal(true);
-                                  }, 45000); // 45 seconds
+                                  }, 45000);
+                                  // Cleanup timer when audio element is removed/changed
                                 } else {
                                   // Check if user has a free membership
-                                  const hasPaidMembership = 
-                                    user?.publicMetadata?.membershipType && 
-                                    user.publicMetadata.membershipType !== "Free";
-                                  
+                                  const hasPaidMembership =
+                                    user?.publicMetadata?.membershipType &&
+                                    user.publicMetadata.membershipType !==
+                                      "Free";
+
                                   if (!hasPaidMembership) {
                                     // Free members also get 45 seconds
                                     setTimeout(() => {
-                                      audio.pause();
-                                      audio.currentTime = 0;
-                                      setShowMembershipModal(true);
+                                      if (audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                        setShowMembershipModal(true);
+                                      }
                                     }, 45000); // 45 seconds
                                   }
                                   // Paid members get full audio
@@ -559,7 +600,8 @@ const Podcastv2 = () => {
                                   setPlayingPodcastId(null);
                                   setShowMembershipModal(true);
                                 }
-                              }, 45000); // 45 seconds
+                              }, 45000);
+                              // 45 seconds
                             } else {
                               // Check if user has a free membership
                               const hasPaidMembership =
@@ -586,34 +628,99 @@ const Podcastv2 = () => {
                     )}
 
                     {/* Category badge */}
-                    <div className="absolute px-3 py-1 text-xs font-medium capitalize rounded-full top-3 left-3 backdrop-blur-sm bg-white/80">
-                      {(podcast.details as PodcastProduct["details"])
-                        ?.category || "Category"}
+                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                      <div
+                        className={`
+                        py-[3px] 
+                        px-[5px] 
+                        text-xs 
+                        font-semibold 
+                        rounded 
+                        shadow-md
+                        capitalize
+                        ${
+                          (podcast.details as PodcastProduct["details"])
+                            ?.category === "mobile addiction"
+                            ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
+                            : (podcast.details as PodcastProduct["details"])
+                                ?.category === "electronic gadgets"
+                            ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
+                            : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
+                        }
+                      `}
+                      >
+                        {(podcast.details as PodcastProduct["details"])
+                          ?.category || "Category"}
+                      </div>
+                      <div
+                        className={`
+                          py-[3px] 
+                          px-[5px] 
+                          text-xs 
+                          font-semibold 
+                          rounded 
+                          shadow-md
+                          capitalize
+                          data-[type=Free]:bg-gradient-to-r
+                          data-[type=Free]:from-green-400 
+                          data-[type=Free]:to-green-500
+                          data-[type=Free]:text-white
+                          data-[type=Prime]:bg-gradient-to-r
+                          data-[type=Prime]:from-yellow-400
+                          data-[type=Prime]:to-orange-500 
+                          data-[type=Prime]:text-white
+                          data-[type=Platinum]:bg-gradient-to-r
+                          data-[type=Platinum]:from-gray-400
+                          data-[type=Platinum]:to-gray-500
+                          data-[type=Platinum]:text-white
+                        `}
+                        data-type={podcast.product_type || undefined}
+                      >
+                        {podcast.product_type || ""}
+                      </div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <h3
-                      className={`text-lg font-bold line-clamp-2 ${
-                        isPlaying ? "text-white" : "text-gray-800"
-                      }`}
-                    >
-                      {podcast.title}
-                    </h3>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3
+                        className={`text-lg font-bold line-clamp-2 ${
+                          isPlaying ? "text-white" : "text-gray-800"
+                        }`}
+                      >
+                        {podcast.title}
+                      </h3>
+                      <div className="flex items-center gap-1 text-sm text-orange-500">
+                        <div className="flex gap-0.5">
+                          <svg
+                            className="w-4 h-4  fill-orange-400"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        </div>
+                        {podcast.rating || "4.5"}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {podcast.description ||
+                        "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world."}
+                    </p>
+                    <div></div>
 
                     <div
                       className={`flex items-center gap-2 ${
                         isPlaying ? "text-white/90" : "text-gray-500"
                       }`}
                     >
-                      <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
-                        <span className="text-xs font-bold text-orange-500">
+                      <div className="flex items-center justify-center w-8 h-8 overflow-hidden bg-orange-200 rounded-full">
+                        <span className="text-sm font-semibold text-orange-500">
                           {(
                             podcast.details as PodcastProduct["details"]
                           )?.host?.charAt(0)}
                         </span>
                       </div>
-                      <p className="text-xs">
+                      <p className="text-sm font-bold">
                         {(podcast.details as PodcastProduct["details"])?.host}
                       </p>
                       {(podcast.details as PodcastProduct["details"])
@@ -623,7 +730,8 @@ const Podcastv2 = () => {
                           {
                             (podcast.details as PodcastProduct["details"])
                               ?.duration
-                          }
+                          }{" "}
+                          minutes
                         </p>
                       )}
                     </div>
@@ -735,17 +843,85 @@ const Podcastv2 = () => {
 
                 <div className="mt-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-3 py-1 text-xs font-bold text-green-600 bg-green-200 rounded-full backdrop-blur-sm">
+                    <span
+                      className="py-[3px] 
+                        px-[5px] 
+                        text-xs 
+                        font-semibold 
+                        rounded 
+                        shadow-md
+                        capitalize text-green-600 bg-green-200 backdrop-blur-sm"
+                    >
                       NEW RELEASE
                     </span>
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 rounded-full animate-pulse bg-primary"></span>
+
+                    <div
+                      className={`
+                        py-[3px] 
+                        px-[5px] 
+                        text-xs 
+                        font-semibold 
+                        rounded 
+                        shadow-md
+                        capitalize
+                        ${
+                          (filteredPodcast as PodcastProduct["details"])
+                            ?.category === "mobile addiction"
+                            ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
+                            : (filteredPodcast as PodcastProduct["details"])
+                                ?.category === "electronic gadgets"
+                            ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
+                            : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
+                        }
+                      `}
+                    >
+                      {(filteredPodcast[0].details as PodcastProduct["details"])
+                        ?.category || "Category"}
                     </div>
                   </div>
 
-                  <h3 className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl">
+                  {/* <h3 className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl">
                     {filteredPodcast[0]?.title || "Electronic gadgets and Kids"}
-                  </h3>
+                  </h3> */}
+
+                  <h2
+                    className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl after:content-[attr(data-badge)]
+              after:hidden
+              data-[badge]:after:inline-block
+              after:py-[4px]
+              after:px-[6px]
+              after:leading-none
+              after:text-white
+              after:text-sm
+              after:font-semibold
+              after:rounded
+              after:ml-2
+              after:shadow-md
+              after:absolute
+              after:animate-[sparkle_2s_ease-in-out_infinite]
+              [--badge-bg:theme(colors.yellow.300)]
+              [--badge-text:theme(colors.yellow.800)]
+
+              data-[badge=Free]:after:bg-gradient-to-r
+              data-[badge=Free]:after:from-green-400
+              data-[badge=Free]:after:to-green-500
+              
+
+              data-[badge=Prime]:after:bg-gradient-to-r
+              data-[badge=Prime]:after:from-yellow-400
+              data-[badge=Prime]:after:to-orange-500
+
+              data-[badge=Platinum]:after:bg-gradient-to-r
+              data-[badge=Platinum]:after:from-gray-400
+              data-[badge=Platinum]:after:to-gray-500"
+                    data-badge={
+                      filteredPodcast[currentPodcastIndex].product_type ||
+                      undefined
+                    }
+                  >
+                    {filteredPodcast[currentPodcastIndex]?.title ||
+                      "Negative impact of Mobile phone"}
+                  </h2>
 
                   <p className="mb-4 text-lg text-white/90 line-clamp-3">
                     {filteredPodcast[0]?.description ||
@@ -753,14 +929,23 @@ const Podcastv2 = () => {
                   </p>
 
                   <div className="flex items-center mb-6 text-sm text-white/80">
-                    <span>
+                    <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
+                      <span className="text-sm font-semibold text-orange-500">
+                        {(
+                          filteredPodcast[0]
+                            .details as PodcastProduct["details"]
+                        )?.host?.charAt(0)}
+                      </span>
+                    </div>
+                    <span className="font-bold text-sm  ml-2">
                       {(filteredPodcast[0].details as PodcastProduct["details"])
                         ?.host || "Mentoons"}
                     </span>
                     <span className="mx-2">•</span>
-                    <span>
+                    <span className="text-sm font-bold">
                       {(filteredPodcast[0].details as PodcastProduct["details"])
-                        ?.duration || "05 MIN"}
+                        ?.duration || "05 MIN"}{" "}
+                      minutes
                     </span>
                   </div>
 

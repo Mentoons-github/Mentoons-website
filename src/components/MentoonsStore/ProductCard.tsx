@@ -4,7 +4,8 @@ import { ProductBase, ProductType } from "@/types/productTypes";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { IoIosCart } from "react-icons/io";
+import { FaShoppingCart } from "react-icons/fa";
+import { FaBolt } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -177,20 +178,21 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
           ) : (
             <div className="flex flex-col gap-2 mt-auto">
               <button
-                className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                className="flex items-center justify-center gap-4  w-full px-4 py-2 font-medium transition-colors border rounded bg-[#ff9800] text-white hover:bg-[#e68900]"
                 onClick={(e) => handleAddtoCart(e)}
                 disabled={isLoading}
               >
-                <IoIosCart className="w-5 h-5 mr-2" />
+                <FaShoppingCart className="w-4 h-4 inline-block self-center " />
                 {isLoading ? "Adding..." : "Add to Cart"}
               </button>
 
               <button
-                className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
+                className="flex items-center justify-center gap-4 w-full px-4 py-2 font-medium transition-colors rounded text-[#ff9800] border border-[#ff9800] hover:bg-[#fff3e0]  duration-200"
                 onClick={(e) => handleBuyNow(e, productDetails)}
                 disabled={isLoading}
               >
-                Buy Now
+                <FaBolt className="w-4 h-4 inline-block self-center " />
+                {isLoading ? "Buying..." : "Buy Now"}
               </button>
             </div>
           )}

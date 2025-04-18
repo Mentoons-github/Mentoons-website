@@ -252,7 +252,7 @@ const ComicsPageV2 = () => {
           <h2 className="py-4 text-3xl text-center luckiest-guy-regular">
             CHOOSE COMICS BEST FOR YOU!
           </h2>
-          <div className="flex items-center justify-center w-full p-4 pr-24">
+          <div className="flex items-center justify-center w-full p-4 lg:pr-24">
             <img
               src="/assets/comic-V2/comic-hero-v2.png"
               alt="comic page hero Image"
@@ -303,26 +303,36 @@ const ComicsPageV2 = () => {
       {/* //dynamic content section */}
       {selectedOption === "comic" && (
         <div className="flex items-center justify-center pb-6 w-[95%] md:w-[90%] mx-auto h-[700px] md:h-[800px] bg-yellow-100 mb-16 relative overflow-hidden">
-          <div className="absolute w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] rounded-full bg-primary bottom-0 -left-[300px] md:-left-96"></div>
+          <div className="absolute w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] rounded-full bg-primary -bottom-50 -left-[300px] md:-left-96"></div>
           <div className="absolute w-[150px] h-[150px] md:w-[200px] md:h-[200px] rounded-full bg-primary -top-8 -right-8 md:-top-16 md:-right-16"></div>
           <div className="relative w-[95%] md:w-[90%] mx-auto flex flex-col items-center justify-between overflow-y-scroll overflow-x-hidden gap-10 md:gap-20 h-full py-10 md:py-20">
             {products.map((product, index) => {
               return (
                 <div
-                  className="flex flex-col items-start justify-between w-full gap-8 p-4 mt-4 rounded-lg md:gap-20 md:mt-8 md:flex-row"
+                  className="flex flex-col items-start justify-between w-full gap-8 p-4 mt-4 duration-200 rounded-lg md:gap-20 md:mt-8 md:flex-row group trnasition-all "
                   key={product.title + index}
                 >
-                  <div className="flex-1 w-full">
-                    <img
+                  <div className="relative flex-1 w-full">
+                    <div className="absolute inset-0 border-4 border-yellow-300" />
+                    <motion.img
                       src={product?.productImages?.[0].imageUrl}
                       alt={product?.title}
-                      className="object-cover w-full h-auto"
+                      className="relative object-cover w-full h-auto"
+                      initial={{
+                        x: window.innerWidth < 768 ? -12 : -24,
+                        y: window.innerWidth < 768 ? -12 : -24,
+                      }}
+                      whileHover={{
+                        x: 0,
+                        y: 0,
+                        transition: { duration: 0.2 },
+                      }}
                     />
                   </div>
                   <div className="flex-1 w-full">
                     <div>
                       <h2
-                        className="py-4 font-bold leading-none text-4xl sm:text-5xl md:text-6xl lg:text-7xl relative pr-2 after:content-[attr(data-badge)]
+                        className="py-4 font-bold leading-none text-4xl sm:text-4xl md:text-5xl lg:text-6xl relative pr-2 after:content-[attr(data-badge)]
               after:hidden
               data-[badge]:after:inline-block
               after:py-[4px]
@@ -356,13 +366,13 @@ const ComicsPageV2 = () => {
                         {product.title}
                       </h2>
 
-                      <p className="pb-4 text-base md:text-xl tracking-wide text-neutral-500 w-full md:w-[80%]">
+                      <p className="pb-4 text-base md:text-xl tracking-wide text-neutral-700 w-full md:w-[80%] ">
                         {product.description}
                       </p>
                     </div>
                     <div>
                       <button
-                        className="px-6 py-2 text-lg font-bold text-white rounded-full md:px-8 md:py-3 md:text-xl bg-primary"
+                        className="px-6 py-2 text-lg font-bold text-white transition-all rounded-full shadow-xl md:px-8 md:py-3 md:text-xl bg-primary hover:scale-110 dauration-200"
                         onClick={() => {
                           return openComicModal(
                             (product.details as ComicProduct["details"])
@@ -387,173 +397,142 @@ const ComicsPageV2 = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.4 }}
-          className="bg-[#FFBABA] relative h-[800px] w-[90%] mx-auto overflow-hidden p-12 mb-20"
+          className="bg-[#FFBABA] relative min-h-[400px] md:h-[800px] w-[95%] md:w-[90%] mx-auto overflow-hidden p-4 md:p-12 mb-20"
         >
-          <div className="w-[600px] h-[800px] rounded-full bg-[#EF4444] absolute top-[40px] -left-40 z-9" />
-          <div className="w-32 h-32 rounded-full bg-[#EF4444] absolute -top-10 -right-10 z-9" />
+          {/* Background circles - made responsive */}
+          <div className="absolute w-[300px] h-[300px] md:w-[1000px] md:h-[1000px] rounded-full bg-[#EF4444] -bottom-24 -left-[150px] md:-left-96"></div>
+          <div className="absolute w-[100px] h-[100px] md:w-[200px] md:h-[200px] rounded-full bg-[#EF4444] -top-8 -right-8 md:-top-16 md:-right-16"></div>
 
-          <div className="relative h-[800px] rounded-xl overflow-hidden ">
+          {/* Main content container */}
+          <div className="relative h-[400px] md:h-[800px] rounded-xl overflow-hidden">
             <div className="h-full" ref={carouselRef}>
               {products.map((comic, index) => (
-                <div
-                  key={comic.title + index}
-                  className={`absolute inset-0 w-full h-[680px] bg-white rounded-2xl  group transition-opacity duration-300 ${
-                    currentIndex === index
-                      ? "opacity-100"
-                      : "opacity-0 pointer-events-none"
-                  }`}
+          <div
+            key={comic.title + index}
+            className={`absolute inset-0 w-full h-[350px] md:h-[680px] bg-white rounded-2xl group transition-opacity duration-300 shadow-xl border-2 md:border-4 border-rose-500 ${
+              currentIndex === index
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
+            }`}
+          >
+            {/* Video/Image container with responsive sizing */}
+            {(comic.details as ComicProduct["details"] | AudioComicProduct["details"])?.sampleUrl ? (
+              <video
+                className="object-contain w-full h-full p-2 md:py-6 rounded-2xl"
+                src={(comic.details as ComicProduct["details"] | AudioComicProduct["details"])?.sampleUrl}
+                poster={comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"}
+                onEnded={(e) => {
+            e.currentTarget.load();
+            setIsPlaying(false);
+                }}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                playsInline
+                ref={(el) => {
+            videoRefs.current[index] = el;
+            if (el) {
+              const observer = new IntersectionObserver(
+                ([entry]) => {
+                  if (!entry.isIntersecting) {
+              el.pause();
+              el.currentTime = 0;
+              setIsPlaying(false);
+                  }
+                },
+                { threshold: 0.5 }
+              );
+              observer.observe(el);
+            }
+                }}
+              />
+            ) : (
+              <img
+                src={comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"}
+                alt={comic.title}
+                className="object-cover w-full h-full rounded-2xl"
+                onError={(e) => {
+            e.currentTarget.src = "/placeholder-image.jpg";
+            e.currentTarget.alt = "Placeholder image";
+                }}
+              />
+            )}
+
+            {/* Hover Overlay - responsive text sizes */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 transition-opacity duration-300 opacity-0 rounded-2xl bg-black/70 group-hover:opacity-100">
+              <h3 className="mb-2 md:mb-4 text-xl md:text-3xl font-bold text-center text-white">
+                {comic?.title || "Untitled Comic"}
+              </h3>
+              <p className="mb-4 md:mb-8 text-sm md:text-base text-center text-white line-clamp-3">
+                {comic?.description || "No description available"}
+              </p>
+
+              {(comic?.details as ComicProduct["details"])?.sampleUrl && (
+                <button
+            className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 transition-colors rounded-full bg-white/20 hover:bg-white/30"
+            onClick={(e) => {
+              e.stopPropagation();
+              const video = e.currentTarget.parentElement?.previousElementSibling as HTMLVideoElement;
+              if (video && comic.product_type === "Free") {
+                if (video.paused) {
+                  video.play();
+                  setIsPlaying(true);
+                } else {
+                  video.pause();
+                  setIsPlaying(false);
+                }
+              } else {
+                openComicModal((comic.details as ComicProduct["details"])?.sampleUrl || "");
+              }
+            }}
                 >
-                  {(
-                    comic.details as
-                      | ComicProduct["details"]
-                      | AudioComicProduct["details"]
-                  )?.sampleUrl ? (
-                    <video
-                      className="object-cover w-full h-full py-6 rounded-2xl"
-                      src={
-                        (
-                          comic.details as
-                            | ComicProduct["details"]
-                            | AudioComicProduct["details"]
-                        )?.sampleUrl
-                      }
-                      poster={
-                        comic.productImages?.[0].imageUrl ||
-                        "/placeholder-image.jpg"
-                      }
-                      onEnded={(e) => {
-                        e.currentTarget.load();
-                        setIsPlaying(false);
-                      }}
-                      onPlay={() => setIsPlaying(true)}
-                      onPause={() => setIsPlaying(false)}
-                      playsInline
-                      ref={(el) => {
-                        videoRefs.current[index] = el;
-                        if (el) {
-                          const observer = new IntersectionObserver(
-                            ([entry]) => {
-                              if (!entry.isIntersecting) {
-                                el.pause();
-                                el.currentTime = 0;
-                                setIsPlaying(false);
-                              }
-                            },
-                            { threshold: 0.5 }
-                          );
-                          observer.observe(el);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={
-                        comic.productImages?.[0].imageUrl ||
-                        "/placeholder-image.jpg"
-                      }
-                      alt={comic.title}
-                      className="object-cover w-full h-full rounded-2xl"
-                      onError={(e) => {
-                        e.currentTarget.src = "/placeholder-image.jpg";
-                        e.currentTarget.alt = "Placeholder image";
-                      }}
-                    />
-                  )}
-
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-300 opacity-0 rounded-2xl bg-black/70 group-hover:opacity-100">
-                    <h3 className="mb-4 text-3xl font-bold text-center text-white">
-                      {comic?.title || "Untitled Comic"}
-                    </h3>
-                    <p className="mb-8 text-center text-white line-clamp-3">
-                      {comic?.description || "No description available"}
-                    </p>
-
-                    {(comic?.details as ComicProduct["details"])?.sampleUrl && (
-                      <button
-                        className="flex items-center justify-center w-16 h-16 transition-colors rounded-full bg-white/20 hover:bg-white/30"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const video = e.currentTarget.parentElement
-                            ?.previousElementSibling as HTMLVideoElement;
-                          if (video && comic.product_type === "Free") {
-                            if (video.paused) {
-                              video.play();
-                              setIsPlaying(true);
-                            } else {
-                              video.pause();
-                              setIsPlaying(false);
-                            }
-                          } else {
-                            openComicModal(
-                              (comic.details as ComicProduct["details"])
-                                ?.sampleUrl || ""
-                            );
-                          }
-                        }}
-                      >
-                        {currentIndex === index && !isPlaying ? (
-                          <svg
-                            className="w-8 h-8 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        ) : currentIndex === index && isPlaying ? (
-                          <svg
-                            className="w-8 h-8 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-8 h-8 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
+            {currentIndex === index && !isPlaying ? (
+              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            ) : currentIndex === index && isPlaying ? (
+              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+                </button>
+              )}
+            </div>
+          </div>
               ))}
             </div>
 
-            {/* Playing indicator */}
+            {/* Playing indicator - made responsive */}
             {isPlaying && (
-              <div className="absolute flex items-center gap-1 px-3 py-1 text-sm text-white rounded-full top-4 right-4 bg-black/50">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                Playing
+              <div className="absolute flex items-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm text-white rounded-full top-2 md:top-4 right-2 md:right-4 bg-black/50">
+          <span className="w-1.5 md:w-2 h-1.5 md:h-2 bg-red-500 rounded-full animate-pulse"></span>
+          Playing
               </div>
             )}
           </div>
-          <div className="absolute flex gap-2 pt-4 bottom-4 right-12">
+
+          {/* Navigation buttons - made responsive */}
+          <div className="absolute flex gap-1 md:gap-2 pt-2 md:pt-4 bottom-2 md:bottom-4 right-4 md:right-12">
             <button
               onClick={() => {
-                pauseAllVideos();
-                setCurrentIndex((prevIndex) =>
-                  prevIndex === 0 ? products.length - 1 : prevIndex - 1
-                );
+          pauseAllVideos();
+          setCurrentIndex((prevIndex) => prevIndex === 0 ? products.length - 1 : prevIndex - 1);
               }}
-              className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+              className="p-1 md:p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
             >
-              <IoIosArrowBack className="text-2xl" />
+              <IoIosArrowBack className="text-xl md:text-2xl" />
             </button>
             <button
               onClick={() => {
-                pauseAllVideos();
-                setCurrentIndex(
-                  (prevIndex) => (prevIndex + 1) % products.length
-                );
+          pauseAllVideos();
+          setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length);
               }}
-              className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+              className="p-1 md:p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
             >
-              <IoIosArrowForward className="text-2xl" />
+              <IoIosArrowForward className="text-xl md:text-2xl" />
             </button>
           </div>
         </motion.div>
@@ -572,7 +551,7 @@ const ComicsPageV2 = () => {
           Trending Comics For You!
         </h2>
         <div
-          className="flex gap-4 overflow-x-auto md:gap-8 scroll-smooth pb-20 px-6"
+          className="flex gap-4 px-6 pb-20 overflow-x-auto md:gap-8 scroll-smooth"
           ref={carouselRef}
         >
           {products.map((comic: ProductBase, index) => (
@@ -583,7 +562,7 @@ const ComicsPageV2 = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="relative w-full h-full overflow-hidden bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl">
+              <div className="relative w-full h-full overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
                 {/* Main Image with Gradient Overlay */}
                 <div className="relative h-[60%] overflow-hidden">
                   <img
@@ -597,7 +576,7 @@ const ComicsPageV2 = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
                   {/* Product Type Badge */}
-                  <div className="absolute bottom-4 left-4 flex gap-2">
+                  <div className="absolute flex gap-2 bottom-4 left-4">
                     {comic.product_type && (
                       <span
                         className={`
@@ -617,7 +596,7 @@ const ComicsPageV2 = () => {
                       </span>
                     )}
                     {/* Release Date Badge */}
-                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-white/90">
+                    <span className="px-3 py-1 text-sm font-medium rounded-lg bg-white/90">
                       {formatDateString(
                         (comic.details as ComicProduct["details"])
                           ?.releaseDate || ""
@@ -629,16 +608,16 @@ const ComicsPageV2 = () => {
 
                 {/* Content Section */}
                 <div className="p-5">
-                  <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2 ">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-1 ">
                     {comic?.title}
                   </h3>
 
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                  <p className="mb-4 text-sm text-gray-600 line-clamp-2">
                     {comic?.description}
                   </p>
 
                   {/* Stats Row */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <svg
                         className="w-4 h-4"
@@ -698,7 +677,7 @@ const ComicsPageV2 = () => {
                             );
                           }
                         }}
-                        className="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors  "
+                        className="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90 "
                       >
                         {comic.type === "comic" ? "Read Now" : "Listen Now"}
                       </button>
@@ -709,17 +688,17 @@ const ComicsPageV2 = () => {
                         <button
                           onClick={(e) => handleAddtoCart(e, comic)}
                           disabled={isLoading}
-                          className="flex-1 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+                          className="flex items-center flex-1 gap-2 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primar whitespace-nowrap"
                         >
-                          <FaShoppingCart className="w-4 h-4 inline-block self-center " />
+                          <FaShoppingCart className="self-center inline-block w-4 h-4 " />
                           {isLoading ? "Adding..." : "Add to Cart"}
                         </button>
                         <button
                           onClick={(e) => handleBuyNow(e, comic)}
                           disabled={isLoading}
-                          className="flex-1 flex items-center gap-2 px-4 py-2 border  text-primary rounded-lg font-medium hover:bg-primary/30 transition-colors whitespace-nowrap border-primary"
+                          className="flex items-center flex-1 gap-2 px-4 py-2 font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 whitespace-nowrap border-primary"
                         >
-                          <FaBolt className="w-4 h-4 inline-block self-center " />
+                          <FaBolt className="self-center inline-block w-4 h-4 " />
                           {isLoading ? "Buying..." : "Buy Now"}
                         </button>
                         {showAddToCartModal && (
@@ -824,9 +803,9 @@ const ComicsPageV2 = () => {
             className="absolute bottom-0 right-0 w-16 md:w-24"
           />
         </div>
-        <div className="flex-1 p-6 mt-12">
-          <div className="flex items-start gap-10 pb-4">
-            <div>
+        <div className="flex-1 p-6 mt-12 ">
+          <div className="flex-1  items-start gap-10 pb-4 sm:flex ">
+            <div className="mb-4">
               <img
                 src={
                   products?.[0]?.productImages?.[0].imageUrl ||
@@ -899,7 +878,7 @@ const ComicsPageV2 = () => {
           ))}
         </div>
         <div className="relative items-start justify-center flex-1">
-          <h2 className="pt-8 text-7xl md:text-8xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_black]">
+          <h2 className="pt-8 text-6xl md:text-8xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_black] pr-8">
             Why our workshops matter?
           </h2>
           {/* <figure className="flex items-center justify-end w-full p-4 pt-0">
