@@ -58,7 +58,7 @@ const ResumeSubmissionModal = ({
 
     const res = await dispatch(
       applyForJob({
-        jobId: id,
+        jobId: "",
         formData: { ...values, resume: fileUrl },
       })
     );
