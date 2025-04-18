@@ -46,18 +46,6 @@ const FreeComics = ({
                 />
                 <motion.div className="absolute inset-0 transition-opacity duration-300 ease-in-out bg-gray-700 opacity-0 group-hover:opacity-50" />
                 <motion.div className="absolute bottom-0 w-full p-3 text-center text-black transition duration-300 ease-in-out bg-green-400 rounded-b-md translate-y-100 group-hover:translate-y-0">
-                  {/* <a
-                  target="_blank"
-                  href={`${
-                    "comicLink" in comic ? comic.comicLink : comic.videoLink
-                  }`}
-                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                    e.stopPropagation()
-                  }
-                  className="block w-full h-full"
-                >
-                  {comicType === "picture" ? "Read Comic" : "Watch Comic"}
-                </a> */}
                   {comicType === "picture" ? (
                     <button
                       className="block w-full h-full"

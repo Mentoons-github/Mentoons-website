@@ -23,14 +23,14 @@ const Home = () => {
   const openComicModal = (comicLink: string) => {
     setComicToView(comicLink);
     setShowComicModal(true);
-    document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+    document.body.style.overflow = "hidden";
   };
 
   const closeComicModal = () => {
     setShowComicModal(false);
-    document.body.style.overflow = "auto"; // Re-enable scrolling
+    document.body.style.overflow = "auto";
   };
-  // Comic sending function
+  
   const sendComic = async () => {
     try {
       const response = await axiosInstance.post(`/email/sendEmail`, {

@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useJobForm } from "@/utils/formik/jobAplpyForm";
+import { applyForJob } from "@/redux/careerSlice";
+import { AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 import {
   Upload,
   Send,
@@ -13,6 +19,7 @@ import {
   User,
   Calendar,
 } from "lucide-react";
+import { uploadFile } from "@/redux/fileUploadSlice";
 
 const ResumeSubmissionModal = ({
   setIsOpen,
@@ -21,13 +28,47 @@ const ResumeSubmissionModal = ({
   setIsOpen: (val: boolean) => void;
   position: string;
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const { getToken } = useAuth();
 
   const formik = useJobForm(async (values) => {
     console.log("form Submitted : ", values);
-    setTimeout(() => {
+    const token = await getToken();
+    if (!token) {
+      navigate("/sign-in");
+      return toast.error("Login first to apply");
+    }
+    if (!values.resume) {
+      return toast.error("Please upload a resume.");
+    }
+
+    const fileAction = await dispatch(
+      uploadFile({
+        file: values.resume,
+        getToken: async () => token,
+      })
+    );
+    const fileUrl = fileAction.payload?.data?.fileDetails.url;
+    if (!fileUrl) {
+      return toast.error("Failed to upload resume");
+    }
+
+    const res = await dispatch(
+      applyForJob({
+        jobId: "",
+        formData: { ...values, resume: fileUrl },
+      })
+    );
+
+    if (res.payload?.success) {
+      toast.success("Application submitted successfully");
       setIsSuccess(true);
-    }, 1000);
+    } else {
+      toast.error(res.payload?.message || "Failed to submit application");
+    }
   });
 
   const gradientStyle = "bg-gradient-to-r from-red-600 to-orange-500";
@@ -164,29 +205,34 @@ const ResumeSubmissionModal = ({
                 variants={inputVariants}
               >
                 <label
-                  htmlFor="age"
+                  htmlFor="gender"
                   className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
                   <Calendar size={16} className="mr-1 text-orange-500" />
-                  Age
+                  Gender
                 </label>
-                <input
-                  type="number"
-                  name="age"
-                  value={formik.values.age}
+                <select
+                  name="gender"
+                  value={formik.values.gender}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  min="18"
-                  max="100"
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                />
-                {formik.touched.age && formik.errors.age && (
+                >
+                  <option value="" disabled>
+                    Select gender
+                  </option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                {formik.touched.gender && formik.errors.gender && (
                   <p className="text-red-500 text-sm mt-1">
-                    {formik.errors.age}
+                    {formik.errors.gender}
                   </p>
                 )}
               </motion.div>
+
               <motion.div
                 initial="initial"
                 animate="animate"

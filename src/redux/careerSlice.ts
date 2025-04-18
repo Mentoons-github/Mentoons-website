@@ -1,6 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { HiringFormData } from "@/components/shared/FAQSection/FAQCard";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export type TPOSITION = {
   _id: string;
@@ -37,10 +38,10 @@ export const getOpenPositions = createAsyncThunk(
 
 export const applyForJob = createAsyncThunk(
   "career/applyForJob",
-  async (data: { jobId: string; formData: HiringFormData }) => {
+  async (data: { jobId: string; formData: Partial<HiringFormData> }) => {
     try {
-      const response = await axiosInstance.post(
-        `/career/jobs/apply/${data.jobId}`,
+      const response = await axios.post(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/career/jobs/apply/${data.jobId}`,
         data.formData
       );
       return response.data;

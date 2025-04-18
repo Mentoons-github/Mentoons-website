@@ -7,9 +7,10 @@ import axios from "axios";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { FaCheck, FaStar, FaTimes } from "react-icons/fa";
-import { toast } from "sonner";
+import LoginModal from "@/components/common/modal/loginModal";
 
 const MembershipCard = ({ membership }: { membership: Membership }) => {
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: false, amount: 0.3 });
 
@@ -56,7 +57,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
 
       const token = await getToken();
       if (!token) {
-        toast.error("Please login to continue");
+        setLoginModalOpen(true);
         return;
       }
       setIsProcessingPayment(true);
@@ -293,6 +294,10 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         onRetry={handlePaymentRetry}
         onCancel={handlePaymentCancel}
         loadingDuration={loadingDuration}
+      />
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
       />
     </>
   );

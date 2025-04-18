@@ -1,30 +1,18 @@
-import useInView from "@/hooks/useInView";
 import { AssessmentProduct, ProductBase } from "@/types/productTypes";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const AssessmentCards = ({
+  isInView,
   assessmentData,
 }: {
+  isInView: boolean;
   assessmentData: ProductBase[];
 }) => {
-  const isMobile = window.innerWidth < 768;
-  const { ref, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
-
   const navigate = useNavigate();
 
-
   return (
-    <motion.div
-      ref={ref}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 place-items-center"
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
-      }}
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 place-items-center">
       {assessmentData.map((data, index) => (
         <motion.div
           className="h-[600px] w-full max-w-[400px] p-5 shadow-xl rounded-xl space-y-3 bg-white flex flex-col justify-between"
@@ -61,7 +49,8 @@ const AssessmentCards = ({
           <div className=" flex flex-col items-start  gap-4">
             <p>
               <span className="text-red-500">🕒</span> Duration:{" "}
-              {(data.details as AssessmentProduct["details"]).duration + "minutes"}
+              {(data.details as AssessmentProduct["details"]).duration +
+                "minutes"}
             </p>
             <p>
               <span className="text-blue-500">📚</span> Reading level:{" "}
@@ -101,7 +90,7 @@ const AssessmentCards = ({
           </motion.div>
         </motion.div>
       ))}
-    </motion.div>
+    </div>
   );
 };
 
