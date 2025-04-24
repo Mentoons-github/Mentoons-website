@@ -12,7 +12,7 @@ const AssessmentCards = ({
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 place-items-center">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 place-items-center">
       {assessmentData.map((data, index) => (
         <motion.div
           className="h-[600px] w-full max-w-[400px] p-5 shadow-xl rounded-xl space-y-3 bg-white flex flex-col justify-between"
@@ -26,7 +26,7 @@ const AssessmentCards = ({
           }}
         >
           <motion.div
-            className="rounded-xl overflow-hidden bg-yellow-300"
+            className="overflow-hidden bg-yellow-300 rounded-xl"
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -37,7 +37,7 @@ const AssessmentCards = ({
             <img
               src={data.productImages?.[0].imageUrl}
               alt="card-img"
-              className="w-full h-52 md:h-56 object-cover"
+              className="object-cover w-full h-52 md:h-56"
             />
           </motion.div>
           <motion.h1 className="font-semibold text-xl lg:text-2xl tracking-[0.5px]">
@@ -46,7 +46,7 @@ const AssessmentCards = ({
           <motion.p className="text-sm lg:text-md tracking-[0.35px]">
             {data.description}
           </motion.p>
-          <div className=" flex flex-col items-start  gap-4">
+          <div className="flex flex-col items-start gap-4 ">
             <p>
               <span className="text-red-500">🕒</span> Duration:{" "}
               {(data.details as AssessmentProduct["details"]).duration +
@@ -60,9 +60,9 @@ const AssessmentCards = ({
               <span className="text-green-500">🎯</span> Age: {data.ageCategory}
             </p>
           </div>
-          <motion.div className="flex flex-col md:flex-row justify-between items-center w-full p-3 space-y-3 md:space-y-0">
+          <motion.div className="flex flex-col items-center justify-between w-full p-3 space-y-3 md:flex-row md:space-y-0">
             <p className="text-sm">
-              <span className="font-medium text-2xl md:text-3xl">
+              <span className="text-2xl font-medium md:text-3xl">
                 ₹ {data.price}/
               </span>{" "}
               Report
@@ -75,7 +75,7 @@ const AssessmentCards = ({
               }}
               whileTap={{ scale: 0.95 }}
               onClick={() =>
-                navigate(`/assesment-questions`, {
+                navigate(`/assessment-questions`, {
                   state: {
                     questionGallery: (
                       data.details as AssessmentProduct["details"]

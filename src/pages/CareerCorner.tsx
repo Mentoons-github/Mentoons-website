@@ -4,7 +4,7 @@ const CareerCorner = () => {
       <img
         src="/assets/images/coming-soon.png"
         alt=""
-        className="  object-cover"
+        className="object-cover "
       />
     </div>
   );

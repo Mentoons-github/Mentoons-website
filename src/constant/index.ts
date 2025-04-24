@@ -1149,7 +1149,7 @@ export const NAV_LINKS: NavLink[] = [
     id: "NL_14",
     label: "Assessments",
     icon: FaChartBar,
-    url: "/assesment-page",
+    url: "/assessment-page",
   },
   {
     id: "NL_15",
@@ -1169,7 +1169,7 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     id: "NL_01",
     label: "Assessments",
     icon: FaUsers,
-    url: "/assesment-page",
+    url: "/assessment-page",
   },
   {
     id: "NL_02",

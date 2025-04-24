@@ -23,6 +23,8 @@ const Podcastv2 = () => {
   const navigate = useNavigate();
   const [playingPodcastId, setPlayingPodcastId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [enquiryEmail, setEnquiryEmail] = useState("");
+  const [enquiryName, setEnquiryName] = useState("");
   const [showMembershipModal, setShowMembershipModal] =
     useState<boolean>(false);
   const { isSignedIn, user } = useUser();
@@ -69,6 +71,9 @@ const Podcastv2 = () => {
         "https://mentoons-backend-zlx3.onrender.com/api/v1/query",
         {
           message: message,
+          name: enquiryName,
+          email: enquiryEmail,
+          queryType: "podcast",
         }
       );
       console.log(queryResponse);
@@ -628,7 +633,7 @@ const Podcastv2 = () => {
                     )}
 
                     {/* Category badge */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                    <div className="absolute flex items-center gap-2 bottom-2 left-2">
                       <div
                         className={`
                         py-[3px] 
@@ -693,7 +698,7 @@ const Podcastv2 = () => {
                       <div className="flex items-center gap-1 text-sm text-orange-500">
                         <div className="flex gap-0.5">
                           <svg
-                            className="w-4 h-4  fill-orange-400"
+                            className="w-4 h-4 fill-orange-400"
                             viewBox="0 0 24 24"
                           >
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -937,7 +942,7 @@ const Podcastv2 = () => {
                         )?.host?.charAt(0)}
                       </span>
                     </div>
-                    <span className="font-bold text-sm  ml-2">
+                    <span className="ml-2 text-sm font-bold">
                       {(filteredPodcast[0].details as PodcastProduct["details"])
                         ?.host || "Mentoons"}
                     </span>
@@ -1123,22 +1128,44 @@ const Podcastv2 = () => {
             <p className="tracking-wide">
               FOR THE PEOPLE WHO WANT TO BE HEARD...
             </p>
-            <p className="pt-2 pb-4 font-semibold text-7xl luckiest-guy-regular">
+            <p className="pt-2 text-6xl font-semibold luckiest-guy-regular">
               WANT YOUR VOICE TO BE HEARD
             </p>
-            <p className="pb-8">
+            <p className="pb-4">
               If you want to create podcast on a particular topic, Join Us! Be
               the voice of change.
             </p>
             <div className="flex items-center w-full gap-4">
-              <form className="flex flex-col w-full gap-4">
+              <form className="flex flex-col w-full gap-2">
+                <div className="flex flex-col w-full md:pr-36">
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    placeholder="Your Name"
+                    value={enquiryName}
+                    onChange={(e) => setEnquiryName(e.target.value)}
+                    className="w-full p-4 mb-2 text-black shadow-lg rounded-xl"
+                  />
+
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Your Email"
+                    value={enquiryEmail}
+                    onChange={(e) => setEnquiryEmail(e.target.value)}
+                    className="w-full p-4 text-black shadow-lg rounded-xl"
+                  />
+                </div>
                 <div className="w-full md:pr-36">
                   <textarea
                     name="message"
                     id="message"
                     placeholder="Write here"
+                    rows={3}
                     onChange={(e) => handleMessageChange(e)}
-                    className="p-4 rounded-xl text-black w-full min-h-[200px] shadow-lg"
+                    className="w-full p-4 text-black shadow-lg rounded-xl"
                   ></textarea>
                 </div>
                 <button

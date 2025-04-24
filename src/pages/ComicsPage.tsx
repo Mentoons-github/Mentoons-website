@@ -35,10 +35,10 @@
 //   };
 
 //   return (
-//     <div className="py-16 px-5 md:py-20 space-y-8">
+//     <div className="px-5 py-16 space-y-8 md:py-20">
 //       <div className="space-y-7">
 //         <div className="flex items-center justify-between">
-//           {/* <div className="flex items-center gap-1 text-black py-1 px-2 bg-gray-50 shadow-sm rounded-md  ">
+//           {/* <div className="flex items-center gap-1 px-2 py-1 text-black rounded-md shadow-sm bg-gray-50 ">
 //           <div
 //             onClick={(e: React.MouseEvent<HTMLDivElement>) =>
 //               handleChangeComic(e)
@@ -64,18 +64,18 @@
 //             Comics
 //           </div>
 //         </div> */}
-//           {/* <div className="border-2 border-green-500 text-gray-600 bg-green-200 rounded-md px-4 py-2 font-semibold">
+//           {/* <div className="px-4 py-2 font-semibold text-gray-600 bg-green-200 border-2 border-green-500 rounded-md">
 //           Audio Comics
 //         </div> */}
-//           <div className="text-3xl text-red-500 lineBefore uppercase">
+//           <div className="text-3xl text-red-500 uppercase lineBefore">
 //             Audio Comics
 //           </div>
 //           <div className="hidden lg:block">
 //             <FilterComics />
 //           </div>
 //         </div>
-//         <div className="font-medium text-3xl space-y-8">
-//           <h1 className="font-extrabold text-3xl lg:text-7xl">
+//         <div className="space-y-8 text-3xl font-medium">
+//           <h1 className="text-3xl font-extrabold lg:text-7xl">
 //             Experience the magic of{" "}
 //             <span className="text-primary md:block md:tracking-widest">
 //               storytelling
@@ -92,7 +92,7 @@
 //       <div>
 //         {comicsToShow.length > 0 ? (
 //           <>
-//             <div className="w-full text-center block lg:hidden">
+//             <div className="block w-full text-center lg:hidden">
 //               <FilterComics />
 //             </div>
 //             <div className="flex flex-wrap gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
@@ -100,7 +100,7 @@
 //                 return (
 //                   <div
 //                     key={v4()}
-//                     className="bg-white shadow-lg group text-black rounded-2xl px-5 py-5 space-y-3"
+//                     className="px-5 py-5 space-y-3 text-black bg-white shadow-lg group rounded-2xl"
 //                   >
 //                     <div className="overflow-hidden rounded-2xl">
 //                       <img
@@ -116,16 +116,16 @@
 //                       <div className="text-xl font-semibold tracking-wide">
 //                         {item?.name}
 //                       </div>
-//                       <div className="text-black text-sm tracking-wide">
+//                       <div className="text-sm tracking-wide text-black">
 //                         {item?.desc}
 //                       </div>
 //                     </div>
-//                     <div className="flex items-center justify-between border-t border-gray-200 pt-2">
+//                     <div className="flex items-center justify-between pt-2 border-t border-gray-200">
 //                       <div
 //                         // onClick={() =>
 //                         //   navigate(`/audio-comic?comic=${item.name}`)
 //                         // }
-//                         className="text-end flex items-center justify-end gap-2 group-hover:text-red-500 group-hover:underline text-xl cursor-pointer"
+//                         className="flex items-center justify-end gap-2 text-xl cursor-pointer text-end group-hover:text-red-500 group-hover:underline"
 //                       >
 //                         Play Sample{" "}
 //                         <FaCirclePlay
@@ -158,9 +158,9 @@
 //             </div>
 //           </>
 //         ) : (
-//           <div className=" text-center space-y-4">
+//           <div className="space-y-4 text-center ">
 //             <div className="text-4xl font-semibold">Comics Coming Soon! 🥺</div>
-//             <div className="text-gray-500 text-lg">
+//             <div className="text-lg text-gray-500">
 //               Explore Out Other Popular Collections
 //             </div>
 //             <button
@@ -168,7 +168,7 @@
 //                 navigate("/comics-list?filter=groupSmall");
 //                 dispatch(updateSelectedFilterReducer("groupSmall"));
 //               }}
-//               className="bg-primary hover:scale-105 active:scale-95 transition-all ease-in-out duration-300 text-white px-6 py-3 rounded-full"
+//               className="px-6 py-3 text-white transition-all duration-300 ease-in-out rounded-full bg-primary hover:scale-105 active:scale-95"
 //             >
 //               View Comics
 //             </button>

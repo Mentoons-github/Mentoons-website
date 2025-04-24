@@ -1,14 +1,61 @@
+import EnquiryModal from "@/components/modals/EnquiryModal";
 import useInView from "@/hooks/useInView";
+import { ModalMessage } from "@/utils/enum";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { MdMessage } from "react-icons/md";
+import { toast } from "sonner";
 
 const FAQ = ({ data }: { data: object }) => {
   const { isInView, ref } = useInView(0.3, false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
+  };
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const queryType = "general"; // Removed unused state setter
+
+  const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      // Determine the queryType based on the current URL
+      const currentUrl = window.location.pathname;
+      let dynamicQueryType = "general";
+
+      if (currentUrl.includes("workshop")) {
+        dynamicQueryType = "workshop";
+      } else if (currentUrl.includes("assessment")) {
+        dynamicQueryType = "assessment";
+      } else if (currentUrl.includes("comic")) {
+        dynamicQueryType = "comic";
+      } else if (currentUrl.includes("product")) {
+        dynamicQueryType = "product";
+      }
+
+      // Use the determined queryType or the state value if it was manually set
+      const finalQueryType =
+        queryType !== "general" ? queryType : dynamicQueryType;
+      const queryResponse = await axios.post(
+        // `https://mentoons-backend-zlx3.onrender.com/api/v1/query`, // Fixed the endpoint URL
+        "http://localhost:4000/api/v1/query", // Fixed the endpoint URL
+        {
+          message: message,
+          name: name,
+          email: email,
+          queryType: finalQueryType,
+        }
+      );
+      console.log(queryResponse);
+      if (queryResponse.status === 201) {
+        setShowEnquiryModal(true);
+      }
+    } catch (error) {
+      toast.error("Failed to submit message");
+    }
   };
 
   return (
@@ -17,7 +64,7 @@ const FAQ = ({ data }: { data: object }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="h-auto px-4 sm:px-8 md:px-12 lg:px-20 py-8 sm:py-10 md:py-15"
+      className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15"
     >
       <motion.h1
         initial={{ opacity: 0, x: -30 }}
@@ -28,25 +75,25 @@ const FAQ = ({ data }: { data: object }) => {
         Frequently Asked Questions
       </motion.h1>
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 w-full mt-6 sm:mt-10">
-        <div className="flex flex-col w-full lg:w-3/5 gap-4 sm:gap-5">
+      <div className="flex flex-col w-full gap-6 mt-6 lg:flex-row lg:gap-10 sm:mt-10">
+        <div className="flex flex-col w-full gap-4 lg:w-3/5 sm:gap-5">
           {Object.entries(data).map(([question, answer], index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="w-full overflow-hidden border border-gray-400 rounded-lg bg-white shadow-md font-manrope"
+              className="w-full overflow-hidden bg-white border border-gray-400 rounded-lg shadow-md font-manrope"
             >
               <button
                 onClick={() => toggleFAQ(index)}
                 className="w-full flex justify-between items-center p-3 sm:p-4 bg-white font-extrabold text-[12px] sm:text-lg md:text-xl transition-all hover:bg-gray-100"
               >
-                <span className="text-left pr-2">{question}</span>
+                <span className="pr-2 text-left">{question}</span>
                 <motion.span
                   animate={{ rotate: openIndex === index ? 180 : 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="text-xl font-bold flex-shrink-0"
+                  className="flex-shrink-0 text-xl font-bold"
                 >
                   {openIndex === index ? "−" : "+"}
                 </motion.span>
@@ -71,14 +118,14 @@ const FAQ = ({ data }: { data: object }) => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col justify-center items-center gap-3 sm:gap-4 w-full lg:w-2/5 p-5 sm:p-8 bg-white rounded-xl shadow-lg h-auto lg:max-h-[400px] flex-shrink-0 lg:min-h-[400px] mt-6 lg:mt-0"
+          className="flex flex-col items-center justify-center flex-shrink-0 w-full gap-3 p-5 mt-6 bg-white shadow-lg sm:gap-4 lg:w-2/5 sm:p-8 rounded-xl lg:mt-0"
         >
-          <MdMessage className="text-4xl sm:text-5xl text-black" />
+          <MdMessage className="text-4xl text-black sm:text-5xl" />
           <motion.h3
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-xl sm:text-2xl font-semibold text-center text-black"
+            className="text-xl font-semibold text-center text-black sm:text-2xl"
           >
             Have Doubts? We are here to help you!
           </motion.h3>
@@ -86,28 +133,65 @@ const FAQ = ({ data }: { data: object }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="text-center text-black leading-relaxed text-sm sm:text-base"
+            className="text-sm leading-relaxed text-center text-black sm:text-base"
           >
             Contact us for additional help regarding your assessment or
             purchase. Our team is ready to assist you!
           </motion.p>
-          <motion.textarea
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            rows={4}
-            className="w-full p-3 sm:p-4 border border-black rounded-3xl outline-none focus:ring-2 focus:ring-blue-400 transition"
-            placeholder="Ask Your Query here..."
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-full bg-yellow-400 py-2 sm:py-3 rounded-lg font-medium text-base sm:text-lg transition-all hover:bg-yellow-300 focus:ring-2 focus:ring-blue-300"
+          <form
+            onSubmit={handleDoubtSubmission}
+            className="flex flex-col w-full gap-3"
           >
-            Submit
-          </motion.button>
+            <motion.div className="flex flex-col w-full gap-3 sm:flex-row">
+              <motion.input
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.55 }}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
+                placeholder="Your Name"
+              />
+              <motion.input
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
+                placeholder="Your Email"
+              />
+            </motion.div>
+            <motion.textarea
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              rows={2}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
+              placeholder="Ask Your Query here..."
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full py-2 text-base font-medium transition-all bg-yellow-400 rounded-lg sm:py-3 sm:text-lg hover:bg-yellow-300 focus:ring-2 focus:ring-blue-300"
+              type="submit"
+            >
+              Submit
+            </motion.button>
+          </form>
         </motion.div>
       </div>
+      {showEnquiryModal && (
+        <EnquiryModal
+          isOpen={showEnquiryModal}
+          onClose={() => setShowEnquiryModal(false)}
+          message={ModalMessage.ENQUIRY_MESSAGE}
+        />
+      )}
     </motion.section>
   );
 };

@@ -9,7 +9,7 @@ import MainLayout from "./layout/MainLayout";
 import OrderSummary from "@/components/OrderSummary";
 import Popup from "./layout/Popup.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
-import AssesmentQuestions from "./pages/AssesmentQuestions";
+
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
@@ -17,11 +17,11 @@ import Home from "./pages/Home";
 import Membership from "./pages/Membership";
 import MentoonsStore from "./pages/MentoonsStore";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
-// import PodCast from "./pages/PodCast.tsx";
+
 import PolicyPage from "./pages/PolicyPage";
 import ProductDetails from "./pages/ProductDetails";
-// import ProductManagement from "./pages/ProductManagement.tsx";
 
+import AssessmentQuestions from "./pages/AssessmentQuestions.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Assessment from "./pages/v2/user/assessment.tsx";
 import ProductsPage from "./pages/v2/user/products/products.tsx";
@@ -71,8 +71,8 @@ const routes = [
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   { path: "/membership", element: <Membership /> },
   { path: "/hiring", element: <CareerPage /> },
-  { path: "/assesment-page", element: <Assessment /> },
-  { path: "/assesment-questions", element: <AssesmentQuestions /> },
+  { path: "/assessment-page", element: <Assessment /> },
+  { path: "/assessment-questions", element: <AssessmentQuestions /> },
   { path: "/order-summary", element: <OrderSummary /> },
   { path: "/payment-status", element: <PaymentStatusPage /> },
   { path: "*", element: <NotFound /> },
