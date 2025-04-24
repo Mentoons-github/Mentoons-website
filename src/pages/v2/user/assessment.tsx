@@ -31,7 +31,7 @@ const Assessment = () => {
     const fetchAssessments = async () => {
       try {
         const token = await getToken();
-
+        //fetch products
         const assessment = await dispatch(
           fetchProducts({
             type: ProductType.ASSESSMENT,
