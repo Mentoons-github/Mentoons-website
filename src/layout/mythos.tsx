@@ -1,5 +1,5 @@
-// import MythosFooter from "@/components/mythos/home/footer";
-import Footer from "@/components/comics/Footer";
+import MythosFooter from "@/components/mythos/home/footer";
+// import Footer from "@/components/comics/Footer";
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
@@ -10,7 +10,8 @@ const MythosLayout = () => {
       <PrimaryHeader />
       <Header />
       <Outlet />
-      <Footer />
+      {/* <Footer /> */}
+      <MythosFooter />
     </main>
   );
 };
