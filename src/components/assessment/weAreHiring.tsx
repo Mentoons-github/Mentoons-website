@@ -2,11 +2,20 @@ import { Hiring } from "@/types";
 import ResumeSubmissionModal from "../common/modal/jobApplyModel";
 import { useState } from "react";
 
+export type Position = {
+  position: string;
+  _id: string;
+};
+
 const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
-  const [position, setPosition] = useState("");
+  const [position, setPosition] = useState<Position | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const handleClick = (job: string) => {
-    setPosition(job);
+  const handleClick = (job: Hiring) => {
+    const data = {
+      position: job.job,
+      _id: job._id,
+    };
+    setPosition(data);
     setIsOpen(true);
   };
 
@@ -15,7 +24,7 @@ const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
       {hiring.map((job, index) => (
         <button
           key={index}
-          onClick={() => handleClick(job.job)}
+          onClick={() => handleClick(job)}
           className="w-full p-3 md:p-5 rounded-xl border border-black shadow-xl font-akshar"
           style={{ background: job.bg }}
         >
@@ -37,7 +46,7 @@ const WeAreHiring = ({ hiring }: { hiring: Hiring[] }) => {
           </div>
         </button>
       ))}
-      {isOpen && (
+      {isOpen && position && (
         <ResumeSubmissionModal setIsOpen={setIsOpen} position={position} />
       )}
     </div>

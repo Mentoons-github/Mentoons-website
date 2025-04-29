@@ -7,6 +7,9 @@ interface JobFormValues {
   phone: string;
   resume: File | null;
   gender: string;
+  portfolioLink: string;
+  coverNote: string;
+  coverLetterLink: string;
 }
 
 const validationSchema = Yup.object({
@@ -26,6 +29,15 @@ const validationSchema = Yup.object({
     .test("fileSize", "File size should be less than 2MB", (value) => {
       return value instanceof File && value.size <= 2 * 1024 * 1024;
     }),
+  portfolioLink: Yup.string()
+    .url("Must be a valid URL")
+    .required("Portfolio link is required"),
+  coverNote: Yup.string()
+    .min(50, "Cover note must be at least 50 characters")
+    .required("Cover note is required"),
+  coverLetterLink: Yup.string()
+    .url("Must be a valid URL")
+    .required("Cover letter link is required"),
 });
 
 type OnSubmitFunction = (
@@ -41,6 +53,9 @@ export const useJobForm = (onSubmit: OnSubmitFunction) => {
       phone: "",
       resume: null,
       gender: "",
+      portfolioLink: "",
+      coverNote: "",
+      coverLetterLink: "",
     },
     validationSchema,
     onSubmit: async (values, formikHelpers) => {

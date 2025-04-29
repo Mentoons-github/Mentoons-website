@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 const LogIn = () => {
   const location = useLocation();
   const previousUrl = location.state?.from || "/";
-  console.log(previousUrl); // Log the previous URL to the console
+  console.log(previousUrl);
 
   return (
     <div className=" h-screen  flex  bg-[url(/assets/images/team-background.png)] bg-no-repeat bg-cover bg-center">

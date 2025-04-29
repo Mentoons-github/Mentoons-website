@@ -1,5 +1,5 @@
-import axiosInstance from "@/api/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
 
 type FileUploadState = {
   loading: boolean;
@@ -19,7 +19,7 @@ export const uploadFile = createAsyncThunk(
   "career/uploadFile",
   async (
     payload: { file: File; getToken: () => Promise<string | null> },
-    { rejectWithValue },
+    { rejectWithValue }
   ) => {
     const { file, getToken } = payload;
     console.log(file, "File to be uploaded");
@@ -30,17 +30,21 @@ export const uploadFile = createAsyncThunk(
       if (!token) {
         throw new Error("No authentication token available");
       }
-      const response = await axiosInstance.post("/upload/file", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to upload file");
     }
-  },
+  }
 );
 
 export const fileUploadSlice = createSlice({

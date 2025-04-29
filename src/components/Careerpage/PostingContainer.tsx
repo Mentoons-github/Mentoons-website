@@ -15,12 +15,12 @@ const PostingContainer = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState<string | null>(null);
   const openPositions = useSelector(
-    (state: RootState) => state.career.openPositions,
+    (state: RootState) => state.career.openPositions
   );
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
   const selectedPosition = openPositions.find(
-    (position) => position.jobTitle === selectedPosting,
+    (position) => position.jobTitle === selectedPosting
   );
 
   const handlePostingClick = (postingTitle: string) => {
@@ -33,7 +33,7 @@ const PostingContainer = () => {
       {openPositions.map((position) => (
         <Postings
           key={position._id}
-          title={position.jobTitle}
+          job={position}
           onClick={() => handlePostingClick(position.jobTitle)}
         />
       ))}
@@ -81,7 +81,6 @@ const PostingContainer = () => {
 
               <div className="p-6 md:p-12 lg:p-16 overflow-y-auto max-h-[90vh]">
                 <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-                  {/* Content Column */}
                   <div className="flex-1">
                     <div className="text-center md:text-left">
                       <h1 className="text-xl font-bold text-white md:text-3xl lg:text-4xl">
@@ -111,14 +110,16 @@ const PostingContainer = () => {
                         Required Skills
                       </h2>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {selectedPosition.skillsRequired.map((skill:string, index:number) => (
-                          <span
-                            key={index}
-                            className="bg-white/10 px-3 py-1.5 rounded-lg text-xs md:text-sm"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+                        {selectedPosition.skillsRequired.map(
+                          (skill: string, index: number) => (
+                            <span
+                              key={index}
+                              className="bg-white/10 px-3 py-1.5 rounded-lg text-xs md:text-sm"
+                            >
+                              {skill}
+                            </span>
+                          )
+                        )}
                       </div>
                     </div>
                     <Button
@@ -136,7 +137,6 @@ const PostingContainer = () => {
                     </Button>
                   </div>
 
-                  {/* Image Column */}
                   <div className="lg:w-1/3">
                     <img
                       src={selectedPosition.thumbnail}
