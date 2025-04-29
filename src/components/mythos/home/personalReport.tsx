@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
-import useInView from "@/hooks/useInView";
-import MythosButton from "./button";
-import { useState } from "react";
 import MythosLoginModal from "@/components/common/modal/mythosLogin";
+import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import MythosButton from "./button";
 
 const PersonalReport = () => {
   const { ref, isInView } = useInView(0.3, false);
@@ -11,7 +11,7 @@ const PersonalReport = () => {
   return (
     <section
       ref={ref}
-      className="relative py-20 w-full h-auto flex flex-col-reverse md:flex-row justify-between items-center gap-20 px-4 md:px-20 overflow-hidden"
+      className="relative flex flex-col-reverse items-center justify-between w-full h-auto gap-20 px-4 py-20 overflow-hidden md:flex-row md:px-20"
     >
       <img
         src="/assets/mythos/personalReport/h3-rev-png5.png.png"
@@ -24,12 +24,12 @@ const PersonalReport = () => {
         initial={{ opacity: 0, x: -50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.8 }}
-        className="relative z-10 w-full flex justify-center"
+        className="relative z-10 flex justify-center w-full"
       >
         <img
           src="/assets/mythos/personalReport/Exploring virtual reality with vr headset.png"
           alt="Exploring VR with Headset"
-          className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl h-auto object-cover"
+          className="object-cover w-full h-auto max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl"
         />
       </motion.div>
 
@@ -47,7 +47,7 @@ const PersonalReport = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-white space-y-8 font-mulish text-md sm:text-lg mt-6 md:px-5"
+          className="mt-6 space-y-8 text-white font-mulish text-md sm:text-lg md:px-5"
         >
           {[
             "This includes psychology-based assessments.",

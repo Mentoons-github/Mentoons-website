@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
 
 const SignUpSection = () => {
   const { ref, isInView } = useInView(0.3, false);
@@ -28,7 +28,7 @@ const SignUpSection = () => {
       <motion.img
         src="/assets/mythos/background/signUp/Star.png"
         alt="star-1"
-        className="hidden sm:block absolute top-1/2 left-72 w-15 h-15 z-0"
+        className="absolute z-0 hidden sm:block top-1/2 left-72 w-15 h-15"
         initial={{ opacity: 0, scale: 0 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -44,19 +44,19 @@ const SignUpSection = () => {
       <motion.img
         src="/assets/mythos/background/signUp/Star.png"
         alt="star-3"
-        className="hidden sm:block absolute top-1/2 left-96 w-15 h-15 z-0"
+        className="absolute z-0 hidden sm:block top-1/2 left-96 w-15 h-15"
         initial={{ opacity: 0, scale: 0 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.6, delay: 0.6 }}
       />
       <motion.div
-        className="w-full max-w-3xl space-y-6 md:space-y-8 text-white text-center md:text-left"
+        className="w-full max-w-3xl space-y-6 text-center text-white md:space-y-8 md:text-left"
         initial={{ opacity: 0, x: -50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
         <motion.h1
-          className="font-cormorant font-bold text-3xl sm:text-4xl md:text-5xl leading-tight"
+          className="text-3xl font-bold leading-tight font-cormorant sm:text-4xl md:text-5xl"
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -64,7 +64,7 @@ const SignUpSection = () => {
           Sign Up to Create Blogs and Connect with People from Your Community
         </motion.h1>
         <motion.p
-          className="font-montserrat font-medium text-base sm:text-lg w-full md:w-3/4 mx-auto md:mx-0"
+          className="w-full mx-auto text-base font-medium font-montserrat sm:text-lg md:w-3/4 md:mx-0"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
