@@ -1,12 +1,12 @@
-import { FaFacebookF, FaLinkedinIn, FaTwitter } from "react-icons/fa";
-import { CONTACT_INFO, CAREER, PLANET } from "@/constant/constants";
-import FooterLinks from "./footerLinks";
+import { CAREER, CONTACT_INFO, PLANET } from "@/constant/constants";
 import { BiLogoInstagramAlt } from "react-icons/bi";
+import { FaFacebookF, FaLinkedinIn, FaTwitter } from "react-icons/fa";
+import FooterLinks from "./footerLinks";
 
 const MythosFooter = () => {
   return (
     <footer className="w-full py-10 px-5 md:px-20 flex justify-center items-center bg-[#E39712]">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 w-full max-w-7xl">
+      <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 md:gap-16 max-w-7xl">
         {[CONTACT_INFO, CAREER, PLANET].map((items, index) => (
           <FooterLinks
             key={index}
@@ -20,21 +20,21 @@ const MythosFooter = () => {
           <h1 className="font-forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
             SIGN-UP FOR OUR NEWSLETTER
           </h1>
-          <div className="flex flex-col items-center sm:items-start gap-2 w-full">
+          <div className="flex flex-col items-center w-full gap-2 sm:items-start">
             <div className="flex w-full max-w-xs sm:max-w-sm">
               <input
                 type="text"
                 placeholder="Email..."
-                className="border border-gray-800 p-3 w-full outline-none"
+                className="w-full p-3 border border-gray-800 outline-none"
               />
-              <button className="border border-l-0 flex items-center gap-2 bg-white px-4 py-3">
+              <button className="flex items-center gap-2 px-4 py-3 bg-white border border-l-0">
                 <span>✦</span>
                 <span className="text-[#E39712] font-mulish text-[13px]">
                   SUBMIT
                 </span>
               </button>
             </div>
-            <span className="text-xs sm:text-sm text-gray-500">
+            <span className="text-xs text-gray-500 sm:text-sm">
               We promise not to spam you
             </span>
           </div>
@@ -42,7 +42,7 @@ const MythosFooter = () => {
             <h1 className="font-forum text-[18px] sm:text-[20px] md:text-[24px] text-[#1A1D3B] tracking-wide">
               SOCIAL MEDIA
             </h1>
-            <div className="flex justify-center sm:justify-start items-center gap-3 flex-wrap">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
               {[FaFacebookF, FaTwitter, FaLinkedinIn, BiLogoInstagramAlt].map(
                 (Icon, index) => (
                   <div

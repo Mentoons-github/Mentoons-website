@@ -28,6 +28,8 @@ const Workshopv2 = () => {
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   const [enquiryMessag, setEquiryMessage] = useState("");
+  const [enquiryEmail, setEnquiryEmail] = useState("");
+  const [enquiryName, setEnquiryName] = useState("");
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
@@ -177,6 +179,9 @@ const Workshopv2 = () => {
         "https://mentoons-backend-zlx3.onrender.com/api/v1/query", // Fixed the endpoint URL
         {
           message: enquiryMessag,
+          name: enquiryName,
+          email: enquiryEmail,
+          queryType: "workshop",
         }
       );
       console.log(queryResponse);
@@ -683,16 +688,45 @@ const Workshopv2 = () => {
                       >
                         Have Doubts? We are here to help you!
                       </h3>
-                      <p className="pt-2 pb-4 text-gray-600 md:text-xl md:pb-6">
-                        Contact us for additional help regarding your assessment
+                      <p className="pt-2 pb-2 text-gray-600 md:text-xl md:pb-6">
+                        Contact us for additional help regarding your workshop
                         or purchase made on this platform, We will help you!{" "}
                       </p>
                     </div>
                     <div className="">
                       <form
-                        className=" w-full flex flex-col gap-10"
+                        className="flex flex-col w-full gap-4 "
                         onSubmit={(e) => handleDoubtSubmission(e)}
                       >
+                        <div className="flex gap-4">
+                          <input
+                            type="text"
+                            name="name"
+                            id="name"
+                            placeholder="Your Name"
+                            value={enquiryName}
+                            onChange={(e) => setEnquiryName(e.target.value)}
+                            className="w-full p-3 rounded-lg shadow-xl"
+                            style={{
+                              border: `2px solid ${workshop.registerFormbgColor}`,
+                            }}
+                            required
+                          />
+
+                          <input
+                            type="email"
+                            name="email"
+                            id="email"
+                            value={enquiryEmail}
+                            onChange={(e) => setEnquiryEmail(e.target.value)}
+                            placeholder="Your Email"
+                            className="w-full p-3 rounded-lg shadow-xl"
+                            style={{
+                              border: `2px solid ${workshop.registerFormbgColor}`,
+                            }}
+                            required
+                          />
+                        </div>
                         <textarea
                           name="doubt"
                           id="doubt"

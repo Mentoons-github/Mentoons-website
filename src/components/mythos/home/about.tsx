@@ -1,16 +1,19 @@
+import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
 import ReactPlayer from "react-player";
-import useInView from "@/hooks/useInView";
+import { useNavigate } from "react-router-dom";
+import MythosButton from "./button";
 
 const AboutMythos = () => {
   const { ref, isInView } = useInView(0.3, false);
+  const navigate = useNavigate();
 
   return (
     <section
       ref={ref}
       className="p-6 md:p-16 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-14 lg:gap-20 bg-[#1A1D3B] bg-[url('/assets/mythos/background/section/stars_background.png')] bg-center"
     >
-      <div className="w-full md:w-1/2 lg:w-lg space-y-6 md:space-y-10">
+      <div className="w-full space-y-6 md:w-1/2 lg:w-lg md:space-y-10">
         <motion.h1
           initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
@@ -32,14 +35,24 @@ const AboutMythos = () => {
           you’re exploring astrology, psychology, or career growth, our groups
           help you connect with like-minded people who share your journey.
         </motion.p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={
+            isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }
+          }
+          onClick={() => {
+            navigate("/mythos/about");
+          }}
+        >
+          <MythosButton label="EXPLORE MORE" />
+        </motion.div>
       </div>
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
         animate={
           isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }
         }
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-        className="w-full md:w-1/2 flex justify-center"
+        className="flex justify-center w-full md:w-1/2"
       >
         <div className="relative w-full pb-[56.25%] max-w-[100%] sm:max-w-[90%] md:max-w-full">
           <ReactPlayer
