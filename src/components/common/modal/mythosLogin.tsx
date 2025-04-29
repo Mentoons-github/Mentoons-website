@@ -10,7 +10,7 @@ const MythosLoginModal = ({ set }: { set: (val: boolean) => void }) => {
       animate={{ scaleY: 1, opacity: 1 }}
       exit={{ scaleY: 0, opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="fixed inset-0 flex items-center justify-center bg-black/90 z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
       onClick={() => set(false)}
     >
       <motion.div
@@ -22,7 +22,7 @@ const MythosLoginModal = ({ set }: { set: (val: boolean) => void }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-2 right-2 text-2xl font-bold cursor-pointer"
+          className="absolute text-2xl font-bold cursor-pointer top-2 right-2"
           onClick={() => set(false)}
         >
           ×
@@ -37,13 +37,13 @@ const MythosLoginModal = ({ set }: { set: (val: boolean) => void }) => {
         <div className="mt-5 space-y-2">
           <button
             className="w-full py-2 bg-[#1A1D3B] text-white inter font-medium text-lg rounded-md"
-            onClick={() => navigate("/mythos/signup")}
+            onClick={() => navigate("/sign-up")}
           >
             Sign Up
           </button>
           <button
-            className="w-full py-2 bg-white border border-gray-800 inter font-medium text-lg rounded-md"
-            onClick={() => navigate("/mythos/login")}
+            className="w-full py-2 text-lg font-medium bg-white border border-gray-800 rounded-md inter"
+            onClick={() => navigate("/sign-in")}
           >
             Login
           </button>

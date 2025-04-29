@@ -31,7 +31,7 @@ export interface ASSESSMENT_RESULTS {
   assessmentName: string;
 }
 
-const AssesmentQuestions: React.FC = () => {
+const AssessmentQuestions: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const {
@@ -80,7 +80,7 @@ const AssesmentQuestions: React.FC = () => {
     }));
   };
 
-  const handleAssesmentNav = () => {
+  const handleAssessmentNav = () => {
     setAssessmentResults({
       responses: [],
       score: {
@@ -91,7 +91,7 @@ const AssesmentQuestions: React.FC = () => {
       },
       assessmentName: "",
     });
-    navigate("/assesment-page");
+    navigate("/assessment-page");
   };
 
   const handleSubmit = () => {
@@ -218,13 +218,13 @@ const AssesmentQuestions: React.FC = () => {
     }
   };
   return (
-    <div className="flex justify-center items-center p-4 min-h-screen bg-white sm:p-6">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-white sm:p-6">
       <div className="w-full max-w-xl">
         {/* Progress */}
         <div className="mb-8">
           <div className="h-1 bg-gray-100 rounded-full">
             <div
-              className="h-full bg-orange-500 rounded-full transition-all duration-300"
+              className="h-full transition-all duration-300 bg-orange-500 rounded-full"
               style={{
                 width: `${
                   ((currentQuestion + 1) / questionGallery.length) * 100
@@ -291,21 +291,21 @@ const AssesmentQuestions: React.FC = () => {
                   handleSubmit();
                   setShowModal(true);
                 }}
-                className="px-6 py-2 text-white bg-orange-500 rounded transition-opacity hover:opacity-80"
+                className="px-6 py-2 text-white transition-opacity bg-orange-500 rounded hover:opacity-80"
               >
                 Submit
               </button>
 
               {showModal && (
                 <div className="fixed inset-0 bg-black  backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-[50]">
-                  <div className="p-6 w-full max-w-md bg-white rounded-lg">
+                  <div className="w-full max-w-md p-6 bg-white rounded-lg">
                     <h2 className="mb-4 text-xl font-semibold">Thank you!</h2>
                     <div className="mb-6 space-y-4">
                       <h3 className="text-lg font-medium text-gray-900">
                         Assessment Results
                       </h3>
-                      {/* <div className="p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg shadow-md">
-                        <div className="flex justify-between items-center mb-4">
+                      {/* <div className="p-6 rounded-lg shadow-md bg-gradient-to-r from-purple-100 to-pink-100">
+                        <div className="flex items-center justify-between mb-4">
                           <span className="text-lg text-purple-700">
                             Score:
                           </span>
@@ -313,7 +313,7 @@ const AssesmentQuestions: React.FC = () => {
                             {assessmentResults.score?.percentage}%
                           </span>
                         </div>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center justify-between mb-4">
                           <span className="text-lg text-purple-700">
                             Performance:
                           </span>
@@ -321,7 +321,7 @@ const AssesmentQuestions: React.FC = () => {
                             {assessmentResults.score?.performance}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                           <span className="text-lg text-purple-700">
                             Correct Answers:
                           </span>
@@ -333,13 +333,13 @@ const AssesmentQuestions: React.FC = () => {
                       </div> */}
 
                       {/* Performance visualization */}
-                      <div className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-lg transition-transform duration-300 transform hover:scale-105">
+                      <div className="p-6 transition-transform duration-300 transform shadow-lg bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl hover:scale-105">
                         <h4 className="mb-4 text-xl font-bold text-center text-orange-600 animate-bounce">
                           Your Amazing Score! 🎉
                         </h4>
-                        <div className="relative mb-6 h-32">
-                          <div className="flex absolute inset-0 justify-center items-center">
-                            <div className="flex justify-center items-center w-24 h-24 bg-white rounded-full border-8 border-orange-200 shadow-inner transition-transform duration-300 transform rotate-3 hover:rotate-0">
+                        <div className="relative h-32 mb-6">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex items-center justify-center w-24 h-24 transition-transform duration-300 transform bg-white border-8 border-orange-200 rounded-full shadow-inner rotate-3 hover:rotate-0">
                               <span className="text-3xl font-bold text-orange-500">
                                 {assessmentResults.score?.percentage}%
                               </span>
@@ -378,7 +378,7 @@ const AssesmentQuestions: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div className="p-4 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-xl transition-transform duration-300 transform hover:-translate-y-1">
+                          <div className="p-4 transition-transform duration-300 transform bg-gradient-to-r from-orange-100 to-yellow-100 rounded-xl hover:-translate-y-1">
                             <div className="mb-2 font-bold text-center text-orange-600">
                               ✨ Correct ✨
                             </div>
@@ -386,7 +386,7 @@ const AssesmentQuestions: React.FC = () => {
                               {assessmentResults.score?.correct}
                             </div>
                           </div>
-                          <div className="p-4 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-xl transition-transform duration-300 transform hover:-translate-y-1">
+                          <div className="p-4 transition-transform duration-300 transform bg-gradient-to-r from-orange-100 to-yellow-100 rounded-xl hover:-translate-y-1">
                             <div className="mb-2 font-bold text-center text-orange-600">
                               🎯 Missed 🎯
                             </div>
@@ -404,14 +404,14 @@ const AssesmentQuestions: React.FC = () => {
                       </p>
                     </div>
                     <button
-                      className="block px-6 py-2 mb-4 w-full text-center text-white bg-orange-500 rounded transition-opacity hover:opacity-80"
+                      className="block w-full px-6 py-2 mb-4 text-center text-white transition-opacity bg-orange-500 rounded hover:opacity-80"
                       onClick={handleAssessmentPayment}
                     >
                       Get your assessment report @ ₹15
                     </button>
                     <button
-                      onClick={handleAssesmentNav}
-                      className="block px-6 py-2 w-full text-center text-black rounded border border-orange-500 transition-opacity hover:bg-orange-200"
+                      onClick={handleAssessmentNav}
+                      className="block w-full px-6 py-2 text-center text-black transition-opacity border border-orange-500 rounded hover:bg-orange-200"
                     >
                       Take another assessment
                     </button>
@@ -424,7 +424,7 @@ const AssesmentQuestions: React.FC = () => {
           ) : (
             <button
               onClick={handleNext}
-              className="px-6 py-2 text-white bg-orange-500 rounded transition-opacity hover:opacity-80"
+              className="px-6 py-2 text-white transition-opacity bg-orange-500 rounded hover:opacity-80"
             >
               Next
             </button>
@@ -437,4 +437,4 @@ const AssesmentQuestions: React.FC = () => {
     </div>
   );
 };
-export default AssesmentQuestions;
+export default AssessmentQuestions;

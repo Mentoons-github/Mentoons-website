@@ -1,14 +1,14 @@
 import HelperList from "@/components/common/helperList/helperList";
-import ProblemFaced from "@/components/mythos/home/problemFaced";
 import AboutMythos from "@/components/mythos/home/about";
 import MythosBanner from "@/components/mythos/home/banner";
 import BlogsForYou from "@/components/mythos/home/blogsForYou";
+import GroupsSuggested from "@/components/mythos/home/groupsSuggested/groupsSuggested";
 import MembershipPlans from "@/components/mythos/home/membershipPlans";
 import PersonalReport from "@/components/mythos/home/personalReport";
+import ProblemFaced from "@/components/mythos/home/problemFaced";
 import SignUpSection from "@/components/mythos/home/signUp";
 import StepsGuide from "@/components/mythos/home/stepGuide";
 import TypeOfIntelligence from "@/components/mythos/home/typeOfIntelligence";
-import GroupsSuggested from "@/components/mythos/home/groupsSuggested/groupsSuggested";
 import { SignedOut } from "@clerk/clerk-react";
 
 const MythosHome = () => {

@@ -19,7 +19,7 @@ import {
   HIRING,
   ASSESSMENT_DATA,
   REPORTS,
-} from "./assessments/assesments";
+} from "./assessments/assessments";
 
 export {
   FAQ,

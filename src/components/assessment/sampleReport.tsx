@@ -1,5 +1,5 @@
 import { REPORTS } from "@/constant/constants";
-import { ASSESSMENT_RESULTS } from "@/pages/AssesmentQuestions";
+import { ASSESSMENT_RESULTS } from "@/pages/AssessmentQuestions";
 import { useUser } from "@clerk/clerk-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";

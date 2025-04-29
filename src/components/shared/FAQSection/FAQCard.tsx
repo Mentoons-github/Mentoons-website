@@ -19,7 +19,7 @@ export type TWORKSHOPFAQ = {
 const FAQCard = ({
   faq,
   isExpanded,
-  color = "#60C6E6",
+  color = "#E39712",
   onClick,
 }: {
   faq: TWORKSHOPFAQ;
@@ -36,7 +36,7 @@ const FAQCard = ({
           "--hover-border-color": `${color}80`,
         } as React.CSSProperties
       }
-      className={`overflow-hidden transition-all duration-300 border-2 cursor-pointer rounded-xl hover:border-[var(--hover-border-color)] ${
+      className={`overflow-hidden transition-all duration-300 border-4 cursor-pointer rounded-xl hover:border-[var(--hover-border-color)] bg-white ${
         isExpanded ? "" : "border-neutral-200"
       }`}
     >

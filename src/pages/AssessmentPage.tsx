@@ -1,5 +1,5 @@
 import FilterComics from "@/components/comics/FilterComics";
-import { ASSESSMENT_DATA } from "@/constant/assessments/assesments";
+import { ASSESSMENT_DATA } from "@/constant/assessments/assessments";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch } from "@/redux/store";
 import { ProductType } from "@/utils/enum";
@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const AssesmentPage: React.FC = () => {
+const AssessmentPage: React.FC = () => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
@@ -19,13 +19,13 @@ const AssesmentPage: React.FC = () => {
         // Fetch products with the current filters
         const token = await getToken();
 
-        const assesment = await dispatch(
+        const assessment = await dispatch(
           fetchProducts({
             type: ProductType.ASSESSMENT,
             token: token!,
           })
         );
-        console.log("Assessment", assesment.payload);
+        console.log("Assessment", assessment.payload);
       } catch (error: unknown) {
         console.error("Error fetching products:", error);
       }
@@ -40,7 +40,7 @@ const AssesmentPage: React.FC = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex flex-col justify-center items-center space-y-5 md:space-y-7">
+      <div className="flex flex-col items-center justify-center space-y-5 md:space-y-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <motion.div
             className="text-2xl text-red-500 uppercase md:text-3xl lineBefore"
@@ -77,14 +77,14 @@ const AssesmentPage: React.FC = () => {
       <div>
         {ASSESSMENT_DATA.length > 0 && (
           <>
-            <div className="block mb-6 w-full text-center lg:hidden">
+            <div className="block w-full mb-6 text-center lg:hidden">
               <FilterComics />
             </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
               {ASSESSMENT_DATA?.map((item, index) => (
                 <motion.div
                   key={index}
-                  className="p-4 mx-auto space-y-3 w-full max-w-md text-black bg-white rounded-2xl shadow-lg group md:p-5" // Added max-width and center alignment
+                  className="w-full max-w-md p-4 mx-auto space-y-3 text-black bg-white shadow-lg rounded-2xl group md:p-5" // Added max-width and center alignment
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
@@ -107,16 +107,16 @@ const AssesmentPage: React.FC = () => {
                       {item?.desc}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                     <div className="text-xs text-rose-500 md:text-sm">
                       Credit: {item.credits}
                     </div>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-5 py-1 text-sm font-semibold text-white rounded-full border-2 cursor-pointer bg-primary border-primary md:text-base"
+                      className="px-5 py-1 text-sm font-semibold text-white border-2 rounded-full cursor-pointer bg-primary border-primary md:text-base"
                       onClick={() =>
-                        navigate(`/assesment-questions`, {
+                        navigate(`/assessment-questions`, {
                           state: {
                             questionGallery: item.questionGallery,
                           },
@@ -136,4 +136,4 @@ const AssesmentPage: React.FC = () => {
   );
 };
 
-export default AssesmentPage;
+export default AssessmentPage;

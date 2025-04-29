@@ -4,16 +4,16 @@ import SampleReport from "@/components/assessment/sampleRepoert";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import { HIRING } from "@/constant/constants";
 import { FAQ_ASSESSMENT } from "@/constant/faq";
+import useInView from "@/hooks/useInView";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { Hiring } from "@/types";
 import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FAQ from "./faq/faq";
-import useInView from "@/hooks/useInView";
-import { motion } from "framer-motion";
 
 const Assessment = () => {
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
@@ -31,14 +31,14 @@ const Assessment = () => {
     const fetchAssessments = async () => {
       try {
         const token = await getToken();
-
-        const assesment = await dispatch(
+        //fetch products
+        const assessment = await dispatch(
           fetchProducts({
             type: ProductType.ASSESSMENT,
             token: token!,
           })
         );
-        console.log("Assessment", assesment.payload);
+        console.log("Assessment", assessment.payload);
       } catch (error: unknown) {
         console.error("Error fetching products:", error);
       }
@@ -51,20 +51,18 @@ const Assessment = () => {
     <>
       <DiscoverYourself />
       <SampleReport />
+
       <motion.div
         ref={ref}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
-        }}
-        className="flex flex-col lg:flex-row justify-between items-start mt-20 p-5 md:p-10 lg:p-15 gap-10"
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 100 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-start justify-between gap-10 p-5 mt-20 lg:flex-row md:p-10 lg:p-15"
       >
         <div className="w-full lg:w-3/4">
           <AssessmentCards assessmentData={products} isInView={isInView} />
         </div>
-        <div className="w-full lg:w-1/4 p-3 flex flex-col justify-start items-center gap-10">
+        <div className="flex flex-col items-center justify-start w-full gap-10 p-3 lg:w-1/4">
           <WeAreHiring hiring={hiring} />
         </div>
       </motion.div>
