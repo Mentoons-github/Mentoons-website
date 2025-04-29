@@ -109,6 +109,7 @@ export const ASSESSMENTS = [
 
 export const HIRING: Hiring[] = [
   {
+    _id: "67e2819c3850a2a118e77ad9",
     job: "Astrologers",
     description:
       "Are you a passionate Astrologer ready to guide others toward self-discovery? We’re looking for talented professionals to be a part of Mentoons Mythos!",
@@ -116,6 +117,7 @@ export const HIRING: Hiring[] = [
     bg: "#EC9600",
   },
   {
+    _id: "6808d7fb9488a1497d6e535d",
     job: "Psychologists",
     description:
       "Are you a passionate Psychologist ready to guide others toward self-discovery? We’re looking for talented professionals to be a part of Mentoons Mythos!",
