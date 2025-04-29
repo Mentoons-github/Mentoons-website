@@ -46,6 +46,9 @@ const ProductDisplay = () => {
           transition={{ duration: 0.7, delay: 0.3 }}
           viewport={{ once: true }}
           whileHover={{ scale: 1.05 }}
+          onClick={() => {
+            navigate("/product-page");
+          }}
         >
           <span className="p-1 bg-black rounded-full">
             <img
