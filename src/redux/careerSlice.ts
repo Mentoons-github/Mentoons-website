@@ -7,10 +7,11 @@ export type TPOSITION = {
   _id: string;
   jobTitle: string;
   jobDescription: string;
-  thumbnail: string;
-  skillsRequired: string[];
-  jobType: string;
+  jobType: "FULLTIME" | "PARTTIME" | "CONTRACT" | "INTERNSHIP";
   location: string;
+  skillsRequired: string[];
+  applicationCount: number;
+  thumbnail: string;
 };
 const initialState: {
   loading: boolean;
