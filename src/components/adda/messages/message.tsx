@@ -309,7 +309,7 @@ const MessageBox = () => {
       >
         <div className="relative">
           <button
-            onClick={(e) => setEmojiShower((prev) => !prev)}
+            onClick={() => setEmojiShower((prev) => !prev)}
             type="button"
             className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
           >
