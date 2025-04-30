@@ -1,9 +1,9 @@
 import HelperList from "@/components/common/helperList/helperList";
-import FAQ from "@/components/mythos/home/about/FAQ";
-import HeroSection from "@/components/mythos/home/about/HeroSection";
-import KnowMoreAboutUs from "@/components/mythos/home/about/KnowMoreAboutUs";
-import Problems from "@/components/mythos/home/about/Problems";
-import ProductDisplay from "@/components/mythos/home/about/ProductDisplay";
+import FAQ from "@/components/mythos/about/FAQ";
+import HeroSection from "@/components/mythos/about/HeroSection";
+import KnowMoreAboutUs from "@/components/mythos/about/KnowMoreAboutUs";
+import Problems from "@/components/mythos/about/Problems";
+import ProductDisplay from "@/components/mythos/about/ProductDisplay";
 const MythosAbout = () => {
   const helps = {
     "Psychology assessment":
