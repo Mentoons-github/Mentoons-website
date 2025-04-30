@@ -1,7 +1,7 @@
-import Discover from "./learnMore";
-import { NEWS, BLOGS } from "../../../constant/constants";
-import { motion } from "framer-motion";
 import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
+import { BLOGS, NEWS } from "../../../constant/constants";
+import Discover from "./learnMore";
 
 const BlogsForYou = () => {
   const { isInView, ref } = useInView(0.3, false);
@@ -11,7 +11,7 @@ const BlogsForYou = () => {
       ref={ref}
       className="px-4 lg:px-16 xl:px-24 py-10 bg-[#1A1D3B] overflow-hidden w-full"
     >
-      <div className="flex flex-col md:flex-row justify-center md:justify-between items-center gap-6 text-center md:text-left">
+      <div className="flex flex-col items-center justify-center gap-6 text-center md:flex-row md:justify-between md:text-left">
         <motion.h1
           className="text-[#E39712] font-montserrat font-semibold text-2xl sm:text-3xl md:text-4xl max-w-xl leading-tight md:leading-10"
           initial={{ opacity: 0, y: 20 }}
@@ -33,10 +33,10 @@ const BlogsForYou = () => {
         </motion.div>
       </div>
 
-      <div className="flex flex-col lg:flex-row justify-between mt-10 gap-8">
+      <div className="flex flex-col justify-between gap-8 mt-10 lg:flex-row">
         <div
           ref={ref}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full lg:w-3/5"
+          className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:w-3/5"
         >
           {BLOGS.slice(0, 4).map((blog, index) => (
             <motion.div
@@ -52,12 +52,12 @@ const BlogsForYou = () => {
               <img
                 src={blog.img}
                 alt="blog-post1"
-                className="w-full h-auto object-cover rounded-xl"
+                className="object-cover w-full h-auto rounded-xl"
               />
               <span className="text-[#9FE9FF] font-semibold text-md sm:text-sm md:text-base font-montserrat">
                 {blog.date}
               </span>
-              <h1 className="mt-1 font-cormorant font-semibold text-xl sm:text-lg md:text-xl lg:text-xl text-white">
+              <h1 className="mt-1 text-xl font-semibold text-white font-cormorant sm:text-lg md:text-xl lg:text-xl">
                 {blog.name}
               </h1>
               <Discover label="READ MORE" />
@@ -73,15 +73,15 @@ const BlogsForYou = () => {
         >
           {NEWS.map((data, index) => (
             <div
-              className="w-full lg:max-w-2xs mx-auto lg:mx-0 p-3"
+              className="w-full p-3 mx-auto lg:max-w-2xs lg:mx-0"
               key={index}
             >
-              <div className="flex justify-center items-center w-full font-jost font-semibold text-xs">
-                <h1 className="bg-white whitespace-nowrap z-10 pr-3">
+              <div className="flex items-center justify-center w-full text-xs font-semibold font-jost">
+                <h1 className="z-10 pr-3 bg-white whitespace-nowrap">
                   {data.category}
                 </h1>
                 <div className="flex-grow border-t border-gray-900"></div>
-                <span className="bg-white text-gray-600 whitespace-nowrap px-3">
+                <span className="px-3 text-gray-600 bg-white whitespace-nowrap">
                   {data.date}
                 </span>
                 <div className="w-[30px] border-t border-gray-900"></div>
