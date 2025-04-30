@@ -13,6 +13,7 @@ import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
 import ComicViewer from "@/components/common/ComicViewer";
 import { MdClose } from "react-icons/md";
+import TopUpArrow from "@/components/common/topUpArrow/upArrow";
 
 const Home = () => {
   const { user } = useUser();
@@ -136,6 +137,7 @@ const Home = () => {
           </motion.div>
         </motion.div>
       )}
+      <TopUpArrow />
     </div>
   );
 };

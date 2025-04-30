@@ -141,7 +141,7 @@ const UserList = () => {
   });
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-80 h-[600px] flex flex-col">
+    <div className="p-4 bg-white rounded-lg shadow-md w-80 h-[520px] flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl text-gray-800 font-bold">Messages</h1>
         <div className="flex items-center gap-2">

@@ -7,13 +7,11 @@ const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
 
 const AddaRouter = () => {
   return (
-    <div className="p-12">
-      <Routes>
-        <Route path="/" element={<AddaHome />} />
-        <Route path="/community" element={<AddaGroups />} />
-        <Route path="/messages" element={<AddaMessages />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<AddaHome />} />
+      <Route path="/community" element={<AddaGroups />} />
+      <Route path="/messages" element={<AddaMessages />} />
+    </Routes>
   );
 };
 

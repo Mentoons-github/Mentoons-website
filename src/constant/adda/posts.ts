@@ -13,6 +13,6 @@ export const PHOTO_POST = [
   },
   {
     icon: "/assets/adda/postIcon/write.png",
-    purpose: "Write An Article",
+    purpose: "Article",
   },
 ];

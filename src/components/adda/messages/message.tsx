@@ -152,7 +152,7 @@ const MessageBox = () => {
   };
 
   return (
-    <div className="sticky border shadow-xl rounded-lg flex-1 flex flex-col h-[600px] bg-gray-50">
+    <div className="sticky border shadow-xl rounded-lg flex-1 flex flex-col h-[520px] bg-gray-50">
       <div className="p-4 flex items-center justify-between bg-gray-800 rounded-t-lg">
         <div className="flex items-center">
           <div className="relative">

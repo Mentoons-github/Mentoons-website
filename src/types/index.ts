@@ -6,6 +6,7 @@ import { Hiring } from "./assessements/assessment";
 import { Color, Membership } from "./home/membership";
 import { Booking } from "./sessionBooking/session";
 import { JobPosting } from "./jobs/jobs";
+import { PostState, EventDetails } from "./adda/posts";
 import {
   FooterLists,
   JoinCardsProps,
@@ -33,4 +34,6 @@ export type {
   Booking,
   IUser,
   JobPosting,
+  PostState,
+  EventDetails,
 };
