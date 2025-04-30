@@ -5,6 +5,7 @@ import { Groups } from "./groups/groups";
 import { Hiring } from "./assessements/assessment";
 import { Color, Membership } from "./home/membership";
 import { Booking } from "./sessionBooking/session";
+import { JobPosting } from "./jobs/jobs";
 import {
   FooterLists,
   JoinCardsProps,
@@ -31,4 +32,5 @@ export type {
   UserStatusInterface,
   Booking,
   IUser,
+  JobPosting,
 };

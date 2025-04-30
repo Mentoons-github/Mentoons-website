@@ -21,6 +21,7 @@ const CareerPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const getOpenPositionsData = async () => {
     const data = await dispatch(getOpenPositions());
+    console.log("data received :", data);
     console.log(data.payload.data.jobs);
   };
   useEffect(() => {

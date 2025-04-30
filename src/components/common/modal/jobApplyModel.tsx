@@ -9,77 +9,101 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import {
-  Upload,
-  Send,
-  Check,
-  X,
-  FileText,
-  Mail,
-  Phone,
   User,
   Calendar,
+  Mail,
+  Phone,
+  FileText,
+  Upload,
+  Check,
+  Send,
+  Link,
+  X,
+  Edit3,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
 import { uploadFile } from "@/redux/fileUploadSlice";
+import { Position } from "@/components/assessment/weAreHiring";
 
 const ResumeSubmissionModal = ({
   setIsOpen,
   position,
 }: {
   setIsOpen: (val: boolean) => void;
-  position: string;
+  position: Position;
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const [isSuccess, setIsSuccess] = useState(false);
-
+  const [currentState, setCurrentState] = useState(0);
+  const [isLoading, setIsloading] = useState(false);
+  const loadingStatus = [
+    "Started Uploading",
+    "File Uploading",
+    "Verifying data",
+    "Please upload resume",
+    "Failed to Submit Data",
+  ];
   const { getToken } = useAuth();
 
   const formik = useJobForm(async (values) => {
-    console.log("form Submitted : ", values);
+    setIsloading(true);
+    setCurrentState(0);
     const token = await getToken();
     if (!token) {
       navigate("/sign-in");
       return toast.error("Login first to apply");
     }
     if (!values.resume) {
+      setCurrentState(3);
       return toast.error("Please upload a resume.");
     }
 
+    setCurrentState(1);
     const fileAction = await dispatch(
       uploadFile({
         file: values.resume,
         getToken: async () => token,
       })
     );
+
     const fileUrl = fileAction.payload?.data?.fileDetails.url;
     if (!fileUrl) {
+      setCurrentState(3);
       return toast.error("Failed to upload resume");
     }
 
+    setCurrentState(2);
+
     const res = await dispatch(
       applyForJob({
-        jobId: "",
+        jobId: position._id,
         formData: { ...values, resume: fileUrl },
       })
     );
-
     if (res.payload?.success) {
+      setIsloading(false);
       toast.success("Application submitted successfully");
       setIsSuccess(true);
     } else {
+      setCurrentState(4);
       toast.error(res.payload?.message || "Failed to submit application");
     }
   });
 
   const gradientStyle = "bg-gradient-to-r from-red-600 to-orange-500";
-
   const successStyle = "bg-gradient-to-r from-green-500 to-green-600";
-
+  const errorStyle = "bg-gradient-to-r from-red-500 to-red-600";
   const inputVariants = {
-    initial: { x: -50, opacity: 0 },
+    initial: { x: -20, opacity: 0 },
     animate: { x: 0, opacity: 1 },
     focus: { boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" },
   };
+
+  const isErrorMessage =
+    loadingStatus[currentState] === "Please upload resume" ||
+    loadingStatus[currentState] === "Failed to Submit Data";
 
   return (
     <motion.div
@@ -96,7 +120,7 @@ const ResumeSubmissionModal = ({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 20 }}
         transition={{ type: "spring", damping: 20, stiffness: 300 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden border-t-4 border-yellow-500"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-3xl relative overflow-hidden border-t-4 border-yellow-500"
       >
         <motion.button
           whileHover={{ scale: 1.1, rotate: 90 }}
@@ -107,7 +131,7 @@ const ResumeSubmissionModal = ({
           <X size={20} />
         </motion.button>
         <div
-          className={`${gradientStyle} p-6 text-white relative overflow-hidden`}
+          className={`${gradientStyle} p-4 text-white relative overflow-hidden`}
         >
           <motion.div
             className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mt-16 -mr-16"
@@ -125,26 +149,130 @@ const ResumeSubmissionModal = ({
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-2xl font-bold flex items-center justify-start gap-2 text-start text-white"
+            className="text-xl font-bold flex items-center justify-start gap-2 text-start text-white"
           >
-            <FileText size={24} />
+            <FileText size={20} />
             Submit Your Resume for{" "}
-            <span className="text-[#FFD700]">{position}</span>
+            <span className="text-[#FFD700]">{position.position}</span>
           </motion.h2>
           <motion.p
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-yellow-100 mt-2 text-sm"
+            className="text-yellow-100 mt-1 text-xs"
           >
             Complete the form below to apply
           </motion.p>
         </div>
-        {isSuccess ? (
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="p-8 flex flex-col items-center justify-center"
+          >
+            <motion.div
+              animate={
+                isErrorMessage
+                  ? { scale: [0.9, 1.1, 1] }
+                  : {
+                      rotate: 360,
+                      borderRadius: ["25%", "50%", "25%"],
+                    }
+              }
+              transition={
+                isErrorMessage
+                  ? {
+                      scale: { duration: 0.5, type: "spring" },
+                    }
+                  : {
+                      rotate: { repeat: Infinity, duration: 2, ease: "linear" },
+                      borderRadius: {
+                        repeat: Infinity,
+                        duration: 1,
+                        ease: "easeInOut",
+                      },
+                    }
+              }
+              className={`w-20 h-20 ${
+                isErrorMessage
+                  ? errorStyle
+                  : "bg-gradient-to-r from-blue-500 to-purple-600"
+              } flex items-center justify-center mb-6 shadow-lg rounded-lg`}
+            >
+              {isErrorMessage ? (
+                <X size={32} className="text-white" />
+              ) : (
+                <Loader size={32} className="text-white animate-pulse" />
+              )}
+            </motion.div>
+
+            <h3
+              className={`text-xl font-semibold ${
+                isErrorMessage ? "text-red-600" : "text-gray-800"
+              } mb-2`}
+            >
+              {isErrorMessage
+                ? "Error Occurred"
+                : "Processing Your Application"}
+            </h3>
+
+            {!isErrorMessage && (
+              <motion.div className="w-full max-w-md bg-gray-100 h-2 rounded-full overflow-hidden mb-4">
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${(currentState + 1) * 33}%` }}
+                  transition={{ duration: 0.5 }}
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+                />
+              </motion.div>
+            )}
+
+            <motion.div
+              key={currentState}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`text-center flex items-center gap-2 ${
+                isErrorMessage ? "text-red-600" : "text-gray-600"
+              }`}
+            >
+              {isErrorMessage && (
+                <AlertCircle size={16} className="text-red-600" />
+              )}
+              <span>{loadingStatus[currentState]}</span>
+            </motion.div>
+
+            <div className="mt-6 text-sm text-gray-500 text-center">
+              {isErrorMessage ? (
+                <>
+                  <p>
+                    Please try again or contact support if the issue persists.
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsloading(false)}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                  >
+                    Go Back
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Please don't close this window while we process your
+                    application.
+                  </p>
+                  <p>This may take a few moments.</p>
+                </>
+              )}
+            </div>
+          </motion.div>
+        ) : isSuccess ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 flex flex-col items-center justify-center text-center"
+            className="p-6 flex flex-col items-center justify-center text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -166,10 +294,58 @@ const ResumeSubmissionModal = ({
             >
               View Other Openings
             </NavLink>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 w-full max-w-md border border-gray-200 rounded-lg p-5 bg-white shadow-sm"
+            >
+              <h4 className="text-lg font-semibold text-gray-800 flex items-center justify-center gap-2">
+                <Phone size={18} className="text-blue-600" />
+                Contact Us
+              </h4>
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-3"></div>
+              <p className="text-gray-600 text-sm">
+                Have questions? We're here to help!
+              </p>
+
+              <div className="mt-4 flex flex-col gap-3">
+                <a
+                  href="tel:9036033300"
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-50 transition group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                    <Phone size={18} className="text-blue-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">Phone</span>
+                    <span className="text-gray-800 font-medium">
+                      9036033300
+                    </span>
+                  </div>
+                </a>
+
+                <a
+                  href="mailto:info@mentoons.com"
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-50 transition group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                    <Mail size={18} className="text-blue-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">Email</span>
+                    <span className="text-gray-800 font-medium">
+                      info@mentoons.com
+                    </span>
+                  </div>
+                </a>
+              </div>
+            </motion.div>
           </motion.div>
         ) : (
-          <form onSubmit={formik.handleSubmit} className="p-6">
-            <div className="space-y-4">
+          <form onSubmit={formik.handleSubmit} className="p-4">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               <motion.div
                 initial="initial"
                 animate="animate"
@@ -180,7 +356,7 @@ const ResumeSubmissionModal = ({
                   htmlFor="name"
                   className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
-                  <User size={16} className="mr-1 text-red-500" />
+                  <User size={14} className="mr-1 text-red-500" />
                   Full Name
                 </label>
                 <input
@@ -190,14 +366,15 @@ const ResumeSubmissionModal = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
                 />
                 {formik.touched.name && formik.errors.name && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs mt-0.5">
                     {formik.errors.name}
                   </p>
                 )}
               </motion.div>
+
               <motion.div
                 initial="initial"
                 animate="animate"
@@ -208,7 +385,7 @@ const ResumeSubmissionModal = ({
                   htmlFor="gender"
                   className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
-                  <Calendar size={16} className="mr-1 text-orange-500" />
+                  <Calendar size={14} className="mr-1 text-orange-500" />
                   Gender
                 </label>
                 <select
@@ -217,7 +394,7 @@ const ResumeSubmissionModal = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
                 >
                   <option value="" disabled>
                     Select gender
@@ -227,7 +404,7 @@ const ResumeSubmissionModal = ({
                   <option value="Other">Other</option>
                 </select>
                 {formik.touched.gender && formik.errors.gender && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs mt-0.5">
                     {formik.errors.gender}
                   </p>
                 )}
@@ -243,7 +420,7 @@ const ResumeSubmissionModal = ({
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
-                  <Mail size={16} className="mr-1 text-yellow-500" />
+                  <Mail size={14} className="mr-1 text-yellow-500" />
                   Email Address
                 </label>
                 <input
@@ -253,13 +430,15 @@ const ResumeSubmissionModal = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
                 />
-
                 {formik.touched.email && formik.errors.email && (
-                  <div className="error">{formik.errors.email}</div>
+                  <p className="text-red-500 text-xs mt-0.5">
+                    {formik.errors.email}
+                  </p>
                 )}
               </motion.div>
+
               <motion.div
                 initial="initial"
                 animate="animate"
@@ -270,7 +449,7 @@ const ResumeSubmissionModal = ({
                   htmlFor="phone"
                   className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
-                  <Phone size={16} className="mr-1 text-blue-500" />
+                  <Phone size={14} className="mr-1 text-blue-500" />
                   Phone Number
                 </label>
                 <input
@@ -280,26 +459,120 @@ const ResumeSubmissionModal = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
                 />
                 {formik.touched.phone && formik.errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs mt-0.5">
                     {formik.errors.phone}
                   </p>
                 )}
               </motion.div>
+
+              <motion.div
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.6 }}
+                variants={inputVariants}
+              >
+                <label
+                  htmlFor="portfolioLink"
+                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                >
+                  <Link size={14} className="mr-1 text-purple-500" />
+                  Portfolio Link
+                </label>
+                <input
+                  type="url"
+                  name="portfolioLink"
+                  value={formik.values.portfolioLink}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  required
+                  placeholder="https://your-portfolio.com"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
+                />
+                {formik.touched.portfolioLink &&
+                  formik.errors.portfolioLink && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.portfolioLink}
+                    </p>
+                  )}
+              </motion.div>
+
+              <motion.div
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.65 }}
+                variants={inputVariants}
+              >
+                <label
+                  htmlFor="coverLetterLink"
+                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                >
+                  <FileText size={14} className="mr-1 text-indigo-500" />
+                  Cover Letter Link
+                </label>
+                <input
+                  type="url"
+                  name="coverLetterLink"
+                  value={formik.values.coverLetterLink}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  required
+                  placeholder="https://drive.google.com/your-cover-letter"
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
+                />
+                {formik.touched.coverLetterLink &&
+                  formik.errors.coverLetterLink && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.coverLetterLink}
+                    </p>
+                  )}
+              </motion.div>
+
               <motion.div
                 initial="initial"
                 animate="animate"
                 transition={{ delay: 0.7 }}
                 variants={inputVariants}
-                className="mt-4"
+                className="col-span-2"
+              >
+                <label
+                  htmlFor="coverNote"
+                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                >
+                  <Edit3 size={14} className="mr-1 text-green-500" />
+                  Cover Note
+                </label>
+                <textarea
+                  name="coverNote"
+                  value={formik.values.coverNote}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  required
+                  rows={2}
+                  placeholder="Tell us why you're interested in this position..."
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
+                ></textarea>
+                {formik.touched.coverNote && formik.errors.coverNote && (
+                  <p className="text-red-500 text-xs mt-0.5">
+                    {formik.errors.coverNote}
+                  </p>
+                )}
+              </motion.div>
+
+              <motion.div
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.75 }}
+                variants={inputVariants}
+                className="col-span-2"
               >
                 <label
                   htmlFor="resume"
-                  className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
+                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
-                  <FileText size={16} className="mr-1 text-blue-500" />
+                  <FileText size={14} className="mr-1 text-blue-500" />
                   Resume (PDF)
                 </label>
                 <div className="relative">
@@ -320,21 +593,21 @@ const ResumeSubmissionModal = ({
                   />
                   <label
                     htmlFor="resume-file"
-                    className={`flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50 ${
+                    className={`flex items-center justify-center w-full p-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50 ${
                       formik.values.resume ? "border-green-500 bg-green-50" : ""
                     }`}
                   >
-                    <div className="flex flex-col items-center space-y-2">
+                    <div className="flex items-center space-x-2">
                       {formik.values.resume ? (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: "spring" }}
                         >
-                          <Check size={24} className="text-green-500" />
+                          <Check size={18} className="text-green-500" />
                         </motion.div>
                       ) : (
-                        <Upload size={24} className="text-gray-500" />
+                        <Upload size={18} className="text-gray-500" />
                       )}
                       <span
                         className={`text-sm ${
@@ -351,24 +624,25 @@ const ResumeSubmissionModal = ({
                   </label>
                 </div>
                 {formik.touched.resume && formik.errors.resume && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs mt-0.5">
                     {formik.errors.resume}
                   </p>
                 )}
               </motion.div>
             </div>
+
             <motion.button
               whileHover={{
-                scale: 1.03,
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                scale: 1.02,
+                boxShadow: "0 5px 10px -3px rgba(0, 0, 0, 0.1)",
               }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ y: 50, opacity: 0 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}
               type="submit"
               disabled={formik.isSubmitting}
-              className={`mt-6 w-full py-3 px-4 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center disabled:opacity-70 shadow-md`}
+              className={`mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center disabled:opacity-70 shadow-md text-sm`}
             >
               {formik.isSubmitting ? (
                 <>
@@ -381,7 +655,7 @@ const ResumeSubmissionModal = ({
                     }}
                     className="mr-2"
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <circle
                         className="opacity-25"
                         cx="12"
@@ -402,7 +676,7 @@ const ResumeSubmissionModal = ({
                 </>
               ) : (
                 <>
-                  <Send size={18} className="mr-2" />
+                  <Send size={16} className="mr-2" />
                   Submit Application
                 </>
               )}
