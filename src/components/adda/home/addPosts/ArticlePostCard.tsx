@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaRegBookmark } from "react-icons/fa6";
 import { HiOutlineDocumentText } from "react-icons/hi";
+import { Link } from "react-router-dom";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
@@ -83,19 +83,19 @@ const ArticlePostCard = ({
     });
   };
 
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title,
-    description: post.content || post.article.body.substring(0, 150) + "...",
-    postUrl: `/posts/${post._id}`,
-    imageUrl: post.article.coverImage || "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: formatDate(post.createdAt),
-    likes: post.likes.length,
-    comments: comments.length,
-    shares: post.shares.length,
-  };
+  // // Create a postDetails object for the Share component
+  // const postDetails = {
+  //   title: post.title,
+  //   description: post.content || post.article.body.substring(0, 150) + "...",
+  //   postUrl: `/posts/${post._id}`,
+  //   imageUrl: post.article.coverImage || "",
+  //   author: post.user.name,
+  //   role: post.user.role,
+  //   timestamp: formatDate(post.createdAt),
+  //   likes: post.likes.length,
+  //   comments: comments.length,
+  //   shares: post.shares.length,
+  // };
 
   // Calculate reading time based on article body length (average reading speed: 200 words per minute)
   const calculateReadingTime = (text: string) => {
@@ -168,7 +168,7 @@ const ArticlePostCard = ({
               </button>
             )}
             <Link
-              href={`/posts/${post._id}`}
+              to={`/posts/${post._id}`}
               className="text-blue-500 hover:underline"
             >
               Read Full Article
@@ -193,7 +193,7 @@ const ArticlePostCard = ({
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes likesCount={post.likes.length} />
+          <Likes postId={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -211,7 +211,21 @@ const ArticlePostCard = ({
               {comments.length}
             </span>
           </div>
-          <Share postDetails={postDetails} />
+            <Share 
+              postDetails={{
+                title: post.title,
+                description: post.article.body.substring(0, 100) + '...',
+                postUrl: `/posts/${post._id}`,
+                imageUrl: post.article.coverImage || '',
+                author: post.user.name,
+                role: post.user.role,
+                timestamp: new Date(post.createdAt).toLocaleString(),
+                likes: post.likes.length,
+                comments: post.comments.length,
+                shareCount: post.shares.length,
+                saves: 0
+              }} 
+            />
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button className="flex items-center justify-center p-2 rounded-full sm:w-8 sm:w-10 sm:h-10">

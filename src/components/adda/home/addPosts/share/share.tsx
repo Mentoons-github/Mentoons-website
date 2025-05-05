@@ -7,13 +7,15 @@ interface PostDetails {
   title: string;
   description: string;
   postUrl: string;
-  imageUrl: string;
+  imageUrl?: string;
+  videoUrl?: string;
   author: string;
   role: string;
   timestamp: string;
   likes: number;
   comments: number;
   saves: number;
+  shareCount: number;
 }
 
 const Share = ({ postDetails }: { postDetails: PostDetails }) => {
@@ -80,7 +82,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
           </a>
           <a
             href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-              postDetails.postUrl
+              postDetails?.postUrl
             )}&text=${encodeURIComponent(shareText)}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -90,7 +92,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
           </a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-              postDetails.postUrl
+              postDetails?.postUrl
             )}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -100,7 +102,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
           </a>
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-              postDetails.postUrl
+              postDetails?.postUrl
             )}`}
             target="_blank"
             rel="noopener noreferrer"

@@ -24,9 +24,9 @@ interface MixedPostCardProps {
       type: "image" | "video";
       caption?: string;
     }>;
-    likes: any[];
-    comments: any[];
-    shares: any[];
+    likes: { _id: string }[];
+    comments: { _id: string }[];
+    shares: { _id: string }[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -238,9 +238,9 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
                   ) : (
                     <div className="relative">
                       {/* Video thumbnail - in a real app you'd generate this */}
-                      <div className="relative bg-gray-200 aspect-video rounded-lg">
+                      <div className="relative bg-gray-200 rounded-lg aspect-video">
                         <button
-                          className="absolute inset-0 flex items-center justify-center w-full h-full bg-black bg-opacity-30 rounded-lg"
+                          className="absolute inset-0 flex items-center justify-center w-full h-full bg-black rounded-lg bg-opacity-30"
                           onClick={() => setActiveVideoIndex(index)}
                         >
                           <FaPlay className="w-12 h-12 text-white" />
@@ -285,7 +285,7 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes likesCount={post.likes.length} />
+          <Likes postId={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -303,7 +303,13 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
               {comments.length}
             </span>
           </div>
-          <Share postDetails={postDetails} />
+          <Share
+            postDetails={{
+              ...postDetails,
+              shareCount: post.shares.length,
+              saves: 0,
+            }}
+          />
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button className="flex items-center justify-center p-2 rounded-full sm:w-8 sm:w-10 sm:h-10">

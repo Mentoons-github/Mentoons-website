@@ -184,7 +184,11 @@ const PostFeed = () => {
       console.log(response.data.data.posts);
       setLoading(false);
       setTimeout(() => {
-        setPosts(samplePosts);
+        setPosts(
+          response.data.data.posts.length > 0
+            ? response.data.data.posts
+            : samplePosts
+        );
         setLoading(false);
       }, 1000);
     };
@@ -203,7 +207,7 @@ const PostFeed = () => {
   return (
     <div className="flex flex-col w-full gap-6 border border-red-600">
       {posts.length > 0 ? (
-        posts.map((post) => <PostCardSwitcher key={post._id} post={post} />)
+        posts.map((post: any) => <PostCardSwitcher key={post.id} post={post} />)
       ) : (
         <div className="flex flex-col items-center justify-center w-full p-8 text-center bg-white rounded-lg shadow-md">
           <h3 className="mb-2 text-xl font-semibold text-gray-700">

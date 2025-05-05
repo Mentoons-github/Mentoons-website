@@ -21,10 +21,10 @@ const AddaHome = () => {
 
   return (
     <>
-      <div className="flex items-start justify-center w-full p-2 max-w-8xl sm:p-3 md:p-4">
+      <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
           {/* Header section with user status */}
-          <div className="sticky left-0 flex items-center w-full bg-white top-[64px] z-[99999]">
+          <div className="sticky left-0 flex items-center w-full top-[64px] z-[99999] bg-white">
             <div className="flex-grow w-full min-w-0 py-2 ">
               <UserStatus />
             </div>
@@ -55,7 +55,7 @@ const AddaHome = () => {
               }`}
             >
               {/* Add posts section */}
-              <div className="sticky top-[190px] z-[9999] bg-white rounded-br-lg shadow-sm rounded-bl-lg rounded-tl-lg rounded-tr-lg  ">
+              <div className="sticky top-[176px] sm:top-[200px]   z-[9999] bg-white rounded-br-lg shadow-sm rounded-bl-lg rounded-tl-lg rounded-tr-lg  ">
                 <AddPosts />
               </div>
 

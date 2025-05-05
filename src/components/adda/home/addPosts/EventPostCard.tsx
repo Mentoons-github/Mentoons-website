@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useState } from "react";
 import { BiCalendarEvent, BiComment, BiMap, BiTimeFive } from "react-icons/bi";
 import { FaRegBookmark } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
@@ -102,19 +102,7 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
     });
   };
 
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title,
-    description: post.event.description,
-    postUrl: `/posts/${post._id}`,
-    imageUrl: post.event.coverImage || "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: formatDate(post.createdAt),
-    likes: post.likes.length,
-    comments: comments.length,
-    shares: post.shares.length,
-  };
+
 
   return (
     <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-gray-200 rounded-xl min-h-fit">
@@ -224,7 +212,7 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
               {attending ? "Attending" : "Attend"}
             </button>
             <Link
-              href={`/posts/${post._id}`}
+              to={`/posts/${post._id}`}
               className="px-4 py-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-full hover:bg-gray-100"
             >
               Event Details
@@ -249,7 +237,7 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes likesCount={post.likes.length} />
+          <Likes postId={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -267,7 +255,21 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
               {comments.length}
             </span>
           </div>
-          <Share postDetails={postDetails} />
+          <Share
+            postDetails={{
+              title: post.title,
+              description: post.event.description,
+              postUrl: `/posts/${post._id}`,
+              imageUrl: post.event.coverImage || "",
+              author: post.user.name,
+              role: post.user.role,
+              timestamp: formatDate(post.createdAt),
+              likes: post.likes.length,
+              comments: comments.length,
+              shareCount: post.shares.length,
+              saves: 0,
+            }}
+          />
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button className="flex items-center justify-center p-2 rounded-full sm:w-8 sm:w-10 sm:h-10">

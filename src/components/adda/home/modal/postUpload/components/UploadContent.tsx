@@ -1,6 +1,7 @@
 import { Field } from "formik";
 import { motion } from "framer-motion";
 import { Image, Upload, X } from "lucide-react";
+import { useState } from "react";
 import { UploadContentProps } from "../types";
 import PhotoVideoForm from "./PhotoVideoForm";
 
@@ -13,6 +14,8 @@ const UploadContent = ({
   removeMediaField,
   setFieldValue,
 }: UploadContentProps) => {
+  const [localMediaPreview, setLocalMediaPreview] =
+    useState<string[]>(mediaPreview);
   if (postType === "photo" || postType === "video") {
     return (
       <PhotoVideoForm
@@ -23,6 +26,7 @@ const UploadContent = ({
       />
     );
   }
+  console.log(localMediaPreview);
 
   if (postType === "article") {
     return (
@@ -103,7 +107,7 @@ const UploadContent = ({
                   setFieldValue("media", newMedia);
                   const newPreviews = [...mediaPreview];
                   newPreviews[0] = "";
-                  setMediaPreview(newPreviews);
+                  setLocalMediaPreview(newPreviews);
                 }}
               >
                 <X size={14} /> Remove image

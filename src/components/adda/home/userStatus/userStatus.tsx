@@ -55,11 +55,11 @@ const UserStatus = () => {
 
   return (
     <section className="w-full ">
-      <div className="flex flex-col items-center justify-start gap-4 px-2 py-2 sm:flex-row sm:gap-10 sm:px-4">
+      <div className="flex items-center justify-start gap-4 px-2 py-2 sm:flex-row sm:gap-10 sm:px-4">
         <div className="flex flex-col items-center justify-center flex-shrink-0 gap-1">
           <label
             htmlFor="upload"
-            className="w-16 h-16 sm:w-20 sm:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer"
+            className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer"
           >
             <FaPlus className="absolute text-[#EC9600] text-2xl sm:text-3xl p-1 border-2 sm:border-3 border-[#EC9600] rounded-full" />
             <input

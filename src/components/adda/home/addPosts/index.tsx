@@ -5,7 +5,7 @@ import AddPosts from "./addPosts";
 
 const PostsContainer = () => {
   // Sample post data for demonstration
-  const [posts, setPosts] = useState<PostData[]>([
+  const [posts, setPosts] = useState<any[]>([
     {
       id: "1",
       type: "text",
@@ -20,8 +20,9 @@ const PostsContainer = () => {
           "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
       },
       timestamp: "25 Nov at 12:24 PM",
-      likes: 15,
-      comments: 3,
+      likes: [{ _id: "1" }],
+      comments: [{ _id: "1" }],
+      shares: [{ _id: "1" }],
       saves: 2,
     },
     {
@@ -39,8 +40,9 @@ const PostsContainer = () => {
           "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
       },
       timestamp: "24 Nov at 10:15 AM",
-      likes: 42,
-      comments: 7,
+      likes: [{ _id: "1" }],
+      comments: [{ _id: "1" }],
+      shares: [{ _id: "1" }],
       saves: 10,
     },
     {
@@ -59,8 +61,9 @@ const PostsContainer = () => {
           "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
       },
       timestamp: "23 Nov at 3:45 PM",
-      likes: 67,
-      comments: 12,
+      likes: [{ _id: "1" }],
+      comments: [{ _id: "1" }],
+      shares: [{ _id: "1" }],
       saves: 25,
     },
     {
@@ -79,12 +82,13 @@ const PostsContainer = () => {
           "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
       },
       timestamp: "23 Nov at 3:45 PM",
-      likes: 67,
-      comments: 12,
+      likes: [{ _id: "1" }],
+      comments: [{ _id: "1" }],
+      shares: [{ _id: "1" }],
       saves: 25,
     },
     {
-      id: "3",
+      _id: "3",
       type: "article",
       title: "Child Development Tips",
       description:
@@ -99,8 +103,9 @@ const PostsContainer = () => {
           "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
       },
       timestamp: "23 Nov at 3:45 PM",
-      likes: 67,
-      comments: 12,
+      likes: [{ _id: "1" }],
+      comments: [{ _id: "1" }],
+      shares: [{ _id: "1" }],
       saves: 25,
     },
   ]);
@@ -110,12 +115,23 @@ const PostsContainer = () => {
     setPosts([newPost, ...posts]);
   };
 
-
-  
-
   return (
     <div className="flex flex-col w-full gap-6">
-      <AddPosts onPostCreated={handleNewPost} />
+      <AddPosts
+        onPostCreated={(post) => {
+          // Ensure coverImage is a string if article exists
+          const newPost: any = {
+            ...post,
+            article: post.article
+              ? {
+                  ...post.article,
+                  coverImage: post.article.coverImage || "", // Provide default empty string if undefined
+                }
+              : undefined,
+          };
+          handleNewPost(newPost);
+        }}
+      />
       <Feed posts={posts} />
     </div>
   );

@@ -44,7 +44,7 @@ export interface PostData {
     coverImage: string;
   };
   likes: { _id: string }[];
-  comments: any[]; // Using any[] as the Comment schema isn't provided
+  comments: { _id: string }[]; // Using any[] as the Comment schema isn't provided
   shares: { _id: string }[];
   tags?: string[];
   location?: string;
@@ -326,7 +326,12 @@ const PostCard = ({ post, initialComments = [] }: PostCardProps) => {
                 {comments.length}
               </span>
             </div>
-            <Share postDetails={postDetails} />
+            <Share 
+              postDetails={{
+                ...postDetails,
+                shareCount: post.shares.length,
+              }}
+            />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10">
