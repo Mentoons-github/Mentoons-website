@@ -1,16 +1,26 @@
 const Influencer = () => {
   return (
-    <div className="flex flex-col justify-center items-center p-5 rounded-xl">
-      <h1 className="text-start figtree w-full text-sm md:text-base">
-        Become Mentoons Influencer
+    <div className="flex flex-col p-6 border border-orange-100 shadow-sm bg-gradient-to-r from-orange-50 to-orange-50 rounded-xl">
+      <h1 className="mb-3 text-xl font-bold text-orange-800 md:text-2xl figtree">
+        Become a Mentoons Influencer
       </h1>
-      <div className="w-full h-auto rounded-lg pt-4 overflow-hidden">
+
+      <p className="mb-4 text-sm text-gray-600 md:text-base">
+        Join our community of influencers and make a positive impact on young
+        minds.
+      </p>
+
+      <div className="w-full h-auto mb-4 overflow-hidden rounded-lg">
         <img
           src="/assets/adda/sidebar/Become influencer.png"
           alt="influencer"
-          className="w-full object-cover"
+          className="object-cover w-full transition-transform duration-300 hover:scale-105"
         />
       </div>
+
+      <button className="self-start px-4 py-2 mt-2 font-medium text-white transition-colors duration-300 bg-orange-600 rounded-lg hover:bg-orange-700">
+        Apply Now
+      </button>
     </div>
   );
 };

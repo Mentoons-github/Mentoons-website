@@ -1,9 +1,52 @@
-import { useState } from "react";
 import { PHOTO_POST } from "@/constant/constants";
+import { useUser } from "@clerk/clerk-react";
+import { useState } from "react";
 import PostUpload from "../modal/postUpload";
 
-const AddPosts = () => {
+// Import the post type from PostCardSwitcher instead of PostCard
+interface PostData {
+  _id: string;
+  postType: "text" | "photo" | "video" | "article" | "event" | "mixed";
+  user: {
+    _id: string;
+    name: string;
+    role: string;
+    profilePicture: string;
+  };
+  content?: string;
+  title?: string;
+  media?: Array<{
+    url: string;
+    type: "image" | "video";
+    caption?: string;
+  }>;
+  article?: {
+    body: string;
+    coverImage?: string;
+  };
+  event?: {
+    startDate: string | Date;
+    endDate?: string | Date;
+    venue: string;
+    description: string;
+    coverImage?: string;
+  };
+  likes: string[]; // Changed from any[] to string[] assuming likes are user IDs
+  comments: string[]; // Changed from any[] to string[] assuming comments are comment IDs
+  shares: string[]; // Changed from any[] to string[] assuming shares are user IDs
+  createdAt: string | Date;
+  visibility: "public" | "friends" | "private";
+  tags?: string[];
+  location?: string;
+}
+
+interface AddPostsProps {
+  onPostCreated?: (post: PostData) => void;
+}
+
+const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useUser();
   const [selectedPostType, setSelectedPostType] = useState<
     "photo" | "video" | "event" | "article" | null
   >(null);
@@ -13,28 +56,50 @@ const AddPosts = () => {
     setIsOpen(true);
   };
 
+  // Add this function to handle post creation completion
+  const handlePostComplete = (newPost: PostData) => {
+    // Close the modal
+    setIsOpen(false);
+    // Reset selected post type
+    setSelectedPostType(null);
+    // Call the callback if provided
+    if (onPostCreated) {
+      onPostCreated(newPost);
+    }
+  };
+
   return (
     <>
-      <div className="flex flex-col justify-start items-center rounded-xl p-5 shadow-xl w-full">
-        <div className="flex justify-center items-center gap-5 py-5 w-full">
-          <div className="w-20 h-18 rounded-full overflow-hidden border-2 border-white">
+      <div className="flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+        <div className="flex items-center w-full gap-3">
+          {/* Improved avatar container with proper sizing and overflow handling */}
+          <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
             <img
-              src="/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg"
-              alt="userProfilePicture"
-              className="w-full h-full object-cover rounded-full"
+              src={
+                user?.imageUrl ||
+                "/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg"
+              }
+              alt={user?.fullName || "User"}
+              className="object-cover w-full h-full rounded-full"
             />
           </div>
-          <input
-            type="text"
-            placeholder="What's in your mind?"
-            className="w-full border-none outline-none"
-          />
+
+          {/* Styled input field with proper height and background */}
+          <div className="flex-grow">
+            <input
+              type="text"
+              placeholder="What's in your mind?"
+              className="w-full px-4 py-2 text-sm border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#e37019]"
+            />
+          </div>
         </div>
-        <hr className="border border-1 w-full border-gray-300" />
-        <div className="flex flex-wrap justify-between items-center gap-5 p-5 w-full">
+
+        <hr className="w-full my-3 border-orange-200" />
+
+        <div className="flex flex-wrap items-center justify-between w-full gap-2">
           {PHOTO_POST.map(({ icon, purpose }, index) => (
             <button
-              className="outline-none flex items-center gap-2 sm:gap-3 cursor-pointer"
+              className="flex items-center gap-2 p-1 transition-colors rounded-lg outline-none cursor-pointer hover:bg-gray-100"
               key={index}
               onClick={() =>
                 handlePost(
@@ -54,11 +119,13 @@ const AddPosts = () => {
           ))}
         </div>
       </div>
+
       {selectedPostType && (
         <PostUpload
           isOpen={isOpen}
           onClose={setIsOpen}
           postType={selectedPostType}
+          onPostCreated={handlePostComplete}
         />
       )}
     </>

@@ -1,99 +1,122 @@
 import AddPosts from "@/components/adda/home/addPosts/addPosts";
 import Posts from "@/components/adda/home/addPosts/posts/posts";
+import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
 import FriendRequest from "@/components/adda/home/friendRequest/friendRequest";
 import Influencer from "@/components/adda/home/influencer/influencer";
 import Meme from "@/components/adda/home/memeOfTheDay/meme";
-import UserStatus from "@/components/adda/home/userStatus/userStatus";
-import { useEffect, useState } from "react";
-// import FounderNote from '../../../components/LandingPage/'
-import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
 import Notification from "@/components/adda/home/notifications/notification";
+import UserStatus from "@/components/adda/home/userStatus/userStatus";
 import FounderNote from "@/components/common/founderNote";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const AddaHome = () => {
-  const [mobile, setMobile] = useState(window.innerWidth < 768);
-
   const [activeSection, setActiveSection] = useState<
     "home" | "notification" | "memeBanner" | "friendRequest"
   >("home");
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    const handleResize = () => {
-      const mobileView = window.innerWidth < 768;
-
-      if (mobileView !== mobile) {
-        setActiveSection("home");
-      }
-
-      setMobile(mobileView);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, [mobile]);
+  }, []);
 
   return (
     <>
-      <div className="flex items-start justify-center w-full gap-4 p-4 sm:p-6 sm:gap-8">
-        <div className="flex flex-col w-full gap-6 sm:gap-8">
-          <div className="flex items-center justify-between">
-            <UserStatus />
-            <Link to="/mythos" className="hidden md:block">
-              <img
-                src="/assets/adda/sidebar/Introducing poster.png"
-                alt="mentoons-mythos"
-                className="max-w-[180px]"
-              />
-            </Link>
-          </div>
-          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
-            <div className="items-start justify-start hidden col-span-1 p-4 bg-white rounded-lg shadow-xl lg:flex h-fit">
-              <FounderNote scroll={true} />
+      <div className="flex items-start justify-center w-full p-2 max-w-8xl sm:p-3 md:p-4">
+        <div className="relative flex flex-col w-full">
+          {/* Header section with user status */}
+          <div className="sticky left-0 flex items-center w-full bg-white top-[64px] z-[99999]">
+            <div className="flex-grow w-full min-w-0 py-2 ">
+              <UserStatus />
             </div>
-            {mobile ? (
-              <>
-                {activeSection === "notification" && <Notification />}
-                {activeSection === "friendRequest" && (
-                  <div className="p-2 bg-white rounded-lg shadow-lg md:p-4">
-                    <FriendRequest />
-                  </div>
-                )}
-                {activeSection === "memeBanner" && (
-                  <>
-                    <Influencer />
-                    <Meme />
-                  </>
-                )}
-                {activeSection === "home" && (
-                  <div className="flex flex-col col-span-1 gap-6 sm:col-span-2">
-                    <AddPosts />
-                    <Posts />
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="flex flex-col col-span-1 gap-6 sm:col-span-2">
-                  <AddPosts />
-                  <Posts />
+            <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
+              <Link to="/mythos">
+                <img
+                  src="/assets/adda/sidebar/Introducing poster.png"
+                  alt="mentoons-mythos"
+                  className="max-w-[134px] lg:max-w-[170px]"
+                />
+              </Link>
+            </div>
+          </div>
+
+          {/* Main content area */}
+          <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6 ">
+            {/* Left sidebar - Founder Note (only visible on lg screens and up) */}
+            <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
+              <div className="sticky top-[204px] w-full">
+                <FounderNote scroll={false} />
+              </div>
+            </div>
+
+            {/* Center content area - Posts */}
+            <div
+              className={`flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%] ${
+                activeSection !== "home" ? "hidden md:flex" : "flex"
+              }`}
+            >
+              {/* Add posts section */}
+              <div className="sticky top-[190px] z-[9999] bg-white rounded-br-lg shadow-sm rounded-bl-lg rounded-tl-lg rounded-tr-lg  ">
+                <AddPosts />
+              </div>
+
+              {/* Posts feed */}
+              <div className="w-full bg-white rounded-bl-lg rounded-br-lg">
+                <Posts />
+              </div>
+            </div>
+
+            {/* Right sidebar */}
+            <div
+              className={`w-full md:w-1/3 lg:w-1/4 flex-shrink-0
+               ${
+                 activeSection === "notification"
+                   ? "block"
+                   : activeSection === "friendRequest"
+                   ? "block"
+                   : activeSection === "memeBanner"
+                   ? "block"
+                   : activeSection !== "home"
+                   ? "hidden"
+                   : "hidden md:block"
+               }`}
+            >
+              <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg  md:pt-0 top-[204px] z-10 w-full ">
+                {/* Mobile view for specific active sections */}
+                <div className="border border-orange-200 md:hidden">
+                  {activeSection === "notification" && <Notification />}
+
+                  {activeSection === "friendRequest" && (
+                    <div className="p-3 bg-white rounded-lg sm:p-4 ">
+                      <FriendRequest />
+                    </div>
+                  )}
+
+                  {activeSection === "memeBanner" && (
+                    <>
+                      <Influencer />
+                      <Meme />
+                    </>
+                  )}
                 </div>
-                <div className="col-span-1 flex flex-col gap-6 shadow-lg max-h-[80vh] overflow-auto sticky top-24">
-                  <div className="p-2 bg-white rounded-lg md:p-4">
+
+                {/* Desktop view - always show on larger screens */}
+                <div className="hidden md:flex md:flex-col md:gap-4 lg:gap-6">
+                  <div className="p-3 bg-white border border-orange-200 rounded-lg sm:p-4">
                     <FriendRequest />
                   </div>
                   <Influencer />
                   <Meme />
                 </div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <BottomNav setActive={setActiveSection} />
+
+      {/* Bottom navigation - visible on small screens */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+        <BottomNav setActive={setActiveSection} />
+      </div>
     </>
   );
 };

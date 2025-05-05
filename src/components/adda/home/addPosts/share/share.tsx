@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { BiShare } from "react-icons/bi";
-import { FaWhatsapp, FaTwitter, FaLinkedin, FaFacebook } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { BiShare } from "react-icons/bi";
+import { FaFacebook, FaLinkedin, FaTwitter, FaWhatsapp } from "react-icons/fa";
 
 interface PostDetails {
   title: string;
@@ -39,13 +39,16 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
   return (
     <div className="relative flex items-center gap-3 share-container">
       <motion.button
-        className="rounded-full w-8 sm:w-12 sm:h-12 p-2 border border-gray-400 flex justify-center items-center"
+        className="flex items-center justify-center w-8 p-2 border border-orange-400 rounded-full sm:w-12 sm:h-12"
         onClick={() => setShareOptions(!showShareOptions)}
         whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1, boxShadow: "0px 4px 10px rgba(0,0,0,0.2)" }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
+        }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
-        <BiShare className="w-5 sm:w-6 sm:h-6 text-[#EC9600] transform scale-x-[-1]" />
+        <BiShare className="w-5 sm:w-6 sm:h-6 text-orange-500 transform scale-x-[-1]" />
       </motion.button>
 
       <span className="text-[#605F5F] text-base figtree text-sm">
@@ -63,7 +66,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
             type: "spring",
             stiffness: 120,
           }}
-          className="absolute bottom-13 sm:bottom-16 -left-3/5 sm:left-0 bg-white shadow-xl sm:p-2 md:p-3 rounded-lg border border-gray-300 flex justify-center items-center gap-3 z-10"
+          className="absolute z-10 flex items-center justify-center gap-3 bg-white border border-gray-300 rounded-lg shadow-xl bottom-13 sm:bottom-16 -left-3/5 sm:left-0 sm:p-2 md:p-3"
         >
           <a
             href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
@@ -71,7 +74,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex justify-center items-center text-green-600 p-2"
+            className="flex items-center justify-center p-2 text-green-600"
           >
             <FaWhatsapp className="w-4 sm:w-5 sm:h-5" />
           </a>
@@ -81,7 +84,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
             )}&text=${encodeURIComponent(shareText)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex justify-center items-center text-blue-500 p-2"
+            className="flex items-center justify-center p-2 text-blue-500"
           >
             <FaTwitter className="w-4 sm:w-5 sm:h-5" />
           </a>
@@ -91,7 +94,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex justify-center items-center text-blue-700 p-2"
+            className="flex items-center justify-center p-2 text-blue-700"
           >
             <FaLinkedin className="w-4 sm:w-5 sm:h-5" />
           </a>
@@ -101,7 +104,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex justify-center items-center text-blue-600 p-2"
+            className="flex items-center justify-center p-2 text-blue-600"
           >
             <FaFacebook className="w-4 sm:w-5 sm:h-5" />
           </a>

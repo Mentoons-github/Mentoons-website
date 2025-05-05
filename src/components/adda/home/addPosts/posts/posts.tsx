@@ -1,176 +1,194 @@
-import { useState } from "react";
-import { BiComment } from "react-icons/bi";
-import Likes from "../likes/likes";
-import { FaRegBookmark } from "react-icons/fa6";
-import Share from "../share/share";
-import { motion } from "framer-motion";
-import Highlight from "@/components/common/modal/highlight";
+import { useUser } from "@clerk/clerk-react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import Feed from "../Feed";
+import { PostData } from "../PostCard";
 
 const Posts = () => {
-  const [showComments, setShowComments] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<string | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [comments, setComments] = useState([
-    { id: 1, text: "Great post!" },
-    { id: 2, text: "Very informative" },
-    { id: 3, text: "Nice content!" },
+  const [posts, setPosts] = useState<PostData[]>([
+    {
+      _id: "1",
+      postType: "text",
+      user: {
+        _id: "user1",
+        name: "John Doe",
+        role: "Student",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      content:
+        "This is a simple text post. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
+      title: "My First Post",
+      likes: [],
+      comments: [],
+      shares: [],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      tags: ["welcome", "first-post"],
+    },
+    {
+      _id: "2",
+      postType: "photo",
+      user: {
+        _id: "user2",
+        name: "Jane Smith",
+        role: "Teacher",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      content: "Check out these awesome photos!",
+      media: [
+        {
+          url: "https://images.unsplash.com/photo-1706812639572-255a585a5c28",
+          type: "image",
+          caption: "Beautiful landscape",
+        },
+        {
+          url: "https://images.unsplash.com/photo-1708126914174-1a36aef617ee",
+          type: "image",
+        },
+      ],
+      likes: [{ _id: "user1" }],
+      comments: [],
+      shares: [],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      location: "New York, NY",
+    },
+    {
+      _id: "3",
+      postType: "video",
+      user: {
+        _id: "user3",
+        name: "Alex Johnson",
+        role: "Content Creator",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      title: "My Latest Video",
+      content: "Just uploaded this awesome video! Let me know what you think.",
+      media: [
+        {
+          url: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+          type: "video",
+          caption: "Sample Video",
+        },
+      ],
+      likes: [],
+      comments: [],
+      shares: [],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      tags: ["video", "tutorial"],
+    },
+    {
+      _id: "4",
+      postType: "article",
+      user: {
+        _id: "user4",
+        name: "Sarah Williams",
+        role: "Writer",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      title: "My Latest Article",
+      article: {
+        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id. Sed rhoncus, tortor sed eleifend tristique, tortor mauris molestie elit, et lacinia ipsum quam nec dui. Quisque nec mauris sit amet elit iaculis pretium sit amet quis magna. Aenean velit odio, elementum in tempus ut, vehicula eu diam. Pellentesque rhoncus aliquam mattis. Ut vulputate eros sed felis sodales nec vulputate justo hendrerit. Vivamus varius pretium ligula, a aliquam odio euismod sit amet. Quisque laoreet sem sit amet orci ullamcorper at ultricies metus viverra. Pellentesque arcu mauris, malesuada quis ornare accumsan, blandit sed diam.",
+        coverImage:
+          "https://images.unsplash.com/photo-1707343848610-16f9afe1ae99",
+      },
+      likes: [{ _id: "user2" }, { _id: "user3" }],
+      comments: [],
+      shares: [{ _id: "user1" }],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      tags: ["article", "writing"],
+    },
+    {
+      _id: "5",
+      postType: "event",
+      user: {
+        _id: "user5",
+        name: "Michael Brown",
+        role: "Event Organizer",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      title: "Community Meetup",
+      event: {
+        startDate: new Date(Date.now() + 86400000 * 7).toISOString(), // 7 days from now
+        endDate: new Date(
+          Date.now() + 86400000 * 7 + 3600000 * 2
+        ).toISOString(), // 2 hours after start
+        venue: "Central Park, New York",
+        description:
+          "Join us for a community meetup! We'll be discussing upcoming projects and activities.",
+        coverImage:
+          "https://images.unsplash.com/photo-1523580494863-6f3031224c94",
+      },
+      likes: [],
+      comments: [],
+      shares: [],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      location: "New York, NY",
+      tags: ["event", "community", "meetup"],
+    },
+    {
+      _id: "6",
+      postType: "mixed",
+      user: {
+        _id: "user6",
+        name: "Emily Davis",
+        role: "Photographer",
+        profilePicture:
+          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
+      },
+      title: "Trip to Paris",
+      content:
+        "Just got back from an amazing trip to Paris! Here are some photos and videos from the trip.",
+      media: [
+        {
+          url: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a",
+          type: "image",
+          caption: "Eiffel Tower",
+        },
+        {
+          url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+          type: "image",
+          caption: "Paris streets",
+        },
+        {
+          url: "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+          type: "video",
+          caption: "Walking in Paris",
+        },
+      ],
+      likes: [{ _id: "user1" }, { _id: "user2" }, { _id: "user3" }],
+      comments: [],
+      shares: [{ _id: "user4" }, { _id: "user5" }],
+      createdAt: new Date().toISOString(),
+      visibility: "public",
+      location: "Paris, France",
+      tags: ["travel", "paris", "vacation"],
+    },
   ]);
-  const [newComment, setNewComment] = useState("");
 
-  const postDetails = {
-    title: "Hardik's Post",
-    description:
-      "Showing anger, frustration, insecurity in situations does not have good impression on the child. Parents should think before they react to any situation specially in front of their children learn from there behavior and so parents have to be good role models for them.",
-    postUrl: "https://example.com/posts/123",
-    imageUrl: "/assets/adda/post/8.jpg",
-    author: "Hardik",
-    role: "Teacher at Divim Technology",
-    timestamp: "25 Nov at 12:24 PM",
-    likes: 25,
-    comments: comments.length,
-    saves: 5,
-  };
+  const user = useUser();
+  console.log(user);
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim() === "") return;
-    setComments([...comments, { id: comments.length + 1, text: newComment }]);
-    setNewComment("");
-  };
-
-  const charLimit = 100;
-
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const response = await axios.get("http://localhost:4000/api/v1/posts");
+      console.log(response.data.data);
+      setPosts(response.data.data);
+    };
+    fetchPosts();
+  }, []);
   return (
-    <>
-      <div className="flex flex-col justify-start items-center gap-5 p-5 shadow-xl rounded-xl w-full min-h-fit">
-        <div className="flex justify-start items-center gap-3 w-full">
-          <div className="w-14 h-14 rounded-full overflow-hidden">
-            <img
-              src="/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
-              alt="user-profile-picture"
-              className="h-full w-full object-cover rounded-full"
-            />
-          </div>
-          <div className="flex flex-col figtree">
-            <span className="Futura Std">Hardik</span>
-            <span className="figtree text-sm text-[#807E7E]">
-              Teacher at Divim Technology
-            </span>
-            <span className="figtree text-[12px] text-[#807E7E]">
-              25 Nov at 12:24 PM
-            </span>
-          </div>
-        </div>
-
-        <p className="figtree text-[#3E3E59] text-base w-full break-words">
-          {isExpanded
-            ? postDetails.description
-            : postDetails.description.slice(0, charLimit) +
-              (postDetails.description.length > charLimit ? "..." : "")}
-          {postDetails.description.length > charLimit && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-blue-500 ml-2"
-            >
-              {isExpanded ? "Read Less" : "Read More"}
-            </button>
-          )}
-        </p>
-
-        <div className="w-full">
-          <img
-            src={postDetails.imageUrl}
-            alt="posts"
-            className="w-full h-auto object-cover rounded-lg"
-            onClick={() => setSelectedPost(postDetails.imageUrl)}
-          />
-        </div>
-
-        <div className="flex justify-between items-center px-3 w-full">
-          <div className="flex justify-start items-center gap-3 sm:gap-4">
-            <Likes />
-            <div className="flex items-center gap-2 sm:gap-3">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                whileHover={{
-                  scale: 1.1,
-                  boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
-                }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="rounded-full w-8 sm:w-12 sm:h-12 p-2 border border-gray-400 flex justify-center items-center"
-                onClick={() => setShowComments(!showComments)}
-              >
-                <BiComment className="w-4 sm:w-6 sm:h-6 text-yellow-500" />
-              </motion.button>
-              <span className="text-[#605F5F] text-sm sm:text-base figtree">
-                {comments.length}
-              </span>
-            </div>
-            <Share postDetails={postDetails} />
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button className="rounded-full sm:w-8 sm:w-10 sm:h-10 p-2 flex justify-center items-center">
-              <FaRegBookmark className="w-5 sm:w-6 sm:h-6 text-[#D56A11]" />
-            </button>
-            <span className="text-[#605F5F] text-sm sm:text-base figtree">
-              5
-            </span>
-          </div>
-        </div>
-        {showComments && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full bg-gray-100 p-4 rounded-lg"
-          >
-            <h3 className="text-lg font-semibold text-gray-700">Comments</h3>
-            <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 p-2">
-              {comments.length > 0 ? (
-                comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-md border border-gray-200 w-full"
-                  >
-                    <img
-                      src="/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
-                      alt="profile-picture"
-                      className="w-10 h-10 rounded-full object-cover border border-gray-300"
-                    />
-                    <div className="flex flex-col bg-gray-100 p-3 rounded-md flex-1 overflow-hidden w-full">
-                      <span className="font-semibold text-gray-800">Sam</span>
-                      <p className="text-gray-600 break-words w-full max-w-full">
-                        {comment.text}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center">No comments yet.</p>
-              )}
-            </div>
-            <div className="w-full pt-3 flex items-center gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="flex-1 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="Write a comment..."
-              />
-              <button
-                onClick={handleCommentSubmit}
-                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
-              >
-                Send
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </div>
-      {selectedPost && (
-        <Highlight selectedPost={selectedPost} setPost={setSelectedPost} />
-      )}
-    </>
+    <div className="flex flex-col items-center justify-start w-full gap-5">
+      <Feed posts={posts} />
+    </div>
   );
 };
 

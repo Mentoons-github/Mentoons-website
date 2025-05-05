@@ -11,6 +11,7 @@ const AddaRouter = () => {
       <Route path="/" element={<AddaHome />} />
       <Route path="/community" element={<AddaGroups />} />
       <Route path="/messages" element={<AddaMessages />} />
+      
     </Routes>
   );
 };

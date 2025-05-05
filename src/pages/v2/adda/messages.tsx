@@ -1,5 +1,5 @@
-import UserList from "@/components/adda/messages/userList";
 import MessageBox from "@/components/adda/messages/message";
+import UserList from "@/components/adda/messages/userList";
 
 const AddaMessages = () => {
   return (
