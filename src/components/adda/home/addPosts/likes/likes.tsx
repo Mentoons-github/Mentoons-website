@@ -1,20 +1,18 @@
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
 
 const Likes = ({
   postId,
   likeCount,
-  isUserLiked,
 }: {
   postId: string;
   likeCount: number;
-  isUserLiked: boolean;
 }) => {
-  const [isLiked, setIsLiked] = useState<boolean>(isUserLiked);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
   const [likeCounter, setLikeCounter] = useState(likeCount);
 
   const { getToken } = useAuth();
@@ -49,6 +47,26 @@ const Likes = ({
     }
   };
 
+  useEffect(() => {
+    const checkLike = async () => {
+      const token = await getToken();
+      const endpoint = `http://localhost:4000/api/v1/likes/posts/like/check?postId=${postId}`;
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await axios.get(endpoint, {
+        headers,
+      });
+      if (response.data.liked) {
+        setIsLiked(true);
+      } else {
+        setIsLiked(false);
+      }
+    };
+
+    checkLike();
+  }, [isLiked]);
   return (
     <div className="flex items-center justify-center gap-3">
       <motion.button

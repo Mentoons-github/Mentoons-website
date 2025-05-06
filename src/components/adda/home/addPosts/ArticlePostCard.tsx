@@ -196,7 +196,6 @@ const ArticlePostCard = ({
           <Likes
             postId={post._id}
             likeCount={post.likes.length}
-            isUserLiked={post.likes.includes(post.user._id)}
           />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button

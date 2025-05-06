@@ -272,7 +272,7 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes postId={post._id} likeCount={post.likes.length} isUserLiked={post.likes.includes(post.user._id)} />
+          <Likes postId={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
