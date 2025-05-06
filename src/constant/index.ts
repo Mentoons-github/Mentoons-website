@@ -6,6 +6,7 @@ import {
   FaPhone,
   FaShare,
   FaShoppingCart,
+  FaUserAlt,
 } from "react-icons/fa";
 import { FaChartBar, FaCoins, FaUsers } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
@@ -1203,6 +1204,12 @@ export const ADDA_NAV_LINKS: NavLink[] = [
   },
   {
     id: "NL_10",
+    label: "Profile",
+    icon: FaUserAlt,
+    url: "/adda/user-profile",
+  },
+  {
+    id: "NL_11",
     label: "Share",
     icon: FaShare,
     url: "#",

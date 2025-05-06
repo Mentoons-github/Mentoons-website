@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 import { SessionDetails } from "@/redux/sessionSlice";
+import React, { useEffect, useState } from "react";
 
 type BookedSessionProps = {
   bookedCalls: SessionDetails[];
@@ -90,33 +90,33 @@ const BookedSession: React.FC<BookedSessionProps> = ({
 
     return (
       <div key={booking._id} className={`${baseClass} ${statusClass}`}>
-        <div className="flex justify-between items-start mb-2 z-20 relative">
+        <div className="relative z-20 flex items-start justify-between mb-2">
           <div>
-            <p className="font-semibold text-base lg:text-lg">{booking.name}</p>
+            <p className="text-base font-semibold lg:text-lg">{booking.name}</p>
             <p className="text-xs lg:text-sm">{booking.email}</p>
             <p className="text-xs lg:text-sm">{booking.phone}</p>
           </div>
           {booking.status !== "cancelled" && (
             <button
               onClick={() => postponeBooking(booking)}
-              className="text-red-500 hover:bg-red-50 p-1 lg:p-2 rounded-full"
+              className="p-1 text-red-500 rounded-full hover:bg-red-50 lg:p-2"
             >
               {booking.status}
               Postpone Session
             </button>
           )}
         </div>
-        <div className="flex items-center text-xs lg:text-sm space-x-2 z-20 relative">
+        <div className="relative z-20 flex items-center space-x-2 text-xs lg:text-sm">
           <span>📅</span>
           <span>{formatDateTime(booking.date, booking.time)}</span>
         </div>
         {booking.description && (
-          <div className="mt-2 text-xs lg:text-sm italic z-20 relative">
+          <div className="relative z-20 mt-2 text-xs italic lg:text-sm">
             <p>Notes: {booking.description}</p>
           </div>
         )}
         {showTodayTag && !isOver && (
-          <div className="absolute bottom-2 right-3 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium shadow z-20">
+          <div className="absolute z-20 px-2 py-1 text-xs font-medium text-green-600 bg-green-100 rounded-full shadow bottom-2 right-3">
             Today’s Session
           </div>
         )}
@@ -125,22 +125,22 @@ const BookedSession: React.FC<BookedSessionProps> = ({
   };
 
   return (
-    <div className="w-full bg-white p-4 lg:p-6 lg:border-r overflow-y-auto max-h-96 lg:max-h-screen lg:sticky lg:top-0">
-      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6 text-orange-500 font-akshar">
+    <div className="w-full p-4 overflow-y-auto bg-white lg:p-6 lg:border-r max-h-96 lg:max-h-screen lg:sticky lg:top-0">
+      <h2 className="mb-4 text-xl font-bold text-orange-500 lg:text-2xl lg:mb-6 font-akshar">
         Booked Sessions
       </h2>
 
       {loading && (
         <div className="flex flex-col items-center justify-center h-64 space-y-4 text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 text-sm">
+          <div className="w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+          <p className="text-sm text-gray-600">
             Please wait, Bookings are loading...
           </p>
         </div>
       )}
 
       {error && !loading && (
-        <p className="text-gray-600 font-inter italic">⚠️ {error}</p>
+        <p className="italic text-gray-600 font-inter">⚠️ {error}</p>
       )}
 
       {!loading && !error && allBookings.length === 0 && (

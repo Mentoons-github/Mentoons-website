@@ -1,26 +1,16 @@
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BiShare } from "react-icons/bi";
 import { FaFacebook, FaLinkedin, FaTwitter, FaWhatsapp } from "react-icons/fa";
 
-interface PostDetails {
-  title: string;
-  description: string;
-  postUrl: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  author: string;
-  role: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  saves: number;
-  shareCount: number;
-}
-
-const Share = ({ postDetails }: { postDetails: PostDetails }) => {
+const Share = ({ postDetails }: { postDetails: any }) => {
   const [showShareOptions, setShareOptions] = useState(false);
-  const shareText = `${postDetails.title} - ${postDetails.description}`;
+  const [shareCount, setShareCount] = useState(postDetails.shares.length);
+  const { getToken } = useAuth();
+  const shareText = `${postDetails?.title} - ${postDetails.content}`;
+  const baseUrl = window.location.origin + "/post/";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,6 +28,41 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showShareOptions]);
 
+  const trackShare = async (platform: string) => {
+    try {
+      setShareCount(shareCount + 1);
+      const token = await getToken();
+      await axios.post(
+        "http://localhost:4000/api/v1/shares",
+        {
+          postId: postDetails._id,
+          caption: postDetails.content,
+          visibility: postDetails.visibility,
+          externalPlatform: platform,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // You can handle the updated post data if needed
+    } catch (error) {
+      console.error("Failed to record share:", error);
+      // Don't show error to user as this is background tracking
+    }
+  };
+
+  const handleShare = (platform: string, shareUrl: string) => {
+    // Track the share attempt
+    trackShare(platform);
+
+    // Open the share URL in a new window
+    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="relative flex items-center gap-3 share-container">
       <motion.button
@@ -53,9 +78,7 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
         <BiShare className="w-5 sm:w-6 sm:h-6 text-orange-500 transform scale-x-[-1]" />
       </motion.button>
 
-      <span className="text-[#605F5F] text-base figtree text-sm">
-        {postDetails.saves}
-      </span>
+      <span className="text-[#605F5F]  figtree text-sm">{shareCount}</span>
 
       {showShareOptions && (
         <motion.div
@@ -70,46 +93,58 @@ const Share = ({ postDetails }: { postDetails: PostDetails }) => {
           }}
           className="absolute z-10 flex items-center justify-center gap-3 bg-white border border-gray-300 rounded-lg shadow-xl bottom-13 sm:bottom-16 -left-3/5 sm:left-0 sm:p-2 md:p-3"
         >
-          <a
-            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-              shareText + " " + postDetails.postUrl
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() =>
+              handleShare(
+                "whatsapp",
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(
+                  shareText + " " + baseUrl + postDetails._id
+                )}`
+              )
+            }
             className="flex items-center justify-center p-2 text-green-600"
           >
             <FaWhatsapp className="w-4 sm:w-5 sm:h-5" />
-          </a>
-          <a
-            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-              postDetails?.postUrl
-            )}&text=${encodeURIComponent(shareText)}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          </button>
+          <button
+            onClick={() =>
+              handleShare(
+                "twitter",
+                `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                  baseUrl + postDetails._id
+                )}&text=${encodeURIComponent(shareText)}`
+              )
+            }
             className="flex items-center justify-center p-2 text-blue-500"
           >
             <FaTwitter className="w-4 sm:w-5 sm:h-5" />
-          </a>
-          <a
-            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-              postDetails?.postUrl
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          </button>
+          <button
+            onClick={() =>
+              handleShare(
+                "linkedin",
+                `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+                  baseUrl + postDetails._id
+                )}`
+              )
+            }
             className="flex items-center justify-center p-2 text-blue-700"
           >
             <FaLinkedin className="w-4 sm:w-5 sm:h-5" />
-          </a>
-          <a
-            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-              postDetails?.postUrl
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          </button>
+          <button
+            onClick={() =>
+              handleShare(
+                "facebook",
+                `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                  baseUrl + postDetails._id
+                )}`
+              )
+            }
             className="flex items-center justify-center p-2 text-blue-600"
           >
             <FaFacebook className="w-4 sm:w-5 sm:h-5" />
-          </a>
+          </button>
         </motion.div>
       )}
     </div>

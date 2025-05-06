@@ -24,9 +24,9 @@ interface MixedPostCardProps {
       type: "image" | "video";
       caption?: string;
     }>;
-    likes: { _id: string }[];
-    comments: { _id: string }[];
-    shares: { _id: string }[];
+    likes: string[];
+    comments: Comment[];
+    shares: string[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -89,20 +89,7 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
     videos: post.media.filter((m) => m.type === "video"),
   };
 
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title || "",
-    description: post.content || "",
-    postUrl: `/posts/${post._id}`,
-    imageUrl: groupedMedia.images.length > 0 ? groupedMedia.images[0].url : "",
-    videoUrl: groupedMedia.videos.length > 0 ? groupedMedia.videos[0].url : "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: formatDate(post.createdAt),
-    likes: post.likes.length,
-    comments: comments.length,
-    shares: post.shares.length,
-  };
+
 
   return (
     <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-gray-200 rounded-xl min-h-fit">
@@ -285,7 +272,7 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes postId={post._id} likeCount={post.likes.length} />
+          <Likes postId={post._id} likeCount={post.likes.length} isUserLiked={post.likes.includes(post.user._id)} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -305,9 +292,14 @@ const MixedPostCard = ({ post, initialComments = [] }: MixedPostCardProps) => {
           </div>
           <Share
             postDetails={{
-              ...postDetails,
-              shareCount: post.shares.length,
+              ...post,
+              shares: post.shares,
               saves: 0,
+              user: {
+                ...post.user,
+                email: "",
+                picture: "",
+              },
             }}
           />
         </div>
