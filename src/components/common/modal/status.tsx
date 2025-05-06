@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { UserStatusInterface } from "../../../types";
+import { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { UserStatusInterface } from "../../../types";
 
 const Status = ({
   status,
@@ -10,53 +11,105 @@ const Status = ({
   setStatus: (val: UserStatusInterface | null) => void;
 }) => {
   const isVideo = (media: string) => /\.(mp4|webm|ogg|mov)$/i.test(media);
+  const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          setTimeout(() => setStatus(null), 500);
+          return 100;
+        }
+        return prev + 0.5;
+      });
+    }, 50);
+
+    // Ensure video plays when component mounts
+    if (isVideo(status.url) && videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.error("Error playing video:", error);
+      });
+    }
+
+    return () => clearInterval(timer);
+  }, [setStatus, status.url]);
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 50 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 50 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="fixed inset-0 flex justify-center items-center bg-[rgba(0,0,0,0.5)] z-50 p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[9999999999999] flex items-center justify-center bg-black"
       onClick={() => setStatus(null)}
     >
       <div
-        className="relative w-[90%] sm:w-[70%] md:w-[50%] max-w-lg bg-white rounded-xl p-4 sm:p-5 shadow-lg flex flex-col gap-4"
+        className="relative w-full h-full md:w-[400px] md:h-[85vh] bg-black flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <FaTimes
-          className="absolute top-3 right-3 w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800 transition"
-          onClick={() => setStatus(null)}
-        />
-
-        <div className="flex items-center gap-3 sm:gap-4">
-          <img
-            src={status.userProfilePicture}
-            alt={status.username}
-            className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-full border-2 border-blue-500"
-          />
-          <p className="text-base sm:text-lg font-semibold">
-            {status.username}
-          </p>
+        {/* Progress bar */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex w-full px-2 pt-2">
+          <div className="w-full h-1 overflow-hidden bg-gray-500 bg-opacity-50 rounded-full">
+            <div
+              className="h-full transition-all duration-100 ease-linear bg-white"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
 
-        <div className="w-full flex justify-center">
+        {/* Header */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between w-full p-4 bg-gradient-to-b from-black/70 to-transparent">
+          <div className="flex items-center gap-2">
+            <img
+              src={status.userProfilePicture}
+              alt={status.username}
+              className="object-cover w-8 h-8 border-2 border-pink-500 rounded-full"
+            />
+            <p className="text-sm font-medium text-white">{status.username}</p>
+            <span className="text-xs text-gray-300">• 2h</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="text-white">
+              <FaTimes
+                className="w-5 h-5 transition cursor-pointer hover:text-gray-300"
+                onClick={() => setStatus(null)}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex items-center justify-center w-full h-full">
           {isVideo(status.url) ? (
             <video
+              ref={videoRef}
               src={status.url}
               autoPlay
-              loop
-              muted
+              controls
               playsInline
-              className="w-[90%] max-w-sm h-[50vh] rounded-lg object-cover"
+              className="object-contain w-full h-full"
             />
           ) : (
             <img
               src={status.url}
               alt="status"
-              className="w-[90%] max-w-sm h-[50vh] object-cover rounded-lg"
+              className="object-contain w-full h-full"
             />
           )}
+        </div>
+
+        {/* Footer - Reply section */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
+          <div className="flex items-center w-full gap-2 p-2 bg-white rounded-full bg-opacity-20">
+            <input
+              type="text"
+              placeholder="Reply to story..."
+              className="flex-1 text-sm text-white placeholder-gray-300 bg-transparent border-none outline-none"
+            />
+            <button className="text-sm font-medium text-white">Send</button>
+          </div>
         </div>
       </div>
     </motion.div>
