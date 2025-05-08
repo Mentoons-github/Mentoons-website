@@ -23,9 +23,9 @@ interface VideoPostCardProps {
       type: "video";
       caption?: string;
     }>;
-    likes: { _id: string }[];
-    comments: { _id: string }[];
-    shares: { _id: string }[];
+    likes: string[];
+    comments: Comment[];
+    shares: string[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -220,7 +220,7 @@ const VideoPostCard = ({ post, initialComments = [] }: VideoPostCardProps) => {
           <Share
             postDetails={{
               ...postDetails,
-              shareCount: post.shares.length,
+              shares: post.shares,
               saves: 0,
               videoUrl: post.media.length > 0 ? post.media[0].url : "",
             }}

@@ -23,9 +23,9 @@ interface PhotoPostCardProps {
       type: "image";
       caption?: string;
     }>;
-    likes: { _id: string }[];
-    comments: { _id: string }[];
-    shares: { _id: string }[];
+    likes: string[];
+    comments: Comment[];
+    shares: string[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -81,19 +81,7 @@ const PhotoPostCard = ({ post, initialComments = [] }: PhotoPostCardProps) => {
     });
   };
 
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title || "",
-    description: post.content || "",
-    postUrl: `/posts/${post._id}`,
-    imageUrl: post.media.length > 0 ? post.media[0].url : "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: formatDate(post.createdAt),
-    likes: post.likes.length,
-    comments: comments.length,
-    shares: post.shares.length,
-  };
+
 
   return (
     <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-gray-200 rounded-xl min-h-fit">
@@ -228,9 +216,14 @@ const PhotoPostCard = ({ post, initialComments = [] }: PhotoPostCardProps) => {
           </div>
           <Share
             postDetails={{
-              ...postDetails,
-              shareCount: post.shares.length,
+              ...post,
+              shares: post.shares,
               saves: 0,
+              user: {
+                ...post.user,
+                email: "",
+                picture: "",
+              },
             }}
           />
         </div>

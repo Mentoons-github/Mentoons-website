@@ -1,50 +1,33 @@
-import PostCard, { PostData } from "./PostCard";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import PostCard from "./PostCard";
 
-interface FeedProps {
-  posts: PostData[];
-  onPostsChange?: (posts: PostData[]) => void;
-}
-
-const Feed = ({ posts }: FeedProps) => {
-  // Sample comments for the first post
-  const sampleComments = [
-    {
-      id: 1,
-      text: "Great post!",
-      author: {
-        name: "Sam",
-        profilePicture:
-          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-      },
-    },
-    {
-      id: 2,
-      text: "Very informative",
-      author: {
-        name: "Alex",
-        profilePicture:
-          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-      },
-    },
-    {
-      id: 3,
-      text: "Thanks for sharing this!",
-      author: {
-        name: "Jordan",
-        profilePicture:
-          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-      },
-    },
-  ];
-
+const Feed = () => {
+  const { getToken } = useAuth();
+  const [userFeeds, setUserFeeds] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchUserFeeds = async () => {
+      try {
+        const token = await getToken();
+        const response = await axios.get(`http://localhost:4000/api/v1/feeds`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserFeeds(response.data.data);
+        console.log(response.data.data);
+        toast.success("User feeds fetched successfully");
+      } catch (error) {
+        console.error("Error fetching user feeds:", error);
+        toast.error("Error fetching user feeds");
+      }
+    };
+    fetchUserFeeds();
+  }, []);
   return (
     <div className="flex flex-col w-full gap-6">
-      {posts?.map((post) => (
-        <PostCard
-          key={post._id}
-          post={post}
-          initialComments={post._id === "1" ? sampleComments : []}
-        />
+      {userFeeds?.map((post) => (
+        <PostCard key={post._id} post={post} />
       ))}
     </div>
   );

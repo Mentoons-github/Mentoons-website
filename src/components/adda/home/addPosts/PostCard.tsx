@@ -1,9 +1,11 @@
 import Highlight from "@/components/common/modal/highlight";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
-import { FaRegBookmark } from "react-icons/fa6";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
+import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
@@ -19,11 +21,12 @@ export type PostType =
 export interface PostData {
   _id: string;
   postType: PostType;
+  postUrl?: string;
   user: {
     _id: string;
     name: string;
-    role: string;
-    profilePicture: string;
+    email: string;
+    picture: string;
   };
   content?: string;
   title?: string;
@@ -43,9 +46,10 @@ export interface PostData {
     description: string;
     coverImage: string;
   };
-  likes: { _id: string }[];
-  comments: { _id: string }[]; // Using any[] as the Comment schema isn't provided
-  shares: { _id: string }[];
+  likes: string[];
+  comments: Comment[]; // Using any[] as the Comment schema isn't provided
+  shares: string[];
+  saves: number;
   tags?: string[];
   location?: string;
   visibility: "public" | "friends" | "private";
@@ -55,60 +59,129 @@ export interface PostData {
 
 interface PostCardProps {
   post: PostData;
-  initialComments?: Comment[];
 }
 
 interface Comment {
-  id: number;
-  text: string;
-  author: {
+  _id: number;
+  user: {
+    _id: string;
+    email: string;
     name: string;
-    profilePicture: string;
+    picture: string;
   };
+  content: string;
 }
 
-const PostCard = ({ post, initialComments = [] }: PostCardProps) => {
+const PostCard = ({ post }: PostCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [isSavedPost, setIsSavedPost] = useState(false);
   const user = useUser();
   console.log(user);
-
-  const handleCommentSubmit = () => {
+  const { getToken } = useAuth();
+  const handleCommentSubmit = async () => {
     if (newComment.trim() === "") return;
-    setComments([
-      ...comments,
-      {
-        id: comments.length + 1,
-        text: newComment,
-        author: {
-          name: user?.user?.fullName || "", // Replace with actual current user
-          profilePicture:
-            user?.user?.imageUrl ||
-            "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg", // Replace with actual user profile
-        },
+    // Ensure comments is an array before spreading
+    const newCommentObj = {
+      _id: typeof comments.length === "number" ? comments.length + 1 : 1,
+      content: newComment,
+      user: {
+        _id: user?.user?.id || "",
+        name: user?.user?.fullName || "",
+        picture: user?.user?.imageUrl || "",
+        email: user?.user?.emailAddresses[0]?.emailAddress || "",
       },
-    ]);
+      post: post._id,
+      media: [],
+      likes: [],
+      replies: [],
+      parentComment: null,
+      mentions: [],
+      isEdited: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setComments(
+      Array.isArray(comments) ? [...comments, newCommentObj] : [newCommentObj]
+    );
     setNewComment("");
+
+    try {
+      const token = await getToken();
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/comments",
+        {
+          postId: post._id,
+          content: newComment,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      toast.success("Comment added successfully");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error("Failed to add comment. Please try again.");
+    }
   };
+
+  const handleSavePost = async () => {
+    const newSavedState = !isSavedPost;
+    setIsSavedPost(newSavedState);
+
+    try {
+      const token = await getToken();
+      const endpoint = newSavedState
+        ? `http://localhost:4000/api/v1/feeds/posts/${post._id}/save`
+        : `http://localhost:4000/api/v1/feeds/posts/${post._id}/unsave`;
+
+      const response = await axios.post(
+        endpoint,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      toast.success(
+        newSavedState ? "Post saved successfully" : "Post unsaved successfully"
+      );
+    } catch (error) {
+      console.error("Error saving/unsaving post:", error);
+      setIsSavedPost(!newSavedState); // Revert state on error
+      toast.error("Failed to update saved status. Please try again.");
+    }
+  };
+
+    useEffect(() => {
+      const checkSavedPost = async () => {
+        try {
+          const token = await getToken();
+          const response = await axios.get(
+            `http://localhost:4000/api/v1/feeds/posts/${post._id}/check-saved`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log(response.data.data);
+          setIsSavedPost(response.data.data);
+        } catch (error) {
+          console.error("Error checking saved post:", error);
+        }
+      };
+      checkSavedPost();
+    }, []);
 
   const charLimit = 100;
-
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title || "",
-    description: post.content || "",
-    postUrl: `post/${post._id}`,
-    imageUrl: post.media && post.media.length > 0 ? post.media[0].url : "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: new Date(post.createdAt).toLocaleString(),
-    likes: post.likes.length,
-    comments: comments.length,
-    saves: post.shares.length,
-  };
 
   const renderPostContent = () => {
     switch (post.postType) {
@@ -288,15 +361,15 @@ const PostCard = ({ post, initialComments = [] }: PostCardProps) => {
         <div className="flex items-center justify-start w-full gap-3">
           <div className="overflow-hidden rounded-full w-14 h-14">
             <img
-              src={user?.user?.imageUrl}
-              alt={`${user?.user?.fullName}-profile`}
+              src={post?.user?.picture}
+              alt={`${post?.user?.name}-profile`}
               className="object-cover w-full h-full rounded-full"
             />
           </div>
           <div className="flex flex-col figtree">
-            <span className="Futura Std">{user?.user?.fullName}</span>
+            <span className="Futura Std">{post.user.name}</span>
             <span className="figtree text-sm text-[#807E7E]">
-              {post.user.role}
+              {post.user.email}
             </span>
             <span className="figtree text-[12px] text-[#807E7E]">
               {new Date(post.createdAt).toLocaleString()}
@@ -323,23 +396,26 @@ const PostCard = ({ post, initialComments = [] }: PostCardProps) => {
                 <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
               </motion.button>
               <span className="text-[#605F5F] text-sm sm:text-base figtree">
-                {comments.length}
+                {post.comments.length}
               </span>
             </div>
-            <Share 
+            <Share
               postDetails={{
-                ...postDetails,
-                shareCount: post.shares.length,
+                ...post,
               }}
             />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <button className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10">
-              <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+            <button
+              className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
+              onClick={handleSavePost}
+            >
+              {isSavedPost ? (
+                <FaBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+              ) : (
+                <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+              )}
             </button>
-            <span className="text-[#605F5F] text-sm sm:text-base figtree">
-              {post.shares.length}
-            </span>
           </div>
         </div>
 
@@ -353,23 +429,23 @@ const PostCard = ({ post, initialComments = [] }: PostCardProps) => {
           >
             <h3 className="text-lg font-semibold text-gray-700">Comments</h3>
             <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 p-2">
-              {comments.length > 0 ? (
-                comments.map((comment) => (
+              {post.comments.length > 0 ? (
+                post.comments.map((comment: Comment) => (
                   <div
-                    key={comment.id}
+                    key={comment._id}
                     className="flex items-start w-full gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-md"
                   >
                     <img
-                      src={comment.author.profilePicture}
+                      src={comment.user.picture}
                       alt="profile-picture"
                       className="object-cover w-10 h-10 border border-gray-300 rounded-full"
                     />
                     <div className="flex flex-col flex-1 w-full p-3 overflow-hidden bg-gray-100 rounded-md">
                       <span className="font-semibold text-gray-800">
-                        {comment.author.name}
+                        {comment.user.name}
                       </span>
                       <p className="w-full max-w-full text-gray-600 break-words">
-                        {comment.text}
+                        {comment.content}
                       </p>
                     </div>
                   </div>
