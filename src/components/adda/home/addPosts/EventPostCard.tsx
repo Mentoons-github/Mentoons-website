@@ -25,9 +25,9 @@ interface EventPostCardProps {
       description: string;
       coverImage?: string;
     };
-    likes: any[];
-    comments: any[];
-    shares: any[];
+    likes: string[];
+    comments: Comment[];
+    shares: string[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -240,7 +240,7 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
           <Likes postId={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.9 }} 
               whileHover={{
                 scale: 1.1,
                 boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
@@ -257,17 +257,14 @@ const EventPostCard = ({ post, initialComments = [] }: EventPostCardProps) => {
           </div>
           <Share
             postDetails={{
-              title: post.title,
-              description: post.event.description,
-              postUrl: `/posts/${post._id}`,
-              imageUrl: post.event.coverImage || "",
-              author: post.user.name,
-              role: post.user.role,
-              timestamp: formatDate(post.createdAt),
-              likes: post.likes.length,
-              comments: comments.length,
-              shareCount: post.shares.length,
+              ...post,
+              shares: post.shares,
               saves: 0,
+              user: {
+                ...post.user,
+                email: "",
+                picture: "",
+              },
             }}
           />
         </div>

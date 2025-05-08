@@ -23,9 +23,9 @@ interface ArticlePostCardProps {
       body: string;
       coverImage?: string;
     };
-    likes: any[];
-    comments: any[];
-    shares: any[];
+    likes: string[];
+    comments: Comment[];
+    shares: string[];
     createdAt: string | Date;
     visibility: "public" | "friends" | "private";
     tags?: string[];
@@ -193,7 +193,10 @@ const ArticlePostCard = ({
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes postId={post._id} likeCount={post.likes.length} />
+          <Likes
+            postId={post._id}
+            likeCount={post.likes.length}
+          />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -211,21 +214,18 @@ const ArticlePostCard = ({
               {comments.length}
             </span>
           </div>
-            <Share 
-              postDetails={{
-                title: post.title,
-                description: post.article.body.substring(0, 100) + '...',
-                postUrl: `/posts/${post._id}`,
-                imageUrl: post.article.coverImage || '',
-                author: post.user.name,
-                role: post.user.role,
-                timestamp: new Date(post.createdAt).toLocaleString(),
-                likes: post.likes.length,
-                comments: post.comments.length,
-                shareCount: post.shares.length,
-                saves: 0
-              }} 
-            />
+          <Share
+            postDetails={{
+              ...post,
+              shares: post.shares,
+              saves: 0,
+              user: {
+                ...post.user,
+                email: "",
+                picture: "",
+              },
+            }}
+          />
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button className="flex items-center justify-center p-2 rounded-full sm:w-8 sm:w-10 sm:h-10">

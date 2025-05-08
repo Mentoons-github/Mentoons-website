@@ -1,19 +1,19 @@
+import SessionBookingForm from "@/components/forms/sessionBooking";
 import BookingCalender from "@/components/session/calender";
+import { fetchSessions, SessionDetails } from "@/redux/sessionSlice";
 import { Hiring } from "@/types";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BookedSession from "./bookedSession";
-import SessionBookingForm from "@/components/forms/sessionBooking";
-import { fetchSessions, SessionDetails } from "@/redux/sessionSlice";
-import { useAuth, useUser } from "@clerk/clerk-react";
 
-import { HIRING } from "@/constant/constants";
 import WeAreHiring from "@/components/assessment/weAreHiring";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
-import { AppDispatch, RootState } from "@/redux/store";
-import SelectedDateBookings from "@/components/session/selectedBookings";
 import PostPone from "@/components/common/modal/postPone";
+import SelectedDateBookings from "@/components/session/selectedBookings";
+import { HIRING } from "@/constant/constants";
+import { AppDispatch, RootState } from "@/redux/store";
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 
 const SessionBooking: React.FC = () => {
   const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
@@ -207,14 +207,14 @@ const SessionBooking: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="lg:hidden sticky top-0 z-20 bg-white p-4 shadow-md">
+      <div className="sticky top-0 z-20 p-4 bg-white shadow-md lg:hidden">
         <button
           onClick={() =>
             document
               .getElementById("bookedSessions")
               ?.classList.toggle("hidden")
           }
-          className="flex items-center justify-between w-full p-2 bg-orange-50 rounded-lg"
+          className="flex items-center justify-between w-full p-2 rounded-lg bg-orange-50"
         >
           <span className="font-semibold text-orange-500">
             View Booked Sessions
@@ -234,7 +234,7 @@ const SessionBooking: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row">
-        <div className="hidden lg:block lg:w-1/4 sticky top-20 h-screen">
+        <div className="sticky hidden h-screen lg:block lg:w-1/4 top-20">
           <BookedSession
             error={error}
             loading={loading}
@@ -244,20 +244,20 @@ const SessionBooking: React.FC = () => {
           />
         </div>
 
-        <div className="flex flex-col md:flex-row w-full lg:w-3/4">
-          <div className="w-full md:w-2/3 p-4 md:p-8 space-y-8">
-            <div className="bg-white shadow-lg rounded-lg p-4 md:p-8 max-w-xl mx-auto">
-              <h1 className="text-3xl md:text-5xl font-extrabold text-center text-orange-600 mb-4 font-akshar">
+        <div className="flex flex-col w-full md:flex-row lg:w-3/4">
+          <div className="w-full p-4 space-y-8 md:w-2/3 md:p-8">
+            <div className="max-w-xl p-4 mx-auto bg-white rounded-lg shadow-lg md:p-8">
+              <h1 className="mb-4 text-3xl font-extrabold text-center text-orange-600 md:text-5xl font-akshar">
                 Schedule Your Personalized One-on-One Call
               </h1>
 
-              <p className="text-gray-700 text-base md:text-lg text-center mb-6 font-inter leading-relaxed">
+              <p className="mb-6 text-base leading-relaxed text-center text-gray-700 md:text-lg font-inter">
                 Curious about your assessment results? Get a personalized,
                 in-depth analysis and expert guidance tailored just for you.
                 Book a one-on-one session now!
               </p>
 
-              <div className="flex items-center justify-center gap-2 text-green-600 font-semibold text-xl md:text-2xl">
+              <div className="flex items-center justify-center gap-2 text-xl font-semibold text-green-600 md:text-2xl">
                 <span>₹</span>
                 <span>Rs 499/hr</span>
               </div>
@@ -265,8 +265,8 @@ const SessionBooking: React.FC = () => {
               <SessionBookingForm handleSubmit={handleSubmit} />
             </div>
 
-            <div className="bg-white shadow-lg rounded-lg p-4 md:p-6">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 text-blue-600">
+            <div className="p-4 bg-white rounded-lg shadow-lg md:p-6">
+              <h2 className="mb-4 text-xl font-bold text-blue-600 md:text-2xl">
                 Booked Dates Calendar
               </h2>
               <BookingCalender
@@ -277,7 +277,7 @@ const SessionBooking: React.FC = () => {
               />
             </div>
           </div>
-          <div className="w-full md:w-1/3 p-3 flex flex-col-reverse md:flex-col justify-start items-center gap-6 md:gap-10">
+          <div className="flex flex-col-reverse items-center justify-start w-full gap-6 p-3 md:w-1/3 md:flex-col md:gap-10">
             <WeAreHiring hiring={hiring} />
             {selectedDate && (
               <div className="w-full md:sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
@@ -300,14 +300,14 @@ const SessionBooking: React.FC = () => {
       <AnimatePresence>
         {errorModalOpen && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setErrorModalOpen(false)}
           >
             <motion.div
-              className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full m-4"
+              className="w-full max-w-md p-6 m-4 bg-white rounded-lg shadow-xl"
               initial={{ scale: 0.5, y: -50 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.5, y: -50, opacity: 0 }}
@@ -320,7 +320,7 @@ const SessionBooking: React.FC = () => {
             >
               <div className="flex items-center justify-center mb-5">
                 <motion.div
-                  className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center"
+                  className="flex items-center justify-center w-20 h-20 rounded-full bg-amber-100"
                   initial={{ rotate: 0, scale: 0.5 }}
                   animate={{
                     rotate: [0, -10, 10, -10, 10, 0],
@@ -334,7 +334,7 @@ const SessionBooking: React.FC = () => {
                 >
                   <motion.svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-amber-600"
+                    className="w-10 h-10 text-amber-600"
                     viewBox="0 0 24 24"
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -355,7 +355,7 @@ const SessionBooking: React.FC = () => {
                 </motion.div>
               </div>
               <motion.h2
-                className="text-2xl font-bold mb-3 text-center text-amber-600"
+                className="mb-3 text-2xl font-bold text-center text-amber-600"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -363,7 +363,7 @@ const SessionBooking: React.FC = () => {
                 Oops!
               </motion.h2>
               <motion.p
-                className="text-gray-700 text-center mb-6"
+                className="mb-6 text-center text-gray-700"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
@@ -378,12 +378,12 @@ const SessionBooking: React.FC = () => {
               >
                 <button
                   onClick={() => setErrorModalOpen(false)}
-                  className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg flex items-center gap-2"
+                  className="flex items-center gap-2 px-6 py-2 text-white transition-all rounded-lg shadow-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
                 >
                   <span>Dismiss</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
+                    className="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
