@@ -23,9 +23,10 @@ interface Comment {
   user: {
     _id: string;
     name: string;
-    profilePicture: string;
+    email: string;
+    picture: string;
   };
-  text: string;
+  content: string;
   createdAt: string;
 }
 
@@ -35,7 +36,7 @@ interface PostDetails {
     _id: string;
     name: string;
     role: string;
-    profilePicture: string;
+    picture: string;
     bio?: string;
   };
   content?: string;
@@ -134,60 +135,6 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-// Sample post data for development - this would be replaced with API call
-const samplePost: PostDetails = {
-  _id: "1",
-  postType: "photo",
-  user: {
-    _id: "user1",
-    name: "Jane Smith",
-    role: "Parent Educator",
-    profilePicture:
-      "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-    bio: "Passionate about helping parents build strong relationships with their children.",
-  },
-  content:
-    "Here's a helpful resource for understanding child development stages. As parents, it's important to recognize when your child is reaching milestones and when they might need additional support.",
-  title: "Child Development Milestones",
-  media: [
-    {
-      url: "https://images.unsplash.com/photo-1587654780291-39c9404d746b",
-      type: "image",
-      caption: "Development stages chart",
-    },
-  ],
-  likes: ["user2", "user3", "user4"],
-  comments: [
-    {
-      _id: "comment1",
-      user: {
-        _id: "user2",
-        name: "John Doe",
-        profilePicture:
-          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-      },
-      text: "This is incredibly helpful, thank you for sharing!",
-      createdAt: "2023-12-01T10:30:00Z",
-    },
-    {
-      _id: "comment2",
-      user: {
-        _id: "user3",
-        name: "Sarah Johnson",
-        profilePicture:
-          "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
-      },
-      text: "I've been looking for something like this. Could you recommend any books on this topic as well?",
-      createdAt: "2023-12-01T11:45:00Z",
-    },
-  ],
-  shares: ["user5"],
-  createdAt: "2023-12-01T09:00:00Z",
-  visibility: "public",
-  tags: ["parenting", "childdevelopment", "education"],
-  location: "Mumbai, India",
-};
-
 const PostDetailsPage = () => {
   const { postId } = useParams<{ postId: string }>();
   const [post, setPost] = useState<PostDetails | null>(null);
@@ -215,8 +162,6 @@ const PostDetailsPage = () => {
       try {
         // Check if user is signed in
         if (!isSignedIn) {
-          // For development, still show the post but also display the modal
-          setPost(samplePost);
           setShowAuthModal(true);
           setLoading(false);
           return;
@@ -230,15 +175,18 @@ const PostDetailsPage = () => {
         }
 
         // Use token directly in the request
-        const response = await axios.get(`/api/v1/posts/${postId}`, {
-          headers: {
-            Authorization: `Bearer ${await getToken()}`,
-          },
-        });
-        setPost(response.data);
+        const response = await axios.get(
+          `http://localhost:4000/api/v1/posts/${postId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${await getToken()}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setPost(response.data.data);
 
-        // Using sample data for development
-        setPost(samplePost);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching post details:", err);
@@ -252,14 +200,15 @@ const PostDetailsPage = () => {
       if (!isSignedIn) return;
 
       try {
-        // In real implementation, fetch saved status from API
-        // Using localStorage for development
-        const savedPosts = JSON.parse(
-          localStorage.getItem("savedPosts") || "[]"
+        const token = await getToken();
+        const response = await axios.get(
+          `http://localhost:4000/api/v1/feeds/posts/${postId}/check-saved`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        setIsSavedPost(savedPosts.includes(postId));
-      } catch (err) {
-        console.error("Error checking saved status:", err);
+        console.log(response.data.data);
+        setIsSavedPost(response.data.data);
+      } catch (error) {
+        console.error("Error checking saved post:", error);
       }
     };
 
@@ -283,34 +232,22 @@ const PostDetailsPage = () => {
     }
 
     try {
-      // In a real implementation, you would send this to your API
-      // Check for token without assignment
       if (!(await getToken())) {
         setShowAuthModal(true);
         return;
       }
 
-      // const response = await axios.post(
-      //   `/api/v1/posts/${postId}/comments`,
-      //   { text: newComment },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`
-      //     }
-      //   }
-      // );
-
-      // For development, update the local state
       const newCommentObj: Comment = {
         _id: `temp-${Date.now()}`,
         user: {
           _id: user.id,
           name: `${user.firstName} ${user.lastName}`,
-          profilePicture:
+          email: user.emailAddresses[0].emailAddress,
+          picture:
             user.imageUrl ||
             "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg",
         },
-        text: newComment,
+        content: newComment,
         createdAt: new Date().toISOString(),
       };
 
@@ -321,6 +258,22 @@ const PostDetailsPage = () => {
           comments: [...prevPost.comments, newCommentObj],
         };
       });
+      const token = await getToken();
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/comments",
+        {
+          postId: postId,
+          content: newComment,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      toast.success("Comment added successfully");
 
       setNewComment("");
     } catch (err) {
@@ -340,21 +293,6 @@ const PostDetailsPage = () => {
         setShowAuthModal(true);
         return;
       }
-
-      const checkSavedPost = async () => {
-        try {
-          const token = await getToken();
-          const response = await axios.get(
-            `http://localhost:4000/api/v1/feeds/posts/${postId}/check-saved`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          console.log(response.data.data);
-          setIsSavedPost(response.data.data);
-        } catch (error) {
-          console.error("Error checking saved post:", error);
-        }
-      };
-      checkSavedPost();
       const newSavedState = !isSavedPost;
       setIsSavedPost(newSavedState);
       const token = await getToken();
@@ -396,7 +334,7 @@ const PostDetailsPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="w-16 h-16 border-t-4 border-yellow-500 border-solid rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-t-4 border-orange-500 border-solid rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -408,7 +346,7 @@ const PostDetailsPage = () => {
         <p className="mb-6 text-gray-700">{error || "Post not found"}</p>
         <Link
           to="/adda"
-          className="px-6 py-2 text-white bg-yellow-500 rounded-lg hover:bg-yellow-600"
+          className="px-6 py-2 text-white bg-orange-500 rounded-lg hover:bg-orange-600"
         >
           Go Back to Feed
         </Link>
@@ -476,7 +414,7 @@ const PostDetailsPage = () => {
                   </div>
                   <div className="overflow-hidden rounded-full w-14 h-14">
                     <img
-                      src={post.user.profilePicture}
+                      src={post.user.picture}
                       alt={`${post.user.name}'s profile`}
                       className="object-cover w-full h-full rounded-full"
                     />
@@ -539,7 +477,7 @@ const PostDetailsPage = () => {
                   </div>
                 )}
 
-                {/* Article content */}
+                {/* Article content
                 {post.postType === "article" && post.article && (
                   <div className="mb-4">
                     {post.article.coverImage && (
@@ -551,14 +489,14 @@ const PostDetailsPage = () => {
                     )}
                     <div className="prose max-w-none">{post.article.body}</div>
                   </div>
-                )}
+                )} */}
 
                 {/* Event content */}
                 {post.postType === "event" && post.event && (
-                  <div className="p-4 mb-4 rounded-lg bg-gray-50">
-                    {post.event.coverImage && (
+                  <div className="p-4 mb-4 border border-orange-200 rounded-lg bg-orange-50">
+                    {post.media && post.media.length > 0 && (
                       <img
-                        src={post.event.coverImage}
+                        src={post.media[0].url}
                         alt="Event cover"
                         className="w-full mb-4 rounded-lg max-h-[300px] object-cover"
                       />
@@ -661,7 +599,7 @@ const PostDetailsPage = () => {
               </div>
 
               {/* Comments section */}
-              <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
                 <h3 className="mb-4 text-xl font-bold">
                   Comments ({post.comments.length})
                 </h3>
@@ -687,14 +625,14 @@ const PostDetailsPage = () => {
                           ? "Add a comment..."
                           : "Sign in to comment..."
                       }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full p-3 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       rows={3}
                       disabled={!isSignedIn}
                     ></textarea>
                     <button
                       onClick={handleCommentSubmit}
                       disabled={!newComment.trim() || !isSignedIn}
-                      className="float-right px-4 py-2 mt-2 text-white bg-yellow-500 rounded-lg disabled:opacity-50 hover:bg-yellow-600"
+                      className="float-right px-4 py-2 mt-2 text-white bg-orange-500 rounded-lg disabled:opacity-50 hover:bg-orange-600"
                     >
                       {isSignedIn ? "Post Comment" : "Sign In to Comment"}
                     </button>
@@ -708,11 +646,11 @@ const PostDetailsPage = () => {
                       {displayedComments.map((comment) => (
                         <div
                           key={comment._id}
-                          className="flex items-start gap-3 p-4 rounded-lg bg-gray-50"
+                          className="flex items-start gap-3 p-4 rounded-lg bg-orange-50"
                         >
                           <div className="w-10 h-10 overflow-hidden rounded-full">
                             <img
-                              src={comment.user.profilePicture}
+                              src={comment.user.picture}
                               alt={`${comment.user.name}'s profile`}
                               className="object-cover w-full h-full"
                             />
@@ -726,8 +664,10 @@ const PostDetailsPage = () => {
                                 {formatDate(comment.createdAt)}
                               </span>
                             </div>
-                            <p className="mt-1 text-gray-700">{comment.text}</p>
-                            <div className="flex items-center gap-3 mt-2">
+                            <p className="mt-1 text-gray-700">
+                              {comment.content}
+                            </p>
+                            {/* <div className="flex items-center gap-3 mt-2">
                               <button
                                 className="text-xs text-gray-500 hover:text-yellow-600"
                                 onClick={
@@ -748,7 +688,7 @@ const PostDetailsPage = () => {
                               >
                                 Reply
                               </button>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       ))}
@@ -783,7 +723,7 @@ const PostDetailsPage = () => {
                   <div className="text-center">
                     <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
                       <img
-                        src={post.user.profilePicture}
+                        src={post.user.picture}
                         alt={`${post.user.name}'s profile`}
                         className="object-cover w-full h-full"
                       />
@@ -851,7 +791,7 @@ const PostDetailsPage = () => {
                     ].map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+                        className="px-3 py-1 text-sm text-gray-700 bg-orange-100 rounded-full cursor-pointer hover:bg-orange-200"
                       >
                         #{tag}
                       </span>

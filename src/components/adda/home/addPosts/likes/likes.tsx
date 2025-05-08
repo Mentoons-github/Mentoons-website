@@ -13,7 +13,7 @@ const Likes = ({
   likeCount: number;
 }) => {
   const [isLiked, setIsLiked] = useState<boolean>(false);
-  const [likeCounter, setLikeCounter] = useState(likeCount);
+  const [likeCounter, setLikeCounter] = useState(likeCount || 0);
 
   const { getToken } = useAuth();
 
@@ -86,11 +86,9 @@ const Likes = ({
         )}
       </motion.button>
 
-      {likeCounter > 0 && (
-        <div className="flex items-center gap-1">
-          <span className="text-[#605F5F] figtree text-sm">{likeCounter}</span>
-        </div>
-      )}
+      <div className="flex items-center gap-1">
+        <span className="text-[#605F5F] figtree text-sm">{likeCounter}</span>
+      </div>
     </div>
   );
 };

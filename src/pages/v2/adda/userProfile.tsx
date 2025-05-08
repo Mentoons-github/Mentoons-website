@@ -225,6 +225,7 @@ const UserProfile = () => {
     };
     fetchUserDetails();
   }, [user?.id]);
+
   return (
     <>
       {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
