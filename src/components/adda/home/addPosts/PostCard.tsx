@@ -2,9 +2,9 @@ import Highlight from "@/components/common/modal/highlight";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
-import { FaRegBookmark } from "react-icons/fa6";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
@@ -59,7 +59,6 @@ export interface PostData {
 
 interface PostCardProps {
   post: PostData;
-  
 }
 
 interface Comment {
@@ -73,12 +72,13 @@ interface Comment {
   content: string;
 }
 
-const PostCard = ({ post, }: PostCardProps) => {
+const PostCard = ({ post }: PostCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [isSavedPost, setIsSavedPost] = useState(false);
   const user = useUser();
   console.log(user);
   const { getToken } = useAuth();
@@ -132,6 +132,54 @@ const PostCard = ({ post, }: PostCardProps) => {
       toast.error("Failed to add comment. Please try again.");
     }
   };
+
+  const handleSavePost = async () => {
+    const newSavedState = !isSavedPost;
+    setIsSavedPost(newSavedState);
+
+    try {
+      const token = await getToken();
+      const endpoint = newSavedState
+        ? `http://localhost:4000/api/v1/feeds/posts/${post._id}/save`
+        : `http://localhost:4000/api/v1/feeds/posts/${post._id}/unsave`;
+
+      const response = await axios.post(
+        endpoint,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      toast.success(
+        newSavedState ? "Post saved successfully" : "Post unsaved successfully"
+      );
+    } catch (error) {
+      console.error("Error saving/unsaving post:", error);
+      setIsSavedPost(!newSavedState); // Revert state on error
+      toast.error("Failed to update saved status. Please try again.");
+    }
+  };
+
+    useEffect(() => {
+      const checkSavedPost = async () => {
+        try {
+          const token = await getToken();
+          const response = await axios.get(
+            `http://localhost:4000/api/v1/feeds/posts/${post._id}/check-saved`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log(response.data.data);
+          setIsSavedPost(response.data.data);
+        } catch (error) {
+          console.error("Error checking saved post:", error);
+        }
+      };
+      checkSavedPost();
+    }, []);
 
   const charLimit = 100;
 
@@ -333,10 +381,7 @@ const PostCard = ({ post, }: PostCardProps) => {
 
         <div className="flex items-center justify-between w-full px-3">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            <Likes
-              postId={post._id}
-              likeCount={post.likes.length}
-            />
+            <Likes postId={post._id} likeCount={post.likes.length} />
             <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -361,12 +406,16 @@ const PostCard = ({ post, }: PostCardProps) => {
             />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <button className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10">
-              <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+            <button
+              className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
+              onClick={handleSavePost}
+            >
+              {isSavedPost ? (
+                <FaBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+              ) : (
+                <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+              )}
             </button>
-            <span className="text-[#605F5F] text-sm sm:text-base figtree">
-              {post.shares.length}
-            </span>
           </div>
         </div>
 

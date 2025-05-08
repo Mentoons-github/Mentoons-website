@@ -10,7 +10,7 @@ const Share = ({ postDetails }: { postDetails: any }) => {
   const [shareCount, setShareCount] = useState(postDetails.shares.length);
   const { getToken } = useAuth();
   const shareText = `${postDetails?.title} - ${postDetails.content}`;
-  const baseUrl = window.location.origin + "/post/";
+  const baseUrl = window.location.origin + "/adda/post/";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

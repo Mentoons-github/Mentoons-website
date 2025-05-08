@@ -27,6 +27,10 @@ import {
 import { Link } from "react-router-dom";
 
 // Shadcn UI components
+import PostCard from "@/components/adda/home/addPosts/PostCard";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
+import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
@@ -63,6 +67,16 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+
+  const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
+
+  const [userDetails, setUserDetails] = useState<any>({});
+
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -138,6 +152,79 @@ const UserProfile = () => {
     }, 5000);
   };
 
+  useEffect(() => {
+    const fetchUsersPost = async () => {
+      try {
+        const token = await getToken();
+        if (!token) {
+          throw new Error("No token found");
+        }
+        const response = await axios.get(
+          `http://localhost:4000/api/v1/posts/user/${user?.id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data.data);
+        setUserPosts(response.data.data);
+        toast.success("Posts fetched successfully");
+      } catch (error) {
+        console.log(error);
+        toast.error("Error fetching posts");
+      }
+    };
+    fetchUsersPost();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserSavedPosts = async () => {
+      try {
+        const token = await getToken();
+        if (!token) {
+          throw new Error("No token found");
+        }
+        const response = await axios.get(
+          `http://localhost:4000/api/v1/feeds/saved`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setUserSavedPosts(response.data.data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error fetching saved posts");
+      }
+    };
+    fetchUserSavedPosts();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const response = await axios.get(
+        `http://localhost:4000/api/v1/user/user/${user?.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setUserDetails(response.data.data);
+    };
+    fetchUserDetails();
+  }, [user?.id]);
   return (
     <>
       {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
@@ -239,10 +326,10 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
-                        defaultValue={userData.name}
+                        defaultValue={userDetails.name}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
-                      {userData.name && (
+                      {userDetails.name && (
                         <FiCheck className="inline ml-2 text-green-500" />
                       )}
                     </div>
@@ -252,10 +339,10 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="email"
-                        defaultValue={userData.email}
+                        defaultValue={userDetails.email}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
-                      {userData.email && (
+                      {userDetails.email && (
                         <FiCheck className="inline ml-2 text-green-500" />
                       )}
                     </div>
@@ -264,7 +351,7 @@ const UserProfile = () => {
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Phone Number
-                        {!userData.phone && (
+                        {!userDetails.phone && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
@@ -273,7 +360,7 @@ const UserProfile = () => {
                       <input
                         type="tel"
                         placeholder="Add your phone number"
-                        defaultValue={userData.phone}
+                        defaultValue={userDetails.phone}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
                     </div>
@@ -283,10 +370,10 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
-                        defaultValue={userData.location}
+                        defaultValue={userDetails.location}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
-                      {userData.location && (
+                      {userDetails?.location && (
                         <FiCheck className="inline ml-2 text-green-500" />
                       )}
                     </div>
@@ -294,7 +381,7 @@ const UserProfile = () => {
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Education
-                        {!userData.education && (
+                        {!userDetails?.education && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
@@ -303,14 +390,14 @@ const UserProfile = () => {
                       <input
                         type="text"
                         placeholder="Add your education"
-                        defaultValue={userData.education}
+                        defaultValue={userDetails?.education}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
                     </div>
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Occupation
-                        {!userData.occupation && (
+                        {!userDetails?.occupation && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
@@ -319,7 +406,7 @@ const UserProfile = () => {
                       <input
                         type="text"
                         placeholder="Add your occupation"
-                        defaultValue={userData.occupation}
+                        defaultValue={userDetails?.occupation}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
                     </div>
@@ -327,7 +414,7 @@ const UserProfile = () => {
                     <div className="space-y-1 md:col-span-2">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Bio
-                        {!userData.bio && (
+                        {!userDetails?.bio && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
@@ -335,7 +422,7 @@ const UserProfile = () => {
                       </label>
                       <textarea
                         placeholder="Tell us about yourself"
-                        defaultValue={userData.bio}
+                        defaultValue={userDetails?.bio}
                         rows={4}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
@@ -344,8 +431,8 @@ const UserProfile = () => {
                     <div className="space-y-1 md:col-span-2">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Interests
-                        {userData.interests &&
-                          userData.interests.length < 3 && (
+                        {userDetails.interests &&
+                          userDetails.interests.length < 3 && (
                             <span className="ml-2 text-xs font-normal text-amber-600">
                               (Add at least 3 interests)
                             </span>
@@ -353,14 +440,16 @@ const UserProfile = () => {
                       </label>
                       <div className="p-2 border border-orange-200 rounded-md">
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {userData.interests.map((interest, index) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
-                            >
-                              {interest}
-                            </span>
-                          ))}
+                          {userDetails.interests.map(
+                            (interest: string, index: number) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
+                              >
+                                {interest}
+                              </span>
+                            )
+                          )}
                         </div>
                         <div className="flex gap-2">
                           <input
@@ -377,8 +466,8 @@ const UserProfile = () => {
                                 "new-interest"
                               ) as HTMLInputElement;
                               if (interestInput && interestInput.value.trim()) {
-                                userData.interests = [
-                                  ...userData.interests,
+                                userDetails.interests = [
+                                  ...userDetails.interests,
                                   interestInput.value.trim(),
                                 ];
                                 interestInput.value = "";
@@ -433,7 +522,10 @@ const UserProfile = () => {
                     <div className="flex flex-col items-center px-4 pb-4 -mt-12">
                       <div className="relative">
                         <Avatar className="w-24 h-24 ring-4 ring-white">
-                          <img src={userData.avatar} alt={userData.name} />
+                          <img
+                            src={userDetails.picture}
+                            alt={userDetails.name}
+                          />
                         </Avatar>
                         <Button
                           className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-[#EC9600] text-white hover:bg-[#EC9600]/90"
@@ -444,15 +536,15 @@ const UserProfile = () => {
                       </div>
 
                       <h2 className="mt-3 text-lg font-bold text-gray-800">
-                        {userData.name}
+                        {userDetails.name}
                       </h2>
                       <p className="flex items-center mt-1 text-sm text-gray-600">
                         <FiMapPin className="mr-1" size={14} />{" "}
-                        {userData.location}
+                        {userDetails.location}
                       </p>
                       <p className="flex items-center mt-1 text-xs text-gray-500">
                         <FiCalendar className="mr-1" size={12} /> Joined{" "}
-                        {userData.joinedDate}
+                        {userDetails.joinedDate}
                       </p>
 
                       {/* Profile Completion Badge */}
@@ -481,19 +573,19 @@ const UserProfile = () => {
                       <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
                         <div className="text-center">
                           <p className="font-bold text-xl text-[#EC9600]">
-                            {userData.stats.posts}
+                            {userDetails?.posts?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
                         <div className="text-center">
                           <p className="font-bold text-xl text-[#EC9600]">
-                            {userData.stats.friends}
+                            {userDetails?.friends?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Friends</p>
                         </div>
                         <div className="text-center">
                           <p className="font-bold text-xl text-[#EC9600]">
-                            {userData.stats.groups}
+                            {userDetails?.groups?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Groups</p>
                         </div>
@@ -516,14 +608,17 @@ const UserProfile = () => {
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {userData.interests.map((interest, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
-                        >
-                          {interest}
-                        </span>
-                      ))}
+                      {userDetails?.interests &&
+                        userDetails?.interests.map(
+                          (interest: string, index: number) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
+                            >
+                              {interest}
+                            </span>
+                          )
+                        )}
                     </div>
                   </Card>
 
@@ -649,7 +744,7 @@ const UserProfile = () => {
                               </label>
                               <input
                                 type="text"
-                                defaultValue={userData.name}
+                                defaultValue={userDetails.name}
                                 className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                               />
                             </div>
@@ -659,7 +754,7 @@ const UserProfile = () => {
                               </label>
                               <input
                                 type="email"
-                                defaultValue={userData.email}
+                                defaultValue={userDetails.email}
                                 className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                               />
                             </div>
@@ -669,7 +764,7 @@ const UserProfile = () => {
                               </label>
                               <input
                                 type="tel"
-                                defaultValue={userData.phone}
+                                defaultValue={userDetails.phone}
                                 className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                               />
                             </div>
@@ -679,7 +774,7 @@ const UserProfile = () => {
                               </label>
                               <input
                                 type="text"
-                                defaultValue={userData.location}
+                                defaultValue={userDetails.location}
                                 className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                               />
                             </div>
@@ -688,7 +783,7 @@ const UserProfile = () => {
                                 Bio
                               </label>
                               <textarea
-                                defaultValue={userData.bio}
+                                defaultValue={userDetails.bio}
                                 rows={4}
                                 className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                               />
@@ -707,7 +802,9 @@ const UserProfile = () => {
                               </p>
                               <div className="flex items-center mt-1">
                                 <FiUser className="text-[#EC9600] mr-2" />
-                                <p className="text-gray-800">{userData.name}</p>
+                                <p className="text-gray-800">
+                                  {userDetails.name}
+                                </p>
                               </div>
                             </div>
                             <div className="p-3 border border-orange-100 rounded-lg">
@@ -717,7 +814,7 @@ const UserProfile = () => {
                               <div className="flex items-center mt-1">
                                 <FiMail className="text-[#EC9600] mr-2" />
                                 <p className="text-gray-800">
-                                  {userData.email}
+                                  {userDetails?.email}
                                 </p>
                               </div>
                             </div>
@@ -728,7 +825,7 @@ const UserProfile = () => {
                               <div className="flex items-center mt-1">
                                 <FiPhone className="text-[#EC9600] mr-2" />
                                 <p className="text-gray-800">
-                                  {userData.phone}
+                                  {userDetails?.phone}
                                 </p>
                               </div>
                             </div>
@@ -739,7 +836,7 @@ const UserProfile = () => {
                               <div className="flex items-center mt-1">
                                 <FiMapPin className="text-[#EC9600] mr-2" />
                                 <p className="text-gray-800">
-                                  {userData.location}
+                                  {userDetails?.location}
                                 </p>
                               </div>
                             </div>
@@ -748,7 +845,7 @@ const UserProfile = () => {
                                 Bio
                               </p>
                               <p className="mt-2 text-gray-800">
-                                {userData.bio}
+                                {userDetails?.bio}
                               </p>
                             </div>
                           </div>
@@ -864,45 +961,8 @@ const UserProfile = () => {
 
                       {/* Post items */}
                       <div className="space-y-4">
-                        {[1, 2, 3].map((post) => (
-                          <div
-                            key={post}
-                            className="p-4 border border-orange-100 rounded-xl"
-                          >
-                            <div className="flex items-start gap-3 mb-3">
-                              <Avatar className="w-10 h-10">
-                                <img
-                                  src={userData.avatar}
-                                  alt={userData.name}
-                                />
-                              </Avatar>
-                              <div>
-                                <p className="font-medium">{userData.name}</p>
-                                <p className="text-xs text-gray-500">
-                                  Posted 2 days ago
-                                </p>
-                              </div>
-                            </div>
-                            <p className="mb-3">
-                              This is a sample post content #{post}. Lorem ipsum
-                              dolor sit amet, consectetur adipiscing elit.
-                            </p>
-                            {post % 2 === 0 && (
-                              <div className="h-48 mb-3 bg-orange-100 rounded-lg"></div>
-                            )}
-                            <div className="flex items-center justify-between pt-2 border-t border-orange-100">
-                              <button className="flex items-center gap-1 text-gray-600 hover:text-[#EC9600]">
-                                <FiHeart />{" "}
-                                <span className="text-sm">Like (24)</span>
-                              </button>
-                              <button className="flex items-center gap-1 text-gray-600 hover:text-[#EC9600]">
-                                <span className="text-sm">Comments (8)</span>
-                              </button>
-                              <button className="flex items-center gap-1 text-gray-600 hover:text-[#EC9600]">
-                                <span className="text-sm">Share</span>
-                              </button>
-                            </div>
-                          </div>
+                        {userPosts.map((post) => (
+                          <PostCard key={post._id} post={post} />
                         ))}
                       </div>
                     </Card>
@@ -948,26 +1008,8 @@ const UserProfile = () => {
                         Saved Items
                       </h3>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {[1, 2, 3, 4].map((item) => (
-                          <div
-                            key={item}
-                            className="overflow-hidden transition-shadow border border-orange-100 rounded-xl hover:shadow-md"
-                          >
-                            <div className="h-40 bg-orange-100"></div>
-                            <div className="p-3">
-                              <h4 className="font-medium text-gray-800">
-                                Saved Item Title {item}
-                              </h4>
-                              <p className="mt-1 text-sm text-gray-500">
-                                Saved on June 12, 2023
-                              </p>
-                              <div className="flex justify-end mt-2">
-                                <Button className="text-xs h-7 bg-[#EC9600] hover:bg-[#EC9600]/90">
-                                  View
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+                        {userSavedPosts.map((item) => (
+                          <PostCard key={item._id} post={item} />
                         ))}
                       </div>
                     </Card>

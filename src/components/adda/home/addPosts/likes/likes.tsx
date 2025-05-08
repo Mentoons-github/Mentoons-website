@@ -72,11 +72,15 @@ const Likes = ({
       <motion.button
         className="flex items-center justify-center w-8 p-2 bg-white border border-orange-400 rounded-full sm:w-12 sm:h-12"
         onClick={handleLike}
-        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
+        }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
       >
         {isLiked ? (
-          <FaHeart className="w-4 text-red-500 sm:w-6 sm:h-6" />
+          <FaHeart className="w-4 text-red-500 sm:w-6 sm:h-6 ho" />
         ) : (
           <FaRegHeart className="w-4 text-orange-500 sm:w-6 sm:h-6" />
         )}

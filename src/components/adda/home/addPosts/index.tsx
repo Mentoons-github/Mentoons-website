@@ -132,7 +132,7 @@ const PostsContainer = () => {
           handleNewPost(newPost);
         }}
       />
-      <Feed posts={posts} />
+      <Feed />
     </div>
   );
 };
