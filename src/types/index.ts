@@ -7,6 +7,7 @@ import { Color, Membership } from "./home/membership";
 import { Booking } from "./sessionBooking/session";
 import { JobPosting } from "./jobs/jobs";
 import { PostState, EventDetails } from "./adda/posts";
+import { Conversations, Friend, Message } from "./adda/conversation";
 import {
   FooterLists,
   JoinCardsProps,
@@ -36,4 +37,7 @@ export type {
   JobPosting,
   PostState,
   EventDetails,
+  Conversations,
+  Friend,
+  Message,
 };

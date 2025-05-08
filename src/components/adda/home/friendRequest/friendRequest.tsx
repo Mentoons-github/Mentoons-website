@@ -1,10 +1,10 @@
-import { FRIEND_REQUEST } from "@/constant/constants";
 import { RequestInterface } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./friendRequest.css";
+import axiosInstance from "@/api/axios";
 
 const FriendRequest = () => {
-  const [requests, setRequests] = useState<RequestInterface[]>(FRIEND_REQUEST);
+  const [requests, setRequests] = useState<RequestInterface[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -13,14 +13,18 @@ const FriendRequest = () => {
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/friend-requests?page=${page}`);
-      const data = await res.json();
-      if (res.ok) {
-        setRequests((prev) =>
-          data.length > 0 ? [...prev, ...data] : FRIEND_REQUEST
-        );
-        setPage((prev) => prev + 1);
-      }
+      const response = await axiosInstance(
+        `/adda/getMyFriendRequests?page=${page}`
+      );
+      const friendRequest = response.data.data;
+      setRequests((prev) =>
+        response.data.data.length > 0
+          ? prev
+            ? [...prev, ...friendRequest]
+            : friendRequest
+          : prev || []
+      );
+      setPage((prev) => prev + 1);
     } catch (error) {
       console.error("Error fetching friend requests:", error);
     }
@@ -63,7 +67,7 @@ const FriendRequest = () => {
             Friend Requests
           </h2>
         </div>
-        {requests.length > 0 && (
+        {requests && requests.length > 0 && (
           <span className="flex items-center justify-center px-[9px] py-1 text-xs font-medium text-white bg-orange-500 rounded-full mr-2">
             {requests.length}
           </span>
@@ -71,7 +75,7 @@ const FriendRequest = () => {
       </div>
 
       <div className="w-full overflow-y-auto max-h-[400px] scrollbar-hide">
-        {requests.length > 0 ? (
+        {requests && requests.length > 0 ? (
           <div className="grid gap-3">
             {requests.map(({ profilePic, userName }, index) => (
               <div
