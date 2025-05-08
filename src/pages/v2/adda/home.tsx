@@ -23,7 +23,6 @@ const AddaHome = () => {
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          {/* Header section with user status */}
           <div className="sticky left-0 flex items-center w-full top-[64px] z-[99999] bg-white">
             <div className="flex-grow w-full min-w-0 py-2 ">
               <UserStatus />
@@ -38,34 +37,24 @@ const AddaHome = () => {
               </Link>
             </div>
           </div>
-
-          {/* Main content area */}
           <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6 ">
-            {/* Left sidebar - Founder Note (only visible on lg screens and up) */}
             <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
               <div className="sticky top-[204px] w-full">
                 <FounderNote scroll={false} />
               </div>
             </div>
-
-            {/* Center content area - Posts */}
             <div
               className={`flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%] ${
                 activeSection !== "home" ? "hidden md:flex" : "flex"
               }`}
             >
-              {/* Add posts section */}
               <div className="sticky top-[176px] sm:top-[200px]   z-[9999] bg-white rounded-br-lg shadow-sm rounded-bl-lg rounded-tl-lg rounded-tr-lg  ">
                 <AddPosts />
               </div>
-
-              {/* Posts feed */}
               <div className="w-full bg-white rounded-bl-lg rounded-br-lg">
                 <Posts />
               </div>
             </div>
-
-            {/* Right sidebar */}
             <div
               className={`w-full md:w-1/3 lg:w-1/4 flex-shrink-0
                ${
