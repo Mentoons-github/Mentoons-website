@@ -9,25 +9,25 @@ const FriendRequest = () => {
   );
 
   return (
-    <div className="flex flex-col items-center w-full rounded-xl p-2 sm:p-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-4 gap-3">
+    <div className="flex flex-col items-center w-full p-2 rounded-xl sm:p-4">
+      <div className="flex flex-col items-start justify-between w-full gap-3 mb-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full sm:w-10 sm:h-10">
             <img
               src="/assets/adda/sidebar/dd917c3b5f69868482390319c6a80c25.png"
               alt="friend-requests"
               className="w-full"
             />
           </div>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-800 figtree">
+          <h2 className="text-base font-semibold text-gray-800 sm:text-lg figtree">
             {activeRequestTab === "receive"
               ? "Friend Requests"
               : "Friend Suggestions"}
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="flex p-1 bg-gray-100 rounded-lg w-full sm:w-auto">
+        <div className="flex items-center w-full gap-2 sm:w-auto">
+          <div className="flex w-full p-1 bg-gray-100 rounded-lg sm:w-auto">
             <button
               className={`flex-1 sm:flex-auto px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all ${
                 activeRequestTab === "receive"
