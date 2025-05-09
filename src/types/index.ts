@@ -16,6 +16,7 @@ import {
 } from "./mythos/interface";
 import { Contests } from "./home/contests";
 import { IUser } from "./user";
+import { Notification, NotificationContextType } from "./adda/notification";
 
 export type {
   Color,
@@ -40,4 +41,6 @@ export type {
   Conversations,
   Friend,
   Message,
+  Notification,
+  NotificationContextType,
 };

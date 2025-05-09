@@ -11,10 +11,9 @@ export interface UserStatusInterface {
 }
 
 export interface RequestInterface {
-  id: string;
+  _id?: string;
   userName: string;
   profilePic: string;
-  status: "pending" | "accepted" | "rejected";
-  senderId: string;
-  receiverId: string;
+  picture: string;
+  name: string;
 }

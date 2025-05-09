@@ -25,8 +25,8 @@ const Likes = ({
     try {
       const token = await getToken();
       const endpoint = newLikedState
-        ? "http://localhost:4000/api/v1/likes/posts/like"
-        : "http://localhost:4000/api/v1/likes/posts/unlike";
+        ? `${import.meta.env.VITE_PROD_URL}/likes/posts/like`
+        : `${import.meta.env.VITE_PROD_URL}/likes/posts/unlike`;
 
       const headers = {
         "Content-Type": "application/json",
@@ -50,7 +50,9 @@ const Likes = ({
   useEffect(() => {
     const checkLike = async () => {
       const token = await getToken();
-      const endpoint = `http://localhost:4000/api/v1/likes/posts/like/check?postId=${postId}`;
+      const endpoint = `${
+        import.meta.env.VITE_PROD_URL
+      }/likes/posts/like/check?postId=${postId}`;
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

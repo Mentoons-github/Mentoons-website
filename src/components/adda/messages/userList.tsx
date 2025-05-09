@@ -21,23 +21,15 @@ const UserList = ({
   const [filter, setFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter friends based on search term and filter settings
   const filteredFriends = !friends
     ? []
-    : friends
-        .filter((friend) => {
-          if (filter === "online") return friend.isOnline; // Assuming you have this property
-          return true;
-        })
-        .filter((friend) =>
-          friend.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    : friends.filter((friend) =>
+        friend.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
-  // Helper function to get the last message for a friend
   const getLastMessage = (friendId: string) => {
     if (!conversations) return null;
 
-    // Find conversation with this friend
     const conversation = conversations.find((conv) =>
       conv.members.includes(friendId)
     );
@@ -49,27 +41,7 @@ const UserList = ({
     ) {
       return null;
     }
-
-    // Return the last message in the conversation
     return conversation.messages[conversation.messages.length - 1];
-  };
-
-  // Helper to check if there are unread messages
-  const getUnreadCount = (friendId: string) => {
-    if (!conversations) return 0;
-
-    const conversation = conversations.find((conv) =>
-      conv.members.includes(friendId)
-    );
-
-    if (!conversation) return 0;
-
-    // Count unread messages (assuming your message objects have a 'read' property)
-    return conversation.messages
-      ? conversation.messages.filter(
-          (msg) => !msg.read && msg.sender !== friendId
-        ).length
-      : 0;
   };
 
   return (
@@ -98,26 +70,6 @@ const UserList = ({
           >
             All
           </button>
-          <button
-            className={`px-3 py-1 text-sm rounded-full ${
-              filter === "unread"
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-            onClick={() => setFilter("unread")}
-          >
-            Unread
-          </button>
-          <button
-            className={`px-3 py-1 text-sm rounded-full ${
-              filter === "online"
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-            onClick={() => setFilter("online")}
-          >
-            Online
-          </button>
         </div>
       )}
 
@@ -139,7 +91,6 @@ const UserList = ({
           </div>
         ) : filteredFriends.length > 0 ? (
           filteredFriends.map((friend) => {
-            const unreadCount = getUnreadCount(friend._id);
             const lastMessage = getLastMessage(friend._id);
 
             return (
@@ -162,24 +113,10 @@ const UserList = ({
                       alt={friend.name}
                       className="w-full h-full rounded-full object-cover"
                     />
-                    {friend.isOnline && (
-                      <span className="absolute bottom-0 right-0 bg-green-500 border-2 border-white rounded-full h-3 w-3"></span>
-                    )}
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {unreadCount}
-                      </span>
-                    )}
                   </div>
                   <div className="ml-3 max-w-[168px]">
                     <div className="flex items-center">
-                      <h3
-                        className={`font-medium ${
-                          unreadCount > 0
-                            ? "text-gray-900 font-semibold"
-                            : "text-gray-700"
-                        }`}
-                      >
+                      <h3 className="font-medium text-gray-700">
                         {friend.name}
                       </h3>
                       {friend.isPinned && (
@@ -193,25 +130,13 @@ const UserList = ({
                         </svg>
                       )}
                     </div>
-                    <p
-                      className={`text-sm truncate w-full ${
-                        unreadCount > 0
-                          ? "text-gray-800 font-medium"
-                          : "text-gray-500"
-                      }`}
-                    >
+                    <p className="text-sm truncate w-full text-gray-500">
                       {lastMessage ? lastMessage.text : "Start a conversation"}
                     </p>
                   </div>
                 </div>
-                <div
-                  className={`text-xs whitespace-nowrap ${
-                    unreadCount > 0
-                      ? "text-blue-600 font-semibold"
-                      : "text-gray-400"
-                  }`}
-                >
-                  {friend.lastSeen || "Online"}
+                <div className="text-xs whitespace-nowrap text-gray-400">
+                  {friend.lastSeen || ""}
                 </div>
               </div>
             );
