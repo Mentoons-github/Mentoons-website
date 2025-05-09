@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
@@ -82,6 +83,7 @@ const PostCard = ({ post }: PostCardProps) => {
   const user = useUser();
   console.log(user);
   const { getToken } = useAuth();
+  const navigate = useNavigate();
   const handleCommentSubmit = async () => {
     if (newComment.trim() === "") return;
     // Ensure comments is an array before spreading
@@ -164,22 +166,22 @@ const PostCard = ({ post }: PostCardProps) => {
     }
   };
 
-    useEffect(() => {
-      const checkSavedPost = async () => {
-        try {
-          const token = await getToken();
-          const response = await axios.get(
-            `http://localhost:4000/api/v1/feeds/posts/${post._id}/check-saved`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          console.log(response.data.data);
-          setIsSavedPost(response.data.data);
-        } catch (error) {
-          console.error("Error checking saved post:", error);
-        }
-      };
-      checkSavedPost();
-    }, []);
+  useEffect(() => {
+    const checkSavedPost = async () => {
+      try {
+        const token = await getToken();
+        const response = await axios.get(
+          `http://localhost:4000/api/v1/feeds/posts/${post._id}/check-saved`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(response.data.data);
+        setIsSavedPost(response.data.data);
+      } catch (error) {
+        console.error("Error checking saved post:", error);
+      }
+    };
+    checkSavedPost();
+  }, []);
 
   const charLimit = 100;
 
@@ -266,7 +268,10 @@ const PostCard = ({ post }: PostCardProps) => {
         );
       case "article":
         return (
-          <div className="w-full">
+          <div
+            className="w-full"
+            onClick={() => navigate(`/adda/post/${post._id}`)}
+          >
             <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
               {isExpanded
                 ? post.content
@@ -284,12 +289,7 @@ const PostCard = ({ post }: PostCardProps) => {
               )}
             </p>
             {post.article && (
-              <a
-                href={`/article/${post._id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50"
-              >
+              <div className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50">
                 <img
                   src={post.article.coverImage}
                   alt={post.title || "Article"}
@@ -303,13 +303,16 @@ const PostCard = ({ post }: PostCardProps) => {
                     {post.article.body.substring(0, 100)}...
                   </p>
                 )}
-              </a>
+              </div>
             )}
           </div>
         );
       case "event":
         return (
-          <div className="w-full">
+          <div
+            className="w-full"
+            onClick={() => navigate(`/adda/post/${post._id}`)}
+          >
             <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
               {isExpanded
                 ? post.content

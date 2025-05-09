@@ -25,7 +25,7 @@ const Feed = () => {
     fetchUserFeeds();
   }, []);
   return (
-    <div className="flex flex-col w-full gap-6">
+    <div className="flex flex-col w-full gap-4">
       {userFeeds?.map((post) => (
         <PostCard key={post._id} post={post} />
       ))}

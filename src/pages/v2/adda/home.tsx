@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 const AddaHome = () => {
   const [activeSection, setActiveSection] = useState<
-    "home" | "notification" | "memeBanner" | "friendRequest"
+    "home" | "notification" | "memeBanner" | "friendRequest" | "userProfile"
   >("home");
 
   useEffect(() => {
@@ -23,7 +23,8 @@ const AddaHome = () => {
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          <div className="sticky left-0 flex items-center w-full top-[64px] z-[99999] bg-white">
+          {/* Header section with user status */}
+          <div className="sticky left-0 flex items-center w-full top-[64px] z-[9] bg-white">
             <div className="flex-grow w-full min-w-0 py-2 ">
               <UserStatus />
             </div>
@@ -48,10 +49,13 @@ const AddaHome = () => {
                 activeSection !== "home" ? "hidden md:flex" : "flex"
               }`}
             >
-              <div className="sticky top-[176px] sm:top-[200px]   z-[9999] bg-white rounded-br-lg shadow-sm rounded-bl-lg rounded-tl-lg rounded-tr-lg  ">
+              {/* Add posts section */}
+              <div className="sticky top-[176px] sm:top-[184px] md:top-[200px]   z-[10] bg-white rounded-br-lg shadow-sm rounded-bl-lg ">
                 <AddPosts />
               </div>
-              <div className="w-full bg-white rounded-bl-lg rounded-br-lg">
+
+              {/* Posts feed */}
+              <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
                 <Posts />
               </div>
             </div>
@@ -69,9 +73,9 @@ const AddaHome = () => {
                    : "hidden md:block"
                }`}
             >
-              <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg  md:pt-0 top-[204px] z-10 w-full ">
+              <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg  md:pt-0 top-[204px] z-[8] w-full ">
                 {/* Mobile view for specific active sections */}
-                <div className="border border-orange-200 md:hidden">
+                <div className="flex flex-col gap-4 mb-16 md:hidden">
                   {activeSection === "notification" && <Notification />}
 
                   {activeSection === "friendRequest" && (
@@ -103,7 +107,7 @@ const AddaHome = () => {
       </div>
 
       {/* Bottom navigation - visible on small screens */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
         <BottomNav setActive={setActiveSection} />
       </div>
     </>

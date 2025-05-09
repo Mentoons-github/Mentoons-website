@@ -1,15 +1,16 @@
 const Notification = () => {
+  
   return (
-    <div className="p-5 flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-5`">
       <h1 className="text-xl font-bold">Notifications</h1>
 
-      <div className="flex flex-col gap-4 max-h-screen ">
-        <div className="flex items-start gap-3 bg-gray-100 p-4 rounded-lg shadow-md w-full">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
+      <div className="flex flex-col max-h-screen gap-4 ">
+        <div className="flex items-start w-full gap-3 p-4 bg-orange-100 rounded-lg ">
+          <div className="w-10 h-10 overflow-hidden border border-gray-300 rounded-full">
             <img
               src="/profilePictures/pexels-simon-robben-55958-614810.jpg"
               alt="profile"
-              className="w-full h-full object-cover"
+              className="object-cover w-full h-full"
             />
           </div>
           <div>
