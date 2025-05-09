@@ -1,27 +1,98 @@
-import { useCallback, useRef } from "react";
-import { RequestInterface } from "@/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
+import { FriendRequestResponse } from "@/types";
 
-interface FriendRequestsListProps {
-  requests: RequestInterface[] | null;
-  loading: boolean;
-  onFetchMore: () => Promise<void>;
+export interface RequestSender {
+  requestId: string;
+  senderDetails: {
+    _id: string;
+    name: string;
+    picture: string;
+  };
+  status?: "pending" | "accepting" | "declining" | "accepted" | "declined";
+  message?: string;
 }
 
-const FriendRequestsList = ({
-  requests,
-  loading,
-  onFetchMore,
-}: FriendRequestsListProps) => {
+const FriendRequestsList = () => {
+  const [requests, setRequests] = useState<RequestSender[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
 
+  const fetchRequests = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+
+    const token = await getToken();
+    try {
+      const response = await axiosInstance.get(
+        `/adda/getMyFriendRequests?page=${page}&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const { pendingReceived, totalPages } = response.data.data;
+
+      console.log("pending received :", pendingReceived);
+
+      const transformedRequests = pendingReceived.map(
+        (data: FriendRequestResponse) => ({
+          requestId: data._id,
+          senderDetails: {
+            _id: data.senderId._id,
+            name: data.senderId.name,
+            picture: data.senderId.picture,
+          },
+          status: "pending",
+        })
+      );
+
+      console.log(transformedRequests);
+
+      if (transformedRequests && transformedRequests.length > 0) {
+        setRequests((prev) =>
+          prev ? [...prev, ...transformedRequests] : transformedRequests
+        );
+        setPage((prev) => prev + 1);
+
+        if (page >= totalPages) {
+          setHasMore(false);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.log("Error fetching friend requests:", error);
+      setHasMore(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
   const handleAccept = async (requestId: string) => {
+    setRequests((prev) =>
+      prev
+        ? prev.map((request) =>
+            request.requestId === requestId
+              ? { ...request, status: "accepting" }
+              : request
+          )
+        : null
+    );
+
     try {
       const token = await getToken();
-      await axiosInstance.post(
-        `/adda/acceptFriendRequest/${requestId}`,
+      const response = await axiosInstance.patch(
+        `/adda/acceptRequest/${requestId}`,
         {},
         {
           headers: {
@@ -29,16 +100,61 @@ const FriendRequestsList = ({
           },
         }
       );
+
+      console.log(response);
+
+      if (response.data.success === true) {
+        setRequests((prev) =>
+          prev
+            ? prev.map((request) =>
+                request.requestId === requestId
+                  ? {
+                      ...request,
+                      status: "accepted",
+                      message: "Request accepted!",
+                    }
+                  : request
+              )
+            : null
+        );
+
+        setTimeout(() => {
+          setRequests((prev) =>
+            prev
+              ? prev.filter((request) => request.requestId !== requestId)
+              : null
+          );
+        }, 1500);
+      }
     } catch (error) {
       console.error("Error accepting friend request:", error);
+      setRequests((prev) =>
+        prev
+          ? prev.map((request) =>
+              request.requestId === requestId
+                ? { ...request, status: "pending" }
+                : request
+            )
+          : null
+      );
     }
   };
 
   const handleDecline = async (requestId: string) => {
+    setRequests((prev) =>
+      prev
+        ? prev.map((request) =>
+            request.requestId === requestId
+              ? { ...request, status: "declining" }
+              : request
+          )
+        : null
+    );
+
     try {
       const token = await getToken();
-      await axiosInstance.post(
-        `/adda/declineFriendRequest/${requestId}`,
+      const response = await axiosInstance.patch(
+        `/adda/rejectRequest/${requestId}`,
         {},
         {
           headers: {
@@ -46,8 +162,41 @@ const FriendRequestsList = ({
           },
         }
       );
+
+      if (response.data.success === true) {
+        setRequests((prev) =>
+          prev
+            ? prev.map((request) =>
+                request.requestId === requestId
+                  ? {
+                      ...request,
+                      status: "declined",
+                      message: "Request declined",
+                    }
+                  : request
+              )
+            : null
+        );
+
+        setTimeout(() => {
+          setRequests((prev) =>
+            prev
+              ? prev.filter((request) => request.requestId !== requestId)
+              : null
+          );
+        }, 1500);
+      }
     } catch (error) {
       console.error("Error declining friend request:", error);
+      setRequests((prev) =>
+        prev
+          ? prev.map((request) =>
+              request.requestId === requestId
+                ? { ...request, status: "pending" }
+                : request
+            )
+          : null
+      );
     }
   };
 
@@ -55,18 +204,29 @@ const FriendRequestsList = ({
     (node: HTMLDivElement | null) => {
       if (loading) return;
       if (observer.current) observer.current.disconnect();
+
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting) {
-            onFetchMore();
+          if (entries[0].isIntersecting && hasMore) {
+            fetchRequests();
           }
         },
-        { threshold: 1.0 }
+        { threshold: 0.8 }
       );
+
       if (node) observer.current.observe(node);
     },
-    [loading, onFetchMore]
+    [loading, hasMore]
   );
+
+  if (!requests && loading) {
+    return (
+      <div className="flex items-center justify-center w-full py-8">
+        <div className="w-6 h-6 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+        <span className="ml-2 text-sm text-gray-500">Loading requests...</span>
+      </div>
+    );
+  }
 
   if (!requests || requests.length === 0) {
     return (
@@ -95,69 +255,181 @@ const FriendRequestsList = ({
     );
   }
 
+  const getCardClasses = (status?: string) => {
+    const baseClasses =
+      "flex flex-col w-full p-4 transition-all duration-300 border rounded-xl";
+
+    switch (status) {
+      case "accepting":
+        return `${baseClasses} border-green-200 bg-green-50`;
+      case "declining":
+        return `${baseClasses} border-red-200 bg-red-50`;
+      case "accepted":
+        return `${baseClasses} border-green-300 bg-green-100 transform scale-95 opacity-80`;
+      case "declined":
+        return `${baseClasses} border-red-300 bg-red-100 transform scale-95 opacity-80`;
+      default:
+        return `${baseClasses} border-orange-100 bg-white hover:shadow-md`;
+    }
+  };
+
+  const getActionButtons = (request: RequestSender) => {
+    const { status, requestId } = request;
+
+    if (status === "accepting") {
+      return (
+        <div className="flex justify-center w-full py-2">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border-2 rounded-full border-t-green-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+            <span className="text-sm font-medium text-green-600">
+              Accepting request...
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    if (status === "declining") {
+      return (
+        <div className="flex justify-center w-full py-2">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border-2 rounded-full border-t-red-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+            <span className="text-sm font-medium text-red-600">
+              Declining request...
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    if (status === "accepted") {
+      return (
+        <div className="flex justify-center w-full py-2">
+          <div className="flex items-center gap-2 text-green-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="font-medium">Request Accepted!</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (status === "declined") {
+      return (
+        <div className="flex justify-center w-full py-2">
+          <div className="flex items-center gap-2 text-red-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="font-medium">Request Declined</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex justify-between w-full gap-2">
+        <button
+          onClick={() => handleAccept(requestId)}
+          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Accept
+        </button>
+        <button
+          onClick={() => handleDecline(requestId)}
+          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg hover:bg-gray-200"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Decline
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="grid gap-3">
-      {requests.map(({ profilePic, userName, _id }, index) => (
+      {requests.map((request, index) => (
         <div
-          key={_id}
-          className="flex flex-col w-full p-4 transition-all duration-200 bg-white border border-orange-100 rounded-xl hover:shadow-md"
+          key={request.requestId}
+          className={getCardClasses(request.status)}
           ref={index === requests.length - 1 ? lastRequestRef : null}
         >
           <div className="flex items-center w-full gap-3 mb-3">
             <div className="w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-50">
               <img
-                src={profilePic}
-                alt={userName}
+                src={request.senderDetails.picture}
+                alt={request.senderDetails.name}
                 className="object-cover w-full h-full"
               />
             </div>
             <div>
               <h3 className="text-base font-medium text-gray-800">
-                {userName}
+                {request.senderDetails.name}
               </h3>
               <p className="text-xs text-gray-500">Wants to connect with you</p>
             </div>
           </div>
-          <div className="flex justify-between w-full gap-2">
-            <button
-              onClick={() => handleAccept(_id!)}
-              className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Accept
-            </button>
-            <button
-              onClick={() => handleDecline(_id!)}
-              className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg hover:bg-gray-200"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Decline
-            </button>
-          </div>
+
+          {getActionButtons(request)}
         </div>
       ))}
+
+      {loading && (
+        <div className="flex items-center justify-center w-full py-3">
+          <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+          <span className="ml-2 text-xs text-gray-500">
+            Loading more requests...
+          </span>
+        </div>
+      )}
+
+      {!hasMore && requests.length > 0 && (
+        <div className="text-center py-2 text-sm text-gray-500">
+          No more friend requests to load
+        </div>
+      )}
     </div>
   );
 };

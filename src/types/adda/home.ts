@@ -17,3 +17,28 @@ export interface RequestInterface {
   picture: string;
   name: string;
 }
+
+export interface requestSender {
+  requestId: string;
+  senderDetails: {
+    _id: string;
+    name: string;
+    picture: string;
+  };
+}
+
+interface UserSummary {
+  _id: string;
+  name: string;
+  picture: string;
+}
+
+export interface FriendRequestResponse {
+  _id: string;
+  senderId: UserSummary;
+  receiverId: UserSummary;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}

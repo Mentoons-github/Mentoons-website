@@ -1,4 +1,9 @@
-import { RequestInterface, UserStatusInterface } from "./adda/home";
+import {
+  RequestInterface,
+  UserStatusInterface,
+  requestSender,
+  FriendRequestResponse,
+} from "./adda/home";
 import { StatusInterface, StatusState } from "./adda/status";
 import { DropDownInterface } from "./common/header";
 import { Groups } from "./groups/groups";
@@ -16,7 +21,11 @@ import {
 } from "./mythos/interface";
 import { Contests } from "./home/contests";
 import { IUser } from "./user";
-import { Notification, NotificationContextType } from "./adda/notification";
+import {
+  Notification,
+  NotificationContextType,
+  NotificationInterface,
+} from "./adda/notification";
 
 export type {
   Color,
@@ -43,4 +52,7 @@ export type {
   Message,
   Notification,
   NotificationContextType,
+  requestSender,
+  FriendRequestResponse,
+  NotificationInterface,
 };
