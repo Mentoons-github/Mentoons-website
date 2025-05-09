@@ -8,6 +8,8 @@ export interface StatusInterface {
   status: "watched" | "unwatched";
   url: string;
   createdAt: string;
+  mediaUrl?: string;
+  caption?: string;
 }
 
 export interface StatusState {

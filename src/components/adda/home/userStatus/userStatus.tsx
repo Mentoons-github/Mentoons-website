@@ -126,9 +126,7 @@ const UserStatus = () => {
           ? URL.createObjectURL(imageWithText)
           : URL.createObjectURL(selectedFile),
         caption: caption,
-        timestamp: new Date().toISOString(),
         status: "unwatched",
-        duration: selectedFile.type.startsWith("video/") ? 30 : 5,
         viewCount: 0,
         type: selectedFile.type.startsWith("video/") ? "video" : "image",
         url: imageWithText
