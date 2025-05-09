@@ -11,7 +11,10 @@ export interface UserStatusInterface {
 }
 
 export interface RequestInterface {
+  _id?: string;
   userName: string;
   accepted: boolean;
   profilePic: string;
+  picture: string;
+  name: string;
 }

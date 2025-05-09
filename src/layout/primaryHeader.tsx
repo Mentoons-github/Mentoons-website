@@ -6,7 +6,7 @@ import {
 import { SignedIn } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { FaClock } from "react-icons/fa";
-import { FaMessage } from "react-icons/fa6";
+import { FaBell, FaMessage } from "react-icons/fa6";
 
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -71,6 +71,15 @@ const PrimaryHeader = () => {
               className="relative cursor-pointer py-2 hidden md:block"
             >
               <FaMessage />
+              <span className="absolute -top-0 -right-4 px-2 rounded-full bg-yellow-400 text-xs text-black text-center">
+                2
+              </span>
+            </NavLink>
+            <NavLink
+              to="/adda/notifications"
+              className="relative cursor-pointer py-2 hidden md:block"
+            >
+              <FaBell />
               <span className="absolute -top-0 -right-4 px-2 rounded-full bg-yellow-400 text-xs text-black text-center">
                 2
               </span>
