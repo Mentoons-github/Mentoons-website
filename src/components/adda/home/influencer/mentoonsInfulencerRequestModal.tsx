@@ -5,10 +5,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { FaLinkedin, FaTiktok, FaXTwitter } from "react-icons/fa6";
+import { FaCheck, FaLinkedin, FaTiktok, FaXTwitter } from "react-icons/fa6";
 import { FiInstagram, FiYoutube } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ const MentoonsInfulencerRequestModal = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(1);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const totalSteps = 3;
 
   const validationSchema = Yup.object({
@@ -97,14 +99,22 @@ const MentoonsInfulencerRequestModal = ({
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Submit logic would go here
         console.log("Form values:", values);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const response = await axios.post(
+          "http://localhost:4000/api/v1/influencer-requests",
+          values,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log(response.data.data);
 
         toast.success("Your application has been submitted successfully!");
-        onClose();
+        setShowSuccessModal(true);
       } catch (error) {
         console.error("Error submitting form:", error);
         toast.error("Failed to submit your application. Please try again.");
@@ -188,6 +198,56 @@ const MentoonsInfulencerRequestModal = ({
       transition: { type: "spring", stiffness: 100 },
     },
   };
+
+  if (showSuccessModal) {
+    return (
+      <DialogContent className="sm:max-w-[500px] bg-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center justify-center p-6 text-center"
+        >
+          <div className="flex items-center justify-center w-20 h-20 mb-6 bg-green-100 rounded-full">
+            <FaCheck className="w-10 h-10 text-green-600" />
+          </div>
+
+          <h2 className="mb-2 text-2xl font-bold text-gray-800">
+            Application Submitted!
+          </h2>
+          <p className="mb-6 text-gray-600">
+            Thank you for applying to become a Mentoons Influencer. We've
+            received your application and will review it shortly.
+          </p>
+
+          <div className="p-4 mb-6 text-left border border-orange-200 rounded-lg bg-orange-50">
+            <h3 className="mb-2 text-sm font-semibold text-gray-700">
+              What happens next?
+            </h3>
+            <ul className="pl-5 text-sm text-gray-600 list-disc">
+              <li className="mb-1">
+                Our team will review your application within 5-7 business days
+              </li>
+              <li className="mb-1">
+                We'll contact you via email with our decision
+              </li>
+              <li>
+                If selected, you'll receive an invitation to join our influencer
+                program
+              </li>
+            </ul>
+          </div>
+
+          <Button
+            onClick={onClose}
+            className="text-white bg-orange-600 hover:bg-orange-700"
+          >
+            Close
+          </Button>
+        </motion.div>
+      </DialogContent>
+    );
+  }
 
   return (
     <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white">

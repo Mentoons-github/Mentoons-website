@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import {
   FaBookmark,
@@ -27,7 +27,7 @@ import {
 import { Link } from "react-router-dom";
 
 // Shadcn UI components
-import PostCard from "@/components/adda/home/addPosts/PostCard";
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -35,24 +35,90 @@ import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 
-// Define interface for user data
-interface UserData {
-  name: string;
-  avatar: string;
-  email: string;
-  phone: string;
-  location: string;
-  joinedDate: string;
-  bio: string;
-  education: string;
-  occupation: string;
-  interests: string[];
-  stats: {
-    posts: number;
-    friends: number;
-    groups: number;
+// Define interface for post type
+type PostType = "text" | "photo" | "video" | "article" | "event" | "mixed";
+
+// Define interface for media items
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+  caption?: string;
+}
+
+// Define interface for comment
+interface Comment {
+  _id?: string;
+  userId?: string;
+  user?: {
+    _id: string;
+    email?: string;
+    name: string;
+    picture?: string;
   };
-  [key: string]: any; // Allow indexing with string
+  content?: string;
+  text?: string;
+  createdAt?: string;
+}
+
+// Define interface for user info in posts
+interface PostUser {
+  _id: string;
+  name: string;
+  picture?: string;
+  email?: string;
+  role?: string;
+}
+
+// Define post interface to match PostData
+interface Post {
+  _id: string;
+  postType: PostType;
+  userId?: string;
+  user: PostUser;
+  content?: string;
+  title?: string;
+  media?: MediaItem[];
+  article?: {
+    body: string;
+    coverImage?: string;
+  };
+  event?: {
+    startDate: string;
+    endDate?: string;
+    venue: string;
+    description: string;
+    coverImage?: string;
+  };
+  likes: string[];
+  comments: Comment[];
+  shares: string[];
+  saves?: string[] | number;
+  tags?: string[];
+  location?: string;
+  visibility: "public" | "friends" | "private";
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// Define interface for user details from API
+interface UserDetails {
+  _id: string;
+  name: string;
+  email: string;
+  picture?: string;
+  bio?: string;
+  phone?: string;
+  location?: string;
+  education?: string;
+  occupation?: string;
+  interests?: string[];
+  posts?: Post[];
+  friends?: string[];
+  groups?: string[];
+  joinedDate?: string;
+  coverPhoto?: string;
+  followers?: string[];
+  following?: string[];
 }
 
 // Define interface for profile field
@@ -68,38 +134,28 @@ const UserProfile = () => {
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
 
-  const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
+  const [userSavedPosts, setUserSavedPosts] = useState<Post[]>([]);
 
-  const [userDetails, setUserDetails] = useState<any>({});
+  const [userDetails, setUserDetails] = useState<UserDetails>({
+    _id: "",
+    name: "",
+    email: "",
+    interests: [],
+  });
 
   const { getToken } = useAuth();
   const { user } = useUser();
   // const navigate = useNavigate();
 
+  // Create refs for file inputs
+  const coverPhotoInputRef = useRef<HTMLInputElement>(null);
+  const profilePhotoInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  // Mock user data with some missing fields to demonstrate incomplete profile
-  const userData: UserData = {
-    name: "John Doe",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-    email: "john.doe@example.com",
-    phone: "", // Missing phone
-    location: "New York, USA",
-    joinedDate: "January 2023",
-    bio: "", // Missing bio
-    education: "", // Missing education
-    occupation: "", // Missing occupation
-    interests: ["Reading"], // Incomplete interests
-    stats: {
-      posts: 24,
-      friends: 186,
-      groups: 5,
-    },
-  };
 
   // Calculate profile completion percentage
   const profileFields: ProfileField[] = [
@@ -120,14 +176,14 @@ const UserProfile = () => {
     profileFields.forEach((field) => {
       if (field.field === "interests") {
         if (
-          userData.interests &&
-          userData.interests.length >= (field.minLength || 1)
+          userDetails.interests &&
+          userDetails.interests.length >= (field.minLength || 1)
         ) {
           completedFields++;
         }
       } else if (
-        userData[field.field] &&
-        userData[field.field].toString().trim() !== ""
+        userDetails[field.field as keyof UserDetails] &&
+        String(userDetails[field.field as keyof UserDetails]).trim() !== ""
       ) {
         completedFields++;
       }
@@ -136,20 +192,118 @@ const UserProfile = () => {
     return Math.round((completedFields / profileFields.length) * 100);
   };
 
+  // Add a function to get the incomplete profile fields
+  const getIncompleteFields = () => {
+    const incompleteFields: string[] = [];
+
+    profileFields.forEach((field) => {
+      if (field.field === "interests") {
+        if (
+          !userDetails.interests ||
+          userDetails.interests.length < (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (
+        !userDetails[field.field as keyof UserDetails] ||
+        String(userDetails[field.field as keyof UserDetails]).trim() === ""
+      ) {
+        incompleteFields.push(field.label);
+      }
+    });
+
+    return incompleteFields;
+  };
+
+  const incompleteFields = getIncompleteFields();
   const profileCompletionPercentage = getProfileCompletion();
   const isProfileComplete = profileCompletionPercentage === 100;
 
-  const handleProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // In a real app, save the form data to the backend
-    // For demo purposes, just show confetti
-    setShowCompletionForm(false);
-    setShowConfetti(true);
 
-    // Hide confetti after 5 seconds
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 5000);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const profileData = {
+        bio: formData.get("bio") as string,
+        location: formData.get("location") as string,
+        education: formData.get("education") as string,
+        occupation: formData.get("occupation") as string,
+        phone: formData.get("phone") as string,
+        interests: userDetails.interests || [], // Include current interests
+      };
+
+      const token = await getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      const response = await axios.put(
+        "http://localhost:4000/api/v1/user/profile",
+        profileData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Profile updated successfully");
+        // Update local user data
+        setUserDetails((prev: UserDetails) => ({ ...prev, ...profileData }));
+        setIsEditing(false);
+        setShowCompletionForm(false);
+
+        // Show confetti for the profile completion
+        if (showCompletionForm) {
+          setShowConfetti(true);
+          // Hide confetti after 5 seconds
+          setTimeout(() => {
+            setShowConfetti(false);
+          }, 5000);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    }
+  };
+
+  // Function to handle adding a new interest
+  const addInterest = () => {
+    const interestInput = document.getElementById(
+      "new-interest"
+    ) as HTMLInputElement;
+    if (interestInput && interestInput.value.trim()) {
+      // Create a new array with all existing interests plus the new one
+      const updatedInterests = [
+        ...(userDetails.interests || []),
+        interestInput.value.trim(),
+      ];
+
+      // Update the user details state with the new interests array
+      setUserDetails((prev) => ({
+        ...prev,
+        interests: updatedInterests,
+      }));
+
+      // Clear the input field
+      interestInput.value = "";
+    }
+  };
+
+  // Function to handle removing an interest
+  const removeInterest = (indexToRemove: number) => {
+    const updatedInterests = (userDetails.interests || []).filter(
+      (_, index) => index !== indexToRemove
+    );
+    setUserDetails((prev) => ({
+      ...prev,
+      interests: updatedInterests,
+    }));
   };
 
   useEffect(() => {
@@ -168,8 +322,25 @@ const UserProfile = () => {
             },
           }
         );
-        console.log(response.data.data);
-        setUserPosts(response.data.data);
+
+        // Ensure posts data matches our Post interface with required email field
+        const formattedPosts = response.data.data.map(
+          (post: Partial<Post>) => ({
+            ...post,
+            postType: (post.postType as PostType) || "text",
+            user: post.user || {
+              _id: user?.id || "",
+              name: userDetails.name || "",
+              picture: userDetails.picture || "",
+              email: userDetails.email || "", // Ensure email is always included
+            },
+            shares: post.shares || [],
+            saves: post.saves || 0,
+            visibility: post.visibility || "public",
+          })
+        );
+
+        setUserPosts(formattedPosts as unknown as Post[]);
         toast.success("Posts fetched successfully");
       } catch (error) {
         console.log(error);
@@ -177,7 +348,7 @@ const UserProfile = () => {
       }
     };
     fetchUsersPost();
-  }, []);
+  }, [user?.id, userDetails.name, userDetails.picture, userDetails.email]);
 
   useEffect(() => {
     const fetchUserSavedPosts = async () => {
@@ -195,8 +366,23 @@ const UserProfile = () => {
             },
           }
         );
-        console.log(response.data);
-        setUserSavedPosts(response.data.data);
+
+        // Ensure saved posts match our Post interface with required email field
+        const formattedSavedPosts = response.data.data.map((post: any) => ({
+          ...post,
+          postType: (post.postType as PostType) || "text",
+          user: post.user || {
+            _id: post.userId || "",
+            name: post.user?.name || "User",
+            picture: post.user?.picture || "",
+            email: post.user?.email || "user@example.com", // Ensure email is always included
+          },
+          shares: post.shares || [],
+          saves: post.saves || 0,
+          visibility: post.visibility || "public",
+        }));
+
+        setUserSavedPosts(formattedSavedPosts as unknown as Post[]);
       } catch (error) {
         console.log(error);
         toast.error("Error fetching saved posts");
@@ -226,9 +412,154 @@ const UserProfile = () => {
     fetchUserDetails();
   }, [user?.id]);
 
+  // Function to handle cover photo upload
+  const handleCoverPhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      try {
+        const token = await getToken();
+        if (!token) {
+          toast.error("Authentication required");
+          return;
+        }
+
+        toast.loading("Uploading cover photo...");
+
+        // First upload the file to S3
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadResponse = await axios.post(
+          "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!uploadResponse.data?.data?.fileDetails?.url) {
+          toast.dismiss();
+          toast.error("Failed to upload cover photo");
+          return;
+        }
+
+        const fileUrl = uploadResponse.data.data.fileDetails.url;
+
+        
+
+        // Now update the user profile with the new cover photo URL
+        const updateResponse = await axios.put(
+          "http://localhost:4000/api/v1/user/profile",
+          { coverPhoto: fileUrl },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (updateResponse.status === 200) {
+          toast.dismiss();
+          toast.success("Cover photo updated successfully");
+
+          // Update local user data with new cover photo URL
+          setUserDetails((prev) => ({
+            ...prev,
+            coverPhoto: fileUrl,
+          }));
+        }
+      } catch (error) {
+        toast.dismiss();
+        console.error("Error uploading cover photo:", error);
+        toast.error("Failed to upload cover photo");
+      }
+    }
+  };
+
+  // Function to handle profile photo upload
+  const handleProfilePhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      try {
+        const token = await getToken();
+        if (!token) {
+          toast.error("Authentication required");
+          return;
+        }
+
+        toast.loading("Uploading profile photo...");
+
+        // First upload the file to S3
+        const formData = new FormData();
+        formData.append("file", file)
+
+        const uploadResponse = await axios.post(
+          "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!uploadResponse.data?.data?.fileDetails?.url) {
+          toast.dismiss();
+          toast.error("Failed to upload profile photo");
+          return;
+        }
+
+        const fileUrl = uploadResponse.data.data.fileDetails.url;
+        
+        
+        
+
+        // Now update the user profile with the new profile photo URL
+        const updateResponse = await axios.put(
+          "http://localhost:4000/api/v1/user/profile",
+          { picture: fileUrl },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (updateResponse.status === 200) {
+          toast.dismiss();
+          toast.success("Profile photo updated successfully");
+
+          // Update local user data with new profile photo URL
+          setUserDetails((prev) => ({
+            ...prev,
+            picture: fileUrl,
+          }));
+        }
+      } catch (error) {
+        toast.dismiss();
+        console.error("Error uploading profile photo:", error);
+        toast.error("Failed to upload profile photo");
+      }
+    }
+  };
+
   return (
     <>
-      {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
+      {showConfetti && (
+        <Confetti recycle={false} numberOfPieces={500} className="w-full" />
+      )}
 
       <div className="flex items-start justify-center w-full p-2 max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
@@ -249,7 +580,25 @@ const UserProfile = () => {
               </div>
               <Button
                 variant="outline"
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => {
+                  if (isEditing) {
+                    // If editing, find the form and submit it
+                    const form = document.getElementById("profile-edit-form");
+                    if (form) {
+                      const formEvent = new Event("submit", {
+                        bubbles: true,
+                        cancelable: true,
+                      }) as unknown as React.FormEvent<HTMLFormElement>;
+                      Object.defineProperty(formEvent, "currentTarget", {
+                        value: form,
+                      });
+                      handleProfileSubmit(formEvent);
+                    }
+                  } else {
+                    // If not editing, switch to edit mode
+                    setIsEditing(true);
+                  }
+                }}
                 className="text-sm border-[#EC9600] text-[#EC9600] hover:bg-orange-50"
               >
                 <FiEdit2 className="mr-2" />{" "}
@@ -284,6 +633,19 @@ const UserProfile = () => {
                       <p className="mt-1 text-xs text-amber-600">
                         {profileCompletionPercentage}% complete
                       </p>
+
+                      {incompleteFields.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium text-amber-700">
+                            Missing information:
+                          </p>
+                          <ul className="pl-4 mt-1 text-xs list-disc text-amber-700">
+                            {incompleteFields.map((field, index) => (
+                              <li key={index}>{field}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     <Button
                       className="mt-3 bg-[#EC9600] hover:bg-[#EC9600]/90 text-white"
@@ -327,6 +689,7 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
+                        name="name"
                         defaultValue={userDetails.name}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
@@ -340,8 +703,10 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="email"
+                        name="email"
                         defaultValue={userDetails.email}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        readOnly
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600] bg-gray-100"
                       />
                       {userDetails.email && (
                         <FiCheck className="inline ml-2 text-green-500" />
@@ -360,6 +725,7 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="tel"
+                        name="phone"
                         placeholder="Add your phone number"
                         defaultValue={userDetails.phone}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
@@ -371,6 +737,7 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
+                        name="location"
                         defaultValue={userDetails.location}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                       />
@@ -390,6 +757,7 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
+                        name="education"
                         placeholder="Add your education"
                         defaultValue={userDetails?.education}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
@@ -406,6 +774,7 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="text"
+                        name="occupation"
                         placeholder="Add your occupation"
                         defaultValue={userDetails?.occupation}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
@@ -422,6 +791,7 @@ const UserProfile = () => {
                         )}
                       </label>
                       <textarea
+                        name="bio"
                         placeholder="Tell us about yourself"
                         defaultValue={userDetails?.bio}
                         rows={4}
@@ -441,13 +811,20 @@ const UserProfile = () => {
                       </label>
                       <div className="p-2 border border-orange-200 rounded-md">
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {userDetails.interests.map(
+                          {userDetails?.interests?.map(
                             (interest: string, index: number) => (
                               <span
                                 key={index}
-                                className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
+                                className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm flex items-center"
                               >
                                 {interest}
+                                <button
+                                  type="button"
+                                  onClick={() => removeInterest(index)}
+                                  className="ml-2 text-orange-500 hover:text-orange-700"
+                                >
+                                  ×
+                                </button>
                               </span>
                             )
                           )}
@@ -458,22 +835,17 @@ const UserProfile = () => {
                             placeholder="Add an interest"
                             id="new-interest"
                             className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addInterest();
+                              }
+                            }}
                           />
                           <Button
                             type="button"
                             className="bg-[#EC9600] hover:bg-[#EC9600]/90"
-                            onClick={() => {
-                              const interestInput = document.getElementById(
-                                "new-interest"
-                              ) as HTMLInputElement;
-                              if (interestInput && interestInput.value.trim()) {
-                                userDetails.interests = [
-                                  ...userDetails.interests,
-                                  interestInput.value.trim(),
-                                ];
-                                interestInput.value = "";
-                              }
-                            }}
+                            onClick={addInterest}
                           >
                             Add
                           </Button>
@@ -511,13 +883,30 @@ const UserProfile = () => {
                 <div className="sticky top-[130px] flex flex-col gap-4">
                   {/* User Card */}
                   <Card className="overflow-hidden border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                    <div className="relative h-24 bg-gradient-to-r from-[#EC9600] to-amber-400">
+                    <div
+                      className="relative h-24 bg-gradient-to-r from-[#EC9600] to-amber-400"
+                      style={{
+                        backgroundImage: userDetails.coverPhoto
+                          ? `url(${userDetails.coverPhoto})`
+                          : "linear-gradient(to right, #EC9600, #fbbf24)",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
                       <Button
                         className="absolute w-8 h-8 p-0 rounded-full top-2 right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                        onClick={() => {}}
+                        onClick={() => coverPhotoInputRef.current?.click()}
                       >
                         <FaCamera className="text-white" />
                       </Button>
+                      {/* Hidden file input for cover photo */}
+                      <input
+                        type="file"
+                        ref={coverPhotoInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleCoverPhotoChange}
+                      />
                     </div>
 
                     <div className="flex flex-col items-center px-4 pb-4 -mt-12">
@@ -530,17 +919,25 @@ const UserProfile = () => {
                         </Avatar>
                         <Button
                           className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-[#EC9600] text-white hover:bg-[#EC9600]/90"
-                          onClick={() => {}}
+                          onClick={() => profilePhotoInputRef.current?.click()}
                         >
                           <FiEdit2 size={14} />
                         </Button>
+                        {/* Hidden file input for profile photo */}
+                        <input
+                          type="file"
+                          ref={profilePhotoInputRef}
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleProfilePhotoChange}
+                        />
                       </div>
 
                       <h2 className="mt-3 text-lg font-bold text-gray-800">
                         {userDetails.name}
                       </h2>
                       <p className="flex items-center mt-1 text-sm text-gray-600">
-                        <FiMapPin className="mr-1" size={14} />{" "}
+                        <FiMapPin className="mr-1" size={14} />
                         {userDetails.location}
                       </p>
                       <p className="flex items-center mt-1 text-xs text-gray-500">
@@ -567,6 +964,33 @@ const UserProfile = () => {
                               }}
                             ></div>
                           </div>
+                          {incompleteFields.length > 0 && (
+                            <div
+                              className="p-2 mt-2 border border-orange-100 rounded-md bg-orange-50"
+                              title={incompleteFields.join(", ")}
+                            >
+                              <p className="text-xs font-medium text-[#EC9600]">
+                                Complete your profile by adding:
+                              </p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {incompleteFields
+                                  .slice(0, 3)
+                                  .map((field, index) => (
+                                    <span
+                                      key={index}
+                                      className="text-xs bg-orange-100 text-[#EC9600] px-1 py-0.5 rounded"
+                                    >
+                                      {field}
+                                    </span>
+                                  ))}
+                                {incompleteFields.length > 3 && (
+                                  <span className="text-xs bg-orange-100 text-[#EC9600] px-1 py-0.5 rounded">
+                                    +{incompleteFields.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -574,7 +998,7 @@ const UserProfile = () => {
                       <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
                         <div className="text-center">
                           <p className="font-bold text-xl text-[#EC9600]">
-                            {userDetails?.posts?.length || 0}
+                            {userPosts?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
@@ -583,6 +1007,18 @@ const UserProfile = () => {
                             {userDetails?.friends?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Friends</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-bold text-xl text-[#EC9600]">
+                            {userDetails?.followers?.length || 0}
+                          </p>
+                          <p className="text-xs text-gray-600">Followers</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-bold text-xl text-[#EC9600]">
+                            {userDetails?.following?.length || 0}
+                          </p>
+                          <p className="text-xs text-gray-600">Following</p>
                         </div>
                         <div className="text-center">
                           <p className="font-bold text-xl text-[#EC9600]">
@@ -738,63 +1174,77 @@ const UserProfile = () => {
                           Personal Information
                         </h3>
                         {isEditing ? (
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-700">
-                                Full Name
-                              </label>
-                              <input
-                                type="text"
-                                defaultValue={userDetails.name}
-                                className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                              />
+                          <form
+                            id="profile-edit-form"
+                            onSubmit={handleProfileSubmit}
+                          >
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Full Name
+                                </label>
+                                <input
+                                  type="text"
+                                  name="name"
+                                  defaultValue={userDetails.name}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Email
+                                </label>
+                                <input
+                                  type="email"
+                                  name="email"
+                                  defaultValue={userDetails.email}
+                                  readOnly
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600] bg-gray-100"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Phone
+                                </label>
+                                <input
+                                  type="tel"
+                                  name="phone"
+                                  defaultValue={userDetails.phone}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Location
+                                </label>
+                                <input
+                                  type="text"
+                                  name="location"
+                                  defaultValue={userDetails.location}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                                />
+                              </div>
+                              <div className="space-y-1 md:col-span-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Bio
+                                </label>
+                                <textarea
+                                  name="bio"
+                                  defaultValue={userDetails.bio}
+                                  rows={4}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                                />
+                              </div>
+                              <div className="flex justify-end mt-2 md:col-span-2">
+                                <Button
+                                  type="submit"
+                                  className="bg-[#EC9600] hover:bg-[#EC9600]/90"
+                                >
+                                  Save Changes
+                                </Button>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-700">
-                                Email
-                              </label>
-                              <input
-                                type="email"
-                                defaultValue={userDetails.email}
-                                className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-700">
-                                Phone
-                              </label>
-                              <input
-                                type="tel"
-                                defaultValue={userDetails.phone}
-                                className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-700">
-                                Location
-                              </label>
-                              <input
-                                type="text"
-                                defaultValue={userDetails.location}
-                                className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                              />
-                            </div>
-                            <div className="space-y-1 md:col-span-2">
-                              <label className="text-sm font-medium text-gray-700">
-                                Bio
-                              </label>
-                              <textarea
-                                defaultValue={userDetails.bio}
-                                rows={4}
-                                className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                              />
-                            </div>
-                            <div className="flex justify-end mt-2 md:col-span-2">
-                              <Button className="bg-[#EC9600] hover:bg-[#EC9600]/90">
-                                Save Changes
-                              </Button>
-                            </div>
-                          </div>
+                          </form>
                         ) : (
                           <div className="grid grid-cols-1 gap-4 bg-white md:grid-cols-2">
                             <div className="p-3 border border-orange-100 rounded-lg">
@@ -852,61 +1302,6 @@ const UserProfile = () => {
                           </div>
                         )}
                       </div>
-
-                      {/* <div className="mt-6">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                          Account Settings
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="p-3 transition-colors border border-orange-100 rounded-lg cursor-pointer hover:bg-orange-50">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-full">
-                                  <FiSettings className="text-[#EC9600]" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-gray-800">
-                                    Privacy Settings
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Manage your privacy preferences
-                                  </p>
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                className="text-[#EC9600]"
-                              >
-                                Manage
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="p-3 transition-colors border border-orange-100 rounded-lg cursor-pointer hover:bg-orange-50">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-full">
-                                  <FiSettings className="text-[#EC9600]" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-gray-800">
-                                    Notification Preferences
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Update how you receive notifications
-                                  </p>
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                className="text-[#EC9600]"
-                              >
-                                Manage
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div> */}
                     </Card>
                   )}
 
@@ -917,53 +1312,10 @@ const UserProfile = () => {
                         My Posts
                       </h3>
 
-                      {/* Post creation box similar to AddPosts component */}
-                      {/* <div className="flex flex-col items-center justify-start w-full p-4 mb-4 border border-orange-200 rounded-xl">
-                        <div className="flex items-center w-full gap-3">
-                          <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
-                            <img
-                              src={userData.avatar}
-                              alt={userData.name}
-                              className="object-cover w-full h-full rounded-full"
-                            />
-                          </div>
-                          <div className="flex-grow">
-                            <input
-                              type="text"
-                              placeholder="What's in your mind?"
-                              className="w-full px-4 py-2 text-sm border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#EC9600]"
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="w-full my-3 border-orange-200" />
-
-                        <div className="flex items-center justify-between w-full">
-                          <button className="flex items-center gap-2 p-1 transition-colors rounded-lg hover:bg-orange-50">
-                            <FaImage className="text-[#EC9600]" />
-                            <span className="text-sm font-medium text-gray-600">
-                              Photo
-                            </span>
-                          </button>
-                          <button className="flex items-center gap-2 p-1 transition-colors rounded-lg hover:bg-orange-50">
-                            <FaVideo className="text-[#EC9600]" />
-                            <span className="text-sm font-medium text-gray-600">
-                              Video
-                            </span>
-                          </button>
-                          <button className="flex items-center gap-2 p-1 transition-colors rounded-lg hover:bg-orange-50">
-                            <FaCalendarAlt className="text-[#EC9600]" />
-                            <span className="text-sm font-medium text-gray-600">
-                              Event
-                            </span>
-                          </button>
-                        </div>
-                      </div> */}
-
                       {/* Post items */}
                       <div className="space-y-4">
                         {userPosts.map((post) => (
-                          <PostCard key={post._id} post={post} />
+                          <PostCard key={post._id} post={post as unknown as PostData} />
                         ))}
                       </div>
                     </Card>
@@ -1010,7 +1362,7 @@ const UserProfile = () => {
                       </h3>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {userSavedPosts.map((item) => (
-                          <PostCard key={item._id} post={item} />
+                          <PostCard key={item._id} post={item as unknown as PostData} />
                         ))}
                       </div>
                     </Card>
