@@ -15,6 +15,19 @@ const Status = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    const header = document.querySelector("header");
+    if (header) {
+      header.style.display = "none";
+    }
+
+    return () => {
+      if (header) {
+        header.style.display = "flex";
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -26,7 +39,6 @@ const Status = ({
       });
     }, 50);
 
-    // Ensure video plays when component mounts
     if (isVideo(status.url) && videoRef.current) {
       videoRef.current.play().catch((error) => {
         console.error("Error playing video:", error);
@@ -42,7 +54,7 @@ const Status = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[9999999999999] flex items-center justify-center bg-black"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
       onClick={() => setStatus(null)}
     >
       <div
