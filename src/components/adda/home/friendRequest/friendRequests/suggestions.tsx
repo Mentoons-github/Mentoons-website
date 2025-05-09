@@ -39,6 +39,8 @@ const FriendSuggestionsList = ({
 
     try {
       const token = await getToken();
+
+      console.log(axiosInstance);
       const response = await axiosInstance.get(
         `/adda/requestSuggestions?page=${page}`,
         {
@@ -47,6 +49,8 @@ const FriendSuggestionsList = ({
           },
         }
       );
+
+      console.log("data found : ", response);
 
       const { suggestions, hasMore: moreAvailable } = response.data.data;
 
@@ -66,6 +70,7 @@ const FriendSuggestionsList = ({
         }
       }
     } catch (error: unknown) {
+      console.log("error found :", error);
       if (error instanceof AxiosError) {
         console.error("Error fetching friend suggestions:", error.response);
         errorToast(error.response?.data.error || "Failed to fetch suggestions");
@@ -146,45 +151,74 @@ const FriendSuggestionsList = ({
     [loading, hasMore, fetchSuggestions]
   );
 
-  if (!loading && (!friendSuggestions || friendSuggestions.length === 0)) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="p-3 mb-3 text-blue-500 rounded-full bg-blue-50">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
-        </div>
-        <p className="font-medium text-gray-600">No suggestions available</p>
-        <p className="text-sm text-gray-500">
-          We'll suggest new connections for you soon
-        </p>
+  const EmptyStateContent = () => (
+    <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center mx-auto w-full max-w-sm">
+      <div className="p-3 mb-3 text-blue-500 bg-blue-50 rounded-full">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-6 h-6 sm:w-8 sm:h-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          />
+        </svg>
       </div>
-    );
+      <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-1">
+        No Suggestions Available
+      </h3>
+      <p className="text-xs sm:text-sm text-gray-500 mb-4">
+        We couldn't find any connection suggestions for you at the moment
+      </p>
+      <button
+        onClick={() => {
+          setPage(1);
+          setHasMore(true);
+          setFriendSuggestions(null);
+          fetchSuggestions();
+        }}
+        className="px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Refresh Suggestions
+      </button>
+    </div>
+  );
+
+  if (!loading && (!friendSuggestions || friendSuggestions.length === 0)) {
+    return <EmptyStateContent />;
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-2 sm:gap-3">
       {friendSuggestions?.map(({ picture, name, _id }, index) => (
         <div
           key={_id}
-          className="flex flex-col w-full p-4 transition-all duration-200 bg-white border border-blue-100 rounded-xl hover:shadow-md"
+          className="flex flex-col w-full p-3 sm:p-4 transition-all duration-200 bg-white border border-blue-100 rounded-lg sm:rounded-xl hover:shadow-md"
           ref={
             index === friendSuggestions.length - 1 ? lastSuggestionRef : null
           }
         >
-          <div className="flex items-center w-full gap-3 mb-3">
-            <div className="w-12 h-12 overflow-hidden rounded-full ring-2 ring-blue-50">
+          <div className="flex items-center w-full gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 overflow-hidden rounded-full ring-2 ring-blue-50">
               <img
                 src={picture}
                 alt={name}
@@ -192,7 +226,9 @@ const FriendSuggestionsList = ({
               />
             </div>
             <div>
-              <h3 className="text-base font-medium text-gray-800">{name}</h3>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800">
+                {name}
+              </h3>
               <p className="text-xs text-gray-500">Suggested connection</p>
             </div>
           </div>
@@ -200,7 +236,7 @@ const FriendSuggestionsList = ({
             <button
               onClick={() => handleConnect(_id)}
               disabled={connectingIds.includes(_id)}
-              className={`flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg ${
+              className={`flex items-center justify-center flex-1 gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition-all duration-200 rounded-lg ${
                 connectingIds.includes(_id)
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
@@ -208,14 +244,14 @@ const FriendSuggestionsList = ({
             >
               {connectingIds.includes(_id) ? (
                 <>
-                  <div className="w-4 h-4 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
                   <span>Connecting...</span>
                 </>
               ) : (
                 <>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
+                    className="w-3 h-3 sm:w-4 sm:h-4"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -234,9 +270,9 @@ const FriendSuggestionsList = ({
       ))}
 
       {loading && (
-        <div className="flex items-center justify-center w-full py-4">
-          <div className="w-6 h-6 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-          <span className="ml-2 text-sm text-gray-500">
+        <div className="flex items-center justify-center w-full py-3 sm:py-4">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+          <span className="ml-2 text-xs sm:text-sm text-gray-500">
             Loading more suggestions...
           </span>
         </div>
@@ -246,7 +282,7 @@ const FriendSuggestionsList = ({
         friendSuggestions &&
         friendSuggestions.length > 0 &&
         !hasMore && (
-          <div className="w-full py-4 text-center text-sm text-gray-500">
+          <div className="w-full py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-500">
             No more suggestions available
           </div>
         )}

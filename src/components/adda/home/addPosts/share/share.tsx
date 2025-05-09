@@ -33,7 +33,7 @@ const Share = ({ postDetails }: { postDetails: any }) => {
       setShareCount(shareCount + 1);
       const token = await getToken();
       await axios.post(
-        "http://localhost:4000/api/v1/shares",
+        `${import.meta.env.VITE_PROD_URL}/shares`,
         {
           postId: postDetails._id,
           caption: postDetails.content,

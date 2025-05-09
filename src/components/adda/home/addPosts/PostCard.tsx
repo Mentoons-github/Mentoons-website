@@ -115,7 +115,7 @@ const PostCard = ({ post }: PostCardProps) => {
     try {
       const token = await getToken();
       const response = await axios.post(
-        "http://localhost:4000/api/v1/comments",
+        `${import.meta.env.VITE_PROD_URL}/comments`,
         {
           postId: post._id,
           content: newComment,
@@ -142,8 +142,8 @@ const PostCard = ({ post }: PostCardProps) => {
     try {
       const token = await getToken();
       const endpoint = newSavedState
-        ? `http://localhost:4000/api/v1/feeds/posts/${post._id}/save`
-        : `http://localhost:4000/api/v1/feeds/posts/${post._id}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/save`
+        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/unsave`;
 
       const response = await axios.post(
         endpoint,
@@ -171,7 +171,9 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `http://localhost:4000/api/v1/feeds/posts/${post._id}/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
+            post._id
+          }/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response.data.data);
