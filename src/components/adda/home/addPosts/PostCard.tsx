@@ -384,7 +384,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
         {renderPostContent()}
 
-        <div className="flex items-center justify-between w-full px-3">
+        <div className="flex items-center justify-between w-full ">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
             <Likes postId={post._id} likeCount={post.likes.length} />
             <div className="flex items-center gap-2 sm:gap-3">

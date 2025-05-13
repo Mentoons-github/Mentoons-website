@@ -18,13 +18,13 @@ const PrimaryHeader = () => {
   const animationTexts = adda ? ANIMATION_TEXTS_ADDA : ANIMATION_TEXTS_HOME;
 
   return (
-    <div className="flex justify-around items-center bg-gray-600 w-full text-white px-5 font-light z-55 font-akshar">
-      <div className="flex justify-start gap-5 md:gap-15 w-auto md:1/3 lg:w-1/2 py-2">
+    <div className="flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 z-55 font-akshar">
+      <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:1/3 lg:w-1/2">
         {adda && (
           <SignedIn>
-            <div className="relative cursor-pointer py-2 md:hidden">
+            <div className="relative py-2 cursor-pointer md:hidden">
               <FaMessage />
-              <span className="absolute -top-0 -right-4 px-2 rounded-full bg-yellow-400 text-xs text-black text-center">
+              <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
             </div>
@@ -38,7 +38,7 @@ const PrimaryHeader = () => {
         </div>
       </div>
 
-      <div className="w-1/2 md:w-1/4 overflow-hidden py-2 flex items-center justify-center">
+      <div className="flex items-center justify-center w-1/2 py-2 overflow-hidden md:w-1/4">
         <motion.div
           className="flex gap-12 whitespace-nowrap"
           initial={{ x: "58%" }}
@@ -63,24 +63,24 @@ const PrimaryHeader = () => {
         </motion.div>
       </div>
 
-      <div className="flex justify-end items-end gap-10 w-auto md:w-1/2">
+      <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
         {adda && (
           <SignedIn>
             <NavLink
               to="/adda/messages"
-              className="relative cursor-pointer py-2 hidden md:block"
+              className="relative hidden py-2 cursor-pointer md:block"
             >
               <FaMessage />
-              <span className="absolute -top-0 -right-4 px-2 rounded-full bg-yellow-400 text-xs text-black text-center">
+              <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
             </NavLink>
             <NavLink
               to="/adda/notifications"
-              className="relative cursor-pointer py-2 hidden md:block"
+              className="relative hidden py-2 cursor-pointer md:block"
             >
               <FaBell />
-              <span className="absolute -top-0 -right-4 px-2 rounded-full bg-yellow-400 text-xs text-black text-center">
+              <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
             </NavLink>

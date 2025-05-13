@@ -67,6 +67,7 @@ const Meme = () => {
       <motion.div
         whileHover={{ scale: 1.02 }}
         className="relative w-full mb-3 overflow-hidden rounded-xl group"
+        onClick={() => (window.location.href = "/adda/meme")}
       >
         <img
           src="/assets/adda/sidebar/WhatsApp Image 2025-02-17 at 15.56.48_ee80d5fb.jpg"
