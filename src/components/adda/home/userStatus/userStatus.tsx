@@ -1,66 +1,105 @@
 import Status from "@/components/common/modal/status";
 import MediaPreviewModal from "@/components/modals/statusPreview";
-import { STATUSES } from "@/constant/adda/status";
 import {
+  createStatus,
   fetchStatus,
-  markAsWatched,
+  deleteStatus,
   sendWatchedStatus,
 } from "@/redux/adda/statusSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { StatusInterface } from "@/types";
+import { UserStatusInterface } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
+import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 
 const UserStatus = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const fetchedStatus = useSelector(
-    (state: RootState) => state.userStatus.statuses
+  const { getToken } = useAuth();
+  const statusGroups = useSelector(
+    (state: RootState) => state.userStatus.statusGroups || []
   );
-
-  const [statuses, setStatuses] = useState<StatusInterface[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<StatusInterface | null>(
-    null
-  );
+  console.log("Fetched status groups:", statusGroups);
+  const [selectedStatusGroup, setSelectedStatusGroup] =
+    useState<UserStatusInterface | null>(null);
+  const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setStatuses(STATUSES);
-    dispatch(fetchStatus);
-  }, [dispatch]);
+    const fetchStatusWithToken = async () => {
+      const token = (await getToken()) || "";
+      dispatch(fetchStatus(token));
+    };
+    fetchStatusWithToken();
+  }, [dispatch, getToken]);
 
-  useEffect(() => {
-    if (fetchedStatus.length > 0) {
-      setStatuses(fetchedStatus);
-    } else {
-      setStatuses(STATUSES);
+  const handleStatus = async (
+    statusGroup: UserStatusInterface,
+    index: number = 0
+  ) => {
+    setSelectedStatusGroup(statusGroup);
+    setCurrentStatusIndex(index);
+    if (
+      !statusGroup.isOwner &&
+      statusGroup.statuses &&
+      statusGroup.statuses.length > 0
+    ) {
+      const token = (await getToken()) || "";
+      const statusToWatch = statusGroup.statuses[index];
+      dispatch(sendWatchedStatus({ statusId: statusToWatch._id, token }));
     }
-  }, [fetchedStatus]);
+  };
 
-  const handleStatus = (status: StatusInterface) => {
-    console.log(status);
-    setSelectedStatus(status);
-    dispatch(markAsWatched({ id: status.id }));
-    console.log("dispatched");
+  const handleNextStatus = async () => {
+    if (
+      selectedStatusGroup &&
+      currentStatusIndex < selectedStatusGroup.statuses.length - 1
+    ) {
+      const nextIndex = currentStatusIndex + 1;
+      setCurrentStatusIndex(nextIndex);
+      if (!selectedStatusGroup.isOwner) {
+        const token = (await getToken()) || "";
+        const statusToWatch = selectedStatusGroup.statuses[nextIndex];
+        dispatch(sendWatchedStatus({ statusId: statusToWatch._id, token }));
+      }
+    } else {
+      const currentGroupIndex = statusGroups.findIndex(
+        (group) => group.user._id === selectedStatusGroup?.user._id
+      );
+      if (currentGroupIndex < statusGroups.length - 1) {
+        const nextGroup = statusGroups[currentGroupIndex + 1];
+        handleStatus(nextGroup, 0);
+      } else {
+        setSelectedStatusGroup(null);
+        setCurrentStatusIndex(0);
+      }
+    }
+  };
 
-    if (timeOutId) clearTimeout(timeOutId);
-    const id = setTimeout(() => {
-      dispatch(sendWatchedStatus);
-    }, 10000);
-
-    setTimeOutId(id);
+  const handlePreviousStatus = () => {
+    if (selectedStatusGroup && currentStatusIndex > 0) {
+      setCurrentStatusIndex(currentStatusIndex - 1);
+    } else {
+      const currentGroupIndex = statusGroups.findIndex(
+        (group) => group.user._id === selectedStatusGroup?.user._id
+      );
+      if (currentGroupIndex > 0) {
+        const prevGroup = statusGroups[currentGroupIndex - 1];
+        handleStatus(prevGroup, prevGroup.statuses.length - 1);
+      }
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
-
     if (file) {
       const validTypes = [
         "image/jpeg",
@@ -70,20 +109,16 @@ const UserStatus = () => {
         "video/mp4",
         "video/webm",
       ];
-
       if (!validTypes.includes(file.type)) {
         toast.error("Invalid file type. Please upload an image or video.");
         return;
       }
-
       if (file.size > 10 * 1024 * 1024) {
         toast.error("File is too large. Maximum size is 10MB.");
         return;
       }
-
       setSelectedFile(file);
     }
-
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -97,53 +132,52 @@ const UserStatus = () => {
     imageWithText: Blob | null,
     caption: string
   ) => {
+    setIsSuccess(false);
     if (!selectedFile) return;
-
     try {
       setIsUploading(true);
-
-      const formData = new FormData();
-
-      if (imageWithText && !selectedFile.type.startsWith("video/")) {
-        const processedFile = new File([imageWithText], selectedFile.name, {
-          type: selectedFile.type,
-        });
-        formData.append("file", processedFile);
-      } else {
-        formData.append("file", selectedFile);
-      }
-
-      formData.append("caption", caption);
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const newStatus: StatusInterface = {
-        id: `status-${Date.now()}`,
-        userId: "current-user",
-        username: "You",
-        userProfilePicture: URL.createObjectURL(selectedFile),
-        mediaUrl: imageWithText
-          ? URL.createObjectURL(imageWithText)
-          : URL.createObjectURL(selectedFile),
-        caption: caption,
-        status: "unwatched",
-        viewCount: 0,
-        type: selectedFile.type.startsWith("video/") ? "video" : "image",
-        url: imageWithText
-          ? URL.createObjectURL(imageWithText)
-          : URL.createObjectURL(selectedFile),
-        createdAt: new Date().toISOString(),
-      };
-
-      setStatuses((prev) => [newStatus, ...prev]);
-
+      const token = (await getToken()) || "";
+      const fileToUpload =
+        imageWithText && !selectedFile.type.startsWith("video/")
+          ? new File([imageWithText], selectedFile.name, {
+              type: selectedFile.type,
+            })
+          : selectedFile;
+      await dispatch(
+        createStatus({
+          file: fileToUpload,
+          caption,
+          token,
+        })
+      ).unwrap();
       toast.success("Status uploaded successfully!");
+      setIsSuccess(true);
       setSelectedFile(null);
     } catch (error) {
       console.error("Error uploading status:", error);
-      toast.error("Failed to upload status. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload status. Please try again."
+      );
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleDeleteStatus = async (statusId: string) => {
+    try {
+      const token = (await getToken()) || "";
+      await dispatch(deleteStatus({ statusId, token })).unwrap();
+      toast.success("Status deleted successfully!");
+      setSelectedStatusGroup(null);
+    } catch (error) {
+      console.error("Error deleting status:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete status. Please try again."
+      );
     }
   };
 
@@ -184,43 +218,67 @@ const UserStatus = () => {
               1280: { slidesPerView: 8, spaceBetween: 15 },
             }}
           >
-            {statuses.map((status) => (
+            {statusGroups.map((statusGroup) => (
               <SwiperSlide
-                key={status.id}
+                key={statusGroup.user._id}
                 className="!w-fit flex flex-col gap-1 flex-shrink-0"
                 style={{ justifyItems: "center" }}
               >
                 <div
-                  className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full outline flex justify-center items-center ${
-                    status.status === "unwatched"
-                      ? "outline-gray-400"
-                      : "outline-[#EC9600]"
-                  }`}
+                  className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full ${
+                    !statusGroup.isRead && !statusGroup.isOwner
+                      ? "outline outline-[#EC9600]"
+                      : "outline outline-gray-300"
+                  } flex justify-center items-center`}
                 >
                   <img
-                    src={status.userProfilePicture}
-                    alt={status.username}
+                    src={statusGroup.user.picture}
+                    alt={statusGroup.user.name}
                     className="object-cover w-full h-full rounded-full cursor-pointer"
-                    onClick={() => handleStatus(status)}
+                    onClick={() => handleStatus(statusGroup)}
                   />
                 </div>
                 <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
-                  {status.username}
+                  {statusGroup.isOwner ? "Your Story" : statusGroup.user.name}
                 </span>
               </SwiperSlide>
             ))}
           </Swiper>
         </div>
       </div>
-
-      {selectedStatus && (
+      {selectedStatusGroup && selectedStatusGroup.statuses.length > 0 && (
         <Status
-          status={selectedStatus}
-          setStatus={() => setSelectedStatus(null)}
+          status={{
+            ...selectedStatusGroup.statuses[currentStatusIndex],
+            isOwner: selectedStatusGroup.isOwner || false,
+          }}
+          setStatus={() => setSelectedStatusGroup(null)}
+          onDelete={handleDeleteStatus}
+          onNext={handleNextStatus}
+          onPrevious={handlePreviousStatus}
+          hasNext={
+            currentStatusIndex < selectedStatusGroup.statuses.length - 1 ||
+            statusGroups.findIndex(
+              (group) => group.user._id === selectedStatusGroup.user._id
+            ) <
+              statusGroups.length - 1
+          }
+          hasPrevious={
+            currentStatusIndex > 0 ||
+            statusGroups.findIndex(
+              (group) => group.user._id === selectedStatusGroup.user._id
+            ) > 0
+          }
+          totalStatuses={selectedStatusGroup.statuses.length}
+          currentIndex={currentStatusIndex}
         />
       )}
       {selectedFile && (
         <MediaPreviewModal
+          setIsSuccess={setIsSuccess}
+          isSuccess={isSuccess}
+          isLoading={loading}
+          setIsLoading={setLoading}
           file={selectedFile}
           onClose={handleClosePreview}
           onSubmit={handleSubmitStatus}
