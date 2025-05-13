@@ -39,8 +39,6 @@ const FriendSuggestionsList = ({
 
     try {
       const token = await getToken();
-
-      console.log(axiosInstance);
       const response = await axiosInstance.get(
         `/adda/requestSuggestions?page=${page}`,
         {

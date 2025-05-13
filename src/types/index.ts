@@ -1,10 +1,22 @@
 import {
   RequestInterface,
-  UserStatusInterface,
   requestSender,
   FriendRequestResponse,
 } from "./adda/home";
-import { StatusInterface, StatusState } from "./adda/status";
+import {
+  StatusInterface,
+  StatusState,
+  ApiResponse,
+  CreateStatusParams,
+  DeleteStatusParams,
+  FileUploadResponse,
+  FriendRequest,
+  SingleStatusApiResponse,
+  StatusApiResponse,
+  UserInfo,
+  UserStatusInterface,
+  WatchStatusParams,
+} from "./adda/status";
 import { DropDownInterface } from "./common/header";
 import { Groups } from "./groups/groups";
 import { Hiring } from "./assessements/assessment";
@@ -55,4 +67,13 @@ export type {
   requestSender,
   FriendRequestResponse,
   NotificationInterface,
+  ApiResponse,
+  CreateStatusParams,
+  DeleteStatusParams,
+  FileUploadResponse,
+  FriendRequest,
+  SingleStatusApiResponse,
+  StatusApiResponse,
+  UserInfo,
+  WatchStatusParams,
 };
