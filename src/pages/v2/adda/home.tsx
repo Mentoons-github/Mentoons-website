@@ -50,7 +50,8 @@ const AddaHome = () => {
                   : "flex"
               }`}
             >
-              {activeSection === "notification" ? (
+              {activeSection === "notification" ||
+              window.location.pathname === "/adda/notifications" ? (
                 <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
                   <Notification />
                 </div>
