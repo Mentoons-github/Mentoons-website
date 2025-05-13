@@ -7,7 +7,6 @@ import { FiCheck } from "react-icons/fi";
 
 interface MediaPreviewModalProps {
   isSuccess: boolean;
-  setIsSuccess: (val: boolean) => void;
   isLoading: boolean;
   setIsLoading: (val: boolean) => void;
   file: File | null;
@@ -17,7 +16,6 @@ interface MediaPreviewModalProps {
 
 const MediaPreviewModal = ({
   isSuccess,
-  setIsSuccess,
   isLoading,
   setIsLoading,
   file,
@@ -122,11 +120,8 @@ const MediaPreviewModal = ({
             ctx.fillText(caption, xPos, yPos);
             canvas.toBlob((blob) => {
               setTimeout(() => {
-                setIsSuccess(true);
                 setTimeout(() => {
                   onSubmit(blob, caption);
-                  setIsLoading(false);
-                  setIsSuccess(false);
                 }, 1000);
               }, 1500);
             });
@@ -136,11 +131,8 @@ const MediaPreviewModal = ({
       img.src = mediaUrl;
     } else {
       setTimeout(() => {
-        setIsSuccess(true);
         setTimeout(() => {
           onSubmit(null, caption);
-          setIsLoading(false);
-          setIsSuccess(false);
         }, 1000);
       }, 1500);
     }

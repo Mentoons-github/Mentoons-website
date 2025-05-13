@@ -42,7 +42,7 @@ const Header = () => {
           )
         )
       : NAV_LINKS.filter((link) =>
-          ["Mythos", "Products", "Book Sessions"].includes(link.label)
+          ["Adda", "Products", "Book Sessions"].includes(link.label)
         );
 
   const handleBrowsePlansClick = (

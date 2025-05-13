@@ -37,50 +37,50 @@ interface NotificationInterface {
 }
 
 // Sample data generator
-const generateSampleNotifications = (): NotificationInterface[] => {
-  const sampleUsers: NotificationSender[] = [
-    {
-      _id: "1",
-      name: "Sarah Johnson",
-      picture: "https://i.pravatar.cc/150?img=1",
-    },
-    {
-      _id: "2",
-      name: "Mike Chen",
-      picture: "https://i.pravatar.cc/150?img=2",
-    },
-    {
-      _id: "3",
-      name: "Emma Wilson",
-      picture: "https://i.pravatar.cc/150?img=3",
-    },
-    {
-      _id: "4",
-      name: "Alex Kumar",
-      picture: "https://i.pravatar.cc/150?img=4",
-    },
-  ];
+// const generateSampleNotifications = (): NotificationInterface[] => {
+//   const sampleUsers: NotificationSender[] = [
+//     {
+//       _id: "1",
+//       name: "Sarah Johnson",
+//       picture: "https://i.pravatar.cc/150?img=1",
+//     },
+//     {
+//       _id: "2",
+//       name: "Mike Chen",
+//       picture: "https://i.pravatar.cc/150?img=2",
+//     },
+//     {
+//       _id: "3",
+//       name: "Emma Wilson",
+//       picture: "https://i.pravatar.cc/150?img=3",
+//     },
+//     {
+//       _id: "4",
+//       name: "Alex Kumar",
+//       picture: "https://i.pravatar.cc/150?img=4",
+//     },
+//   ];
 
-  const types = ["friend_request_accepted", "like", "comment", "default"];
-  const messages = [
-    "accepted your friend request",
-    "liked your post",
-    "commented on your post: 'Great content! 👏'",
-    "shared a new post in your group",
-  ];
+//   const types = ["friend_request_accepted", "like", "comment", "default"];
+//   const messages = [
+//     "accepted your friend request",
+//     "liked your post",
+//     "commented on your post: 'Great content! 👏'",
+//     "shared a new post in your group",
+//   ];
 
-  return Array.from({ length: 8 }, (_, index) => ({
-    _id: `sample-${index + 1}`,
-    userId: "current-user",
-    initiatorId: sampleUsers[index % sampleUsers.length],
-    type: types[index % types.length],
-    message: messages[index % messages.length],
-    isRead: index % 3 === 0, // Some notifications are read, some are unread
-    createdAt: new Date(Date.now() - index * 1000 * 60 * 30).toISOString(), // Staggered times
-    updatedAt: new Date().toISOString(),
-    __v: 0,
-  }));
-};
+//   return Array.from({ length: 8 }, (_, index) => ({
+//     _id: `sample-${index + 1}`,
+//     userId: "current-user",
+//     initiatorId: sampleUsers[index % sampleUsers.length],
+//     type: types[index % types.length],
+//     message: messages[index % messages.length],
+//     isRead: index % 3 === 0, // Some notifications are read, some are unread
+//     createdAt: new Date(Date.now() - index * 1000 * 60 * 30).toISOString(), // Staggered times
+//     updatedAt: new Date().toISOString(),
+//     __v: 0,
+//   }));
+// };
 
 const Notification = () => {
   const [notifications, setNotifications] = useState<NotificationInterface[]>(
@@ -93,21 +93,19 @@ const Notification = () => {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        // For testing, use sample data instead of API call
-        // Comment out the API call and use sample data
-        /*
         const token = await getToken();
         const response = await axiosInstance.get("/adda/userNotifications", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        console.log(response);
         setNotifications(response.data.data);
-        */
 
         // Use sample data
-        const sampleData = generateSampleNotifications();
-        setNotifications(sampleData);
+        // const sampleData = generateSampleNotifications();
+        // setNotifications(sampleData);
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
         toast.error("Failed to load notifications");
@@ -164,7 +162,6 @@ const Notification = () => {
   return (
     <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
       <div className="relative flex flex-col w-full">
-        {/* Header section with user status */}
         <div className="sticky left-0 flex items-center w-full top-[64px] z-[99999] bg-white">
           <div className="flex-grow w-full min-w-0 py-2">
             <UserStatus />

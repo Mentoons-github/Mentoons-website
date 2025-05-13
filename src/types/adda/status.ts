@@ -25,6 +25,7 @@ export interface UserInfo {
   name: string;
   picture: string;
   email?: string;
+  joined?: string;
 }
 
 export interface StatusInterface {

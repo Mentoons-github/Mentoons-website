@@ -151,7 +151,8 @@ const UserStatus = () => {
         })
       ).unwrap();
       toast.success("Status uploaded successfully!");
-      setIsSuccess(true);
+      setIsSuccess(false);
+      setLoading(false);
       setSelectedFile(null);
     } catch (error) {
       console.error("Error uploading status:", error);
@@ -275,7 +276,6 @@ const UserStatus = () => {
       )}
       {selectedFile && (
         <MediaPreviewModal
-          setIsSuccess={setIsSuccess}
           isSuccess={isSuccess}
           isLoading={loading}
           setIsLoading={setLoading}

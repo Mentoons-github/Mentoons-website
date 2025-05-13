@@ -41,7 +41,7 @@ const Sidebar = ({
         )
       : NAV_LINKS.filter((data) =>
           [
-            "Mythos",
+            "Adda",
             "Products",
             "Browse Plans",
             "Workshops",

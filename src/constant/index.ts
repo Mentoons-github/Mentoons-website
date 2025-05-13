@@ -1046,9 +1046,8 @@ export const NAV_LINKS: NavLink[] = [
   },
   {
     id: "NL_03",
-    label: "Join Us",
-    icon: "group",
-    url: "/hiring",
+    label: "Adda",
+    url: "/adda",
   },
   {
     id: "NL_04",
@@ -1162,6 +1161,12 @@ export const NAV_LINKS: NavLink[] = [
     id: "NL_16",
     label: "Book Sessions",
     url: "/bookings",
+  },
+  {
+    id: "NL_17",
+    label: "Join Us",
+    icon: "group",
+    url: "/hiring",
   },
 ];
 

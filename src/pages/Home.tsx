@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-import AddaSection from "@/components/LandingPage/addaSection";
+// import AddaSection from "@/components/LandingPage/addaSection";
 import Community from "@/components/LandingPage/benefits/community/community";
 import HeroSection from "@/components/LandingPage/hero/HeroSection";
 import { errorToast, successToast } from "@/utils/toastResposnse";
@@ -58,7 +58,7 @@ const Home = () => {
   return (
     <div className="w-full">
       <HeroSection />
-      <AddaSection />
+      {/* <AddaSection /> */}
       <motion.div>
         <Community openComicModal={openComicModal} />
       </motion.div>

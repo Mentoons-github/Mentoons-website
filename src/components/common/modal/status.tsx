@@ -1,3 +1,5 @@
+// Status.tsx
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -30,8 +32,8 @@ const Status = ({
   onPrevious?: () => void;
   hasNext?: boolean;
   hasPrevious?: boolean;
-  totalStatuses?: number; // Add this prop type
-  currentIndex?: number; // Add this prop type
+  totalStatuses?: number;
+  currentIndex?: number;
 }) => {
   const isVideo = (media: string) => /\.(mp4|webm|ogg|mov)$/i.test(media);
   const [progress, setProgress] = useState(0);
@@ -165,8 +167,8 @@ const Status = ({
         className="relative w-full h-full mx-auto md:w-[400px] md:h-[85vh] lg:h-[90vh] bg-black flex flex-col max-w-screen-sm"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Progress Bars */}
         <div className="absolute top-0 left-0 right-0 z-30 flex w-full px-2 pt-2 gap-1">
-          {/* Replace this section with the new progress bars */}
           {totalStatuses > 0 && (
             <div className="w-full flex gap-1">
               {Array.from({ length: totalStatuses }).map((_, idx) => (
@@ -190,6 +192,7 @@ const Status = ({
           )}
         </div>
 
+        {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between w-full p-4 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -255,6 +258,8 @@ const Status = ({
             </motion.button>
           </div>
         </div>
+
+        {/* Navigation Click Zones */}
         <div className="absolute inset-0 flex z-10">
           {hasPrevious && (
             <div
@@ -287,6 +292,8 @@ const Status = ({
             </div>
           )}
         </div>
+
+        {/* Media Display */}
         <div className="flex items-center justify-center w-full h-full z-5">
           {isVideo(status.content) ? (
             <video
@@ -307,6 +314,8 @@ const Status = ({
             />
           )}
         </div>
+
+        {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
           {status.isOwner && (
             <div className="flex justify-between mb-3">
@@ -341,6 +350,8 @@ const Status = ({
             </div>
           )}
         </div>
+
+        {/* Viewers Panel */}
         <AnimatePresence>
           {showViewers && (
             <motion.div
@@ -348,69 +359,21 @@ const Status = ({
               animate={{ y: "0%" }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 left-0 right-0 z-30 flex flex-col w-full p-4 bg-black bg-opacity-90 rounded-t-2xl"
-              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 left-0 right-0 max-h-[60vh] overflow-y-auto bg-black z-40 p-4"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-white">Viewers</h3>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-300">Story Paused</span>
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={toggleViewers}
-                  >
-                    <FaPlay className="w-5 h-5 text-gray-300 hover:text-white" />
-                  </motion.button>
-                </div>
-              </div>
-              <div className="max-h-60 overflow-y-auto">
-                {displayViewers.length > 0 ? (
-                  displayViewers.map((viewer) => {
-                    const viewerObj =
-                      typeof viewer === "string"
-                        ? {
-                            _id: viewer,
-                            name: "Unknown User",
-                            picture: "/default-avatar.png",
-                          }
-                        : viewer;
-                    return (
-                      <motion.div
-                        key={viewerObj._id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-3 p-2 mb-2 rounded-lg hover:bg-white hover:bg-opacity-10"
-                      >
-                        <img
-                          src={viewerObj.picture}
-                          alt={viewerObj.name}
-                          className="object-cover w-10 h-10 rounded-full"
-                        />
-                        <p className="text-sm font-medium text-white">
-                          {viewerObj.name}
-                        </p>
-                      </motion.div>
-                    );
-                  })
-                ) : (
-                  <div className="flex items-center justify-center p-4">
-                    <p className="text-sm text-gray-300">No viewers yet</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {deleteConfirm && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="absolute top-16 left-0 right-0 z-40 mx-auto px-4 py-2 bg-red-500 text-white text-center w-4/5 rounded-lg"
-            >
-              Tap delete again to confirm
+              <h3 className="text-white font-semibold mb-3">Viewed by</h3>
+              <ul className="space-y-2">
+                {displayViewers.map((viewer: any, idx: number) => (
+                  <li key={idx} className="flex items-center gap-2">
+                    <img
+                      src={viewer.picture || "/default-avatar.png"}
+                      alt={viewer.name}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <span className="text-sm text-white">{viewer.name}</span>
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           )}
         </AnimatePresence>
