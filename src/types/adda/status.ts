@@ -51,6 +51,7 @@ export interface StatusState {
   statusGroups: UserStatusInterface[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  deletingStatusIds: string[];
 }
 
 export interface CreateStatusParams {

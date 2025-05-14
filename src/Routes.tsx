@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { useSelector } from "react-redux";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ComicCard from "./components/comics/HoverCardComic";
 import ScrollToTop from "./components/comics/ScrollToTop";
 import Loader from "./components/common/Loader";
@@ -43,7 +43,8 @@ const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const routes = [
-  { path: "/", element: <Home /> },
+  { path: "/", element: <Navigate to="/adda" replace /> },
+  { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },

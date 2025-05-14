@@ -16,6 +16,7 @@ const initialState: StatusState = {
   statusGroups: [],
   status: "idle",
   error: null,
+  deletingStatusIds: [],
 };
 
 export const fetchStatus = createAsyncThunk<
@@ -157,20 +158,22 @@ export const deleteStatus = createAsyncThunk<
   "status/deleteStatus",
   async ({ statusId, token }, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(
-        `/adda/deleteStatus/${statusId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      dispatch(statusSlice.actions.setDeletingStatus(statusId));
 
-      console.log(response);
+      await axiosInstance.delete(`/adda/deleteStatus/${statusId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      dispatch(statusSlice.actions.removeDeletedStatus(statusId));
+
       dispatch(fetchStatus(token));
 
       return statusId;
     } catch (error) {
+      dispatch(statusSlice.actions.clearDeletingStatus(statusId));
+
       if (error instanceof AxiosError && error.response) {
         return rejectWithValue(
           error.response.data.message || "Failed to delete status"
@@ -184,14 +187,53 @@ export const deleteStatus = createAsyncThunk<
 const statusSlice = createSlice({
   name: "userStatus",
   initialState,
-  reducers: {},
+  reducers: {
+    setDeletingStatus: (state, action) => {
+      state.deletingStatusIds.push(action.payload);
+    },
+    clearDeletingStatus: (state, action) => {
+      state.deletingStatusIds = state.deletingStatusIds.filter(
+        (id) => id !== action.payload
+      );
+    },
+    removeDeletedStatus: (state, action) => {
+      const statusIdToRemove = action.payload;
+      state.statusGroups = state.statusGroups
+        .map((group) => {
+          const updatedStatuses = group.statuses.filter(
+            (status) => status._id !== statusIdToRemove
+          );
+
+          return {
+            ...group,
+            statuses: updatedStatuses,
+          };
+        })
+        .filter((group) => group.statuses.length > 0);
+
+      state.deletingStatusIds = state.deletingStatusIds.filter(
+        (id) => id !== statusIdToRemove
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchStatus.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchStatus.fulfilled, (state, action) => {
-        state.statusGroups = action.payload;
+        if (state.deletingStatusIds.length > 0) {
+          state.statusGroups = action.payload
+            .map((group) => ({
+              ...group,
+              statuses: group.statuses.filter(
+                (status) => !state.deletingStatusIds.includes(status._id)
+              ),
+            }))
+            .filter((group) => group.statuses.length > 0);
+        } else {
+          state.statusGroups = action.payload;
+        }
         state.status = "succeeded";
       })
       .addCase(fetchStatus.rejected, (state, action) => {
@@ -231,4 +273,6 @@ const statusSlice = createSlice({
   },
 });
 
+export const { setDeletingStatus, clearDeletingStatus, removeDeletedStatus } =
+  statusSlice.actions;
 export default statusSlice.reducer;

@@ -22,7 +22,7 @@ const Feed = () => {
         toast.success("User feeds fetched successfully");
       } catch (error) {
         console.error("Error fetching user feeds:", error);
-        toast.error("Error fetching user feeds");
+        // toast.error("Error fetching user feeds");
       }
     };
     fetchUserFeeds();
