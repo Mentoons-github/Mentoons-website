@@ -35,37 +35,37 @@ interface NotificationInterface {
 }
 
 // Sample data generator
-// const generateSampleNotifications = (): NotificationInterface[] => {
-//   const sampleUsers: NotificationSender[] = [
-//     {
-//       _id: "1",
-//       name: "Sarah Johnson",
-//       picture: "https://i.pravatar.cc/150?img=1",
-//     },
-//     {
-//       _id: "2",
-//       name: "Mike Chen",
-//       picture: "https://i.pravatar.cc/150?img=2",
-//     },
-//     {
-//       _id: "3",
-//       name: "Emma Wilson",
-//       picture: "https://i.pravatar.cc/150?img=3",
-//     },
-//     {
-//       _id: "4",
-//       name: "Alex Kumar",
-//       picture: "https://i.pravatar.cc/150?img=4",
-//     },
-//   ];
+const generateSampleNotifications = (): NotificationInterface[] => {
+  const sampleUsers: NotificationSender[] = [
+    {
+      _id: "1",
+      name: "Sarah Johnson",
+      picture: "https://i.pravatar.cc/150?img=1",
+    },
+    {
+      _id: "2",
+      name: "Mike Chen",
+      picture: "https://i.pravatar.cc/150?img=2",
+    },
+    {
+      _id: "3",
+      name: "Emma Wilson",
+      picture: "https://i.pravatar.cc/150?img=3",
+    },
+    {
+      _id: "4",
+      name: "Alex Kumar",
+      picture: "https://i.pravatar.cc/150?img=4",
+    },
+  ];
 
-//   const types = ["friend_request_accepted", "like", "comment", "default"];
-//   const messages = [
-//     "accepted your friend request",
-//     "liked your post",
-//     "commented on your post: 'Great content! 👏'",
-//     "shared a new post in your group",
-//   ];
+  const types = ["friend_request_accepted", "like", "comment", "default"];
+  const messages = [
+    "accepted your friend request",
+    "liked your post",
+    "commented on your post: 'Great content! 👏'",
+    "shared a new post in your group",
+  ];
 
   return Array.from({ length: 8 }, (_, index) => ({
     _id: `sample-${index + 1}`,

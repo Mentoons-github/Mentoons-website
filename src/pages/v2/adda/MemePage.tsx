@@ -303,7 +303,7 @@ const MemePage = () => {
   return (
     <div className="relative flex flex-col w-full gap-4 sm:gap-6">
       {/* Meme header */}
-      <div className="sticky top-[200px] z-[10] flex items-center justify-between w-full bg-white rounded-lg rounded-tr-none rounded-tl-none">
+      <div className="sticky top-[200px] z-[5] flex items-center justify-between w-full bg-white rounded-lg rounded-tr-none rounded-tl-none">
         <div className="flex items-center w-full p-2 border border-orange-200 rounded-lg shadow-lg justify-betweens shadow-orange-100/80">
           <div className="flex items-center justify-start w-full gap-3 ">
             <button

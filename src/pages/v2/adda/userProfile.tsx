@@ -30,6 +30,7 @@ import { Link, useNavigate } from "react-router-dom";
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
 import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import { UserInfo } from "@/types";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -37,8 +38,6 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import axiosInstance from "@/api/axios";
-import { UserInfo } from "@/types";
 
 // Define interface for post type
 type PostType = "text" | "photo" | "video" | "article" | "event" | "mixed";
@@ -665,7 +664,7 @@ const UserProfile = () => {
       <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[200px]  z-[10] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center">
                 <div
