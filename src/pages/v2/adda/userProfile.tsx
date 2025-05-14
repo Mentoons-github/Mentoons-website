@@ -34,6 +34,8 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
+import axiosInstance from "@/api/axios";
+import { UserInfo } from "@/types";
 
 // Define interface for post type
 type PostType = "text" | "photo" | "video" | "article" | "event" | "mixed";
@@ -133,6 +135,7 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [friends, setFriends] = useState<UserInfo[]>([]);
 
   const [userPosts, setUserPosts] = useState<Post[]>([]);
 
@@ -155,6 +158,24 @@ const UserProfile = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    const fetchFriends = async () => {
+      const token = await getToken();
+      try {
+        const response = await axiosInstance("/adda/getFriends", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log(response.data.data);
+        setFriends(response.data.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchFriends();
   }, []);
 
   // Calculate profile completion percentage
@@ -451,8 +472,6 @@ const UserProfile = () => {
 
         const fileUrl = uploadResponse.data.data.fileDetails.url;
 
-        
-
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
           "http://localhost:4000/api/v1/user/profile",
@@ -501,7 +520,7 @@ const UserProfile = () => {
 
         // First upload the file to S3
         const formData = new FormData();
-        formData.append("file", file)
+        formData.append("file", file);
 
         const uploadResponse = await axios.post(
           "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
@@ -521,9 +540,6 @@ const UserProfile = () => {
         }
 
         const fileUrl = uploadResponse.data.data.fileDetails.url;
-        
-        
-        
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
@@ -1315,7 +1331,10 @@ const UserProfile = () => {
                       {/* Post items */}
                       <div className="space-y-4">
                         {userPosts.map((post) => (
-                          <PostCard key={post._id} post={post as unknown as PostData} />
+                          <PostCard
+                            key={post._id}
+                            post={post as unknown as PostData}
+                          />
                         ))}
                       </div>
                     </Card>
@@ -1328,22 +1347,19 @@ const UserProfile = () => {
                         My Friends
                       </h3>
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                        {Array.from({ length: 6 }).map((_, index) => (
+                        {friends.map((data, index) => (
                           <div
                             key={index}
                             className="flex flex-col items-center p-3 border border-orange-100 rounded-lg"
                           >
                             <Avatar className="w-16 h-16 mb-2">
-                              <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Friend${index}`}
-                                alt="Friend"
-                              />
+                              <img src={data.picture} alt={data.name} />
                             </Avatar>
                             <p className="font-medium text-center">
-                              Friend Name {index + 1}
+                              {data.name} {index + 1}
                             </p>
                             <p className="mb-2 text-xs text-gray-500">
-                              Joined Jan 2023
+                              {data.joined ?? "Unavailable"}
                             </p>
                             <Button className="mt-1 w-full text-xs h-8 bg-[#EC9600] hover:bg-[#EC9600]/90">
                               Message
@@ -1362,7 +1378,10 @@ const UserProfile = () => {
                       </h3>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {userSavedPosts.map((item) => (
-                          <PostCard key={item._id} post={item as unknown as PostData} />
+                          <PostCard
+                            key={item._id}
+                            post={item as unknown as PostData}
+                          />
                         ))}
                       </div>
                     </Card>

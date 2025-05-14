@@ -25,6 +25,7 @@ export interface UserInfo {
   name: string;
   picture: string;
   email?: string;
+  joined?: string;
 }
 
 export interface StatusInterface {
@@ -50,6 +51,7 @@ export interface StatusState {
   statusGroups: UserStatusInterface[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  deletingStatusIds: string[];
 }
 
 export interface CreateStatusParams {

@@ -37,12 +37,10 @@ const Header = () => {
   const navLeft =
     title === "adda"
       ? ADDA_NAV_LINKS.filter((link) =>
-          ["Mythos", "Community", "Collect Coins", "Profile"].includes(
-            link.label
-          )
+          ["Mythos", "Community", "Products", "Profile"].includes(link.label)
         )
       : NAV_LINKS.filter((link) =>
-          ["Mythos", "Products", "Book Sessions"].includes(link.label)
+          ["Adda", "Products", "Book Sessions"].includes(link.label)
         );
 
   const handleBrowsePlansClick = (
@@ -50,7 +48,7 @@ const Header = () => {
   ) => {
     e.preventDefault();
     if (location.pathname !== "/") {
-      navigate("/");
+      navigate("/mentoons");
       setTimeout(() => scrollToSubscription(), 500);
     } else {
       scrollToSubscription();

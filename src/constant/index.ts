@@ -8,7 +8,7 @@ import {
   FaShoppingCart,
   FaUserAlt,
 } from "react-icons/fa";
-import { FaChartBar, FaCoins, FaUsers } from "react-icons/fa6";
+import { FaChartBar, FaUsers } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 
 export const CATEGORIES = [
@@ -1046,9 +1046,8 @@ export const NAV_LINKS: NavLink[] = [
   },
   {
     id: "NL_03",
-    label: "Join Us",
-    icon: "group",
-    url: "/hiring",
+    label: "Adda",
+    url: "/adda",
   },
   {
     id: "NL_04",
@@ -1163,6 +1162,12 @@ export const NAV_LINKS: NavLink[] = [
     label: "Book Sessions",
     url: "/bookings",
   },
+  {
+    id: "NL_17",
+    label: "Join Us",
+    icon: "group",
+    url: "/hiring",
+  },
 ];
 
 export const ADDA_NAV_LINKS: NavLink[] = [
@@ -1179,37 +1184,59 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     url: "/adda/community",
   },
   {
-    id: "NL_13",
+    id: "NL_03",
     label: "Products",
     icon: FaShoppingCart,
-    url: "/mythos",
+    url: "/mentoons-store",
+    items: [
+      {
+        id: "AC_01",
+        label: "6-12",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "13-16",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "17-19",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "20+",
+        url: "/mentoons-store",
+      },
+    ],
   },
   {
-    id: "NL_15",
+    id: "NL_04",
     label: "Browse Plans",
     icon: FaCreditCard,
     url: "#subscription",
   },
   {
-    id: "NL_08",
+    id: "NL_05",
     label: "Workshops",
     icon: FaChalkboard,
     url: "/mentoons-workshops",
   },
+  // {
+  //   id: "NL_06",
+  //   label: "Collect Coins",
+  //   icon: FaCoins,
+  //   url: "#",
+  // },
   {
-    id: "NL_09",
-    label: "Collect Coins",
-    icon: FaCoins,
-    url: "#",
-  },
-  {
-    id: "NL_10",
+    id: "NL_06",
     label: "Profile",
     icon: FaUserAlt,
     url: "/adda/user-profile",
   },
   {
-    id: "NL_11",
+    id: "NL_07",
     label: "Share",
     icon: FaShare,
     url: "#",

@@ -11,15 +11,18 @@ const Feed = () => {
     const fetchUserFeeds = async () => {
       try {
         const token = await getToken();
-        const response = await axios.get(`http://localhost:4000/api/v1/feeds`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}/feeds`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUserFeeds(response.data.data);
         console.log(response.data.data);
         toast.success("User feeds fetched successfully");
       } catch (error) {
         console.error("Error fetching user feeds:", error);
-        toast.error("Error fetching user feeds");
+        // toast.error("Error fetching user feeds");
       }
     };
     fetchUserFeeds();

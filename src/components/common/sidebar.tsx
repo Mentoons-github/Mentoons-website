@@ -41,13 +41,15 @@ const Sidebar = ({
         )
       : NAV_LINKS.filter((data) =>
           [
-            "Mythos",
+            "Adda",
             "Products",
             "Browse Plans",
             "Workshops",
             "Assessments",
           ].includes(data.label)
         );
+
+  console.log(navLinks);
 
   useEffect(() => {
     const handleBreakPoint = () => {
@@ -91,6 +93,7 @@ const Sidebar = ({
         {navLinks.map(({ id, label, url, items }) =>
           items ? (
             <NavButton
+              key={id ? id : label}
               className="text-white text-2xl sm:text-3xl md:text-4xl"
               label={label}
               icon={false}
