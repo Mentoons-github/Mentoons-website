@@ -77,18 +77,21 @@ const PostCard = ({ post }: PostCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(post.comments);
   const [newComment, setNewComment] = useState("");
   const [isSavedPost, setIsSavedPost] = useState(false);
   const user = useUser();
   console.log(user);
   const { getToken } = useAuth();
   const navigate = useNavigate();
+
   const handleCommentSubmit = async () => {
     if (newComment.trim() === "") return;
-    // Ensure comments is an array before spreading
+
+    // Create the new comment object with a temporary ID
+    const tempId = Date.now(); // Use timestamp as temporary ID to ensure uniqueness
     const newCommentObj = {
-      _id: typeof comments.length === "number" ? comments.length + 1 : 1,
+      _id: tempId,
       content: newComment,
       user: {
         _id: user?.user?.id || "",
@@ -107,18 +110,21 @@ const PostCard = ({ post }: PostCardProps) => {
       updatedAt: new Date().toISOString(),
     };
 
-    setComments(
-      Array.isArray(comments) ? [...comments, newCommentObj] : [newCommentObj]
-    );
-    setNewComment("");
-
     try {
+      // First update UI immediately for better user experience
+      setComments((prevComments) => [
+        ...(Array.isArray(prevComments) ? prevComments : []),
+        newCommentObj,
+      ]);
+      setNewComment(""); // Clear input field immediately
+
+      // Then make API call
       const token = await getToken();
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/comments`,
+        `${import.meta.env.VITE_PROD_URL}comments`,
         {
           postId: post._id,
-          content: newComment,
+          content: newCommentObj.content,
         },
         {
           headers: {
@@ -127,11 +133,30 @@ const PostCard = ({ post }: PostCardProps) => {
           },
         }
       );
-      console.log(response.data);
-      toast.success("Comment added successfully");
+
+      // If the API returns the updated comment, replace our temporary one with the server version
+      if (response.data && response.data.data) {
+        const serverComment = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        // Replace the temporary comment with the server-returned one
+        setComments(serverComment.data.data);
+
+        toast.success("Comment added successfully");
+      }
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment. Please try again.");
+
+      // Remove the optimistically added comment on error
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== tempId)
+      );
     }
   };
 
@@ -142,8 +167,8 @@ const PostCard = ({ post }: PostCardProps) => {
     try {
       const token = await getToken();
       const endpoint = newSavedState
-        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/save`
-        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/save`
+        : `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/unsave`;
 
       const response = await axios.post(
         endpoint,
@@ -171,9 +196,7 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
-            post._id
-          }/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response.data.data);
@@ -182,8 +205,18 @@ const PostCard = ({ post }: PostCardProps) => {
         console.error("Error checking saved post:", error);
       }
     };
+
+    const getComments = async () => {
+      const token = await getToken();
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComments(response.data.data);
+    };
+    getComments();
     checkSavedPost();
-  }, []);
+  }, [post._id, user?.user?.id, getToken]);
 
   const charLimit = 100;
 
@@ -386,7 +419,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
         <div className="flex items-center justify-between w-full ">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            <Likes postId={post._id} likeCount={post.likes.length} />
+            <Likes type="post" id={post._id} likeCount={post.likes.length} />
             <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -405,6 +438,7 @@ const PostCard = ({ post }: PostCardProps) => {
               </span>
             </div>
             <Share
+              type="post"
               postDetails={{
                 ...post,
               }}
@@ -434,8 +468,8 @@ const PostCard = ({ post }: PostCardProps) => {
           >
             <h3 className="text-lg font-semibold text-gray-700">Comments</h3>
             <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 p-2">
-              {post.comments.length > 0 ? (
-                post.comments.map((comment: Comment) => (
+              {comments.length > 0 ? (
+                comments.map((comment: Comment) => (
                   <div
                     key={comment._id}
                     className="flex items-start w-full gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-md"

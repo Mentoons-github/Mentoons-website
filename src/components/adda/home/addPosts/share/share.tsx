@@ -5,12 +5,17 @@ import { useEffect, useState } from "react";
 import { BiShare } from "react-icons/bi";
 import { FaFacebook, FaLinkedin, FaTwitter, FaWhatsapp } from "react-icons/fa";
 
-const Share = ({ postDetails }: { postDetails: any }) => {
+const Share = ({ postDetails, type }: { postDetails: any; type: string }) => {
   const [showShareOptions, setShareOptions] = useState(false);
   const [shareCount, setShareCount] = useState(postDetails.shares.length);
   const { getToken } = useAuth();
   const shareText = `${postDetails?.title} - ${postDetails.content}`;
-  const baseUrl = window.location.origin + "/adda/post/";
+  const baseUrl =
+    type === "post"
+      ? window.location.origin + "/adda/post/"
+      : type === "meme"
+      ? window.location.origin + "/adda/meme/"
+      : "";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -32,23 +37,39 @@ const Share = ({ postDetails }: { postDetails: any }) => {
     try {
       setShareCount(shareCount + 1);
       const token = await getToken();
-      await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/shares`,
-        {
-          postId: postDetails._id,
-          caption: postDetails.content,
-          visibility: postDetails.visibility,
-          externalPlatform: platform,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+      if (type === "post") {
+        await axios.post(
+          `${import.meta.env.VITE_PROD_URL}shares`,
+          {
+            postId: postDetails._id,
+            caption: postDetails.content,
+            visibility: postDetails.visibility,
+            externalPlatform: platform,
           },
-        }
-      );
-
-      // You can handle the updated post data if needed
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (type === "meme") {
+        await axios.post(
+          `${import.meta.env.VITE_PROD_URL}shares`,
+          {
+            memeId: postDetails._id,
+            caption: postDetails.content,
+            visibility: postDetails.visibility,
+            externalPlatform: platform,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
     } catch (error) {
       console.error("Failed to record share:", error);
       // Don't show error to user as this is background tracking

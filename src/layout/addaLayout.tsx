@@ -7,7 +7,7 @@ import FounderNote from "@/components/common/founderNote";
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 
-const AddaOverlay = () => {
+const AddaLayout = () => {
   const [activeSection, setActiveSection] = useState<
     "home" | "notification" | "memeBanner" | "friendRequest" | "userProfile"
   >("home");
@@ -64,4 +64,4 @@ const AddaOverlay = () => {
   );
 };
 
-export default AddaOverlay;
+export default AddaLayout;

@@ -8,11 +8,11 @@ import { motion } from "framer-motion";
 import { FaClock } from "react-icons/fa";
 import { FaBell, FaMessage } from "react-icons/fa6";
 
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const PrimaryHeader = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
   const adda = location.pathname.startsWith("/adda");
 
   const animationTexts = adda ? ANIMATION_TEXTS_ADDA : ANIMATION_TEXTS_HOME;
@@ -66,24 +66,24 @@ const PrimaryHeader = () => {
       <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
         {adda && (
           <SignedIn>
-            <NavLink
-              to="/adda/messages"
+            <div
+              onClick={() => navigate("/adda/messages")}
               className="relative hidden py-2 cursor-pointer md:block"
             >
               <FaMessage />
               <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
-            </NavLink>
-            <NavLink
-              to="/adda/notifications"
+            </div>
+            <div
+              onClick={() => navigate("/adda/notifications")}
               className="relative hidden py-2 cursor-pointer md:block"
             >
               <FaBell />
               <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
-            </NavLink>
+            </div>
           </SignedIn>
         )}
 

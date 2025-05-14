@@ -1,59 +1,64 @@
-import {
-  FaHome,
-  FaRegLaughSquint,
-  FaUser,
-  FaUserFriends,
-} from "react-icons/fa";
-import { FiBell } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Dispatch, SetStateAction } from "react";
+import { FaBell, FaHome, FaUser } from "react-icons/fa";
+import { FaMessage } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
-const BottomNav = ({
-  setActive,
-}: {
-  setActive: React.Dispatch<
-    React.SetStateAction<
+interface BottomNavProps {
+  activeSection:
+    | "home"
+    | "notification"
+    | "memeBanner"
+    | "friendRequest"
+    | "userProfile";
+  setActiveSection: Dispatch<
+    SetStateAction<
       "home" | "notification" | "memeBanner" | "friendRequest" | "userProfile"
     >
   >;
-  
-  }) => {
-  const navigate = useNavigate();
+}
+
+const BottomNav = ({ activeSection, setActiveSection }: BottomNavProps) => {
   return (
-    <div className="fixed bottom-0 left-0 flex items-center justify-between w-full px-4 bg-white border-t border-gray-300 md:hidden h-14">
-      <div className="relative" onClick={() => setActive("notification")}>
-        <button className="relative p-2 outline-none cursor-pointer">
-          <FiBell className="text-3xl" />
-          <span className="absolute top-0 flex items-center justify-center w-5 h-5 text-xs text-white bg-red-600 rounded-full -right-0">
-            1
-          </span>
+    <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
+      <div className="flex items-center justify-around h-16">
+        <button
+          onClick={() => setActiveSection("home")}
+          className={`flex flex-col items-center justify-center w-full h-full ${
+            activeSection === "home" ? "text-orange-500" : "text-gray-500"
+          }`}
+        >
+          <FaHome className="text-xl" />
+          <span className="mt-1 text-xs">Home</span>
         </button>
-      </div>
-
-      <div className="relative" onClick={() => setActive("memeBanner")}>
-        <button className="relative p-2 outline-none cursor-pointer">
-          <FaRegLaughSquint className="text-3xl" />
+        <button
+          onClick={() => setActiveSection("notification")}
+          className={`flex flex-col items-center justify-center w-full h-full ${
+            activeSection === "notification"
+              ? "text-orange-500"
+              : "text-gray-500"
+          }`}
+        >
+          <FaBell className="text-xl" />
+          <span className="mt-1 text-xs">Notifications</span>
         </button>
-      </div>
-
-      <div className="relative" onClick={() => setActive("home")}>
-        <button className="relative p-2 outline-none cursor-pointer">
-          <FaHome className="text-3xl" />
+        <button
+          onClick={() => setActiveSection("friendRequest")}
+          className={`flex flex-col items-center justify-center w-full h-full ${
+            activeSection === "friendRequest"
+              ? "text-orange-500"
+              : "text-gray-500"
+          }`}
+        >
+          <FaMessage className="text-xl" />
+          <span className="mt-1 text-xs">Messages</span>
         </button>
-      </div>
-
-      <div className="relative" onClick={() => setActive("friendRequest")}>
-        <button className="relative p-2 outline-none cursor-pointer">
-          <FaUserFriends className="text-3xl" />
-          <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-600 rounded-full -top-0 -right-1">
-            1
-          </span>
-        </button>
-      </div>
-
-      <div className="relative" onClick={() => navigate("/adda/user-profile") }>
-        <button className="p-2 outline-none cursor-pointer">
-          <FaUser className="text-3xl" />
-        </button>
+        <Link
+          to="/adda/user-profile"
+          className="flex flex-col items-center justify-center w-full h-full text-gray-500"
+        >
+          <FaUser className="text-xl" />
+          <span className="mt-1 text-xs">Profile</span>
+        </Link>
       </div>
     </div>
   );
