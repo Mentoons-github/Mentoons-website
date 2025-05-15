@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 import {
   FiAlertCircle,
-  FiArrowLeft,
   FiAward,
   FiCalendar,
   FiCheck,
@@ -34,6 +33,7 @@ import { UserInfo } from "@/types";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
@@ -672,16 +672,16 @@ const UserProfile = () => {
           {/* Profile Header */}
           <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
-              <div className="flex items-center">
-                <div
+              <div className="flex items-center gap-4">
+                <button
                   onClick={() => navigate("/adda/home")}
-                  className="mr-3 flex items-center text-[#EC9600] hover:text-[#EC9600]/80"
+                  className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
                 >
-                  <FiArrowLeft className="mr-1" size={18} />
-                  <span className="text-sm font-medium">Back to Adda</span>
-                </div>
-                <h1 className="text-xl font-semibold text-gray-800 md:text-2xl">
-                  My Profile
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+
+                <h1 className="text-xl font-semibold text-orange-700 md:text-2xl">
+                  {userDetails.name}
                 </h1>
               </div>
               <Button

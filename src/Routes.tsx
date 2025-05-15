@@ -44,7 +44,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 
 const routes = [
-  { path: "/", element: <Navigate to="/adda" replace /> },
+  { path: "/", element: <Navigate to="/adda/home" replace /> },
   { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },

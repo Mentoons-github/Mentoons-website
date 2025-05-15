@@ -70,9 +70,9 @@ const ArticleForm = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="w-full mt-6 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800"
+        className="w-full p-3 mt-6 border border-blue-100 rounded-lg bg-blue-50 dark:bg-blue-900/30 dark:border-blue-800"
       >
-        <p className="text-sm text-blue-800 dark:text-blue-200 flex items-center justify-between">
+        <p className="flex items-center justify-between text-sm text-blue-800 dark:text-blue-200">
           <span>You'll be able to add a cover image in the next step</span>
           <span className="text-xs text-blue-500">Step 1 of 3</span>
         </p>
