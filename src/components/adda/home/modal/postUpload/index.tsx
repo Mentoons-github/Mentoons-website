@@ -57,7 +57,7 @@ const PostUpload = ({
       formData.append("file", file);
 
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/upload/file`,
+        `${import.meta.env.VITE_PROD_URL}upload/file`,
         formData,
         {
           headers: {

@@ -194,7 +194,8 @@ const ArticlePostCard = ({
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
           <Likes
-            postId={post._id}
+            type="post"
+            id={post._id}
             likeCount={post.likes.length}
           />
           <div className="flex items-center gap-2 sm:gap-3">
@@ -215,6 +216,7 @@ const ArticlePostCard = ({
             </span>
           </div>
           <Share
+            type="post"
             postDetails={{
               ...post,
               shares: post.shares,
@@ -232,7 +234,7 @@ const ArticlePostCard = ({
             <FaRegBookmark className="w-5 sm:w-6 sm:h-6 text-[#D56A11]" />
           </button>
           <span className="text-[#605F5F] text-sm sm:text-base figtree">
-            {post.shares.length}
+            {post.shares.length}  
           </span>
         </div>
       </div>

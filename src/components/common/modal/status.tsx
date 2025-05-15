@@ -1,17 +1,17 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { formatDistanceToNow } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
-  FaTimes,
-  FaTrash,
+  FaChevronLeft,
+  FaChevronRight,
   FaEye,
   FaPause,
   FaPlay,
-  FaChevronLeft,
-  FaChevronRight,
   FaSpinner,
+  FaTimes,
+  FaTrash,
 } from "react-icons/fa";
 import { StatusInterface } from "../../../types";
-import { formatDistanceToNow } from "date-fns";
 
 const Status = ({
   status,
@@ -243,7 +243,7 @@ const Status = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 flex items-center justify-center bg-black z-[10]"
       onClick={setStatus}
     >
       <motion.div
@@ -266,13 +266,13 @@ const Status = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Progress Bars */}
-        <div className="absolute top-0 left-0 right-0 z-30 flex w-full px-2 pt-2 gap-1">
+        <div className="absolute top-0 left-0 right-0 z-30 flex w-full gap-1 px-2 pt-2">
           {totalStatuses > 0 && (
-            <div className="w-full flex gap-1">
+            <div className="flex w-full gap-1">
               {Array.from({ length: totalStatuses }).map((_, idx) => (
                 <div
                   key={`status-${idx}`}
-                  className="h-1 overflow-hidden bg-gray-500 bg-opacity-50 rounded-full flex-1"
+                  className="flex-1 h-1 overflow-hidden bg-gray-500 bg-opacity-50 rounded-full"
                 >
                   {idx === currentIndex ? (
                     <motion.div
@@ -282,7 +282,7 @@ const Status = ({
                       transition={{ ease: "linear", duration: 0.1 }}
                     />
                   ) : idx < currentIndex ? (
-                    <div className="h-full w-full bg-white" />
+                    <div className="w-full h-full bg-white" />
                   ) : null}
                 </div>
               ))}
@@ -292,7 +292,7 @@ const Status = ({
 
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between w-full p-4 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center w-full">
-            <div className="flex items-center gap-2 mr-2 flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 gap-2 mr-2">
               <motion.img
                 initial={{ scale: isUserChange ? 0.5 : 1 }}
                 animate={{ scale: 1 }}
@@ -307,10 +307,10 @@ const Status = ({
                     ? status.user.name
                     : "Unknown User"
                 }
-                className="object-cover w-8 h-8 border-2 border-pink-500 rounded-full flex-shrink-0"
+                className="flex-shrink-0 object-cover w-8 h-8 border-2 border-pink-500 rounded-full"
               />
             </div>
-            <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex flex-col flex-1 min-w-0">
               <motion.p
                 initial={{
                   y: isUserChange ? 10 : 0,
@@ -345,7 +345,7 @@ const Status = ({
               </motion.span>
             </div>
           </div>
-          <div className="flex items-center gap-4 flex-shrink-0 ml-2">
+          <div className="flex items-center flex-shrink-0 gap-4 ml-2">
             {status.isOwner && (
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -390,13 +390,13 @@ const Status = ({
           </div>
         </div>
 
-        <div className="absolute inset-0 flex z-10">
+        <div className="absolute inset-0 z-10 flex">
           {hasPrevious && (
             <div
-              className="w-1/3 h-full cursor-pointer flex items-center justify-start px-4"
+              className="flex items-center justify-start w-1/3 h-full px-4 cursor-pointer"
               onClick={handleLeftSideClick}
             >
-              <div className="bg-black/30 rounded-full p-2 opacity-70 hover:opacity-100">
+              <div className="p-2 rounded-full bg-black/30 opacity-70 hover:opacity-100">
                 <FaChevronLeft className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -413,10 +413,10 @@ const Status = ({
           />
           {hasNext && (
             <div
-              className="w-1/3 h-full cursor-pointer flex items-center justify-end px-4"
+              className="flex items-center justify-end w-1/3 h-full px-4 cursor-pointer"
               onClick={handleRightSideClick}
             >
-              <div className="bg-black/30 rounded-full p-2 opacity-70 hover:opacity-100">
+              <div className="p-2 rounded-full bg-black/30 opacity-70 hover:opacity-100">
                 <FaChevronRight className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -425,7 +425,7 @@ const Status = ({
 
         <div className="flex items-center justify-center w-full h-full z-5">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 z-20">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black bg-opacity-70">
               <FaSpinner className="w-10 h-10 text-white animate-spin" />
             </div>
           )}
@@ -453,14 +453,14 @@ const Status = ({
             <div className="flex justify-between mb-3">
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center px-3 py-1 text-white bg-white bg-opacity-20 rounded-full"
+                className="flex items-center px-3 py-1 text-white bg-white rounded-full bg-opacity-20"
                 onClick={toggleViewers}
               >
                 <FaEye className="w-4 h-4 mr-2" />
                 <span className="text-xs">{displayViewers.length} viewed</span>
               </motion.button>
               {(showViewers || isPaused || isLoading) && (
-                <div className="text-xs text-white bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                <div className="px-3 py-1 text-xs text-white bg-white rounded-full bg-opacity-20">
                   {isLoading
                     ? "Loading..."
                     : showViewers
@@ -496,14 +496,14 @@ const Status = ({
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="absolute bottom-0 left-0 right-0 max-h-[60vh] overflow-y-auto bg-black z-40 p-4"
             >
-              <h3 className="text-white font-semibold mb-3">Viewed by</h3>
+              <h3 className="mb-3 font-semibold text-white">Viewed by</h3>
               <ul className="space-y-2">
                 {displayViewers.map((viewer: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-2">
                     <img
                       src={viewer.picture || "/default-avatar.png"}
                       alt={viewer.name}
-                      className="w-6 h-6 rounded-full object-cover"
+                      className="object-cover w-6 h-6 rounded-full"
                     />
                     <span className="text-sm text-white">{viewer.name}</span>
                   </li>
