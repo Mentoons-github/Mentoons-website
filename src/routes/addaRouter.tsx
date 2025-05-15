@@ -2,11 +2,14 @@ import AddaLayout from "@/layout/addaLayout";
 
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
+// import ProtectedRoute from "@/components/adda/auth/protectedRoute";
+
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
 const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
+const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
 const Notification = lazy(
   () => import("@/components/adda/home/notifications/notification")
 );
@@ -25,6 +28,7 @@ const AddaRouter = () => {
         <Route path="notifications" element={<Notification />} />
         <Route path="meme" element={<MemePage />} />
         <Route path="meme/:memeId" element={<MemeDetails />} />
+        <Route path="/user/:userId" element={<ProfileDetails />} />
       </Route>
     </Routes>
   );

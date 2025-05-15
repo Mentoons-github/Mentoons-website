@@ -16,6 +16,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import { NavLink } from "react-router-dom";
 
 const UserStatus = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -239,9 +240,18 @@ const UserStatus = () => {
                     onClick={() => handleStatus(statusGroup)}
                   />
                 </div>
-                <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
-                  {statusGroup.isOwner ? "Your Story" : statusGroup.user.name}
-                </span>
+                {statusGroup.isOwner ? (
+                  <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
+                    Your Story
+                  </span>
+                ) : (
+                  <NavLink
+                    to={`/adda/user/${statusGroup.user._id}`}
+                    className="text-xs sm:text-sm text-center truncate max-w-[80px]"
+                  >
+                    {statusGroup.user.name}
+                  </NavLink>
+                )}
               </SwiperSlide>
             ))}
           </Swiper>

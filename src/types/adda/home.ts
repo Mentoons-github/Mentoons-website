@@ -27,7 +27,7 @@ export interface requestSender {
   };
 }
 
-interface UserSummary {
+export interface UserSummary {
   _id: string;
   name: string;
   picture: string;
