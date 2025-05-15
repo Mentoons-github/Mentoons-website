@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
@@ -363,7 +363,10 @@ const PostCard = ({ post }: PostCardProps) => {
   return (
     <>
       <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
-        <div className="flex items-center justify-start w-full gap-3">
+        <NavLink
+          to={`/adda/user/${post.user._id}`}
+          className="flex items-center justify-start w-full gap-3"
+        >
           <div className="overflow-hidden rounded-full w-14 h-14">
             <img
               src={post?.user?.picture}
@@ -380,7 +383,7 @@ const PostCard = ({ post }: PostCardProps) => {
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
-        </div>
+        </NavLink>
 
         {renderPostContent()}
 

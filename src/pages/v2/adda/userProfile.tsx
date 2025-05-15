@@ -38,7 +38,13 @@ import axiosInstance from "@/api/axios";
 import { UserInfo } from "@/types";
 
 // Define interface for post type
-type PostType = "text" | "photo" | "video" | "article" | "event" | "mixed";
+export type PostType =
+  | "text"
+  | "photo"
+  | "video"
+  | "article"
+  | "event"
+  | "mixed";
 
 // Define interface for media items
 interface MediaItem {
@@ -72,7 +78,7 @@ interface PostUser {
 }
 
 // Define post interface to match PostData
-interface Post {
+export interface Post {
   _id: string;
   postType: PostType;
   userId?: string;
@@ -261,7 +267,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        "http://localhost:4000/api/v1/user/profile",
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
         {
           headers: {
@@ -335,7 +341,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `http://localhost:4000/api/v1/posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -379,7 +385,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `http://localhost:4000/api/v1/feeds/saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/saved`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -419,7 +425,7 @@ const UserProfile = () => {
         throw new Error("No token found");
       }
       const response = await axios.get(
-        `http://localhost:4000/api/v1/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/${user?.id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -474,7 +480,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          "http://localhost:4000/api/v1/user/profile",
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -543,7 +549,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          "http://localhost:4000/api/v1/user/profile",
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { picture: fileUrl },
           {
             headers: {

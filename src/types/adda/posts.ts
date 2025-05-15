@@ -40,3 +40,5 @@ export interface PostState {
 export interface PostMethods {
   isLikedBy: (userId: string) => boolean;
 }
+
+

@@ -17,6 +17,7 @@ import {
   UserStatusInterface,
   WatchStatusParams,
 } from "./adda/status";
+import { UserSummary } from "./adda/home";
 import { DropDownInterface } from "./common/header";
 import { Groups } from "./groups/groups";
 import { Hiring } from "./assessements/assessment";
@@ -38,6 +39,17 @@ import {
   NotificationContextType,
   NotificationInterface,
 } from "./adda/notification";
+import {
+  SocialLinks,
+  Media,
+  MediaType,
+  Post,
+  PostType,
+  Subscription,
+  TabType,
+  User,
+  UserRole,
+} from "./adda/userProfile";
 
 export type {
   Color,
@@ -76,4 +88,14 @@ export type {
   StatusApiResponse,
   UserInfo,
   WatchStatusParams,
+  SocialLinks,
+  Media,
+  Post,
+  Subscription,
+  TabType,
+  User,
+  UserRole,
+  UserSummary,
 };
+
+export { MediaType, PostType };

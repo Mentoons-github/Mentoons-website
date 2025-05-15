@@ -10,17 +10,24 @@ import Meme from "@/components/adda/home/memeOfTheDay/meme";
 import Notification from "@/components/adda/home/notifications/notification";
 import UserStatus from "@/components/adda/home/userStatus/userStatus";
 import FounderNote from "@/components/common/founderNote";
-import WelcomeLogin from "@/components/adda/welcome/welcome";
 
 const AddaHome = () => {
   const [activeSection, setActiveSection] = useState<
     "home" | "notification" | "memeBanner" | "friendRequest" | "userProfile"
   >("home");
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen">
+        <div className="w-10 h-10 border-4 border-orange-300 border-t-orange-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -49,35 +56,33 @@ const AddaHome = () => {
                 <FounderNote scroll={false} />
               </div>
             </div>
-
-            {isSignedIn ? (
-              <>
-                <div
-                  className={`flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%] ${
-                    activeSection !== "home" && activeSection !== "notification"
-                      ? "hidden md:flex"
-                      : "flex"
-                  }`}
-                >
-                  {activeSection === "notification" ||
-                  window.location.pathname === "/adda/notifications" ? (
-                    <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
-                      <Notification />
+            <>
+              <div
+                className={`flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%] ${
+                  activeSection !== "home" && activeSection !== "notification"
+                    ? "hidden md:flex"
+                    : "flex"
+                }`}
+              >
+                {activeSection === "notification" ||
+                window.location.pathname === "/adda/notifications" ? (
+                  <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
+                    <Notification />
+                  </div>
+                ) : (
+                  <>
+                    <div className="sticky top-[176px] sm:top-[184px] md:top-[200px] z-[5] bg-white rounded-br-lg shadow-sm rounded-bl-lg">
+                      <AddPosts />
                     </div>
-                  ) : (
-                    <>
-                      <div className="sticky top-[176px] sm:top-[184px] md:top-[200px] z-[5] bg-white rounded-br-lg shadow-sm rounded-bl-lg">
-                        <AddPosts />
-                      </div>
-                      <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
-                        <Posts />
-                      </div>
-                    </>
-                  )}
-                </div>
+                    <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
+                      <Posts />
+                    </div>
+                  </>
+                )}
+              </div>
 
-                <div
-                  className={`w-full md:w-1/3 lg:w-1/4 flex-shrink-0
+              <div
+                className={`w-full md:w-1/3 lg:w-1/4 flex-shrink-0
                   ${
                     activeSection === "friendRequest" ||
                     activeSection === "memeBanner"
@@ -88,38 +93,33 @@ const AddaHome = () => {
                       ? "hidden"
                       : "hidden md:block"
                   }`}
-                >
-                  <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 top-[204px] z-[8] w-full">
-                    <div className="flex flex-col gap-4 mb-16 md:hidden">
-                      {activeSection === "friendRequest" && (
-                        <div className="p-3 bg-white rounded-lg sm:p-4">
-                          <FriendRequest />
-                        </div>
-                      )}
-
-                      {activeSection === "memeBanner" && (
-                        <>
-                          <Influencer />
-                          <Meme />
-                        </>
-                      )}
-                    </div>
-
-                    <div className="hidden md:flex md:flex-col md:gap-4 lg:gap-6">
-                      <div className="p-3 bg-white border border-orange-200 rounded-lg sm:p-4">
+              >
+                <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 top-[204px] z-[8] w-full">
+                  <div className="flex flex-col gap-4 mb-16 md:hidden">
+                    {activeSection === "friendRequest" && (
+                      <div className="p-3 bg-white rounded-lg sm:p-4">
                         <FriendRequest />
                       </div>
-                      <Influencer />
-                      <Meme />
+                    )}
+
+                    {activeSection === "memeBanner" && (
+                      <>
+                        <Influencer />
+                        <Meme />
+                      </>
+                    )}
+                  </div>
+
+                  <div className="hidden md:flex md:flex-col md:gap-4 lg:gap-6">
+                    <div className="p-3 bg-white border border-orange-200 rounded-lg sm:p-4">
+                      <FriendRequest />
                     </div>
+                    <Influencer />
+                    <Meme />
                   </div>
                 </div>
-              </>
-            ) : (
-              <div className="w-full md:flex-1 mb-16">
-                <WelcomeLogin />
               </div>
-            )}
+            </>
           </div>
         </div>
       </div>

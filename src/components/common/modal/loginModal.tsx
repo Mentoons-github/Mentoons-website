@@ -65,7 +65,7 @@ const LoginModal = ({
 
   const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    onClose;
+    onClose();
   };
 
   return (

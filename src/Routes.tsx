@@ -42,6 +42,7 @@ const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+
 const routes = [
   { path: "/", element: <Navigate to="/adda" replace /> },
   { path: "/mentoons", element: <Home /> },
