@@ -6,10 +6,12 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
 
 const Likes = ({
-  postId,
+  type,
+  id,
   likeCount,
 }: {
-  postId: string;
+  type: "post" | "meme";
+  id: string;
   likeCount: number;
 }) => {
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -17,63 +19,77 @@ const Likes = ({
 
   const { getToken } = useAuth();
 
-  const handleLike = async () => {
+  const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     const newLikedState = !isLiked;
+
+    // Optimistically update UI
     setIsLiked(newLikedState);
-    setLikeCounter((prev) => (newLikedState ? prev + 1 : prev - 1));
+    setLikeCounter((prev) => Math.max(0, newLikedState ? prev + 1 : prev - 1));
 
     try {
       const token = await getToken();
       const endpoint = newLikedState
-        ? `${import.meta.env.VITE_PROD_URL}/likes/posts/like`
-        : `${import.meta.env.VITE_PROD_URL}/likes/posts/unlike`;
+        ? `${import.meta.env.VITE_PROD_URL}likes/add-like`
+        : `${import.meta.env.VITE_PROD_URL}likes/remove-like`;
 
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
 
-      await axios.post(endpoint, { postId }, { headers });
+      const response = await axios.post(endpoint, { type, id }, { headers });
 
-      // Show success message
+      // Update with server response
+      if (response.data.likeCount !== undefined) {
+        setLikeCounter(response.data.likeCount);
+      }
+
       toast.success(
         newLikedState ? "Liked successfully" : "Reaction removed successfully"
       );
     } catch (error) {
       console.error("Error updating reaction:", error);
       toast.error("Failed to update reaction. Please try again.");
+      // Revert UI state on error
       setIsLiked(!newLikedState);
-      setLikeCounter((prev) => (newLikedState ? prev - 1 : prev + 1));
+      setLikeCounter((prev) =>
+        Math.max(0, newLikedState ? prev - 1 : prev + 1)
+      );
     }
   };
 
   useEffect(() => {
     const checkLike = async () => {
-      const token = await getToken();
-      const endpoint = `${
-        import.meta.env.VITE_PROD_URL
-      }/likes/posts/like/check?postId=${postId}`;
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      const response = await axios.get(endpoint, {
-        headers,
-      });
-      if (response.data.liked) {
-        setIsLiked(true);
-      } else {
-        setIsLiked(false);
+      try {
+        const token = await getToken();
+        const endpoint = `${
+          import.meta.env.VITE_PROD_URL
+        }likes/check-like?type=${type}&id=${id}`;
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await axios.get(endpoint, {
+          headers,
+        });
+        setIsLiked(response.data.liked);
+        if (response.data.likeCount !== undefined) {
+          setLikeCounter(response.data.likeCount);
+        }
+      } catch (error) {
+        console.error("Error checking like:", error);
       }
     };
 
     checkLike();
-  }, [isLiked]);
+  }, [type, id, getToken]);
+
   return (
     <div className="flex items-center justify-center gap-3">
       <motion.button
         className="flex items-center justify-center w-8 p-2 bg-white border border-orange-400 rounded-full sm:w-12 sm:h-12"
-        onClick={handleLike}
+        onClick={(e) => handleLike(e)}
         whileTap={{ scale: 0.9 }}
         whileHover={{
           scale: 1.1,
@@ -82,7 +98,7 @@ const Likes = ({
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
         {isLiked ? (
-          <FaHeart className="w-4 text-red-500 sm:w-6 sm:h-6 ho" />
+          <FaHeart className="w-4 text-red-500 sm:w-6 sm:h-6" />
         ) : (
           <FaRegHeart className="w-4 text-orange-500 sm:w-6 sm:h-6" />
         )}

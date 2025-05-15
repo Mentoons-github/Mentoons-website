@@ -23,19 +23,21 @@ import {
   FiMapPin,
   FiPhone,
   FiUser,
+  FiUsers,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Shadcn UI components
+import axiosInstance from "@/api/axios";
 import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import { UserInfo } from "@/types";
+import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import axiosInstance from "@/api/axios";
-import { UserInfo } from "@/types";
 
 // Define interface for post type
 export type PostType =
@@ -136,6 +138,13 @@ interface ProfileField {
   minLength?: number;
 }
 
+// Add interface for suggested friends
+interface SuggestionInterface {
+  _id: string;
+  name: string;
+  picture: string;
+}
+
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
@@ -146,6 +155,7 @@ const UserProfile = () => {
   const [userPosts, setUserPosts] = useState<Post[]>([]);
 
   const [userSavedPosts, setUserSavedPosts] = useState<Post[]>([]);
+  const navigate = useNavigate();
 
   const [userDetails, setUserDetails] = useState<UserDetails>({
     _id: "",
@@ -161,6 +171,12 @@ const UserProfile = () => {
   // Create refs for file inputs
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const [friendSuggestions, setFriendSuggestions] = useState<
+    SuggestionInterface[] | null
+  >(null);
+  const [connectingIds, setConnectingIds] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -577,25 +593,93 @@ const UserProfile = () => {
     }
   };
 
+  // Add function to fetch suggestions
+  const fetchSuggestions = async () => {
+    if (loadingSuggestions) return;
+    setLoadingSuggestions(true);
+
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.get(
+        `/adda/requestSuggestions?page=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response.data);
+
+      const { suggestions } = response.data.data;
+      setFriendSuggestions(suggestions || []);
+    } catch (error) {
+      console.error("Error fetching friend suggestions:", error);
+      errorToast("Failed to fetch suggestions");
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  // Add handleConnect function
+  const handleConnect = async (suggestionId: string) => {
+    setConnectingIds((prev) => [...prev, suggestionId]);
+
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        `/adda/request/${suggestionId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success === true) {
+        setFriendSuggestions((prevSuggestions) =>
+          prevSuggestions
+            ? prevSuggestions.filter(
+                (suggestion) => suggestion._id !== suggestionId
+              )
+            : null
+        );
+
+        successToast("Friend request sent successfully");
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      errorToast("Failed to send friend request");
+    } finally {
+      setConnectingIds((prev) => prev.filter((id) => id !== suggestionId));
+    }
+  };
+
+  // Add useEffect to fetch suggestions when component mounts
+  useEffect(() => {
+    fetchSuggestions();
+  }, []);
+
   return (
     <>
       {showConfetti && (
         <Confetti recycle={false} numberOfPieces={500} className="w-full" />
       )}
 
-      <div className="flex items-start justify-center w-full p-2 max-w-8xl sm:p-3 md:p-4">
-        <div className="relative flex flex-col w-full">
+      <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
+        <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky left-0 top-[64px] z-[99999] bg-white">
-            <div className="flex items-center justify-between w-full p-3 border-b border-orange-200">
+          <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+            <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center">
-                <Link
-                  to="/adda"
+                <div
+                  onClick={() => navigate("/adda/home")}
                   className="mr-3 flex items-center text-[#EC9600] hover:text-[#EC9600]/80"
                 >
                   <FiArrowLeft className="mr-1" size={18} />
                   <span className="text-sm font-medium">Back to Adda</span>
-                </Link>
+                </div>
                 <h1 className="text-xl font-semibold text-gray-800 md:text-2xl">
                   My Profile
                 </h1>
@@ -661,7 +745,7 @@ const UserProfile = () => {
                           <p className="text-xs font-medium text-amber-700">
                             Missing information:
                           </p>
-                          <ul className="pl-4 mt-1 text-xs list-disc text-amber-700">
+                          <ul className="flex flex-wrap gap-6 pl-4 list-disc te-xt-xs mt1 text-amber-700">
                             {incompleteFields.map((field, index) => (
                               <li key={index}>{field}</li>
                             ))}
@@ -899,9 +983,9 @@ const UserProfile = () => {
 
           {/* Main content area - only show if not displaying the completion form */}
           {!showCompletionForm && (
-            <div className="flex flex-col w-full mt-4 md:flex-row md:gap-4 lg:gap-6">
+            <div className="flex flex-col w-full mt-4 md:gap-4 lg:gap-6">
               {/* Left sidebar */}
-              <div className="flex-shrink-0 w-full md:w-1/3 lg:w-1/4">
+              <div className="w-full ">
                 <div className="sticky top-[130px] flex flex-col gap-4">
                   {/* User Card */}
                   <Card className="overflow-hidden border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
@@ -931,8 +1015,8 @@ const UserProfile = () => {
                       />
                     </div>
 
-                    <div className="flex flex-col items-center px-4 pb-4 -mt-12">
-                      <div className="relative">
+                    <div className="flex flex-col items-start px-4 pb-4 -mt-12">
+                      <div className="relative ">
                         <Avatar className="w-24 h-24 ring-4 ring-white">
                           <img
                             src={userDetails.picture}
@@ -945,6 +1029,7 @@ const UserProfile = () => {
                         >
                           <FiEdit2 size={14} />
                         </Button>
+
                         {/* Hidden file input for profile photo */}
                         <input
                           type="file"
@@ -954,67 +1039,21 @@ const UserProfile = () => {
                           onChange={handleProfilePhotoChange}
                         />
                       </div>
-
-                      <h2 className="mt-3 text-lg font-bold text-gray-800">
-                        {userDetails.name}
-                      </h2>
-                      <p className="flex items-center mt-1 text-sm text-gray-600">
-                        <FiMapPin className="mr-1" size={14} />
-                        {userDetails.location}
-                      </p>
-                      <p className="flex items-center mt-1 text-xs text-gray-500">
-                        <FiCalendar className="mr-1" size={12} /> Joined{" "}
-                        {userDetails.joinedDate}
-                      </p>
-
-                      {/* Profile Completion Badge */}
-                      {!isProfileComplete && (
-                        <div className="w-full mt-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">
-                              Profile Completion
-                            </span>
-                            <span className="text-xs font-medium text-[#EC9600]">
-                              {profileCompletionPercentage}%
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 bg-orange-100 rounded-full mt-1">
-                            <div
-                              className="h-1.5 bg-[#EC9600] rounded-full"
-                              style={{
-                                width: `${profileCompletionPercentage}%`,
-                              }}
-                            ></div>
-                          </div>
-                          {incompleteFields.length > 0 && (
-                            <div
-                              className="p-2 mt-2 border border-orange-100 rounded-md bg-orange-50"
-                              title={incompleteFields.join(", ")}
-                            >
-                              <p className="text-xs font-medium text-[#EC9600]">
-                                Complete your profile by adding:
-                              </p>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {incompleteFields
-                                  .slice(0, 3)
-                                  .map((field, index) => (
-                                    <span
-                                      key={index}
-                                      className="text-xs bg-orange-100 text-[#EC9600] px-1 py-0.5 rounded"
-                                    >
-                                      {field}
-                                    </span>
-                                  ))}
-                                {incompleteFields.length > 3 && (
-                                  <span className="text-xs bg-orange-100 text-[#EC9600] px-1 py-0.5 rounded">
-                                    +{incompleteFields.length - 3} more
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                      <div className="flex flex-col gap-1">
+                        <h2 className="mt-3 text-lg font-bold text-gray-800">
+                          {userDetails.name}
+                        </h2>
+                        <div className="flex gap-2">
+                          <p className="flex items-center mt-1 text-sm text-gray-600">
+                            <FiMapPin className="mr-1" size={14} />
+                            {userDetails.location}
+                          </p>
+                          <p className="flex items-center mt-1 text-xs text-gray-500">
+                            <FiCalendar className="mr-1" size={12} /> Joined{" "}
+                            {userDetails.joinedDate}
+                          </p>
                         </div>
-                      )}
+                      </div>
 
                       {/* User Stats */}
                       <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
@@ -1081,45 +1120,89 @@ const UserProfile = () => {
                     </div>
                   </Card>
 
-                  {/* Suggested Friends - Similar to friend request on home page */}
+                  {/* Suggested Friends */}
                   <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <h3 className="mb-3 text-lg font-semibold text-gray-800">
                       Suggested Friends
                     </h3>
                     <div className="space-y-3">
-                      {[1, 2, 3].map((item) => (
-                        <div
-                          key={item}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Avatar className="w-10 h-10">
-                              <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Friend${item}`}
-                                alt="Friend"
-                              />
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">
-                                Friend Name {item}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                12 mutual friends
-                              </p>
+                      {loadingSuggestions ? (
+                        <div className="flex items-center justify-center w-full py-3">
+                          <div className="w-5 h-5 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                          <span className="ml-2 text-sm text-gray-500">
+                            Loading suggestions...
+                          </span>
+                        </div>
+                      ) : friendSuggestions && friendSuggestions.length > 0 ? (
+                        friendSuggestions.map((suggestion) => (
+                          <div
+                            key={suggestion._id}
+                            className="flex items-center justify-between p-3 transition-all duration-200 bg-white border border-orange-100 rounded-lg hover:shadow-md"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Avatar className="w-10 h-10">
+                                <img
+                                  src={suggestion.picture}
+                                  alt={suggestion.name}
+                                  className="object-cover w-full h-full"
+                                />
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-medium text-gray-800">
+                                  {suggestion.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Suggested connection
+                                </p>
+                              </div>
                             </div>
+                            <Button
+                              onClick={() => handleConnect(suggestion._id)}
+                              disabled={connectingIds.includes(suggestion._id)}
+                              className={`text-xs h-8 ${
+                                connectingIds.includes(suggestion._id)
+                                  ? "bg-gray-300 cursor-not-allowed"
+                                  : "bg-[#EC9600] hover:bg-[#EC9600]/90"
+                              }`}
+                            >
+                              {connectingIds.includes(suggestion._id) ? (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                                  <span>Connecting...</span>
+                                </div>
+                              ) : (
+                                "Connect"
+                              )}
+                            </Button>
                           </div>
-                          <Button className="text-xs h-8 bg-[#EC9600] hover:bg-[#EC9600]/90">
-                            Connect
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center w-full py-6 text-center">
+                          <div className="p-3 mb-3 text-[#EC9600] rounded-full bg-orange-50">
+                            <FiUsers className="w-6 h-6" />
+                          </div>
+                          <h3 className="mb-1 text-base font-medium text-gray-700">
+                            No Suggestions Available
+                          </h3>
+                          <p className="mb-4 text-sm text-gray-500">
+                            We couldn't find any connection suggestions for you
+                            at the moment
+                          </p>
+                          <Button
+                            onClick={fetchSuggestions}
+                            className="bg-[#EC9600] hover:bg-[#EC9600]/90"
+                          >
+                            Refresh Suggestions
                           </Button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </Card>
                 </div>
               </div>
 
               {/* Main Content */}
-              <div className="w-full md:flex-1 lg:max-w-[75%] mt-4 md:mt-0">
+              <div className="w-full mt-4 md:flex-1 md:mt-0">
                 {/* Navigation Tabs */}
                 <Card className="p-2 mb-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                   <div className="flex pb-1 space-x-2 overflow-x-auto">

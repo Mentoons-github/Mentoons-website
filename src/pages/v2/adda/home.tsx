@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
 import AddPosts from "@/components/adda/home/addPosts/addPosts";
 import Posts from "@/components/adda/home/addPosts/posts/posts";
 import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
@@ -10,6 +7,9 @@ import Meme from "@/components/adda/home/memeOfTheDay/meme";
 import Notification from "@/components/adda/home/notifications/notification";
 import UserStatus from "@/components/adda/home/userStatus/userStatus";
 import FounderNote from "@/components/common/founderNote";
+import { useAuth } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const AddaHome = () => {
   const [activeSection, setActiveSection] = useState<
@@ -125,7 +125,10 @@ const AddaHome = () => {
       </div>
       {isSignedIn && (
         <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
-          <BottomNav setActive={setActiveSection} />
+          <BottomNav
+            setActiveSection={setActiveSection}
+            activeSection={activeSection}
+          />
         </div>
       )}
     </>

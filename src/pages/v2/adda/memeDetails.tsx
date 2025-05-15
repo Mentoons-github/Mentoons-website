@@ -1,18 +1,11 @@
 import Likes from "@/components/adda/home/addPosts/likes/likes";
 import Share from "@/components/adda/home/addPosts/share/share";
-import UserStatus from "@/components/adda/home/userStatus/userStatus";
-import FounderNote from "@/components/common/founderNote";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BiArrowBack, BiComment, BiLock } from "react-icons/bi";
-import {
-  FaBookmark,
-  FaMapMarkerAlt,
-  FaRegBookmark,
-  FaUserPlus,
-} from "react-icons/fa";
+import { FaBookmark, FaRegBookmark, FaUserPlus } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -35,24 +28,27 @@ interface MemeDetails {
   user: {
     _id: string;
     name: string;
-    role: string;
+    email: string;
     picture: string;
+    role: string;
     bio?: string;
+    location?: string;
   };
-  content?: string;
   title?: string;
-  media: Array<{
-    url: string;
-    type: "image";
-    caption?: string;
-  }>;
+  image: string;
+  description?: string;
   likes: string[];
+  likeCount: number;
   comments: Comment[];
+  commentCount: number;
   shares: string[];
-  createdAt: string | Date;
-  visibility: "public" | "friends" | "private";
+  shareCount: number;
+  saves: string[];
+  saveCount: number;
   tags?: string[];
-  location?: string;
+  visibility: "public" | "friends" | "private";
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Authentication Modal Component
@@ -132,71 +128,12 @@ const MemeDetailsPage = () => {
   const [isSavedMeme, setIsSavedMeme] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+ 
+  const [likeCount, setLikeCount] = useState(meme?.likeCount || 0);
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const location = useLocation();
-
-  // Dummy data for testing
-  const dummyMeme: MemeDetails = {
-    _id: "dummy-meme-1",
-    user: {
-      _id: "user-1",
-      name: "John Doe",
-      role: "Meme Creator",
-      picture: "https://source.unsplash.com/random/100x100?portrait",
-      bio: "Creating memes that make you laugh since 2020",
-    },
-    content: "When you finally fix that bug after 5 hours of debugging...",
-    title: "The Debugging Life",
-    media: [
-      {
-        url: "https://source.unsplash.com/random/800x600?meme",
-        type: "image",
-        caption: "The moment of triumph",
-      },
-    ],
-    likes: ["user-1", "user-2", "user-3"],
-    comments: [
-      {
-        _id: "comment-1",
-        user: {
-          _id: "user-2",
-          name: "Jane Smith",
-          email: "jane@example.com",
-          picture: "https://source.unsplash.com/random/100x100?portrait&sig=1",
-        },
-        content: "This is so relatable! 😂",
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        _id: "comment-2",
-        user: {
-          _id: "user-3",
-          name: "Mike Johnson",
-          email: "mike@example.com",
-          picture: "https://source.unsplash.com/random/100x100?portrait&sig=2",
-        },
-        content: "Been there, done that!",
-        createdAt: new Date(Date.now() - 7200000).toISOString(),
-      },
-      {
-        _id: "comment-3",
-        user: {
-          _id: "user-4",
-          name: "Sarah Wilson",
-          email: "sarah@example.com",
-          picture: "https://source.unsplash.com/random/100x100?portrait&sig=3",
-        },
-        content: "The best feeling ever!",
-        createdAt: new Date(Date.now() - 10800000).toISOString(),
-      },
-    ],
-    shares: ["user-1", "user-2"],
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    visibility: "public",
-    tags: ["programming", "debugging", "coding", "developer"],
-    location: "San Francisco, CA",
-  };
+  const navigate = useNavigate();
 
   // Check for redirect from authentication
   useEffect(() => {
@@ -210,13 +147,6 @@ const MemeDetailsPage = () => {
     const fetchMemeDetails = async () => {
       setLoading(true);
       try {
-        // For testing, use dummy data
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Add a small delay to simulate loading
-        setMeme(dummyMeme);
-        setLoading(false);
-
-        // Comment out the actual API call for now
-        /*
         if (!isSignedIn) {
           setShowAuthModal(true);
           setLoading(false);
@@ -230,7 +160,7 @@ const MemeDetailsPage = () => {
         }
 
         const response = await axios.get(
-          `http://localhost:4000/api/v1/memes/${memeId}`,
+          `${import.meta.env.VITE_PROD_URL}memes/${memeId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -240,7 +170,7 @@ const MemeDetailsPage = () => {
         );
         console.log(response.data);
         setMeme(response.data.data);
-        */
+        setLoading(false);
       } catch (err) {
         console.error("Error fetching meme details:", err);
         setError(true);
@@ -248,15 +178,8 @@ const MemeDetailsPage = () => {
       }
     };
 
-    // Check if the meme is saved
-    const checkSavedStatus = async () => {
-      // For testing, set a random saved status
-      setIsSavedMeme(Math.random() > 0.5);
-    };
-
     // Call both functions
     fetchMemeDetails();
-    checkSavedStatus();
 
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
@@ -323,23 +246,16 @@ const MemeDetailsPage = () => {
   };
 
   const handleSaveMeme = async () => {
-    // If not signed in, show auth modal
-    if (!isSignedIn) {
-      setShowAuthModal(true);
-      return;
-    }
+    const newSavedState = !isSavedMeme;
+    setIsSavedMeme(newSavedState);
+
+   
 
     try {
-      if (!(await getToken())) {
-        setShowAuthModal(true);
-        return;
-      }
-      const newSavedState = !isSavedMeme;
-      setIsSavedMeme(newSavedState);
       const token = await getToken();
-      const endpoint = newSavedState
-        ? `http://localhost:4000/api/v1/feeds/memes/${memeId}/save`
-        : `http://localhost:4000/api/v1/feeds/memes/${memeId}/unsave`;
+      const endpoint = `${
+        import.meta.env.VITE_PROD_URL
+      }memeFeed/save/${memeId}`;
 
       const response = await axios.post(
         endpoint,
@@ -355,10 +271,46 @@ const MemeDetailsPage = () => {
       toast.success(
         newSavedState ? "Meme saved successfully" : "Meme unsaved successfully"
       );
-    } catch (err) {
-      console.error("Error toggling save status:", err);
+    } catch (error) {
+      console.error("Error saving/unsaving meme:", error);
+      // Revert both saved state and count on error
+      setIsSavedMeme(!newSavedState);
+     
+      toast.error("Failed to update saved status. Please try again.");
     }
   };
+
+  useEffect(() => {
+    const checkSavedMeme = async () => {
+      try {
+        const token = await getToken();
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}memeFeed/saved/${memeId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(response.data.saved);
+        setIsSavedMeme(response.data.saved);
+      } catch (error) {
+        console.error("Error checking saved meme:", error);
+      }
+    };
+    checkSavedMeme();
+  }, []);
+
+  useEffect(() => {
+    const getAllLikes = async () => {
+      const token = await getToken();
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_PROD_URL
+        }likes/get-likes?type=meme&id=${memeId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log(response.data.data);
+      setLikeCount(response.data.data.length);
+    };
+    getAllLikes();
+  }, []);
 
   // Format date for display
   const formatDate = (dateString: string | Date) => {
@@ -390,10 +342,10 @@ const MemeDetailsPage = () => {
             : "Meme not found"}
         </p>
         <Link
-          to="/adda"
+          to="/adda/meme"
           className="px-6 py-2 text-white bg-orange-500 rounded-lg hover:bg-orange-600"
         >
-          Go Back to Feed
+          Go Back to Memes
         </Link>
       </div>
     );
@@ -415,361 +367,223 @@ const MemeDetailsPage = () => {
         />
       )}
 
-      <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
-        <div className="relative flex flex-col w-full">
-          {/* Header section with user status */}
-          <div className="sticky left-0 flex items-center w-full top-[64px] z-[99999] bg-white">
-            <div className="flex-grow w-full min-w-0 py-2">
-              <UserStatus />
+      <div className="flex flex-col w-full gap-4 sm:gap-6">
+        {/* Meme details */}
+        <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
+          {/* User information */}
+          <div className="flex items-start gap-4 mb-4">
+            <button
+              onClick={() => navigate("/adda/meme")}
+              className="p-2 text-orange-600 transition-colors rounded-full hover:bg-orange-200"
+            >
+              <BiArrowBack className="w-5 h-5" />
+            </button>
+            <div className="overflow-hidden rounded-full w-14 h-14">
+              <img
+                src={meme.user.picture}
+                alt={`${meme.user.name}'s profile`}
+                className="object-cover w-full h-full rounded-full"
+              />
             </div>
-            <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
-              <Link to="/mythos">
-                <img
-                  src="/assets/adda/sidebar/Introducing poster.png"
-                  alt="mentoons-mythos"
-                  className="max-w-[134px] lg:max-w-[170px]"
-                />
-              </Link>
+            <div className="flex flex-col">
+              <h3 className="text-xl font-bold">{meme.user.name}</h3>
+              <p className="text-sm text-gray-600">{meme.user.role}</p>
             </div>
           </div>
 
-          {/* Main content area */}
-          <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6">
-            {/* Left sidebar - Founder Note (only visible on lg screens and up) */}
-            <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
-              <div className="sticky top-[204px] w-full">
-                <FounderNote scroll={false} />
+          {/* Meme title */}
+          {meme.title && (
+            <h1 className="mb-3 text-xl font-bold text-gray-800">
+              {meme.title}
+            </h1>
+          )}
+
+          {/* Meme content */}
+          {meme?.description && (
+            <p className="mb-4 text-gray-700">{meme?.description}</p>
+          )}
+
+          {/* Meme image */}
+          {meme.image && (
+            <div className="mb-4">
+              <div className="overflow-hidden rounded-lg">
+                <img
+                  src={meme.image}
+                  alt={meme.title || "Meme"}
+                  className="w-full object-contain max-h-[600px]"
+                />
+              </div>
+              {meme.description && (
+                <p className="mt-2 text-sm italic text-gray-600">
+                  {meme.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Tags */}
+          {meme.tags && meme.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {meme.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Interaction buttons */}
+          <div className="flex items-center justify-between w-full pt-4 border-t border-organge-200">
+            <div className="flex items-center gap-4">
+              {/* Like button */}
+              <div
+                onClick={!isSignedIn ? () => setShowAuthModal(true) : undefined}
+              >
+                <Likes type="meme" id={meme._id} likeCount={likeCount} />
+              </div>
+
+              {/* Comment count */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{
+                    scale: 1.1,
+                    boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
+                  }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="flex items-center justify-center w-8 p-2 border border-orange-400 rounded-full sm:w-12 sm:h-12"
+                >
+                  <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
+                </motion.button>
+                <span className="text-[#605F5F] text-sm sm:text-base figtree">
+                  {meme.comments.length}
+                </span>
+              </div>
+
+              {/* Share button */}
+              <div
+                onClick={!isSignedIn ? () => setShowAuthModal(true) : undefined}
+              >
+                <Share
+                  type="meme"
+                  postDetails={{
+                    ...meme,
+                    shares: meme.shares,
+                    saves: 0,
+                    user: {
+                      ...meme.user,
+                      email: "",
+                      picture: "",
+                    },
+                  }}
+                />
               </div>
             </div>
 
-            {/* Center content area - Meme details */}
-            <div className="flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%]">
-              {/* Meme details */}
-              <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
-                {/* User information */}
-                <div className="flex items-start gap-4 mb-4">
-                  {/* Back button */}
-                  <div className="h-full pt-4 rounded-lg ">
-                    <Link
-                      to="/adda/meme"
-                      className="flex items-center text-orange-600 hover:text-yellow-700"
-                    >
-                      <BiArrowBack className="mr-2 text-2xl font-semibold " />
-                    </Link>
-                  </div>
-                  <div className="overflow-hidden rounded-full w-14 h-14">
-                    <img
-                      src={meme.user.picture}
-                      alt={`${meme.user.name}'s profile`}
-                      className="object-cover w-full h-full rounded-full"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <h3 className="text-xl font-bold">{meme.user.name}</h3>
-                    <p className="text-sm text-gray-600">{meme.user.role}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>{formatDate(meme.createdAt)}</span>
-                      {meme.location && (
-                        <span className="flex items-center ml-2">
-                          <FaMapMarkerAlt className="mr-1 text-red-400" />
-                          {meme.location}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Meme title */}
-                {meme.title && (
-                  <h1 className="mb-3 text-xl font-bold text-gray-800">
-                    {meme.title}
-                  </h1>
+            {/* Save button */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
+                onClick={handleSaveMeme}
+              >
+                {isSavedMeme ? (
+                  <FaBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
+                ) : (
+                  <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
                 )}
-
-                {/* Meme content */}
-                {meme.content && (
-                  <p className="mb-4 text-gray-700">{meme.content}</p>
-                )}
-
-                {/* Meme image */}
-                {meme.media && meme.media.length > 0 && (
-                  <div className="mb-4">
-                    <div className="overflow-hidden rounded-lg">
-                      <img
-                        src={meme.media[0].url}
-                        alt={meme.media[0].caption || "Meme"}
-                        className="w-full object-contain max-h-[600px]"
-                      />
-                    </div>
-                    {meme.media[0].caption && (
-                      <p className="mt-2 text-sm italic text-gray-600">
-                        {meme.media[0].caption}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Tags */}
-                {meme.tags && meme.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {meme.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Interaction buttons */}
-                <div className="flex items-center justify-between w-full pt-4 border-t border-organge-200">
-                  <div className="flex items-center gap-4">
-                    {/* Like button */}
-                    <div
-                      onClick={
-                        !isSignedIn ? () => setShowAuthModal(true) : undefined
-                      }
-                    >
-                      <Likes postId={meme._id} likeCount={meme.likes.length} />
-                    </div>
-
-                    {/* Comment count */}
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        whileHover={{
-                          scale: 1.1,
-                          boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
-                        }}
-                        transition={{ duration: 0.2, ease: "easeInOut" }}
-                        className="flex items-center justify-center w-8 p-2 border border-orange-400 rounded-full sm:w-12 sm:h-12"
-                      >
-                        <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
-                      </motion.button>
-                      <span className="text-[#605F5F] text-sm sm:text-base figtree">
-                        {meme.comments.length}
-                      </span>
-                    </div>
-
-                    {/* Share button */}
-                    <div
-                      onClick={
-                        !isSignedIn ? () => setShowAuthModal(true) : undefined
-                      }
-                    >
-                      <Share
-                        postDetails={{
-                          ...meme,
-                          shares: meme.shares,
-                          saves: 0,
-                          user: {
-                            ...meme.user,
-                            email: "",
-                            picture: "",
-                          },
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save button */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <button
-                      className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
-                      onClick={handleSaveMeme}
-                    >
-                      {isSavedMeme ? (
-                        <FaBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
-                      ) : (
-                        <FaRegBookmark className="w-5 text-orange-500 sm:w-6 sm:h-6" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Comments section */}
-              <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
-                <h3 className="mb-4 text-xl font-bold">
-                  Comments ({meme.comments.length})
-                </h3>
-
-                {/* Comment form */}
-                <div className="flex items-start gap-3 pb-6 mb-6 border-b border-gray-200">
-                  <div className="w-10 h-10 overflow-hidden rounded-full">
-                    <img
-                      src={
-                        user?.imageUrl ||
-                        "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
-                      }
-                      alt="Your profile"
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={
-                        isSignedIn
-                          ? "Add a comment..."
-                          : "Sign in to comment..."
-                      }
-                      className="w-full p-3 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      rows={3}
-                      disabled={!isSignedIn}
-                    ></textarea>
-                    <button
-                      onClick={handleCommentSubmit}
-                      disabled={!newComment.trim() || !isSignedIn}
-                      className="float-right px-4 py-2 mt-2 text-white bg-orange-500 rounded-lg disabled:opacity-50 hover:bg-orange-600"
-                    >
-                      {isSignedIn ? "Post Comment" : "Sign In to Comment"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comments list */}
-                <div className="space-y-4">
-                  {meme.comments.length > 0 ? (
-                    <>
-                      {displayedComments.map((comment) => (
-                        <div
-                          key={comment._id}
-                          className="flex items-start gap-3 p-4 rounded-lg bg-orange-50"
-                        >
-                          <div className="w-10 h-10 overflow-hidden rounded-full">
-                            <img
-                              src={comment.user.picture}
-                              alt={`${comment.user.name}'s profile`}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold">
-                                {comment.user.name}
-                              </h4>
-                              <span className="text-xs text-gray-500">
-                                {formatDate(comment.createdAt)}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-gray-700">
-                              {comment.content}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-
-                      {meme.comments.length > 3 && (
-                        <button
-                          onClick={() => setShowAllComments(!showAllComments)}
-                          className="w-full py-2 font-medium text-center text-yellow-600 hover:text-yellow-700"
-                        >
-                          {showAllComments
-                            ? "Show Less Comments"
-                            : `Show All ${meme.comments.length} Comments`}
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <p className="text-gray-500">
-                        No comments yet. Be the first to comment!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              </button>
             </div>
+          </div>
+        </div>
 
-            {/* Right sidebar - Similar to home page */}
-            <div className="flex-shrink-0 hidden w-full md:w-1/3 lg:w-1/4 md:block">
-              <div className="md:sticky flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 top-[204px] z-10 w-full">
-                {/* User profile card */}
-                <div className="p-5 bg-white border border-orange-200 rounded-lg">
-                  <div className="text-center">
-                    <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
+        {/* Comments section */}
+        <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
+          <h3 className="mb-4 text-xl font-bold">
+            Comments ({meme.comments.length})
+          </h3>
+
+          {/* Comment form */}
+          <div className="flex items-start gap-3 pb-6 mb-6 border-b border-gray-200">
+            <div className="w-10 h-10 overflow-hidden rounded-full">
+              <img
+                src={
+                  user?.imageUrl ||
+                  "/assets/adda/profilePictures/pexels-stefanstefancik-91227.jpg"
+                }
+                alt="Your profile"
+                className="object-cover w-full h-full"
+              />
+            </div>
+            <div className="flex-1">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={
+                  isSignedIn ? "Add a comment..." : "Sign in to comment..."
+                }
+                className="w-full p-3 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                rows={3}
+                disabled={!isSignedIn}
+              ></textarea>
+              <button
+                onClick={handleCommentSubmit}
+                disabled={!newComment.trim() || !isSignedIn}
+                className="float-right px-4 py-2 mt-2 text-white bg-orange-500 rounded-lg disabled:opacity-50 hover:bg-orange-600"
+              >
+                {isSignedIn ? "Post Comment" : "Sign In to Comment"}
+              </button>
+            </div>
+          </div>
+
+          {/* Comments list */}
+          <div className="space-y-4">
+            {meme.comments.length > 0 ? (
+              <>
+                {displayedComments.map((comment) => (
+                  <div
+                    key={comment._id}
+                    className="flex items-start gap-3 p-4 rounded-lg bg-orange-50"
+                  >
+                    <div className="w-10 h-10 overflow-hidden rounded-full">
                       <img
-                        src={meme.user.picture}
-                        alt={`${meme.user.name}'s profile`}
+                        src={comment.user.picture}
+                        alt={`${comment.user.name}'s profile`}
                         className="object-cover w-full h-full"
                       />
                     </div>
-                    <h3 className="mb-1 text-xl font-bold">{meme.user.name}</h3>
-                    <p className="mb-2 text-sm text-gray-600">
-                      {meme.user.role}
-                    </p>
-                    {meme.user.bio && (
-                      <p className="mb-4 text-sm text-gray-700">
-                        {meme.user.bio}
-                      </p>
-                    )}
-                    <button
-                      className="w-full px-4 py-2 text-white bg-orange-500 rounded-lg hover:bg-orange-600"
-                      onClick={
-                        !isSignedIn ? () => setShowAuthModal(true) : undefined
-                      }
-                    >
-                      Follow
-                    </button>
-                  </div>
-                </div>
-                {/* Right sidebar */}
-                {/* Popular tags */}
-                <div className="p-5 bg-white border border-orange-200 rounded-lg">
-                  <h3 className="mb-4 text-lg font-bold">Popular Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "memes",
-                      "funny",
-                      "programming",
-                      "coding",
-                      "humor",
-                      "tech",
-                    ].map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 text-sm text-gray-700 bg-orange-100 rounded-full cursor-pointer hover:bg-orange-200"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Related memes */}
-                <div className="p-5 bg-white border border-orange-200 rounded-lg">
-                  <h3 className="mb-4 text-lg font-bold">Related Memes</h3>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((item) => (
-                      <div
-                        key={item}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
-                      >
-                        <div className="w-16 h-16 overflow-hidden rounded-lg">
-                          <img
-                            src={`https://source.unsplash.com/random/100x100?meme&sig=${item}`}
-                            alt="Related meme"
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium">
-                            Funny Parenting Meme
-                          </h4>
-                          <p className="mt-1 text-xs text-gray-500">
-                            2 days ago
-                          </p>
-                        </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold">{comment.user.name}</h4>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(comment.createdAt)}
+                        </span>
                       </div>
-                    ))}
+                      <p className="mt-1 text-gray-700">{comment.content}</p>
+                    </div>
                   </div>
-                </div>
+                ))}
+
+                {meme.comments.length > 3 && (
+                  <button
+                    onClick={() => setShowAllComments(!showAllComments)}
+                    className="w-full py-2 font-medium text-center text-yellow-600 hover:text-yellow-700"
+                  >
+                    {showAllComments
+                      ? "Show Less Comments"
+                      : `Show All ${meme.comments.length} Comments`}
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-gray-500">
+                  No comments yet. Be the first to comment!
+                </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

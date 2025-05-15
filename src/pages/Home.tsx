@@ -12,8 +12,8 @@ import { IoCloseOutline } from "react-icons/io5";
 import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
 import ComicViewer from "@/components/common/ComicViewer";
-import { MdClose } from "react-icons/md";
 import TopUpArrow from "@/components/common/topUpArrow/upArrow";
+import { MdClose } from "react-icons/md";
 
 const Home = () => {
   const { user } = useUser();
