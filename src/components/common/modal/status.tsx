@@ -29,7 +29,7 @@ const Status = ({
   hasPrevious,
   totalStatuses = 1,
   currentIndex = 0,
-  isUserChange = false, // New prop to indicate user change
+  isUserChange = false,
 }: {
   status: StatusInterface;
   setStatus: () => void;

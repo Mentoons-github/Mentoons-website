@@ -14,11 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
+import { useAuthModal } from "@/context/adda/authModalContext";
 
 const UserStatus = () => {
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
   const statusGroups = useSelector(
@@ -100,6 +103,10 @@ const UserStatus = () => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
     const file = event.target.files && event.target.files[0];
     if (file) {
       const validTypes = [

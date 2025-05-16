@@ -9,14 +9,16 @@ import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
 import ErrorDisplay from "@/components/adda/userProfile/loader/errorDisplay";
 import { TabType, User, UserSummary } from "@/types";
 import { Post, PostType } from "./userProfile";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axiosInstance from "@/api/axios";
 
 const ProfileDetails = () => {
   const { userId } = useParams();
+  const { user: currentUser } = useUser();
   const { getToken } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [numberOfPosts, setNumberOfPosts] = useState<number>(0);
+  const [isFriend, setIsFriend] = useState(false);
   const [numberOffollowers, setNumberOffollowers] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
@@ -42,15 +44,16 @@ const ProfileDetails = () => {
         if (!token) {
           throw new Error("No token found");
         }
-        const response = await axiosInstance.get(`/user/user/${userId}`, {
+        const response = await axiosInstance.get(`/user/friend/${userId}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
         console.log(response);
-        console.log(response.data);
-        setUser(response.data.data);
+        console.log(response.data.data.isFriend);
+        setUser(response.data.data.user);
+        setIsFriend(response.data.data.isFriend);
 
         fetchUserPosts(userId);
       } catch (err) {
@@ -100,6 +103,8 @@ const ProfileDetails = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        console.log(response.data.data);
 
         const formattedPosts = response.data.data.map(
           (post: Partial<Post>) => ({
@@ -169,6 +174,7 @@ const ProfileDetails = () => {
           user={user}
           totalPosts={numberOfPosts}
           totalFollowing={numberOffollowers}
+          isCurrentUser={user.clerkId === currentUser?.id || isFriend}
         />
 
         <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />

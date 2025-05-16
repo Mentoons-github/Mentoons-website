@@ -1,3 +1,4 @@
+// import GlobalAuthModal from "@/components/adda/global/globalAuthModal";
 import AddaLayout from "@/layout/addaLayout";
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
@@ -29,6 +30,7 @@ const AddaRouter = () => {
         <Route path="meme/:memeId" element={<MemeDetails />} />
         <Route path="/user/:userId" element={<ProfileDetails />} />
       </Route>
+      {/* <GlobalAuthModal /> */}
     </Routes>
   );
 };

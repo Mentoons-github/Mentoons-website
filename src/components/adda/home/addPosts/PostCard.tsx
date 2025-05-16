@@ -7,6 +7,7 @@ import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
@@ -74,6 +75,8 @@ interface Comment {
 }
 
 const PostCard = ({ post }: PostCardProps) => {
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -86,6 +89,10 @@ const PostCard = ({ post }: PostCardProps) => {
   const navigate = useNavigate();
 
   const handleCommentSubmit = async () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
     if (newComment.trim() === "") return;
 
     // Create the new comment object with a temporary ID
@@ -161,14 +168,18 @@ const PostCard = ({ post }: PostCardProps) => {
   };
 
   const handleSavePost = async () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
     const newSavedState = !isSavedPost;
     setIsSavedPost(newSavedState);
 
     try {
       const token = await getToken();
       const endpoint = newSavedState
-        ? `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/save`
-        : `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/save`
+        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/unsave`;
 
       const response = await axios.post(
         endpoint,
@@ -196,9 +207,12 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
+            post._id
+          }/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log(response);
         console.log(response.data.data);
         setIsSavedPost(response.data.data);
       } catch (error) {
@@ -209,7 +223,7 @@ const PostCard = ({ post }: PostCardProps) => {
     const getComments = async () => {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
+        `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setComments(response.data.data);
