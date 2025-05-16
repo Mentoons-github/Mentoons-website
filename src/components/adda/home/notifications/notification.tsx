@@ -1,5 +1,5 @@
-import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -34,52 +34,6 @@ interface NotificationInterface {
   __v: number;
 }
 
-// Sample data generator
-const generateSampleNotifications = (): NotificationInterface[] => {
-  const sampleUsers: NotificationSender[] = [
-    {
-      _id: "1",
-      name: "Sarah Johnson",
-      picture: "https://i.pravatar.cc/150?img=1",
-    },
-    {
-      _id: "2",
-      name: "Mike Chen",
-      picture: "https://i.pravatar.cc/150?img=2",
-    },
-    {
-      _id: "3",
-      name: "Emma Wilson",
-      picture: "https://i.pravatar.cc/150?img=3",
-    },
-    {
-      _id: "4",
-      name: "Alex Kumar",
-      picture: "https://i.pravatar.cc/150?img=4",
-    },
-  ];
-
-  const types = ["friend_request_accepted", "like", "comment", "default"];
-  const messages = [
-    "accepted your friend request",
-    "liked your post",
-    "commented on your post: 'Great content! 👏'",
-    "shared a new post in your group",
-  ];
-
-  return Array.from({ length: 8 }, (_, index) => ({
-    _id: `sample-${index + 1}`,
-    userId: "current-user",
-    initiatorId: sampleUsers[index % sampleUsers.length],
-    type: types[index % types.length],
-    message: messages[index % messages.length],
-    isRead: index % 3 === 0,
-    createdAt: new Date(Date.now() - index * 1000 * 60 * 30).toISOString(),
-    updatedAt: new Date().toISOString(),
-    __v: 0,
-  }));
-};
-
 const Notification = () => {
   const [notifications, setNotifications] = useState<NotificationInterface[]>(
     []
@@ -93,8 +47,17 @@ const Notification = () => {
       setLoading(true);
       try {
         // For testing, use sample data instead of API call
-        const sampleData = generateSampleNotifications();
-        setNotifications(sampleData);
+        const token = await getToken();
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}adda/userNotifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setNotifications(response.data.data);
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
         toast.error("Failed to load notifications");
@@ -109,8 +72,10 @@ const Notification = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       const token = await getToken();
-      await axiosInstance.patch(
-        `/adda/markNotificationAsRead/${notificationId}`,
+      const response = await axios.post(
+        `${
+          import.meta.env.VITE_PROD_URL
+        }adda/userNotifications/${notificationId}`,
         {},
         {
           headers: {
@@ -118,6 +83,7 @@ const Notification = () => {
           },
         }
       );
+      console.log(response.data);
       setNotifications((prev) =>
         prev.map((notif) =>
           notif._id === notificationId ? { ...notif, isRead: true } : notif
@@ -133,11 +99,17 @@ const Notification = () => {
   const deleteNotification = async (notificationId: string) => {
     try {
       const token = await getToken();
-      await axiosInstance.delete(`/adda/deleteNotification/${notificationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.delete(
+        `${
+          import.meta.env.VITE_PROD_URL
+        }adda/userNotifications/${notificationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
       setNotifications((prev) =>
         prev.filter((notif) => notif._id !== notificationId)
       );
@@ -149,9 +121,9 @@ const Notification = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-4 sm:gap-6">
+    <div className="relative flex flex-col w-full gap-4 sm:gap-6">
       {/* Notifications header */}
-      <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
+      <div className="sticky p-3 bg-white border border-orange-200 rounded-lg shadow-lg shadow-orange-100/80 top-[200px] z-5">
         <div className="flex items-center justify-start w-full gap-3">
           <button
             onClick={() => navigate("/adda/home")}
@@ -259,7 +231,7 @@ const NotificationCard = ({
   const timeAgo = notification.createdAt
     ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })
     : "recently";
-
+  console.log(notification);
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "friend_request_accepted":
@@ -268,6 +240,8 @@ const NotificationCard = ({
         return <Heart className="w-5 h-5 text-orange-500" />;
       case "comment":
         return <MessageCircle className="w-5 h-5 text-orange-500" />;
+      case "friend_request":
+        return <UserPlus className="w-5 h-5 text-orange-500" />;
       default:
         return <Share2 className="w-5 h-5 text-orange-500" />;
     }
@@ -281,7 +255,7 @@ const NotificationCard = ({
       <div className="flex items-start w-full gap-4">
         <motion.div
           whileHover={{ scale: 1.1 }}
-          className="relative overflow-hidden border-2 border-orange-200 rounded-full w-14 h-14 shrink-0"
+          className="relative overflow-hidden border-2 border-orange-200 rounded-full w-14 h-14 shrink-0 z-[1]"
         >
           <img
             src={notification.initiatorId?.picture || "/default-avatar.png"}

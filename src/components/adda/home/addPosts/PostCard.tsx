@@ -1,4 +1,5 @@
 import Highlight from "@/components/common/modal/highlight";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -7,7 +8,6 @@ import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuthModal } from "@/context/adda/authModalContext";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
@@ -178,8 +178,8 @@ const PostCard = ({ post }: PostCardProps) => {
     try {
       const token = await getToken();
       const endpoint = newSavedState
-        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/save`
-        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/save`
+        : `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/unsave`;
 
       const response = await axios.post(
         endpoint,
@@ -207,7 +207,7 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
+          `${import.meta.env.VITE_PROD_URL}feeds/posts/${
             post._id
           }/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -223,7 +223,7 @@ const PostCard = ({ post }: PostCardProps) => {
     const getComments = async () => {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
+        `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setComments(response.data.data);

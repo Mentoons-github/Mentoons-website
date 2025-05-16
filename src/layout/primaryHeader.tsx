@@ -1,10 +1,13 @@
+import axios from "@/api/axios";
 import AuthButton from "@/components/common/authButton";
 import {
   ANIMATION_TEXTS_ADDA,
   ANIMATION_TEXTS_HOME,
 } from "@/constant/constants";
-import { SignedIn } from "@clerk/clerk-react";
+import { NotificationInterface } from "@/types";
+import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import { FaClock } from "react-icons/fa";
 import { FaBell, FaMessage } from "react-icons/fa6";
 
@@ -14,8 +17,35 @@ const PrimaryHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const adda = location.pathname.startsWith("/adda");
+  const { getToken } = useAuth();
 
   const animationTexts = adda ? ANIMATION_TEXTS_ADDA : ANIMATION_TEXTS_HOME;
+
+  const [notifications, setNotifications] = useState<NotificationInterface[]>(
+    []
+  );
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}adda/userNotifications`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setNotifications(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  }, [getToken]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   return (
     <div className="flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 z-55 font-akshar">
@@ -81,7 +111,7 @@ const PrimaryHeader = () => {
             >
               <FaBell />
               <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
-                2
+                {notifications.length}
               </span>
             </div>
           </SignedIn>
