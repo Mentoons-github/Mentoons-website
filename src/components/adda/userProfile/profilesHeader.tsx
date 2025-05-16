@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User } from "@/types";
 import {
   Calendar,
@@ -8,7 +8,15 @@ import {
   User as UserIcon,
   UserPlus,
   UserMinus,
+  Clock,
+  Check,
+  X,
+  Loader2,
 } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
+import axiosInstance from "@/api/axios";
+import { AxiosError } from "axios";
+import { errorToast, successToast } from "@/utils/toastResposnse";
 
 interface ProfileHeaderProps {
   user: User;
@@ -17,14 +25,52 @@ interface ProfileHeaderProps {
   isCurrentUser: boolean;
 }
 
+type FriendStatus = "pending" | "accepted" | "rejected" | "one_way" | "none";
+
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
   totalPosts,
   totalFollowing,
   isCurrentUser,
 }) => {
-  const [isFriend, setIsFriend] = useState(false);
+  const { getToken } = useAuth();
+  const [friendStatus, setFriendStatus] = useState<FriendStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isStatusLoading, setIsStatusLoading] = useState(true);
+  const [isRequester, setIsRequester] = useState(false);
+
+  useEffect(() => {
+    const checkFriendStatus = async () => {
+      setIsStatusLoading(true);
+      try {
+        const token = await getToken();
+        const response = await axiosInstance.get(
+          `/adda/check-friend-status/${user._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Friend status response:", response.data);
+
+        setFriendStatus(response.data.data.status || "none");
+        setIsRequester(response.data.data.isRequester || false);
+      } catch (error) {
+        console.error("Failed to fetch friend status:", error);
+        setFriendStatus("none");
+      } finally {
+        setIsStatusLoading(false);
+      }
+    };
+
+    if (!isCurrentUser) {
+      checkFriendStatus();
+    } else {
+      setIsStatusLoading(false);
+    }
+  }, [user._id, getToken, isCurrentUser]);
 
   const formatDate = (dateString: Date | string | undefined): string => {
     if (!dateString) return "Not available";
@@ -39,25 +85,158 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const handleFriendAction = async () => {
     setIsLoading(true);
     try {
-      // Replace with actual API call to add/remove friend
-      // const token = await getToken();
-      // const endpoint = isFriend ? `/adda/unfriend/${user._id}` : `/adda/addFriend/${user._id}`;
-      // await axiosInstance(endpoint, {
-      //   method: 'POST',
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   }
-      // });
+      const token = await getToken();
 
-      // For demo purposes, we'll just toggle the state
-      setIsFriend(!isFriend);
-    } catch (error) {
-      console.error("Friend action failed:", error);
+      let endpoint;
+      switch (friendStatus) {
+        case "accepted":
+          endpoint = `/adda/unfriend/${user._id}`;
+          break;
+        case "pending":
+          endpoint = isRequester
+            ? `/adda/cancelRequest/${user._id}`
+            : `/adda/rejectRequest/${user._id}`;
+          break;
+        case "rejected":
+          endpoint = `/adda/request/${user._id}`;
+          break;
+        case "one_way":
+          endpoint = `/adda/unfriend/${user._id}`;
+          break;
+        case "none":
+        default:
+          endpoint = `/adda/request/${user._id}`;
+          break;
+      }
+
+      const response = await axiosInstance.post(
+        endpoint,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status) {
+        setFriendStatus(response.data.status);
+        if (response.data.isRequester !== undefined) {
+          setIsRequester(response.data.isRequester);
+        }
+        successToast(response.data.message || "Friend status updated");
+      } else {
+        if (friendStatus === "accepted" || friendStatus === "one_way") {
+          setFriendStatus("none");
+        } else if (friendStatus === "pending" && isRequester) {
+          setFriendStatus("none");
+        } else if (friendStatus === "pending" && !isRequester) {
+          setFriendStatus("rejected");
+        } else {
+          setFriendStatus("pending");
+          setIsRequester(true);
+        }
+      }
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        errorToast(error?.response?.data.error || "Request failed");
+      } else {
+        errorToast("Friend action failed");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleAcceptRequest = async () => {
+    setIsLoading(true);
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        `/adda/acceptRequest/${user._id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response);
+
+      setFriendStatus("accepted");
+      successToast("Friend request accepted");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        errorToast(error?.response?.data.error || "Request failed");
+      } else {
+        errorToast("Failed to accept friend request");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getFriendButtonConfig = () => {
+    console.log(
+      "Current friendStatus:",
+      friendStatus,
+      "isRequester:",
+      isRequester
+    );
+
+    if (!friendStatus) return null;
+
+    switch (friendStatus) {
+      case "accepted":
+        return {
+          text: "Unfriend",
+          icon: <UserMinus size={16} />,
+          classes: "bg-red-50 text-red-600 hover:bg-red-100",
+          action: handleFriendAction,
+        };
+      case "pending":
+        if (isRequester) {
+          return {
+            text: "Cancel Request",
+            icon: <X size={16} />,
+            classes: "bg-yellow-50 text-yellow-600 hover:bg-yellow-100",
+            action: handleFriendAction,
+          };
+        } else {
+          return {
+            text: "Respond to Request",
+            icon: <Clock size={16} />,
+            classes: "bg-yellow-50 text-yellow-600 hover:bg-yellow-100",
+            action: null,
+          };
+        }
+      case "rejected":
+        return {
+          text: "Send Request",
+          icon: <UserPlus size={16} />,
+          classes: "bg-blue-50 text-blue-600 hover:bg-blue-100",
+          action: handleFriendAction,
+        };
+      case "one_way":
+        return {
+          text: "Unfriend",
+          icon: <UserMinus size={16} />,
+          classes: "bg-purple-50 text-purple-600 hover:bg-purple-100",
+          action: handleFriendAction,
+        };
+      case "none":
+      default:
+        return {
+          text: "Add Friend",
+          icon: <UserPlus size={16} />,
+          classes: "bg-blue-50 text-blue-600 hover:bg-blue-100",
+          action: handleFriendAction,
+        };
+    }
+  };
+
+  const buttonConfig = getFriendButtonConfig();
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden mb-4 w-full">
@@ -83,30 +262,62 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             )}
           </div>
+
           {!isCurrentUser && (
-            <button
-              onClick={handleFriendAction}
-              disabled={isLoading}
-              className={`flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                isFriend
-                  ? "bg-red-50 text-red-600 hover:bg-red-100"
-                  : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-              }`}
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
-              ) : isFriend ? (
+            <div className="flex gap-2">
+              {isStatusLoading ? (
+                <div className="flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-colors bg-gray-50 text-gray-600">
+                  <Loader2 size={16} className="animate-spin mr-2" />
+                  <span>Loading...</span>
+                </div>
+              ) : friendStatus === "pending" && !isRequester ? (
                 <>
-                  <UserMinus size={16} />
-                  <span>Unfriend</span>
+                  <button
+                    onClick={handleAcceptRequest}
+                    disabled={isLoading}
+                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-green-50 text-green-600 hover:bg-green-100"
+                  >
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        <span>Accept</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleFriendAction}
+                    disabled={isLoading}
+                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-red-50 text-red-600 hover:bg-red-100"
+                  >
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <X size={16} />
+                        <span>Reject</span>
+                      </>
+                    )}
+                  </button>
                 </>
-              ) : (
-                <>
-                  <UserPlus size={16} />
-                  <span>Add Friend</span>
-                </>
-              )}
-            </button>
+              ) : buttonConfig?.action ? (
+                <button
+                  onClick={buttonConfig.action}
+                  disabled={isLoading}
+                  className={`flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${buttonConfig.classes}`}
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      {buttonConfig.icon}
+                      <span>{buttonConfig.text}</span>
+                    </>
+                  )}
+                </button>
+              ) : null}
+            </div>
           )}
         </div>
         <div className="space-y-4">
