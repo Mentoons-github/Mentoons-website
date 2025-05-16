@@ -14,6 +14,7 @@ interface VideoPostCardProps {
       name: string;
       role: string;
       profilePicture: string;
+      email?: string;
     };
     content?: string;
     title?: string;
@@ -79,20 +80,6 @@ const VideoPostCard = ({ post, initialComments = [] }: VideoPostCardProps) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  // Create a postDetails object for the Share component
-  const postDetails = {
-    title: post.title || "",
-    description: post.content || "",
-    postUrl: `/posts/${post._id}`,
-    videoUrl: post.media.length > 0 ? post.media[0].url : "",
-    author: post.user.name,
-    role: post.user.role,
-    timestamp: formatDate(post.createdAt),
-    likes: post.likes.length,
-    comments: comments.length,
-    shares: post.shares.length,
   };
 
   return (
@@ -220,10 +207,20 @@ const VideoPostCard = ({ post, initialComments = [] }: VideoPostCardProps) => {
           <Share
             type="post"
             postDetails={{
-              ...postDetails,
+              _id: post._id,
+              title: post.title,
+              content: post.content,
+              visibility: post.visibility,
               shares: post.shares,
-              saves: 0,
-              videoUrl: post.media.length > 0 ? post.media[0].url : "",
+              saves: post.shares || [],
+              saveCount: post.shares ? post.shares.length : 0,
+              user: {
+                _id: post.user._id,
+                name: post.user.name,
+                email: post.user.email || "user@example.com", // Add default if missing
+                picture: post.user.profilePicture,
+                role: post.user.role,
+              },
             }}
           />
         </div>

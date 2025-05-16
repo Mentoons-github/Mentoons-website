@@ -34,9 +34,17 @@ interface Meme {
     role: string;
     picture: string;
     bio?: string;
+    email: string;
   };
   description: string;
   tags?: string[];
+  visibility: "public" | "friends" | "private";
+  updatedAt: string;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  saves: string[];
+  saveCount: number;
 }
 
 // Dummy data for memes
@@ -67,9 +75,17 @@ const dummyMemes: Meme[] = [
       role: "developer",
       picture: "https://i.pravatar.cc/150?img=1",
       bio: "Full-stack developer",
+      email: "john@example.com",
     },
     description: "That moment when your code works on the first try...",
     tags: ["coding", "programming", "humor"],
+    visibility: "public",
+    updatedAt: new Date().toISOString(),
+    likeCount: 2,
+    commentCount: 1,
+    shareCount: 1,
+    saves: [],
+    saveCount: 0,
   },
   {
     _id: "2",
@@ -108,10 +124,18 @@ const dummyMemes: Meme[] = [
       role: "developer",
       picture: "https://i.pravatar.cc/150?img=2",
       bio: "Frontend developer",
+      email: "jane@example.com",
     },
     description:
       "When you spend 4 hours debugging and the issue was a missing semicolon...",
     tags: ["debugging", "coding", "humor"],
+    visibility: "public",
+    updatedAt: new Date().toISOString(),
+    likeCount: 3,
+    commentCount: 2,
+    shareCount: 1,
+    saves: [],
+    saveCount: 0,
   },
   {
     _id: "3",
@@ -139,10 +163,18 @@ const dummyMemes: Meme[] = [
       role: "developer",
       picture: "https://i.pravatar.cc/150?img=3",
       bio: "Backend developer",
+      email: "mike@example.com",
     },
     description:
       "When your commit message is longer than the actual code change...",
     tags: ["git", "coding", "humor"],
+    visibility: "public",
+    updatedAt: new Date().toISOString(),
+    likeCount: 4,
+    commentCount: 1,
+    shareCount: 1,
+    saves: [],
+    saveCount: 0,
   },
 ];
 
@@ -523,9 +555,20 @@ const MemePage = () => {
       )}
 
       {/* Meme list */}
-      {memes?.map((meme) => (
-        <MemeCard key={meme._id} meme={meme} />
-      ))}
+      {memes?.map((meme) => {
+        // Convert Meme to MemeData
+        const memeData = {
+          ...meme,
+          comments: meme.comments.map((comment) => ({
+            ...comment,
+            _id:
+              typeof comment._id === "string"
+                ? parseInt(comment._id)
+                : comment._id,
+          })),
+        };
+        return <MemeCard key={meme._id} meme={memeData} />;
+      })}
     </div>
   );
 };
