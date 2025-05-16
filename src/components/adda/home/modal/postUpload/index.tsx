@@ -4,6 +4,7 @@ import { Form, Formik, FormikProps } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Edit, FileText, Image, Video, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
 import ArticleForm from "./components/ArticleForm";
@@ -261,7 +262,7 @@ const PostUpload = ({
       // API endpoint
       // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
 
-      const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
+      const apiUrl = `${import.meta.env.VITE_PROD_URL}posts`;
 
       console.log("Sending request to:", apiUrl);
       console.log("With authorization token:", token.substring(0, 10) + "...");
@@ -307,6 +308,8 @@ const PostUpload = ({
   };
 
   const handleNextTab = (isValid: boolean, values: FormValues) => {
+    console.log("Next button clicked", { isValid, activeTab, postType });
+
     // For article posts, we'll do our own validation
     if (postType === "article") {
       // Only on the first tab, check for required fields
@@ -323,13 +326,15 @@ const PostUpload = ({
       return;
     }
 
-    // For other post types, use regular validation
-    if (!isValid) return;
-
-    // We now use 3 tabs for all post types
+    // For other post types, still move forward even if validation fails
+    // This ensures basic functionality works
     const maxTab = 3;
     if (activeTab < maxTab) {
       setActiveTab(activeTab + 1);
+      // If form isn't valid, show a toast but still allow navigation
+      if (!isValid) {
+        toast.warning("Some fields may need your attention");
+      }
     }
   };
 
@@ -444,15 +449,22 @@ const PostUpload = ({
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[99999999] flex items-center justify-center p-5 bg-gray-800 bg-opacity-50 backdrop-blur-sm"
+          className="fixed inset-0 z-[2147483647] flex items-center justify-center p-2 sm:p-3 md:p-5 bg-gray-800 bg-opacity-50 backdrop-blur-sm overflow-y-auto pointer-events-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          style={{
+            isolation: "isolate",
+            contain: "layout paint size",
+            transformStyle: "preserve-3d",
+            position: "fixed",
+            zIndex: 2147483647,
+          }}
         >
           <Formik
             innerRef={formikRef}
@@ -586,20 +598,7 @@ const PostUpload = ({
                         onClick={() => {
                           handleNextTab(isValid, values);
                         }}
-                        className={`flex items-center gap-2 px-5 py-2 text-white transition duration-200 rounded-md ${
-                          !isValid && postType !== "article"
-                            ? "bg-orange-300 dark:bg-orange-400 cursor-not-allowed"
-                            : "bg-orange-500 dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
-                        }`}
-                        disabled={
-                          postType === "article"
-                            ? false
-                            : !isValid ||
-                              (activeTab === 2 &&
-                                (postType === "photo" ||
-                                  postType === "video") &&
-                                !mediaPreview?.length)
-                        }
+                        className="flex items-center gap-2 px-5 py-2 text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
                       >
                         Next
                         <motion.div
@@ -642,7 +641,8 @@ const PostUpload = ({
           </Formik>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

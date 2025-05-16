@@ -77,7 +77,7 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+      <div className=" relative flex flex-col items-center justify-start w-full  p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl z-[50]">
         <div className="flex items-center w-full gap-3">
           {/* Improved avatar container with proper sizing and overflow handling */}
           <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">

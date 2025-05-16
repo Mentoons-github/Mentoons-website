@@ -1,6 +1,5 @@
 // import GlobalAuthModal from "@/components/adda/global/globalAuthModal";
 import AddaLayout from "@/layout/addaLayout";
-
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 // import ProtectedRoute from "@/components/adda/auth/protectedRoute";
