@@ -1,9 +1,10 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
+import { useAuthModal } from "@/context/adda/authModalContext";
 
 const Likes = ({
   type,
@@ -14,24 +15,29 @@ const Likes = ({
   id: string;
   likeCount: number;
 }) => {
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [likeCounter, setLikeCounter] = useState(likeCount || 0);
 
   const { getToken } = useAuth();
 
   const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
     e.stopPropagation();
     const newLikedState = !isLiked;
 
-    // Optimistically update UI
     setIsLiked(newLikedState);
     setLikeCounter((prev) => Math.max(0, newLikedState ? prev + 1 : prev - 1));
 
     try {
       const token = await getToken();
       const endpoint = newLikedState
-        ? `${import.meta.env.VITE_PROD_URL}likes/add-like`
-        : `${import.meta.env.VITE_PROD_URL}likes/remove-like`;
+        ? `${import.meta.env.VITE_PROD_URL}/likes/add-like`
+        : `${import.meta.env.VITE_PROD_URL}/likes/remove-like`;
 
       const headers = {
         "Content-Type": "application/json",
@@ -45,9 +51,9 @@ const Likes = ({
         setLikeCounter(response.data.likeCount);
       }
 
-      toast.success(
-        newLikedState ? "Liked successfully" : "Reaction removed successfully"
-      );
+      // toast.success(
+      //   newLikedState ? "Liked successfully" : "Reaction removed successfully"
+      // );
     } catch (error) {
       console.error("Error updating reaction:", error);
       toast.error("Failed to update reaction. Please try again.");
@@ -65,7 +71,7 @@ const Likes = ({
         const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
-        }likes/check-like?type=${type}&id=${id}`;
+        }/likes/check-like?type=${type}&id=${id}`;
         const headers = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

@@ -60,6 +60,7 @@ const LoginModal = ({
     path: string
   ) => {
     e.stopPropagation();
+    onClose();
     navigate(`/${path}`);
   };
 
@@ -102,7 +103,7 @@ const LoginModal = ({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                Please login to purchase the product or add it to cart
+                Please login to continue
               </motion.p>
             </div>
 
