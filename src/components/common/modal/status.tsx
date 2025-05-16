@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -12,6 +13,11 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { StatusInterface } from "../../../types";
+
+interface ViewerType {
+  name: string;
+  picture?: string;
+}
 
 const Status = ({
   status,
@@ -178,7 +184,12 @@ const Status = ({
     ? formatDistanceToNow(new Date(status.createdAt), { addSuffix: true })
     : "2h ago";
 
-  const displayViewers = Array.isArray(status.viewers) ? status.viewers : [];
+  const displayViewers: ViewerType[] = Array.isArray(status.viewers)
+    ? (status.viewers as ViewerType[]).map((viewer) => ({
+        name: viewer?.name || "Unknown",
+        picture: viewer?.picture,
+      }))
+    : [];
 
   const contentVariants = {
     sameUserInitial: {
@@ -237,14 +248,21 @@ const Status = ({
     },
   };
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 flex items-center justify-center bg-black z-[10]"
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black pointer-events-auto"
       onClick={setStatus}
+      style={{
+        isolation: "isolate",
+        contain: "layout paint size",
+        transformStyle: "preserve-3d",
+        position: "fixed",
+        zIndex: 2147483647,
+      }}
     >
       <motion.div
         initial={
@@ -266,7 +284,7 @@ const Status = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Progress Bars */}
-        <div className="absolute top-0 left-0 right-0 z-30 flex w-full gap-1 px-2 pt-2">
+        <div className="absolute top-0 left-0 right-0 z-[10003] flex w-full gap-1 px-2 pt-2">
           {totalStatuses > 0 && (
             <div className="flex w-full gap-1">
               {Array.from({ length: totalStatuses }).map((_, idx) => (
@@ -290,7 +308,7 @@ const Status = ({
           )}
         </div>
 
-        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between w-full p-4 bg-gradient-to-b from-black/70 to-transparent">
+        <div className="absolute top-0 left-0 right-0 z-[10002] flex items-center justify-between w-full p-4 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center w-full">
             <div className="flex items-center flex-shrink-0 gap-2 mr-2">
               <motion.img
@@ -390,7 +408,7 @@ const Status = ({
           </div>
         </div>
 
-        <div className="absolute inset-0 z-10 flex">
+        <div className="absolute inset-0 z-[10001] flex">
           {hasPrevious && (
             <div
               className="flex items-center justify-start w-1/3 h-full px-4 cursor-pointer"
@@ -423,9 +441,9 @@ const Status = ({
           )}
         </div>
 
-        <div className="flex items-center justify-center w-full h-full z-5">
+        <div className="flex items-center justify-center w-full h-full z-[10000]">
           {isLoading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="absolute inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-70">
               <FaSpinner className="w-10 h-10 text-white animate-spin" />
             </div>
           )}
@@ -448,7 +466,7 @@ const Status = ({
           )}
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 z-[10002] flex flex-col w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
           {status.isOwner && (
             <div className="flex justify-between mb-3">
               <motion.button
@@ -494,11 +512,11 @@ const Status = ({
               animate={{ y: "0%" }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 left-0 right-0 max-h-[60vh] overflow-y-auto bg-black z-40 p-4"
+              className="absolute bottom-0 left-0 right-0 max-h-[60vh] overflow-y-auto bg-black z-[10004] p-4"
             >
               <h3 className="mb-3 font-semibold text-white">Viewed by</h3>
               <ul className="space-y-2">
-                {displayViewers.map((viewer: any, idx: number) => (
+                {displayViewers.map((viewer: ViewerType, idx: number) => (
                   <li key={idx} className="flex items-center gap-2">
                     <img
                       src={viewer.picture || "/default-avatar.png"}
@@ -513,7 +531,8 @@ const Status = ({
           )}
         </AnimatePresence>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 };
 

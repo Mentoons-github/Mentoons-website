@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 import {
   FiAlertCircle,
-  FiArrowLeft,
   FiAward,
   FiCalendar,
   FiCheck,
@@ -34,6 +33,7 @@ import { UserInfo } from "@/types";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
@@ -216,7 +216,10 @@ const UserProfile = () => {
   const getProfileCompletion = () => {
     let completedFields = 0;
 
-    console.log("profile details :", profileFields);
+    if (!userDetails) {
+      return 0;
+    }
+
     profileFields.forEach((field) => {
       if (field.field === "interests") {
         if (
@@ -239,6 +242,10 @@ const UserProfile = () => {
   // Add a function to get the incomplete profile fields
   const getIncompleteFields = () => {
     const incompleteFields: string[] = [];
+
+    if (!userDetails) {
+      return profileFields.map((field) => field.label);
+    }
 
     profileFields.forEach((field) => {
       console.log("data =================>", field);
@@ -286,7 +293,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        `${import.meta.env.VITE_PROD_URL}user/profile`,
         profileData,
         {
           headers: {
@@ -360,7 +367,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}posts/user/${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -368,6 +375,7 @@ const UserProfile = () => {
             },
           }
         );
+        console.log(response.data.data);
 
         console.log(response);
         // Ensure posts data matches our Post interface with required email field
@@ -395,7 +403,7 @@ const UserProfile = () => {
       }
     };
     fetchUsersPost();
-  }, [user?.id, userDetails.name, userDetails.picture, userDetails.email]);
+  }, []);
 
   useEffect(() => {
     const fetchUserSavedPosts = async () => {
@@ -405,7 +413,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds/saved`,
+          `${import.meta.env.VITE_PROD_URL}feeds/saved`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -445,7 +453,7 @@ const UserProfile = () => {
         throw new Error("No token found");
       }
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}user/user/${user?.id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -457,7 +465,7 @@ const UserProfile = () => {
       setUserDetails(response.data.data);
     };
     fetchUserDetails();
-  }, [user?.id]);
+  }, [user?.id ]);
 
   // Function to handle cover photo upload
   const handleCoverPhotoChange = async (
@@ -500,7 +508,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -569,7 +577,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { picture: fileUrl },
           {
             headers: {
@@ -676,16 +684,16 @@ const UserProfile = () => {
           {/* Profile Header */}
           <div className="sticky top-[68 px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
-              <div className="flex items-center">
-                <div
+              <div className="flex items-center gap-4">
+                <button
                   onClick={() => navigate("/adda/home")}
-                  className="mr-3 flex items-center text-[#EC9600] hover:text-[#EC9600]/80"
+                  className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
                 >
-                  <FiArrowLeft className="mr-1" size={18} />
-                  <span className="text-sm font-medium">Back to Adda</span>
-                </div>
-                <h1 className="text-xl font-semibold text-gray-800 md:text-2xl">
-                  My Profile
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+
+                <h1 className="text-xl font-semibold text-orange-700 md:text-2xl">
+                  {userDetails.name}
                 </h1>
               </div>
               <Button

@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-react";
 import axios, { AxiosError } from "axios";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PostCard, { PostData } from "./PostCard";
 
 interface PaginationData {
@@ -33,7 +33,7 @@ const Feed = () => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds`,
+          `${import.meta.env.VITE_PROD_URL}feeds`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { page: pageNum, limit: POSTS_PER_PAGE },
@@ -114,7 +114,7 @@ const Feed = () => {
       <div className="flex flex-col items-center justify-center w-full py-10 text-center">
         <p className="text-lg text-red-600">Error: {error}</p>
         <button
-          className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition"
+          className="px-4 py-2 mt-4 text-white transition bg-orange-500 rounded-md hover:bg-orange-600"
           onClick={() => fetchUserFeeds(1)}
         >
           Try Again
@@ -126,7 +126,7 @@ const Feed = () => {
   if (isLoading && userFeeds.length === 0) {
     return (
       <div className="flex items-center justify-center w-full py-10">
-        <div className="w-10 h-10 border-4 border-orange-300 border-t-orange-500 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-orange-300 rounded-full border-t-orange-500 animate-spin"></div>
       </div>
     );
   }
@@ -151,12 +151,12 @@ const Feed = () => {
           ref={loadingRef}
           className="flex items-center justify-center w-full py-4"
         >
-          <div className="w-8 h-8 border-4 border-orange-300 border-t-orange-500 rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-orange-300 rounded-full border-t-orange-500 animate-spin"></div>
         </div>
       )}
 
       {!hasMore && userFeeds.length > 0 && (
-        <div className="text-center py-4 text-gray-500">
+        <div className="py-4 text-center text-gray-500">
           You've reached the end of the feed
         </div>
       )}

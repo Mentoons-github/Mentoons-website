@@ -1,9 +1,10 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { IoCloseOutline } from "react-icons/io5";
+import { createPortal } from "react-dom";
 import { FaPaperPlane } from "react-icons/fa";
-import { MdOutlineEdit } from "react-icons/md";
-import { motion, AnimatePresence } from "framer-motion";
 import { FiCheck } from "react-icons/fi";
+import { IoCloseOutline } from "react-icons/io5";
+import { MdOutlineEdit } from "react-icons/md";
 
 interface MediaPreviewModalProps {
   isSuccess: boolean;
@@ -173,8 +174,17 @@ const MediaPreviewModal = ({
 
   if (!file || !mediaUrl) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black bg-opacity-75 pointer-events-auto"
+      style={{
+        isolation: "isolate",
+        contain: "layout paint size",
+        transformStyle: "preserve-3d",
+        position: "fixed",
+        zIndex: 2147483647,
+      }}
+    >
       <div
         ref={modalRef}
         className={`relative bg-gray-900 text-white rounded-lg overflow-hidden flex flex-col transition-all duration-300 
@@ -277,7 +287,7 @@ const MediaPreviewModal = ({
             </>
           )}
           {!isVideo && caption && (
-            <div className="absolute bottom-4 left-4 text-sm text-white bg-gray-800 bg-opacity-75 rounded px-2 py-1">
+            <div className="absolute px-2 py-1 text-sm text-white bg-gray-800 bg-opacity-75 rounded bottom-4 left-4">
               Click anywhere on the image to position your caption
             </div>
           )}
@@ -329,7 +339,7 @@ const MediaPreviewModal = ({
               <button
                 onClick={handleSubmit}
                 disabled={!mediaUrl || isLoading}
-                className="flex items-center gap-2 px-5 py-2 text-white rounded-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+                className="relative flex items-center gap-2 px-5 py-2 overflow-hidden text-white rounded-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <AnimatePresence mode="wait">
                   {isLoading ? (
@@ -354,7 +364,7 @@ const MediaPreviewModal = ({
                       >
                         <span>Sharing</span>
                         <motion.div
-                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          className="w-5 h-5 border-2 border-white rounded-full border-t-transparent"
                           animate={{ rotate: 360 }}
                           transition={{
                             duration: 1,
@@ -381,7 +391,7 @@ const MediaPreviewModal = ({
             </div>
           )}
           {!isVideo && caption && (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               <div className="flex items-center gap-2">
                 <label className="text-sm text-gray-300">Font Size:</label>
                 <select
@@ -392,7 +402,7 @@ const MediaPreviewModal = ({
                       fontSize: parseInt(e.target.value),
                     })
                   }
-                  className="bg-gray-700 text-white text-sm rounded px-2 py-1"
+                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
                 >
                   <option value="16">Small</option>
                   <option value="24">Medium</option>
@@ -407,7 +417,7 @@ const MediaPreviewModal = ({
                   onChange={(e) =>
                     setTextStyle({ ...textStyle, color: e.target.value })
                   }
-                  className="bg-gray-700 text-white text-sm rounded px-2 py-1"
+                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
                 >
                   <option value="#ffffff">White</option>
                   <option value="#000000">Black</option>
@@ -426,7 +436,7 @@ const MediaPreviewModal = ({
                       backgroundColor: e.target.value,
                     })
                   }
-                  className="bg-gray-700 text-white text-sm rounded px-2 py-1"
+                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
                 >
                   <option value="rgba(0,0,0,0.5)">
                     Semi-transparent black
@@ -450,7 +460,7 @@ const MediaPreviewModal = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 z-10"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black bg-opacity-70"
             >
               {isSuccess ? (
                 <motion.div
@@ -492,7 +502,7 @@ const MediaPreviewModal = ({
                     animate={{ opacity: 1 }}
                   >
                     <motion.div
-                      className="w-full h-full border-4 border-orange-500 border-t-transparent rounded-full"
+                      className="w-full h-full border-4 border-orange-500 rounded-full border-t-transparent"
                       animate={{ rotate: 360 }}
                       transition={{
                         duration: 1.2,
@@ -554,7 +564,8 @@ const MediaPreviewModal = ({
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
