@@ -21,31 +21,50 @@ const PrimaryHeader = () => {
 
   const animationTexts = adda ? ANIMATION_TEXTS_ADDA : ANIMATION_TEXTS_HOME;
 
-  const [notifications, setNotifications] = useState<NotificationInterface[]>(
-    []
-  );
+  const [notifications, setNotifications] = useState<
+    NotificationInterface[] | null
+  >(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
+    setIsLoading(true);
     try {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}adda/userNotifications`,
+        `${import.meta.env.VITE_PROD_URL}/adda/userNotifications`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(response.data);
-      setNotifications(response.data.data);
+      console.log("Notifications response:", response.data);
+      // Ensure we're setting an array, even if the API response is unexpected
+      setNotifications(
+        Array.isArray(response.data.data) ? response.data.data : []
+      );
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+      // Set to empty array on error to prevent null reference
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
     }
   }, [getToken]);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (adda) {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, adda]);
+
+  const getNotificationCount = () => {
+    if (isLoading) {
+      return 0;
+    }
+
+    return notifications?.length || 0;
+  };
 
   return (
     <div className="flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 z-55 font-akshar">
@@ -110,9 +129,11 @@ const PrimaryHeader = () => {
               className="relative hidden py-2 cursor-pointer md:block"
             >
               <FaBell />
-              <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
-                {notifications.length}
-              </span>
+              {getNotificationCount() > 0 && (
+                <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
+                  {getNotificationCount()}
+                </span>
+              )}
             </div>
           </SignedIn>
         )}

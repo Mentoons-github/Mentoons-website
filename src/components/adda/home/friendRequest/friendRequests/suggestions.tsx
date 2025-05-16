@@ -10,6 +10,7 @@ interface SuggestionInterface {
   picture: string;
 }
 
+
 interface FriendSuggestionsListProps {
   initialSuggestions?: SuggestionInterface[] | null;
   initialLoading?: boolean;
