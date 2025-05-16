@@ -262,7 +262,7 @@ const PostUpload = ({
       // API endpoint
       // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
 
-      const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
+      const apiUrl = `${import.meta.env.VITE_PROD_URL}posts`;
 
       console.log("Sending request to:", apiUrl);
       console.log("With authorization token:", token.substring(0, 10) + "...");

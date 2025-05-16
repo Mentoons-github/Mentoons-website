@@ -1,10 +1,10 @@
+import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
-import { useAuthModal } from "@/context/adda/authModalContext";
 
 const Likes = ({
   type,
@@ -36,8 +36,8 @@ const Likes = ({
     try {
       const token = await getToken();
       const endpoint = newLikedState
-        ? `${import.meta.env.VITE_PROD_URL}/likes/add-like`
-        : `${import.meta.env.VITE_PROD_URL}/likes/remove-like`;
+        ? `${import.meta.env.VITE_PROD_URL}likes/add-like`
+        : `${import.meta.env.VITE_PROD_URL}likes/remove-like`;
 
       const headers = {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ const Likes = ({
         const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
-        }/likes/check-like?type=${type}&id=${id}`;
+        }likes/check-like?type=${type}&id=${id}`;
         const headers = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

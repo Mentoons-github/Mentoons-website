@@ -216,7 +216,10 @@ const UserProfile = () => {
   const getProfileCompletion = () => {
     let completedFields = 0;
 
-    console.log("profile details :", profileFields);
+    if (!userDetails) {
+      return 0;
+    }
+
     profileFields.forEach((field) => {
       if (field.field === "interests") {
         if (
@@ -239,6 +242,10 @@ const UserProfile = () => {
   // Add a function to get the incomplete profile fields
   const getIncompleteFields = () => {
     const incompleteFields: string[] = [];
+
+    if (!userDetails) {
+      return profileFields.map((field) => field.label);
+    }
 
     profileFields.forEach((field) => {
       console.log("data =================>", field);
@@ -286,7 +293,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        `${import.meta.env.VITE_PROD_URL}user/profile`,
         profileData,
         {
           headers: {
@@ -360,7 +367,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}posts/user/${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -368,6 +375,7 @@ const UserProfile = () => {
             },
           }
         );
+        console.log(response.data.data);
 
         console.log(response);
         // Ensure posts data matches our Post interface with required email field
@@ -395,7 +403,7 @@ const UserProfile = () => {
       }
     };
     fetchUsersPost();
-  }, [user?.id, userDetails.name, userDetails.picture, userDetails.email]);
+  }, []);
 
   useEffect(() => {
     const fetchUserSavedPosts = async () => {
@@ -405,7 +413,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds/saved`,
+          `${import.meta.env.VITE_PROD_URL}feeds/saved`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -445,7 +453,7 @@ const UserProfile = () => {
         throw new Error("No token found");
       }
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}user/user/${user?.id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -457,7 +465,7 @@ const UserProfile = () => {
       setUserDetails(response.data.data);
     };
     fetchUserDetails();
-  }, [user?.id]);
+  }, [user?.id ]);
 
   // Function to handle cover photo upload
   const handleCoverPhotoChange = async (
@@ -500,7 +508,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -569,7 +577,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { picture: fileUrl },
           {
             headers: {
