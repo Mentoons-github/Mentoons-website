@@ -216,6 +216,7 @@ const UserProfile = () => {
   const getProfileCompletion = () => {
     let completedFields = 0;
 
+    console.log("profile details :", profileFields);
     profileFields.forEach((field) => {
       if (field.field === "interests") {
         if (
@@ -240,6 +241,7 @@ const UserProfile = () => {
     const incompleteFields: string[] = [];
 
     profileFields.forEach((field) => {
+      console.log("data =================>", field);
       if (field.field === "interests") {
         if (
           !userDetails.interests ||
@@ -255,6 +257,7 @@ const UserProfile = () => {
       }
     });
 
+    console.log(incompleteFields);
     return incompleteFields;
   };
 
@@ -366,6 +369,7 @@ const UserProfile = () => {
           }
         );
 
+        console.log(response);
         // Ensure posts data matches our Post interface with required email field
         const formattedPosts = response.data.data.map(
           (post: Partial<Post>) => ({
@@ -670,7 +674,7 @@ const UserProfile = () => {
       <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="sticky top-[68 px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center">
                 <div

@@ -2,6 +2,7 @@ import { PHOTO_POST } from "@/constant/constants";
 import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 import PostUpload from "../modal/postUpload";
+import { useAuthModal } from "@/context/adda/authModalContext";
 
 // Import the post type from PostCardSwitcher instead of PostCard
 interface PostData {
@@ -45,6 +46,8 @@ interface AddPostsProps {
 }
 
 const AddPosts = ({ onPostCreated }: AddPostsProps) => {
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
   const [selectedPostType, setSelectedPostType] = useState<
@@ -52,6 +55,10 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   >(null);
 
   const handlePost = (type: "photo" | "video" | "event" | "article") => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
     setSelectedPostType(type);
     setIsOpen(true);
   };

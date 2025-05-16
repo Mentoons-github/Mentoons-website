@@ -57,7 +57,6 @@ const Meme = () => {
           className="object-cover w-full h-auto transition-all rounded-xl"
         />
 
-        {/* Colorful gradient overlay on hover */}
         <div className="absolute inset-0 transition-opacity opacity-0 bg-gradient-to-br from-mt-purple/20 via-transparent to-mt-yellow/20 group-hover:opacity-100 rounded-xl" />
       </motion.div>
       <motion.div

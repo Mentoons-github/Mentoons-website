@@ -1,11 +1,22 @@
 import { Dialog } from "@/components/ui/dialog";
 import { useState } from "react";
 import MentoonsInfulencerRequestModal from "./mentoonsInfulencerRequestModal";
+import { useUser } from "@clerk/clerk-react";
+import { useAuthModal } from "@/context/adda/authModalContext";
 
 const Influencer = () => {
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    if (isSignedIn) {
+      setIsModalOpen(true);
+    } else {
+      openAuthModal("sign-in");
+    }
+  };
+
   const closeModal = () => setIsModalOpen(false);
 
   return (
