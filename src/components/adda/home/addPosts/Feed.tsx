@@ -33,7 +33,7 @@ const Feed = () => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds`,
+          `${import.meta.env.VITE_PROD_URL}/feeds`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { page: pageNum, limit: POSTS_PER_PAGE },
