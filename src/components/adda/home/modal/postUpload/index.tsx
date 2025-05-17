@@ -58,7 +58,7 @@ const PostUpload = ({
       formData.append("file", file);
 
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}upload/file`,
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {
@@ -262,7 +262,7 @@ const PostUpload = ({
       // API endpoint
       // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
 
-      const apiUrl = `${import.meta.env.VITE_PROD_URL}posts`;
+      const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
       console.log("Sending request to:", apiUrl);
       console.log("With authorization token:", token.substring(0, 10) + "...");

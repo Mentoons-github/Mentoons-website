@@ -63,7 +63,6 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
     setIsOpen(true);
   };
 
-  // Add this function to handle post creation completion
   const handlePostComplete = (newPost: PostData) => {
     // Close the modal
     setIsOpen(false);
