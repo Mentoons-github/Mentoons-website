@@ -1,3 +1,5 @@
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -5,11 +7,37 @@ import { useEffect, useState } from "react";
 import { BiShare } from "react-icons/bi";
 import { FaFacebook, FaLinkedin, FaTwitter, FaWhatsapp } from "react-icons/fa";
 
-const Share = ({ postDetails, type }: { postDetails: any; type: string }) => {
+// Use a more permissive generic interface to accommodate different post types
+interface BasePostDetails {
+  _id: string;
+  title?: string;
+  visibility: string;
+  shares: string[];
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    picture: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+interface ShareProps {
+  postDetails: BasePostDetails;
+  type: "post" | "meme";
+}
+
+const Share = ({ postDetails, type }: ShareProps) => {
   const [showShareOptions, setShareOptions] = useState(false);
   const [shareCount, setShareCount] = useState(postDetails.shares.length);
   const { getToken } = useAuth();
-  const shareText = `${postDetails?.title} - ${postDetails.content}`;
+
+  // Handle different content fields based on type
+  const shareText = `${postDetails?.title || ""} - ${
+    type === "post" ? postDetails.content || "" : postDetails.description || ""
+  }`;
+
   const baseUrl =
     type === "post"
       ? window.location.origin + "/adda/post/"
@@ -42,7 +70,7 @@ const Share = ({ postDetails, type }: { postDetails: any; type: string }) => {
           `${import.meta.env.VITE_PROD_URL}shares`,
           {
             postId: postDetails._id,
-            caption: postDetails.content,
+            caption: postDetails.content || "",
             visibility: postDetails.visibility,
             externalPlatform: platform,
           },
@@ -53,12 +81,15 @@ const Share = ({ postDetails, type }: { postDetails: any; type: string }) => {
             },
           }
         );
+
+        // Trigger reward for sharing a post
+        triggerReward(RewardEventType.SHARE_POST, postDetails._id);
       } else if (type === "meme") {
         await axios.post(
           `${import.meta.env.VITE_PROD_URL}shares`,
           {
             memeId: postDetails._id,
-            caption: postDetails.content,
+            caption: postDetails.description || "",
             visibility: postDetails.visibility,
             externalPlatform: platform,
           },
@@ -69,6 +100,9 @@ const Share = ({ postDetails, type }: { postDetails: any; type: string }) => {
             },
           }
         );
+
+        // We can still reward for meme shares using SHARE_POST
+        triggerReward(RewardEventType.SHARE_POST, postDetails._id);
       }
     } catch (error) {
       console.error("Failed to record share:", error);

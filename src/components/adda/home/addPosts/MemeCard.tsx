@@ -1,4 +1,6 @@
 import Highlight from "@/components/common/modal/highlight";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -36,7 +38,7 @@ export interface MemeData {
 }
 
 interface MemeCardProps {
-  meme: MemeData | any;
+  meme: MemeData;
 }
 
 interface Comment {
@@ -116,6 +118,9 @@ const MemeCard = ({ meme }: MemeCardProps) => {
         )
       );
 
+      // Trigger reward for commenting on a meme
+      triggerReward(RewardEventType.COMMENT_POST, meme._id);
+
       toast.success("Comment added successfully");
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -147,6 +152,12 @@ const MemeCard = ({ meme }: MemeCardProps) => {
         }
       );
       console.log(response.data);
+
+      // Trigger reward for saving a meme (only when saving, not unsaving)
+      if (newSavedState) {
+        triggerReward(RewardEventType.SHARE_PRODUCT, meme._id);
+      }
+
       toast.success(
         newSavedState ? "Meme saved successfully" : "Meme unsaved successfully"
       );

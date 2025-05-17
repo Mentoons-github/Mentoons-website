@@ -4,10 +4,7 @@ import {
   FaBookmark,
   FaCalendarAlt,
   FaCamera,
-  FaCrown,
-  FaGift,
   FaImage,
-  FaMedal,
   FaUsers,
 } from "react-icons/fa";
 import {
@@ -29,7 +26,10 @@ import { Link, useNavigate } from "react-router-dom";
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
 import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import { UserInfo } from "@/types";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -145,6 +145,17 @@ interface SuggestionInterface {
   picture: string;
 }
 
+// Update the Post interface to include all fields from saved posts
+export interface SavedPost extends Post {
+  userId?: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    picture: string;
+  };
+}
+
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
@@ -248,7 +259,6 @@ const UserProfile = () => {
     }
 
     profileFields.forEach((field) => {
-      console.log("data =================>", field);
       if (field.field === "interests") {
         if (
           !userDetails.interests ||
@@ -264,7 +274,6 @@ const UserProfile = () => {
       }
     });
 
-    console.log(incompleteFields);
     return incompleteFields;
   };
 
@@ -293,7 +302,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_PROD_URL}user/profile`,
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
         {
           headers: {
@@ -310,14 +319,15 @@ const UserProfile = () => {
         setIsEditing(false);
         setShowCompletionForm(false);
 
+        // Trigger reward for completing the profile
+        triggerReward(RewardEventType.PROFILE_COMPLETION);
+
         // Show confetti for the profile completion
-        if (showCompletionForm) {
-          setShowConfetti(true);
-          // Hide confetti after 5 seconds
-          setTimeout(() => {
-            setShowConfetti(false);
-          }, 5000);
-        }
+        setShowConfetti(true);
+        // Hide confetti after 5 seconds
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 5000);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -377,7 +387,6 @@ const UserProfile = () => {
         );
         console.log(response.data.data);
 
-        console.log(response);
         // Ensure posts data matches our Post interface with required email field
         const formattedPosts = response.data.data.map(
           (post: Partial<Post>) => ({
@@ -422,20 +431,29 @@ const UserProfile = () => {
           }
         );
 
-        // Ensure saved posts match our Post interface with required email field
-        const formattedSavedPosts = response.data.data.map((post: any) => ({
-          ...post,
-          postType: (post.postType as PostType) || "text",
-          user: post.user || {
-            _id: post.userId || "",
-            name: post.user?.name || "User",
-            picture: post.user?.picture || "",
-            email: post.user?.email || "user@example.com", // Ensure email is always included
-          },
-          shares: post.shares || [],
-          saves: post.saves || 0,
-          visibility: post.visibility || "public",
-        }));
+        // Fix the type issues by explicitly defining the user property
+        const formattedSavedPosts = response.data.data.map(
+          (post: SavedPost) => ({
+            ...post,
+            postType: (post.postType as PostType) || "text",
+            user: {
+              _id: post.userId || "",
+              name:
+                typeof post.user === "object"
+                  ? post.user.name || "User"
+                  : "User",
+              picture:
+                typeof post.user === "object" ? post.user.picture || "" : "",
+              email:
+                typeof post.user === "object"
+                  ? post.user.email || "user@example.com"
+                  : "user@example.com",
+            },
+            shares: post.shares || [],
+            saves: post.shares?.length || 0,
+            visibility: post.visibility || "public",
+          })
+        );
 
         setUserSavedPosts(formattedSavedPosts as unknown as Post[]);
       } catch (error) {
@@ -465,7 +483,7 @@ const UserProfile = () => {
       setUserDetails(response.data.data);
     };
     fetchUserDetails();
-  }, [user?.id ]);
+  }, [user?.id]);
 
   // Function to handle cover photo upload
   const handleCoverPhotoChange = async (
@@ -508,7 +526,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}user/profile`,
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -577,7 +595,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}user/profile`,
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { picture: fileUrl },
           {
             headers: {
@@ -682,7 +700,7 @@ const UserProfile = () => {
       <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[68 px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center gap-4">
                 <button
@@ -1489,226 +1507,7 @@ const UserProfile = () => {
                   )}
 
                   {/* Reward Points Tab */}
-                  {activeTab === "rewards" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                        Your Reward Points
-                      </h3>
-
-                      {/* Points Overview */}
-                      <div className="p-4 mb-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl">
-                        <div className="flex flex-col items-center justify-between md:flex-row">
-                          <div className="flex items-center mb-4 md:mb-0">
-                            <div className="h-16 w-16 rounded-full bg-[#EC9600] flex items-center justify-center mr-4">
-                              <FaCrown className="text-3xl text-white" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">
-                                Total Points
-                              </p>
-                              <p className="text-3xl font-bold text-gray-800">
-                                1,250
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-center md:items-end">
-                            <p className="mb-1 text-sm text-gray-600">
-                              Current Level
-                            </p>
-                            <div className="flex items-center">
-                              <FaMedal className="text-[#EC9600] mr-2" />
-                              <p className="font-semibold text-gray-800">
-                                Silver Member
-                              </p>
-                            </div>
-                            <p className="mt-1 text-xs text-gray-500">
-                              750 more points to Gold
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Reward Tiers */}
-                      <div className="mb-6">
-                        <h4 className="mb-3 text-lg font-semibold text-gray-800">
-                          Reward Tiers
-                        </h4>
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                          <div className="p-3 border border-orange-100 rounded-lg bg-orange-50">
-                            <div className="flex items-center mb-2">
-                              <div className="flex items-center justify-center w-8 h-8 mr-2 bg-gray-400 rounded-full">
-                                <FaMedal className="text-sm text-white" />
-                              </div>
-                              <p className="font-medium text-gray-800">
-                                Bronze
-                              </p>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              0 - 1,000 points
-                            </p>
-                            <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                              <li>• Access to basic features</li>
-                              <li>• Weekly newsletter</li>
-                            </ul>
-                          </div>
-                          <div className="p-3 border border-orange-100 rounded-lg bg-gradient-to-r from-gray-100 to-gray-200">
-                            <div className="flex items-center mb-2">
-                              <div className="flex items-center justify-center w-8 h-8 mr-2 bg-gray-500 rounded-full">
-                                <FaMedal className="text-sm text-white" />
-                              </div>
-                              <p className="font-medium text-gray-800">
-                                Silver (Current)
-                              </p>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              1,000 - 2,000 points
-                            </p>
-                            <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                              <li>• All Bronze benefits</li>
-                              <li>• Exclusive content access</li>
-                              <li>• Monthly digital rewards</li>
-                            </ul>
-                          </div>
-                          <div className="p-3 border border-orange-100 rounded-lg bg-gradient-to-r from-yellow-50 to-amber-100">
-                            <div className="flex items-center mb-2">
-                              <div className="flex items-center justify-center w-8 h-8 mr-2 bg-yellow-500 rounded-full">
-                                <FaMedal className="text-sm text-white" />
-                              </div>
-                              <p className="font-medium text-gray-800">Gold</p>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              2,000+ points
-                            </p>
-                            <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                              <li>• All Silver benefits</li>
-                              <li>• Premium workshop access</li>
-                              <li>• Merchandise discounts</li>
-                              <li>• Priority support</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Available Rewards */}
-                      <div className="mb-6">
-                        <h4 className="mb-3 text-lg font-semibold text-gray-800">
-                          Available Rewards
-                        </h4>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                          {[
-                            {
-                              name: "Digital Sticker Pack",
-                              points: 100,
-                              image: "stickers",
-                            },
-                            {
-                              name: "Exclusive E-Book",
-                              points: 350,
-                              image: "ebook",
-                            },
-                            {
-                              name: "Premium Workshop",
-                              points: 500,
-                              image: "workshop",
-                            },
-                            {
-                              name: "Mentoons Merchandise",
-                              points: 750,
-                              image: "merch",
-                            },
-                          ].map((reward, index) => (
-                            <div
-                              key={index}
-                              className="overflow-hidden border border-orange-100 rounded-lg"
-                            >
-                              <div className="flex items-center justify-center h-32 bg-orange-100">
-                                <FaGift className="text-[#EC9600] text-4xl" />
-                              </div>
-                              <div className="p-3">
-                                <h5 className="font-medium text-gray-800">
-                                  {reward.name}
-                                </h5>
-                                <div className="flex items-center justify-between mt-2">
-                                  <p className="text-sm text-gray-600">
-                                    {reward.points} points
-                                  </p>
-                                  <Button
-                                    size="sm"
-                                    className={`text-xs ${
-                                      reward.points <= 1250
-                                        ? "bg-[#EC9600] hover:bg-[#EC9600]/90"
-                                        : "bg-gray-300 cursor-not-allowed"
-                                    }`}
-                                    disabled={reward.points > 1250}
-                                  >
-                                    Redeem
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Points History */}
-                      <div>
-                        <h4 className="mb-3 text-lg font-semibold text-gray-800">
-                          Points History
-                        </h4>
-                        <div className="space-y-3">
-                          {[
-                            {
-                              action: "Completed profile",
-                              points: 50,
-                              date: "2 days ago",
-                            },
-                            {
-                              action: "Daily login streak (7 days)",
-                              points: 70,
-                              date: "1 week ago",
-                            },
-                            {
-                              action: "Shared a post",
-                              points: 10,
-                              date: "1 week ago",
-                            },
-                            {
-                              action: "Workshop participation",
-                              points: 200,
-                              date: "2 weeks ago",
-                            },
-                            {
-                              action: "Commented on 5 posts",
-                              points: 25,
-                              date: "3 weeks ago",
-                            },
-                          ].map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between p-3 border border-orange-100 rounded-lg hover:bg-orange-50"
-                            >
-                              <div className="flex items-center">
-                                <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-3 bg-orange-100 rounded-full">
-                                  <FiAward className="text-[#EC9600]" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-gray-800">
-                                    {item.action}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {item.date}
-                                  </p>
-                                </div>
-                              </div>
-                              <p className="font-bold text-[#EC9600]">
-                                +{item.points}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
+                  {activeTab === "rewards" && <RewardsSection />}
 
                   {/* Activities Tab */}
                   {activeTab === "activities" && (

@@ -2,6 +2,9 @@ import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
+
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
@@ -51,9 +54,15 @@ const Likes = ({
         setLikeCounter(response.data.likeCount);
       }
 
-      // toast.success(
-      //   newLikedState ? "Liked successfully" : "Reaction removed successfully"
-      // );
+      // Trigger reward points only when adding a like (not when removing)
+      if (newLikedState) {
+        // Trigger reward for liking a post
+        triggerReward(RewardEventType.LIKE_POST, id);
+      }
+
+      toast.success(
+        newLikedState ? "Liked successfully" : "Reaction removed successfully"
+      );
     } catch (error) {
       console.error("Error updating reaction:", error);
       toast.error("Failed to update reaction. Please try again.");

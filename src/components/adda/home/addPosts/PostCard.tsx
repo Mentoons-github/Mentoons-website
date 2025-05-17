@@ -1,5 +1,7 @@
 import Highlight from "@/components/common/modal/highlight";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -154,6 +156,9 @@ const PostCard = ({ post }: PostCardProps) => {
         // Replace the temporary comment with the server-returned one
         setComments(serverComment.data.data);
 
+        // Trigger reward for commenting on a post
+        triggerReward(RewardEventType.COMMENT_POST, post._id);
+
         toast.success("Comment added successfully");
       }
     } catch (error) {
@@ -192,6 +197,12 @@ const PostCard = ({ post }: PostCardProps) => {
         }
       );
       console.log(response.data);
+
+      // If the user is saving the post (not unsaving), reward them
+      if (newSavedState) {
+        triggerReward(RewardEventType.SHARE_PRODUCT, post._id);
+      }
+
       toast.success(
         newSavedState ? "Post saved successfully" : "Post unsaved successfully"
       );
@@ -207,9 +218,7 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds/posts/${
-            post._id
-          }/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response);

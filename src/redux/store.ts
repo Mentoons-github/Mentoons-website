@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 // import cardProductReducer from "./cardProductSlice";
+import userStatusReducer from "./adda/statusSlice";
 import careerReducer from "./careerSlice";
 import cartReducer from "./cartSlice";
 import comicsReducer from "./comicSlice";
@@ -7,10 +8,10 @@ import fileUploadReducer from "./fileUploadSlice";
 import authReducer from "./loginSlice";
 import podcastReducer from "./Podcastslice";
 import productsReducer from "./productSlice";
+import rewardsReducer from "./rewardSlice";
+import sessionReducer from "./sessionSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
-import userStatusReducer from "./adda/statusSlice";
-import sessionReducer from "./sessionSlice";
 
 export const store = configureStore<{
   comics: ReturnType<typeof comicsReducer>;
@@ -25,6 +26,7 @@ export const store = configureStore<{
   products: ReturnType<typeof productsReducer>;
   userStatus: ReturnType<typeof userStatusReducer>;
   session: ReturnType<typeof sessionReducer>;
+  rewards: ReturnType<typeof rewardsReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -39,6 +41,7 @@ export const store = configureStore<{
     products: productsReducer,
     userStatus: userStatusReducer,
     session: sessionReducer,
+    rewards: rewardsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
