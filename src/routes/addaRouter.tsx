@@ -29,7 +29,7 @@ const AddaRouter = () => {
         <Route path="notifications" element={<Notification />} />
         <Route path="meme" element={<MemePage />} />
         <Route path="meme/:memeId" element={<MemeDetails />} />
-        <Route path="/user/:userId" element={<ProfileDetails />} />
+        <Route path="user/:userId" element={<ProfileDetails />} />
         <Route path="search-friend" element={<FriendSearch />} />
       </Route>
       {/* <GlobalAuthModal /> */}

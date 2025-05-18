@@ -14,13 +14,57 @@ export interface RequestSender {
   message?: string;
 }
 
+export interface FollowBackUser {
+  _id: string;
+  name: string;
+  picture: string;
+  status?: "following" | "following-in-progress";
+  message?: string;
+}
+
 const FriendRequestsList = () => {
   const [requests, setRequests] = useState<RequestSender[] | null>(null);
+  const [followBackUsers, setFollowBackUsers] = useState<
+    FollowBackUser[] | null
+  >(null);
   const [loading, setLoading] = useState(false);
+  const [followBackLoading, setFollowBackLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
+
+  const fetchFollowBackUsers = async () => {
+    setFollowBackLoading(true);
+    const token = await getToken();
+
+    try {
+      const response = await axiosInstance.get("/adda/getFollowBackUsers", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Follow back users:", response.data.data);
+
+      if (response.data.success && response.data.data) {
+        const transformedUsers = response.data.data.map((user: any) => ({
+          _id: user._id,
+          name: user.name,
+          picture: user.picture,
+        }));
+
+        setFollowBackUsers(transformedUsers);
+      } else {
+        setFollowBackUsers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching follow back users:", error);
+      setFollowBackUsers([]);
+    }
+
+    setFollowBackLoading(false);
+  };
 
   const fetchRequests = async () => {
     if (loading || !hasMore) return;
@@ -39,8 +83,6 @@ const FriendRequestsList = () => {
 
       const { pendingReceived, totalPages } = response.data.data;
 
-      console.log("pending received :", pendingReceived);
-
       const transformedRequests = pendingReceived.map(
         (data: FriendRequestResponse) => ({
           requestId: data._id,
@@ -52,8 +94,6 @@ const FriendRequestsList = () => {
           status: "pending",
         })
       );
-
-      console.log(transformedRequests);
 
       if (transformedRequests && transformedRequests.length > 0) {
         setRequests((prev) =>
@@ -76,6 +116,7 @@ const FriendRequestsList = () => {
 
   useEffect(() => {
     fetchRequests();
+    fetchFollowBackUsers();
   }, []);
 
   const handleAccept = async (requestId: string) => {
@@ -100,8 +141,6 @@ const FriendRequestsList = () => {
           },
         }
       );
-
-      console.log(response);
 
       if (response.data.success === true) {
         setRequests((prev) =>
@@ -200,6 +239,59 @@ const FriendRequestsList = () => {
     }
   };
 
+  const handleFollowBack = async (userId: string) => {
+    setFollowBackUsers((prev) =>
+      prev
+        ? prev.map((user) =>
+            user._id === userId
+              ? { ...user, status: "following-in-progress" }
+              : user
+          )
+        : null
+    );
+
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        `/adda/request/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response);
+      if (response.data.success) {
+        setFollowBackUsers((prev) =>
+          prev
+            ? prev.map((user) =>
+                user._id === userId
+                  ? { ...user, status: "following", message: "Following!" }
+                  : user
+              )
+            : null
+        );
+
+        setTimeout(() => {
+          setFollowBackUsers((prev) =>
+            prev ? prev.filter((user) => user._id !== userId) : null
+          );
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error sending follow back request:", error);
+      setFollowBackUsers((prev) =>
+        prev
+          ? prev.map((user) =>
+              user._id === userId ? { ...user, status: undefined } : user
+            )
+          : null
+      );
+    }
+  };
+
   const lastRequestRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loading) return;
@@ -219,41 +311,104 @@ const FriendRequestsList = () => {
     [loading, hasMore]
   );
 
-  if (!requests && loading) {
+  if ((!requests && loading) || (!followBackUsers && followBackLoading)) {
     return (
       <div className="flex items-center justify-center w-full py-8">
         <div className="w-6 h-6 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-        <span className="ml-2 text-sm text-gray-500">Loading requests...</span>
+        <span className="ml-2 text-sm text-gray-500">Loading...</span>
       </div>
     );
   }
 
-  if (!requests || requests.length === 0) {
+  const renderFollowBackSection = () => {
+    if (!followBackUsers || followBackLoading) return null;
+
+    if (followBackUsers.length === 0) return null;
+
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="p-3 mb-3 text-orange-500 rounded-full bg-orange-50">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
+      <div className="mb-6">
+        <h2 className="mb-3 text-lg font-semibold text-gray-800">
+          People to Follow Back
+        </h2>
+        <div className="grid gap-3">
+          {followBackUsers.map((user) => (
+            <div
+              key={user._id}
+              className={`flex justify-between items-center w-full p-4 border rounded-xl ${
+                user.status === "following-in-progress"
+                  ? "border-blue-200 bg-blue-50"
+                  : user.status === "following"
+                  ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
+                  : "border-orange-100 bg-white hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 overflow-hidden rounded-full ring-2 ring-orange-50">
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium text-gray-800">
+                    {user.name}
+                  </h3>
+                  <p className="text-xs text-gray-500">Follows you</p>
+                </div>
+              </div>
+
+              {user.status === "following-in-progress" ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                  <span className="text-sm font-medium text-blue-600">
+                    Following...
+                  </span>
+                </div>
+              ) : user.status === "following" ? (
+                <div className="flex items-center gap-2 text-green-600">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="font-medium">Following!</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleFollowBack(user._id)}
+                  className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                  Follow Back
+                </button>
+              )}
+            </div>
+          ))}
         </div>
-        <p className="font-medium text-gray-600">No friend requests yet</p>
-        <p className="text-sm text-gray-500">
-          When someone sends you a request, it will appear here
-        </p>
       </div>
     );
-  }
+  };
 
   const getCardClasses = (status?: string) => {
     const baseClasses =
@@ -388,46 +543,90 @@ const FriendRequestsList = () => {
     );
   };
 
+  if (
+    (!requests || requests.length === 0) &&
+    (!followBackUsers || followBackUsers.length === 0)
+  ) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <div className="p-3 mb-3 text-orange-500 rounded-full bg-orange-50">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+          </svg>
+        </div>
+        <p className="font-medium text-gray-600">No connection requests</p>
+        <p className="text-sm text-gray-500">
+          When someone sends you a request or follows you, it will appear here
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid gap-3">
-      {requests.map((request, index) => (
-        <div
-          key={request.requestId}
-          className={getCardClasses(request.status)}
-          ref={index === requests.length - 1 ? lastRequestRef : null}
-        >
-          <div className="flex items-center w-full gap-3 mb-3">
-            <div className="w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-50">
-              <img
-                src={request.senderDetails.picture}
-                alt={request.senderDetails.name}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div>
-              <h3 className="text-base font-medium text-gray-800">
-                {request.senderDetails.name}
-              </h3>
-              <p className="text-xs text-gray-500">Wants to connect with you</p>
-            </div>
+    <div className="space-y-6">
+      {renderFollowBackSection()}
+
+      {/* Friend Requests section */}
+      {requests && requests.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-lg font-semibold text-gray-800">
+            Friend Requests
+          </h2>
+          <div className="grid gap-3">
+            {requests.map((request, index) => (
+              <div
+                key={request.requestId}
+                className={getCardClasses(request.status)}
+                ref={index === requests.length - 1 ? lastRequestRef : null}
+              >
+                <div className="flex items-center w-full gap-3 mb-3">
+                  <div className="w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-50">
+                    <img
+                      src={request.senderDetails.picture}
+                      alt={request.senderDetails.name}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-medium text-gray-800">
+                      {request.senderDetails.name}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Wants to connect with you
+                    </p>
+                  </div>
+                </div>
+
+                {getActionButtons(request)}
+              </div>
+            ))}
+
+            {loading && (
+              <div className="flex items-center justify-center w-full py-3">
+                <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                <span className="ml-2 text-xs text-gray-500">
+                  Loading more requests...
+                </span>
+              </div>
+            )}
+
+            {!hasMore && requests.length > 0 && (
+              <div className="text-center py-2 text-sm text-gray-500">
+                No more friend requests to load
+              </div>
+            )}
           </div>
-
-          {getActionButtons(request)}
-        </div>
-      ))}
-
-      {loading && (
-        <div className="flex items-center justify-center w-full py-3">
-          <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-          <span className="ml-2 text-xs text-gray-500">
-            Loading more requests...
-          </span>
-        </div>
-      )}
-
-      {!hasMore && requests.length > 0 && (
-        <div className="text-center py-2 text-sm text-gray-500">
-          No more friend requests to load
         </div>
       )}
     </div>

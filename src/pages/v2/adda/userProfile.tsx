@@ -379,7 +379,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -424,7 +424,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds/saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/saved`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -473,7 +473,7 @@ const UserProfile = () => {
         throw new Error("No token found");
       }
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
         {
           headers: {
             "Content-Type": "application/json",
