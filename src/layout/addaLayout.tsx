@@ -7,6 +7,7 @@ import Influencer from "@/components/adda/home/influencer/influencer";
 import Meme from "@/components/adda/home/memeOfTheDay/meme";
 import UserStatus from "@/components/adda/home/userStatus/userStatus";
 import FounderNote from "@/components/common/founderNote";
+import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 
 const AddaLayout = () => {
   const { isSignedIn } = useAuth();
@@ -25,6 +26,10 @@ const AddaLayout = () => {
 
   const handleGoBack = useCallback(() => {
     navigate(-1);
+  }, [navigate]);
+
+  const navigateToFriendRequestsPage = useCallback(() => {
+    navigate("/adda/search-friend");
   }, [navigate]);
 
   return (
@@ -86,6 +91,11 @@ const AddaLayout = () => {
                 {isSignedIn && (
                   <div className="p-3 mb-4 bg-white border border-orange-200 rounded-lg sm:p-4">
                     <FriendRequest />
+                    <div className="mt-4 border-t border-orange-100 pt-3">
+                      <ViewAllFriends
+                        onNavigate={navigateToFriendRequestsPage}
+                      />
+                    </div>
                   </div>
                 )}
                 <div className="hidden md:flex md:flex-col md:gap-4 lg:gap-6 md:max-h-[calc(100vh-150px)] md:overflow-y-auto md:pr-2">

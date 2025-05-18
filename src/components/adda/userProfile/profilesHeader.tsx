@@ -27,6 +27,12 @@ interface ProfileHeaderProps {
 
 type FriendStatus = "pending" | "accepted" | "rejected" | "one_way" | "none";
 
+interface FriendStatusResponse {
+  status: FriendStatus;
+  isRequester: boolean;
+  requestId?: string;
+}
+
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
   totalPosts,
@@ -38,6 +44,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
   const [isRequester, setIsRequester] = useState(false);
+  const [requestId, setRequestId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const checkFriendStatus = async () => {
@@ -55,8 +62,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
         console.log("Friend status response:", response.data);
 
-        setFriendStatus(response.data.data.status || "none");
-        setIsRequester(response.data.data.isRequester || false);
+        const statusData: FriendStatusResponse = response.data.data;
+        setFriendStatus(statusData.status || "none");
+        setIsRequester(statusData.isRequester || false);
+        setRequestId(statusData.requestId);
       } catch (error) {
         console.error("Failed to fetch friend status:", error);
         setFriendStatus("none");
@@ -95,7 +104,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         case "pending":
           endpoint = isRequester
             ? `/adda/cancelRequest/${user._id}`
-            : `/adda/rejectRequest/${user._id}`;
+            : `/adda/rejectRequest/${requestId}`;
           break;
         case "rejected":
           endpoint = `/adda/request/${user._id}`;
@@ -109,15 +118,28 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           break;
       }
 
-      const response = await axiosInstance.post(
-        endpoint,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const method =
+        friendStatus === "pending" && !isRequester ? "patch" : "post";
+
+      const response = await (method === "patch"
+        ? axiosInstance.patch(
+            endpoint,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+        : axiosInstance.post(
+            endpoint,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          ));
 
       if (response.data.status) {
         setFriendStatus(response.data.status);
@@ -152,8 +174,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      const response = await axiosInstance.post(
-        `/adda/acceptRequest/${user._id}`,
+      const response = await axiosInstance.patch(
+        `/adda/acceptRequest/${requestId}`,
         {},
         {
           headers: {
@@ -182,7 +204,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       "Current friendStatus:",
       friendStatus,
       "isRequester:",
-      isRequester
+      isRequester,
+      "requestId:",
+      requestId
     );
 
     if (!friendStatus) return null;
@@ -237,6 +261,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   const buttonConfig = getFriendButtonConfig();
+  console.log(buttonConfig);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden mb-4 w-full">

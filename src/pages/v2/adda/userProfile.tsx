@@ -312,6 +312,8 @@ const UserProfile = () => {
         }
       );
 
+      console.log(response);
+
       if (response.status === 200) {
         toast.success("Profile updated successfully");
         // Update local user data
@@ -711,7 +713,7 @@ const UserProfile = () => {
                 </button>
 
                 <h1 className="text-xl font-semibold text-orange-700 md:text-2xl">
-                  {userDetails.name}
+                  {userDetails?.name}
                 </h1>
               </div>
               <Button
@@ -1022,8 +1024,8 @@ const UserProfile = () => {
                     <div
                       className="relative h-24 bg-gradient-to-r from-[#EC9600] to-amber-400"
                       style={{
-                        backgroundImage: userDetails.coverPhoto
-                          ? `url(${userDetails.coverPhoto})`
+                        backgroundImage: userDetails?.coverPhoto
+                          ? `url(${userDetails?.coverPhoto})`
                           : "linear-gradient(to right, #EC9600, #fbbf24)",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
@@ -1049,8 +1051,8 @@ const UserProfile = () => {
                       <div className="relative ">
                         <Avatar className="w-24 h-24 ring-4 ring-white">
                           <img
-                            src={userDetails.picture}
-                            alt={userDetails.name}
+                            src={userDetails?.picture}
+                            alt={userDetails?.name}
                           />
                         </Avatar>
                         <Button
@@ -1071,16 +1073,16 @@ const UserProfile = () => {
                       </div>
                       <div className="flex flex-col gap-1">
                         <h2 className="mt-3 text-lg font-bold text-gray-800">
-                          {userDetails.name}
+                          {userDetails?.name}
                         </h2>
                         <div className="flex gap-2">
                           <p className="flex items-center mt-1 text-sm text-gray-600">
                             <FiMapPin className="mr-1" size={14} />
-                            {userDetails.location}
+                            {userDetails?.location}
                           </p>
                           <p className="flex items-center mt-1 text-xs text-gray-500">
                             <FiCalendar className="mr-1" size={12} /> Joined{" "}
-                            {userDetails.joinedDate}
+                            {userDetails?.joinedDate}
                           </p>
                         </div>
                       </div>
@@ -1389,7 +1391,7 @@ const UserProfile = () => {
                               <div className="flex items-center mt-1">
                                 <FiUser className="text-[#EC9600] mr-2" />
                                 <p className="text-gray-800">
-                                  {userDetails.name}
+                                  {userDetails?.name}
                                 </p>
                               </div>
                             </div>

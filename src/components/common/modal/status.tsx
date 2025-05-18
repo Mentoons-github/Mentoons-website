@@ -40,84 +40,200 @@ const Status = ({
   hasPrevious?: boolean;
   totalStatuses?: number;
   currentIndex?: number;
-  isUserChange?: boolean; // New prop
+  isUserChange?: boolean;
 }) => {
-  const isVideo = (media: string) => /\.(mp4|webm|ogg|mov)$/i.test(media);
+  const isVideo = (media: string) => {
+    if (!media) return false;
+    return /\.(mp4|webm|ogg|mov)$/i.test(media);
+  };
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showViewers, setShowViewers] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<
     "left" | "right" | "none"
   >("none");
   const progressInterval = 10;
   const progressStep = 100 / (progressInterval * 20);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const header = document.querySelector("header");
     if (header) {
       header.style.display = "none";
     }
+
+    const statusId = status._id || "status";
+    const originalUrl = window.location.href;
+    const statusUrl = `${originalUrl}${
+      originalUrl.includes("?") ? "&" : "?"
+    }statusId=${statusId}`;
+
+    window.history.pushState({ statusModal: true }, "", statusUrl);
+
+    const handlePopState = () => {
+      setStatus();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
     return () => {
       if (header) {
         header.style.display = "flex";
       }
+      window.removeEventListener("popstate", handlePopState);
     };
-  }, []);
+  }, [status._id, setStatus]);
 
   useEffect(() => {
     setProgress(0);
     setIsLoading(true);
     setIsPaused(true);
+
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
   }, [status._id]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
+  const startProgressTimer = () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+    }
 
-    if (!showViewers && !isPaused && !isLoading) {
-      timer = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(timer);
-            if (hasNext && onNext) {
-              setTimeout(() => onNext(), 300);
-              return 0;
-            } else {
-              setTimeout(() => setStatus(), 300);
-              return 100;
-            }
+    progressTimerRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          if (progressTimerRef.current) {
+            clearInterval(progressTimerRef.current);
+            progressTimerRef.current = null;
           }
-          return prev + progressStep;
-        });
-      }, 50);
+          if (hasNext && onNext) {
+            setTimeout(() => onNext(), 300);
+            return 0;
+          } else {
+            setTimeout(() => setStatus(), 300);
+            return 100;
+          }
+        }
+        return prev + progressStep;
+      });
+    }, 50);
+  };
+
+  const stopProgressTimer = () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (isVideo(status.content) && videoRef.current) {
+      const video = videoRef.current;
+
+      const handleWaiting = () => {
+        console.log("Video waiting/buffering");
+        setIsBuffering(true);
+        stopProgressTimer();
+      };
+
+      const handlePlaying = () => {
+        console.log("Video playing now");
+        setIsBuffering(false);
+        if (!isPaused && !showViewers) {
+          startProgressTimer();
+        }
+      };
+
+      const handleSeeking = () => {
+        setIsBuffering(true);
+        stopProgressTimer();
+      };
+
+      const handleSeeked = () => {
+        setIsBuffering(false);
+        if (!isPaused && !showViewers) {
+          startProgressTimer();
+        }
+      };
+
+      const handleCanPlay = () => {
+        console.log("Video can play now");
+        setIsLoading(false);
+
+        if (!isPaused && !showViewers) {
+          video
+            .play()
+            .then(() => {
+              console.log("Video started playing on canplay event");
+              setIsBuffering(false);
+            })
+            .catch((err) => console.error("Play error on canplay:", err));
+        }
+      };
+
+      const handleError = (e: Event) => {
+        console.error("Video error:", (e.target as HTMLVideoElement).error);
+        setIsLoading(false);
+        setIsBuffering(false);
+        setIsPaused(true);
+      };
+
+      video.addEventListener("waiting", handleWaiting);
+      video.addEventListener("playing", handlePlaying);
+      video.addEventListener("seeked", handleSeeked);
+      video.addEventListener("seeking", handleSeeking);
+      video.addEventListener("canplay", handleCanPlay);
+      video.addEventListener("error", handleError);
+
+      return () => {
+        video.removeEventListener("waiting", handleWaiting);
+        video.removeEventListener("playing", handlePlaying);
+        video.removeEventListener("seeked", handleSeeked);
+        video.removeEventListener("seeking", handleSeeking);
+        video.removeEventListener("canplay", handleCanPlay);
+        video.removeEventListener("error", handleError);
+      };
+    }
+  }, [status.content, isPaused, showViewers]);
+
+  useEffect(() => {
+    if (!showViewers && !isPaused && !isLoading && !isBuffering) {
+      startProgressTimer();
 
       if (isVideo(status.content) && videoRef.current) {
-        videoRef.current.play().catch((error) => {
-          console.error("Error playing video:", error);
-        });
+        const playPromise = videoRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Error playing video in main effect:", error);
+            if (error.name === "NotAllowedError") {
+              setIsPaused(true);
+            }
+          });
+        }
       }
     } else {
+      stopProgressTimer();
+
       if (isVideo(status.content) && videoRef.current) {
-        videoRef.current.pause();
+        try {
+          videoRef.current.pause();
+        } catch (error) {
+          console.error("Error pausing video:", error);
+        }
       }
     }
 
     return () => {
-      if (timer) clearInterval(timer);
+      stopProgressTimer();
     };
-  }, [
-    setStatus,
-    status.content,
-    showViewers,
-    isPaused,
-    isLoading,
-    hasNext,
-    onNext,
-    progressStep,
-  ]);
+  }, [status.content, showViewers, isPaused, isLoading, isBuffering]);
 
   const handleDelete = async () => {
     if (deleteConfirm) {
@@ -178,6 +294,21 @@ const Status = ({
   const handleVideoLoad = () => {
     setIsLoading(false);
     setIsPaused(false);
+
+    if (videoRef.current) {
+      videoRef.current
+        .play()
+        .then(() => {
+          console.log("Video started playing successfully");
+          setIsBuffering(false);
+        })
+        .catch((error) => {
+          console.error("Error playing video:", error);
+          if (error.name === "NotAllowedError") {
+            setIsPaused(true);
+          }
+        });
+    }
   };
 
   const formattedTime = status.createdAt
@@ -283,7 +414,6 @@ const Status = ({
         className="relative w-full h-full mx-auto md:w-[400px] md:h-[85vh] lg:h-[90vh] bg-black flex flex-col max-w-screen-sm"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Progress Bars */}
         <div className="absolute top-0 left-0 right-0 z-[10003] flex w-full gap-1 px-2 pt-2">
           {totalStatuses > 0 && (
             <div className="flex w-full gap-1">
@@ -442,7 +572,7 @@ const Status = ({
         </div>
 
         <div className="flex items-center justify-center w-full h-full z-[10000]">
-          {isLoading && (
+          {(isLoading || isBuffering) && (
             <div className="absolute inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-70">
               <FaSpinner className="w-10 h-10 text-white animate-spin" />
             </div>
@@ -453,8 +583,21 @@ const Status = ({
               src={status.content}
               autoPlay={false}
               playsInline
+              muted={false}
+              preload="auto"
               className="object-contain w-full h-full"
               onLoadedData={handleVideoLoad}
+              onLoadStart={() => console.log("Video load started")}
+              onCanPlayThrough={() => {
+                console.log("Video can play through");
+                setIsLoading(false);
+                setIsBuffering(false);
+                if (!isPaused && !showViewers) {
+                  videoRef.current
+                    ?.play()
+                    .catch((e) => console.error("Play error:", e));
+                }
+              }}
             />
           ) : (
             <img
@@ -477,10 +620,12 @@ const Status = ({
                 <FaEye className="w-4 h-4 mr-2" />
                 <span className="text-xs">{displayViewers.length} viewed</span>
               </motion.button>
-              {(showViewers || isPaused || isLoading) && (
+              {(showViewers || isPaused || isLoading || isBuffering) && (
                 <div className="px-3 py-1 text-xs text-white bg-white rounded-full bg-opacity-20">
                   {isLoading
                     ? "Loading..."
+                    : isBuffering
+                    ? "Buffering..."
                     : showViewers
                     ? "Viewers Open"
                     : "Paused"}

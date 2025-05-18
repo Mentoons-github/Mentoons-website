@@ -83,6 +83,7 @@ const PostCard = ({ post }: PostCardProps) => {
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>(post.comments);
+  const [commentCount, setCommentCount] = useState(post.comments.length);
   const [newComment, setNewComment] = useState("");
   const [isSavedPost, setIsSavedPost] = useState(false);
   const user = useUser();
@@ -97,8 +98,7 @@ const PostCard = ({ post }: PostCardProps) => {
     }
     if (newComment.trim() === "") return;
 
-    // Create the new comment object with a temporary ID
-    const tempId = Date.now(); // Use timestamp as temporary ID to ensure uniqueness
+    const tempId = Date.now();
     const newCommentObj = {
       _id: tempId,
       content: newComment,
@@ -125,12 +125,14 @@ const PostCard = ({ post }: PostCardProps) => {
         ...(Array.isArray(prevComments) ? prevComments : []),
         newCommentObj,
       ]);
+      // Immediately update the comment count
+      setCommentCount((prev) => prev + 1);
       setNewComment(""); // Clear input field immediately
 
       // Then make API call
       const token = await getToken();
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}comments`,
+        `${import.meta.env.VITE_PROD_URL}/comments`,
         {
           postId: post._id,
           content: newCommentObj.content,
@@ -146,7 +148,7 @@ const PostCard = ({ post }: PostCardProps) => {
       // If the API returns the updated comment, replace our temporary one with the server version
       if (response.data && response.data.data) {
         const serverComment = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
+          `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -155,6 +157,8 @@ const PostCard = ({ post }: PostCardProps) => {
         );
         // Replace the temporary comment with the server-returned one
         setComments(serverComment.data.data);
+        // Update comment count with the server data
+        setCommentCount(serverComment.data.data.length);
 
         // Trigger reward for commenting on a post
         triggerReward(RewardEventType.COMMENT_POST, post._id);
@@ -169,6 +173,8 @@ const PostCard = ({ post }: PostCardProps) => {
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== tempId)
       );
+      // Revert the comment count on error
+      setCommentCount((prev) => prev - 1);
     }
   };
 
@@ -183,8 +189,8 @@ const PostCard = ({ post }: PostCardProps) => {
     try {
       const token = await getToken();
       const endpoint = newSavedState
-        ? `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/save`
-        : `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/save`
+        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/unsave`;
 
       const response = await axios.post(
         endpoint,
@@ -218,7 +224,9 @@ const PostCard = ({ post }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds/posts/${post._id}/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
+            post._id
+          }/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response);
@@ -232,10 +240,11 @@ const PostCard = ({ post }: PostCardProps) => {
     const getComments = async () => {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}comments/post/${post._id}`,
+        `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setComments(response.data.data);
+      setCommentCount(response.data.data.length);
     };
     getComments();
     checkSavedPost();
@@ -460,7 +469,7 @@ const PostCard = ({ post }: PostCardProps) => {
                 <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
               </motion.button>
               <span className="text-[#605F5F] text-sm sm:text-base figtree">
-                {post.comments.length}
+                {commentCount}
               </span>
             </div>
             <Share
@@ -494,7 +503,7 @@ const PostCard = ({ post }: PostCardProps) => {
           >
             <h3 className="text-lg font-semibold text-gray-700">Comments</h3>
             <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 p-2">
-              {comments.length > 0 ? (
+              {comments?.length > 0 ? (
                 comments.map((comment: Comment) => (
                   <div
                     key={comment._id}

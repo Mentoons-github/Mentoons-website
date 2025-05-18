@@ -4,7 +4,6 @@ import { useState } from "react";
 import PostUpload from "../modal/postUpload";
 import { useAuthModal } from "@/context/adda/authModalContext";
 
-// Import the post type from PostCardSwitcher instead of PostCard
 interface PostData {
   _id: string;
   postType: "text" | "photo" | "video" | "article" | "event" | "mixed";
@@ -32,9 +31,9 @@ interface PostData {
     description: string;
     coverImage?: string;
   };
-  likes: string[]; // Changed from any[] to string[] assuming likes are user IDs
-  comments: string[]; // Changed from any[] to string[] assuming comments are comment IDs
-  shares: string[]; // Changed from any[] to string[] assuming shares are user IDs
+  likes: string[];
+  comments: string[];
+  shares: string[];
   createdAt: string | Date;
   visibility: "public" | "friends" | "private";
   tags?: string[];
@@ -64,9 +63,7 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   };
 
   const handlePostComplete = (newPost: PostData) => {
-    // Close the modal
     setIsOpen(false);
-    // Reset selected post type
     setSelectedPostType(null);
     // Call the callback if provided
     if (onPostCreated) {

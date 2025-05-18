@@ -49,7 +49,7 @@ const Notification = () => {
         // For testing, use sample data instead of API call
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}adda/userNotifications`,
+          `${import.meta.env.VITE_PROD_URL}/adda/userNotifications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
