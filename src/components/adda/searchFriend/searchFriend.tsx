@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
+import { FollowBackUser } from "../home/friendRequest/friendRequests/requests";
 
 interface Friend {
   _id: string;
@@ -114,6 +115,10 @@ const FriendSearch = () => {
   const [requests, setRequests] = useState<RequestSender[]>([]);
   const [requestCount, setRequestCount] = useState<number>(0);
   const [loadingRequests, setLoadingRequests] = useState<boolean>(false);
+  const [followBackUsers, setFollowBackUsers] = useState<
+    FollowBackUser[] | null
+  >(null);
+  const [followBackLoading, setFollowBackLoading] = useState(false);
 
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
@@ -121,7 +126,41 @@ const FriendSearch = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
 
-  // Fetch friend request count
+  const fetchFollowBackUsers = async () => {
+    setFollowBackLoading(true);
+    const token = await getToken();
+
+    try {
+      const response = await axiosInstance.get("/adda/getFollowBackUsers", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Follow back users:", response.data.data);
+
+      if (response.data.success && response.data.data) {
+        const transformedUsers = response.data.data.map((user: any) => ({
+          _id: user._id,
+          name: user.name,
+          picture: user.picture,
+        }));
+
+        setFollowBackUsers(transformedUsers);
+      } else {
+        setFollowBackUsers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching follow back users:", error);
+      setFollowBackUsers([]);
+    }
+
+    setFollowBackLoading(false);
+  };
+  useEffect(() => {
+    fetchFollowBackUsers();
+  }, []);
+
   const fetchFriendRequestCount = useCallback(async () => {
     try {
       const token = await getToken();
@@ -515,6 +554,104 @@ const FriendSearch = () => {
     }
   };
 
+  const handleFollowBack = async (userId: string) => {
+    setFollowBackUsers((prev) =>
+      prev
+        ? prev.map((user) =>
+            user._id === userId
+              ? { ...user, status: "following-in-progress" }
+              : user
+          )
+        : null
+    );
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        `/adda/request/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      if (response.data.success) {
+        setFollowBackUsers((prev) =>
+          prev
+            ? prev.map((user) =>
+                user._id === userId
+                  ? { ...user, status: "following", message: "Following!" }
+                  : user
+              )
+            : null
+        );
+        setTimeout(() => {
+          setFollowBackUsers((prev) =>
+            prev ? prev.filter((user) => user._id !== userId) : null
+          );
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error sending follow back request:", error);
+      setFollowBackUsers((prev) =>
+        prev
+          ? prev.map((user) =>
+              user._id === userId ? { ...user, status: undefined } : user
+            )
+          : null
+      );
+    }
+  };
+
+  const handleDeclineFollowBack = async (userId: string) => {
+    setFollowBackUsers((prev) =>
+      prev
+        ? prev.map((user) =>
+            user._id === userId ? { ...user, status: "declining" } : user
+          )
+        : null
+    );
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        "/adda/declineFollowBack",
+        { targetUserId: userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      if (response.data.success) {
+        setFollowBackUsers((prev) =>
+          prev
+            ? prev.map((user) =>
+                user._id === userId
+                  ? { ...user, status: "declined", message: "Declined!" }
+                  : user
+              )
+            : null
+        );
+        setTimeout(() => {
+          setFollowBackUsers((prev) =>
+            prev ? prev.filter((user) => user._id !== userId) : null
+          );
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error declining follow back request:", error);
+      setFollowBackUsers((prev) =>
+        prev
+          ? prev.map((user) =>
+              user._id === userId ? { ...user, status: undefined } : user
+            )
+          : null
+      );
+    }
+  };
+
   const getCardClasses = (status?: string) => {
     const baseClasses =
       "flex flex-col w-full p-4 transition-all duration-300 border rounded-xl";
@@ -869,7 +1006,6 @@ const FriendSearch = () => {
           )}
         </AnimatePresence>
       </div>
-
       <AnimatePresence>
         {showRequests && (
           <motion.div
@@ -925,7 +1061,157 @@ const FriendSearch = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
+      {followBackUsers && followBackUsers.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md mb-4 overflow-hidden"
+        >
+          <div className="p-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-800">Follow Back</h2>
+            <p className="text-sm text-gray-500">
+              These people follow you. Follow them back?
+            </p>
+          </div>
+          <div className="max-h-96 overflow-y-auto p-4">
+            {followBackLoading ? (
+              <div className="flex justify-center items-center py-6">
+                <div className="w-8 h-8 border-4 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {followBackUsers.map((user) => (
+                  <div
+                    key={user._id}
+                    className={`flex flex-col w-full p-4 transition-all duration-300 border rounded-xl ${
+                      user.status === "following-in-progress" ||
+                      user.status === "declining"
+                        ? "border-orange-200 bg-orange-50"
+                        : user.status === "following"
+                        ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
+                        : user.status === "declined"
+                        ? "border-red-300 bg-red-100 transform scale-95 opacity-80"
+                        : "border-orange-100 bg-white hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex items-center mb-4">
+                      <img
+                        src={user.picture}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-orange-100"
+                      />
+                      <div className="ml-3 flex-1">
+                        <h3 className="font-medium text-gray-800">
+                          {user.name}
+                        </h3>
+                        {user.message && (
+                          <p className="text-sm text-gray-500">
+                            {user.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {user.status === "following-in-progress" ? (
+                      <div className="flex justify-center w-full py-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                          <span className="text-sm font-medium text-orange-600">
+                            Following...
+                          </span>
+                        </div>
+                      </div>
+                    ) : user.status === "declining" ? (
+                      <div className="flex justify-center w-full py-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-2 rounded-full border-t-red-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                          <span className="text-sm font-medium text-red-600">
+                            Declining...
+                          </span>
+                        </div>
+                      </div>
+                    ) : user.status === "following" ? (
+                      <div className="flex justify-center w-full py-2">
+                        <div className="flex items-center gap-2 text-green-600">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span className="font-medium">Following!</span>
+                        </div>
+                      </div>
+                    ) : user.status === "declined" ? (
+                      <div className="flex justify-center w-full py-2">
+                        <div className="flex items-center gap-2 text-red-600">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span className="font-medium">Declined!</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between w-full gap-2">
+                        <button
+                          onClick={() => handleFollowBack(user._id)}
+                          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Follow Back
+                        </button>
+                        <button
+                          onClick={() => handleDeclineFollowBack(user._id)}
+                          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg hover:bg-gray-200"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Decline
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
       <div className="flex-1 overflow-y-auto">
         {isSearchMode ? (
           <div className="mb-6">

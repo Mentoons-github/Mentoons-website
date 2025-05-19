@@ -123,7 +123,7 @@ const Notification = () => {
   return (
     <div className="relative flex flex-col w-full gap-4 sm:gap-6">
       {/* Notifications header */}
-      <div className="sticky p-3 bg-white bg-opacity-100 border border-orange-200 rounded-lg shadow-lg shadow-orange-100/80 top-[200px] z-10">
+      <div className="sticky p-3 bg-white bg-opacity-100 border border-orange-200 rounded-lg shadow-lg shadow-orange-100/80 top-[172px] md:top-[200px] z-10">
         <div className="flex items-center justify-start w-full gap-3">
           <button
             onClick={() => navigate("/adda/home")}

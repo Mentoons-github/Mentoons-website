@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
@@ -216,6 +216,16 @@ const PostCard = ({ post }: PostCardProps) => {
       console.error("Error saving/unsaving post:", error);
       setIsSavedPost(!newSavedState); // Revert state on error
       toast.error("Failed to update saved status. Please try again.");
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    } else {
+      navigate(`/adda/user/${post.user._id}`);
     }
   };
 
@@ -428,9 +438,9 @@ const PostCard = ({ post }: PostCardProps) => {
   return (
     <>
       <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
-        <NavLink
-          to={`/adda/user/${post.user._id}`}
-          className="flex items-center justify-start w-full gap-3"
+        <div
+          onClick={(e) => handleClick(e)}
+          className="flex items-center justify-start w-full gap-3 cursor-pointer"
         >
           <div className="overflow-hidden rounded-full w-14 h-14">
             <img
@@ -448,7 +458,7 @@ const PostCard = ({ post }: PostCardProps) => {
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
-        </NavLink>
+        </div>
 
         {renderPostContent()}
 

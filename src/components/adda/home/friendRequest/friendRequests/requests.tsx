@@ -156,6 +156,7 @@ const FriendRequestsList = () => {
               )
             : null
         );
+        fetchFollowBackUsers();
 
         setTimeout(() => {
           setRequests((prev) =>

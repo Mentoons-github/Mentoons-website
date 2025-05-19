@@ -3,6 +3,8 @@ import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 import PostUpload from "../modal/postUpload";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { FiUser } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 interface PostData {
   _id: string;
@@ -52,6 +54,7 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   const [selectedPostType, setSelectedPostType] = useState<
     "photo" | "video" | "event" | "article" | null
   >(null);
+  const navigate = useNavigate();
 
   const handlePost = (type: "photo" | "video" | "event" | "article") => {
     if (!isSignedIn) {
@@ -77,14 +80,16 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
         <div className="flex items-center w-full gap-3">
           {/* Improved avatar container with proper sizing and overflow handling */}
           <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
-            <img
-              src={
-                user?.imageUrl ||
-                "/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg"
-              }
-              alt={user?.fullName || "User"}
-              className="object-cover w-full h-full rounded-full"
-            />
+            {user?.imageUrl ? (
+              <img
+                onClick={() => navigate("/adda/user-profile")}
+                src={user?.imageUrl}
+                alt={user?.fullName || "User"}
+                className="object-cover w-full h-full rounded-full cursor-pointer"
+              />
+            ) : (
+              <FiUser className="w-8 h-8 text-gray-500" />
+            )}
           </div>
 
           {/* Styled input field with proper height and background */}

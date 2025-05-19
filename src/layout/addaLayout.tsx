@@ -106,9 +106,11 @@ const AddaLayout = () => {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
-        <BottomNav />
-      </div>
+      {isSignedIn && (
+        <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
+          <BottomNav />
+        </div>
+      )}
     </>
   );
 };
