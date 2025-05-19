@@ -1,10 +1,10 @@
 import { PHOTO_POST } from "@/constant/constants";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 import PostUpload from "../modal/postUpload";
-import { useAuthModal } from "@/context/adda/authModalContext";
-import { FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { FiUser } from "react-icons/fi";
 
 interface PostData {
   _id: string;

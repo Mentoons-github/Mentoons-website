@@ -1,11 +1,17 @@
-import Team from "@/components/comics/Team";
-import React, { Suspense, useEffect, useState } from "react";
-import "../components/videoModal/";
+import ProductDisplay from "@/components/mythos/about/ProductDisplay";
+import { ABOUT_HOW_IT_WORKS, ABOUT_WHAT_WE_OFFER } from "@/constant";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
+import { FAQ_PRODUCT } from "@/constant/faq";
+import { useNavigate } from "react-router-dom";
+import FAQ from "../pages/v2/user/faq/faq";
+
+// aboutmentoon_Audio :"https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/about-mentoons.mp3"
 const AboutMentoons = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const audioRef = React.useRef<HTMLAudioElement>(null);
+  // const audioRef = React.useRef<HTMLAudioElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (window.location.hash === "#fun-section") {
@@ -16,80 +22,67 @@ const AboutMentoons = () => {
     }
   }, []);
 
-  const toggleIntroPlayPause = () => {
-    if (audioRef.current) {
-      if (audioRef.current.paused) {
-        audioRef.current.play();
-        setIsPaused(false);
-      } else {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        setIsPaused(true);
-      }
-    }
-  };
+  // const mentorVideos = [
+  //   {
+  //     title: "Sarah",
+  //     thumbnail: "/assets/images/persona-2.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Sarah%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
+  //     description:
+  //       "Discover how Sarah inspires young minds as an elementary school teacher.",
+  //   },
+  //   {
+  //     title: "Raj",
+  //     thumbnail: "/assets/images/persona-1.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Raj%2C+42+Years%2C+IT+Manager%2C+Podcast+%26+Convo+Ca.mp4",
+  //     description:
+  //       "Raj shares his journey of mentorship and fostering innovation in IT.",
+  //   },
+  //   {
+  //     title: "Emma",
+  //     thumbnail: "/assets/images/persona-3.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Emma%2C+28+Years%2C+Psychologist.mp4",
+  //     description:
+  //       "Emma reveals her creative approach to empowering mental well-being.",
+  //   },
+  //   {
+  //     title: "Samantha",
+  //     thumbnail: "/assets/images/persona-6.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Samantha%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
+  //     description:
+  //       "Explore Samantha's impactful teaching methods in elementary education.",
+  //   },
+  //   {
+  //     title: "Rajesh",
+  //     thumbnail: "/assets/images/persona-4.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Rajesh+K+42+Years+old+(IT+Manager).mp4",
+  //     description:
+  //       "Rajesh discusses how mentorship drives success in the IT world.",
+  //   },
+  //   {
+  //     title: "Olivia",
+  //     thumbnail: "/assets/images/persona-5.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Olivia%2C+28+Years%2C+Psychologist(1).mp4",
+  //     description:
+  //       "Olivia shares her passion for helping others through psychology.",
+  //   },
+  // ];
 
-  const mentorVideos = [
-    {
-      title: "Sarah",
-      thumbnail: "/assets/images/persona-2.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Sarah%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-      description:
-        "Discover how Sarah inspires young minds as an elementary school teacher.",
-    },
-    {
-      title: "Raj",
-      thumbnail: "/assets/images/persona-1.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Raj%2C+42+Years%2C+IT+Manager%2C+Podcast+%26+Convo+Ca.mp4",
-      description:
-        "Raj shares his journey of mentorship and fostering innovation in IT.",
-    },
-    {
-      title: "Emma",
-      thumbnail: "/assets/images/persona-3.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Emma%2C+28+Years%2C+Psychologist.mp4",
-      description:
-        "Emma reveals her creative approach to empowering mental well-being.",
-    },
-    {
-      title: "Samantha",
-      thumbnail: "/assets/images/persona-6.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Samantha%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-      description:
-        "Explore Samantha's impactful teaching methods in elementary education.",
-    },
-    {
-      title: "Rajesh",
-      thumbnail: "/assets/images/persona-4.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Rajesh+K+42+Years+old+(IT+Manager).mp4",
-      description:
-        "Rajesh discusses how mentorship drives success in the IT world.",
-    },
-    {
-      title: "Olivia",
-      thumbnail: "/assets/images/persona-5.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Olivia%2C+28+Years%2C+Psychologist(1).mp4",
-      description:
-        "Olivia shares her passion for helping others through psychology.",
-    },
-  ];
-
-  const newMentorVideos = [
-    {
-      title: "Kumar Archit",
-      thumbnail: "/assets/images/persona-1.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/KUMAR_SIR.mp4",
-      description:
-        "Exploring the transformative power of mentorship and personal growth.",
-    },
-    {
-      title: "Nithya Raghunath",
-      thumbnail: "/assets/images/persona-2.jpg",
-      src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/NITHYA+MA'AM.mp4",
-      description:
-        "Building meaningful connections and inspiring potential in others.",
-    },
-  ];
+  // const newMentorVideos = [
+  //   {
+  //     title: "Kumar Archit",
+  //     thumbnail: "/assets/images/persona-1.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/KUMAR_SIR.mp4",
+  //     description:
+  //       "Exploring the transformative power of mentorship and personal growth.",
+  //   },
+  //   {
+  //     title: "Nithya Raghunath",
+  //     thumbnail: "/assets/images/persona-2.jpg",
+  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/NITHYA+MA'AM.mp4",
+  //     description:
+  //       "Building meaningful connections and inspiring potential in others.",
+  //   },
+  // ];
 
   const closeVideoModal = () => {
     setSelectedVideo(null);
@@ -97,42 +90,142 @@ const AboutMentoons = () => {
 
   return (
     <div className="w-full">
-      <div className="relative">
-        <img
-          src="/assets/images/about-mentoons-hero.png"
-          alt=""
-          className="w-full object-cover"
-        />
+      {/* hero section */}
+      <div className="relative flex flex-col items-start justify-center gap-12 p-12 md:flex-row">
+        <div className="w-full md:w-[50%] flex flex-col items-center md:items-start">
+          <h2 className="text-3xl font-semibold text-center md:text-4xl lg:text-6xl md:text-start">
+            About <span className="text-primary">Mentoons</span>
+          </h2>
+          <p className="mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
+            At Mentoons, we believe that gadgets shouldn't replace goodness.
+            We're on a mission to help children and families rediscover
+            balance—between digital play and real-life values.
+          </p>
 
-        <div className="absolute -bottom-5 md:-bottom-16 left-1/2 transform -translate-x-1/2">
+          <p className="mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
+            Through engaging workshops, stories, and community-led programs, we
+            empower kids to be tech-smart, emotionally resilient, and culturally
+            rooted.
+          </p>
+        </div>
+
+        <div className="relative w-full md:w-[410px] lg:w-[500px] xl:w-[590px] h-auto flex justify-center items-center p-6 ">
           <img
-            src={`/assets/images/${isPaused ? "play.png" : "pause.png"}`}
-            alt="Play Button"
-            className="w-12 md:w-32 hover:scale-110 transition-all duration-300"
-            onClick={toggleIntroPlayPause}
+            src="/assets/home/addaTV/Rectangle 285.png"
+            alt="tv"
+            className="w-3/4 h-auto xl:w-full"
           />
 
-          <audio
-            ref={audioRef}
-            typeof=".mp3"
-            src="https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/about-mentoons.mp3"
-          ></audio>
+          <div
+            className="absolute mentoons-video top-1/2 left-1/2 w-[65%] lg:w-[65%] xl:w-[84%] h-[70%] bg-black -translate-x-1/2 -translate-y-1/2 rounded-t-[60px] overflow-hidden flex items-center justify-center"
+            style={{ clipPath: "polygon(15% 100%, 90% 100%, 100% 0%, 0% 0%)" }}
+          >
+            <video
+              className="w-[80%] h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+            >
+              <source
+                src={`${
+                  import.meta.env.VITE_STATIC_URL
+                }static/Mentoons Team Video_03.mp4`}
+                type="video/mp4"
+              />
+            </video>
+          </div>
         </div>
       </div>
+      {/* How it helps kids */}
+      <section className="p-4 py-6 pb-24 md:p-12 lg:p-24">
+        <div className="flex flex-col items-start justify-center gap-6 ">
+          <div>
+            <h2 className="pb-4 text-4xl font-semibold text-center md:text-start">
+              How It Helps Your Kids?
+            </h2>
+            <p className="text-xl  md:w-[75%]  text-center md:text-start">
+              Today’s children are growing up online—but growing apart from
+              self-awareness, empathy, and heritage. We’re here to change that.
+            </p>
+          </div>
 
-      <div>
-        <img
-          src="/assets/images/about-mentoons-mission.png"
-          alt="Mentoons mission section"
-          className="w-full object-cover"
-        />
-      </div>
+          <motion.div className="flex flex-col items-center w-full gap-4 md:flex-row md:justify-between">
+            {ABOUT_HOW_IT_WORKS.map((offering, index) => (
+              <motion.div
+                key={offering.id}
+                custom={index}
+                className="flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                whileHover={{
+                  scale: 1.05,
+                  transition: { duration: 0.3 },
+                }}
+              >
+                <img
+                  src={offering.imageUrl}
+                  alt={offering.title}
+                  className="w-24 h-24"
+                />
+                <p
+                  style={{ color: offering.accentColor }}
+                  className="text-lg font-bold text-center"
+                >
+                  {offering.title}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+      <section className="p-4 py-6 pb-24 md:p-12 lg:p-24 ">
+        <div className="flex flex-col items-start justify-center gap-6 ">
+          <div className="pb-8 ">
+            <h2 className="pb-4 text-4xl font-semibold text-center md:text-start">
+              What We Offer?
+            </h2>
+            <p className="text-xl md:w-[75%] text-center md:text-start">
+              Today’s children are growing up online—but growing apart from
+              self-awareness, empathy, and heritage. We’re here to change that.
+            </p>
+          </div>
 
+          <motion.div className="flex flex-col items-center w-full gap-4 md:flex-row md:justify-between">
+            {ABOUT_WHAT_WE_OFFER.map((offering, index) => (
+              <motion.div
+                key={offering.id}
+                custom={index}
+                className="flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                whileHover={{
+                  scale: 1.05,
+                  transition: { duration: 0.3 },
+                }}
+                onClick={() => navigate(offering.link)}
+              >
+                <img
+                  src={offering.imageUrl}
+                  alt={offering.title}
+                  className="w-full h-full"
+                />
+                <p
+                  style={{ color: offering.accentColor }}
+                  className="text-lg font-bold text-center"
+                >
+                  {offering.title}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+      <ProductDisplay />
+      <section className="py-12">
+        <FAQ data={FAQ_PRODUCT} />
+      </section>
       {/* New Mentors Section */}
-      <section className="bg-[#B0E0E6]">
-        <div className="py-12 px-2 md:py-16 text-center text-2xl md:text-4xl font-semibold relative">
-          <h2 className="pb-8 relative z-20">Meet Our Mentors</h2>
-          <p className="text-blue-700 text-3xl md:text-5xl">
+      {/*<section className="bg-[#B0E0E6]">
+        <div className="relative px-2 py-12 text-2xl font-semibold text-center md:py-16 md:text-4xl">
+          <h2 className="relative z-20 pb-8">Meet Our Mentors</h2>
+          <p className="text-3xl text-blue-700 md:text-5xl">
             Inspiring Journeys of Guidance
           </p>
           <div className="absolute top-10 right-5 z-2 md:right-[30%]">
@@ -144,24 +237,24 @@ const AboutMentoons = () => {
           </div>
         </div>
 
-        <div className="relative">
+         <div className="relative">
           <div className="p-4">
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 items-center gap-4 mx-auto relative z-20 w-[80%]">
                 {newMentorVideos.map((video) => (
                   <div
                     key={video.title}
-                    className="group relative cursor-pointer rounded-lg"
+                    className="relative rounded-lg cursor-pointer group"
                     onClick={() => setSelectedVideo(video.src)}
                   >
-                    <div className="image-wrapper relative rounded-2xl">
+                    <div className="relative image-wrapper rounded-2xl">
                       <img
                         src={video.thumbnail}
                         alt={video.title}
                         className="w-full h-auto transition-transform duration-300 group-hover:scale-105 rounded-2xl"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
-                        <div className="bg-white p-2 rounded-full">
+                      <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 bg-black opacity-0 bg-opacity-30 group-hover:opacity-100 rounded-2xl">
+                        <div className="p-2 bg-white rounded-full">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -189,25 +282,24 @@ const AboutMentoons = () => {
             </div>
           </div>
 
-          <div className="absolute -top-20 left-0 z-0">
+          <div className="absolute left-0 z-0 -top-20">
             <img
               src="/assets/images/decorative-illustration.png"
               alt=""
-              className="w-52 md:w-72 rounded-lg"
+              className="rounded-lg w-52 md:w-72"
             />
           </div>
         </div>
-      </section>
-      {/* Team Section */}
+      </section> */}
+      {/* Team Section
       <Suspense fallback={<div>Loading...</div>}>
         <Team />
-      </Suspense>
-
+      </Suspense> */}
       {/* Fun @ Mentoons Section */}
-      <div>
-        <div className="flex flex-col bg-mt-teal text-white py-10 space-y-7">
+      {/* <div>
+        <div className="flex flex-col py-10 text-white bg-mt-teal space-y-7">
           <div className="py-8 space-y-7" id="fun-section">
-            <div className="text-start space-y-4">
+            <div className="space-y-4 text-start">
               <div className="text-5xl text-center lg:text-7xl w-full font-extrabold tracking-wide leading-[1.10]">
                 Fun @mentoons
               </div>
@@ -225,13 +317,12 @@ const AboutMentoons = () => {
             </div>
           </div>
         </div>
-      </div>
-
+      </div> */}
       {/* Mentoons In Action Section */}
-      <section className="bg-[#FFDB67]">
-        <div className="py-12 px-2 md:py-16 text-center text-2xl md:text-4xl font-semibold relative">
-          <h2 className="pb-8 relative z-20">Mentoons In Action</h2>
-          <p className="text-orange-600 text-3xl md:text-5xl">
+      {/* <section className="bg-[#FFDB67]">
+        <div className="relative px-2 py-12 text-2xl font-semibold text-center md:py-16 md:text-4xl">
+          <h2 className="relative z-20 pb-8">Mentoons In Action</h2>
+          <p className="text-3xl text-orange-600 md:text-5xl">
             Behind the Scene with our Guides
           </p>
           <div className="absolute top-10 right-5 z-2 md:right-[30%]">
@@ -250,17 +341,17 @@ const AboutMentoons = () => {
                 {mentorVideos.map((video) => (
                   <div
                     key={video.title}
-                    className="group relative cursor-pointer rounded-lg"
+                    className="relative rounded-lg cursor-pointer group"
                     onClick={() => setSelectedVideo(video.src)}
                   >
-                    <div className="image-wrapper relative rounded-2xl">
+                    <div className="relative image-wrapper rounded-2xl">
                       <img
                         src={video.thumbnail}
                         alt={video.title}
                         className="w-full h-auto transition-transform duration-300 group-hover:scale-105 rounded-2xl"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
-                        <div className="bg-white p-2 rounded-full">
+                      <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 bg-black opacity-0 bg-opacity-30 group-hover:opacity-100 rounded-2xl">
+                        <div className="p-2 bg-white rounded-full">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -288,20 +379,19 @@ const AboutMentoons = () => {
             </div>
           </div>
 
-          <div className="absolute -top-20 left-0 z-0">
+          <div className="absolute left-0 z-0 -top-20">
             <img
               src="/assets/images/decorative-illustration.png"
               alt=""
-              className="w-52 md:w-72 rounded-lg"
+              className="rounded-lg w-52 md:w-72"
             />
           </div>
         </div>
-      </section>
-
+      </section> */}
       {/* Video Modal */}
       {selectedVideo && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
           onClick={closeVideoModal}
         >
           <div
@@ -310,7 +400,7 @@ const AboutMentoons = () => {
           >
             <button
               onClick={closeVideoModal}
-              className="absolute -top-10 right-0 text-white text-3xl hover:text-gray-300"
+              className="absolute right-0 text-3xl text-white -top-10 hover:text-gray-300"
             >
               ×
             </button>

@@ -10,7 +10,6 @@ interface SuggestionInterface {
   picture: string;
 }
 
-
 interface FriendSuggestionsListProps {
   initialSuggestions?: SuggestionInterface[] | null;
   initialLoading?: boolean;
@@ -152,7 +151,7 @@ const FriendSuggestionsList = ({
 
   const EmptyStateContent = () => (
     <div className="flex flex-col items-center justify-center w-full max-w-sm py-6 mx-auto text-center sm:py-8">
-      <div className="p-3 mb-3 text-blue-500 rounded-full bg-blue-50">
+      <div className="p-3 mb-3 text-orange-500 rounded-full bg-orange-50">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="w-6 h-6 sm:w-8 sm:h-8"
@@ -181,7 +180,7 @@ const FriendSuggestionsList = ({
           setFriendSuggestions(null);
           fetchSuggestions();
         }}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-white transition-colors bg-blue-500 rounded-lg sm:text-sm hover:bg-blue-600"
+        className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-white transition-colors bg-orange-500 rounded-lg sm:text-sm hover:bg-orange-600"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -211,13 +210,13 @@ const FriendSuggestionsList = ({
       {friendSuggestions?.map(({ picture, name, _id }, index) => (
         <div
           key={_id}
-          className="flex flex-col w-full p-3 transition-all duration-200 bg-white border border-blue-100 rounded-lg sm:p-4 sm:rounded-xl hover:shadow-md"
+          className="flex flex-col w-full p-3 transition-all duration-200 bg-white border border-orange-100 rounded-lg sm:p-4 sm:rounded-xl hover:shadow-md"
           ref={
             index === friendSuggestions.length - 1 ? lastSuggestionRef : null
           }
         >
           <div className="flex items-center w-full gap-2 mb-2 sm:gap-3 sm:mb-3">
-            <div className="w-10 h-10 overflow-hidden rounded-full sm:w-12 sm:h-12 ring-2 ring-blue-50">
+            <div className="w-10 h-10 overflow-hidden rounded-full sm:w-12 sm:h-12 ring-2 ring-orange-50">
               <img
                 src={picture}
                 alt={name}
@@ -237,8 +236,8 @@ const FriendSuggestionsList = ({
               disabled={connectingIds.includes(_id)}
               className={`flex items-center justify-center flex-1 gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition-all duration-200 rounded-lg ${
                 connectingIds.includes(_id)
-                  ? "bg-blue-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+                  ? "bg-orange-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
               }`}
             >
               {connectingIds.includes(_id) ? (
@@ -270,7 +269,7 @@ const FriendSuggestionsList = ({
 
       {loading && (
         <div className="flex items-center justify-center w-full py-3 sm:py-4">
-          <div className="w-5 h-5 border-2 rounded-full sm:w-6 sm:h-6 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+          <div className="w-5 h-5 border-2 rounded-full sm:w-6 sm:h-6 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
           <span className="ml-2 text-xs text-gray-500 sm:text-sm">
             Loading more suggestions...
           </span>

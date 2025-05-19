@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import ProfileHeader from "@/components/adda/userProfile/profilesHeader";
-import ProfileTabs from "@/components/adda/userProfile/profileTabs";
-import PostsList from "@/components/adda/userProfile/postList";
+import axiosInstance from "@/api/axios";
 import AboutSection from "@/components/adda/userProfile/aboutSection";
 import FriendsSection from "@/components/adda/userProfile/freindSections";
-import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
 import ErrorDisplay from "@/components/adda/userProfile/loader/errorDisplay";
+import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
+import PostsList from "@/components/adda/userProfile/postList";
+import ProfileHeader from "@/components/adda/userProfile/profilesHeader";
+import ProfileTabs from "@/components/adda/userProfile/profileTabs";
 import { TabType, User, UserSummary } from "@/types";
-import { Post, PostType } from "./userProfile";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import axiosInstance from "@/api/axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Post, PostType } from "./userProfile";
 
 const ProfileDetails = () => {
   const { userId } = useParams();
@@ -168,8 +168,8 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
         <ProfileHeader
           user={user}
           totalPosts={numberOfPosts}
