@@ -18,7 +18,7 @@ export interface FollowBackUser {
   _id: string;
   name: string;
   picture: string;
-  status?: "following" | "following-in-progress";
+  status?: "following" | "following-in-progress" | "declining" | "declined";
   message?: string;
 }
 
@@ -292,6 +292,57 @@ const FriendRequestsList = () => {
     }
   };
 
+  const handleDeclineFollowBack = async (userId: string) => {
+    setFollowBackUsers((prev) =>
+      prev
+        ? prev.map((user) =>
+            user._id === userId ? { ...user, status: "declining" } : user
+          )
+        : null
+    );
+
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.post(
+        "/adda/declineFollowBack",
+        { targetUserId: userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response);
+      if (response.data.success) {
+        setFollowBackUsers((prev) =>
+          prev
+            ? prev.map((user) =>
+                user._id === userId
+                  ? { ...user, status: "declined", message: "Declined!" }
+                  : user
+              )
+            : null
+        );
+
+        setTimeout(() => {
+          setFollowBackUsers((prev) =>
+            prev ? prev.filter((user) => user._id !== userId) : null
+          );
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error declining follow back request:", error);
+      setFollowBackUsers((prev) =>
+        prev
+          ? prev.map((user) =>
+              user._id === userId ? { ...user, status: undefined } : user
+            )
+          : null
+      );
+    }
+  };
+
   const lastRequestRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loading) return;
@@ -334,15 +385,18 @@ const FriendRequestsList = () => {
           {followBackUsers.map((user) => (
             <div
               key={user._id}
-              className={`flex justify-between items-center w-full p-4 border rounded-xl ${
-                user.status === "following-in-progress"
+              className={`flex flex-col sm:flex-row sm:items-center w-full p-4 border rounded-xl ${
+                user.status === "following-in-progress" ||
+                user.status === "declining"
                   ? "border-blue-200 bg-blue-50"
                   : user.status === "following"
                   ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
+                  : user.status === "declined"
+                  ? "border-red-300 bg-red-100 transform scale-95 opacity-80"
                   : "border-orange-100 bg-white hover:shadow-md"
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-3 sm:mb-0 sm:flex-1">
                 <div className="w-10 h-10 overflow-hidden rounded-full ring-2 ring-orange-50">
                   <img
                     src={user.picture}
@@ -359,14 +413,21 @@ const FriendRequestsList = () => {
               </div>
 
               {user.status === "following-in-progress" ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2 p-2">
                   <div className="w-5 h-5 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
                   <span className="text-sm font-medium text-blue-600">
                     Following...
                   </span>
                 </div>
+              ) : user.status === "declining" ? (
+                <div className="flex items-center justify-center gap-2 p-2">
+                  <div className="w-5 h-5 border-2 rounded-full border-t-red-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                  <span className="text-sm font-medium text-red-600">
+                    Declining...
+                  </span>
+                </div>
               ) : user.status === "following" ? (
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center justify-center gap-2 p-2 text-green-600">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-5 h-5"
@@ -381,27 +442,63 @@ const FriendRequestsList = () => {
                   </svg>
                   <span className="font-medium">Following!</span>
                 </div>
-              ) : (
-                <button
-                  onClick={() => handleFollowBack(user._id)}
-                  className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-                >
+              ) : user.status === "declined" ? (
+                <div className="flex items-center justify-center gap-2 p-2 text-red-600">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    className="w-5 h-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
                     />
                   </svg>
-                  Follow Back
-                </button>
+                  <span className="font-medium">Declined!</span>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:ml-auto gap-2 items-center">
+                  <button
+                    onClick={() => handleFollowBack(user._id)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white rounded-md bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 transition-all duration-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                    Follow Back
+                  </button>
+                  <button
+                    onClick={() => handleDeclineFollowBack(user._id)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Decline
+                  </button>
+                </div>
               )}
             </div>
           ))}

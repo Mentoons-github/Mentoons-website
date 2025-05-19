@@ -37,7 +37,7 @@ const Header = () => {
   const navLeft =
     title === "adda"
       ? ADDA_NAV_LINKS.filter((link) =>
-          ["Mythos", "Community", "Products", "Profile"].includes(link.label)
+          ["Mythos", "Products", "Profile"].includes(link.label)
         )
       : NAV_LINKS.filter((link) =>
           ["Adda", "Products", "Book Sessions"].includes(link.label)
