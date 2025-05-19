@@ -13,20 +13,14 @@ import {
   FiCalendar,
   FiCheck,
   FiEdit2,
-  FiHeart,
-  FiHome,
-  FiMail,
   FiMapPin,
-  FiPhone,
   FiUser,
   FiUsers,
 } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
-import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import { UserInfo } from "@/types";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
