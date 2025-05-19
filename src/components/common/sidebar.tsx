@@ -34,7 +34,7 @@ const Sidebar = ({
           [
             "Mythos",
             "Products",
-            "Community",
+            "Profile",
             "Browse Plans",
             "Workshops",
           ].includes(data.label)

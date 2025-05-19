@@ -4,14 +4,14 @@ import { FaFacebookF, FaLinkedinIn } from "react-icons/fa";
 const FounderNote = ({ scroll = false }: { scroll?: boolean }) => {
   return (
     <section
-      className={`w-full p-[.6px] rounded-xl h-fit overflow-auto ${
+      className={`w-full p-[.6px] rounded-xl max-h-[calc(100vh-204px)] overflow-y-auto ${
         scroll ? "" : "lg:bg-orange-100"
       }`}
     >
       <div className="flex items-start justify-center h-full gap-5">
         <div
-          className={`flex flex-col items-center w-full h-full max-w-xl gap-2 sm:gap-3 lg:gap-4 p-4 sm:p-4 rounded-xl  ${
-            scroll ? "h-full" : "shadow-xl "
+          className={`flex flex-col items-center w-full h-full max-w-xl gap-2 sm:gap-3 lg:gap-4 p-4 sm:p-4 rounded-xl ${
+            scroll ? "h-full" : "shadow-xl"
           }`}
         >
           <div className="flex flex-col items-center justify-center pt-4 text-center ">

@@ -1,4 +1,5 @@
 // import GlobalAuthModal from "@/components/adda/global/globalAuthModal";
+import FriendSearch from "@/components/adda/searchFriend/searchFriend";
 import AddaLayout from "@/layout/addaLayout";
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
@@ -28,7 +29,8 @@ const AddaRouter = () => {
         <Route path="notifications" element={<Notification />} />
         <Route path="meme" element={<MemePage />} />
         <Route path="meme/:memeId" element={<MemeDetails />} />
-        <Route path="/user/:userId" element={<ProfileDetails />} />
+        <Route path="user/:userId" element={<ProfileDetails />} />
+        <Route path="search-friend" element={<FriendSearch />} />
       </Route>
       {/* <GlobalAuthModal /> */}
     </Routes>

@@ -13,20 +13,14 @@ import {
   FiCalendar,
   FiCheck,
   FiEdit2,
-  FiHeart,
-  FiHome,
-  FiMail,
   FiMapPin,
-  FiPhone,
   FiUser,
   FiUsers,
 } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
-import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import { UserInfo } from "@/types";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
@@ -38,6 +32,8 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
+import ProfileActiveTab from "@/components/adda/userProfile/profileComponents/activeComponent";
+import MobileBottomNav from "@/components/adda/userProfile/profileComponents/mobileBottomNav";
 
 // Define interface for post type
 export type PostType =
@@ -111,7 +107,7 @@ export interface Post {
 }
 
 // Define interface for user details from API
-interface UserDetails {
+export interface UserDetails {
   _id: string;
   name: string;
   email: string;
@@ -312,6 +308,8 @@ const UserProfile = () => {
         }
       );
 
+      console.log(response);
+
       if (response.status === 200) {
         toast.success("Profile updated successfully");
         // Update local user data
@@ -377,7 +375,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -422,7 +420,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds/saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/saved`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -471,7 +469,7 @@ const UserProfile = () => {
         throw new Error("No token found");
       }
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -700,7 +698,7 @@ const UserProfile = () => {
       <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="sticky top-[172px] md:top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center gap-4">
                 <button
@@ -711,7 +709,7 @@ const UserProfile = () => {
                 </button>
 
                 <h1 className="text-xl font-semibold text-orange-700 md:text-2xl">
-                  {userDetails.name}
+                  {userDetails?.name}
                 </h1>
               </div>
               <Button
@@ -1022,8 +1020,8 @@ const UserProfile = () => {
                     <div
                       className="relative h-24 bg-gradient-to-r from-[#EC9600] to-amber-400"
                       style={{
-                        backgroundImage: userDetails.coverPhoto
-                          ? `url(${userDetails.coverPhoto})`
+                        backgroundImage: userDetails?.coverPhoto
+                          ? `url(${userDetails?.coverPhoto})`
                           : "linear-gradient(to right, #EC9600, #fbbf24)",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
@@ -1049,8 +1047,8 @@ const UserProfile = () => {
                       <div className="relative ">
                         <Avatar className="w-24 h-24 ring-4 ring-white">
                           <img
-                            src={userDetails.picture}
-                            alt={userDetails.name}
+                            src={userDetails?.picture}
+                            alt={userDetails?.name}
                           />
                         </Avatar>
                         <Button
@@ -1071,16 +1069,16 @@ const UserProfile = () => {
                       </div>
                       <div className="flex flex-col gap-1">
                         <h2 className="mt-3 text-lg font-bold text-gray-800">
-                          {userDetails.name}
+                          {userDetails?.name}
                         </h2>
                         <div className="flex gap-2">
                           <p className="flex items-center mt-1 text-sm text-gray-600">
                             <FiMapPin className="mr-1" size={14} />
-                            {userDetails.location}
+                            {userDetails?.location}
                           </p>
                           <p className="flex items-center mt-1 text-xs text-gray-500">
                             <FiCalendar className="mr-1" size={12} /> Joined{" "}
-                            {userDetails.joinedDate}
+                            {userDetails?.joinedDate}
                           </p>
                         </div>
                       </div>
@@ -1300,248 +1298,15 @@ const UserProfile = () => {
                 </Card>
 
                 {/* Tab Content */}
-                <div className="tab-content">
-                  {/* Profile Info Tab */}
-                  {activeTab === "profile" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <div className="mb-4">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                          Personal Information
-                        </h3>
-                        {isEditing ? (
-                          <form
-                            id="profile-edit-form"
-                            onSubmit={handleProfileSubmit}
-                          >
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                              <div className="space-y-1">
-                                <label className="text-sm font-medium text-gray-700">
-                                  Full Name
-                                </label>
-                                <input
-                                  type="text"
-                                  name="name"
-                                  defaultValue={userDetails.name}
-                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-sm font-medium text-gray-700">
-                                  Email
-                                </label>
-                                <input
-                                  type="email"
-                                  name="email"
-                                  defaultValue={userDetails.email}
-                                  readOnly
-                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600] bg-gray-100"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-sm font-medium text-gray-700">
-                                  Phone
-                                </label>
-                                <input
-                                  type="tel"
-                                  name="phone"
-                                  defaultValue={userDetails.phone}
-                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-sm font-medium text-gray-700">
-                                  Location
-                                </label>
-                                <input
-                                  type="text"
-                                  name="location"
-                                  defaultValue={userDetails.location}
-                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                                />
-                              </div>
-                              <div className="space-y-1 md:col-span-2">
-                                <label className="text-sm font-medium text-gray-700">
-                                  Bio
-                                </label>
-                                <textarea
-                                  name="bio"
-                                  defaultValue={userDetails.bio}
-                                  rows={4}
-                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
-                                />
-                              </div>
-                              <div className="flex justify-end mt-2 md:col-span-2">
-                                <Button
-                                  type="submit"
-                                  className="bg-[#EC9600] hover:bg-[#EC9600]/90"
-                                >
-                                  Save Changes
-                                </Button>
-                              </div>
-                            </div>
-                          </form>
-                        ) : (
-                          <div className="grid grid-cols-1 gap-4 bg-white md:grid-cols-2">
-                            <div className="p-3 border border-orange-100 rounded-lg">
-                              <p className="text-sm font-medium text-gray-500">
-                                Full Name
-                              </p>
-                              <div className="flex items-center mt-1">
-                                <FiUser className="text-[#EC9600] mr-2" />
-                                <p className="text-gray-800">
-                                  {userDetails.name}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="p-3 border border-orange-100 rounded-lg">
-                              <p className="text-sm font-medium text-gray-500">
-                                Email
-                              </p>
-                              <div className="flex items-center mt-1">
-                                <FiMail className="text-[#EC9600] mr-2" />
-                                <p className="text-gray-800">
-                                  {userDetails?.email}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="p-3 border border-orange-100 rounded-lg">
-                              <p className="text-sm font-medium text-gray-500">
-                                Phone
-                              </p>
-                              <div className="flex items-center mt-1">
-                                <FiPhone className="text-[#EC9600] mr-2" />
-                                <p className="text-gray-800">
-                                  {userDetails?.phone}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="p-3 border border-orange-100 rounded-lg">
-                              <p className="text-sm font-medium text-gray-500">
-                                Location
-                              </p>
-                              <div className="flex items-center mt-1">
-                                <FiMapPin className="text-[#EC9600] mr-2" />
-                                <p className="text-gray-800">
-                                  {userDetails?.location}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="p-3 border border-orange-100 rounded-lg md:col-span-2">
-                              <p className="text-sm font-medium text-gray-500">
-                                Bio
-                              </p>
-                              <p className="mt-2 text-gray-800">
-                                {userDetails?.bio}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Posts Tab */}
-                  {activeTab === "posts" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                        My Posts
-                      </h3>
-
-                      {/* Post items */}
-                      <div className="space-y-4">
-                        {userPosts.map((post) => (
-                          <PostCard
-                            key={post._id}
-                            post={post as unknown as PostData}
-                          />
-                        ))}
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Friends Tab */}
-                  {activeTab === "friends" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                        My Friends
-                      </h3>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                        {friends.map((data, index) => (
-                          <div
-                            key={index}
-                            className="flex flex-col items-center p-3 border border-orange-100 rounded-lg"
-                          >
-                            <Avatar className="w-16 h-16 mb-2">
-                              <img src={data.picture} alt={data.name} />
-                            </Avatar>
-                            <p className="font-medium text-center">
-                              {data.name} {index + 1}
-                            </p>
-                            <p className="mb-2 text-xs text-gray-500">
-                              {data.joined ?? "Unavailable"}
-                            </p>
-                            <Button className="mt-1 w-full text-xs h-8 bg-[#EC9600] hover:bg-[#EC9600]/90">
-                              Message
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Saved Items Tab */}
-                  {activeTab === "saved" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                        Saved Items
-                      </h3>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {userSavedPosts.map((item) => (
-                          <PostCard
-                            key={item._id}
-                            post={item as unknown as PostData}
-                          />
-                        ))}
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Reward Points Tab */}
-                  {activeTab === "rewards" && <RewardsSection />}
-
-                  {/* Activities Tab */}
-                  {activeTab === "activities" && (
-                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                        Recent Activities
-                      </h3>
-                      <div className="space-y-3">
-                        {[1, 2, 3, 4, 5].map((item) => (
-                          <div
-                            key={item}
-                            className="p-3 transition-colors border border-orange-100 rounded-lg hover:bg-orange-50"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full">
-                                <FiHeart className="text-[#EC9600]" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-800">
-                                  {item % 2 === 0
-                                    ? "You commented on a post in 'Creative Arts' group"
-                                    : "You liked a post by Jane Smith"}
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  {item} hour{item !== 1 ? "s" : ""} ago
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-                  )}
-                </div>
+                <ProfileActiveTab
+                  activeTab={activeTab}
+                  friends={friends}
+                  handleProfileSubmit={handleProfileSubmit}
+                  isEditing={isEditing}
+                  userDetails={userDetails}
+                  userPosts={userPosts}
+                  userSavedPosts={userSavedPosts}
+                />
               </div>
             </div>
           )}
@@ -1549,49 +1314,7 @@ const UserProfile = () => {
       </div>
 
       {/* Mobile fixed bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
-        <div className="flex items-center justify-between px-4 h-14">
-          <button
-            className={`relative outline-none cursor-pointer p-2 ${
-              activeTab === "profile" ? "text-[#EC9600]" : ""
-            }`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <FiUser className="text-2xl" />
-          </button>
-
-          <button
-            className={`relative outline-none cursor-pointer p-2 ${
-              activeTab === "friends" ? "text-[#EC9600]" : ""
-            }`}
-            onClick={() => setActiveTab("friends")}
-          >
-            <FaUsers className="text-2xl" />
-          </button>
-
-          <Link to="/adda" className="relative p-2 outline-none cursor-pointer">
-            <FiHome className="text-2xl text-[#EC9600]" />
-          </Link>
-
-          <button
-            className={`relative outline-none cursor-pointer p-2 ${
-              activeTab === "rewards" ? "text-[#EC9600]" : ""
-            }`}
-            onClick={() => setActiveTab("rewards")}
-          >
-            <FiAward className="text-2xl" />
-          </button>
-
-          <button
-            className={`relative outline-none cursor-pointer p-2 ${
-              activeTab === "saved" ? "text-[#EC9600]" : ""
-            }`}
-            onClick={() => setActiveTab("saved")}
-          >
-            <FaBookmark className="text-2xl" />
-          </button>
-        </div>
-      </div>
+      <MobileBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </>
   );
 };

@@ -3,8 +3,9 @@ import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 import PostUpload from "../modal/postUpload";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { FiUser } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
-// Import the post type from PostCardSwitcher instead of PostCard
 interface PostData {
   _id: string;
   postType: "text" | "photo" | "video" | "article" | "event" | "mixed";
@@ -32,9 +33,9 @@ interface PostData {
     description: string;
     coverImage?: string;
   };
-  likes: string[]; // Changed from any[] to string[] assuming likes are user IDs
-  comments: string[]; // Changed from any[] to string[] assuming comments are comment IDs
-  shares: string[]; // Changed from any[] to string[] assuming shares are user IDs
+  likes: string[];
+  comments: string[];
+  shares: string[];
   createdAt: string | Date;
   visibility: "public" | "friends" | "private";
   tags?: string[];
@@ -53,6 +54,7 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   const [selectedPostType, setSelectedPostType] = useState<
     "photo" | "video" | "event" | "article" | null
   >(null);
+  const navigate = useNavigate();
 
   const handlePost = (type: "photo" | "video" | "event" | "article") => {
     if (!isSignedIn) {
@@ -64,9 +66,7 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   };
 
   const handlePostComplete = (newPost: PostData) => {
-    // Close the modal
     setIsOpen(false);
-    // Reset selected post type
     setSelectedPostType(null);
     // Call the callback if provided
     if (onPostCreated) {
@@ -76,18 +76,20 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
 
   return (
     <>
-      <div className=" relative flex flex-col items-center justify-start w-full  p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl z-[50]">
+      <div className=" relative flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl z-[20]">
         <div className="flex items-center w-full gap-3">
           {/* Improved avatar container with proper sizing and overflow handling */}
           <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
-            <img
-              src={
-                user?.imageUrl ||
-                "/assets/adda/profilePictures/pexels-simon-robben-55958-614810.jpg"
-              }
-              alt={user?.fullName || "User"}
-              className="object-cover w-full h-full rounded-full"
-            />
+            {user?.imageUrl ? (
+              <img
+                onClick={() => navigate("/adda/user-profile")}
+                src={user?.imageUrl}
+                alt={user?.fullName || "User"}
+                className="object-cover w-full h-full rounded-full cursor-pointer"
+              />
+            ) : (
+              <FiUser className="w-8 h-8 text-gray-500" />
+            )}
           </div>
 
           {/* Styled input field with proper height and background */}

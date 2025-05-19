@@ -15,6 +15,7 @@ import TextPostForm from "./components/TextPostForm";
 import UploadContent from "./components/UploadContent";
 import { getInitialValues, getValidationSchema } from "./formConfig";
 import { FormValues, PostUploadProps } from "./types";
+import { errorToast } from "@/utils/toastResposnse";
 
 const PostUpload = ({
   isOpen,
@@ -68,6 +69,8 @@ const PostUpload = ({
         }
       );
 
+      console.log(response);
+
       return response.data.data.fileDetails.url;
     } catch (error) {
       console.error("Failed to upload media:", error);
@@ -82,8 +85,12 @@ const PostUpload = ({
     index: number = 0
   ) => {
     const file = e.target.files?.[0];
+    console.log("File being uploaded:", file);
+
     if (file) {
+      console.log("File found");
       const values = formikRef.current?.values;
+      console.log("Current form values:", values);
       if (!values) return;
 
       // Show preview immediately
@@ -91,30 +98,36 @@ const PostUpload = ({
       newPreviews[index] = URL.createObjectURL(file);
       setMediaPreview(newPreviews);
 
-      // Start with file info
+      // Determine file type correctly
+      const isImage = file.type.startsWith("image/");
+      const fileType = isImage ? "image" : "video";
+      console.log(`Detected file type: ${fileType} for file: ${file.name}`);
+
+      // Set basic file info first
       const newMedia = [...values.media];
       newMedia[index] = {
         ...newMedia[index],
         file: file,
-        type: file.type.startsWith("image/") ? "image" : "video",
+        type: fileType,
       };
-
       setFieldValue("media", newMedia);
 
-      // Upload the file to get the URL
-      if (
-        postType === "photo" ||
-        postType === "video" ||
-        postType === "article"
-      ) {
-        const fileUrl = await uploadMediaFile(file);
-        if (fileUrl) {
-          newMedia[index] = {
-            ...newMedia[index],
-            url: fileUrl,
-          };
-          setFieldValue("media", newMedia);
-        }
+      // Always upload media files regardless of post type
+      console.log(`Uploading ${fileType} file to server...`);
+      const fileUrl = await uploadMediaFile(file);
+
+      console.log("File URL received from server:", fileUrl);
+      if (fileUrl) {
+        newMedia[index] = {
+          ...newMedia[index],
+          url: fileUrl,
+        };
+        console.log(newMedia);
+        setFieldValue("media", newMedia);
+        console.log(`Updated media[${index}] with URL:`, newMedia[index]);
+      } else {
+        errorToast("Failed to get URL for uploaded file");
+        console.error("Failed to get URL for uploaded file");
       }
     }
   };
@@ -244,6 +257,7 @@ const PostUpload = ({
       }
       // Handle other post types (photo, video, mixed)
       else {
+        console.log("media =====> ", values.media);
         // Include only valid media
         postData.media = values.media
           .filter((m) => m.file && m.url)
