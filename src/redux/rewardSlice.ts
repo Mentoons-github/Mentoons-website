@@ -104,6 +104,7 @@ export const addRewardPoints = createAsyncThunk(
 
   async (request: AddPointsRequest, { rejectWithValue }) => {
     try {
+      console.log("Adding reward points:", request);
       if (!request.token) {
         console.error("No authentication token available");
         return rejectWithValue("Authentication required");

@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
 // import NewSection from "@/components/LandingPage/NewSection";
+import AddaSection from "@/components/LandingPage/addaSection";
 import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
 import ComicViewer from "@/components/common/ComicViewer";
@@ -58,7 +59,7 @@ const Home = () => {
   return (
     <div className="w-full">
       <HeroSection />
-      {/* <AddaSection /> */}
+      <AddaSection />
       <motion.div>
         <Community openComicModal={openComicModal} />
       </motion.div>

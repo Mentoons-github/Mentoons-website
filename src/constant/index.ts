@@ -2083,3 +2083,75 @@ export const MYTHOS_FAQ = [
       " If you encounter any issues accessing your group, please contact our support team. We are here to help you and ensure you have a smooth experience on our platform.",
   },
 ];
+
+export const ABOUT_HOW_IT_WORKS = [
+  {
+    id: "WO_01",
+    title: "Personal Development",
+    description: "Learn how to ace your interviews with our expert tips.",
+    imageUrl: "/assets/workshopv2/interactive-group-discussions.png",
+    accentColor: "#4285F4",
+  },
+  {
+    id: "WO_02",
+    title: "Parenting Guidance",
+    description:
+      "Learn how to build a strong professional network and leverage it to your advantage.",
+    imageUrl: "/assets/workshopv2/peer-learning-activities.png",
+    accentColor: "#EF4444",
+  },
+  {
+    id: "WO_03",
+    title: "Practical Workshops",
+    description:
+      "Identify your strengths and weaknesses with our comprehensive skill assessments.",
+    imageUrl: "/assets/workshopv2/practical-workshops.png",
+    accentColor: "#22C55E",
+  },
+  {
+    id: "WO_04",
+    title: "Expert guidance",
+    description:
+      "Insightful sessions led by industry experts and experienced mentors",
+    imageUrl: "/assets/workshopv2/expert-guidance.png",
+    accentColor: "#F7941D",
+  },
+];
+
+export const ABOUT_WHAT_WE_OFFER = [
+  {
+    id: "WO_01",
+    title: "Comics",
+    link: "/mentoons-comics",
+    description: "Learn how to ace your interviews with our expert tips.",
+    imageUrl: "/assets/workshopv2/comic.png",
+    accentColor: "#4285F4",
+  },
+  {
+    id: "WO_02",
+    title: "Podcasts",
+    link: "/mentoons-podcast",
+    description:
+      "Learn how to build a strong professional network and leverage it to your advantage.",
+    imageUrl: "/assets/workshopv2/podcast.png",
+    accentColor: "#EF4444",
+  },
+  {
+    id: "WO_03",
+    title: "Workshops",
+    link: "/mentoons-workshops",
+    description:
+      "Identify your strengths and weaknesses with our comprehensive skill assessments.",
+    imageUrl: "/assets/workshopv2/workshops.png",
+    accentColor: "#22C55E",
+  },
+  {
+    id: "WO_04",
+    title: "Assessments",
+    link: "/assessment-page",
+    description:
+      "Insightful sessions led by industry experts and experienced mentors",
+    imageUrl: "/assets/workshopv2/assessments.png",
+    accentColor: "#F7941D",
+  },
+];

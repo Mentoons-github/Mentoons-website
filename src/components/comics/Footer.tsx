@@ -142,7 +142,7 @@
 //             <h3 className="text-2xl font-semibold md:text-3xl lg:text-4xl">
 //               Subscribe to our Newsletter
 //             </h3>
-//             <div className="flex justify-center items-start space-x-1 md:space-x-4">
+//             <div className="flex items-start justify-center space-x-1 md:space-x-4">
 //               <div>
 //                 <Field
 //                   name="email"
@@ -159,7 +159,7 @@
 //               <button
 //                 type="submit"
 //                 disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
-//                 className="px-6 py-2 text-white bg-green-800 rounded-full border-2 border-white transition-all duration-300 ease-in-out cursor-pointer hover:text-green-800 hover:bg-white hover:border-green-800"
+//                 className="px-6 py-2 text-white transition-all duration-300 ease-in-out bg-green-800 border-2 border-white rounded-full cursor-pointer hover:text-green-800 hover:bg-white hover:border-green-800"
 //               >
 //                 Submit
 //               </button>
@@ -169,13 +169,13 @@
 //       </Formik>
 //       <div className="container bg-[#FF7D00] w-full h-fit space-y-2 lg:space-y-5">
 //         {/* top section */}
-//         <div className="flex flex-wrap justify-between items-center pt-4 space-y-4 lg:pt-0 lg:space-y-0">
+//         <div className="flex flex-wrap items-center justify-between pt-4 space-y-4 lg:pt-0 lg:space-y-0">
 //           <div>
 //             <Link to="/" onClick={scrollToHomeSection}>
 //               <img className="w-60" src={Logo} alt="mentoons logo" />
 //             </Link>
 //           </div>
-//           <div className="flex justify-between items-center">
+//           <div className="flex items-center justify-between">
 //             <Link to="/" onClick={scrollToHomeSection}>
 //               <div className="px-4 font-semibold border-r-2 border-white cursor-pointer">
 //                 Home
@@ -209,7 +209,7 @@
 //         {/* middle section */}
 //         <div className="flex flex-wrap justify-between space-y-2">
 //           {/* first div */}
-//           <div className="hidden space-y-2 w-full md:w-fit">
+//           <div className="hidden w-full space-y-2 md:w-fit">
 //             <div className="w-full">
 //               <div
 //                 onClick={() => setShowEvents((prev) => !prev)}
@@ -228,7 +228,7 @@
 //                   visibility: showEvents ? "hidden" : "visible",
 //                 }}
 //               >
-//                 <div className="flex gap-2 items-center">
+//                 <div className="flex items-center gap-2">
 //                   <div className="text-base md:text-lg font-semibold bg-white  hover:text-[#f87218ea] hover:bg-white transition-all ease-in-out duration-300 cursor-pointer py-2">
 //                     <img className="w-16" src="/Family camp.png" alt="" />
 //                   </div>
@@ -239,7 +239,7 @@
 //                     </div>
 //                   </div>
 //                 </div>
-//                 <div className="flex gap-2 items-center">
+//                 <div className="flex items-center gap-2">
 //                   <div className=" text-base md:text-lg font-semibold bg-white  hover:text-[#f87218ea] hover:bg-white transition-all ease-in-out duration-300 cursor-pointer py-2">
 //                     <img className="w-16" src="/Family camp.png" alt="" />
 //                   </div>
@@ -260,7 +260,7 @@
 //             </div>
 //           </div>
 //           {/* second div */}
-//           <div className="space-y-2 w-full md:w-fit">
+//           <div className="w-full space-y-2 md:w-fit">
 //             <div className="w-full">
 //               <div
 //                 onClick={() => navigate("/faq")}
@@ -292,7 +292,7 @@
 //                 visibility: showWorkshop ? "hidden" : "visible",
 //               }}
 //             >
-//               <div className="flex flex-col justify-center items-center cursor-pointer group">
+//               <div className="flex flex-col items-center justify-center cursor-pointer group">
 //                 <img
 //                   onClick={() => {
 //                     scrollToWorkshopPage();
@@ -306,7 +306,7 @@
 //                   Buddy Camp
 //                 </div>
 //               </div>
-//               <div className="flex flex-col justify-center items-center cursor-pointer group">
+//               <div className="flex flex-col items-center justify-center cursor-pointer group">
 //                 <img
 //                   onClick={() => {
 //                     scrollToWorkshopPage();
@@ -337,7 +337,7 @@
 //             </div>
 //           </div>
 //           {/* third div */}
-//           <div className="space-y-2 w-full md:w-fit">
+//           <div className="w-full space-y-2 md:w-fit">
 //             <div className="">
 //               <div
 //                 onClick={() => setShowInside((prev) => !prev)}
@@ -361,7 +361,7 @@
 //                     <div
 //                       key={index}
 //                       onClick={() => openPopup(image)}
-//                       className="flex items-center rounded-full border-4 border-white cursor-pointer w-fit hover:border-green-300"
+//                       className="flex items-center border-4 border-white rounded-full cursor-pointer w-fit hover:border-green-300"
 //                     >
 //                       <img
 //                         className="w-12 rounded-full"
@@ -404,17 +404,17 @@
 //                 >
 //                   {({ isSubmitting, isValid, dirty }) => (
 //                     <Form className="w-full">
-//                       <div className="flex relative items-center">
+//                       <div className="relative flex items-center">
 //                         <Field
 //                           name="email"
 //                           type="email"
-//                           className="p-3 pr-32 pl-5 w-full text-gray-700 rounded-full border-2 border-gray-200 focus:outline-none focus:border-orange-400"
+//                           className="w-full p-3 pl-5 pr-32 text-gray-700 border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-400"
 //                           placeholder="Enter your email"
 //                         />
 //                         <button
 //                           type="submit"
 //                           disabled={isSubmitting || !isValid || !dirty}
-//                           className="flex absolute right-1 gap-2 items-center px-6 py-2 font-medium text-white bg-orange-500 rounded-full transition-all duration-300 hover:bg-orange-600"
+//                           className="absolute flex items-center gap-2 px-6 py-2 font-medium text-white transition-all duration-300 bg-orange-500 rounded-full right-1 hover:bg-orange-600"
 //                         >
 //                           <span>Subscribe</span>
 //                           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -447,13 +447,13 @@
 //           </div>
 
 //           {/* fourth div */}
-//           <div className="space-y-2 w-full md:w-fit">
+//           <div className="w-full space-y-2 md:w-fit">
 //             <MapComponent />
-//             <div className="flex justify-start items-center text-lg font-medium tracking-wide">
+//             <div className="flex items-center justify-start text-lg font-medium tracking-wide">
 //               <MdLocationOn />
 //               Domlur, Bangalore
 //             </div>
-//             <div className="flex gap-4 justify-center items-center md:justify-between md:gap-1">
+//             <div className="flex items-center justify-center gap-4 md:justify-between md:gap-1">
 //               {contactIcons?.map((item,index) => {
 //                 return (
 //                   <a
@@ -470,7 +470,7 @@
 //           </div>
 //         </div>
 //         {/* bottom section */}
-//         <div className="flex flex-wrap justify-between items-center pb-10">
+//         <div className="flex flex-wrap items-center justify-between pb-10">
 //           <Link to="/privacy-policy">
 //             <div className="text-base font-semibold tracking-wide md:text-lg">
 //               Privacy policy , Terms & conditions
@@ -479,7 +479,7 @@
 //           <div>
 //             <img className="w-28" src="/flowers.png" alt="flower image" />
 //           </div>
-//           <div className="flex gap-2 items-center px-4 py-2 bg-white rounded-full">
+//           <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full">
 //             {companyImg?.map((item, idx) => {
 //               return (
 //                 <Link to={item?.url} className="overflow-hidden" key={idx}>
@@ -538,15 +538,15 @@
 //   if (!isOpen) return null;
 
 //   return (
-//     <div className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
 //       <div className="relative bg-white rounded-lg shadow-lg p-4 max-w-[425px]">
 //         <button
 //           onClick={onClose}
-//           className="absolute top-2 right-2 text-xl text-black transition-all duration-300 ease-in-out cursor-pointer hover:text-red-400 active:scale-50"
+//           className="absolute text-xl text-black transition-all duration-300 ease-in-out cursor-pointer top-2 right-2 hover:text-red-400 active:scale-50"
 //         >
 //           <IoMdClose />
 //         </button>
-//         <img className="mt-4 w-full rounded-md" src={imageSrc} alt={altText} />
+//         <img className="w-full mt-4 rounded-md" src={imageSrc} alt={altText} />
 //         <div className="mt-4 text-2xl font-semibold text-black">{altText}</div>
 //       </div>
 //     </div>
@@ -712,7 +712,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-b from-[#FEB977] to-[#FF942E] relative ">
+    <footer className="bg-[#FF942E] relative ">
       <div className="absolute bottom-0 w-full">
         <img
           src="/assets/images/footer-illustration.png"
@@ -720,7 +720,7 @@ const Footer = () => {
           className="w-full max-h-96"
         />
       </div>
-      <div className="flex flex-wrap justify-center items-center p-4 px-20 pt-8 lg:justify-between">
+      <div className="flex flex-wrap items-center justify-center p-4 px-20 pt-8 lg:justify-between">
         <div>
           <img
             src="/assets/images/mentoons-logo.png"
@@ -732,7 +732,7 @@ const Footer = () => {
         <div className="flex flex-[0.4] items-center justify-between relative border-spacing-3   ">
           {FOOTER_NAVLINKS.map((navItem, index) => (
             <div
-              className="flex justify-center items-center transition-all duration-300 hover:underline"
+              className="flex items-center justify-center transition-all duration-300 hover:underline"
               key={navItem.id}
               onClick={() => scrollToTop(navItem.url)}
             >
@@ -785,7 +785,7 @@ const Footer = () => {
                   <div
                     onClick={() => handleLinkClick(linkItem)}
                     key={linkItem.id}
-                    className="flex gap-2 justify-center items-center text-center transition-all duration-300 cursor-pointer lg:justify-normal hover:scale-110"
+                    className="flex items-center justify-center gap-2 text-center transition-all duration-300 cursor-pointer lg:justify-normal hover:scale-110"
                   >
                     {linkItem.label.includes("@") && <MdEmail />}
                     {linkItem.label.includes("+91") && <PiPhoneCallFill />}
@@ -805,12 +805,12 @@ const Footer = () => {
             {(
               { isSubmitting, isValid, dirty } // Added isValid and dirty
             ) => (
-              <Form className="flex flex-col gap-4 w-full">
+              <Form className="flex flex-col w-full gap-4">
                 <div className="box-border w-full">
                   <Field
                     name="email"
                     type="email"
-                    className="p-2 px-4 w-full rounded-full focus:outline-primary"
+                    className="w-full p-2 px-4 rounded-full focus:outline-primary"
                     placeholder="Enter your email"
                   />
                   <ErrorMessage
@@ -823,7 +823,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
-                  className="p-2 w-full text-white whitespace-nowrap bg-orange-600 rounded-full transition-all duration-300 cursor-pointer hover:bg-orange-700 text-ellipsis"
+                  className="w-full p-2 text-white transition-all duration-300 bg-orange-600 rounded-full cursor-pointer whitespace-nowrap hover:bg-orange-700 text-ellipsis"
                 >
                   Be the first to be Informed
                 </button>
@@ -853,9 +853,9 @@ const Footer = () => {
               ))}
             </div>
           )}
-          <div className="space-y-2 w-full">
+          <div className="w-full space-y-2">
             <MapComponent />{" "}
-            <div className="flex justify-start items-center w-full text-lg font-medium tracking-wide">
+            <div className="flex items-center justify-start w-full text-lg font-medium tracking-wide">
               <MdLocationOn />
               Domlur, Bangalore{" "}
             </div>{" "}
@@ -863,14 +863,14 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="flex relative flex-wrap gap-8 justify-center items-center mt-16">
+      <div className="relative flex flex-wrap items-center justify-center gap-8 mt-16">
         {companyImg.map((item) => (
           <div key={item.id} className="h-16">
             <Link to={item.url} className="cursor-pointer">
               <img
                 src={item.image}
                 alt=""
-                className="object-cover h-14 transition-all duration-300 hover:scale-105"
+                className="object-cover transition-all duration-300 h-14 hover:scale-105"
               />
             </Link>
           </div>

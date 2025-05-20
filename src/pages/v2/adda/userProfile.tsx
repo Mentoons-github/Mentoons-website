@@ -1,23 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
-import {
-  FaBookmark,
-  FaCalendarAlt,
-  FaCamera,
-  FaImage,
-  FaUsers,
-} from "react-icons/fa";
+import { FaBookmark, FaCamera, FaImage, FaUsers } from "react-icons/fa";
 import {
   FiAlertCircle,
   FiAward,
   FiCalendar,
   FiCheck,
   FiEdit2,
+  FiHome,
+  FiMail,
   FiMapPin,
+  FiPhone,
   FiUser,
   FiUsers,
 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
@@ -32,8 +29,8 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import ProfileActiveTab from "@/components/adda/userProfile/profileComponents/activeComponent";
-import MobileBottomNav from "@/components/adda/userProfile/profileComponents/mobileBottomNav";
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 
 // Define interface for post type
 export type PostType =
@@ -173,6 +170,7 @@ const UserProfile = () => {
 
   const { getToken } = useAuth();
   const { user } = useUser();
+  console.log(user);
   // const navigate = useNavigate();
 
   // Create refs for file inputs
@@ -298,7 +296,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        `${import.meta.env.VITE_PROD_URL}user/profile`,
         profileData,
         {
           headers: {
@@ -522,9 +520,16 @@ const UserProfile = () => {
 
         const fileUrl = uploadResponse.data.data.fileDetails.url;
 
+        const clerkResponse = await user?.update({
+          unsafeMetadata: {
+            coverPhoto: fileUrl,
+          },
+        });
+        console.log("clerkResponse For cover photo", clerkResponse);
+
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -561,6 +566,7 @@ const UserProfile = () => {
 
       try {
         const token = await getToken();
+
         if (!token) {
           toast.error("Authentication required");
           return;
@@ -571,6 +577,10 @@ const UserProfile = () => {
         // First upload the file to S3
         const formData = new FormData();
         formData.append("file", file);
+
+        // Update profile image in Clerk with the original file object
+        const clerkResponse = await user?.setProfileImage({ file });
+        console.log("Clerk update response:", clerkResponse);
 
         const uploadResponse = await axios.post(
           "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
@@ -593,7 +603,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/user/profile`,
+          `${import.meta.env.VITE_PROD_URL}user/profile`,
           { picture: fileUrl },
           {
             headers: {
@@ -733,7 +743,7 @@ const UserProfile = () => {
                     setIsEditing(true);
                   }
                 }}
-                className="text-sm border-[#EC9600] text-[#EC9600] hover:bg-orange-50"
+                className="text-sm text-orange-500 border-orange-500 hover:bg-orange-50"
               >
                 <FiEdit2 className="mr-2" />{" "}
                 {isEditing ? "Save Changes" : "Edit Profile"}
@@ -743,37 +753,37 @@ const UserProfile = () => {
 
           {/* Profile Completion Alert - Show only if profile is incomplete */}
           {!isProfileComplete && !showCompletionForm && (
-            <div className="p-4 mt-4 border bg-amber-50 border-amber-200 rounded-xl">
+            <div className="p-4 mt-4 border border-orange-200 bg-orange-50 rounded-xl">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <FiAlertCircle className="w-5 h-5 text-amber-400" />
+                  <FiAlertCircle className="w-5 h-5 text-orange-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-amber-800">
+                  <h3 className="text-sm font-medium text-orange-800">
                     Your profile is incomplete
                   </h3>
-                  <div className="mt-2 text-sm text-amber-700">
+                  <div className="mt-2 text-sm text-orange-700">
                     <p>
                       Please complete your profile to get the most out of
                       Mentoons Adda.
                     </p>
                     <div className="mt-2">
-                      <div className="relative h-2 overflow-hidden rounded-full bg-amber-100">
+                      <div className="relative h-2 overflow-hidden bg-orange-100 rounded-full">
                         <div
-                          className="absolute left-0 top-0 h-full bg-[#EC9600]"
+                          className="absolute top-0 left-0 h-full bg-orange-500"
                           style={{ width: `${profileCompletionPercentage}%` }}
                         ></div>
                       </div>
-                      <p className="mt-1 text-xs text-amber-600">
+                      <p className="mt-1 text-xs text-orange-600">
                         {profileCompletionPercentage}% complete
                       </p>
 
                       {incompleteFields.length > 0 && (
                         <div className="mt-2">
-                          <p className="text-xs font-medium text-amber-700">
+                          <p className="text-xs font-medium text-orange-700">
                             Missing information:
                           </p>
-                          <ul className="flex flex-wrap gap-6 pl-4 list-disc te-xt-xs mt1 text-amber-700">
+                          <ul className="flex flex-wrap gap-6 pl-4 text-orange-700 list-disc te-xt-xs mt1">
                             {incompleteFields.map((field, index) => (
                               <li key={index}>{field}</li>
                             ))}
@@ -782,7 +792,7 @@ const UserProfile = () => {
                       )}
                     </div>
                     <Button
-                      className="mt-3 bg-[#EC9600] hover:bg-[#EC9600]/90 text-white"
+                      className="mt-3 text-white bg-orange-500 hover:bg-orange-500/90"
                       onClick={() => setShowCompletionForm(true)}
                     >
                       Complete Your Profile
@@ -804,7 +814,7 @@ const UserProfile = () => {
                   <div className="flex items-center">
                     <div className="w-32 bg-gray-200 rounded-full h-2.5 mr-2">
                       <div
-                        className="bg-[#EC9600] h-2.5 rounded-full"
+                        className="bg-orange-500 h-2.5 rounded-full"
                         style={{ width: `${profileCompletionPercentage}%` }}
                       ></div>
                     </div>
@@ -825,7 +835,7 @@ const UserProfile = () => {
                         type="text"
                         name="name"
                         defaultValue={userDetails.name}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                       {userDetails.name && (
                         <FiCheck className="inline ml-2 text-green-500" />
@@ -840,7 +850,7 @@ const UserProfile = () => {
                         name="email"
                         defaultValue={userDetails.email}
                         readOnly
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600] bg-gray-100"
+                        className="w-full p-2 bg-gray-100 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                       {userDetails.email && (
                         <FiCheck className="inline ml-2 text-green-500" />
@@ -862,7 +872,7 @@ const UserProfile = () => {
                         name="phone"
                         placeholder="Add your phone number"
                         defaultValue={userDetails.phone}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
                     <div className="space-y-1">
@@ -873,7 +883,7 @@ const UserProfile = () => {
                         type="text"
                         name="location"
                         defaultValue={userDetails.location}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                       {userDetails?.location && (
                         <FiCheck className="inline ml-2 text-green-500" />
@@ -894,7 +904,7 @@ const UserProfile = () => {
                         name="education"
                         placeholder="Add your education"
                         defaultValue={userDetails?.education}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
                     <div className="space-y-1">
@@ -911,7 +921,7 @@ const UserProfile = () => {
                         name="occupation"
                         placeholder="Add your occupation"
                         defaultValue={userDetails?.occupation}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
 
@@ -929,7 +939,7 @@ const UserProfile = () => {
                         placeholder="Tell us about yourself"
                         defaultValue={userDetails?.bio}
                         rows={4}
-                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
 
@@ -949,7 +959,7 @@ const UserProfile = () => {
                             (interest: string, index: number) => (
                               <span
                                 key={index}
-                                className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm flex items-center"
+                                className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
                               >
                                 {interest}
                                 <button
@@ -968,7 +978,7 @@ const UserProfile = () => {
                             type="text"
                             placeholder="Add an interest"
                             id="new-interest"
-                            className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
+                            className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                             onKeyPress={(e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
@@ -978,7 +988,7 @@ const UserProfile = () => {
                           />
                           <Button
                             type="button"
-                            className="bg-[#EC9600] hover:bg-[#EC9600]/90"
+                            className="bg-orange-500 hover:bg-orange-500/90"
                             onClick={addInterest}
                           >
                             Add
@@ -992,14 +1002,14 @@ const UserProfile = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-[#EC9600] text-[#EC9600] hover:bg-orange-50"
+                      className="text-orange-500 border-orange-500 hover:bg-orange-50"
                       onClick={() => setShowCompletionForm(false)}
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-[#EC9600] hover:bg-[#EC9600]/90"
+                      className="bg-orange-500 hover:bg-orange-500/90"
                     >
                       Complete Profile
                     </Button>
@@ -1018,10 +1028,10 @@ const UserProfile = () => {
                   {/* User Card */}
                   <Card className="overflow-hidden border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <div
-                      className="relative h-24 bg-gradient-to-r from-[#EC9600] to-amber-400"
+                      className="relative h-24 bg-gradient-to-r from-orange-500 to-orange-400"
                       style={{
-                        backgroundImage: userDetails?.coverPhoto
-                          ? `url(${userDetails?.coverPhoto})`
+                        backgroundImage: user?.unsafeMetadata?.coverPhoto
+                          ? `url(${user?.unsafeMetadata?.coverPhoto})`
                           : "linear-gradient(to right, #EC9600, #fbbf24)",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
@@ -1052,7 +1062,7 @@ const UserProfile = () => {
                           />
                         </Avatar>
                         <Button
-                          className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-[#EC9600] text-white hover:bg-[#EC9600]/90"
+                          className="absolute bottom-0 right-0 w-8 h-8 p-0 text-white bg-orange-500 rounded-full hover:bg-orange-500/90"
                           onClick={() => profilePhotoInputRef.current?.click()}
                         >
                           <FiEdit2 size={14} />
@@ -1086,31 +1096,31 @@ const UserProfile = () => {
                       {/* User Stats */}
                       <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
                         <div className="text-center">
-                          <p className="font-bold text-xl text-[#EC9600]">
+                          <p className="text-xl font-bold text-orange-500">
                             {userPosts?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-bold text-xl text-[#EC9600]">
+                          <p className="text-xl font-bold text-orange-500">
                             {userDetails?.friends?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Friends</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-bold text-xl text-[#EC9600]">
+                          <p className="text-xl font-bold text-orange-500">
                             {userDetails?.followers?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Followers</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-bold text-xl text-[#EC9600]">
+                          <p className="text-xl font-bold text-orange-500">
                             {userDetails?.following?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Following</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-bold text-xl text-[#EC9600]">
+                          <p className="text-xl font-bold text-orange-500">
                             {userDetails?.groups?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Groups</p>
@@ -1128,23 +1138,30 @@ const UserProfile = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-[#EC9600] hover:text-[#EC9600]/90 p-0"
+                        className="p-0 text-orange-500 hover:text-orange-500/90"
+                        onClick={() => setIsEditing(true)}
                       >
                         <FiEdit2 size={16} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {userDetails?.interests &&
+                      userDetails?.interests.length > 0 ? (
                         userDetails?.interests.map(
                           (interest: string, index: number) => (
                             <span
                               key={index}
-                              className="px-3 py-1 bg-orange-100 text-[#EC9600] rounded-full text-sm"
+                              className="px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
                             >
                               {interest}
                             </span>
                           )
-                        )}
+                        )
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No interests added yet
+                        </p>
+                      )}
                     </div>
                   </Card>
 
@@ -1156,7 +1173,7 @@ const UserProfile = () => {
                     <div className="space-y-3">
                       {loadingSuggestions ? (
                         <div className="flex items-center justify-center w-full py-3">
-                          <div className="w-5 h-5 border-2 rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                          <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
                           <span className="ml-2 text-sm text-gray-500">
                             Loading suggestions...
                           </span>
@@ -1187,15 +1204,15 @@ const UserProfile = () => {
                             <Button
                               onClick={() => handleConnect(suggestion._id)}
                               disabled={connectingIds.includes(suggestion._id)}
-                              className={`text-xs h-8 ${
+                              className={`text-xs h-8 text-white font-semibold ${
                                 connectingIds.includes(suggestion._id)
                                   ? "bg-gray-300 cursor-not-allowed"
-                                  : "bg-[#EC9600] hover:bg-[#EC9600]/90"
+                                  : "bg-orange-500 hover:bg-orange-500/90"
                               }`}
                             >
                               {connectingIds.includes(suggestion._id) ? (
                                 <div className="flex items-center gap-1">
-                                  <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                                  <div className="w-3 h-3 rounded-full bo rder-2 border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
                                   <span>Connecting...</span>
                                 </div>
                               ) : (
@@ -1206,7 +1223,7 @@ const UserProfile = () => {
                         ))
                       ) : (
                         <div className="flex flex-col items-center justify-center w-full py-6 text-center">
-                          <div className="p-3 mb-3 text-[#EC9600] rounded-full bg-orange-50">
+                          <div className="p-3 mb-3 text-orange-500 rounded-full bg-orange-50">
                             <FiUsers className="w-6 h-6" />
                           </div>
                           <h3 className="mb-1 text-base font-medium text-gray-700">
@@ -1218,7 +1235,7 @@ const UserProfile = () => {
                           </p>
                           <Button
                             onClick={fetchSuggestions}
-                            className="bg-[#EC9600] hover:bg-[#EC9600]/90"
+                            className="bg-orange-500 hover:bg-orange-500/90"
                           >
                             Refresh Suggestions
                           </Button>
@@ -1238,7 +1255,7 @@ const UserProfile = () => {
                       onClick={() => setActiveTab("profile")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "profile"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
@@ -1248,7 +1265,7 @@ const UserProfile = () => {
                       onClick={() => setActiveTab("posts")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "posts"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
@@ -1258,7 +1275,7 @@ const UserProfile = () => {
                       onClick={() => setActiveTab("friends")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "friends"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
@@ -1268,7 +1285,7 @@ const UserProfile = () => {
                       onClick={() => setActiveTab("saved")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "saved"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
@@ -1278,35 +1295,280 @@ const UserProfile = () => {
                       onClick={() => setActiveTab("rewards")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "rewards"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
                       <FiAward className="mr-2" /> Reward Points
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => setActiveTab("activities")}
                       className={`px-4 py-2 rounded-md transition-colors whitespace-nowrap flex items-center ${
                         activeTab === "activities"
-                          ? "bg-[#EC9600] text-white"
+                          ? "bg-orange-500 text-white"
                           : "hover:bg-orange-50"
                       }`}
                     >
                       <FaCalendarAlt className="mr-2" /> Activities
-                    </button>
+                    </button> */}
                   </div>
                 </Card>
 
                 {/* Tab Content */}
-                <ProfileActiveTab
-                  activeTab={activeTab}
-                  friends={friends}
-                  handleProfileSubmit={handleProfileSubmit}
-                  isEditing={isEditing}
-                  userDetails={userDetails}
-                  userPosts={userPosts}
-                  userSavedPosts={userSavedPosts}
-                />
+                <div className="tab-content">
+                  {/* Profile Info Tab */}
+                  {activeTab === "profile" && (
+                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                      <div className="mb-4">
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                          Personal Information
+                        </h3>
+                        {isEditing ? (
+                          <form
+                            id="profile-edit-form"
+                            onSubmit={handleProfileSubmit}
+                          >
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Full Name
+                                </label>
+                                <input
+                                  type="text"
+                                  name="name"
+                                  defaultValue={userDetails.name}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Email
+                                </label>
+                                <input
+                                  type="email"
+                                  name="email"
+                                  defaultValue={userDetails.email}
+                                  readOnly
+                                  className="w-full p-2 bg-gray-100 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Phone
+                                </label>
+                                <input
+                                  type="tel"
+                                  name="phone"
+                                  defaultValue={userDetails.phone}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Location
+                                </label>
+                                <input
+                                  type="text"
+                                  name="location"
+                                  defaultValue={userDetails.location}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1 md:col-span-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Bio
+                                </label>
+                                <textarea
+                                  name="bio"
+                                  defaultValue={userDetails.bio}
+                                  rows={4}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="flex justify-end mt-2 md:col-span-2">
+                                <Button
+                                  type="submit"
+                                  className="bg-orange-500 hover:bg-orange-500/90"
+                                >
+                                  Save Changes
+                                </Button>
+                              </div>
+                            </div>
+                          </form>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-4 bg-white md:grid-cols-2">
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Full Name
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiUser className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails.name}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Email
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiMail className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.email}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Phone
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiPhone className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.phone}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Location
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiMapPin className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.location}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg md:col-span-2">
+                              <p className="text-sm font-medium text-gray-500">
+                                Bio
+                              </p>
+                              <p className="mt-2 text-gray-800">
+                                {userDetails?.bio}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Posts Tab */}
+                  {activeTab === "posts" && (
+                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                        My Posts
+                      </h3>
+
+                      {/* Post items */}
+                      <div className="space-y-4">
+                        {userPosts.map((post) => (
+                          <PostCard
+                            key={post._id}
+                            post={post as unknown as PostData}
+                          />
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Friends Tab */}
+                  {activeTab === "friends" && (
+                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                        My Friends
+                      </h3>
+                      {friends.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                          {friends.map((data, index) => (
+                            <div
+                              key={index}
+                              className="flex flex-col items-center p-3 border border-orange-100 rounded-lg"
+                            >
+                              <Avatar className="w-16 h-16 mb-2">
+                                <img src={data.picture} alt={data.name} />
+                              </Avatar>
+                              <p className="font-medium text-center">
+                                {data.name} {index + 1}
+                              </p>
+                              <p className="mb-2 text-xs text-gray-500">
+                                {data.joined ?? "Unavailable"}
+                              </p>
+                              <Button className="w-full h-8 mt-1 text-xs bg-orange-500 hover:bg-orange-500/90">
+                                Message
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-8 text-center">
+                          <FiUsers className="w-12 h-12 mb-4 text-orange-400" />
+                          <p className="text-lg font-medium text-gray-600">
+                            No Friends Found
+                          </p>
+                          <p className="mt-2 text-sm text-gray-500">
+                            Start connecting with people to see them here
+                          </p>
+                        </div>
+                      )}
+                    </Card>
+                  )}
+
+                  {/* Saved Items Tab */}
+                  {activeTab === "saved" && (
+                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                        Saved Items
+                      </h3>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        {userSavedPosts.map((item) => (
+                          <PostCard
+                            key={item._id}
+                            post={item as unknown as PostData}
+                          />
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Reward Points Tab */}
+                  {activeTab === "rewards" && <RewardsSection />}
+                  {/* 
+                  
+                  {activeTab === "activities" && (
+                    <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                      <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                        Recent Activities
+                      </h3>
+                      <div className="space-y-3">
+                        {[1, 2, 3, 4, 5].map((item) => (
+                          <div
+                            key={item}
+                            className="p-3 transition-colors border border-orange-100 rounded-lg hover:bg-orange-50"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full">
+                                <FiHeart className="text-[#EC9600]" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800">
+                                  {item % 2 === 0
+                                    ? "You commented on a post in 'Creative Arts' group"
+                                    : "You liked a post by Jane Smith"}
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  {item} hour{item !== 1 ? "s" : ""} ago
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )} */}
+                </div>
               </div>
             </div>
           )}
@@ -1314,7 +1576,49 @@ const UserProfile = () => {
       </div>
 
       {/* Mobile fixed bottom navigation */}
-      <MobileBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+        <div className="flex items-center justify-between px-4 h-14">
+          <button
+            className={`relative outline-none cursor-pointer p-2 ${
+              activeTab === "profile" ? "text-orange-500" : ""
+            }`}
+            onClick={() => setActiveTab("profile")}
+          >
+            <FiUser className="text-2xl" />
+          </button>
+
+          <button
+            className={`relative outline-none cursor-pointer p-2 ${
+              activeTab === "friends" ? "text-orange-500" : ""
+            }`}
+            onClick={() => setActiveTab("friends")}
+          >
+            <FaUsers className="text-2xl" />
+          </button>
+
+          <Link to="/adda" className="relative p-2 outline-none cursor-pointer">
+            <FiHome className="text-2xl text-orange-500" />
+          </Link>
+
+          <button
+            className={`relative outline-none cursor-pointer p-2 ${
+              activeTab === "rewards" ? "text-orange-500" : ""
+            }`}
+            onClick={() => setActiveTab("rewards")}
+          >
+            <FiAward className="text-2xl" />
+          </button>
+
+          <button
+            className={`relative outline-none cursor-pointer p-2 ${
+              activeTab === "saved" ? "text-orange-500" : ""
+            }`}
+            onClick={() => setActiveTab("saved")}
+          >
+            <FaBookmark className="text-2xl" />
+          </button>
+        </div>
+      </div>
     </>
   );
 };
