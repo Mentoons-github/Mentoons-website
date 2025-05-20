@@ -75,7 +75,7 @@ const Notification = () => {
       const response = await axios.post(
         `${
           import.meta.env.VITE_PROD_URL
-        }adda/userNotifications/${notificationId}`,
+        }/adda/userNotifications/${notificationId}`,
         {},
         {
           headers: {
@@ -102,7 +102,7 @@ const Notification = () => {
       const response = await axios.delete(
         `${
           import.meta.env.VITE_PROD_URL
-        }adda/userNotifications/${notificationId}`,
+        }/adda/userNotifications/${notificationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

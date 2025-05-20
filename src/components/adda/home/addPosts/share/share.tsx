@@ -67,7 +67,7 @@ const Share = ({ postDetails, type }: ShareProps) => {
       const token = await getToken();
       if (type === "post") {
         await axios.post(
-          `${import.meta.env.VITE_PROD_URL}shares`,
+          `${import.meta.env.VITE_PROD_URL}/shares`,
           {
             postId: postDetails._id,
             caption: postDetails.content || "",
@@ -86,7 +86,7 @@ const Share = ({ postDetails, type }: ShareProps) => {
         triggerReward(RewardEventType.SHARE_POST, postDetails._id);
       } else if (type === "meme") {
         await axios.post(
-          `${import.meta.env.VITE_PROD_URL}shares`,
+          `${import.meta.env.VITE_PROD_URL}/shares`,
           {
             memeId: postDetails._id,
             caption: postDetails.description || "",

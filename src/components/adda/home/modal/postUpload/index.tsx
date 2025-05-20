@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
+import { errorToast } from "@/utils/toastResposnse";
 import ArticleForm from "./components/ArticleForm";
 import EventForm from "./components/EventForm";
 import PreviewContent from "./components/PreviewContent";
@@ -15,7 +16,6 @@ import TextPostForm from "./components/TextPostForm";
 import UploadContent from "./components/UploadContent";
 import { getInitialValues, getValidationSchema } from "./formConfig";
 import { FormValues, PostUploadProps } from "./types";
-import { errorToast } from "@/utils/toastResposnse";
 
 const PostUpload = ({
   isOpen,
