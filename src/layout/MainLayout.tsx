@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
+import Breadcrumbs from "@/components/common/breadCrumbs/breadCrumbs";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -30,9 +31,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <FaArrowRight className="mr-3 text-xl" />
           </button>
         </div> */}
-        {/* <div className="absolute top-24 left-10 z-[99] hidden lg:block">
+        <div className="absolute top-24 left-10 z-[99] hidden lg:block">
           <Breadcrumbs />
-        </div> */}
+        </div>
         <PrimaryHeader />
         <Header />
 
