@@ -18,6 +18,8 @@ import { Link, useNavigate } from "react-router-dom";
 
 // Shadcn UI components
 import axiosInstance from "@/api/axios";
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import { UserInfo } from "@/types";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
@@ -29,8 +31,6 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
-import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 
 // Define interface for post type
 export type PostType =
