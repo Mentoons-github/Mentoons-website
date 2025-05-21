@@ -178,7 +178,7 @@ const PostFeed = () => {
     // Simulate API fetch with a slight delay
     const fetchPosts = async () => {
       setLoading(true);
-      const apiUrl = "http://localhost:4000/api/v1/posts";
+      const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
       const response = await axios.get(apiUrl);
       setPosts(response.data.data.posts);
       console.log(response.data.data.posts);

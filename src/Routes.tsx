@@ -31,6 +31,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import StatusModal from "./components/adda/global/statusModal.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -44,7 +45,7 @@ const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const routes = [
-  { path: "/", element: <Navigate to="/adda/home" replace /> },
+  { path: "/", element: <Navigate to="/adda" replace /> },
   { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
@@ -136,6 +137,7 @@ const Router = () => {
         />
       )}
       <GlobalAuthModal />
+      <StatusModal />
     </>
   );
 };

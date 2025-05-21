@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import DropDown from "./nav/dropdown";
 import NavButton from "./nav/navButton";
 import { useEffect } from "react";
-import { ADDA_NAV_LINKS, NAV_LINKS } from "@/constant";
+import { COMMON_NAV } from "@/constant";
 
 const Sidebar = ({
   isOpen,
-  title,
   dropdown,
   handleHover,
   handleMouseLeave,
@@ -15,7 +14,6 @@ const Sidebar = ({
   handlePlans,
 }: {
   isOpen: boolean;
-  title: string;
   token: string | null;
   dropdown: {
     comics: boolean;
@@ -28,29 +26,6 @@ const Sidebar = ({
   setIsOpen: (val: boolean) => void;
   handlePlans: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }) => {
-  const navLinks =
-    title === "adda"
-      ? ADDA_NAV_LINKS.filter((data) =>
-          [
-            "Mythos",
-            "Products",
-            "Profile",
-            "Browse Plans",
-            "Workshops",
-          ].includes(data.label)
-        )
-      : NAV_LINKS.filter((data) =>
-          [
-            "Adda",
-            "Products",
-            "Browse Plans",
-            "Workshops",
-            "Assessments",
-          ].includes(data.label)
-        );
-
-  console.log(navLinks);
-
   useEffect(() => {
     const handleBreakPoint = () => {
       if (window.innerWidth >= 1024) {
@@ -89,8 +64,8 @@ const Sidebar = ({
         isOpen ? "pointer-events-auto" : "pointer-events-none"
       } lg:hidden`}
     >
-      <div className="flex flex-col items-center gap-12">
-        {navLinks.map(({ id, label, url, items }) =>
+      <div className="flex flex-col items-center gap-8">
+        {COMMON_NAV.map(({ id, label, url, items }) =>
           items ? (
             <NavButton
               key={id ? id : label}

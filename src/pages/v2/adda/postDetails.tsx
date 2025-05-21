@@ -175,7 +175,7 @@ const PostDetailsPage = () => {
 
         // Use token directly in the request
         const response = await axios.get(
-          `http://localhost:4000/api/v1/posts/${postId}`,
+          `${import.meta.env.VITE_PROD_URL}/posts/${postId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -201,7 +201,7 @@ const PostDetailsPage = () => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `http://localhost:4000/api/v1/feeds/posts/${postId}/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${postId}/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response.data.data);
@@ -259,7 +259,7 @@ const PostDetailsPage = () => {
       });
       const token = await getToken();
       const response = await axios.post(
-        "http://localhost:4000/api/v1/comments",
+        `${import.meta.env.VITE_PROD_URL}/comments`,
         {
           postId: postId,
           content: newComment,
@@ -296,8 +296,8 @@ const PostDetailsPage = () => {
       setIsSavedPost(newSavedState);
       const token = await getToken();
       const endpoint = newSavedState
-        ? `http://localhost:4000/api/v1/feeds/posts/${postId}/save`
-        : `http://localhost:4000/api/v1/feeds/posts/${postId}/unsave`;
+        ? `${import.meta.env.VITE_PROD_URL}/feeds/posts/${postId}/save`
+        : `${import.meta.env.VITE_PROD_URL}/feeds/posts/${postId}/unsave`;
 
       const response = await axios.post(
         endpoint,

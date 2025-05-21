@@ -102,7 +102,7 @@ const MentoonsInfulencerRequestModal = ({
         console.log("Form values:", values);
 
         const response = await axios.post(
-          "http://localhost:4000/api/v1/influencer-requests",
+          `${import.meta.env.VITE_PROD_URL}/influencer-requests`,
           values,
           {
             headers: {

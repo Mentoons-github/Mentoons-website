@@ -171,6 +171,7 @@ const UserProfile = () => {
   const { getToken } = useAuth();
   const { user } = useUser();
   console.log(user);
+
   // const navigate = useNavigate();
 
   // Create refs for file inputs
@@ -296,7 +297,7 @@ const UserProfile = () => {
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_PROD_URL}user/profile`,
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
         {
           headers: {
@@ -373,7 +374,7 @@ const UserProfile = () => {
           throw new Error("No token found");
         }
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
+          `${import.meta.env.VITE_PROD_URL}/posts/user/${null}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -403,7 +404,6 @@ const UserProfile = () => {
         setUserPosts(formattedPosts as unknown as Post[]);
         toast.success("Posts fetched successfully");
       } catch (error) {
-        console.log(error);
         toast.error("Error fetching posts");
       }
     };
@@ -529,7 +529,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}user/profile`,
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { coverPhoto: fileUrl },
           {
             headers: {
@@ -603,7 +603,7 @@ const UserProfile = () => {
 
         // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}user/profile`,
+          `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { picture: fileUrl },
           {
             headers: {
@@ -705,14 +705,14 @@ const UserProfile = () => {
         <Confetti recycle={false} numberOfPieces={500} className="w-full" />
       )}
 
-      <div className="flex items-start justify-center w-full max-w-8xl rounded-xl realatie">
+      <div className="flex items-start justify-center w-full max-w-8xl rounded-xl">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[172px] md:top-[200px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="sticky top-[68px] md:top-[100px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate("/adda/home")}
+                  onClick={() => navigate("/adda")}
                   className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -1466,6 +1466,8 @@ const UserProfile = () => {
                       <div className="space-y-4">
                         {userPosts.map((post) => (
                           <PostCard
+                            setUserPosts={setUserPosts}
+                            isUser={true}
                             key={post._id}
                             post={post as unknown as PostData}
                           />

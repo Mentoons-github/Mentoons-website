@@ -128,7 +128,7 @@ const MemeDetailsPage = () => {
   const [isSavedMeme, setIsSavedMeme] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
- 
+
   const [likeCount, setLikeCount] = useState(meme?.likeCount || 0);
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
@@ -160,7 +160,7 @@ const MemeDetailsPage = () => {
         }
 
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}memes/${memeId}`,
+          `${import.meta.env.VITE_PROD_URL}/memes/${memeId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -224,7 +224,7 @@ const MemeDetailsPage = () => {
       });
       const token = await getToken();
       const response = await axios.post(
-        "http://localhost:4000/api/v1/comments",
+        `${import.meta.env.VITE_PROD_URL}/comments`,
         {
           memeId: memeId,
           content: newComment,
@@ -249,13 +249,11 @@ const MemeDetailsPage = () => {
     const newSavedState = !isSavedMeme;
     setIsSavedMeme(newSavedState);
 
-   
-
     try {
       const token = await getToken();
       const endpoint = `${
         import.meta.env.VITE_PROD_URL
-      }memeFeed/save/${memeId}`;
+      }/memeFeed/save/${memeId}`;
 
       const response = await axios.post(
         endpoint,
@@ -275,7 +273,7 @@ const MemeDetailsPage = () => {
       console.error("Error saving/unsaving meme:", error);
       // Revert both saved state and count on error
       setIsSavedMeme(!newSavedState);
-     
+
       toast.error("Failed to update saved status. Please try again.");
     }
   };
@@ -285,7 +283,7 @@ const MemeDetailsPage = () => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}memeFeed/saved/${memeId}`,
+          `${import.meta.env.VITE_PROD_URL}/memeFeed/saved/${memeId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response.data.saved);
@@ -303,7 +301,7 @@ const MemeDetailsPage = () => {
       const response = await axios.get(
         `${
           import.meta.env.VITE_PROD_URL
-        }likes/get-likes?type=meme&id=${memeId}`,
+        }/likes/get-likes?type=meme&id=${memeId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log(response.data.data);

@@ -5,13 +5,17 @@ import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
+import { BsThreeDots } from "react-icons/bs"; // Import three dots icon
+import { RiDeleteBin6Line } from "react-icons/ri"; // Import delete icon
 import { useNavigate } from "react-router-dom";
+import { useStatusModal } from "@/context/adda/statusModalContext";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
+import { Post } from "@/pages/v2/adda/userProfile";
 
 // Define the different post types
 export type PostType =
@@ -63,6 +67,9 @@ export interface PostData {
 
 interface PostCardProps {
   post: PostData;
+  isUser?: boolean;
+  setUserPosts?: React.Dispatch<React.SetStateAction<Post[]>>;
+  onDelete?: (postId: string) => void; // Added callback for delete functionality
 }
 
 interface Comment {
@@ -76,7 +83,12 @@ interface Comment {
   content: string;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({
+  post,
+  isUser = false,
+  onDelete,
+  setUserPosts,
+}: PostCardProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
@@ -86,10 +98,73 @@ const PostCard = ({ post }: PostCardProps) => {
   const [commentCount, setCommentCount] = useState(post.comments.length);
   const [newComment, setNewComment] = useState("");
   const [isSavedPost, setIsSavedPost] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { showStatus } = useStatusModal();
   const user = useUser();
   console.log(user);
   const { getToken } = useAuth();
   const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleDeletePost = async () => {
+    try {
+      const token = await getToken();
+      const response = await axios.delete(
+        `${import.meta.env.VITE_PROD_URL}/posts/${post._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success === true) {
+        setUserPosts?.((prev) => {
+          const deletedPost = prev.find(
+            (userPost) => userPost._id === post._id
+          );
+          if (deletedPost) {
+            console.log("Deleted post:", deletedPost);
+          }
+
+          return prev.filter((userPost) => userPost._id !== post._id);
+        });
+
+        showStatus("success", "Post deleted successfully.");
+      } else {
+        showStatus("error", "Failed to delete post.");
+      }
+
+      if (onDelete) {
+        onDelete(post._id);
+      }
+    } catch (error: any) {
+      console.error("Error deleting post:", error);
+      showStatus(
+        "error",
+        error?.response?.data?.message || "Something went wrong."
+      );
+    } finally {
+      setShowDropdown(false);
+    }
+  };
 
   const handleCommentSubmit = async () => {
     if (!isSignedIn) {
@@ -221,9 +296,12 @@ const PostCard = ({ post }: PostCardProps) => {
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    console.log(isUser);
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
+    } else if (isUser) {
+      navigate("/adda/user-profile");
     } else {
       navigate(`/adda/user/${post.user._id}`);
     }
@@ -438,26 +516,51 @@ const PostCard = ({ post }: PostCardProps) => {
   return (
     <>
       <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
-        <div
-          onClick={(e) => handleClick(e)}
-          className="flex items-center justify-start w-full gap-3 cursor-pointer"
-        >
-          <div className="overflow-hidden rounded-full w-14 h-14">
-            <img
-              src={post?.user?.picture}
-              alt={`${post?.user?.name}-profile`}
-              className="object-cover w-full h-full rounded-full"
-            />
+        <div className="flex items-center justify-between w-full">
+          <div
+            onClick={(e) => handleClick(e)}
+            className="flex items-center justify-start gap-3 cursor-pointer"
+          >
+            <div className="overflow-hidden rounded-full w-14 h-14">
+              <img
+                src={post?.user?.picture}
+                alt={`${post?.user?.name}-profile`}
+                className="object-cover w-full h-full rounded-full"
+              />
+            </div>
+            <div className="flex flex-col figtree">
+              <span className="Futura Std">{post.user.name}</span>
+              <span className="figtree text-sm text-[#807E7E]">
+                {post.user.email}
+              </span>
+              <span className="figtree text-[12px] text-[#807E7E]">
+                {new Date(post.createdAt).toLocaleString()}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col figtree">
-            <span className="Futura Std">{post.user.name}</span>
-            <span className="figtree text-sm text-[#807E7E]">
-              {post.user.email}
-            </span>
-            <span className="figtree text-[12px] text-[#807E7E]">
-              {new Date(post.createdAt).toLocaleString()}
-            </span>
-          </div>
+
+          {isUser && (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                className="p-2 text-gray-500 rounded-full hover:bg-gray-100"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <BsThreeDots className="w-5 h-5" />
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 z-10 w-48 mt-2 overflow-hidden bg-white rounded-md shadow-lg">
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-left text-red-600 transition-colors hover:bg-gray-100"
+                    onClick={handleDeletePost}
+                  >
+                    <RiDeleteBin6Line className="w-5 h-5 mr-2" />
+                    Delete Post
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {renderPostContent()}

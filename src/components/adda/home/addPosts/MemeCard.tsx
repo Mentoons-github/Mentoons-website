@@ -96,7 +96,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
     try {
       const token = await getToken();
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}comments`,
+        `${import.meta.env.VITE_PROD_URL}/comments`,
         {
           memeId: meme._id,
           content: newComment,
@@ -137,7 +137,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
     setIsSavedMeme(newSavedState);
     try {
       const token = await getToken();
-      const endpoint = `${import.meta.env.VITE_PROD_URL}memeFeed/save/${
+      const endpoint = `${import.meta.env.VITE_PROD_URL}/memeFeed/save/${
         meme._id
       }`;
 
@@ -174,7 +174,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}memeFeed/saved/${meme._id}`,
+          `${import.meta.env.VITE_PROD_URL}/memeFeed/saved/${meme._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(response.data.saved);
@@ -190,7 +190,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
     const getAllLikes = async () => {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}likes/get-likes?type=meme&id=${
+        `${import.meta.env.VITE_PROD_URL}/likes/get-likes?type=meme&id=${
           meme._id
         }`,
         { headers: { Authorization: `Bearer ${token}` } }

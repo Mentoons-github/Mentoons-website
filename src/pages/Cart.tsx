@@ -108,7 +108,7 @@ const Cart: React.FC = () => {
 
       {error || cart?.items?.length > 0 ? (
         <div className="flex flex-wrap gap-4 bg-transparent">
-          <div className="flex flex-col w-full gap-4 lg:flex-row-reverse">
+          <div className="flex flex-col-reverse w-full gap-4 lg:flex-row-reverse">
             <div className="w-full lg:w-[40%] flex flex-col items-start justify-between rounded-3xl border-4 bg-white shadow-xl h-fit text-2xl font-semibold p-4">
               <div className="w-full text-lg">
                 <div className="flex justify-between">

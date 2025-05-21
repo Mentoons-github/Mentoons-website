@@ -8,7 +8,10 @@ const Membership = () => {
   const { ref: sectionRef, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
 
   return (
-    <section className="relative p-6 md:p-10 flex flex-col justify-center overflow-hidden items-center bg-white">
+    <section
+      className="relative p-6 md:p-10 flex flex-col justify-center overflow-hidden items-center bg-white"
+      id="subscription"
+    >
       <motion.div
         className="absolute -top-[25%] -left-[10%] translate-x-[25%] translate-y-[33%] w-[500px] h-[500px] bg-yellow-200 rounded-full"
         animate={{ y: [0, 15, 0], scale: [1, 1.1, 1] }}
