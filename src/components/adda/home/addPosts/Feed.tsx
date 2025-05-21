@@ -11,7 +11,7 @@ interface PaginationData {
   hasMore?: boolean;
 }
 
-const Feed = ({ newPost }: { newPost: boolean }) => {
+const Feed = ({ newPost }: { newPost?: boolean }) => {
   const { getToken } = useAuth();
   const [userFeeds, setUserFeeds] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
