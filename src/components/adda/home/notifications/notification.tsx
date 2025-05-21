@@ -75,7 +75,7 @@ const Notification = () => {
       const response = await axios.post(
         `${
           import.meta.env.VITE_PROD_URL
-        }adda/userNotifications/${notificationId}`,
+        }/adda/userNotifications/${notificationId}`,
         {},
         {
           headers: {
@@ -102,7 +102,7 @@ const Notification = () => {
       const response = await axios.delete(
         `${
           import.meta.env.VITE_PROD_URL
-        }adda/userNotifications/${notificationId}`,
+        }/adda/userNotifications/${notificationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -126,7 +126,7 @@ const Notification = () => {
       <div className="sticky p-3 bg-white bg-opacity-100 border border-orange-200 rounded-lg shadow-lg shadow-orange-100/80 top-[172px] md:top-[200px] z-10">
         <div className="flex items-center justify-start w-full gap-3">
           <button
-            onClick={() => navigate("/adda/home")}
+            onClick={() => navigate("/adda")}
             className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
           >
             <ArrowLeft className="w-5 h-5" />

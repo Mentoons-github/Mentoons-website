@@ -1170,6 +1170,84 @@ export const NAV_LINKS: NavLink[] = [
   },
 ];
 
+export const COMMON_NAV: NavLink[] = [
+  {
+    id: "NL_01",
+    label: "Assessments",
+    // icon: FaUsers,
+    url: "/assessment-page",
+  },
+  {
+    id: "NL_02",
+    label: "Products",
+    // icon: FaShoppingCart,
+    url: "/mentoons-store",
+    items: [
+      {
+        id: "AC_01",
+        label: "6-12",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "13-16",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "17-19",
+        url: "/mentoons-store",
+      },
+      {
+        id: "AC_01",
+        label: "20+",
+        url: "/mentoons-store",
+      },
+    ],
+  },
+  {
+    id: "NL_03",
+    label: "Profile",
+    // icon: FaUserAlt,
+    url: "/adda/user-profile",
+  },
+  {
+    id: "NL_04",
+    label: "Browse Plans",
+    // icon: FaCreditCard,
+    url: "/mentoons#subscription",
+  },
+  {
+    id: "NL_05",
+    label: "Workshops",
+    // icon: FaChalkboard,
+    url: "/mentoons-workshops",
+  },
+  {
+    id: "NL_06",
+    label: "Book Sessions",
+    url: "/bookings",
+  },
+  {
+    id: "NL_07",
+    label: "Join Us",
+    icon: "group",
+    url: "/hiring",
+  },
+  {
+    id: "NL_08",
+    label: "Podcast",
+    icon: "mic",
+    url: "/mentoons-podcast",
+  },
+  // {
+  //   id: "NL_09",
+  //   label: "Share",
+  //   icon: FaShare,
+  //   url: "#",
+  // },
+];
+
 export const ADDA_NAV_LINKS: NavLink[] = [
   {
     id: "NL_01",

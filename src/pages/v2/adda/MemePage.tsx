@@ -259,7 +259,7 @@ const MemePage = () => {
       const imageUrl = uploadResponse.data.data.fileDetails.url;
 
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}memes`,
+        `${import.meta.env.VITE_PROD_URL}/memes`,
         {
           title: "test",
           image: imageUrl,
@@ -299,7 +299,7 @@ const MemePage = () => {
         }
 
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}memeFeed`,
+          `${import.meta.env.VITE_PROD_URL}/memeFeed`,
           {
             headers: { Authorization: `Bearer ${await getToken()}` },
             params: {

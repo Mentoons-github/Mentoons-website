@@ -44,9 +44,10 @@ interface PostData {
 
 interface AddPostsProps {
   onPostCreated?: (post: PostData) => void;
+  setNewPost: (val: boolean) => void;
 }
 
-const AddPosts = ({ onPostCreated }: AddPostsProps) => {
+const AddPosts = ({ setNewPost, onPostCreated }: AddPostsProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +67,10 @@ const AddPosts = ({ onPostCreated }: AddPostsProps) => {
   };
 
   const handlePostComplete = (newPost: PostData) => {
+    setNewPost(true);
+    setTimeout(() => {
+      setNewPost(false);
+    }, 3000);
     setIsOpen(false);
     setSelectedPostType(null);
     // Call the callback if provided

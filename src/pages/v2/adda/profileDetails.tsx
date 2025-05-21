@@ -31,7 +31,7 @@ const ProfileDetails = () => {
     setError(null);
     setUser(null);
     setUserPosts([]);
-
+    console.log(userId);
     if (!userId) {
       setError("User ID is required");
       setIsLoading(false);

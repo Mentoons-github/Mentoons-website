@@ -2,7 +2,7 @@ import DropDown from "@/components/common/nav/dropdown";
 import NavButton from "@/components/common/nav/navButton";
 import Sidebar from "@/components/common/sidebar";
 import ShareModal from "@/components/modals/ShareModal";
-import { ADDA_NAV_LINKS, NAV_LINKS } from "@/constant";
+import { COMMON_NAV } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { DropDownInterface } from "@/types";
@@ -14,6 +14,7 @@ import { FaTimes } from "react-icons/fa";
 import { FaBars, FaPhone } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,14 +35,7 @@ const Header = () => {
   const { getToken, userId } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
-  const navLeft =
-    title === "adda"
-      ? ADDA_NAV_LINKS.filter((link) =>
-          ["Mythos", "Products", "Profile"].includes(link.label)
-        )
-      : NAV_LINKS.filter((link) =>
-          ["Adda", "Products", "Book Sessions"].includes(link.label)
-        );
+  const navLeft = COMMON_NAV.slice(0, 4);
 
   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -54,6 +48,7 @@ const Header = () => {
       scrollToSubscription();
     }
   };
+
   const scrollToSubscription = () =>
     document
       .getElementById("subscription")
@@ -93,129 +88,170 @@ const Header = () => {
     <header
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-      } flex justify-between items-center bg-primary max-w-screen-full h-16 px-4 md:px-10 transition-all duration-300 z-[9999] w-auto font-akshar`}
+      } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-[9999] w-full font-akshar`}
     >
-      <a
-        href="tel:+919036033300"
-        className={`no-underline ${
-          title === "adda" ? "lg:hidden block" : "md:hidden block"
-        } whitespace-nowrap`}
-      >
-        <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-primary">
-          <FaPhone /> <span> +91 90360 33300</span>
-        </div>
-      </a>
-      <nav
-        className={`w-auto lg:w-1/2 ${
-          title === "adda"
-            ? "hidden lg:flex gap-3 md:gap-10"
-            : "hidden lg:flex gap-3 md:gap-20"
-        } justify-start lg:justify-center items-center `}
-      >
-        <a href="tel:+919036033300" className="hidden no-underline xl:block">
-          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-2 text-primary">
-            <FaPhone /> <span> +91 90360 33300</span>
+      <div className="flex items-center lg:w-1/3 justify-start pl-0 lg:pl-4 xl:pl-6">
+        <a
+          href="tel:+919036033300"
+          className={`no-underline ${
+            title === "adda" ? "lg:hidden flex" : "md:hidden flex"
+          } whitespace-nowrap flex-shrink-0`}
+        >
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 py-1 flex justify-center items-center gap-1 text-primary">
+            <FaPhone className="flex-shrink-0" />{" "}
+            <span className="flex-shrink-0">+91 90360 33300</span>
           </div>
         </a>
-        {navLeft.map(({ icon: Icon, id, label, url, items }) => (
-          <div key={id} className="relative">
-            {items && items?.length ? (
-              <NavButton
-                label={label}
-                onMouseEnter={() => handleHover(label.toLowerCase())}
-                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
-              >
-                {dropdown.products && (
-                  <DropDown
-                    labelType={label.toLowerCase() as "products" | "games"}
-                    items={items}
-                  />
-                )}
-              </NavButton>
-            ) : (
-              <NavLink
-                to={url}
+
+        <nav
+          className={`w-auto flex-shrink-0 ${
+            title === "adda"
+              ? "hidden lg:flex gap-4 xl:gap-8"
+              : "hidden lg:flex gap-4 xl:gap-8"
+          } justify-start items-center`}
+        >
+          <a
+            href="tel:+919036033300"
+            className="hidden no-underline xl:block flex-shrink-0"
+          >
+            <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
+              <FaPhone className="flex-shrink-0" />{" "}
+              <span className="flex-shrink-0">+91 90360 33300</span>
+            </div>
+          </a>
+          {navLeft.map(({ icon: Icon, id, label, url, items }) =>
+            label === "Browse Plans" ? (
+              <a
+                key={id}
+                href={url}
+                onClick={handleBrowsePlansClick}
                 className="group relative bg-transparent outline-none cursor-pointer text-center 
              text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
              items-center gap-1 transition-all duration-300 ease-in-out"
               >
-                {typeof Icon === "function" ? (
+                {Icon && typeof Icon === "function" ? (
                   <Icon className="sm:text-sm md:text-lg" />
                 ) : null}
-
                 {label}
-
-                {label === "Mythos" && (
-                  <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[12px] leading-none text-white">
-                    Introducing
-                  </span>
-                )}
                 <span
                   className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
                    transition-all duration-300 ease-in-out group-hover:w-full"
                 ></span>
-              </NavLink>
-            )}
-          </div>
-        ))}
-      </nav>
-      <div className="flex justify-center px-10">
+              </a>
+            ) : (
+              <div key={id} className="relative flex-shrink-0">
+                {items && items?.length ? (
+                  <NavButton
+                    label={label}
+                    onMouseEnter={() => handleHover(label.toLowerCase())}
+                    onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                  >
+                    {dropdown.products && (
+                      <DropDown
+                        labelType={label.toLowerCase() as "products" | "games"}
+                        items={items}
+                      />
+                    )}
+                  </NavButton>
+                ) : (
+                  <NavLink
+                    to={url}
+                    className="group relative bg-transparent outline-none cursor-pointer text-center 
+                  text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
+                  items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
+                  >
+                    {typeof Icon === "function" ? (
+                      <Icon className="text-xs md:text-sm flex-shrink-0" />
+                    ) : null}
+
+                    {label}
+
+                    {label === "Mythos" && (
+                      <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[8px] md:text-[10px] leading-none text-white whitespace-nowrap">
+                        Introducing
+                      </span>
+                    )}
+                    <span
+                      className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                    transition-all duration-300 ease-in-out group-hover:w-full"
+                    ></span>
+                  </NavLink>
+                )}
+              </div>
+            )
+          )}
+        </nav>
+      </div>
+
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex-shrink-0">
         <NavLink to="/">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
             alt="mentoons-logo"
-            className="w-[120px] md:w-[130px] lg:w-[150px] mx-auto"
+            className="w-[100px] sm:w-[120px] md:w-[130px] lg:w-[150px]"
           />
         </NavLink>
       </div>
-      <motion.div
-        className={`${
-          title === "adda" ? "lg:hidden block" : "lg:hidden block"
-        } cursor-pointer z-50`}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ rotate: 90, scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 300 }}
-        onClick={() => setSideBarOpen(!sidebarOpen)}
-      >
-        {sidebarOpen ? (
-          <FaTimes
-            size={26}
-            className="text-white transition-colors hover:text-gray-300"
-          />
-        ) : (
-          <FaBars
-            size={26}
-            className="text-white transition-colors hover:text-gray-300"
-          />
-        )}
-      </motion.div>
+
+      <div className="flex items-end lg:w-1/3 justify-end gap-2 pr-0 lg:pr-4 xl:pr-6">
+        <SignedIn>
+          <div className="relative cursor-pointer lg:hidden flex flex-shrink-0">
+            <NavLink to="/cart">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              {cart.totalItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  {cart.totalItemCount}
+                </span>
+              )}
+            </NavLink>
+          </div>
+        </SignedIn>
+
+        <motion.div
+          className={`${
+            title === "adda" ? "lg:hidden flex" : "lg:hidden flex"
+          } cursor-pointer z-50 flex-shrink-0 ml-2`}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ rotate: 90, scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          onClick={() => setSideBarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? (
+            <FaTimes
+              size={24}
+              className="text-white transition-colors hover:text-gray-300"
+            />
+          ) : (
+            <FaBars
+              size={24}
+              className="text-white transition-colors hover:text-gray-300"
+            />
+          )}
+        </motion.div>
+      </div>
 
       <nav
-        className={`w-fit lg:w-1/2 ${
+        className={`${
           title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
-        } justify-evenly items-center gap-2 md:gap-5`}
+        } items-center gap-4 xl:gap-8 justify-end`}
       >
-        {ADDA_NAV_LINKS.filter((data) =>
-          ["Browse Plans", "Workshops", "Assessments", "Share"].includes(
-            data.label
-          )
-        ).map(({ id, label, url, icon: Icon }) =>
+        {COMMON_NAV.slice(4).map(({ id, label, url, icon: Icon }) =>
           label === "Browse Plans" ? (
             <a
               key={id}
               href={url}
               onClick={handleBrowsePlansClick}
               className="group relative bg-transparent outline-none cursor-pointer text-center 
-             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
-             items-center gap-1 transition-all duration-300 ease-in-out"
+              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
+              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
               {Icon && typeof Icon === "function" ? (
-                <Icon className="sm:text-sm md:text-lg" />
+                <Icon className="text-xs md:text-sm flex-shrink-0" />
               ) : null}
               {label}
               <span
                 className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                   transition-all duration-300 ease-in-out group-hover:w-full"
+                transition-all duration-300 ease-in-out group-hover:w-full"
               ></span>
             </a>
           ) : label === "Share" ? (
@@ -223,14 +259,14 @@ const Header = () => {
               key={id}
               onClick={() => setShowShareModal(true)}
               className="group relative bg-transparent outline-none cursor-pointer text-center 
-             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
-             items-center gap-1 transition-all duration-300 ease-in-out"
+              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
+              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="sm:text-sm md:text-lg" />}
+              {Icon && <Icon className="text-xs md:text-sm flex-shrink-0" />}
               {label}
               <span
                 className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                   transition-all duration-300 ease-in-out group-hover:w-full"
+                transition-all duration-300 ease-in-out group-hover:w-full"
               ></span>
               {showShareModal && (
                 <ShareModal
@@ -239,37 +275,30 @@ const Header = () => {
                   link={window.location.href}
                 />
               )}
-              {/* {showShareModal && (
-                <ThankyouModal
-                  onClose={() => setShowShareModal(false)}
-                  isOpen={showShareModal}
-                  message={ModalMessage.ENQUIRY_MESSAGE}
-                />
-              )} */}
             </div>
           ) : (
             <NavLink
               key={id}
               to={url}
               className="group relative bg-transparent outline-none cursor-pointer text-center 
-             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
-             items-center gap-1 transition-all duration-300 ease-in-out"
+              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
+              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="sm:text-sm md:text-lg" />}
+              {Icon && <Icon className="text-xs md:text-sm flex-shrink-0" />}
               {label}
               <span
                 className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                   transition-all duration-300 ease-in-out group-hover:w-full"
+                transition-all duration-300 ease-in-out group-hover:w-full"
               ></span>
             </NavLink>
           )
         )}
         <SignedIn>
-          <div className="relative cursor-pointer">
+          <div className="relative cursor-pointer flex-shrink-0">
             <NavLink to="/cart">
-              <ShoppingCart className="w-6 h-6 text-white" />
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               {cart.totalItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {cart.totalItemCount}
                 </span>
               )}
@@ -277,10 +306,10 @@ const Header = () => {
           </div>
         </SignedIn>
       </nav>
+
       <Sidebar
         token={userId ?? null}
         isOpen={sidebarOpen}
-        title={title}
         dropdown={dropdown}
         handleHover={handleHover}
         handleMouseLeave={handleMouseLeave}

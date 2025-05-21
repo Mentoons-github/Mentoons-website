@@ -11,7 +11,7 @@ interface PaginationData {
   hasMore?: boolean;
 }
 
-const Feed = () => {
+const Feed = ({ newPost }: { newPost: boolean }) => {
   const { getToken } = useAuth();
   const [userFeeds, setUserFeeds] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,13 +33,14 @@ const Feed = () => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}feeds`,
+          `${import.meta.env.VITE_PROD_URL}/feeds`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { page: pageNum, limit: POSTS_PER_PAGE },
           }
         );
 
+        console.log(response.data);
         if (response.data.success) {
           const newPosts = response.data.data;
           const pagination: PaginationData = response.data.pagination;
@@ -71,7 +72,11 @@ const Feed = () => {
     },
     [getToken]
   );
-
+  useEffect(() => {
+    if (newPost) {
+      fetchUserFeeds(1);
+    }
+  }, [newPost]);
   useEffect(() => {
     fetchUserFeeds(1);
   }, [fetchUserFeeds]);

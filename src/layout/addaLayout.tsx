@@ -15,7 +15,7 @@ const AddaLayout = () => {
   const location = useLocation();
 
   const isHomeRoute =
-    location.pathname === "/adda/home" ||
+    location.pathname === "/adda/" ||
     location.pathname === "/adda" ||
     location.pathname === "/adda/meme" ||
     location.pathname === "/adda/notifications" ||
@@ -34,7 +34,7 @@ const AddaLayout = () => {
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          <div className="sticky left-0 flex items-center w-full top-[64px] bg-white z-20">
+          <div className="left-0 flex items-center w-full bg-white z-20">
             <div className="flex items-center w-full bg-white">
               <div className="flex-grow w-full min-w-0 py-2">
                 <UserStatus />
@@ -53,7 +53,7 @@ const AddaLayout = () => {
 
           <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6">
             <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
-              <div className="sticky top-[204px] w-full z-4">
+              <div className="sticky top-[104px] w-full z-4">
                 <FounderNote scroll={false} />
               </div>
             </div>
@@ -85,7 +85,7 @@ const AddaLayout = () => {
             </div>
 
             <div className="flex-shrink-0 hidden w-1/3 md:block lg:w-1/4">
-              <div className="sticky top-[204px] flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 w-full z-4 max-h-[calc(100vh-204px)] overflow-y-auto">
+              <div className="sticky top-[104px] flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 w-full z-4 max-h-[calc(100vh-204px)] overflow-y-auto">
                 {isSignedIn && (
                   <div className="p-3 mb-4 bg-white border border-orange-200 rounded-lg sm:p-4">
                     <FriendRequest />
