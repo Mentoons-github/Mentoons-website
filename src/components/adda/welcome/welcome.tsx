@@ -1,364 +1,197 @@
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import {
-  UserPlus,
-  ChevronRight,
-  BookOpen,
-  Users,
-  MessageSquare,
-  Sparkle,
-  Star,
-  Heart,
-} from "lucide-react";
-import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.15,
-    },
-  },
+type WelcomeModalProps = {
+  onClose?: () => void;
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 70,
-      damping: 9,
-    },
-  },
-};
-
-const heroVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.8,
-      ease: "easeOut",
-    },
-  },
-};
-
-const WelcomeLogin = () => {
-  const [currentFeature, setCurrentFeature] = useState(0);
-  const features = [
-    {
-      title: "Community Stories",
-      description:
-        "Share your adventures and read exciting stories from friends around the world",
-      icon: <BookOpen className="text-orange-600" size={26} />,
-      color: "bg-orange-50",
-      borderColor: "border-orange-200",
-    },
-    {
-      title: "Find Friends",
-      description:
-        "Connect with peers who share your interests and make lasting friendships",
-      icon: <Users className="text-amber-600" size={26} />,
-      color: "bg-amber-50",
-      borderColor: "border-amber-200",
-    },
-    {
-      title: "Chat & Create (Upcoming)",
-      description:
-        "Join discussions, share ideas, and collaborate on creative projects together",
-      icon: <MessageSquare className="text-yellow-600" size={26} />,
-      color: "bg-yellow-50",
-      borderColor: "border-yellow-200",
-    },
-  ];
+const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % features.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    const checkScrollable = () => {
+      const modal = modalRef.current;
+      if (modal) {
+        const isScrollable = modal.scrollHeight > modal.clientHeight;
+        setShowScrollIndicator(
+          isScrollable &&
+            modal.scrollTop < modal.scrollHeight - modal.clientHeight - 20
+        );
+      }
+    };
+
+    checkScrollable();
+
+    const modal = modalRef.current;
+    if (modal) {
+      modal.addEventListener("scroll", checkScrollable);
+    }
+
+    const timer = setTimeout(checkScrollable, 500);
+
+    return () => {
+      if (modal) {
+        modal.removeEventListener("scroll", checkScrollable);
+      }
+      clearTimeout(timer);
+    };
   }, []);
 
+  const scrollToBottom = () => {
+    const modal = modalRef.current;
+    if (modal) {
+      modal.scrollTo({
+        top: modal.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const details = {
+    Workshops:
+      "Engaging sessions for all ages, including music and art therapy, storytelling, revival of ancient values, study skills, and a basic introduction to spirituality.",
+    "Comics & Audio Comics":
+      "Engaging stories that inspire creativity and teach positive values, providing a healthy alternative to excessive screen time and helping children develop focus and imagination.",
+    Podcasts:
+      "Engaging discussions offering practical advice to manage digital distractions, build self-control, and promote emotional well-being for children and families.",
+    Assessments:
+      "Tools to identify and address social media and mobile addiction, offering personalized guidance to improve academic focus and overall personal growth.",
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <motion.div
-      className="w-full bg-white rounded-xl overflow-hidden mb-4 shadow-lg border border-orange-100"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
-      <div className="bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-500 p-5">
-        <div className="flex items-center gap-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-[9999] overflow-auto">
+      <div
+        className="bg-white max-w-3xl w-full relative shadow-lg border rounded-lg font-sans max-h-[90vh] overflow-y-auto"
+        ref={modalRef}
+      >
+        {/* ❌ Close button */}
+        <button
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 z-10"
+          onClick={onClose}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <div className="p-4 md:p-8">
           <motion.div
-            className="h-14 w-14 bg-white rounded-full flex items-center justify-center shadow-lg"
-            whileHover={{ rotate: 10, scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            className="flex justify-center items-center"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
           >
             <img
-              src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png "
-              alt="Mentoons"
-              className="w-15 h-15 object-contain"
+              alt="mentoons-logo"
+              src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+              className="w-40 h-16 md:w-55 md:h-24"
             />
           </motion.div>
-          <div>
-            <h3 className="font-bold text-xl text-white">Mentoons Adda</h3>
-            <div className="flex items-center gap-3 text-orange-100">
-              <span className="flex items-center text-xs">
-                <span className="h-2 w-2 rounded-full bg-green-400 mr-1 animate-pulse"></span>
-                <span>Online now</span>
-              </span>
-              <span className="flex items-center text-xs">
-                <Heart size={12} className="mr-1" />
-                <span>10k+ members</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-orange-600"></div>
-          <div className="absolute bottom-20 right-20 w-60 h-60 rounded-full bg-amber-600"></div>
-          <div className="absolute top-40 right-10 w-20 h-20 rounded-full bg-yellow-600"></div>
-        </div>
-        <motion.div
-          className="p-6 sm:p-8 relative z-10"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div className="text-center mb-8" variants={itemVariants}>
-            <motion.span
-              className="inline-block text-3xl mb-2"
-              animate={{
-                rotate: [0, 10, 0, -10, 0],
-                scale: [1, 1.2, 1, 1.2, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatDelay: 3,
-              }}
-            >
-              👋
-            </motion.span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
-              Welcome to your creative community!
-            </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Mentoons Adda is a safe, fun space where young minds connect,
-              share stories, and discover amazing content crafted especially for
-              you.
-            </p>
-          </motion.div>
-          <motion.div
-            className="relative h-64 sm:h-80 md:h-96 mb-10 rounded-xl overflow-hidden"
-            variants={heroVariants}
-          >
-            <motion.div
-              className="absolute top-10 right-10 z-10"
-              animate={{
-                y: [0, -15, 0],
-                rotate: 360,
-              }}
-              transition={{
-                y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-                rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-              }}
-            >
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <Star className="text-amber-500" size={24} />
-              </div>
-            </motion.div>
-            <motion.div
-              className="absolute bottom-10 left-10 z-10"
-              animate={{
-                y: [0, 15, 0],
-                rotate: -360,
-              }}
-              transition={{
-                y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-              }}
-            >
-              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                <Sparkle className="text-orange-500" size={20} />
-              </div>
-            </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl"></div>
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center"
-              animate={{
-                y: [0, -8, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <motion.img
-                src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png "
-                alt="icon-post"
-                className="h-5/6 object-contain drop-shadow-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              />
-            </motion.div>
-          </motion.div>
-          <motion.div className="mb-10" variants={itemVariants}>
-            <motion.div
-              className={`p-6 rounded-xl shadow-md ${features[currentFeature].color} border ${features[currentFeature].borderColor}`}
-              key={currentFeature}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                <div className="p-3 bg-white rounded-full shadow-sm">
-                  {features[currentFeature].icon}
+
+          <h1 className="text-orange-500 font-bold text-2xl md:text-4xl text-center mt-4">
+            Welcome to Mentoons!
+          </h1>
+
+          <p className="mx-auto text-center text-gray-700 max-w-xl mt-3 text-sm md:text-base">
+            Mentoons is a platform created by psychologists and educators with a
+            mission to bring a healthy academic and digital balance to children,
+            youth, parents, and elders.
+          </p>
+
+          <ul className="mx-auto space-y-4 mt-6">
+            {Object.entries(details).map(([key, value], index) => (
+              <li
+                className="text-gray-700 flex items-start gap-2 md:gap-5 text-sm md:text-base"
+                key={index}
+              >
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-orange-500 h-5 w-5 md:h-6 md:w-6 flex-shrink-0 mt-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
-                    {features[currentFeature].title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {features[currentFeature].description}
-                  </p>
+                  <span className="text-orange-500 font-bold">{key}</span>:{" "}
+                  {value}
                 </div>
-              </div>
-            </motion.div>
-            <div className="flex justify-center mt-4 gap-2">
-              {features.map((_, index) => (
-                <motion.button
-                  key={index}
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    currentFeature === index ? "bg-orange-600" : "bg-orange-200"
-                  }`}
-                  onClick={() => setCurrentFeature(index)}
-                  whileHover={{ scale: 1.3 }}
-                  whileTap={{ scale: 0.9 }}
-                />
-              ))}
-            </div>
-          </motion.div>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10"
-            variants={containerVariants}
-          >
-            {[
-              {
-                title: "Make Friends",
-                desc: "Connect with like-minded peers",
-                icon: <Users size={22} className="text-amber-600" />,
-                color: "bg-amber-50",
-                border: "border-amber-200",
-              },
-              {
-                title: "Share Stories",
-                desc: "Express yourself in a safe space",
-                icon: <MessageSquare size={22} className="text-orange-600" />,
-                color: "bg-orange-50",
-                border: "border-orange-200",
-              },
-              {
-                title: "Learn & Grow",
-                desc: "Discover fun educational content",
-                icon: <BookOpen size={22} className="text-yellow-600" />,
-                color: "bg-yellow-50",
-                border: "border-yellow-200",
-              },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                className={`${feature.color} border ${feature.border} p-5 rounded-xl flex flex-col items-center shadow-sm`}
-                variants={itemVariants}
-                whileHover={{
-                  y: -5,
-                  boxShadow: "0 15px 30px rgba(234, 88, 12, 0.15)",
-                }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <div className="bg-white p-3 rounded-full shadow-sm mb-4">
-                  {feature.icon}
-                </div>
-                <h4 className="font-semibold text-gray-800 mb-1">
-                  {feature.title}
-                </h4>
-                <p className="text-sm text-gray-600 text-center">
-                  {feature.desc}
-                </p>
-              </motion.div>
+              </li>
             ))}
-          </motion.div>
-          <motion.div className="text-center mb-8" variants={itemVariants}>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
-              Join our creative community today!
-            </h2>
-            <p className="text-gray-600 mb-2">
-              Sign in to start posting, connect with friends, and unlock
-              exclusive content created just for you!
-            </p>
-          </motion.div>
-        </motion.div>
-      </div>
-      <motion.div
-        className="relative p-8 flex flex-col sm:flex-row gap-5 justify-center items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7, duration: 0.6 }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-100 via-amber-100 to-yellow-100"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-300 to-orange-300 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-orange-300 to-yellow-300 rounded-full blur-3xl opacity-20 translate-y-1/3 -translate-x-1/4"></div>
-        <div className="relative z-10 w-full flex flex-col sm:flex-row gap-5 justify-center items-center">
-          <Link to="/sign-in" className="w-full sm:w-auto">
-            <motion.button
-              className="w-full py-4 px-10 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium flex items-center justify-center shadow-lg"
-              whileHover={{
-                scale: 1.03,
-                boxShadow: "0 15px 25px -5px rgba(234, 88, 12, 0.5)",
-              }}
-              whileTap={{ scale: 0.98 }}
+          </ul>
+
+          <div className="flex flex-col justify-center items-center mt-6 gap-4">
+            <NavLink
+              to="/sign-up"
+              className="text-center text-base md:text-lg text-white px-6 md:px-24 py-3 bg-orange-500 rounded-full font-bold w-full md:w-auto"
             >
-              <span className="text-lg">Login Now</span>
-              <motion.span
-                animate={{ x: [0, 5, 0] }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="ml-2"
-              >
-                <ChevronRight size={20} />
-              </motion.span>
-            </motion.button>
-          </Link>
-          <Link to="/sign-up" className="w-full sm:w-auto">
-            <motion.button
-              className="w-full py-4 px-10 bg-white border-2 border-orange-300 text-orange-700 rounded-xl font-medium flex items-center justify-center gap-2 shadow-md"
-              whileHover={{
-                scale: 1.03,
-                borderColor: "#EA580C",
-                boxShadow: "0 15px 25px -5px rgba(234, 88, 12, 0.2)",
-              }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <UserPlus size={20} />
-              <span className="text-lg">Register Now</span>
-            </motion.button>
-          </Link>
+              Take the First Step
+            </NavLink>
+
+            <span className="text-orange-500 text-sm md:text-base">
+              Already have an account?{" "}
+              <a href="/sign-in" className="underline">
+                Log In
+              </a>
+            </span>
+          </div>
+
+          <p className="text-gray-500 text-xs md:text-sm text-center mt-6 md:mt-8">
+            By continuing, you agree to our Terms of Use and Privacy Policy
+          </p>
         </div>
-      </motion.div>
-    </motion.div>
+
+        {showScrollIndicator && (
+          <div
+            className="hidden sm:flex absolute bottom-6 right-5 transform -translate-x-1/2 bg-orange-500 text-white px-3 py-2 rounded-full cursor-pointer shadow-lg items-center gap-2 animate-bounce hover:bg-orange-600 transition-colors"
+            onClick={scrollToBottom}
+          >
+            <span className="text-sm font-medium">More content</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-export default WelcomeLogin;
+export default WelcomeModal;
