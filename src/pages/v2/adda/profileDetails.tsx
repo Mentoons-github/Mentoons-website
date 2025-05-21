@@ -38,6 +38,8 @@ const ProfileDetails = () => {
       return;
     }
 
+    console.log("reached");
+
     const fetchUserData = async () => {
       try {
         const token = await getToken();
@@ -97,7 +99,7 @@ const ProfileDetails = () => {
         if (!token) {
           throw new Error("No token found");
         }
-        const response = await axiosInstance(`/posts/user/${uid}`, {
+        const response = await axiosInstance(`/posts/friends-post/${uid}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -169,7 +171,7 @@ const ProfileDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
+      <div className="max-w-full px-2 sm:max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto pt-4 sm:pt-6 md:pt-8">
         <ProfileHeader
           user={user}
           totalPosts={numberOfPosts}
@@ -179,7 +181,7 @@ const ProfileDetails = () => {
 
         <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="mt-6">{renderTabContent()}</div>
+        <div className="mt-4 sm:mt-6">{renderTabContent()}</div>
       </div>
     </div>
   );

@@ -75,4 +75,4 @@ export interface Post {
   media: Media[];
 }
 
-export type TabType = "posts" | "about" | "friends" | "rewards";
+export type TabType = "posts" | "about" | "friends" | "rewards" | "follow";

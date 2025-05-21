@@ -71,7 +71,6 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
         className="bg-white max-w-3xl w-full relative shadow-lg border rounded-lg font-sans max-h-[90vh] overflow-y-auto"
         ref={modalRef}
       >
-        {/* ❌ Close button */}
         <button
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 z-10"
           onClick={onClose}

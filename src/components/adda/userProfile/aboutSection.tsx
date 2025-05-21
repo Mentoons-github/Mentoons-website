@@ -33,12 +33,6 @@ const AboutSection: React.FC<AboutSectionProps> = ({ user }) => {
                 </span>
               </div>
               <div>
-                <span className="text-gray-500">Email:</span>
-                <span className="ml-2 text-gray-900">
-                  {user.email || "Not provided"}
-                </span>
-              </div>
-              <div>
                 <span className="text-gray-500">Location:</span>
                 <span className="ml-2 text-gray-900">
                   {user.location || "Not provided"}
@@ -95,6 +89,31 @@ const AboutSection: React.FC<AboutSectionProps> = ({ user }) => {
                     </span>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {user.bio && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Bio</h3>
+              <p className="mt-2 text-gray-900 whitespace-pre-line">
+                {user.bio}
+              </p>
+            </div>
+          )}
+
+          {user.interests && user.interests.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Interests</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {user.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                  >
+                    {interest}
+                  </span>
+                ))}
               </div>
             </div>
           )}

@@ -110,35 +110,39 @@ const ProductsPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
+  const NAV_HEIGHT = 100;
+
   useEffect(() => {
     setSelectedCategory(category);
   }, [category]);
 
   const handleSelectedCategory = async (category: string) => {
     try {
-      const searchParams = new URLSearchParams(window.location.pathname);
+      const searchParams = new URLSearchParams(window.location.search);
       if (category === "all") {
-        if (sectionRef.current) {
-          sectionRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
         searchParams.delete("category");
-      } else {
-        if (section20Ref.current && category == "20+") {
-          section20Ref.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        } else if (sectionRef.current) {
-          sectionRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
+        if (sectionRef.current) {
+          const offsetTop =
+            sectionRef.current.getBoundingClientRect().top +
+            window.scrollY -
+            NAV_HEIGHT;
+          window.scrollTo({ top: offsetTop, behavior: "smooth" });
         }
-
+      } else {
         searchParams.set("category", category);
+        if (category === "20+" && section20Ref.current) {
+          const offsetTop =
+            section20Ref.current.getBoundingClientRect().top +
+            window.scrollY -
+            NAV_HEIGHT;
+          window.scrollTo({ top: offsetTop, behavior: "smooth" });
+        } else if (sectionRef.current) {
+          const offsetTop =
+            sectionRef.current.getBoundingClientRect().top +
+            window.scrollY -
+            NAV_HEIGHT;
+          window.scrollTo({ top: offsetTop, behavior: "smooth" });
+        }
       }
       navigate({
         search: searchParams.toString(),
@@ -164,10 +168,11 @@ const ProductsPage = () => {
             })
           );
           if (sectionRef.current) {
-            sectionRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
+            const offsetTop =
+              sectionRef.current.getBoundingClientRect().top +
+              window.scrollY -
+              NAV_HEIGHT;
+            window.scrollTo({ top: offsetTop, behavior: "smooth" });
           }
         } else {
           await dispatch(fetchProducts({}));

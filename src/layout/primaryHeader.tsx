@@ -9,7 +9,7 @@ import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { FaClock } from "react-icons/fa";
-import { FaBell, FaMessage } from "react-icons/fa6";
+import { FaBell } from "react-icons/fa6";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -39,13 +39,11 @@ const PrimaryHeader = () => {
         }
       );
       console.log("Notifications response:", response.data);
-      // Ensure we're setting an array, even if the API response is unexpected
       setNotifications(
         Array.isArray(response.data.data) ? response.data.data : []
       );
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
-      // Set to empty array on error to prevent null reference
       setNotifications([]);
     } finally {
       setIsLoading(false);
@@ -69,7 +67,7 @@ const PrimaryHeader = () => {
   return (
     <div className="flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 z-55 font-akshar">
       <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:1/3 lg:w-1/2">
-        {adda && (
+        {/* {adda && (
           <SignedIn>
             <div className="relative py-2 cursor-pointer md:hidden">
               <FaMessage />
@@ -78,7 +76,7 @@ const PrimaryHeader = () => {
               </span>
             </div>
           </SignedIn>
-        )}
+        )} */}
 
         <div className="hidden md:inline-flex items-center whitespace-nowrap gap-0 sm:gap-2 text-[10px] md:text-xs lg:text-sm xl:text-base">
           <FaClock className="hidden sm:block" />
@@ -115,7 +113,7 @@ const PrimaryHeader = () => {
       <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
         {adda && (
           <SignedIn>
-            <div
+            {/* <div
               onClick={() => navigate("/adda/messages")}
               className="relative hidden py-2 cursor-pointer md:block"
             >
@@ -123,7 +121,7 @@ const PrimaryHeader = () => {
               <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-4">
                 2
               </span>
-            </div>
+            </div> */}
             <div
               onClick={() => navigate("/adda/notifications")}
               className="relative hidden py-2 cursor-pointer md:block"

@@ -6,8 +6,8 @@ import FriendRequest from "@/components/adda/home/friendRequest/friendRequest";
 import Influencer from "@/components/adda/home/influencer/influencer";
 import Meme from "@/components/adda/home/memeOfTheDay/meme";
 import UserStatus from "@/components/adda/home/userStatus/userStatus";
-import FounderNote from "@/components/common/founderNote";
 import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
+import WhatWeOffer from "@/components/adda/home/whatweExplore/weOffer";
 
 const AddaLayout = () => {
   const { isSignedIn } = useAuth();
@@ -54,7 +54,7 @@ const AddaLayout = () => {
           <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6">
             <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
               <div className="sticky top-[104px] w-full z-4">
-                <FounderNote scroll={false} />
+                <WhatWeOffer />
               </div>
             </div>
 

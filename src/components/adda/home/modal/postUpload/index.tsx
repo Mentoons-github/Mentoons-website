@@ -69,8 +69,6 @@ const PostUpload = ({
         }
       );
 
-      console.log(response);
-
       return response.data.data.fileDetails.url;
     } catch (error) {
       console.error("Failed to upload media:", error);
@@ -154,6 +152,79 @@ const PostUpload = ({
     const newPreviews = [...mediaPreview];
     newPreviews.splice(index, 1);
     setMediaPreview(newPreviews);
+  };
+
+  const validateContent = (values: FormValues): boolean => {
+    switch (postType) {
+      case "article":
+        return !!(values.title?.trim() && values.articleBody?.trim());
+      case "event":
+        return !!(values.description?.trim() || values.venue?.trim());
+      case "photo":
+      case "video":
+      case "mixed":
+        return !!values.content?.trim();
+      default:
+        return false;
+    }
+  };
+
+  const handleNextTab = (isValid: boolean, values: FormValues) => {
+    console.log("Next button clicked", { isValid, activeTab, postType });
+
+    const hasContent = validateContent(values);
+    if (!hasContent) {
+      toast.error(
+        `Please add ${
+          postType === "article"
+            ? "title and article body"
+            : postType === "event"
+            ? "description or venue"
+            : "content"
+        } before proceeding`
+      );
+      return;
+    }
+
+    const maxTab = 3;
+    if (activeTab < maxTab) {
+      setActiveTab(activeTab + 1);
+    }
+  };
+
+  const handlePrevTab = () => {
+    if (activeTab > 1) {
+      setActiveTab(activeTab - 1);
+    }
+  };
+
+  const handleTabChange = (tab: number) => {
+    if (tab <= activeTab) {
+      setActiveTab(tab);
+      return;
+    }
+
+    const values = formikRef.current?.values;
+    if (!values) {
+      toast.error("Form data not available");
+      return;
+    }
+
+    const hasContent = validateContent(values);
+    if (!hasContent) {
+      toast.error(
+        `Please add ${
+          postType === "article"
+            ? "title and article body"
+            : postType === "event"
+            ? "description or venue"
+            : "content"
+        } before proceeding`
+      );
+      return;
+    }
+
+    setActiveTab(tab);
   };
 
   const handleSubmit = async (values: FormValues) => {
@@ -273,9 +344,6 @@ const PostUpload = ({
         JSON.stringify(postData, null, 2)
       );
 
-      // API endpoint
-      // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
-
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
       console.log("Sending request to:", apiUrl);
@@ -318,43 +386,6 @@ const PostUpload = ({
       toast.error(`Failed to create post: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleNextTab = (isValid: boolean, values: FormValues) => {
-    console.log("Next button clicked", { isValid, activeTab, postType });
-
-    // For article posts, we'll do our own validation
-    if (postType === "article") {
-      // Only on the first tab, check for required fields
-      if (activeTab === 1 && (!values.title || !values.articleBody)) {
-        toast.error("Please fill in the article title and body");
-        return;
-      }
-
-      // Otherwise, always allow moving to the next tab
-      const maxTab = 3;
-      if (activeTab < maxTab) {
-        setActiveTab(activeTab + 1);
-      }
-      return;
-    }
-
-    // For other post types, still move forward even if validation fails
-    // This ensures basic functionality works
-    const maxTab = 3;
-    if (activeTab < maxTab) {
-      setActiveTab(activeTab + 1);
-      // If form isn't valid, show a toast but still allow navigation
-      if (!isValid) {
-        toast.warning("Some fields may need your attention");
-      }
-    }
-  };
-
-  const handlePrevTab = () => {
-    if (activeTab > 1) {
-      setActiveTab(activeTab - 1);
     }
   };
 
@@ -430,8 +461,6 @@ const PostUpload = ({
           : [],
       };
 
-      // API endpoint
-      // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
       // Make the API call
@@ -519,7 +548,7 @@ const PostUpload = ({
                 <TabNavigation
                   postType={postType}
                   activeTab={activeTab}
-                  setActiveTab={setActiveTab}
+                  setActiveTab={handleTabChange}
                 />
 
                 <Form className="w-full">

@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const products = [
@@ -68,27 +68,29 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
   const scrollLeft = () => {
     const newIndex = (currentIndex - 1 + products.length) % products.length;
     scrollToIndex(newIndex);
+    setIsPaused(false);
   };
 
   const scrollRight = () => {
     const newIndex = (currentIndex + 1) % products.length;
     scrollToIndex(newIndex);
+    setIsPaused(false);
   };
 
   const jumpToSlide = (index: number) => {
     scrollToIndex(index);
-    resetTimer();
+    setIsPaused(false);
   };
 
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    setIsPaused((prev) => !prev);
   };
 
   const resetTimer = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    if (isPlaying) {
+    if (!isPaused) {
       intervalRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => {
           const newIndex = (prevIndex + 1) % products.length;
@@ -97,7 +99,30 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
         });
       }, 3000);
     }
-  }, [isPlaying, products.length, scrollToIndex]);
+  }, [isPaused, products.length, scrollToIndex]);
+
+  useEffect(() => {
+    resetTimer();
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPaused, resetTimer]);
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+  };
+
+  const handleShopNow = (title: string) => {
+    shopNow(title);
+    setIsPaused(false);
+    resetTimer();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -142,27 +167,6 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
   }, [currentIndex]);
 
   useEffect(() => {
-    resetTimer();
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isPlaying, resetTimer]);
-
-  const handleMouseEnter = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (isPlaying) {
-      resetTimer();
-    }
-  };
-
-  useEffect(() => {
     if (sliderRef.current) {
       sliderRef.current.scrollLeft = 0;
       setCurrentIndex(0);
@@ -199,9 +203,9 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
         <button
           onClick={togglePlayPause}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
-          aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+          aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
         >
-          {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          {isPaused ? <Play size={20} /> : <Pause size={20} />}
         </button>
       </div>
 
@@ -224,7 +228,7 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
               </p>
               <button
                 className="mt-5 bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-opacity-80 transition-colors"
-                onClick={() => shopNow(product.title)}
+                onClick={() => handleShopNow(product.title)}
               >
                 Shop Now
               </button>
@@ -234,7 +238,7 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
               <img
                 src={product.image}
                 alt={product.alt}
-                className="w-[200px] sm:w-[250px] md:w-[300px] lg:w[340px] xl:w-[400px] object-contain transform transition-transform hover:rotate-2"
+                className="w-[200px] sm:w-[250px] md:w-[300px] lg:w-[340px] xl:w-[400px] object-contain transform transition-transform hover:rotate-2"
               />
             </div>
           </div>
@@ -255,14 +259,14 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
         ))}
       </div>
       <style>{`
-      .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-    `}</style>
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

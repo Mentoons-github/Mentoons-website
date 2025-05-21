@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/types";
 import {
   Calendar,
-  MapPin,
-  Link,
-  Mail,
   User as UserIcon,
   UserPlus,
   UserMinus,
@@ -215,7 +212,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       case "accepted":
         return {
           text: "Unfriend",
-          icon: <UserMinus size={16} />,
+          icon: <UserMinus size={14} />,
           classes: "bg-red-50 text-red-600 hover:bg-red-100",
           action: handleFriendAction,
         };
@@ -223,14 +220,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         if (isRequester) {
           return {
             text: "Cancel Request",
-            icon: <X size={16} />,
+            icon: <X size={14} />,
             classes: "bg-yellow-50 text-yellow-600 hover:bg-yellow-100",
             action: handleFriendAction,
           };
         } else {
           return {
             text: "Respond to Request",
-            icon: <Clock size={16} />,
+            icon: <Clock size={14} />,
             classes: "bg-yellow-50 text-yellow-600 hover:bg-yellow-100",
             action: null,
           };
@@ -238,14 +235,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       case "rejected":
         return {
           text: "Send Request",
-          icon: <UserPlus size={16} />,
+          icon: <UserPlus size={14} />,
           classes: "bg-blue-50 text-blue-600 hover:bg-blue-100",
           action: handleFriendAction,
         };
       case "one_way":
         return {
           text: "Unfriend",
-          icon: <UserMinus size={16} />,
+          icon: <UserMinus size={14} />,
           classes: "bg-purple-50 text-purple-600 hover:bg-purple-100",
           action: handleFriendAction,
         };
@@ -253,7 +250,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       default:
         return {
           text: "Add Friend",
-          icon: <UserPlus size={16} />,
+          icon: <UserPlus size={14} />,
           classes: "bg-blue-50 text-blue-600 hover:bg-blue-100",
           action: handleFriendAction,
         };
@@ -265,34 +262,34 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden mb-4 w-full">
-      <div className="h-24 md:h-40 bg-gradient-to-r from-blue-100 to-purple-100"></div>
+      <div className="h-20 sm:h-24 md:h-40 bg-gradient-to-r from-blue-100 to-purple-100"></div>
 
-      <div className="px-4 sm:px-6 pb-6 relative">
-        <div className="flex justify-between items-end -mt-12 md:-mt-16 mb-4">
+      <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 relative">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end -mt-10 sm:-mt-12 md:-mt-16 mb-3 sm:mb-4">
           <div className="relative">
             {user.picture ? (
               <img
                 src={user.picture}
                 alt={user.name || "User"}
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md object-cover"
+                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md object-cover"
               />
             ) : (
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md bg-gray-200 flex items-center justify-center">
-                <UserIcon size={36} className="text-gray-400" />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md bg-gray-200 flex items-center justify-center">
+                <UserIcon size={24} className="text-gray-400" />
               </div>
             )}
             {user.subscription?.plan && user.subscription.plan !== "free" && (
-              <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded-full">
+              <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                 {user.subscription.plan}
               </div>
             )}
           </div>
 
           {!isCurrentUser && (
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-0">
               {isStatusLoading ? (
-                <div className="flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-colors bg-gray-50 text-gray-600">
-                  <Loader2 size={16} className="animate-spin mr-2" />
+                <div className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors bg-gray-50 text-gray-600">
+                  <Loader2 size={14} className="animate-spin mr-1 sm:mr-2" />
                   <span>Loading...</span>
                 </div>
               ) : friendStatus === "pending" && !isRequester ? (
@@ -300,13 +297,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   <button
                     onClick={handleAcceptRequest}
                     disabled={isLoading}
-                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-green-50 text-green-600 hover:bg-green-100"
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors bg-green-50 text-green-600 hover:bg-green-100"
                   >
                     {isLoading ? (
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                     ) : (
                       <>
-                        <Check size={16} />
+                        <Check size={14} />
                         <span>Accept</span>
                       </>
                     )}
@@ -314,13 +311,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   <button
                     onClick={handleFriendAction}
                     disabled={isLoading}
-                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-red-50 text-red-600 hover:bg-red-100"
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors bg-red-50 text-red-600 hover:bg-red-100"
                   >
                     {isLoading ? (
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                     ) : (
                       <>
-                        <X size={16} />
+                        <X size={14} />
                         <span>Reject</span>
                       </>
                     )}
@@ -330,10 +327,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <button
                   onClick={buttonConfig.action}
                   disabled={isLoading}
-                  className={`flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${buttonConfig.classes}`}
+                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors ${buttonConfig.classes}`}
                 >
                   {isLoading ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={14} className="animate-spin" />
                   ) : (
                     <>
                       {buttonConfig.icon}
@@ -345,81 +342,77 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
           )}
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
               {user.name || "Unnamed User"}
             </h1>
 
-            <div className="mt-1 flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-gray-500 text-sm">
+            <div className="mt-1 flex flex-col gap-1 sm:gap-2 text-gray-500 text-xs sm:text-sm">
               <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-1 flex-shrink-0" />
-                <span className="truncate">
-                  {user.email || "No email provided"}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                <span>{user.location || "Location not specified"}</span>
-              </div>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
                 <span>Joined {formatDate(user.joinedDate)}</span>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs md:text-sm font-medium">
+            <div className="bg-blue-50 text-blue-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-medium">
               {user.role || "USER"}
             </div>
-            <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs md:text-sm font-medium">
+            <div className="bg-green-50 text-green-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-medium">
               <span>Last active: </span>
               {user.lastActive
                 ? new Date(user.lastActive).toLocaleDateString()
                 : "Never"}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center py-3 border-y border-gray-100">
+          <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center py-2 sm:py-3 border-y border-gray-100">
             <div>
-              <div className="text-lg md:text-xl font-bold text-gray-900">
+              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                 {totalFollowing || 0}
               </div>
-              <div className="text-xs md:text-sm text-gray-500">Followers</div>
+              <div className="text-[10px] sm:text-xs md:text-sm text-gray-500">
+                Followers
+              </div>
             </div>
             <div>
-              <div className="text-lg md:text-xl font-bold text-gray-900">
+              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                 {user.following?.length || 0}
               </div>
-              <div className="text-xs md:text-sm text-gray-500">Following</div>
+              <div className="text-[10px] sm:text-xs md:text-sm text-gray-500">
+                Following
+              </div>
             </div>
             <div>
-              <div className="text-lg md:text-xl font-bold text-gray-900">
+              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                 {totalPosts || 0}
               </div>
-              <div className="text-xs md:text-sm text-gray-500">Posts</div>
+              <div className="text-[10px] sm:text-xs md:text-sm text-gray-500">
+                Posts
+              </div>
             </div>
           </div>
           {user.bio && (
             <div>
-              <h3 className="text-xs md:text-sm font-medium text-gray-500">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-500">
                 Bio
               </h3>
-              <p className="mt-1 text-sm md:text-base text-gray-900">
+              <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base text-gray-900">
                 {user.bio}
               </p>
             </div>
           )}
           {user.interests && user.interests.length > 0 && (
             <div>
-              <h3 className="text-xs md:text-sm font-medium text-gray-500">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-500">
                 Interests
               </h3>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-1 sm:mt-2 flex flex-wrap gap-1 sm:gap-2">
                 {user.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
+                    className="bg-gray-100 text-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs"
                   >
                     {interest}
                   </span>
@@ -427,71 +420,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             </div>
           )}
-          {user.socialLinks &&
-            Object.values(user.socialLinks).some((link) => link) && (
-              <div>
-                <h3 className="text-xs md:text-sm font-medium text-gray-500">
-                  Connect
-                </h3>
-                <div className="mt-2 flex flex-wrap gap-3">
-                  {user.socialLinks.facebook && (
-                    <a
-                      href={`https://${user.socialLinks.facebook}`}
-                      className="text-blue-600 hover:text-blue-800 flex items-center text-xs md:text-sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                      <span>Facebook</span>
-                    </a>
-                  )}
-                  {user.socialLinks.twitter && (
-                    <a
-                      href={`https://${user.socialLinks.twitter}`}
-                      className="text-blue-400 hover:text-blue-600 flex items-center text-xs md:text-sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                      <span>Twitter</span>
-                    </a>
-                  )}
-                  {user.socialLinks.instagram && (
-                    <a
-                      href={`https://${user.socialLinks.instagram}`}
-                      className="text-pink-600 hover:text-pink-800 flex items-center text-xs md:text-sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                      <span>Instagram</span>
-                    </a>
-                  )}
-                  {user.socialLinks.linkedin && (
-                    <a
-                      href={`https://${user.socialLinks.linkedin}`}
-                      className="text-blue-700 hover:text-blue-900 flex items-center text-xs md:text-sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                      <span>LinkedIn</span>
-                    </a>
-                  )}
-                  {user.socialLinks.website && (
-                    <a
-                      href={`https://${user.socialLinks.website}`}
-                      className="text-gray-600 hover:text-gray-800 flex items-center text-xs md:text-sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                      <span>Website</span>
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
         </div>
       </div>
     </div>
