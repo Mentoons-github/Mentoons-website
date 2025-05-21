@@ -3,11 +3,11 @@ import {
   FaPaperPlane,
   FaImage,
   FaPaperclip,
-  FaSmile,
+  // FaSmile,
   FaMicrophone,
 } from "react-icons/fa";
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
+// import Picker from "@emoji-mart/react";
+// import data from "@emoji-mart/data";
 import axiosInstance from "@/api/axios";
 import { Friend, Message as MessageType } from "@/types";
 
@@ -20,7 +20,7 @@ const MessageBox = ({ selectedUser }: MessageBoxProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emojiShower, setEmojiShower] = useState(false);
+  // const [emojiShower, setEmojiShower] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -104,10 +104,10 @@ const MessageBox = ({ selectedUser }: MessageBoxProps) => {
     }
   };
 
-  const handleEmojiSelect = (emoji: any) => {
-    setNewMessage((prev) => prev + emoji.native);
-    setEmojiShower(false);
-  };
+  // const handleEmojiSelect = (emoji: any) => {
+  //   setNewMessage((prev) => prev + emoji.native);
+  //   setEmojiShower(false);
+  // };
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -394,7 +394,7 @@ const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         onSubmit={handleSendMessage}
         className="border-t p-3 bg-white flex items-center gap-2"
       >
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => setEmojiShower((prev) => !prev)}
             type="button"
@@ -415,7 +415,7 @@ const MessageBox = ({ selectedUser }: MessageBoxProps) => {
               />
             </div>
           )}
-        </div>
+        </div> */}
 
         <button
           type="button"
