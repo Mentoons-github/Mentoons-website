@@ -1,13 +1,13 @@
-import { useState } from "react";
-import Postings from "./Postings";
-import { IoChevronBack } from "react-icons/io5";
 import { RootState } from "@/redux/store";
-import { useSelector } from "react-redux";
-import { Button } from "../ui/button";
-import { JobApplicationForm } from "../shared/FAQSection/FAQCard";
-import { FaTimes } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
+import { useState } from "react";
+import { FaTimes } from "react-icons/fa";
+import { IoChevronBack } from "react-icons/io5";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { JobApplicationForm } from "../shared/FAQSection/FAQCard";
+import { Button } from "../ui/button";
+import Postings from "./Postings";
 
 const PostingContainer = () => {
   const navigate = useNavigate();

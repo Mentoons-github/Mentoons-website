@@ -1,3 +1,5 @@
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -37,6 +39,9 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
 
     if (subscriptionType === "platinum" || subscriptionType === "prime") {
       setOpen(true);
+    }
+    if (status === "Success") {
+      triggerReward(RewardEventType.PURCHASE_PRODUCT, orderId);
     }
   }, [searchParams]);
 
@@ -119,7 +124,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
 
   return (
     <motion.div
-      className="p-4 sm:p-6 md:p-10 max-w-4xl mx-auto bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl my-8"
+      className="max-w-4xl p-4 mx-auto my-8 shadow-xl sm:p-6 md:p-10 bg-gradient-to-br from-white to-gray-50 rounded-2xl"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -140,29 +145,29 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
         <h1 className={`text-3xl sm:text-4xl font-bold mb-4 ${theme.color}`}>
           {theme.title}
         </h1>
-        <p className="text-lg text-gray-700 mb-2">{theme.message}</p>
+        <p className="mb-2 text-lg text-gray-700">{theme.message}</p>
       </motion.div>
 
       {statusData.orderId && (
         <motion.div
-          className="mb-8 p-6 bg-white rounded-lg shadow-md"
+          className="p-6 mb-8 bg-white rounded-lg shadow-md"
           variants={itemVariants}
         >
-          <h2 className="text-2xl font-semibold mb-4 text-black">
+          <h2 className="mb-4 text-2xl font-semibold text-black">
             Order Details
           </h2>
           <div className="space-y-4">
-            <div className="flex justify-between border-b pb-3">
+            <div className="flex justify-between pb-3 border-b">
               <span className="text-gray-600">Order ID:</span>
               <span className="font-medium">{statusData.orderId}</span>
             </div>
             {statusData.trackingId && (
-              <div className="flex justify-between border-b pb-3">
+              <div className="flex justify-between pb-3 border-b">
                 <span className="text-gray-600">Tracking ID:</span>
                 <span className="font-medium">{statusData.trackingId}</span>
               </div>
             )}
-            <div className="flex justify-between border-b pb-3">
+            <div className="flex justify-between pb-3 border-b">
               <span className="text-gray-600">Status:</span>
               <span className={`font-medium ${theme.color}`}>
                 {statusData.status}
@@ -178,11 +183,11 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
         </motion.div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <motion.div variants={itemVariants} className="flex-1">
           <Link to="/mentoons-store" className="block">
             <motion.button
-              className="w-full px-5 py-4 bg-black text-white rounded-lg font-medium text-lg shadow-lg"
+              className="w-full px-5 py-4 text-lg font-medium text-white bg-black rounded-lg shadow-lg"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -196,7 +201,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
           <motion.div variants={itemVariants} className="flex-1">
             <Link to="/account/orders" className="block">
               <motion.button
-                className="w-full px-5 py-4 bg-white text-black border-2 border-black rounded-lg font-medium text-lg shadow-lg"
+                className="w-full px-5 py-4 text-lg font-medium text-black bg-white border-2 border-black rounded-lg shadow-lg"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -213,7 +218,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
           <motion.div variants={itemVariants} className="flex-1">
             <Link to="/checkout" className="block">
               <motion.button
-                className="w-full px-5 py-4 bg-white text-black border-2 border-black rounded-lg font-medium text-lg shadow-lg"
+                className="w-full px-5 py-4 text-lg font-medium text-black bg-white border-2 border-black rounded-lg shadow-lg"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15 }}

@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
-import { errorToast } from "@/utils/toastResposnse";
 import ArticleForm from "./components/ArticleForm";
 import EventForm from "./components/EventForm";
 import PreviewContent from "./components/PreviewContent";
@@ -29,6 +28,7 @@ const PostUpload = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setActiveTab(1);
@@ -103,7 +103,7 @@ const PostUpload = ({
       const fileType = isImage ? "image" : "video";
       console.log(`Detected file type: ${fileType} for file: ${file.name}`);
 
-      // Set basic file info first
+      // Set basic file info first and store the file for later upload
       const newMedia = [...values.media];
       newMedia[index] = {
         ...newMedia[index],
@@ -112,23 +112,7 @@ const PostUpload = ({
       };
       setFieldValue("media", newMedia);
 
-      // Always upload media files regardless of post type
-      console.log(`Uploading ${fileType} file to server...`);
-      const fileUrl = await uploadMediaFile(file);
-
-      console.log("File URL received from server:", fileUrl);
-      if (fileUrl) {
-        newMedia[index] = {
-          ...newMedia[index],
-          url: fileUrl,
-        };
-        console.log(newMedia);
-        setFieldValue("media", newMedia);
-        console.log(`Updated media[${index}] with URL:`, newMedia[index]);
-      } else {
-        errorToast("Failed to get URL for uploaded file");
-        console.error("Failed to get URL for uploaded file");
-      }
+      // Note: We're NOT uploading the file here anymore - that will happen on submit
     }
   };
 
@@ -156,6 +140,47 @@ const PostUpload = ({
     setMediaPreview(newPreviews);
   };
 
+  // Upload all media files at once when submitting
+  const uploadAllMedia = async (values: FormValues) => {
+    if (!values.media || values.media.length === 0) {
+      return values; // No media to upload
+    }
+
+    setIsUploading(true);
+    toast.info("Uploading media files...");
+
+    try {
+      const updatedValues = { ...values };
+      const updatedMedia = [...updatedValues.media];
+
+      // Upload all files that haven't been uploaded yet
+      const uploadPromises = updatedMedia.map(async (media, index) => {
+        if (media.file && !media.url) {
+          const url = await uploadMediaFile(media.file);
+          if (url) {
+            updatedMedia[index] = {
+              ...media,
+              url: url,
+            };
+          }
+          return url;
+        }
+        return media.url;
+      });
+
+      await Promise.all(uploadPromises);
+      updatedValues.media = updatedMedia;
+
+      return updatedValues;
+    } catch (error) {
+      console.error("Failed to upload media files:", error);
+      toast.error("Error uploading media files");
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (values: FormValues) => {
     console.log("🚨 ARTICLE SUBMISSION FUNCTION TRIGGERED 🚨");
     console.log("Post type:", postType);
@@ -168,6 +193,10 @@ const PostUpload = ({
 
     try {
       setIsSubmitting(true);
+
+      // First upload all media files
+      const valuesWithUploadedMedia = await uploadAllMedia(values);
+
       toast.info("Processing your post...");
 
       const token = await getToken();
@@ -178,9 +207,9 @@ const PostUpload = ({
       }
 
       console.log("=== ARTICLE POST SUBMISSION DEBUG INFO ===");
-      console.log("Form values:", values);
+      console.log("Form values:", valuesWithUploadedMedia);
       console.log("Post type:", postType);
-      console.log("Media objects:", values.media);
+      console.log("Media objects:", valuesWithUploadedMedia.media);
 
       // Create base post data
       const postData: {
@@ -206,12 +235,12 @@ const PostUpload = ({
           description: string;
         };
       } = {
-        title: values.title || "",
-        content: values.content || "",
+        title: valuesWithUploadedMedia.title || "",
+        content: valuesWithUploadedMedia.content || "",
         postType: postType,
-        location: values.location || "",
-        tags: values.tags || [],
-        visibility: values.visibility || "public",
+        location: valuesWithUploadedMedia.location || "",
+        tags: valuesWithUploadedMedia.tags || [],
+        visibility: valuesWithUploadedMedia.visibility || "public",
       };
 
       // Handle article post type specifically
@@ -219,17 +248,21 @@ const PostUpload = ({
         console.log("Processing ARTICLE post type");
         // Article-specific data
         postData.article = {
-          body: values.articleBody || "",
-          coverImage: values.media[0]?.url || "",
+          body: valuesWithUploadedMedia.articleBody || "",
+          coverImage: valuesWithUploadedMedia.media[0]?.url || "",
         };
 
         // Filter media if any exist (optional for articles)
-        if (values.media && values.media.length > 0 && values.media[0]?.url) {
+        if (
+          valuesWithUploadedMedia.media &&
+          valuesWithUploadedMedia.media.length > 0 &&
+          valuesWithUploadedMedia.media[0]?.url
+        ) {
           postData.media = [
             {
               type: "image",
-              caption: values.media[0]?.caption || "",
-              url: values.media[0]?.url || "",
+              caption: valuesWithUploadedMedia.media[0]?.caption || "",
+              url: valuesWithUploadedMedia.media[0]?.url || "",
             },
           ];
         } else {
@@ -240,14 +273,16 @@ const PostUpload = ({
       // Handle event post type
       else if (postType === "event") {
         postData.event = {
-          startDate: values.eventStartDate,
-          endDate: values.eventEndDate || values.eventStartDate,
-          venue: values.venue || "",
-          description: values.description || "",
+          startDate: valuesWithUploadedMedia.eventStartDate,
+          endDate:
+            valuesWithUploadedMedia.eventEndDate ||
+            valuesWithUploadedMedia.eventStartDate,
+          venue: valuesWithUploadedMedia.venue || "",
+          description: valuesWithUploadedMedia.description || "",
         };
 
         // Include media if available
-        postData.media = values.media
+        postData.media = valuesWithUploadedMedia.media
           .filter((m) => m.file && m.url)
           .map((m) => ({
             type: m.type,
@@ -257,9 +292,9 @@ const PostUpload = ({
       }
       // Handle other post types (photo, video, mixed)
       else {
-        console.log("media =====> ", values.media);
+        console.log("media =====> ", valuesWithUploadedMedia.media);
         // Include only valid media
-        postData.media = values.media
+        postData.media = valuesWithUploadedMedia.media
           .filter((m) => m.file && m.url)
           .map((m) => ({
             type: m.type,
@@ -321,77 +356,10 @@ const PostUpload = ({
     }
   };
 
-  const handleNextTab = (isValid: boolean, values: FormValues) => {
-    console.log("Next button clicked", { isValid, activeTab, postType });
-
-    // For article posts, we'll do our own validation
-    if (postType === "article") {
-      // Only on the first tab, check for required fields
-      if (activeTab === 1 && (!values.title || !values.articleBody)) {
-        toast.error("Please fill in the article title and body");
-        return;
-      }
-
-      // Otherwise, always allow moving to the next tab
-      const maxTab = 3;
-      if (activeTab < maxTab) {
-        setActiveTab(activeTab + 1);
-      }
-      return;
-    }
-
-    // For other post types, still move forward even if validation fails
-    // This ensures basic functionality works
-    const maxTab = 3;
-    if (activeTab < maxTab) {
-      setActiveTab(activeTab + 1);
-      // If form isn't valid, show a toast but still allow navigation
-      if (!isValid) {
-        toast.warning("Some fields may need your attention");
-      }
-    }
-  };
-
-  const handlePrevTab = () => {
-    if (activeTab > 1) {
-      setActiveTab(activeTab - 1);
-    }
-  };
-
-  const getPostTypeIcon = () => {
-    switch (postType) {
-      case "photo":
-        return <Image className="text-blue-500" size={24} />;
-      case "video":
-        return <Video className="text-purple-500" size={24} />;
-      case "event":
-        return <Calendar className="text-green-500" size={24} />;
-      case "article":
-        return <FileText className="text-orange-500" size={24} />;
-      case "mixed":
-        return <Edit className="text-indigo-500" size={24} />;
-      default:
-        return <Edit className="text-gray-500" size={24} />;
-    }
-  };
-
-  // Add a manual form submission handler that uses the formik reference
-  const handleManualSubmit = () => {
-    console.log("Manual submit triggered");
-    if (formikRef.current) {
-      console.log("Formik instance found, submitting form");
-      formikRef.current.submitForm();
-    } else {
-      console.error("Formik instance not found");
-      toast.error("Error: Form system not initialized");
-    }
-  };
-
   // Add a direct submission function that doesn't rely on Formik
   const submitArticleDirectly = async () => {
     try {
       setIsSubmitting(true);
-      toast.info("Submitting your article...");
 
       // Get form values directly from formikRef
       if (!formikRef.current) {
@@ -399,7 +367,11 @@ const PostUpload = ({
         return;
       }
 
+      // First upload any media files
       const values = formikRef.current.values;
+      const valuesWithUploadedMedia = await uploadAllMedia(values);
+
+      toast.info("Submitting your article...");
 
       const token = await getToken();
       if (!token) {
@@ -409,22 +381,22 @@ const PostUpload = ({
 
       // Prepare article data
       const articleData = {
-        title: values.title || "",
-        content: values.content || "",
+        title: valuesWithUploadedMedia.title || "",
+        content: valuesWithUploadedMedia.content || "",
         postType: "article",
-        location: values.location || "",
-        tags: values.tags || [],
-        visibility: values.visibility || "public",
+        location: valuesWithUploadedMedia.location || "",
+        tags: valuesWithUploadedMedia.tags || [],
+        visibility: valuesWithUploadedMedia.visibility || "public",
         article: {
-          body: values.articleBody || "",
-          coverImage: values.media[0]?.url || "",
+          body: valuesWithUploadedMedia.articleBody || "",
+          coverImage: valuesWithUploadedMedia.media[0]?.url || "",
         },
-        media: values.media[0]?.url
+        media: valuesWithUploadedMedia.media[0]?.url
           ? [
               {
                 type: "image",
-                caption: values.media[0]?.caption || "",
-                url: values.media[0]?.url,
+                caption: valuesWithUploadedMedia.media[0]?.caption || "",
+                url: valuesWithUploadedMedia.media[0]?.url,
               },
             ]
           : [],
@@ -460,6 +432,82 @@ const PostUpload = ({
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleNextTab = (isValid: boolean, values: FormValues) => {
+    console.log("Next button clicked", { isValid, activeTab, postType });
+
+    // For article posts, we'll do our own validation
+    if (postType === "article") {
+      // Only on the first tab, check for required fields
+      if (activeTab === 1 && (!values.title || !values.articleBody)) {
+        toast.error("Please fill in the article title and body");
+        return;
+      }
+
+      // Otherwise, always allow moving to the next tab
+      const maxTab = 3;
+      if (activeTab < maxTab) {
+        setActiveTab(activeTab + 1);
+      }
+      return;
+    }
+
+    if (postType === "text") {
+      setActiveTab(3);
+      return;
+    }
+
+    // For other post types, still move forward even if validation fails
+    // This ensures basic functionality works
+    const maxTab = 3;
+    if (activeTab < maxTab) {
+      setActiveTab(activeTab + 1);
+      // If form isn't valid, show a toast but still allow navigation
+      if (!isValid) {
+        toast.warning("Some fields may need your attention");
+      }
+    }
+  };
+
+  const handlePrevTab = () => {
+    if (activeTab > 1) {
+      setActiveTab(activeTab - 1);
+    }
+
+    if (postType === "text") {
+      setActiveTab(1);
+      return;
+    }
+  };
+
+  const getPostTypeIcon = () => {
+    switch (postType) {
+      case "photo":
+        return <Image className="text-blue-500" size={24} />;
+      case "video":
+        return <Video className="text-purple-500" size={24} />;
+      case "event":
+        return <Calendar className="text-green-500" size={24} />;
+      case "article":
+        return <FileText className="text-orange-500" size={24} />;
+      case "mixed":
+        return <Edit className="text-indigo-500" size={24} />;
+      default:
+        return <Edit className="text-gray-500" size={24} />;
+    }
+  };
+
+  // Add a manual form submission handler that uses the formik reference
+  const handleManualSubmit = () => {
+    console.log("Manual submit triggered");
+    if (formikRef.current) {
+      console.log("Formik instance found, submitting form");
+      formikRef.current.submitForm();
+    } else {
+      console.error("Formik instance not found");
+      toast.error("Error: Form system not initialized");
     }
   };
 
@@ -643,9 +691,13 @@ const PostUpload = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isUploading}
                       >
-                        {isSubmitting ? "Submitting..." : "Submit Post"}
+                        {isUploading
+                          ? "Uploading Media..."
+                          : isSubmitting
+                          ? "Submitting..."
+                          : "Submit Post"}
                       </motion.button>
                     )}
                   </div>

@@ -1,7 +1,5 @@
-import { useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
-import { triggerReward } from '@/utils/rewardMiddleware';
-import { RewardEventType } from '@/types/rewards';
+import { useUser } from "@clerk/clerk-react";
+import { useEffect } from "react";
 
 /**
  * Component to handle daily login rewards
@@ -15,15 +13,18 @@ const DailyLoginReward = () => {
     if (!isSignedIn || !user) return;
 
     // Check if we've already rewarded this user today
-    const lastLoginDate = localStorage.getItem('lastLoginRewardDate');
+    const lastLoginDate = localStorage.getItem("lastLoginRewardDate");
     const today = new Date().toDateString();
 
     // If no lastLoginDate or if it's a different day, reward the user
     if (lastLoginDate !== today) {
       // Add a small delay to ensure reward system is initialized
       const timer = setTimeout(() => {
-        triggerReward(RewardEventType.DAILY_LOGIN);
-        localStorage.setItem('lastLoginRewardDate', today);
+        // Use the global reward action handlers
+        if (window.rewardActions && window.rewardActions.dailyLogin) {
+          window.rewardActions.dailyLogin();
+        }
+        localStorage.setItem("lastLoginRewardDate", today);
       }, 3000);
 
       return () => clearTimeout(timer);
@@ -34,4 +35,4 @@ const DailyLoginReward = () => {
   return null;
 };
 
-export default DailyLoginReward; 
+export default DailyLoginReward;

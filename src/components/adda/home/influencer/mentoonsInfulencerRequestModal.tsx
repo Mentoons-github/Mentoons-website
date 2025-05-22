@@ -5,6 +5,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import axios from "axios";
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
@@ -114,6 +116,10 @@ const MentoonsInfulencerRequestModal = ({
         console.log(response.data.data);
 
         toast.success("Your application has been submitted successfully!");
+
+        // Trigger reward for successful application submission using middleware
+        triggerReward(RewardEventType.PROFILE_COMPLETION);
+
         setShowSuccessModal(true);
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -219,6 +225,15 @@ const MentoonsInfulencerRequestModal = ({
             Thank you for applying to become a Mentoons Influencer. We've
             received your application and will review it shortly.
           </p>
+
+          <div className="p-4 mb-4 text-left border border-green-200 rounded-lg bg-green-50">
+            <div className="flex items-center">
+              <FaCheck className="w-4 h-4 mr-2 text-green-600" />
+              <p className="text-sm font-medium text-green-800">
+                You've been awarded points for completing your profile!
+              </p>
+            </div>
+          </div>
 
           <div className="p-4 mb-6 text-left border border-orange-200 rounded-lg bg-orange-50">
             <h3 className="mb-2 text-sm font-semibold text-gray-700">
