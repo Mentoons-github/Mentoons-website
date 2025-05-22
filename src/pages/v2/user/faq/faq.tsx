@@ -40,8 +40,8 @@ const FAQ = ({ data }: { data: object }) => {
       const finalQueryType =
         queryType !== "general" ? queryType : dynamicQueryType;
       const queryResponse = await axios.post(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/query`, // Fixed the endpoint URL
-        "http://localhost:4000/api/v1/query", // Fixed the endpoint URL
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/query`, // Fixed the endpoint URL
+        // "http://localhost:4000/api/v1/query", // Fixed the endpoint URL
         {
           message: message,
           name: name,

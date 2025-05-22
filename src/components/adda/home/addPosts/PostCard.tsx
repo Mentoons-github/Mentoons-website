@@ -1,21 +1,21 @@
 import Highlight from "@/components/common/modal/highlight";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { Post } from "@/pages/v2/adda/userProfile";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { BsThreeDots } from "react-icons/bs";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { useStatusModal } from "@/context/adda/statusModalContext";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
-import { Post } from "@/pages/v2/adda/userProfile";
 
 export type PostType =
   | "text"
@@ -231,7 +231,7 @@ const PostCard = ({
         setCommentCount(serverComment.data.data.length);
 
         triggerReward(RewardEventType.COMMENT_POST, post._id);
-        toast.success("Comment added successfully");
+        // toast.success("Comment added successfully");
       }
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -283,9 +283,9 @@ const PostCard = ({
         triggerReward(RewardEventType.SHARE_PRODUCT, post._id);
       }
 
-      toast.success(
-        newSavedState ? "Post saved successfully" : "Post unsaved successfully"
-      );
+      // toast.success(
+      //   newSavedState ? "Post saved successfully" : "Post unsaved successfully"
+      // );
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
       setIsSavedPost(!newSavedState);

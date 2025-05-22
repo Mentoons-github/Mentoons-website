@@ -2,7 +2,8 @@ import ProductCard from "@/components/MentoonsStore/ProductCard";
 import AddToCartModal from "@/components/modals/AddToCartModal";
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
-import { PRODUCT_TYPE, WORKSHOP_FAQ } from "@/constant";
+import { PRODUCT_TYPE } from "@/constant";
+import { FAQ_PRODUCT_DETAILS } from "@/constant/faq";
 import { addItemCart } from "@/redux/cartSlice";
 import { fetchProductById, fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -18,7 +19,7 @@ import { formatDateString } from "@/utils/formateDate";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 
-import { Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, ZoomIn } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { IoIosCart } from "react-icons/io";
@@ -37,6 +38,12 @@ const ProductDetails = () => {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [message, setMessage] = useState<string>("");
+
+  // New state for image viewer
+  const [selectedImage, setSelectedImage] = useState<number>(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductBase>();
@@ -188,6 +195,35 @@ const ProductDetails = () => {
     }
   };
 
+  // Handle mouse movement for zoom effect
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current || !isZoomed) return;
+
+    const { left, top, width, height } =
+      imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+
+    setZoomPosition({ x, y });
+  };
+
+  // Function to handle thumbnail click
+  const handleThumbnailClick = (index: number) => {
+    setSelectedImage(index);
+  };
+
+  // Function to navigate to the next/previous image
+  const navigateImage = (direction: "next" | "prev") => {
+    if (!product || !product.productImages) return;
+
+    const imagesLength = product.productImages.length;
+    if (direction === "next") {
+      setSelectedImage((prev) => (prev + 1) % imagesLength);
+    } else {
+      setSelectedImage((prev) => (prev - 1 + imagesLength) % imagesLength);
+    }
+  };
+
   if (loading || !product) {
     return (
       <div className="w-[90%] mx-auto my-20 animate-pulse">
@@ -261,12 +297,88 @@ const ProductDetails = () => {
             {product?.description}
           </p>
         </div>
-        <div className="flex items-center justify-center flex-1 w-full h-[200px] sm:h-[300px] md:h-auto ">
-          <img
-            src={product?.productImages?.[0]?.imageUrl}
-            alt={product?.title || "Product image"}
-            className="object-contain w-full h-full md:object-cover"
-          />
+
+        {/* Product Image Viewer - Amazon Style */}
+        <div className="flex flex-col flex-1 w-full border border-red-500 ">
+          {/* Main Image Container */}
+          <div
+            ref={imageContainerRef}
+            className="relative w-full h-[300px] md:h-[500px] overflow-hidden border rounded-lg cursor-zoom-in"
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => setIsZoomed(false)}
+            onMouseMove={handleMouseMove}
+            onClick={() => setIsZoomed(!isZoomed)}
+          >
+            {/* Navigation buttons */}
+            {product?.productImages && product.productImages.length > 1 && (
+              <>
+                <button
+                  className="absolute z-10 p-2 transform -translate-y-1/2 bg-white rounded-full shadow-md opacity-80 hover:opacity-100 left-2 top-1/2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateImage("prev");
+                  }}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  className="absolute z-10 p-2 transform -translate-y-1/2 bg-white rounded-full shadow-md opacity-80 hover:opacity-100 right-2 top-1/2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateImage("next");
+                  }}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Zoom indicator */}
+            <div className="absolute z-10 p-1 bg-white rounded-full shadow-md opacity-80 top-2 right-2">
+              <ZoomIn className="w-4 h-4" />
+            </div>
+
+            {/* Main image */}
+            <img
+              src={product?.productImages?.[selectedImage]?.imageUrl}
+              alt={product?.title || "Product image"}
+              className={`object-contain w-full h-full transition-transform duration-200 ${
+                isZoomed ? "scale-150" : ""
+              }`}
+              style={
+                isZoomed
+                  ? {
+                      transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    }
+                  : {}
+              }
+            />
+          </div>
+
+          {/* Thumbnails */}
+          {product &&
+            product.productImages &&
+            product.productImages.length > 0 && (
+              <div className="flex justify-center mt-4 space-x-2 overflow-x-auto">
+                {product.productImages.map((image, index) => (
+                  <div
+                    key={`thumb-${index}`}
+                    className={`w-16 h-16 border-2 rounded cursor-pointer ${
+                      selectedImage === index
+                        ? "border-primary"
+                        : "border-transparent"
+                    } hover:border-primary transition-all`}
+                    onClick={() => handleThumbnailClick(index)}
+                  >
+                    <img
+                      src={image.imageUrl}
+                      alt={`${product.title} thumbnail ${index + 1}`}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
         </div>
       </div>
 
@@ -434,7 +546,7 @@ const ProductDetails = () => {
             <h2 className="mb-8 text-4xl font-semibold">
               You will also like this -
             </h2>
-            <div className="flex items-center justify-start gap-6 rounded-sm flex-wrap mb-8">
+            <div className="flex flex-wrap items-center justify-start gap-6 mb-8 rounded-sm">
               {PRODUCT_TYPE.map((type) => (
                 <button
                   key={type.id}
@@ -473,11 +585,11 @@ const ProductDetails = () => {
             {scrollPosition > 0 && (
               <button
                 onClick={() => handleScroll("left")}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+                className="absolute left-0 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 hover:bg-gray-100"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -495,7 +607,7 @@ const ProductDetails = () => {
             <div
               ref={scrollContainerRef}
               onScroll={checkScrollPosition}
-              className="flex overflow-x-scroll scrollbar-hide py-16"
+              className="flex py-16 overflow-x-scroll scrollbar-hide"
             >
               {recommendedProducts?.length > 0 ? (
                 recommendedProducts
@@ -511,11 +623,11 @@ const ProductDetails = () => {
                     );
                   })
               ) : (
-                <div className="w-full text-center p-8 rounded-lg bg-gray-50 border border-gray-200">
-                  <p className="text-lg text-gray-600 font-medium">
+                <div className="w-full p-8 text-center border border-gray-200 rounded-lg bg-gray-50">
+                  <p className="text-lg font-medium text-gray-600">
                     No products found in this category
                   </p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="mt-2 text-sm text-gray-400">
                     Try selecting a different category
                   </p>
                 </div>
@@ -528,11 +640,11 @@ const ProductDetails = () => {
                   scrollContainerRef.current.clientWidth && (
                 <button
                   onClick={() => handleScroll("right")}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
+                  className="absolute right-0 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 hover:bg-gray-100"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -556,7 +668,7 @@ const ProductDetails = () => {
           </h2>
           <div className="md:flex md:gap-8 ">
             <div className="flex flex-col flex-1 gap-4 mb-8 ">
-              {WORKSHOP_FAQ.map((faq, index) => (
+              {FAQ_PRODUCT_DETAILS.map((faq, index) => (
                 <FAQCard
                   key={faq.id}
                   faq={faq}

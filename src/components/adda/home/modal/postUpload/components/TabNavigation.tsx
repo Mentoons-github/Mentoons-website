@@ -12,6 +12,10 @@ const TabNavigation = ({
     return null;
   }
 
+  if (postType === "text") {
+    return null;
+  }
+
   return (
     <div className="flex justify-between w-full pb-4 mb-4 border-b dark:border-gray-700">
       {tabLabels.map((label, index) => (
