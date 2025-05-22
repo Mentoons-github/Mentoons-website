@@ -1,5 +1,7 @@
 import Likes from "@/components/adda/home/addPosts/likes/likes";
 import Share from "@/components/adda/home/addPosts/share/share";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -273,7 +275,8 @@ const PostDetailsPage = () => {
       );
       console.log(response.data);
       toast.success("Comment added successfully");
-
+      triggerReward(RewardEventType.COMMENT_POST
+        , postId);
       setNewComment("");
     } catch (err) {
       console.error("Error adding comment:", err);

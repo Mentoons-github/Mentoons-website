@@ -1,21 +1,21 @@
 import Highlight from "@/components/common/modal/highlight";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { Post } from "@/pages/v2/adda/userProfile";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiComment } from "react-icons/bi";
-import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { BsThreeDots } from "react-icons/bs"; // Import three dots icon
+import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { RiDeleteBin6Line } from "react-icons/ri"; // Import delete icon
 import { useNavigate } from "react-router-dom";
-import { useStatusModal } from "@/context/adda/statusModalContext";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
-import { Post } from "@/pages/v2/adda/userProfile";
 
 // Define the different post types
 export type PostType =

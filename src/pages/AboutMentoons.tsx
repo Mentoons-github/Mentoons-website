@@ -1,9 +1,10 @@
 import ProductDisplay from "@/components/mythos/about/ProductDisplay";
 import { ABOUT_HOW_IT_WORKS, ABOUT_WHAT_WE_OFFER } from "@/constant";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-import { FAQ_PRODUCT } from "@/constant/faq";
+import Team from "@/components/comics/Team";
+import { FAQ_ABOUT_US } from "@/constant/faq";
 import { useNavigate } from "react-router-dom";
 import FAQ from "../pages/v2/user/faq/faq";
 
@@ -218,8 +219,11 @@ const AboutMentoons = () => {
         </div>
       </section>
       <ProductDisplay />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Team />
+      </Suspense>
       <section className="py-12">
-        <FAQ data={FAQ_PRODUCT} />
+        <FAQ data={FAQ_ABOUT_US} />
       </section>
       {/* New Mentors Section */}
       {/*<section className="bg-[#B0E0E6]">

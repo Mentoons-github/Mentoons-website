@@ -1,30 +1,29 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useJobForm } from "@/utils/formik/jobAplpyForm";
+import { Position } from "@/components/assessment/weAreHiring";
 import { applyForJob } from "@/redux/careerSlice";
+import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch } from "@/redux/store";
-import { useDispatch } from "react-redux";
-import { NavLink } from "react-router-dom";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useJobForm } from "@/utils/formik/jobAplpyForm";
 import { useAuth } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
 import {
-  User,
+  AlertCircle,
   Calendar,
+  Check,
+  Edit3,
+  FileText,
+  Link,
+  Loader,
   Mail,
   Phone,
-  FileText,
-  Upload,
-  Check,
   Send,
-  Link,
+  Upload,
+  User,
   X,
-  Edit3,
-  Loader,
-  AlertCircle,
 } from "lucide-react";
-import { uploadFile } from "@/redux/fileUploadSlice";
-import { Position } from "@/components/assessment/weAreHiring";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const ResumeSubmissionModal = ({
   setIsOpen,
@@ -110,7 +109,7 @@ const ResumeSubmissionModal = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) setIsOpen(false);
       }}
@@ -120,12 +119,12 @@ const ResumeSubmissionModal = ({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 20 }}
         transition={{ type: "spring", damping: 20, stiffness: 300 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-3xl relative overflow-hidden border-t-4 border-yellow-500"
+        className="relative w-full max-w-3xl overflow-hidden bg-white border-t-4 border-yellow-500 shadow-2xl rounded-xl"
       >
         <motion.button
           whileHover={{ scale: 1.1, rotate: 90 }}
           whileTap={{ scale: 0.9 }}
-          className="absolute top-4 right-4 text-gray-600 hover:text-black bg-white rounded-full p-1 shadow-md z-10"
+          className="absolute z-10 p-1 text-gray-600 bg-white rounded-full shadow-md top-4 right-4 hover:text-black"
           onClick={() => setIsOpen(false)}
         >
           <X size={20} />
@@ -134,7 +133,7 @@ const ResumeSubmissionModal = ({
           className={`${gradientStyle} p-4 text-white relative overflow-hidden`}
         >
           <motion.div
-            className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mt-16 -mr-16"
+            className="absolute top-0 right-0 w-32 h-32 -mt-16 -mr-16 bg-white rounded-full opacity-10"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.1, 0.15, 0.1],
@@ -149,7 +148,7 @@ const ResumeSubmissionModal = ({
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-xl font-bold flex items-center justify-start gap-2 text-start text-white"
+            className="flex items-center justify-start gap-2 text-xl font-bold text-white text-start"
           >
             <FileText size={20} />
             Submit Your Resume for{" "}
@@ -159,7 +158,7 @@ const ResumeSubmissionModal = ({
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-yellow-100 mt-1 text-xs"
+            className="mt-1 text-xs text-yellow-100"
           >
             Complete the form below to apply
           </motion.p>
@@ -168,7 +167,7 @@ const ResumeSubmissionModal = ({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="p-8 flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center p-8"
           >
             <motion.div
               animate={
@@ -217,7 +216,7 @@ const ResumeSubmissionModal = ({
             </h3>
 
             {!isErrorMessage && (
-              <motion.div className="w-full max-w-md bg-gray-100 h-2 rounded-full overflow-hidden mb-4">
+              <motion.div className="w-full h-2 max-w-md mb-4 overflow-hidden bg-gray-100 rounded-full">
                 <motion.div
                   initial={{ width: "0%" }}
                   animate={{ width: `${(currentState + 1) * 33}%` }}
@@ -242,7 +241,7 @@ const ResumeSubmissionModal = ({
               <span>{loadingStatus[currentState]}</span>
             </motion.div>
 
-            <div className="mt-6 text-sm text-gray-500 text-center">
+            <div className="mt-6 text-sm text-center text-gray-500">
               {isErrorMessage ? (
                 <>
                   <p>
@@ -252,7 +251,7 @@ const ResumeSubmissionModal = ({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsloading(false)}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                    className="px-4 py-2 mt-4 text-white transition bg-blue-600 rounded-lg shadow hover:bg-blue-700"
                   >
                     Go Back
                   </motion.button>
@@ -272,7 +271,7 @@ const ResumeSubmissionModal = ({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 flex flex-col items-center justify-center text-center"
+            className="flex flex-col items-center justify-center p-6 text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -285,12 +284,12 @@ const ResumeSubmissionModal = ({
             <h3 className="text-xl font-semibold text-gray-800">
               Submission Successful!
             </h3>
-            <p className="text-gray-600 mt-2">
+            <p className="mt-2 text-gray-600">
               Thank you for your application. We'll review it shortly.
             </p>
             <NavLink
               to="/hiring"
-              className="mt-4 inline-block px-4 py-2 text-white bg-blue-600 rounded-lg shadow hover:bg-blue-700 transition"
+              className="inline-block px-4 py-2 mt-4 text-white transition bg-blue-600 rounded-lg shadow hover:bg-blue-700"
             >
               View Other Openings
             </NavLink>
@@ -299,28 +298,28 @@ const ResumeSubmissionModal = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 w-full max-w-md border border-gray-200 rounded-lg p-5 bg-white shadow-sm"
+              className="w-full max-w-md p-5 mt-8 bg-white border border-gray-200 rounded-lg shadow-sm"
             >
-              <h4 className="text-lg font-semibold text-gray-800 flex items-center justify-center gap-2">
+              <h4 className="flex items-center justify-center gap-2 text-lg font-semibold text-gray-800">
                 <Phone size={18} className="text-blue-600" />
                 Contact Us
               </h4>
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-3"></div>
-              <p className="text-gray-600 text-sm">
+              <div className="h-px my-3 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <p className="text-sm text-gray-600">
                 Have questions? We're here to help!
               </p>
 
-              <div className="mt-4 flex flex-col gap-3">
+              <div className="flex flex-col gap-3 mt-4">
                 <a
                   href="tel:9036033300"
-                  className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-50 transition group"
+                  className="flex items-center gap-3 p-2 transition rounded-md hover:bg-blue-50 group"
                 >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                  <div className="flex items-center justify-center w-10 h-10 transition bg-blue-100 rounded-full group-hover:bg-blue-200">
                     <Phone size={18} className="text-blue-600" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Phone</span>
-                    <span className="text-gray-800 font-medium">
+                    <span className="font-medium text-gray-800">
                       9036033300
                     </span>
                   </div>
@@ -328,14 +327,14 @@ const ResumeSubmissionModal = ({
 
                 <a
                   href="mailto:info@mentoons.com"
-                  className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-50 transition group"
+                  className="flex items-center gap-3 p-2 transition rounded-md hover:bg-blue-50 group"
                 >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                  <div className="flex items-center justify-center w-10 h-10 transition bg-blue-100 rounded-full group-hover:bg-blue-200">
                     <Mail size={18} className="text-blue-600" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Email</span>
-                    <span className="text-gray-800 font-medium">
+                    <span className="font-medium text-gray-800">
                       info@mentoons.com
                     </span>
                   </div>
@@ -354,7 +353,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <User size={14} className="mr-1 text-red-500" />
                   Full Name
@@ -383,7 +382,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="gender"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <Calendar size={14} className="mr-1 text-orange-500" />
                   Gender
@@ -418,7 +417,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <Mail size={14} className="mr-1 text-yellow-500" />
                   Email Address
@@ -447,7 +446,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <Phone size={14} className="mr-1 text-blue-500" />
                   Phone Number
@@ -476,7 +475,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="portfolioLink"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <Link size={14} className="mr-1 text-purple-500" />
                   Portfolio Link
@@ -507,7 +506,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="coverLetterLink"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <FileText size={14} className="mr-1 text-indigo-500" />
                   Cover Letter Link
@@ -539,7 +538,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="coverNote"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <Edit3 size={14} className="mr-1 text-green-500" />
                   Cover Note
@@ -570,7 +569,7 @@ const ResumeSubmissionModal = ({
               >
                 <label
                   htmlFor="resume"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="flex items-center block mb-1 text-sm font-medium text-gray-700"
                 >
                   <FileText size={14} className="mr-1 text-blue-500" />
                   Resume (PDF)

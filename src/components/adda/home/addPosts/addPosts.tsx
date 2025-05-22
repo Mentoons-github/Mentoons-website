@@ -2,9 +2,9 @@ import { PHOTO_POST } from "@/constant/constants";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
-import PostUpload from "../modal/postUpload";
-import { useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import PostUpload from "../modal/postUpload";
 
 interface PostData {
   _id: string;
@@ -53,11 +53,11 @@ const AddPosts = ({ setNewPost, onPostCreated }: AddPostsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
   const [selectedPostType, setSelectedPostType] = useState<
-    "photo" | "video" | "event" | "article" | null
+    "photo" | "video" | "event" | "article" | "text" | null
   >(null);
   const navigate = useNavigate();
 
-  const handlePost = (type: "photo" | "video" | "event" | "article") => {
+  const handlePost = (type: "photo" | "video" | "event" | "article" | "text") => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
@@ -101,7 +101,7 @@ const AddPosts = ({ setNewPost, onPostCreated }: AddPostsProps) => {
           </div>
 
           {/* Styled input field with proper height and background */}
-          <div className="flex-grow">
+          <div className="flex-grow" onClick={()=>handlePost("text")}>
             <input
               type="text"
               placeholder="What's in your mind?"

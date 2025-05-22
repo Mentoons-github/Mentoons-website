@@ -29,20 +29,7 @@ const RewardIntegrations: React.FC = () => {
   // Get relevant state from Redux
   const { userLoggedIn } = useSelector((state: RootState) => state.user);
 
-  // Daily login check
-  useEffect(() => {
-    if (userLoggedIn) {
-      const lastLoginDate = localStorage.getItem("lastLoginDate");
-      const today = new Date().toDateString();
-
-      if (lastLoginDate !== today) {
-        // Reward daily login
-        rewardDailyLogin();
-        showRewardNotification(RewardEventType.DAILY_LOGIN);
-        localStorage.setItem("lastLoginDate", today);
-      }
-    }
-  }, [userLoggedIn, rewardDailyLogin, showRewardNotification]);
+  // Daily login check is removed since it's handled by DailyLoginReward component
 
   // Expose reward action handlers to window for global access
   useEffect(() => {

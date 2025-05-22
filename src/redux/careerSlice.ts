@@ -1,5 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { HiringFormData } from "@/components/shared/FAQSection/FAQCard";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -45,6 +47,11 @@ export const applyForJob = createAsyncThunk(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/career/jobs/apply/${data.jobId}`,
         data.formData
       );
+
+      if (response.status === 200 || response.status === 201) {
+        triggerReward(RewardEventType.APPLY_JOB, response.data.jobId);
+      }
+
       return response.data;
     } catch (error) {
       throw new Error("Failed to apply for job");

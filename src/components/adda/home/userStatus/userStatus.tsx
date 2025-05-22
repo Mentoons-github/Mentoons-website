@@ -1,23 +1,23 @@
 import Status from "@/components/common/modal/status";
 import MediaPreviewModal from "@/components/modals/statusPreview";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import {
   createStatus,
-  fetchStatus,
   deleteStatus,
+  fetchStatus,
   sendWatchedStatus,
 } from "@/redux/adda/statusSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { UserStatusInterface } from "@/types";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
+import { NavLink } from "react-router-dom";
+import { toast } from "sonner";
 import { FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { toast } from "sonner";
-import { NavLink } from "react-router-dom";
-import { useAuthModal } from "@/context/adda/authModalContext";
 
 const UserStatus = () => {
   const { isSignedIn } = useUser();

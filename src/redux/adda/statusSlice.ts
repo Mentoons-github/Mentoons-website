@@ -1,14 +1,16 @@
 import axiosInstance from "@/api/axios";
 import {
-  UserStatusInterface,
   CreateStatusParams,
   DeleteStatusParams,
-  WatchStatusParams,
-  StatusApiResponse,
-  SingleStatusApiResponse,
   FileUploadResponse,
+  SingleStatusApiResponse,
+  StatusApiResponse,
   StatusState,
+  UserStatusInterface,
+  WatchStatusParams,
 } from "@/types";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
@@ -134,6 +136,11 @@ export const createStatus = createAsyncThunk<
             Authorization: `Bearer ${token}`,
           },
         }
+      );
+
+      triggerReward(
+        RewardEventType.CREATE_STATUS,
+        statusResponse.data.data._id
       );
 
       dispatch(fetchStatus(token));
