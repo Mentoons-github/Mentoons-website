@@ -1,14 +1,33 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 type WelcomeModalProps = {
-  onClose?: () => void;
+  onClose: () => void; // Made required
 };
 
 const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
+
+  const handleBrowsePlansClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (location.pathname !== "/mentoons") {
+      navigate("/mentoons");
+      setTimeout(() => scrollToSubscription(), 500);
+    } else {
+      scrollToSubscription();
+    }
+  };
+
+  const scrollToSubscription = () =>
+    document
+      .getElementById("subscription")
+      ?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
     const checkScrollable = () => {
@@ -74,6 +93,7 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
         <button
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 z-10"
           onClick={onClose}
+          aria-label="Close modal"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -102,6 +122,9 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
               alt="mentoons-logo"
               src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
               className="w-40 h-16 md:w-55 md:h-24"
+              onError={(e) =>
+                (e.currentTarget.src = "/assets/fallback-logo.png")
+              }
             />
           </motion.div>
 
@@ -138,8 +161,14 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
                   </svg>
                 </div>
                 <div>
-                  <span className="text-orange-500 font-bold">{key}</span>:{" "}
-                  {value}
+                  <NavLink
+                    to="/mentoons"
+                    onClick={handleBrowsePlansClick}
+                    className="text-orange-500 font-bold hover:underline"
+                  >
+                    {key}
+                  </NavLink>
+                  : {value}
                 </div>
               </li>
             ))}
@@ -155,9 +184,9 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
 
             <span className="text-orange-500 text-sm md:text-base">
               Already have an account?{" "}
-              <a href="/sign-in" className="underline">
+              <NavLink to="/sign-in" className="underline">
                 Log In
-              </a>
+              </NavLink>
             </span>
           </div>
 
@@ -168,7 +197,7 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
 
         {showScrollIndicator && (
           <div
-            className="hidden sm:flex absolute bottom-6 right-5 transform -translate-x-1/2 bg-orange-500 text-white px-3 py-2 rounded-full cursor-pointer shadow-lg items-center gap-2 animate-bounce hover:bg-orange-600 transition-colors"
+            className="flex absolute bottom-6 right-5 bg-orange-500 text-white px-3 py-2 rounded-full cursor-pointer shadow-lg items-center gap-2 animate-bounce hover:bg-orange-600 transition-colors"
             onClick={scrollToBottom}
           >
             <span className="text-sm font-medium">More content</span>

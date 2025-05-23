@@ -89,7 +89,7 @@ const Podcastv2 = () => {
   ) => {
     e.preventDefault();
     if (location.pathname !== "/") {
-      navigate("/");
+      navigate("/mentoons");
       setTimeout(() => scrollToSubscription(), 500);
     } else {
       scrollToSubscription();
