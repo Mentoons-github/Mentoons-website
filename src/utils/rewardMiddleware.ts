@@ -6,6 +6,8 @@ if (typeof window !== "undefined" && !window.rewardActions) {
   window.rewardActions = {
     likePost: (id: string) =>
       console.log("Reward action not fully initialized yet: likePost", id),
+    lovePost: (id: string) =>
+      console.log("Reward action not fully initialized yet: lovePost", id),
     commentPost: (id: string) =>
       console.log("Reward action not fully initialized yet: commentPost", id),
     sharePost: (id: string) =>
@@ -56,6 +58,9 @@ export const triggerReward = (
     switch (eventType) {
       case RewardEventType.LIKE_POST:
         window.rewardActions.likePost(referenceId || "");
+        break;
+      case RewardEventType.LOVE_POST:
+        window.rewardActions.lovePost(referenceId || "");
         break;
       case RewardEventType.COMMENT_POST:
         window.rewardActions.commentPost(referenceId || "");

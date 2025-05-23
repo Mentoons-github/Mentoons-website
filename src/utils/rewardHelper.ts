@@ -36,6 +36,8 @@ export const useRewardActions = () => {
     // Content interaction
     rewardLikePost: (postId: string) =>
       handleRewardAction(RewardEventType.LIKE_POST, postId),
+    rewardLovePost: (postId: string) =>
+      handleRewardAction(RewardEventType.LOVE_POST, postId),
     rewardCommentPost: (postId: string) =>
       handleRewardAction(RewardEventType.COMMENT_POST, postId),
     rewardSharePost: (postId: string) =>
@@ -82,6 +84,7 @@ export const getRewardEventLabel = (eventType: RewardEventType): string => {
     [RewardEventType.REGISTRATION]: "New Registration",
     [RewardEventType.PROFILE_COMPLETION]: "Profile Completion",
     [RewardEventType.LIKE_POST]: "Liked a Post",
+    [RewardEventType.LOVE_POST]: "Loved a Post",
     [RewardEventType.COMMENT_POST]: "Commented on a Post",
     [RewardEventType.SHARE_POST]: "Shared a Post",
     [RewardEventType.SAVED_POST]: "Saved a Post",

@@ -14,7 +14,7 @@ import { BsThreeDots } from "react-icons/bs";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Likes from "./likes/likes";
+import Reactions from "./likes/reactions";
 import Share from "./share/share";
 
 export type PostType =
@@ -563,7 +563,12 @@ const PostCard = ({
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            <Likes type="post" id={post._id} likeCount={post.likes.length} />
+            {/* <Likes type="post" id={post._id} likeCount={post.likes.length} /> */}
+            <Reactions
+              type="post"
+              id={post._id}
+              likeCount={post.likes.length}
+            />
             <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
