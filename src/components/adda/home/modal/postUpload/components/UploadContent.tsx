@@ -16,17 +16,25 @@ const UploadContent = ({
 }: UploadContentProps) => {
   const [localMediaPreview, setLocalMediaPreview] =
     useState<string[]>(mediaPreview);
+
   if (postType === "photo" || postType === "video") {
     return (
       <PhotoVideoForm
         postType={postType as "photo" | "video"}
-        mediaPreview={mediaPreview}
-        handleMediaUpload={handleMediaUpload}
+        mediaPreview={localMediaPreview}
+        handleMediaUpload={(e, setFieldValue) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleMediaUpload(e, setFieldValue);
+            const file = e.target.files[0];
+            const url = URL.createObjectURL(file);
+            setLocalMediaPreview([url]);
+          }
+        }}
         setFieldValue={setFieldValue}
+        setMediaPreview={setLocalMediaPreview}
       />
     );
   }
-  console.log(localMediaPreview);
 
   if (postType === "article") {
     return (
@@ -50,7 +58,14 @@ const UploadContent = ({
             accept="image/*"
             id="articleCoverImage"
             className="hidden"
-            onChange={(e) => handleMediaUpload(e, setFieldValue, 0)}
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleMediaUpload(e, setFieldValue, 0);
+                const file = e.target.files[0];
+                const url = URL.createObjectURL(file);
+                setLocalMediaPreview([url]);
+              }
+            }}
           />
 
           <motion.div
@@ -62,9 +77,9 @@ const UploadContent = ({
               htmlFor="articleCoverImage"
               className="flex flex-col items-center justify-center w-full h-48 px-4 py-2 text-gray-600 transition duration-200 border-2 border-gray-400 border-dashed rounded-lg cursor-pointer dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              {mediaPreview[0] ? (
+              {localMediaPreview[0] ? (
                 <motion.img
-                  src={mediaPreview[0]}
+                  src={localMediaPreview[0]}
                   alt="Article cover"
                   className="object-cover max-w-full rounded-md max-h-40"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -94,7 +109,7 @@ const UploadContent = ({
             </label>
           </motion.div>
 
-          {mediaPreview && mediaPreview.length > 0 && (
+          {localMediaPreview && localMediaPreview.length > 0 && (
             <div className="flex items-center justify-center mt-2">
               <motion.button
                 type="button"
@@ -103,11 +118,12 @@ const UploadContent = ({
                 className="flex items-center gap-1 px-3 py-1 text-xs text-red-500 border border-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
                 onClick={() => {
                   const newMedia = [...values.media];
+                  if (newMedia[0].url) {
+                    URL.revokeObjectURL(newMedia[0].url);
+                  }
                   newMedia[0] = { ...newMedia[0], file: null, url: undefined };
                   setFieldValue("media", newMedia);
-                  const newPreviews = [...mediaPreview];
-                  newPreviews[0] = "";
-                  setLocalMediaPreview(newPreviews);
+                  setLocalMediaPreview([]);
                 }}
               >
                 <X size={14} /> Remove image
@@ -117,7 +133,7 @@ const UploadContent = ({
 
           <div className="flex justify-between mt-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {mediaPreview[0] ? "Cover image added" : "No cover image"}
+              {localMediaPreview[0] ? "Cover image added" : "No cover image"}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Step 2 of 3
@@ -198,7 +214,15 @@ const UploadContent = ({
               <button
                 type="button"
                 className="text-red-500 hover:text-red-700"
-                onClick={() => removeMediaField(index, setFieldValue)}
+                onClick={() => {
+                  if (localMediaPreview[index]) {
+                    URL.revokeObjectURL(localMediaPreview[index]);
+                  }
+                  removeMediaField(index, setFieldValue);
+                  const newPreviews = [...localMediaPreview];
+                  newPreviews[index] = "";
+                  setLocalMediaPreview(newPreviews);
+                }}
               >
                 <X size={18} />
               </button>
@@ -210,7 +234,16 @@ const UploadContent = ({
             accept={media.type === "video" ? "video/*" : "image/*"}
             id={`mediaUpload-${index}`}
             className="hidden"
-            onChange={(e) => handleMediaUpload(e, setFieldValue, index)}
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleMediaUpload(e, setFieldValue, index);
+                const file = e.target.files[0];
+                const url = URL.createObjectURL(file);
+                const newPreviews = [...localMediaPreview];
+                newPreviews[index] = url;
+                setLocalMediaPreview(newPreviews);
+              }
+            }}
           />
 
           <motion.div
@@ -222,19 +255,34 @@ const UploadContent = ({
               htmlFor={`mediaUpload-${index}`}
               className="flex flex-col items-center justify-center w-full h-48 px-4 py-2 text-gray-600 transition duration-200 border-2 border-gray-400 border-dashed rounded-lg cursor-pointer dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              {mediaPreview[index] ? (
-                <motion.img
-                  src={mediaPreview[index]}
-                  alt="Preview"
-                  className="object-contain max-w-full rounded-md max-h-40"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                />
+              {localMediaPreview[index] ? (
+                media.type === "video" ? (
+                  <motion.video
+                    src={localMediaPreview[index]}
+                    controls
+                    className="object-contain max-w-full rounded-md max-h-40"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                  />
+                ) : (
+                  <motion.img
+                    src={localMediaPreview[index]}
+                    alt="Preview"
+                    className="object-contain max-w-full rounded-md max-h-40"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                  />
+                )
               ) : (
                 <motion.div
                   className="flex flex-col items-center gap-2"
@@ -292,7 +340,7 @@ const UploadContent = ({
           onClick={() => addMediaField(setFieldValue)}
           className="flex items-center justify-center gap-2 p-2 mt-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-700"
         >
-          + Add Another Media
+          sexes+ Add Another Media
         </motion.button>
       )}
     </div>

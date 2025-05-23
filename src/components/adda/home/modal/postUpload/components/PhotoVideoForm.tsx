@@ -5,6 +5,7 @@ import { MediaUploadProps } from "../types";
 
 interface PhotoVideoFormProps extends MediaUploadProps {
   postType: "photo" | "video";
+  setMediaPreview: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const PhotoVideoForm = ({
@@ -12,6 +13,7 @@ const PhotoVideoForm = ({
   mediaPreview,
   handleMediaUpload,
   setFieldValue,
+  setMediaPreview,
 }: PhotoVideoFormProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -23,7 +25,11 @@ const PhotoVideoForm = ({
         accept={postType === "video" ? "video/*" : "image/*"}
         id="mediaUpload"
         className="hidden"
-        onChange={(e) => handleMediaUpload(e, setFieldValue)}
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleMediaUpload(e, setFieldValue);
+          }
+        }}
       />
 
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -32,18 +38,33 @@ const PhotoVideoForm = ({
           className="flex flex-col items-center justify-center w-full h-64 px-4 py-2 text-gray-600 transition duration-200 border-2 border-gray-400 border-dashed rounded-lg cursor-pointer dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           {mediaPreview && mediaPreview.length > 0 ? (
-            <motion.img
-              src={mediaPreview[0]}
-              alt="Preview"
-              className="object-contain max-w-full rounded-md max-h-56"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-              }}
-            />
+            postType === "video" ? (
+              <motion.video
+                src={mediaPreview[0]}
+                controls
+                className="object-contain max-w-full rounded-md max-h-56"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                }}
+              />
+            ) : (
+              <motion.img
+                src={mediaPreview[0]}
+                alt="Preview"
+                className="object-contain max-w-full rounded-md max-h-56"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                }}
+              />
+            )
           ) : (
             <motion.div
               className="flex flex-col items-center gap-2"
@@ -72,9 +93,17 @@ const PhotoVideoForm = ({
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center self-center gap-1 text-red-500 hover:text-red-600"
           onClick={() => {
+            if (mediaPreview[0]) {
+              URL.revokeObjectURL(mediaPreview[0]);
+            }
             setFieldValue("media", [
-              { file: null, type: postType === "video" ? "video" : "image" },
+              {
+                file: null,
+                type: postType === "video" ? "video" : "image",
+                url: undefined,
+              },
             ]);
+            setMediaPreview([]);
             if (fileInputRef.current) fileInputRef.current.value = "";
           }}
         >

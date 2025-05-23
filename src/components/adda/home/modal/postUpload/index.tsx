@@ -50,6 +50,11 @@ const PostUpload = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
+  // Define handleTabChange function to fix the error
+  const handleTabChange = (tab: number) => {
+    setActiveTab(tab);
+  };
+
   if (!isOpen) return null;
 
   const uploadMediaFile = async (file: File) => {
@@ -68,8 +73,6 @@ const PostUpload = ({
           },
         }
       );
-
-      console.log(response);
 
       return response.data.data.fileDetails.url;
     } catch (error) {
@@ -111,8 +114,6 @@ const PostUpload = ({
         type: fileType,
       };
       setFieldValue("media", newMedia);
-
-      // Note: We're NOT uploading the file here anymore - that will happen on submit
     }
   };
 
@@ -140,10 +141,9 @@ const PostUpload = ({
     setMediaPreview(newPreviews);
   };
 
-  // Upload all media files at once when submitting
   const uploadAllMedia = async (values: FormValues) => {
     if (!values.media || values.media.length === 0) {
-      return values; // No media to upload
+      return values;
     }
 
     setIsUploading(true);
@@ -153,7 +153,6 @@ const PostUpload = ({
       const updatedValues = { ...values };
       const updatedMedia = [...updatedValues.media];
 
-      // Upload all files that haven't been uploaded yet
       const uploadPromises = updatedMedia.map(async (media, index) => {
         if (media.file && !media.url) {
           const url = await uploadMediaFile(media.file);
@@ -185,7 +184,6 @@ const PostUpload = ({
     console.log("🚨 ARTICLE SUBMISSION FUNCTION TRIGGERED 🚨");
     console.log("Post type:", postType);
 
-    // Prevent double submission
     if (isSubmitting) {
       console.log("Already submitting, skipping duplicate request");
       return;
@@ -194,7 +192,6 @@ const PostUpload = ({
     try {
       setIsSubmitting(true);
 
-      // First upload all media files
       const valuesWithUploadedMedia = await uploadAllMedia(values);
 
       toast.info("Processing your post...");
@@ -211,7 +208,6 @@ const PostUpload = ({
       console.log("Post type:", postType);
       console.log("Media objects:", valuesWithUploadedMedia.media);
 
-      // Create base post data
       const postData: {
         title: string;
         content: string;
@@ -243,16 +239,13 @@ const PostUpload = ({
         visibility: valuesWithUploadedMedia.visibility || "public",
       };
 
-      // Handle article post type specifically
       if (postType === "article") {
         console.log("Processing ARTICLE post type");
-        // Article-specific data
         postData.article = {
           body: valuesWithUploadedMedia.articleBody || "",
           coverImage: valuesWithUploadedMedia.media[0]?.url || "",
         };
 
-        // Filter media if any exist (optional for articles)
         if (
           valuesWithUploadedMedia.media &&
           valuesWithUploadedMedia.media.length > 0 &&
@@ -266,12 +259,9 @@ const PostUpload = ({
             },
           ];
         } else {
-          // Include empty media array for articles without cover image
           postData.media = [];
         }
-      }
-      // Handle event post type
-      else if (postType === "event") {
+      } else if (postType === "event") {
         postData.event = {
           startDate: valuesWithUploadedMedia.eventStartDate,
           endDate:
@@ -281,7 +271,6 @@ const PostUpload = ({
           description: valuesWithUploadedMedia.description || "",
         };
 
-        // Include media if available
         postData.media = valuesWithUploadedMedia.media
           .filter((m) => m.file && m.url)
           .map((m) => ({
@@ -289,11 +278,8 @@ const PostUpload = ({
             caption: m.caption || "",
             url: m.url || "",
           }));
-      }
-      // Handle other post types (photo, video, mixed)
-      else {
+      } else {
         console.log("media =====> ", valuesWithUploadedMedia.media);
-        // Include only valid media
         postData.media = valuesWithUploadedMedia.media
           .filter((m) => m.file && m.url)
           .map((m) => ({
@@ -307,9 +293,6 @@ const PostUpload = ({
         "Final post data to be submitted:",
         JSON.stringify(postData, null, 2)
       );
-
-      // API endpoint
-      // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
 
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
@@ -332,7 +315,6 @@ const PostUpload = ({
         setMediaPreview([]);
         setActiveTab(1);
 
-        // Call the onPostCreated callback if provided with the created post
         if (onPostCreated) {
           onPostCreated(response.data.data.post);
         }
@@ -343,7 +325,6 @@ const PostUpload = ({
       console.error("Post creation failed:", error);
       let errorMessage = "Unknown error";
 
-      // Type guard for Axios errors
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data?.message || error.message;
       } else if (error instanceof Error) {
@@ -356,18 +337,15 @@ const PostUpload = ({
     }
   };
 
-  // Add a direct submission function that doesn't rely on Formik
   const submitArticleDirectly = async () => {
     try {
       setIsSubmitting(true);
 
-      // Get form values directly from formikRef
       if (!formikRef.current) {
         toast.error("Form reference not available");
         return;
       }
 
-      // First upload any media files
       const values = formikRef.current.values;
       const valuesWithUploadedMedia = await uploadAllMedia(values);
 
@@ -379,7 +357,6 @@ const PostUpload = ({
         return;
       }
 
-      // Prepare article data
       const articleData = {
         title: valuesWithUploadedMedia.title || "",
         content: valuesWithUploadedMedia.content || "",
@@ -402,11 +379,8 @@ const PostUpload = ({
           : [],
       };
 
-      // API endpoint
-      // const apiUrl = "https://mentoons-backend-zlx3.onrender.com/api/v1/posts";
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
-      // Make the API call
       const response = await axios.post(apiUrl, articleData, {
         headers: {
           "Content-Type": "application/json",
@@ -422,7 +396,6 @@ const PostUpload = ({
         throw new Error(`Unexpected response status: ${response.status}`);
       }
     } catch (error) {
-      // Error handling
       if (axios.isAxiosError(error)) {
         toast.error(
           `Submission failed: ${error.response?.data?.message || error.message}`
@@ -438,15 +411,12 @@ const PostUpload = ({
   const handleNextTab = (isValid: boolean, values: FormValues) => {
     console.log("Next button clicked", { isValid, activeTab, postType });
 
-    // For article posts, we'll do our own validation
     if (postType === "article") {
-      // Only on the first tab, check for required fields
       if (activeTab === 1 && (!values.title || !values.articleBody)) {
         toast.error("Please fill in the article title and body");
         return;
       }
 
-      // Otherwise, always allow moving to the next tab
       const maxTab = 3;
       if (activeTab < maxTab) {
         setActiveTab(activeTab + 1);
@@ -459,12 +429,9 @@ const PostUpload = ({
       return;
     }
 
-    // For other post types, still move forward even if validation fails
-    // This ensures basic functionality works
     const maxTab = 3;
     if (activeTab < maxTab) {
       setActiveTab(activeTab + 1);
-      // If form isn't valid, show a toast but still allow navigation
       if (!isValid) {
         toast.warning("Some fields may need your attention");
       }
@@ -499,7 +466,6 @@ const PostUpload = ({
     }
   };
 
-  // Add a manual form submission handler that uses the formik reference
   const handleManualSubmit = () => {
     console.log("Manual submit triggered");
     if (formikRef.current) {
@@ -544,7 +510,6 @@ const PostUpload = ({
                 exit={{ scale: 0.9, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
               >
-                {/* Header */}
                 <div className="flex items-center justify-between w-full mb-4">
                   <div className="flex items-center gap-2">
                     {getPostTypeIcon()}
@@ -563,15 +528,13 @@ const PostUpload = ({
                   </motion.button>
                 </div>
 
-                {/* Tab Navigation */}
                 <TabNavigation
                   postType={postType}
                   activeTab={activeTab}
-                  setActiveTab={setActiveTab}
+                  setActiveTab={handleTabChange} // Use handleTabChange
                 />
 
                 <Form className="w-full">
-                  {/* Form Content */}
                   <div
                     className="flex flex-col items-center w-full py-4 mb-4"
                     style={{ minHeight: "300px" }}
@@ -618,16 +581,24 @@ const PostUpload = ({
                       )}
 
                       {activeTab === 3 && (
-                        <PreviewContent
-                          postType={postType}
-                          values={values}
-                          mediaPreview={mediaPreview}
-                        />
+                        <motion.div
+                          key="tab3"
+                          className="w-full h-full"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <PreviewContent
+                            postType={postType}
+                            values={values}
+                            mediaPreview={mediaPreview}
+                          />
+                        </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
 
-                  {/* Form Actions */}
                   <div className="flex gap-4 mt-auto">
                     {activeTab > 1 && (
                       <motion.button

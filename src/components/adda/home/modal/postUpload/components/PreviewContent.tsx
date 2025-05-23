@@ -21,13 +21,21 @@ const PreviewContent = ({
             Article Preview
           </h3>
 
-          {mediaPreview && mediaPreview.length > 0 && (
+          {mediaPreview && mediaPreview.length > 0 && values.media[0]?.type && (
             <div className="flex justify-center mb-4">
-              <img
-                src={mediaPreview[0]}
-                alt="Article Cover"
-                className="object-cover w-full rounded-lg shadow-md max-h-56"
-              />
+              {values.media[0].type === "image" ? (
+                <img
+                  src={mediaPreview[0]}
+                  alt="Article Cover"
+                  className="object-cover w-full rounded-lg shadow-md max-h-56"
+                />
+              ) : (
+                <video
+                  src={mediaPreview[0]}
+                  controls
+                  className="object-contain w-full rounded-lg shadow-md max-h-56"
+                />
+              )}
             </div>
           )}
 
@@ -69,13 +77,21 @@ const PreviewContent = ({
           Preview Your {postType}
         </h3>
 
-        {mediaPreview && mediaPreview.length > 0 && (
+        {mediaPreview && mediaPreview.length > 0 && values.media[0]?.type && (
           <div className="flex justify-center mb-4">
-            <img
-              src={mediaPreview[0]}
-              alt="Preview"
-              className="rounded-lg shadow-md max-h-48"
-            />
+            {values.media[0].type === "image" ? (
+              <img
+                src={mediaPreview[0]}
+                alt="Preview"
+                className="object-contain rounded-lg shadow-md max-h-48"
+              />
+            ) : (
+              <video
+                src={mediaPreview[0]}
+                controls
+                className="object-contain rounded-lg shadow-md max-h-48"
+              />
+            )}
           </div>
         )}
 

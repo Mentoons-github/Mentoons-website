@@ -32,6 +32,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import HowMentoonsWork from "./components/adda/home/howMentoonsWorks/mentoonsWorks.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -50,6 +51,10 @@ const routes = [
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },
+  {
+    path: "/mentoons-works",
+    element: <HowMentoonsWork />,
+  },
   {
     path: "/product-page",
     element: <ProductsPage />,

@@ -9,15 +9,14 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BiComment } from "react-icons/bi";
-import { BsThreeDots } from "react-icons/bs"; // Import three dots icon
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
-import { RiDeleteBin6Line } from "react-icons/ri"; // Import delete icon
+import { BsThreeDots } from "react-icons/bs";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Likes from "./likes/likes";
 import Share from "./share/share";
 
-// Define the different post types
 export type PostType =
   | "text"
   | "photo"
@@ -55,7 +54,7 @@ export interface PostData {
     coverImage: string;
   };
   likes: string[];
-  comments: Comment[]; // Using any[] as the Comment schema isn't provided
+  comments: Comment[];
   shares: string[];
   saves: number;
   tags?: string[];
@@ -69,7 +68,7 @@ interface PostCardProps {
   post: PostData;
   isUser?: boolean;
   setUserPosts?: React.Dispatch<React.SetStateAction<Post[]>>;
-  onDelete?: (postId: string) => void; // Added callback for delete functionality
+  onDelete?: (postId: string) => void;
 }
 
 interface Comment {
@@ -102,7 +101,6 @@ const PostCard = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { showStatus } = useStatusModal();
   const user = useUser();
-  console.log(user);
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
@@ -195,16 +193,15 @@ const PostCard = ({
     };
 
     try {
-      // First update UI immediately for better user experience
+      // Optimistically update UI
       setComments((prevComments) => [
         ...(Array.isArray(prevComments) ? prevComments : []),
         newCommentObj,
       ]);
-      // Immediately update the comment count
       setCommentCount((prev) => prev + 1);
-      setNewComment(""); // Clear input field immediately
+      setNewComment("");
 
-      // Then make API call
+      // Make API call
       const token = await getToken();
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/comments`,
@@ -220,7 +217,7 @@ const PostCard = ({
         }
       );
 
-      // If the API returns the updated comment, replace our temporary one with the server version
+      // Update with server response
       if (response.data && response.data.data) {
         const serverComment = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
@@ -230,26 +227,29 @@ const PostCard = ({
             },
           }
         );
-        // Replace the temporary comment with the server-returned one
         setComments(serverComment.data.data);
-        // Update comment count with the server data
         setCommentCount(serverComment.data.data.length);
 
-        // Trigger reward for commenting on a post
         triggerReward(RewardEventType.COMMENT_POST, post._id);
-
-        toast.success("Comment added successfully");
+        // toast.success("Comment added successfully");
       }
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment. Please try again.");
 
-      // Remove the optimistically added comment on error
+      // Revert optimistic update
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== tempId)
       );
-      // Revert the comment count on error
       setCommentCount((prev) => prev - 1);
+    }
+  };
+
+  // Handle Enter key press for comment submission
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent default Enter behavior (e.g., new line)
+      handleCommentSubmit();
     }
   };
 
@@ -279,24 +279,22 @@ const PostCard = ({
       );
       console.log(response.data);
 
-      // If the user is saving the post (not unsaving), reward them
       if (newSavedState) {
         triggerReward(RewardEventType.SHARE_PRODUCT, post._id);
       }
 
-      toast.success(
-        newSavedState ? "Post saved successfully" : "Post unsaved successfully"
-      );
+      // toast.success(
+      //   newSavedState ? "Post saved successfully" : "Post unsaved successfully"
+      // );
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
-      setIsSavedPost(!newSavedState); // Revert state on error
+      setIsSavedPost(!newSavedState);
       toast.error("Failed to update saved status. Please try again.");
     }
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    console.log(isUser);
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
@@ -317,8 +315,6 @@ const PostCard = ({
           }/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log(response);
-        console.log(response.data.data);
         setIsSavedPost(response.data.data);
       } catch (error) {
         console.error("Error checking saved post:", error);
@@ -565,7 +561,7 @@ const PostCard = ({
 
         {renderPostContent()}
 
-        <div className="flex items-center justify-between w-full ">
+        <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
             <Likes type="post" id={post._id} likeCount={post.likes.length} />
             <div className="flex items-center gap-2 sm:gap-3">
@@ -646,6 +642,7 @@ const PostCard = ({
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={handleKeyDown} // Added onKeyDown handler
                 className="flex-1 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Write a comment..."
               />

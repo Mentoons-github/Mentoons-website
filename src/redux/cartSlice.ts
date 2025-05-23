@@ -176,8 +176,8 @@ export const updateItemQuantity = createAsyncThunk(
   }) => {
     try {
       const response = await axios.patch(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
-        // "http://localhost:4000/api/v1/cart/update-quantity",
+        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
+        `${import.meta.env.VITE_PROD_URL}/cart/update-quantity`,
         {
           userId,
           productId,
@@ -211,7 +211,7 @@ export const applyCoupon = createAsyncThunk(
   }) => {
     try {
       const response = await axios.post(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/apply-coupon`, // Restore the API endpoint
+        `${import.meta.env.VITE_PROD_URL}/cart/apply-coupon`, // Restore the API endpoint
 
         {
           userId,
@@ -237,7 +237,7 @@ export const removeCoupon = createAsyncThunk(
   async ({ token, userId }: { token: string; userId: string }) => {
     try {
       const response = await axios.post(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove-coupon`,
+        `${import.meta.env.VITE_PROD_URL}/cart/remove-coupon`,
         {
           userId,
         },

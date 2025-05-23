@@ -60,9 +60,9 @@ const Likes = ({
         triggerReward(RewardEventType.LIKE_POST, id);
       }
 
-      toast.success(
-        newLikedState ? "Liked successfully" : "Reaction removed successfully"
-      );
+      // toast.success(
+      //   newLikedState ? "Liked successfully" : "Reaction removed successfully"
+      // );
     } catch (error) {
       console.error("Error updating reaction:", error);
       toast.error("Failed to update reaction. Please try again.");

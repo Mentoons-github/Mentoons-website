@@ -4,12 +4,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
-import { FollowBackUser } from "../home/friendRequest/friendRequests/requests";
 
 interface Friend {
   _id: string;
   name: string;
   picture: string;
+  status:
+    | "connect"
+    | "friends"
+    | "followBack"
+    | "pendingSent"
+    | "pendingReceived";
+  requestId?: string;
 }
 
 interface RequestSender {
@@ -49,6 +55,7 @@ const itemVariants = {
 interface FriendCardProps {
   friend: Friend;
   onSendRequest: (friendId: string) => void;
+  onCancelRequest: (requestId: string) => void;
   isConnecting: boolean;
   index: number;
 }
@@ -56,6 +63,7 @@ interface FriendCardProps {
 const FriendCard = ({
   friend,
   onSendRequest,
+  onCancelRequest,
   isConnecting,
   index,
 }: FriendCardProps) => {
@@ -76,24 +84,48 @@ const FriendCard = ({
         <h3 className="font-medium text-gray-800 text-sm mb-2 line-clamp-1">
           {friend.name}
         </h3>
-        <button
-          onClick={() => onSendRequest(friend._id)}
-          disabled={isConnecting}
-          className={`mt-auto w-full px-3 py-1 text-sm font-medium text-white ${
-            isConnecting
-              ? "bg-orange-400 cursor-not-allowed"
-              : "bg-orange-500 hover:bg-orange-600"
-          } rounded-full transition-colors duration-200`}
-        >
-          {isConnecting ? (
-            <div className="flex items-center justify-center gap-1">
-              <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-              <span>Connecting...</span>
+        {friend.status === "friends" ? (
+          <div className="mt-auto w-full px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-full">
+            Friends
+          </div>
+        ) : friend.status === "pendingSent" && friend.requestId ? (
+          <div className="mt-auto w-full flex flex-col gap-2">
+            <div className="w-full px-3 py-1 text-sm font-medium text-orange-600 bg-orange-100 rounded-full">
+              Request Sent
             </div>
-          ) : (
-            "Connect"
-          )}
-        </button>
+            <button
+              onClick={() => onCancelRequest(friend.requestId!)}
+              className="w-full px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors duration-200"
+            >
+              Cancel Request
+            </button>
+          </div>
+        ) : friend.status === "pendingReceived" ? (
+          <div className="mt-auto w-full px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded-full">
+            Request Pending
+          </div>
+        ) : (
+          <button
+            onClick={() => onSendRequest(friend._id)}
+            disabled={isConnecting || friend.status === "followBack"}
+            className={`mt-auto w-full px-3 py-1 text-sm font-medium text-white ${
+              isConnecting
+                ? "bg-orange-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
+            } rounded-full transition-colors duration-200`}
+          >
+            {isConnecting ? (
+              <div className="flex items-center justify-center gap-1">
+                <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                <span>Connecting...</span>
+              </div>
+            ) : friend.status === "followBack" ? (
+              "Follow Back"
+            ) : (
+              "Connect"
+            )}
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -106,8 +138,10 @@ const FriendSearch = () => {
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState<boolean>(true);
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [searchPage, setSearchPage] = useState<number>(1);
+  const [searchHasMore, setSearchHasMore] = useState<boolean>(true);
+  const [suggestionPage, setSuggestionPage] = useState<number>(1);
+  const [suggestionHasMore, setSuggestionHasMore] = useState<boolean>(true);
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
   const [connectingIds, setConnectingIds] = useState<string[]>([]);
@@ -115,10 +149,7 @@ const FriendSearch = () => {
   const [requests, setRequests] = useState<RequestSender[]>([]);
   const [requestCount, setRequestCount] = useState<number>(0);
   const [loadingRequests, setLoadingRequests] = useState<boolean>(false);
-  const [followBackUsers, setFollowBackUsers] = useState<
-    FollowBackUser[] | null
-  >(null);
-  const [followBackLoading, setFollowBackLoading] = useState(false);
+  const [isHeaderHovered, setIsHeaderHovered] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
@@ -126,53 +157,13 @@ const FriendSearch = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
 
-  const fetchFollowBackUsers = async () => {
-    setFollowBackLoading(true);
-    const token = await getToken();
-
-    try {
-      const response = await axiosInstance.get("/adda/getFollowBackUsers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log("Follow back users:", response.data.data);
-
-      if (response.data.success && response.data.data) {
-        const transformedUsers = response.data.data.map((user: any) => ({
-          _id: user._id,
-          name: user.name,
-          picture: user.picture,
-        }));
-
-        setFollowBackUsers(transformedUsers);
-      } else {
-        setFollowBackUsers([]);
-      }
-    } catch (error) {
-      console.error("Error fetching follow back users:", error);
-      setFollowBackUsers([]);
-    }
-
-    setFollowBackLoading(false);
-  };
-  useEffect(() => {
-    fetchFollowBackUsers();
-  }, []);
-
   const fetchFriendRequestCount = useCallback(async () => {
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
         "/adda/getMyFriendRequests?page=1&limit=1",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success) {
         setRequestCount(response.data.data.totalCount || 0);
       }
@@ -183,30 +174,20 @@ const FriendSearch = () => {
 
   useEffect(() => {
     fetchFriendRequestCount();
-    // Set up interval to refresh count every 30 seconds
     const intervalId = setInterval(fetchFriendRequestCount, 30000);
-
     return () => clearInterval(intervalId);
   }, [fetchFriendRequestCount]);
 
-  // Fetch friend requests
   const fetchRequests = async () => {
     if (loadingRequests) return;
     setLoadingRequests(true);
-
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
         "/adda/getMyFriendRequests?page=1&limit=10",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const { pendingReceived } = response.data.data;
-
       const transformedRequests = pendingReceived.map((data: any) => ({
         requestId: data._id,
         senderDetails: {
@@ -216,7 +197,6 @@ const FriendSearch = () => {
         },
         status: "pending",
       }));
-
       setRequests(transformedRequests);
       setRequestCount(transformedRequests.length);
     } catch (error) {
@@ -241,67 +221,63 @@ const FriendSearch = () => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
     if (debouncedQuery.trim() === "") {
       setSearchResults([]);
       setIsSearchMode(false);
+      setSearchPage(1);
+      setSearchHasMore(true);
       return;
     }
-
     setIsSearchMode(true);
     setLoadingSearch(true);
-
     const performSearch = async () => {
       try {
-        const results = await searchFriends(debouncedQuery);
-        setSearchResults(results);
+        console.log("Search query:", debouncedQuery);
+        const results = await searchFriends(debouncedQuery, searchPage);
+        console.log("Search results:", results);
+        setSearchResults((prev) =>
+          searchPage === 1
+            ? results.suggestions
+            : [...prev, ...results.suggestions]
+        );
+        setSearchHasMore(results.hasMore);
+        if (results.hasMore) {
+          setSearchPage((prev) => prev + 1);
+        }
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
         setLoadingSearch(false);
       }
     };
-
     performSearch();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, searchPage]);
 
   const fetchSuggestions = useCallback(async () => {
-    if (loadingSuggestions && page > 1) return;
-
+    if (loadingSuggestions && suggestionPage > 1) return;
     setLoadingSuggestions(true);
-
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
-        `/adda/requestSuggestions?page=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/adda/requestSuggestions?page=${suggestionPage}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const { suggestions: newSuggestions, hasMore: moreAvailable } =
         response.data.data;
-
-      setHasMore(moreAvailable);
-
+      setSuggestionHasMore(moreAvailable);
       if (newSuggestions && newSuggestions.length > 0) {
         setSuggestions((prev) =>
-          page === 1 ? newSuggestions : [...prev, ...newSuggestions]
+          suggestionPage === 1 ? newSuggestions : [...prev, ...newSuggestions]
         );
-
         if (moreAvailable) {
-          setPage((prev) => prev + 1);
+          setSuggestionPage((prev) => prev + 1);
         }
       } else if (!newSuggestions || newSuggestions.length === 0) {
-        if (page === 1) {
+        if (suggestionPage === 1) {
           setSuggestions([]);
         }
       }
@@ -311,63 +287,72 @@ const FriendSearch = () => {
     } finally {
       setLoadingSuggestions(false);
     }
-  }, [page, loadingSuggestions, getToken]);
+  }, [suggestionPage, loadingSuggestions, getToken]);
 
   useEffect(() => {
     fetchSuggestions();
   }, []);
 
-  const searchFriends = async (searchQuery: string): Promise<Friend[]> => {
-    if (!searchQuery.trim()) return [];
-
+  const searchFriends = async (searchQuery: string, page: number) => {
+    if (!searchQuery.trim()) return { suggestions: [], hasMore: false };
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
-        `/adda/requestSuggestions?page=1&search=${encodeURIComponent(
+        `/user/search-friend?page=${page}&search=${encodeURIComponent(
           searchQuery
         )}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      return response.data.data.suggestions || [];
+      return {
+        suggestions: response.data.data.suggestions || [],
+        hasMore: response.data.data.hasMore || false,
+      };
     } catch (error) {
       console.error("Search failed:", error);
       errorToast("Failed to search for users");
-      return [];
+      return { suggestions: [], hasMore: false };
     }
   };
 
   const handleSendRequest = useCallback(
     async (friendId: string) => {
       setConnectingIds((prev) => [...prev, friendId]);
-
       try {
         const token = await getToken();
         const response = await axiosInstance.post(
           `/adda/request/${friendId}`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
         if (response.data.success === true) {
           if (isSearchMode) {
-            setSearchResults((prev) => prev.filter((s) => s._id !== friendId));
+            setSearchResults((prev) =>
+              prev.map((s) =>
+                s._id === friendId
+                  ? {
+                      ...s,
+                      status: "pendingSent",
+                      requestId: response.data.data.requestId,
+                    }
+                  : s
+              )
+            );
           } else {
-            setSuggestions((prev) => prev.filter((s) => s._id !== friendId));
+            setSuggestions((prev) =>
+              prev.map((s) =>
+                s._id === friendId
+                  ? {
+                      ...s,
+                      status: "pendingSent",
+                      requestId: response.data.data.requestId,
+                    }
+                  : s
+              )
+            );
           }
-
           successToast("Friend request sent successfully");
-
-          if (!isSearchMode && suggestions.length <= 3 && hasMore) {
-            setPage(1);
+          if (!isSearchMode && suggestions.length <= 3 && suggestionHasMore) {
+            setSuggestionPage(1);
             fetchSuggestions();
           }
         }
@@ -382,45 +367,82 @@ const FriendSearch = () => {
       suggestions,
       searchResults,
       isSearchMode,
-      hasMore,
+      suggestionHasMore,
       getToken,
       fetchSuggestions,
     ]
   );
 
+  const handleCancelRequest = useCallback(
+    async (requestId: string) => {
+      try {
+        const token = await getToken();
+        const response = await axiosInstance.post(
+          `/adda/cancelRequest/${requestId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log("data ======================================>", response);
+        if (response.data.success === true) {
+          if (isSearchMode) {
+            setSearchResults((prev) =>
+              prev.map((s) =>
+                s.requestId === requestId
+                  ? { ...s, status: "connect", requestId: undefined }
+                  : s
+              )
+            );
+          } else {
+            setSuggestions((prev) =>
+              prev.map((s) =>
+                s.requestId === requestId
+                  ? { ...s, status: "connect", requestId: undefined }
+                  : s
+              )
+            );
+          }
+          successToast("Friend request cancelled successfully");
+        }
+      } catch (error) {
+        console.error("Failed to cancel friend request:", error);
+        errorToast("Failed to cancel friend request");
+      }
+    },
+    [isSearchMode]
+  );
+
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
+    setSearchPage(1);
   }, []);
 
   useEffect(() => {
-    if (isSearchMode || !hasMore) return;
-
+    if (isSearchMode || !suggestionHasMore) return;
     const options = {
       root: null,
       rootMargin: "0px",
       threshold: 0.5,
     };
-
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && hasMore && !loadingSuggestions) {
+      if (
+        entries[0].isIntersecting &&
+        suggestionHasMore &&
+        !loadingSuggestions
+      ) {
         fetchSuggestions();
       }
     };
-
     observer.current = new IntersectionObserver(handleObserver, options);
-
     if (loadMoreRef.current) {
       observer.current.observe(loadMoreRef.current);
     }
-
     return () => {
       if (observer.current) {
         observer.current.disconnect();
       }
     };
-  }, [hasMore, loadingSuggestions, isSearchMode, fetchSuggestions]);
+  }, [suggestionHasMore, loadingSuggestions, isSearchMode, fetchSuggestions]);
 
   useEffect(() => {
     if (showSearch && searchInputRef.current) {
@@ -438,6 +460,8 @@ const FriendSearch = () => {
       setQuery("");
       setSearchResults([]);
       setIsSearchMode(false);
+      setSearchPage(1);
+      setSearchHasMore(true);
     }
     if (showRequests) {
       setShowRequests(false);
@@ -452,35 +476,22 @@ const FriendSearch = () => {
           : request
       )
     );
-
     try {
       const token = await getToken();
       const response = await axiosInstance.patch(
         `/adda/acceptRequest/${requestId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success === true) {
         setRequests((prev) =>
           prev.map((request) =>
             request.requestId === requestId
-              ? {
-                  ...request,
-                  status: "accepted",
-                  message: "Request accepted!",
-                }
+              ? { ...request, status: "accepted", message: "Request accepted!" }
               : request
           )
         );
-
-        // Update request count
         setRequestCount((count) => Math.max(0, count - 1));
-
         setTimeout(() => {
           setRequests((prev) =>
             prev.filter((request) => request.requestId !== requestId)
@@ -507,35 +518,22 @@ const FriendSearch = () => {
           : request
       )
     );
-
     try {
       const token = await getToken();
       const response = await axiosInstance.patch(
         `/adda/rejectRequest/${requestId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success === true) {
         setRequests((prev) =>
           prev.map((request) =>
             request.requestId === requestId
-              ? {
-                  ...request,
-                  status: "declined",
-                  message: "Request declined",
-                }
+              ? { ...request, status: "declined", message: "Request declined" }
               : request
           )
         );
-
-        // Update request count
         setRequestCount((count) => Math.max(0, count - 1));
-
         setTimeout(() => {
           setRequests((prev) =>
             prev.filter((request) => request.requestId !== requestId)
@@ -554,108 +552,9 @@ const FriendSearch = () => {
     }
   };
 
-  const handleFollowBack = async (userId: string) => {
-    setFollowBackUsers((prev) =>
-      prev
-        ? prev.map((user) =>
-            user._id === userId
-              ? { ...user, status: "following-in-progress" }
-              : user
-          )
-        : null
-    );
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.post(
-        `/adda/request/${userId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response);
-      if (response.data.success) {
-        setFollowBackUsers((prev) =>
-          prev
-            ? prev.map((user) =>
-                user._id === userId
-                  ? { ...user, status: "following", message: "Following!" }
-                  : user
-              )
-            : null
-        );
-        setTimeout(() => {
-          setFollowBackUsers((prev) =>
-            prev ? prev.filter((user) => user._id !== userId) : null
-          );
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Error sending follow back request:", error);
-      setFollowBackUsers((prev) =>
-        prev
-          ? prev.map((user) =>
-              user._id === userId ? { ...user, status: undefined } : user
-            )
-          : null
-      );
-    }
-  };
-
-  const handleDeclineFollowBack = async (userId: string) => {
-    setFollowBackUsers((prev) =>
-      prev
-        ? prev.map((user) =>
-            user._id === userId ? { ...user, status: "declining" } : user
-          )
-        : null
-    );
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.post(
-        "/adda/declineFollowBack",
-        { targetUserId: userId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response);
-      if (response.data.success) {
-        setFollowBackUsers((prev) =>
-          prev
-            ? prev.map((user) =>
-                user._id === userId
-                  ? { ...user, status: "declined", message: "Declined!" }
-                  : user
-              )
-            : null
-        );
-        setTimeout(() => {
-          setFollowBackUsers((prev) =>
-            prev ? prev.filter((user) => user._id !== userId) : null
-          );
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Error declining follow back request:", error);
-      setFollowBackUsers((prev) =>
-        prev
-          ? prev.map((user) =>
-              user._id === userId ? { ...user, status: undefined } : user
-            )
-          : null
-      );
-    }
-  };
-
   const getCardClasses = (status?: string) => {
     const baseClasses =
       "flex flex-col w-full p-4 transition-all duration-300 border rounded-xl";
-
     switch (status) {
       case "accepting":
         return `${baseClasses} border-green-200 bg-green-50`;
@@ -672,7 +571,6 @@ const FriendSearch = () => {
 
   const getActionButtons = (request: RequestSender) => {
     const { status, requestId } = request;
-
     if (status === "accepting") {
       return (
         <div className="flex justify-center w-full py-2">
@@ -685,7 +583,6 @@ const FriendSearch = () => {
         </div>
       );
     }
-
     if (status === "declining") {
       return (
         <div className="flex justify-center w-full py-2">
@@ -698,7 +595,6 @@ const FriendSearch = () => {
         </div>
       );
     }
-
     if (status === "accepted") {
       return (
         <div className="flex justify-center w-full py-2">
@@ -720,7 +616,6 @@ const FriendSearch = () => {
         </div>
       );
     }
-
     if (status === "declined") {
       return (
         <div className="flex justify-center w-full py-2">
@@ -742,7 +637,6 @@ const FriendSearch = () => {
         </div>
       );
     }
-
     return (
       <div className="flex justify-between w-full gap-2">
         <button
@@ -811,8 +705,8 @@ const FriendSearch = () => {
       </p>
       <button
         onClick={() => {
-          setPage(1);
-          setHasMore(true);
+          setSuggestionPage(1);
+          setSuggestionHasMore(true);
           fetchSuggestions();
         }}
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-orange-500 rounded-lg hover:bg-orange-600"
@@ -863,7 +757,11 @@ const FriendSearch = () => {
 
   return (
     <div className="relative flex flex-col w-full max-w-3xl mx-auto bg-orange-50 min-h-screen p-4">
-      <div className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3">
+      <div
+        className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3 group"
+        onMouseEnter={() => setIsHeaderHovered(true)}
+        onMouseLeave={() => setIsHeaderHovered(false)}
+      >
         <div className="flex items-center justify-between">
           <button
             onClick={handleGoBack}
@@ -886,13 +784,13 @@ const FriendSearch = () => {
               <path d="M12 19l-7-7 7-7" />
             </svg>
           </button>
-
           <h1 className="text-lg font-semibold text-gray-800">Find Friends</h1>
-
           <div className="flex items-center gap-2">
             <button
               onClick={toggleRequestsPanel}
-              className="relative flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-colors"
+              className={`flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-opacity duration-200 ${
+                isHeaderHovered ? "opacity-100" : "opacity-0"
+              }`}
               aria-label="Friend Requests"
             >
               <svg
@@ -913,15 +811,20 @@ const FriendSearch = () => {
                 <line x1="23" y1="11" x2="17" y2="11"></line>
               </svg>
               {requestCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full">
+                <span
+                  className={`absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full transition-opacity duration-200 ${
+                    isHeaderHovered ? "opacity-100" : "opacity-0"
+                  }`}
+                >
                   {requestCount > 99 ? "99+" : requestCount}
                 </span>
               )}
             </button>
-
             <button
               onClick={toggleSearch}
-              className="flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-colors"
+              className={`flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-opacity duration-200 ${
+                isHeaderHovered ? "opacity-100" : "opacity-0"
+              }`}
               aria-label="Search"
             >
               <svg
@@ -942,7 +845,6 @@ const FriendSearch = () => {
             </button>
           </div>
         </div>
-
         <AnimatePresence>
           {showSearch && (
             <motion.div
@@ -982,6 +884,8 @@ const FriendSearch = () => {
                       setQuery("");
                       setSearchResults([]);
                       setIsSearchMode(false);
+                      setSearchPage(1);
+                      setSearchHasMore(true);
                     }}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                   >
@@ -1020,7 +924,6 @@ const FriendSearch = () => {
                 Friend Requests
               </h2>
             </div>
-
             <div className="max-h-96 overflow-y-auto p-4">
               {loadingRequests ? (
                 <div className="flex justify-center items-center py-6">
@@ -1061,157 +964,6 @@ const FriendSearch = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      {followBackUsers && followBackUsers.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow-md mb-4 overflow-hidden"
-        >
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800">Follow Back</h2>
-            <p className="text-sm text-gray-500">
-              These people follow you. Follow them back?
-            </p>
-          </div>
-          <div className="max-h-96 overflow-y-auto p-4">
-            {followBackLoading ? (
-              <div className="flex justify-center items-center py-6">
-                <div className="w-8 h-8 border-4 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {followBackUsers.map((user) => (
-                  <div
-                    key={user._id}
-                    className={`flex flex-col w-full p-4 transition-all duration-300 border rounded-xl ${
-                      user.status === "following-in-progress" ||
-                      user.status === "declining"
-                        ? "border-orange-200 bg-orange-50"
-                        : user.status === "following"
-                        ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
-                        : user.status === "declined"
-                        ? "border-red-300 bg-red-100 transform scale-95 opacity-80"
-                        : "border-orange-100 bg-white hover:shadow-md"
-                    }`}
-                  >
-                    <div className="flex items-center mb-4">
-                      <img
-                        src={user.picture}
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-orange-100"
-                      />
-                      <div className="ml-3 flex-1">
-                        <h3 className="font-medium text-gray-800">
-                          {user.name}
-                        </h3>
-                        {user.message && (
-                          <p className="text-sm text-gray-500">
-                            {user.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {user.status === "following-in-progress" ? (
-                      <div className="flex justify-center w-full py-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-                          <span className="text-sm font-medium text-orange-600">
-                            Following...
-                          </span>
-                        </div>
-                      </div>
-                    ) : user.status === "declining" ? (
-                      <div className="flex justify-center w-full py-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 border-2 rounded-full border-t-red-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-                          <span className="text-sm font-medium text-red-600">
-                            Declining...
-                          </span>
-                        </div>
-                      </div>
-                    ) : user.status === "following" ? (
-                      <div className="flex justify-center w-full py-2">
-                        <div className="flex items-center gap-2 text-green-600">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-5 h-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="font-medium">Following!</span>
-                        </div>
-                      </div>
-                    ) : user.status === "declined" ? (
-                      <div className="flex justify-center w-full py-2">
-                        <div className="flex items-center gap-2 text-red-600">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-5 h-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="font-medium">Declined!</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between w-full gap-2">
-                        <button
-                          onClick={() => handleFollowBack(user._id)}
-                          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-4 h-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Follow Back
-                        </button>
-                        <button
-                          onClick={() => handleDeclineFollowBack(user._id)}
-                          className="flex items-center justify-center flex-1 gap-1 px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg hover:bg-gray-200"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-4 h-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Decline
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      )}
       <div className="flex-1 overflow-y-auto">
         {isSearchMode ? (
           <div className="mb-6">
@@ -1235,9 +987,13 @@ const FriendSearch = () => {
                     index={index}
                     friend={friend}
                     onSendRequest={handleSendRequest}
+                    onCancelRequest={handleCancelRequest}
                     isConnecting={connectingIds.includes(friend._id)}
                   />
                 ))}
+                {searchHasMore && (
+                  <div ref={loadMoreRef} className="col-span-3 h-4" />
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -1266,7 +1022,6 @@ const FriendSearch = () => {
                     />
                   </svg>
                 </motion.div>
-
                 <motion.p
                   className="text-lg font-medium text-gray-600"
                   initial={{ opacity: 0 }}
@@ -1275,7 +1030,6 @@ const FriendSearch = () => {
                 >
                   No results found
                 </motion.p>
-
                 <motion.p
                   className="text-sm text-gray-400 mt-1"
                   initial={{ opacity: 0 }}
@@ -1285,6 +1039,17 @@ const FriendSearch = () => {
                   Try adjusting your search or filters
                 </motion.p>
               </motion.div>
+            )}
+            {loadingSearch && searchResults.length > 0 && (
+              <div className="flex justify-center p-4 mt-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                <span className="ml-2 text-gray-500">Loading more...</span>
+              </div>
+            )}
+            {!loadingSearch && !searchHasMore && searchResults.length > 0 && (
+              <div className="text-center p-4 mt-2">
+                <p className="text-gray-500">No more results</p>
+              </div>
             )}
           </div>
         ) : (
@@ -1309,30 +1074,30 @@ const FriendSearch = () => {
                     index={index}
                     friend={friend}
                     onSendRequest={handleSendRequest}
+                    onCancelRequest={handleCancelRequest}
                     isConnecting={connectingIds.includes(friend._id)}
                   />
                 ))}
-
-                {hasMore && (
+                {suggestionHasMore && (
                   <div ref={loadMoreRef} className="col-span-3 h-4" />
                 )}
               </motion.div>
             ) : (
               <EmptyState />
             )}
-
             {loadingSuggestions && suggestions.length > 0 && (
               <div className="flex justify-center p-4 mt-2">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                 <span className="ml-2 text-gray-500">Loading more...</span>
               </div>
             )}
-
-            {!loadingSuggestions && !hasMore && suggestions.length > 0 && (
-              <div className="text-center p-4 mt-2">
-                <p className="text-gray-500">That's everyone we know!</p>
-              </div>
-            )}
+            {!loadingSuggestions &&
+              !suggestionHasMore &&
+              suggestions.length > 0 && (
+                <div className="text-center p-4 mt-2">
+                  <p className="text-gray-500">That's everyone we know!</p>
+                </div>
+              )}
           </>
         )}
       </div>

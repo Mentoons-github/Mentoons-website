@@ -2,10 +2,16 @@ import { PLATINUM, PRIME } from "@/constant/constants";
 import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
 import MembershipCard from "../cards/membershipCard";
+import { NavLink } from "react-router-dom";
 
 const Membership = () => {
   const isMobile = window.innerWidth < 768;
   const { ref: sectionRef, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
+
+  const linkVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } },
+  };
 
   return (
     <section
@@ -106,6 +112,35 @@ const Membership = () => {
             <MembershipCard membership={data} key={index} />
           ))}
         </div>
+        <motion.div
+          variants={linkVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="mt-8"
+        >
+          <NavLink
+            to="/mentoons-works"
+            className="inline-flex items-center px-6 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all duration-300"
+            aria-label="Learn how Mentoons work"
+          >
+            <span>How Mentoons Work</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="ml-2 h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </NavLink>
+        </motion.div>
       </motion.div>
     </section>
   );
