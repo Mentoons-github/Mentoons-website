@@ -1,3 +1,5 @@
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useUser } from "@clerk/clerk-react";
 import * as pdfjsLib from "pdfjs-dist";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,15 +13,24 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 interface ComicViewerProps {
   pdfUrl: string;
   productType?: string;
+  productId?: string; // Add productId for reward tracking
 }
 
-const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
+const ComicViewer: React.FC<ComicViewerProps> = ({
+  pdfUrl,
+  productType,
+  productId,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const navigate = useNavigate();
+  const pagesViewedRef = useRef<Set<number>>(new Set());
+  const [readProgress, setReadProgress] = useState(0);
+  const [hasEarnedReward, setHasEarnedReward] = useState(false);
+  const [videoWatched, setVideoWatched] = useState(false);
 
   const { user } = useUser();
 
@@ -38,7 +49,13 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
       }
     };
 
-    loadPDF();
+    if (pdfUrl.toLowerCase().endsWith(".pdf")) {
+      loadPDF();
+      // Reset viewed pages when comic changes
+      pagesViewedRef.current = new Set([1]); // Mark first page as viewed
+      setReadProgress(0);
+      setHasEarnedReward(false);
+    }
   }, [pdfUrl]);
 
   useEffect(() => {
@@ -52,6 +69,20 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [currentPage, pdfDoc]);
+
+  // Update read progress whenever pages are viewed
+  useEffect(() => {
+    if (numPages > 0) {
+      const progress = (pagesViewedRef.current.size / numPages) * 100;
+      setReadProgress(Math.round(progress));
+
+      // Check if all pages have been viewed and reward hasn't been given yet
+      if (progress >= 100 && !hasEarnedReward && productId) {
+        triggerReward(RewardEventType.READ_COMIC, productId);
+        setHasEarnedReward(true);
+      }
+    }
+  }, [pagesViewedRef.current.size, numPages, hasEarnedReward, productId]);
 
   const renderPage = async (
     pageNum: number,
@@ -89,6 +120,10 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
     };
 
     await page.render(renderContext).promise;
+
+    // Add this page to viewed pages
+    pagesViewedRef.current.add(pageNum);
+    setReadProgress((pagesViewedRef.current.size / numPages) * 100);
   };
 
   const changePage = async (delta: number) => {
@@ -148,11 +183,32 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
         }).promise;
 
         printContainer.appendChild(canvas);
+        // Mark all pages as viewed when printing
+        pagesViewedRef.current.add(i);
+      }
+
+      // Update read progress after printing all pages
+      setReadProgress(100);
+
+      // Award points if user prints (which means they've viewed all pages)
+      if (productId && !hasEarnedReward) {
+        triggerReward(RewardEventType.READ_COMIC, productId);
+        setHasEarnedReward(true);
       }
 
       window.print();
     } finally {
       document.body.removeChild(printContainer);
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setVideoWatched(true);
+
+    // Trigger reward for audio comic completion
+    if (productId && !hasEarnedReward && productType === "Free") {
+      triggerReward(RewardEventType.LISTEN_AUDIO_COMIC, productId);
+      setHasEarnedReward(true);
     }
   };
 
@@ -185,6 +241,15 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
               .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(" ") || "View comic"}
           </h1>
+
+          {/* Read progress bar */}
+          <div className="w-full h-2 mb-4 bg-gray-200 rounded-full">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${readProgress}%` }}
+            ></div>
+          </div>
+
           <div
             ref={containerRef}
             className="relative flex items-center justify-center flex-1 overflow-hidden rounded-lg shadow-md bg-neutral-50"
@@ -263,16 +328,33 @@ const ComicViewer: React.FC<ComicViewerProps> = ({ pdfUrl, productType }) => {
               </svg>
             </button>
           </div>
+
+          {/* Reward message */}
+          {hasEarnedReward && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-green-700 animate-pulse">
+              <span className="font-medium">Congratulations!</span> You've
+              earned points for reading this comic!
+            </div>
+          )}
         </div>
       ) : pdfUrl &&
         pdfUrl.toLowerCase().endsWith(".mp4") &&
         productType === "Free" ? (
-        <div className="flex items-center justify-center w-full h-full p-6">
+        <div className="flex flex-col items-center justify-center w-full h-full p-6">
           <video
             controls
             className="w-full h-full rounded-lg shadow-md"
             src={pdfUrl}
+            onEnded={handleVideoEnded}
           />
+
+          {/* Video completion message */}
+          {videoWatched && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-green-700 animate-pulse">
+              <span className="font-medium">Congratulations!</span> You've
+              earned points for watching this audio comic!
+            </div>
+          )}
         </div>
       ) : (
         <div className="relative flex flex-col items-center justify-center h-full p-8 overflow-hidden text-center">

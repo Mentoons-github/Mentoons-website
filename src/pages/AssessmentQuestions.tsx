@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import Confetti from "react-confetti";
 import { useLocation, useNavigate } from "react-router-dom";
 
-
 import { toast } from "sonner";
 interface QuestionGallery {
   id: string;
@@ -138,7 +137,6 @@ const AssessmentQuestions: React.FC = () => {
       assessmentName: assessment,
     });
   };
-
 
   const handleAssessmentPayment = async () => {
     console.log("Assessment payment handling initiated");
