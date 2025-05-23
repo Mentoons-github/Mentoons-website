@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { BiComment } from "react-icons/bi";
-import { FaRegBookmark } from "react-icons/fa6";
+import { FaComment, FaRegBookmark } from "react-icons/fa6";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import Likes from "./likes/likes";
@@ -193,11 +192,7 @@ const ArticlePostCard = ({
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes
-            type="post"
-            id={post._id}
-            likeCount={post.likes.length}
-          />
+          <Likes type="post" id={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -206,10 +201,10 @@ const ArticlePostCard = ({
                 boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
               }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="flex items-center justify-center w-8 p-2 border border-gray-400 rounded-full sm:w-12 sm:h-12"
+              className="flex items-center justify-center w-8 p-1 border border-gray-400 rounded-full sm:w-12 sm:h-12"
               onClick={() => setShowComments(!showComments)}
             >
-              <BiComment className="w-4 text-yellow-500 sm:w-6 sm:h-6" />
+              <FaComment className="w-4 text-yellow-500 sm:w-6 sm:h-6" />
             </motion.button>
             <span className="text-[#605F5F] text-sm sm:text-base figtree">
               {comments.length}
@@ -234,7 +229,7 @@ const ArticlePostCard = ({
             <FaRegBookmark className="w-5 sm:w-6 sm:h-6 text-[#D56A11]" />
           </button>
           <span className="text-[#605F5F] text-sm sm:text-base figtree">
-            {post.shares.length}  
+            {post.shares.length}
           </span>
         </div>
       </div>

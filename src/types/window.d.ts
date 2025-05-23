@@ -1,5 +1,6 @@
 interface RewardActions {
   likePost: (postId: string) => void;
+  lovePost: (postId: string) => void;
   commentPost: (postId: string) => void;
   sharePost: (postId: string) => void;
   createStatus: (statusId: string) => void;
@@ -21,6 +22,7 @@ declare global {
   interface Window {
     rewardActions: {
       likePost: (referenceId: string) => void;
+      lovePost: (referenceId: string) => void;
       commentPost: (referenceId: string) => void;
       sharePost: (referenceId: string) => void;
       createStatus: (referenceId: string) => void;

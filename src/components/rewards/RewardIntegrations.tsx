@@ -9,6 +9,7 @@ const RewardIntegrations: React.FC = () => {
   const { showRewardNotification } = useRewardsContext();
   const {
     rewardLikePost,
+    rewardLovePost,
     rewardCommentPost,
     rewardSharePost,
     rewardCreateStatus,
@@ -39,6 +40,10 @@ const RewardIntegrations: React.FC = () => {
         likePost: (postId: string) => {
           rewardLikePost(postId);
           showRewardNotification(RewardEventType.LIKE_POST);
+        },
+        lovePost: (postId: string) => {
+          rewardLovePost(postId);
+          showRewardNotification(RewardEventType.LOVE_POST);
         },
         commentPost: (postId: string) => {
           rewardCommentPost(postId);
@@ -105,6 +110,7 @@ const RewardIntegrations: React.FC = () => {
   }, [
     userLoggedIn,
     rewardLikePost,
+    rewardLovePost,
     rewardCommentPost,
     rewardSharePost,
     rewardCreateStatus,

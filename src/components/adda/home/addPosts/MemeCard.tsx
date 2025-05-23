@@ -9,7 +9,7 @@ import { BiComment } from "react-icons/bi";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Likes from "./likes/likes";
+import Reactions from "./likes/reactions";
 import Share from "./share/share";
 
 export interface MemeData {
@@ -283,8 +283,9 @@ const MemeCard = ({ meme }: MemeCardProps) => {
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            <Likes type="meme" id={meme._id} likeCount={likeCount} />
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* <Likes type="meme" id={ meme._id } likeCount={ likeCount } /> */}
+            <Reactions type="meme" id={meme._id} likeCount={likeCount} />
+            <div className="flex items-center gap-1 sm:gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 whileHover={{

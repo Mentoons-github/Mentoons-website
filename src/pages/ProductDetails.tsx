@@ -299,11 +299,11 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Image Viewer - Amazon Style */}
-        <div className="flex flex-col flex-1 w-full border border-red-500 ">
+        <div className="flex flex-col flex-1 w-full border-[0.5px] border-gray-200 rounded-lg ">
           {/* Main Image Container */}
           <div
             ref={imageContainerRef}
-            className="relative w-full h-[300px] md:h-[500px] overflow-hidden border rounded-lg cursor-zoom-in"
+            className="relative w-full h-[300px] md:h-[500px] overflow-hidden  rounded-lg cursor-zoom-in"
             onMouseEnter={() => setIsZoomed(true)}
             onMouseLeave={() => setIsZoomed(false)}
             onMouseMove={handleMouseMove}
