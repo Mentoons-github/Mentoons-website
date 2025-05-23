@@ -55,7 +55,7 @@ const itemVariants = {
 interface FriendCardProps {
   friend: Friend;
   onSendRequest: (friendId: string) => void;
-  onCancelRequest: (requestId: string) => void;
+  onCancelRequest: (friendId: string) => void;
   isConnecting: boolean;
   index: number;
 }
@@ -88,13 +88,13 @@ const FriendCard = ({
           <div className="mt-auto w-full px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-full">
             Friends
           </div>
-        ) : friend.status === "pendingSent" && friend.requestId ? (
+        ) : friend.status === "pendingSent" ? (
           <div className="mt-auto w-full flex flex-col gap-2">
             <div className="w-full px-3 py-1 text-sm font-medium text-orange-600 bg-orange-100 rounded-full">
               Request Sent
             </div>
             <button
-              onClick={() => onCancelRequest(friend.requestId!)}
+              onClick={() => onCancelRequest(friend._id)}
               className="w-full px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors duration-200"
             >
               Cancel Request
@@ -324,7 +324,9 @@ const FriendSearch = () => {
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log("Send request response:", response.data); // Debugging log
         if (response.data.success === true) {
+          const requestId = response.data.data?.requestId; // Safely access requestId
           if (isSearchMode) {
             setSearchResults((prev) =>
               prev.map((s) =>
@@ -332,7 +334,7 @@ const FriendSearch = () => {
                   ? {
                       ...s,
                       status: "pendingSent",
-                      requestId: response.data.data.requestId,
+                      requestId: requestId || undefined, // Set requestId if available
                     }
                   : s
               )
@@ -344,7 +346,7 @@ const FriendSearch = () => {
                   ? {
                       ...s,
                       status: "pendingSent",
-                      requestId: response.data.data.requestId,
+                      requestId: requestId || undefined, // Set requestId if available
                     }
                   : s
               )
@@ -355,6 +357,9 @@ const FriendSearch = () => {
             setSuggestionPage(1);
             fetchSuggestions();
           }
+        } else {
+          console.error("Request failed:", response.data);
+          errorToast("Failed to send friend request");
         }
       } catch (error) {
         console.error("Failed to send friend request:", error);
@@ -374,20 +379,29 @@ const FriendSearch = () => {
   );
 
   const handleCancelRequest = useCallback(
-    async (requestId: string) => {
+    async (friendId: string) => {
+      const friend = isSearchMode
+        ? searchResults.find((s) => s._id === friendId)
+        : suggestions.find((s) => s._id === friendId);
+
+      if (!friend) {
+        errorToast("No friend found to cancel request");
+        return;
+      }
+
       try {
         const token = await getToken();
         const response = await axiosInstance.post(
-          `/adda/cancelRequest/${requestId}`,
+          `/adda/cancelRequest/${friendId}`,
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log("data ======================================>", response);
         if (response.data.success === true) {
           if (isSearchMode) {
             setSearchResults((prev) =>
               prev.map((s) =>
-                s.requestId === requestId
+                s._id === friendId
                   ? { ...s, status: "connect", requestId: undefined }
                   : s
               )
@@ -395,7 +409,7 @@ const FriendSearch = () => {
           } else {
             setSuggestions((prev) =>
               prev.map((s) =>
-                s.requestId === requestId
+                s._id === friendId
                   ? { ...s, status: "connect", requestId: undefined }
                   : s
               )
@@ -408,7 +422,7 @@ const FriendSearch = () => {
         errorToast("Failed to cancel friend request");
       }
     },
-    [isSearchMode]
+    [isSearchMode, suggestions, searchResults, getToken]
   );
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
