@@ -54,7 +54,7 @@ const RewardBadge: React.FC<RewardBadgeProps> = ({
       >
         <span className={sizeClasses[size].icon}>{tierStyle[tier].icon}</span>
       </div>
-      <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+      <div className="absolute px-2 py-1 mt-1 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 pointer-events-none top-full left-1/2 group-hover:opacity-100 whitespace-nowrap">
         {tierStyle[tier].label} Tier
       </div>
     </div>
