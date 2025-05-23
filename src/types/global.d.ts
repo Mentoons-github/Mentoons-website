@@ -2,6 +2,7 @@ declare global {
   interface Window {
     rewardActions?: {
       likePost: (id: string) => void;
+      lovePost: (id: string) => void;
       commentPost: (id: string) => void;
       sharePost: (id: string) => void;
       createStatus: (id: string) => void;

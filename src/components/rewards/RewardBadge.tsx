@@ -1,6 +1,6 @@
-import React from "react";
 import { RewardTier } from "@/types/rewards";
-import { FaStar, FaCrown, FaMedal } from "react-icons/fa";
+import React from "react";
+import { FaCrown, FaMedal, FaStar } from "react-icons/fa";
 
 interface RewardBadgeProps {
   tier: RewardTier;

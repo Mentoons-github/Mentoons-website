@@ -4,16 +4,47 @@ import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { PodcastProduct, ProductBase } from "@/types/productTypes";
+import { RewardEventType } from "@/types/rewards";
 import { ModalMessage, ProductType } from "@/utils/enum";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { IoCloseCircleOutline, IoPlay } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+// Interface for database user
+interface Subscription {
+  plan: string;
+  validUntil: string;
+  isActive: boolean;
+  consumedContent?: {
+    prime?: number;
+    platinum?: number;
+    lastResetDate?: string;
+  };
+}
+
+interface DBUser {
+  _id: string;
+  name: string;
+  email: string;
+  subscription: Subscription;
+  // Add other fields as needed
+}
+
+// Type to track podcast playback behavior
+interface PlaybackTrackingState {
+  startTime: number;
+  paused: boolean;
+  skipped: boolean;
+  podcastId: string;
+  podcastType: string;
+}
 
 const Podcastv2 = () => {
   const [selectedCategory, setSelectedCategory] = useState("mobile addiction");
@@ -36,6 +67,16 @@ const Podcastv2 = () => {
 
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [dbUser, setDbUser] = useState<DBUser | null>(null);
+
+  // State to track podcast playback behavior
+  const [playbackTracking, setPlaybackTracking] =
+    useState<PlaybackTrackingState | null>(null);
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
+  const [quotaModalMessage, setQuotaModalMessage] = useState("");
+  // Track if a modal has been shown recently to prevent multiple modals
+  const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
+
   const handleScroll = () => {
     const carousel = carouselRef.current;
     if (carousel) {
@@ -84,6 +125,61 @@ const Podcastv2 = () => {
       toast.error("Failed to submit message");
     }
   };
+
+  // Handle podcast completion to trigger reward
+  const handlePodcastCompletion = (podcastId: string, podcastType: string) => {
+    // Convert podcastType to lowercase for consistent comparison
+    podcastType = podcastType.toLowerCase();
+
+    // Only reward signed-in users with a valid subscription and within quota
+    if (isSignedIn && dbUser) {
+      const subscription = dbUser.subscription;
+
+      console.log("Podcast completion:", {
+        podcastId,
+        podcastType,
+        subscription,
+      });
+
+      // Only reward if user has proper subscription and within quota
+      if (hasQuotaForPodcastType(podcastType, subscription)) {
+        // Only reward if the podcast was played without skipping or pausing
+        if (
+          playbackTracking &&
+          playbackTracking.podcastId === podcastId &&
+          !playbackTracking.paused &&
+          !playbackTracking.skipped
+        ) {
+          // Increment consumption count for appropriate content type
+          if (podcastType !== "free") {
+            updateContentConsumption(podcastType);
+          }
+
+          // Log for debugging
+          console.log(
+            "Triggering reward for podcast completion:",
+            podcastId,
+            podcastType
+          );
+
+          // Trigger the reward using the built-in reward system
+          triggerReward(RewardEventType.LISTEN_PODCAST, podcastId);
+          toast.success("You earned points for completing this podcast!");
+        } else {
+          console.log(
+            "Podcast was paused, skipped, or tracking not initialized:",
+            playbackTracking
+          );
+        }
+      } else {
+        // Show appropriate quota message
+        const message = getQuotaMessage(podcastType, subscription);
+        setQuotaModalMessage(message);
+        setShowQuotaModal(true);
+      }
+    }
+  };
+
   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
@@ -177,6 +273,350 @@ const Podcastv2 = () => {
     console.log(filteredPodcast);
     setFilteredPodcast(filteredPodcast);
   }, [products, selectedCategory]);
+
+  const fetchDBUser = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data.data);
+      if (response.status === 200) {
+        setDbUser(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [user?.id, getToken]);
+
+  useEffect(() => {
+    fetchDBUser();
+  }, [fetchDBUser, user?.id, getToken]);
+
+  // Helper function to check if free subscription is within 3 days
+  const isFreePlanValid = useCallback(
+    (subscription: Subscription | undefined): boolean => {
+      if (!subscription) return false;
+      if (subscription.plan !== "free") return true; // Non-free plans are considered valid
+
+      // Check validity status directly if available
+      if (subscription.isActive === false) {
+        console.log("Free subscription explicitly marked as inactive");
+        return false;
+      }
+
+      // Check if within validity period
+      if (subscription.validUntil) {
+        const validUntil = new Date(subscription.validUntil);
+        const now = new Date();
+
+        // Debug log
+        console.log("Free subscription validity check:", {
+          validUntil: validUntil.toISOString(),
+          now: now.toISOString(),
+          isValid: now <= validUntil,
+        });
+
+        return now <= validUntil;
+      }
+
+      // Default to false if no validUntil date
+      console.log(
+        "Free subscription has no validUntil date, defaulting to invalid"
+      );
+      return false;
+    },
+    []
+  );
+
+  // Helper function to check if user has quota for podcast type
+  const hasQuotaForPodcastType = useCallback(
+    (podcastType: string, subscription: Subscription | undefined): boolean => {
+      if (!subscription) return false;
+
+      // Normalize both podcast type and subscription plan to lowercase for consistent comparison
+      const normalizedPodcastType = podcastType.toLowerCase();
+      const normalizedPlan = subscription.plan.toLowerCase();
+
+      console.log("Checking quota for:", {
+        podcastType: normalizedPodcastType,
+        subscriptionPlan: normalizedPlan,
+      });
+
+      // Initialize consumedContent if not exists
+      const consumedContent = subscription.consumedContent || {
+        prime: 0,
+        platinum: 0,
+      };
+
+      // Check if we need to reset monthly quota
+      const lastResetDate = consumedContent.lastResetDate
+        ? new Date(consumedContent.lastResetDate)
+        : null;
+      const currentDate = new Date();
+      const needsReset =
+        !lastResetDate ||
+        lastResetDate.getMonth() !== currentDate.getMonth() ||
+        lastResetDate.getFullYear() !== currentDate.getFullYear();
+
+      if (needsReset) {
+        // Would reset in the real implementation through API
+        console.log("Monthly quota reset needed");
+      }
+
+      // Check quota by subscription type
+      if (normalizedPlan === "free") {
+        // Free users can only access free content
+        const validFree = isFreePlanValid(subscription);
+        console.log("Free user has valid subscription:", validFree);
+        return normalizedPodcastType === "free" && validFree;
+      } else if (normalizedPlan === "prime") {
+        // Prime users can access free content and have quota for prime
+        if (normalizedPodcastType === "free") return true;
+        if (normalizedPodcastType === "prime") {
+          const hasQuota = (consumedContent.prime || 0) < 5;
+          console.log(
+            "Prime user consuming Prime content, has quota:",
+            hasQuota,
+            "consumed:",
+            consumedContent.prime
+          );
+          return hasQuota;
+        }
+        return false; // Cannot access Platinum
+      } else if (normalizedPlan === "platinum") {
+        // Platinum users can access all with quotas for Prime and Platinum
+        if (normalizedPodcastType === "free") return true;
+        if (normalizedPodcastType === "prime") {
+          const hasQuota = (consumedContent.prime || 0) < 5;
+          console.log(
+            "Platinum user consuming Prime content, has quota:",
+            hasQuota,
+            "consumed:",
+            consumedContent.prime
+          );
+          return hasQuota;
+        }
+        if (normalizedPodcastType === "platinum") {
+          const hasQuota = (consumedContent.platinum || 0) < 8;
+          console.log(
+            "Platinum user consuming Platinum content, has quota:",
+            hasQuota,
+            "consumed:",
+            consumedContent.platinum
+          );
+          return hasQuota;
+        }
+      }
+
+      return false;
+    },
+    [isFreePlanValid]
+  );
+
+  // Helper function to get quota message for a podcast type
+  const getQuotaMessage = useCallback(
+    (podcastType: string, subscription: Subscription | undefined): string => {
+      if (!subscription) return "Please subscribe to access this content";
+
+      // Normalize both podcast type and subscription plan to lowercase for consistent comparison
+      const normalizedPodcastType = podcastType.toLowerCase();
+      const normalizedPlan = subscription.plan.toLowerCase();
+
+      if (normalizedPlan === "free") {
+        if (
+          normalizedPodcastType === "prime" ||
+          normalizedPodcastType === "platinum"
+        ) {
+          return `Upgrade to ${normalizedPodcastType} subscription to access this content`;
+        }
+        if (!isFreePlanValid(subscription)) {
+          return "Your free trial has expired. Please upgrade to continue accessing content.";
+        }
+      } else if (normalizedPlan === "prime") {
+        if (normalizedPodcastType === "platinum") {
+          return "Upgrade to Platinum subscription to access this premium content";
+        }
+        if (
+          normalizedPodcastType === "prime" &&
+          (subscription.consumedContent?.prime || 0) >= 5
+        ) {
+          return "You've reached your monthly limit of 5 Prime podcasts. Please wait for next month or upgrade to Platinum.";
+        }
+      } else if (normalizedPlan === "platinum") {
+        if (
+          normalizedPodcastType === "prime" &&
+          (subscription.consumedContent?.prime || 0) >= 5
+        ) {
+          return "You've reached your monthly limit of 5 Prime podcasts. Please wait for next month.";
+        }
+        if (
+          normalizedPodcastType === "platinum" &&
+          (subscription.consumedContent?.platinum || 0) >= 8
+        ) {
+          return "You've reached your monthly limit of 8 Platinum podcasts. Please wait for next month.";
+        }
+      }
+
+      return "";
+    },
+    [isFreePlanValid]
+  );
+
+  // Helper function to update content consumption
+  const updateContentConsumption = useCallback(
+    async (podcastType: string) => {
+      if (!isSignedIn || !dbUser || !dbUser._id) return;
+
+      try {
+        // Update consumption count in localStorage
+        const consumptionKey = `${dbUser._id}_consumption`;
+        const storedConsumption = localStorage.getItem(consumptionKey);
+        const consumption = storedConsumption
+          ? JSON.parse(storedConsumption)
+          : {
+              prime: 0,
+              platinum: 0,
+            };
+
+        if (podcastType === "prime") {
+          consumption.prime += 1;
+        } else if (podcastType === "platinum") {
+          consumption.platinum += 1;
+        }
+
+        localStorage.setItem(consumptionKey, JSON.stringify(consumption));
+
+        // Update local state for immediate UI feedback
+        if (dbUser.subscription) {
+          const consumedContent = dbUser.subscription.consumedContent || {
+            prime: 0,
+            platinum: 0,
+          };
+          const updatedUser = { ...dbUser };
+
+          if (podcastType === "prime") {
+            updatedUser.subscription.consumedContent = {
+              ...consumedContent,
+              prime: (consumedContent.prime || 0) + 1,
+            };
+          } else if (podcastType === "platinum") {
+            updatedUser.subscription.consumedContent = {
+              ...consumedContent,
+              platinum: (consumedContent.platinum || 0) + 1,
+            };
+          }
+
+          setDbUser(updatedUser);
+        }
+
+        // Fetch the updated user data
+        fetchDBUser();
+      } catch (error) {
+        console.error("Error updating content consumption:", error);
+      }
+    },
+    [dbUser, isSignedIn, getToken, fetchDBUser]
+  );
+
+  // Centralized function to check subscription and control playback
+  const checkAccessAndControlPlayback = useCallback(
+    (podcast: ProductBase, audioElement?: HTMLAudioElement | null) => {
+      const podcastId = String(podcast._id);
+      // Ensure podcast_type is lowercase for consistent comparison
+      const podcastType = String(podcast.product_type || "free").toLowerCase();
+
+      console.log("Checking access for:", {
+        podcastType,
+        podcastTitle: podcast.title,
+        userSubscription: dbUser?.subscription?.plan,
+      });
+
+      // Check if user has quota for this podcast type
+      if (
+        isSignedIn &&
+        dbUser &&
+        !hasQuotaForPodcastType(podcastType, dbUser.subscription)
+      ) {
+        // Only show a modal if none has been shown in the last 5 seconds
+        const currentTime = Date.now();
+        if (currentTime - modalShownTimestamp > 5000) {
+          const message = getQuotaMessage(podcastType, dbUser.subscription);
+          setQuotaModalMessage(message);
+          setShowQuotaModal(true);
+          setModalShownTimestamp(currentTime);
+        }
+
+        // Pause audio if element is provided
+        if (audioElement && !audioElement.paused) {
+          audioElement.pause();
+          console.log(
+            `Paused podcast due to subscription restrictions: ${podcast.title}`
+          );
+
+          // For content outside subscription tier, set a 45-second preview
+          setTimeout(() => {
+            if (audioElement && !audioElement.paused) {
+              audioElement.pause();
+
+              // Only show modal if none shown in last 5 seconds
+              const timeNow = Date.now();
+              if (timeNow - modalShownTimestamp > 5000) {
+                const message = getQuotaMessage(
+                  podcastType,
+                  dbUser.subscription
+                );
+                setQuotaModalMessage(message);
+                setShowQuotaModal(true);
+                setModalShownTimestamp(timeNow);
+              }
+            }
+          }, 45000);
+          return false;
+        }
+        return false;
+      } else if (!isSignedIn && audioElement) {
+        // For non-signed in users, always set a 45 second preview
+        setTimeout(() => {
+          if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+
+            // Only show modal if none shown in last 5 seconds
+            const timeNow = Date.now();
+            if (timeNow - modalShownTimestamp > 5000) {
+              setShowMembershipModal(true);
+              setModalShownTimestamp(timeNow);
+            }
+          }
+        }, 45000);
+      }
+
+      // Initialize playback tracking for valid access
+      if (isSignedIn) {
+        setPlaybackTracking({
+          startTime: Date.now(),
+          paused: false,
+          skipped: false,
+          podcastId,
+          podcastType,
+        });
+      }
+
+      return true;
+    },
+    [
+      dbUser,
+      getQuotaMessage,
+      hasQuotaForPodcastType,
+      isSignedIn,
+      modalShownTimestamp,
+    ]
+  );
 
   return (
     <>
@@ -363,15 +803,23 @@ const Podcastv2 = () => {
               data-[badge=Free]:after:bg-gradient-to-r
               data-[badge=Free]:after:from-green-400
               data-[badge=Free]:after:to-green-500
-              
+              data-[badge=free]:after:bg-gradient-to-r
+              data-[badge=free]:after:from-green-400
+              data-[badge=free]:after:to-green-500
 
               data-[badge=Prime]:after:bg-gradient-to-r
               data-[badge=Prime]:after:from-yellow-400
               data-[badge=Prime]:after:to-orange-500
+              data-[badge=prime]:after:bg-gradient-to-r
+              data-[badge=prime]:after:from-yellow-400
+              data-[badge=prime]:after:to-orange-500
 
               data-[badge=Platinum]:after:bg-gradient-to-r
               data-[badge=Platinum]:after:from-gray-400
-              data-[badge=Platinum]:after:to-gray-500"
+              data-[badge=Platinum]:after:to-gray-500
+              data-[badge=platinum]:after:bg-gradient-to-r
+              data-[badge=platinum]:after:from-gray-400
+              data-[badge=platinum]:after:to-gray-500"
                           data-badge={
                             filteredPodcast[currentPodcastIndex].product_type ||
                             undefined
@@ -389,7 +837,7 @@ const Podcastv2 = () => {
                           <span className="font-medium tracking-wider opacity-80 text-md text-italic luckiest-guy-regular">
                             {(
                               filteredPodcast[currentPodcastIndex]
-                                ?.details as PodcastProduct["details"]
+                                .details as PodcastProduct["details"]
                             )?.host || "Mentoons"}
                           </span>
                         </div>
@@ -397,49 +845,68 @@ const Podcastv2 = () => {
                         <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20 ">
                           <audio
                             key={currentPodcastIndex}
-                            className="w-full "
+                            className="w-full"
                             controls
                             controlsList="nodownload"
                             preload="metadata"
                             src={
                               (
                                 filteredPodcast[currentPodcastIndex]
-                                  ?.details as PodcastProduct["details"]
+                                  .details as PodcastProduct["details"]
                               )?.sampleUrl || "#"
                             }
-                            ref={(audio) => {
-                              // Set up time restriction for non-subscribed users or free members
-                              if (audio) {
-                                if (!isSignedIn) {
-                                  // Not logged in users get 45 seconds
-                                  setTimeout(() => {
-                                    if (audio) {
-                                      audio.pause();
-                                      audio.currentTime = 0;
-                                    }
-                                    setShowMembershipModal(true);
-                                  }, 45000);
-                                  // Cleanup timer when audio element is removed/changed
-                                } else {
-                                  // Check if user has a free membership
-                                  const hasPaidMembership =
-                                    user?.publicMetadata?.membershipType &&
-                                    user.publicMetadata.membershipType !==
-                                      "Free";
+                            onPlay={(e) => {
+                              // Use centralized function to check access and control playback
+                              const hasAccess = checkAccessAndControlPlayback(
+                                filteredPodcast[currentPodcastIndex],
+                                e.currentTarget
+                              );
 
-                                  if (!hasPaidMembership) {
-                                    // Free members also get 45 seconds
-                                    setTimeout(() => {
-                                      if (audio) {
-                                        audio.pause();
-                                        audio.currentTime = 0;
-                                        setShowMembershipModal(true);
-                                      }
-                                    }, 45000); // 45 seconds
-                                  }
-                                  // Paid members get full audio
-                                }
+                              // If no access, prevent playback and reset state
+                              if (!hasAccess) {
+                                e.currentTarget.pause();
+                                setPlayingPodcastId(null);
                               }
+                            }}
+                            onPause={() => {
+                              // Mark as paused
+                              if (
+                                playbackTracking &&
+                                playbackTracking.podcastId ===
+                                  String(
+                                    filteredPodcast[currentPodcastIndex]._id
+                                  )
+                              ) {
+                                setPlaybackTracking((prev) =>
+                                  prev ? { ...prev, paused: true } : null
+                                );
+                              }
+                            }}
+                            onSeeked={() => {
+                              // Mark as skipped if user seeks
+                              if (
+                                playbackTracking &&
+                                playbackTracking.podcastId ===
+                                  String(
+                                    filteredPodcast[currentPodcastIndex]._id
+                                  )
+                              ) {
+                                setPlaybackTracking((prev) =>
+                                  prev ? { ...prev, skipped: true } : null
+                                );
+                              }
+                            }}
+                            onEnded={() => {
+                              setPlayingPodcastId(null);
+                              handlePodcastCompletion(
+                                String(
+                                  filteredPodcast[currentPodcastIndex]._id
+                                ),
+                                String(
+                                  filteredPodcast[currentPodcastIndex]
+                                    .product_type || "free"
+                                )
+                              );
                             }}
                           >
                             Your browser does not support the audio element.
@@ -592,42 +1059,47 @@ const Podcastv2 = () => {
                         }
                         autoPlay
                         controlsList="nodownload"
-                        onEnded={() => setPlayingPodcastId(null)}
-                        ref={(audio) => {
-                          // Set up time restriction for non-subscribed users or free members
-                          if (audio) {
-                            if (!isSignedIn) {
-                              // Not logged in users get 45 seconds
-                              setTimeout(() => {
-                                if (playingPodcastId === String(podcast._id)) {
-                                  audio.pause();
-                                  audio.currentTime = 0;
-                                  setPlayingPodcastId(null);
-                                  setShowMembershipModal(true);
-                                }
-                              }, 45000);
-                              // 45 seconds
-                            } else {
-                              // Check if user has a free membership
-                              const hasPaidMembership =
-                                user?.publicMetadata?.membershipType &&
-                                user.publicMetadata.membershipType !== "Free";
-                              if (!hasPaidMembership) {
-                                // Free members also get 45 seconds
-                                setTimeout(() => {
-                                  if (
-                                    playingPodcastId === String(podcast._id)
-                                  ) {
-                                    audio.pause();
-                                    audio.currentTime = 0;
-                                    setPlayingPodcastId(null);
-                                    setShowMembershipModal(true);
-                                  }
-                                }, 45000); // 45 seconds
-                              }
-                              // Paid members get full audio
-                            }
+                        onPlay={(e) => {
+                          // Use centralized function to check access and control playback
+                          const hasAccess = checkAccessAndControlPlayback(
+                            podcast,
+                            e.currentTarget
+                          );
+
+                          // If no access, prevent playback and reset state
+                          if (!hasAccess) {
+                            e.currentTarget.pause();
+                            setPlayingPodcastId(null);
                           }
+                        }}
+                        onPause={() => {
+                          // Mark as paused
+                          if (
+                            playbackTracking &&
+                            playbackTracking.podcastId === String(podcast._id)
+                          ) {
+                            setPlaybackTracking((prev) =>
+                              prev ? { ...prev, paused: true } : null
+                            );
+                          }
+                        }}
+                        onSeeked={() => {
+                          // Mark as skipped if user seeks
+                          if (
+                            playbackTracking &&
+                            playbackTracking.podcastId === String(podcast._id)
+                          ) {
+                            setPlaybackTracking((prev) =>
+                              prev ? { ...prev, skipped: true } : null
+                            );
+                          }
+                        }}
+                        onEnded={() => {
+                          setPlayingPodcastId(null);
+                          handlePodcastCompletion(
+                            String(podcast._id),
+                            String(podcast.product_type || "free")
+                          );
                         }}
                       />
                     )}
@@ -670,14 +1142,28 @@ const Podcastv2 = () => {
                           data-[type=Free]:from-green-400 
                           data-[type=Free]:to-green-500
                           data-[type=Free]:text-white
+                          data-[type=free]:bg-gradient-to-r
+                          data-[type=free]:from-green-400 
+                          data-[type=free]:to-green-500
+                          data-[type=free]:text-white
+
                           data-[type=Prime]:bg-gradient-to-r
                           data-[type=Prime]:from-yellow-400
                           data-[type=Prime]:to-orange-500 
                           data-[type=Prime]:text-white
+                          data-[type=prime]:bg-gradient-to-r
+                          data-[type=prime]:from-yellow-400
+                          data-[type=prime]:to-orange-500 
+                          data-[type=prime]:text-white
+                          
                           data-[type=Platinum]:bg-gradient-to-r
                           data-[type=Platinum]:from-gray-400
                           data-[type=Platinum]:to-gray-500
                           data-[type=Platinum]:text-white
+                          data-[type=platinum]:bg-gradient-to-r
+                          data-[type=platinum]:from-gray-400
+                          data-[type=platinum]:to-gray-500
+                          data-[type=platinum]:text-white
                         `}
                         data-type={podcast.product_type || undefined}
                       >
@@ -816,7 +1302,22 @@ const Podcastv2 = () => {
               stroke="currentColor"
               strokeWidth="8"
               strokeDasharray="10 15"
-            />
+            >
+              <animate
+                attributeName="r"
+                from="40"
+                to="65"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                from="0.8"
+                to="0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
           </svg>
           <svg
             className="absolute w-32 h-32 text-pink-400 right-10 bottom-10 opacity-20"
@@ -910,15 +1411,23 @@ const Podcastv2 = () => {
               data-[badge=Free]:after:bg-gradient-to-r
               data-[badge=Free]:after:from-green-400
               data-[badge=Free]:after:to-green-500
-              
+              data-[badge=free]:after:bg-gradient-to-r
+              data-[badge=free]:after:from-green-400
+              data-[badge=free]:after:to-green-500
 
               data-[badge=Prime]:after:bg-gradient-to-r
               data-[badge=Prime]:after:from-yellow-400
               data-[badge=Prime]:after:to-orange-500
+              data-[badge=prime]:after:bg-gradient-to-r
+              data-[badge=prime]:after:from-yellow-400
+              data-[badge=prime]:after:to-orange-500
 
               data-[badge=Platinum]:after:bg-gradient-to-r
               data-[badge=Platinum]:after:from-gray-400
-              data-[badge=Platinum]:after:to-gray-500"
+              data-[badge=Platinum]:after:to-gray-500
+              data-[badge=platinum]:after:bg-gradient-to-r
+              data-[badge=platinum]:after:from-gray-400
+              data-[badge=platinum]:after:to-gray-500"
                     data-badge={
                       filteredPodcast[currentPodcastIndex].product_type ||
                       undefined
@@ -1000,38 +1509,53 @@ const Podcastv2 = () => {
                         )?.sampleUrl || "#"
                       }
                       autoPlay
-                      onEnded={() => setPlayingPodcastId(null)}
-                      className="hidden"
-                      ref={(audio) => {
-                        // Set up time restriction for non-subscribed users or free members
-                        if (audio) {
-                          if (!isSignedIn) {
-                            // Not logged in users get 45 seconds
-                            setTimeout(() => {
-                              audio.pause();
-                              audio.currentTime = 0;
-                              setPlayingPodcastId(null);
-                              setShowMembershipModal(true);
-                            }, 45000); // 45 seconds
-                          } else {
-                            // Check if user has a free membership
-                            const hasPaidMembership =
-                              user?.publicMetadata?.membershipType &&
-                              user.publicMetadata.membershipType !== "free";
+                      onPlay={(e) => {
+                        // Use centralized function to check access and control playback
+                        const hasAccess = checkAccessAndControlPlayback(
+                          filteredPodcast[0],
+                          e.currentTarget
+                        );
 
-                            if (!hasPaidMembership) {
-                              // Free members also get 45 seconds
-                              setTimeout(() => {
-                                audio.pause();
-                                audio.currentTime = 0;
-                                setPlayingPodcastId(null);
-                                setShowMembershipModal(true);
-                              }, 45000); // 45 seconds
-                            }
-                            // Paid members get full audio
-                          }
+                        // If no access, prevent playback and reset state
+                        if (!hasAccess) {
+                          e.currentTarget.pause();
+                          setPlayingPodcastId(null);
                         }
                       }}
+                      onPause={() => {
+                        // Mark as paused
+                        if (
+                          playbackTracking &&
+                          playbackTracking.podcastId ===
+                            String(filteredPodcast[0]._id)
+                        ) {
+                          setPlaybackTracking((prev) =>
+                            prev ? { ...prev, paused: true } : null
+                          );
+                        }
+                      }}
+                      onSeeked={() => {
+                        // Mark as skipped if user seeks
+                        if (
+                          playbackTracking &&
+                          playbackTracking.podcastId ===
+                            String(filteredPodcast[0]._id)
+                        ) {
+                          setPlaybackTracking((prev) =>
+                            prev ? { ...prev, skipped: true } : null
+                          );
+                        }
+                      }}
+                      onEnded={() => {
+                        setPlayingPodcastId(null);
+                        if (filteredPodcast[0]) {
+                          handlePodcastCompletion(
+                            String(filteredPodcast[0]._id),
+                            String(filteredPodcast[0].product_type || "free")
+                          );
+                        }
+                      }}
+                      className="hidden"
                     />
                   )}
                 </div>
@@ -1232,6 +1756,44 @@ const Podcastv2 = () => {
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
+      )}
+
+      {/* Quota Modal */}
+      {showQuotaModal && (
+        <div
+          className="fixed inset-0 z-[999] bg-black bg-opacity-50 flex items-center justify-center"
+          onClick={() => setShowQuotaModal(false)}
+        >
+          <div
+            className="bg-white p-8 rounded-lg relative sm:max-w-[425px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-0 right-0 m-4 text-3xl rounded text-muted-foreground"
+              onClick={() => setShowQuotaModal(false)}
+            >
+              <IoCloseCircleOutline />
+            </button>
+            <div className="py-4 space-y-4">
+              <p className="text-2xl font-bold text-center text-muted-foreground">
+                Subscription Limit Reached
+              </p>
+              <p className="text-center text-md text-muted-foreground">
+                {quotaModalMessage}
+              </p>
+            </div>
+            <a
+              href={"#subscription"}
+              className="block w-full px-4 py-3 text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
+              onClick={(e) => {
+                setShowQuotaModal(false);
+                handleBrowsePlansClick(e);
+              }}
+            >
+              View Subscription Plans
+            </a>
+          </div>
+        </div>
       )}
     </>
   );

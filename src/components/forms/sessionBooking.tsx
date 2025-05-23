@@ -1,6 +1,6 @@
 import { useSessionForm } from "@/utils/formik/sessionForm";
-import { motion } from "framer-motion";
 import axios, { AxiosError } from "axios";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -94,21 +94,21 @@ const SessionBookingForm = ({
   return (
     <motion.form
       onSubmit={formik.handleSubmit}
-      className="space-y-6 mt-8 p-6 bg-white rounded-2xl shadow-lg"
+      className="p-6 mt-8 space-y-6 bg-white shadow-lg rounded-2xl"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2"
         variants={itemVariants}
       >
         <div className="group">
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+            className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
           >
-            <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+            <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
               👤
             </span>{" "}
             Full Name
@@ -121,7 +121,7 @@ const SessionBookingForm = ({
               value={formik.values.name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
             <motion.div
@@ -133,7 +133,7 @@ const SessionBookingForm = ({
           </div>
           {formik.touched.name && formik.errors.name && (
             <motion.p
-              className="text-red-500 text-sm mt-1"
+              className="mt-1 text-sm text-red-500"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
@@ -146,9 +146,9 @@ const SessionBookingForm = ({
         <div className="group">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+            className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
           >
-            <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+            <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
               ✉️
             </span>{" "}
             Email Address
@@ -161,7 +161,7 @@ const SessionBookingForm = ({
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
             <motion.div
@@ -173,7 +173,7 @@ const SessionBookingForm = ({
           </div>
           {formik.touched.email && formik.errors.email && (
             <motion.p
-              className="text-red-500 text-sm mt-1"
+              className="mt-1 text-sm text-red-500"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
@@ -185,15 +185,15 @@ const SessionBookingForm = ({
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2"
         variants={itemVariants}
       >
         <div className="group">
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+            className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
           >
-            <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+            <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
               📞
             </span>{" "}
             Phone Number
@@ -206,7 +206,7 @@ const SessionBookingForm = ({
               value={formik.values.phone}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
             <motion.div
@@ -218,7 +218,7 @@ const SessionBookingForm = ({
           </div>
           {formik.touched.phone && formik.errors.phone && (
             <motion.p
-              className="text-red-500 text-sm mt-1"
+              className="mt-1 text-sm text-red-500"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
@@ -231,9 +231,9 @@ const SessionBookingForm = ({
         <div className="group">
           <label
             htmlFor="selectedDate"
-            className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+            className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
           >
-            <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+            <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
               📅
             </span>{" "}
             Select Date
@@ -246,7 +246,7 @@ const SessionBookingForm = ({
               value={formik.values.selectedDate}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               min={new Date().toISOString().split("T")[0]}
             />
@@ -259,7 +259,7 @@ const SessionBookingForm = ({
           </div>
           {formik.touched.selectedDate && formik.errors.selectedDate && (
             <motion.p
-              className="text-red-500 text-sm mt-1"
+              className="mt-1 text-sm text-red-500"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
@@ -273,9 +273,9 @@ const SessionBookingForm = ({
       <motion.div variants={itemVariants} className="group">
         <label
           htmlFor="selectedTime"
-          className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+          className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
         >
-          <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+          <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
             🕒
           </span>{" "}
           Select Time
@@ -288,7 +288,7 @@ const SessionBookingForm = ({
             value={formik.values.selectedTime}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
             step="900"
           />
@@ -301,7 +301,7 @@ const SessionBookingForm = ({
         </div>
         {formik.touched.selectedTime && formik.errors.selectedTime && (
           <motion.p
-            className="text-red-500 text-sm mt-1"
+            className="mt-1 text-sm text-red-500"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2 }}
@@ -314,9 +314,9 @@ const SessionBookingForm = ({
       <motion.div variants={itemVariants} className="group">
         <label
           htmlFor="state"
-          className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+          className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
         >
-          <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+          <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
             🏙️
           </span>{" "}
           Select State
@@ -328,7 +328,7 @@ const SessionBookingForm = ({
             value={formik.values.state || ""}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none"
+            className="w-full px-4 py-3 transition-all duration-200 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="" disabled>
@@ -365,7 +365,7 @@ const SessionBookingForm = ({
         </div>
         {formik.touched.state && formik.errors.state && (
           <motion.p
-            className="text-red-500 text-sm mt-1"
+            className="mt-1 text-sm text-red-500"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2 }}
@@ -378,9 +378,9 @@ const SessionBookingForm = ({
       <motion.div variants={itemVariants} className="group">
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-2 font-inter group-focus-within:text-blue-600 transition-colors duration-200"
+          className="block mb-2 text-sm font-medium text-gray-700 transition-colors duration-200 font-inter group-focus-within:text-blue-600"
         >
-          <span className="inline-block transform transition-transform group-hover:scale-110 duration-200">
+          <span className="inline-block transition-transform duration-200 transform group-hover:scale-110">
             ✏️
           </span>{" "}
           Additional Details (Optional)
@@ -392,7 +392,7 @@ const SessionBookingForm = ({
             value={formik.values.description}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={4}
             placeholder="Any specific topics or concerns you'd like to discuss?"
           />
@@ -405,7 +405,7 @@ const SessionBookingForm = ({
         </div>
         {formik.touched.description && formik.errors.description && (
           <motion.p
-            className="text-red-500 text-sm mt-1"
+            className="mt-1 text-sm text-red-500"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2 }}
@@ -418,7 +418,7 @@ const SessionBookingForm = ({
       <motion.div variants={itemVariants}>
         <motion.button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 rounded-xl font-mulish font-medium text-lg transition-all duration-300 overflow-hidden relative"
+          className="relative w-full py-4 overflow-hidden text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl font-mulish"
           variants={buttonVariants}
           initial="initial"
           whileHover="hover"
@@ -438,7 +438,7 @@ const SessionBookingForm = ({
             Book Your Session
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="w-5 h-5"
               viewBox="0 0 20 20"
               fill="currentColor"
             >

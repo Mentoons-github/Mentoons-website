@@ -25,8 +25,9 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
       [RewardEventType.REGISTRATION]: 50,
       [RewardEventType.PROFILE_COMPLETION]: 100,
       [RewardEventType.LIKE_POST]: 2,
+      [RewardEventType.LOVE_POST]: 3,
       [RewardEventType.COMMENT_POST]: 5,
-      [RewardEventType.SHARE_POST]: 10,
+      [RewardEventType.SHARE_POST]: 5,
       [RewardEventType.CREATE_STATUS]: 8,
       [RewardEventType.JOIN_GROUP]: 15,
       [RewardEventType.FOLLOW_USER]: 5,
@@ -63,7 +64,7 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <svg
-            className="h-8 w-8 text-yellow-400"
+            className="w-8 h-8 text-yellow-400"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -77,7 +78,7 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
             />
           </svg>
         </div>
-        <div className="ml-3 w-0 flex-1">
+        <div className="flex-1 w-0 ml-3">
           <p className="text-sm font-medium text-gray-900 dark:text-white">
             +{getPointsForEvent()} Points Earned!
           </p>
@@ -85,7 +86,7 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
             {getRewardEventLabel(eventType)}
           </p>
           <div className="mt-2">
-            <div className="flex justify-between text-xs mb-1">
+            <div className="flex justify-between mb-1 text-xs">
               <span>Total: {totalPoints} points</span>
               <span className="capitalize">{currentTier} tier</span>
             </div>
@@ -112,11 +113,11 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
             setVisible(false);
             setTimeout(onClose, 300);
           }}
-          className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500"
+          className="flex-shrink-0 ml-4 text-gray-400 hover:text-gray-500"
         >
           <span className="sr-only">Close</span>
           <svg
-            className="h-5 w-5"
+            className="w-5 h-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"

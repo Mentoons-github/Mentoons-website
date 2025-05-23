@@ -12,6 +12,7 @@ export enum RewardEventType {
 
   // Content interaction
   LIKE_POST = "like_post",
+  LOVE_POST = "love_post",
   COMMENT_POST = "comment_post",
   SHARE_POST = "share_post",
   CREATE_STATUS = "create_status",
@@ -42,6 +43,7 @@ export interface RewardPointsConfig {
   [RewardEventType.REGISTRATION]: number;
   [RewardEventType.PROFILE_COMPLETION]: number;
   [RewardEventType.LIKE_POST]: number;
+  [RewardEventType.LOVE_POST]: number;
   [RewardEventType.COMMENT_POST]: number;
   [RewardEventType.SHARE_POST]: number;
   [RewardEventType.CREATE_STATUS]: number;
