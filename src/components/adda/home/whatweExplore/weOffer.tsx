@@ -1,6 +1,11 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
-const WhatWeOffer = () => {
+const WhatWeOffer = ({
+  onActionButtonClick,
+}: {
+  onActionButtonClick: () => void;
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,7 +40,31 @@ const WhatWeOffer = () => {
 
   return (
     <div className="p-5 font-inter bg-[#FFEDD5]">
-      <h1 className="text-[#F97316] text-3xl font-bold">What We Offer</h1>
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h1 className="text-[#F97316] text-3xl font-bold">What We Offer</h1>
+
+        <motion.button
+          onClick={onActionButtonClick}
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatType: "loop",
+            ease: "easeInOut",
+          }}
+          className="flex items-center justify-center bg-orange-400 rounded-full shadow-lg hover:scale-105 transition-transform z-10
+            w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16"
+          aria-label="Create new post"
+        >
+          <img
+            src="/assets/home/homepage fillers/sir Illustration.png"
+            alt="Action button icon"
+            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+          />
+        </motion.button>
+      </div>
+
       <ul className="mx-auto space-y-4 mt-6">
         {Object.entries(details).map(([key, value], index) => (
           <li key={index}>

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 type WelcomeModalProps = {
-  onClose: () => void; // Made required
+  onClose: () => void;
 };
 
 const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
