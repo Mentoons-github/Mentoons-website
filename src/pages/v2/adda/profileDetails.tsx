@@ -123,6 +123,11 @@ const ProfileDetails = () => {
             visibility: post.visibility || "public",
           })
         );
+
+        console.log(
+          "posts ======================================>",
+          formattedPosts
+        );
         setNumberOfPosts(formattedPosts.length ?? 0);
         setUserPosts(formattedPosts as unknown as Post[]);
         setIsLoading(false);

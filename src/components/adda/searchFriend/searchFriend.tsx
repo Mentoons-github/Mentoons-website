@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
+import FriendCard from "./friendCard";
 
-interface Friend {
+export interface Friend {
   _id: string;
   name: string;
   picture: string;
@@ -39,98 +40,6 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { y: 10, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 24,
-    },
-  },
-};
-
-interface FriendCardProps {
-  friend: Friend;
-  onSendRequest: (friendId: string) => void;
-  onCancelRequest: (requestId: string) => void;
-  isConnecting: boolean;
-  index: number;
-}
-
-const FriendCard = ({
-  friend,
-  onSendRequest,
-  onCancelRequest,
-  isConnecting,
-  index,
-}: FriendCardProps) => {
-  return (
-    <motion.div
-      key={index}
-      variants={itemVariants}
-      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
-    >
-      <div className="p-3 flex-1 flex flex-col items-center text-center">
-        <div className="mb-2">
-          <img
-            src={friend.picture}
-            alt={friend.name}
-            className="w-16 h-16 rounded-full object-cover border-2 border-orange-200"
-          />
-        </div>
-        <h3 className="font-medium text-gray-800 text-sm mb-2 line-clamp-1">
-          {friend.name}
-        </h3>
-        {friend.status === "friends" ? (
-          <div className="mt-auto w-full px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-full">
-            Friends
-          </div>
-        ) : friend.status === "pendingSent" && friend.requestId ? (
-          <div className="mt-auto w-full flex flex-col gap-2">
-            <div className="w-full px-3 py-1 text-sm font-medium text-orange-600 bg-orange-100 rounded-full">
-              Request Sent
-            </div>
-            <button
-              onClick={() => onCancelRequest(friend.requestId!)}
-              className="w-full px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors duration-200"
-            >
-              Cancel Request
-            </button>
-          </div>
-        ) : friend.status === "pendingReceived" ? (
-          <div className="mt-auto w-full px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded-full">
-            Request Pending
-          </div>
-        ) : (
-          <button
-            onClick={() => onSendRequest(friend._id)}
-            disabled={isConnecting || friend.status === "followBack"}
-            className={`mt-auto w-full px-3 py-1 text-sm font-medium text-white ${
-              isConnecting
-                ? "bg-orange-400 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600"
-            } rounded-full transition-colors duration-200`}
-          >
-            {isConnecting ? (
-              <div className="flex items-center justify-center gap-1">
-                <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-                <span>Connecting...</span>
-              </div>
-            ) : friend.status === "followBack" ? (
-              "Follow Back"
-            ) : (
-              "Connect"
-            )}
-          </button>
-        )}
-      </div>
-    </motion.div>
-  );
-};
-
 const FriendSearch = () => {
   const [query, setQuery] = useState<string>("");
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
@@ -149,8 +58,6 @@ const FriendSearch = () => {
   const [requests, setRequests] = useState<RequestSender[]>([]);
   const [requestCount, setRequestCount] = useState<number>(0);
   const [loadingRequests, setLoadingRequests] = useState<boolean>(false);
-  const [isHeaderHovered, setIsHeaderHovered] = useState<boolean>(false);
-
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -254,6 +161,7 @@ const FriendSearch = () => {
         setLoadingSearch(false);
       }
     };
+
     performSearch();
   }, [debouncedQuery, searchPage]);
 
@@ -381,7 +289,6 @@ const FriendSearch = () => {
           `/adda/cancelRequest/${requestId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
         console.log("data ======================================>", response);
         if (response.data.success === true) {
           if (isSearchMode) {
@@ -757,11 +664,8 @@ const FriendSearch = () => {
 
   return (
     <div className="relative flex flex-col w-full max-w-3xl mx-auto bg-orange-50 min-h-screen p-4">
-      <div
-        className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3 group"
-        onMouseEnter={() => setIsHeaderHovered(true)}
-        onMouseLeave={() => setIsHeaderHovered(false)}
-      >
+      {/* Updated header section - removed hover dependency */}
+      <div className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3">
         <div className="flex items-center justify-between">
           <button
             onClick={handleGoBack}
@@ -788,9 +692,7 @@ const FriendSearch = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleRequestsPanel}
-              className={`flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-opacity duration-200 ${
-                isHeaderHovered ? "opacity-100" : "opacity-0"
-              }`}
+              className="relative flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Friend Requests"
             >
               <svg
@@ -811,20 +713,14 @@ const FriendSearch = () => {
                 <line x1="23" y1="11" x2="17" y2="11"></line>
               </svg>
               {requestCount > 0 && (
-                <span
-                  className={`absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full transition-opacity duration-200 ${
-                    isHeaderHovered ? "opacity-100" : "opacity-0"
-                  }`}
-                >
+                <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full">
                   {requestCount > 99 ? "99+" : requestCount}
                 </span>
               )}
             </button>
             <button
               onClick={toggleSearch}
-              className={`flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-opacity duration-200 ${
-                isHeaderHovered ? "opacity-100" : "opacity-0"
-              }`}
+              className="flex items-center justify-center w-8 h-8 bg-white rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Search"
             >
               <svg
@@ -861,7 +757,7 @@ const FriendSearch = () => {
                   value={query}
                   onChange={handleSearch}
                   placeholder="Search for friends..."
-                  className="w-full p-2 pl-10 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+                  className="w-full p-2 pl-10 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-                  transparent"
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

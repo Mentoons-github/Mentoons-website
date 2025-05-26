@@ -21,13 +21,8 @@ const AddaHome = () => {
   return (
     <>
       {showModal && <WelcomeModal onClose={() => setShowModal(false)} />}
-
-      <div className="bg-white rounded-bl-lg rounded-br-lg shadow-sm z-[10]">
-        <AddPosts setNewPost={setNewPost} />
-      </div>
-      <div className="w-full mb-16 bg-white rounded-bl-lg rounded-br-lg">
-        <Posts newPost={newPost} />
-      </div>
+      <AddPosts setNewPost={setNewPost} />
+      <Posts newPost={newPost} />
     </>
   );
 };

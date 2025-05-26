@@ -9,7 +9,7 @@ const BottomNav = () => {
     <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
       <div className="flex items-center justify-around h-16">
         <button
-          onClick={() => navigate("/adda/home")}
+          onClick={() => navigate("/adda")}
           className={`flex flex-col items-center justify-center w-full h-full ${
             location.pathname === "/adda/home"
               ? "text-orange-500"
