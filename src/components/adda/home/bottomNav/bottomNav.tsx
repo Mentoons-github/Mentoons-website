@@ -1,5 +1,5 @@
 import { FaBell, FaHome, FaUser, FaUserFriends } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const BottomNav = () => {
         <button
           onClick={() => navigate("/adda")}
           className={`flex flex-col items-center justify-center w-full h-full ${
-            location.pathname === "/adda/home"
+            location.pathname === "/adda"
               ? "text-orange-500"
               : "text-gray-500"
           }`}

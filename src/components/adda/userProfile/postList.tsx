@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { User, MediaType } from "@/types";
 import { Post } from "@/pages/v2/adda/userProfile";
+import { MediaType, User } from "@/types";
+import { useState } from "react";
 
 interface PostsListProps {
   posts: Post[];
@@ -38,20 +38,20 @@ const PostsList = ({ posts, user }: PostsListProps) => {
     switch (media.type) {
       case MediaType.IMAGE:
         return (
-          <div className="mt-3 rounded-lg overflow-hidden">
+          <div className="mt-3 overflow-hidden rounded-lg">
             <img
               src={media.url}
               alt={media.caption || "Post image"}
-              className="w-full h-auto object-cover"
+              className="object-cover w-full h-auto"
             />
             {media.caption && (
-              <p className="text-sm text-gray-500 mt-1">{media.caption}</p>
+              <p className="mt-1 text-sm text-gray-500">{media.caption}</p>
             )}
           </div>
         );
       case MediaType.VIDEO:
         return (
-          <div className="mt-3 rounded-lg overflow-hidden">
+          <div className="mt-3 overflow-hidden rounded-lg">
             <video
               src={media.url}
               controls
@@ -59,7 +59,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
               poster="/api/placeholder/640/360"
             />
             {media.caption && (
-              <p className="text-sm text-gray-500 mt-1">{media.caption}</p>
+              <p className="mt-1 text-sm text-gray-500">{media.caption}</p>
             )}
           </div>
         );
@@ -68,13 +68,13 @@ const PostsList = ({ posts, user }: PostsListProps) => {
           <div className="mt-3">
             <audio src={media.url} controls className="w-full" />
             {media.caption && (
-              <p className="text-sm text-gray-500 mt-1">{media.caption}</p>
+              <p className="mt-1 text-sm text-gray-500">{media.caption}</p>
             )}
           </div>
         );
       case MediaType.DOCUMENT:
         return (
-          <div className="mt-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="p-3 mt-3 border border-gray-200 rounded-lg bg-gray-50">
             <a
               href={media.url}
               target="_blank"
@@ -115,7 +115,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
                 </p>
                 <button
                   onClick={() => togglePostExpansion(post._id)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1"
+                  className="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800"
                 >
                   Read More
                 </button>
@@ -126,7 +126,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
                 {post.content && post.content?.length > 280 && (
                   <button
                     onClick={() => togglePostExpansion(post._id)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1"
+                    className="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800"
                   >
                     Show Less
                   </button>
@@ -167,7 +167,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
               {post.event?.endDate && ` - ${formatDate(post.event.endDate)}`}
             </p>
             <p className="text-gray-700">{post.event?.description}</p>
-            <p className="text-sm text-gray-600 italic">
+            <p className="text-sm italic text-gray-600">
               Venue: {post.event?.venue}
             </p>
           </div>
@@ -180,7 +180,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
 
   if (posts.length === 0) {
     return (
-      <div className="bg-white shadow rounded-lg p-6 text-center">
+      <div className="p-6 text-center bg-white rounded-lg shadow">
         <h3 className="text-lg font-medium text-gray-900">No posts yet</h3>
         <p className="mt-2 text-gray-500">
           {user._id === user.clerkId
@@ -196,7 +196,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
       {posts.map((post) => (
         <div
           key={post._id}
-          className="bg-white shadow rounded-lg overflow-hidden"
+          className="overflow-hidden bg-white rounded-lg shadow"
         >
           <div className="p-4">
             {/* Header */}
@@ -227,7 +227,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
             )}
 
             {/* Actions */}
-            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+            <div className="flex items-center justify-between pt-3 mt-4 border-t border-gray-100">
               <div className="flex space-x-4">
                 <ActionButton icon="👍" count={post.likes.length} />
                 <ActionButton icon="💬" count={post.comments.length} />
@@ -242,7 +242,7 @@ const PostsList = ({ posts, user }: PostsListProps) => {
 };
 
 const ActionButton = ({ icon, count }: { icon: string; count: number }) => (
-  <button className="flex items-center text-gray-500 hover:text-blue-600 text-sm">
+  <button className="flex items-center text-sm text-gray-500 hover:text-blue-600">
     <span className="mr-1">{icon}</span>
     <span>{count}</span>
   </button>

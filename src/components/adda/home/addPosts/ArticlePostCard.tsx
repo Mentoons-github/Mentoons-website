@@ -3,7 +3,7 @@ import { useState } from "react";
 import { FaComment, FaRegBookmark } from "react-icons/fa6";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import Likes from "./likes/likes";
+import Reactions from "./likes/reactions";
 import Share from "./share/share";
 
 interface ArticlePostCardProps {
@@ -192,7 +192,8 @@ const ArticlePostCard = ({
 
       <div className="flex items-center justify-between w-full px-3">
         <div className="flex items-center justify-start gap-3 sm:gap-4">
-          <Likes type="post" id={post._id} likeCount={post.likes.length} />
+          {/* <Likes type="post" id={post._id} likeCount={post.likes.length} /> */}
+          <Reactions type="post" id={post._id} likeCount={post.likes.length} />
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}

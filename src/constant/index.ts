@@ -1047,7 +1047,7 @@ export const NAV_LINKS: NavLink[] = [
   {
     id: "NL_03",
     label: "Adda",
-    url: "/adda/home",
+    url: "/adda",
   },
   {
     id: "NL_04",

@@ -1,6 +1,6 @@
-import React from "react";
 import { Post, User } from "@/types";
 import { Heart, MessagesSquare, Share2, User as UserIcon } from "lucide-react";
+import React from "react";
 
 interface SinglePostProps {
   post: Post;
@@ -9,17 +9,17 @@ interface SinglePostProps {
 
 const SinglePost: React.FC<SinglePostProps> = ({ post, user }) => {
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="overflow-hidden bg-white rounded-lg shadow">
       <div className="p-6">
         <div className="flex items-center mb-4">
           {user.picture ? (
             <img
               src={user.picture}
               alt={user.name || "User"}
-              className="h-10 w-10 rounded-full mr-3"
+              className="w-10 h-10 mr-3 rounded-full"
             />
           ) : (
-            <div className="h-10 w-10 rounded-full mr-3 bg-gray-200 flex items-center justify-center">
+            <div className="flex items-center justify-center w-10 h-10 mr-3 bg-gray-200 rounded-full">
               <UserIcon size={20} className="text-gray-400" />
             </div>
           )}
@@ -34,11 +34,11 @@ const SinglePost: React.FC<SinglePostProps> = ({ post, user }) => {
         </div>
 
         {/* Post Content */}
-        <p className="text-gray-900 mb-4">{post.content}</p>
+        <p className="mb-4 text-gray-900">{post.content}</p>
 
         {/* Post Media if available */}
         {post.media && post.media.length > 0 && post.media[0].url && (
-          <div className="rounded-lg overflow-hidden mb-4">
+          <div className="mb-4 overflow-hidden rounded-lg">
             <img
               src={post.media[0].url}
               alt={post.media[0].caption || "Post media"}
@@ -48,20 +48,20 @@ const SinglePost: React.FC<SinglePostProps> = ({ post, user }) => {
         )}
 
         {/* Post Stats */}
-        <div className="flex justify-between text-sm text-gray-500 mt-4">
+        <div className="flex justify-between mt-4 text-sm text-gray-500">
           <div className="flex space-x-4">
             <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-1" />
+              <Heart className="w-4 h-4 mr-1" />
               <span>{post.likes ? post.likes.length : 0} Likes</span>
             </div>
             <div className="flex items-center">
-              <MessagesSquare className="h-4 w-4 mr-1" />
+              <MessagesSquare className="w-4 h-4 mr-1" />
               <span>{post.commentCount || 0} Comments</span>
             </div>
           </div>
           <div>
             <div className="flex items-center">
-              <Share2 className="h-4 w-4 mr-1" />
+              <Share2 className="w-4 h-4 mr-1" />
               <span>{post.shares ? post.shares.length : 0} Shares</span>
             </div>
           </div>

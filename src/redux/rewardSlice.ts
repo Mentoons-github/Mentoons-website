@@ -23,24 +23,24 @@ const TIER_THRESHOLDS = {
 
 // Define the points for each action
 const POINTS_CONFIG = {
-  [RewardEventType.DAILY_LOGIN]: 5,
-  [RewardEventType.REGISTRATION]: 50,
-  [RewardEventType.PROFILE_COMPLETION]: 100,
+  [RewardEventType.DAILY_LOGIN]: 2,
+  [RewardEventType.REGISTRATION]: 5,
+  [RewardEventType.PROFILE_COMPLETION]: 10,
   [RewardEventType.LIKE_POST]: 2,
   [RewardEventType.LOVE_POST]: 3,
   [RewardEventType.COMMENT_POST]: 5,
-  [RewardEventType.SHARE_POST]: 5,
-  [RewardEventType.CREATE_STATUS]: 8,
-  [RewardEventType.JOIN_GROUP]: 15,
+  [RewardEventType.SHARE_POST]: 3,
+  [RewardEventType.CREATE_STATUS]: 5,
+  [RewardEventType.JOIN_GROUP]: 8,
   [RewardEventType.FOLLOW_USER]: 5,
-  [RewardEventType.PURCHASE_PRODUCT]: 50,
-  [RewardEventType.SHARE_PRODUCT]: 15,
-  [RewardEventType.BOOK_SESSION]: 30,
-  [RewardEventType.APPLY_JOB]: 20,
-  [RewardEventType.LISTEN_AUDIO_COMIC]: 15,
-  [RewardEventType.LISTEN_PODCAST]: 10,
-  [RewardEventType.READ_COMIC]: 20,
-  [RewardEventType.SAVED_POST]: 5,
+  [RewardEventType.PURCHASE_PRODUCT]: 10,
+  [RewardEventType.SHARE_PRODUCT]: 5,
+  [RewardEventType.BOOK_SESSION]: 10,
+  [RewardEventType.APPLY_JOB]: 8,
+  [RewardEventType.LISTEN_AUDIO_COMIC]: 5,
+  [RewardEventType.LISTEN_PODCAST]: 5,
+  [RewardEventType.READ_COMIC]: 5,
+  [RewardEventType.SAVED_POST]: 4,
 };
 
 const initialState: UserRewardState = {

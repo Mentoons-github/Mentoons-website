@@ -69,6 +69,7 @@
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.26.2",
     "react-scan": "^0.2.7",
+    "react-share": "^5.2.2",
     "react-slick": "^0.30.2",
     "react-spinners": "^0.15.0",
     "react-to-print": "^3.0.2",
