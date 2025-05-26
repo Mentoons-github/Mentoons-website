@@ -15,9 +15,17 @@ import { formatDateString } from "@/utils/formateDate";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaBolt } from "react-icons/fa6";
 
+import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
+import {
+  canAccessContent,
+  getUserSubscriptionLimits,
+  updateUserContentAccess,
+  UserSubscriptionLimits,
+} from "@/utils/subscriptionAccess";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -51,8 +59,19 @@ const ComicsPageV2 = () => {
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { user } = useUser();
+  const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
+    null
+  );
+  const [dbUser, setDbUser] = useState<any>(null);
 
-  const membershipType = user?.publicMetadata?.membershipType || "free";
+  const membershipType = dbUser?.subscription.plan;
+  const [currentProductId, setCurrentProductId] = useState<string>("");
+
+  // Subscription limit modal state
+  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
+    useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState("");
+  const [limitModalTitle, setLimitModalTitle] = useState("");
 
   const maxComicsToRead = membershipType === "platinum" ? 5 : products.length;
   const accessibleComics = products.slice(0, maxComicsToRead);
@@ -152,16 +171,34 @@ const ComicsPageV2 = () => {
     navigate(`/order-summary?productId=${product._id}`, { replace: true });
   };
 
-  const openComicModal = (comicLink: string, productType?: string) => {
-    setComicToView(comicLink);
-    setShowComicModal(true);
-    if (productType) setProductType(productType);
-    document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+  const openComicModal = (
+    comicLink: string,
+    comic?: ProductBase | null,
+    productType?: string
+  ) => {
+    if (!comic) {
+      // For backwards compatibility - allow opening comics without checking access
+      setComicToView(comicLink);
+      setShowComicModal(true);
+      if (productType) setProductType(productType);
+      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+      return;
+    }
+
+    // Check user access before opening comic
+    if (checkContentAccess(comic)) {
+      setComicToView(comicLink);
+      setCurrentProductId(comic._id || ""); // Set the current product ID for reward tracking
+      setShowComicModal(true);
+      if (productType) setProductType(productType);
+      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+    }
   };
 
   const closeComicModal = () => {
     setShowComicModal(false);
     setProductType("");
+    setCurrentProductId("");
     document.body.style.overflow = "auto"; // Re-enable scrolling
   };
 
@@ -218,7 +255,87 @@ const ComicsPageV2 = () => {
     };
 
     fetchComics();
-  }, [dispatch, selectedOption, option, getToken]);
+  }, [dispatch, selectedOption, option, getToken, products]);
+
+  const fetchDBUser = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data.data);
+      if (response.status === 200) {
+        const userData = response.data.data;
+        setDbUser(userData);
+
+        // Initialize or retrieve subscription limits
+        const limits = getUserSubscriptionLimits(userData);
+        setUserLimits(limits);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [user?.id, getToken]);
+
+  // Update user subscription limits in the database
+  const updateUserSubscriptionLimits = async (
+    updatedLimits: UserSubscriptionLimits
+  ) => {
+    try {
+      const token = await getToken();
+      if (!userId || !token) return;
+
+      await axios.patch(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        {
+          subscriptionLimits: updatedLimits,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUserLimits(updatedLimits);
+    } catch (error) {
+      console.error("Error updating subscription limits:", error);
+    }
+  };
+
+  // Check if user can access content and handle limitations
+  const checkContentAccess = (comic: ProductBase): boolean => {
+    if (!userLimits || !user) {
+      setShowLoginModal(true);
+      return false;
+    }
+
+  const accessResult = canAccessContent(comic, membershipType, userLimits);
+    
+    if (!accessResult.canAccess) {
+      setLimitModalTitle(accessResult.title);
+      setLimitModalMessage(accessResult.message);
+      setShowSubscriptionLimitModal(true);
+      return false;
+    }
+
+    // If accessible, update limits for premium content
+    if (comic.product_type !== "Free") {
+      const updatedLimits = updateUserContentAccess(comic, userLimits);
+      updateUserSubscriptionLimits(updatedLimits);
+    }
+
+    return true;
+  };
+
+  useEffect(() => {
+    fetchDBUser();
+  }, [fetchDBUser, user?.id, getToken]);
 
   return (
     <div>
@@ -376,7 +493,8 @@ const ComicsPageV2 = () => {
                         onClick={() => {
                           return openComicModal(
                             (product.details as ComicProduct["details"])
-                              ?.sampleUrl || ""
+                              ?.sampleUrl || "",
+                            product
                           );
                         }}
                       >
@@ -407,130 +525,167 @@ const ComicsPageV2 = () => {
           <div className="relative h-[400px] md:h-[800px] rounded-xl overflow-hidden">
             <div className="h-full" ref={carouselRef}>
               {products.map((comic, index) => (
-          <div
-            key={comic.title + index}
-            className={`absolute inset-0 w-full h-[350px] md:h-[680px] bg-white rounded-2xl group transition-opacity duration-300 shadow-xl border-2 md:border-4 border-rose-500 ${
-              currentIndex === index
-                ? "opacity-100"
-                : "opacity-0 pointer-events-none"
-            }`}
-          >
-            {/* Video/Image container with responsive sizing */}
-            {(comic.details as ComicProduct["details"] | AudioComicProduct["details"])?.sampleUrl ? (
-              <video
-                className="object-contain w-full h-full p-2 md:py-6 rounded-2xl"
-                src={(comic.details as ComicProduct["details"] | AudioComicProduct["details"])?.sampleUrl}
-                poster={comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"}
-                onEnded={(e) => {
-            e.currentTarget.load();
-            setIsPlaying(false);
-                }}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                playsInline
-                ref={(el) => {
-            videoRefs.current[index] = el;
-            if (el) {
-              const observer = new IntersectionObserver(
-                ([entry]) => {
-                  if (!entry.isIntersecting) {
-              el.pause();
-              el.currentTime = 0;
-              setIsPlaying(false);
-                  }
-                },
-                { threshold: 0.5 }
-              );
-              observer.observe(el);
-            }
-                }}
-              />
-            ) : (
-              <img
-                src={comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"}
-                alt={comic.title}
-                className="object-cover w-full h-full rounded-2xl"
-                onError={(e) => {
-            e.currentTarget.src = "/placeholder-image.jpg";
-            e.currentTarget.alt = "Placeholder image";
-                }}
-              />
-            )}
-
-            {/* Hover Overlay - responsive text sizes */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 transition-opacity duration-300 opacity-0 rounded-2xl bg-black/70 group-hover:opacity-100">
-              <h3 className="mb-2 md:mb-4 text-xl md:text-3xl font-bold text-center text-white">
-                {comic?.title || "Untitled Comic"}
-              </h3>
-              <p className="mb-4 md:mb-8 text-sm md:text-base text-center text-white line-clamp-3">
-                {comic?.description || "No description available"}
-              </p>
-
-              {(comic?.details as ComicProduct["details"])?.sampleUrl && (
-                <button
-            className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 transition-colors rounded-full bg-white/20 hover:bg-white/30"
-            onClick={(e) => {
-              e.stopPropagation();
-              const video = e.currentTarget.parentElement?.previousElementSibling as HTMLVideoElement;
-              if (video && comic.product_type === "Free") {
-                if (video.paused) {
-                  video.play();
-                  setIsPlaying(true);
-                } else {
-                  video.pause();
-                  setIsPlaying(false);
-                }
-              } else {
-                openComicModal((comic.details as ComicProduct["details"])?.sampleUrl || "");
-              }
-            }}
+                <div
+                  key={comic.title + index}
+                  className={`absolute inset-0 w-full h-[350px] md:h-[680px] bg-white rounded-2xl group transition-opacity duration-300 shadow-xl border-2 md:border-4 border-rose-500 ${
+                    currentIndex === index
+                      ? "opacity-100"
+                      : "opacity-0 pointer-events-none"
+                  }`}
                 >
-            {currentIndex === index && !isPlaying ? (
-              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            ) : currentIndex === index && isPlaying ? (
-              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
-                </button>
-              )}
-            </div>
-          </div>
+                  {/* Video/Image container with responsive sizing */}
+                  {(
+                    comic.details as
+                      | ComicProduct["details"]
+                      | AudioComicProduct["details"]
+                  )?.sampleUrl ? (
+                    <video
+                      className="object-contain w-full h-full p-2 md:py-6 rounded-2xl"
+                      src={
+                        (
+                          comic.details as
+                            | ComicProduct["details"]
+                            | AudioComicProduct["details"]
+                        )?.sampleUrl
+                      }
+                      poster={
+                        comic.productImages?.[0].imageUrl ||
+                        "/placeholder-image.jpg"
+                      }
+                      onEnded={(e) => {
+                        e.currentTarget.load();
+                        setIsPlaying(false);
+                      }}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      playsInline
+                      ref={(el) => {
+                        videoRefs.current[index] = el;
+                        if (el) {
+                          const observer = new IntersectionObserver(
+                            ([entry]) => {
+                              if (!entry.isIntersecting) {
+                                el.pause();
+                                el.currentTime = 0;
+                                setIsPlaying(false);
+                              }
+                            },
+                            { threshold: 0.5 }
+                          );
+                          observer.observe(el);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={
+                        comic.productImages?.[0].imageUrl ||
+                        "/placeholder-image.jpg"
+                      }
+                      alt={comic.title}
+                      className="object-cover w-full h-full rounded-2xl"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder-image.jpg";
+                        e.currentTarget.alt = "Placeholder image";
+                      }}
+                    />
+                  )}
+
+                  {/* Hover Overlay - responsive text sizes */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0 md:p-8 rounded-2xl bg-black/70 group-hover:opacity-100">
+                    <h3 className="mb-2 text-xl font-bold text-center text-white md:mb-4 md:text-3xl">
+                      {comic?.title || "Untitled Comic"}
+                    </h3>
+                    <p className="mb-4 text-sm text-center text-white md:mb-8 md:text-base line-clamp-3">
+                      {comic?.description || "No description available"}
+                    </p>
+
+                    {(comic?.details as ComicProduct["details"])?.sampleUrl && (
+                      <button
+                        className="flex items-center justify-center w-12 h-12 transition-colors rounded-full md:w-16 md:h-16 bg-white/20 hover:bg-white/30"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const video = e.currentTarget.parentElement
+                            ?.previousElementSibling as HTMLVideoElement;
+                          if (video && comic.product_type === "Free") {
+                            if (video.paused) {
+                              video.play();
+                              setIsPlaying(true);
+                            } else {
+                              video.pause();
+                              setIsPlaying(false);
+                            }
+                          } else {
+                            openComicModal(
+                              (comic.details as ComicProduct["details"])
+                                ?.sampleUrl || "",
+                              comic
+                            );
+                          }
+                        }}
+                      >
+                        {currentIndex === index && !isPlaying ? (
+                          <svg
+                            className="w-6 h-6 text-white md:w-8 md:h-8"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        ) : currentIndex === index && isPlaying ? (
+                          <svg
+                            className="w-6 h-6 text-white md:w-8 md:h-8"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="w-6 h-6 text-white md:w-8 md:h-8"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
 
             {/* Playing indicator - made responsive */}
             {isPlaying && (
-              <div className="absolute flex items-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm text-white rounded-full top-2 md:top-4 right-2 md:right-4 bg-black/50">
-          <span className="w-1.5 md:w-2 h-1.5 md:h-2 bg-red-500 rounded-full animate-pulse"></span>
-          Playing
+              <div className="absolute flex items-center gap-1 px-2 py-1 text-xs text-white rounded-full md:px-3 md:text-sm top-2 md:top-4 right-2 md:right-4 bg-black/50">
+                <span className="w-1.5 md:w-2 h-1.5 md:h-2 bg-red-500 rounded-full animate-pulse"></span>
+                Playing
               </div>
             )}
           </div>
 
           {/* Navigation buttons - made responsive */}
-          <div className="absolute flex gap-1 md:gap-2 pt-2 md:pt-4 bottom-2 md:bottom-4 right-4 md:right-12">
+          <div className="absolute flex gap-1 pt-2 md:gap-2 md:pt-4 bottom-2 md:bottom-4 right-4 md:right-12">
             <button
               onClick={() => {
-          pauseAllVideos();
-          setCurrentIndex((prevIndex) => prevIndex === 0 ? products.length - 1 : prevIndex - 1);
+                pauseAllVideos();
+                setCurrentIndex((prevIndex) =>
+                  prevIndex === 0 ? products.length - 1 : prevIndex - 1
+                );
               }}
-              className="p-1 md:p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+              className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
             >
               <IoIosArrowBack className="text-xl md:text-2xl" />
             </button>
             <button
               onClick={() => {
-          pauseAllVideos();
-          setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length);
+                pauseAllVideos();
+                setCurrentIndex(
+                  (prevIndex) => (prevIndex + 1) % products.length
+                );
               }}
-              className="p-1 md:p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+              className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
             >
               <IoIosArrowForward className="text-xl md:text-2xl" />
             </button>
@@ -673,6 +828,7 @@ const ComicsPageV2 = () => {
                           if ("sampleUrl" in comic.details) {
                             openComicModal(
                               comic.details.sampleUrl || "",
+                              comic,
                               comic.product_type
                             );
                           }
@@ -772,10 +928,23 @@ const ComicsPageV2 = () => {
               <MdClose className="text-2xl" />
             </button>
 
-            <ComicViewer pdfUrl={comicToView} productType={productType} />
+            <ComicViewer
+              pdfUrl={comicToView}
+              productType={productType}
+              productId={currentProductId}
+            />
           </motion.div>
         </motion.div>
       )}
+
+      {/* Subscription Limit Modal */}
+      <SubscriptionLimitModal
+        isOpen={showSubscriptionLimitModal}
+        onClose={() => setShowSubscriptionLimitModal(false)}
+        message={limitModalMessage}
+        title={limitModalTitle}
+        planType={"free"} // Fall back to 'free' if membershipType causes type issues
+      />
 
       {/* Feature of the Month Section */}
       <motion.div
@@ -804,7 +973,7 @@ const ComicsPageV2 = () => {
           />
         </div>
         <div className="flex-1 p-6 mt-12 ">
-          <div className="flex-1  items-start gap-10 pb-4 sm:flex ">
+          <div className="items-start flex-1 gap-10 pb-4 sm:flex ">
             <div className="mb-4">
               <img
                 src={
@@ -836,7 +1005,8 @@ const ComicsPageV2 = () => {
                 onClick={() =>
                   openComicModal(
                     (products[0].details as ComicProduct["details"])
-                      ?.sampleUrl || ""
+                      ?.sampleUrl || "",
+                    products[0]
                   )
                 }
               >
@@ -886,6 +1056,32 @@ const ComicsPageV2 = () => {
           </figure> */}
         </div>
       </motion.div>
+
+      {/* Modals */}
+      {showLoginModal && (
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      {showAddToCartModal && (
+        <AddToCartModal
+          onClose={() => setShowAddToCartModal(false)}
+          isOpen={showAddToCartModal}
+          productName={selectedComic?.title || ""}
+        />
+      )}
+
+      {showSubscriptionLimitModal && (
+        <SubscriptionLimitModal
+          isOpen={showSubscriptionLimitModal}
+          onClose={() => setShowSubscriptionLimitModal(false)}
+          message={limitModalMessage}
+          title={limitModalTitle}
+          planType={"free"} // Fall back to 'free' if membershipType causes type issues
+        />
+      )}
     </div>
   );
 };
