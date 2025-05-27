@@ -211,9 +211,13 @@ const UserProfile = () => {
 
     const fetchFriends = async () => {
       const token = await getToken();
+       if (!token) {
+         throw new Error("No token found");
+       }
       try {
-        const response = await axiosInstance("/adda/getFriends", {
+        const response = await axiosInstance("/adda/getFriends/", {
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });

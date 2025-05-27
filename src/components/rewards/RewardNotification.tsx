@@ -39,6 +39,7 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
       [RewardEventType.LISTEN_PODCAST]: 10,
       [RewardEventType.READ_COMIC]: 20,
       [RewardEventType.SAVED_POST]: 5,
+      [RewardEventType.REDEEM_POINTS]: 0,
     };
 
     return pointsMapping[eventType] || 0;

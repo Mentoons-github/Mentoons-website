@@ -16,11 +16,12 @@ interface RewardActions {
   dailyLogin: () => void;
   registration: () => void;
   profileCompletion: () => void;
+  redeemPoints: (points: number, referenceId: string) => void;
 }
 
 declare global {
   interface Window {
-    rewardActions: {
+    rewardActions?: {
       likePost: (referenceId: string) => void;
       lovePost: (referenceId: string) => void;
       commentPost: (referenceId: string) => void;
@@ -38,6 +39,7 @@ declare global {
       dailyLogin: () => void;
       registration: () => void;
       profileCompletion: () => void;
+      redeemPoints: (points: number, referenceId: string) => void;
     };
   }
 }

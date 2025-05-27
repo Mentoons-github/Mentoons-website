@@ -1,5 +1,34 @@
 import { RewardEventType } from "@/types/rewards";
 
+// Define rewards action type at runtime for initialization
+type RewardActions = {
+  likePost: (id: string) => void;
+  lovePost: (id: string) => void;
+  commentPost: (id: string) => void;
+  sharePost: (id: string) => void;
+  createStatus: (id: string) => void;
+  joinGroup: (id: string) => void;
+  followUser: (id: string) => void;
+  purchaseProduct: (id: string) => void;
+  shareProduct: (id: string) => void;
+  redeemPoints: (points: number, id: string) => void;
+  bookSession: (id: string) => void;
+  applyJob: (id: string) => void;
+  listenAudioComic: (id: string) => void;
+  listenPodcast: (id: string) => void;
+  readComic: (id: string) => void;
+  dailyLogin: () => void;
+  registration: () => void;
+  profileCompletion: () => void;
+};
+
+// Use type assertion to tell TypeScript about the window property
+declare global {
+  interface Window {
+    rewardActions?: RewardActions;
+  }
+}
+
 // Initialize an empty rewardActions object if it doesn't exist yet
 if (typeof window !== "undefined" && !window.rewardActions) {
   // Create a temporary placeholder that logs actions until the real implementation is ready
@@ -25,6 +54,12 @@ if (typeof window !== "undefined" && !window.rewardActions) {
       ),
     shareProduct: (id: string) =>
       console.log("Reward action not fully initialized yet: shareProduct", id),
+    redeemPoints: (points: number, id: string) =>
+      console.log(
+        "Reward action not fully initialized yet: redeemPoints",
+        points,
+        id
+      ),
     bookSession: (id: string) =>
       console.log("Reward action not fully initialized yet: bookSession", id),
     applyJob: (id: string) =>
@@ -44,7 +79,7 @@ if (typeof window !== "undefined" && !window.rewardActions) {
       console.log("Reward action not fully initialized yet: registration"),
     profileCompletion: () =>
       console.log("Reward action not fully initialized yet: profileCompletion"),
-  };
+  } as RewardActions;
 }
 
 /**
@@ -52,7 +87,8 @@ if (typeof window !== "undefined" && !window.rewardActions) {
  */
 export const triggerReward = (
   eventType: RewardEventType,
-  referenceId?: string
+  referenceId?: string,
+  points?: number
 ) => {
   if (window.rewardActions) {
     switch (eventType) {
@@ -82,6 +118,9 @@ export const triggerReward = (
         break;
       case RewardEventType.SHARE_PRODUCT:
         window.rewardActions.shareProduct(referenceId || "");
+        break;
+      case RewardEventType.REDEEM_POINTS:
+        window.rewardActions.redeemPoints(points || 0, referenceId || "");
         break;
       case RewardEventType.BOOK_SESSION:
         window.rewardActions.bookSession(referenceId || "");
