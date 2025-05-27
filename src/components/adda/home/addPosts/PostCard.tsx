@@ -526,9 +526,9 @@ const PostCard = ({
             </div>
             <div className="flex flex-col figtree">
               <span className="Futura Std">{post.user.name}</span>
-              <span className="figtree text-sm text-[#807E7E]">
+              {/* <span className="figtree text-sm text-[#807E7E]">
                 {post.user.email}
-              </span>
+              </span> */}
               <span className="figtree text-[12px] text-[#807E7E]">
                 {new Date(post.createdAt).toLocaleString()}
               </span>

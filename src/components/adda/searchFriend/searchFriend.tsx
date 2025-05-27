@@ -6,7 +6,7 @@ import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import FriendCard from "./friendCard";
 
-export interface Friend {
+interface Friend {
   _id: string;
   name: string;
   picture: string;
@@ -166,40 +166,56 @@ const FriendSearch = () => {
   }, [debouncedQuery, searchPage]);
 
   const fetchSuggestions = useCallback(async () => {
+    
+    if (suggestions.length > 0) {
+      setLoadingSuggestions(false);
+      return;
+    }
     if (loadingSuggestions && suggestionPage > 1) return;
     setLoadingSuggestions(true);
     try {
       const token = await getToken();
+     
       const response = await axiosInstance.get(
-        `/adda/requestSuggestions?page=${suggestionPage}`,
+        `/adda/getFriends?page=${suggestionPage}&limit=10`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const { suggestions: newSuggestions, hasMore: moreAvailable } =
-        response.data.data;
-      setSuggestionHasMore(moreAvailable);
-      if (newSuggestions && newSuggestions.length > 0) {
+
+      console.log("friends ============>", response.data);
+      const { friends, totalPages } = response.data.data;
+
+      console.log(friends);
+
+      const mappedSuggestions: Friend[] = friends.map((friend: any) => ({
+        _id: friend._id,
+        name: friend.name,
+        picture: friend.picture,
+        status: "friends",
+      }));
+      setSuggestionHasMore(suggestionPage < totalPages);
+      if (mappedSuggestions.length > 0) {
         setSuggestions((prev) =>
-          suggestionPage === 1 ? newSuggestions : [...prev, ...newSuggestions]
+          suggestionPage === 1
+            ? mappedSuggestions
+            : [...prev, ...mappedSuggestions]
         );
-        if (moreAvailable) {
+        if (suggestionPage < totalPages) {
           setSuggestionPage((prev) => prev + 1);
         }
-      } else if (!newSuggestions || newSuggestions.length === 0) {
-        if (suggestionPage === 1) {
-          setSuggestions([]);
-        }
+      } else if (suggestionPage === 1) {
+        setSuggestions([]);
       }
     } catch (error) {
-      console.error("Failed to fetch suggestions:", error);
+      console.error("Failed to fetch friend suggestions:", error);
       errorToast("Failed to load friend suggestions");
     } finally {
       setLoadingSuggestions(false);
     }
-  }, [suggestionPage, loadingSuggestions, getToken]);
+  }, [suggestionPage, loadingSuggestions, getToken, suggestions.length]);
 
   useEffect(() => {
     fetchSuggestions();
-  }, []);
+  }, [fetchSuggestions]);
 
   const searchFriends = async (searchQuery: string, page: number) => {
     if (!searchQuery.trim()) return { suggestions: [], hasMore: false };
@@ -287,9 +303,9 @@ const FriendSearch = () => {
         const token = await getToken();
         const response = await axiosInstance.post(
           `/adda/cancelRequest/${requestId}`,
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("data ======================================>", response);
         if (response.data.success === true) {
           if (isSearchMode) {
             setSearchResults((prev) =>
@@ -605,10 +621,11 @@ const FriendSearch = () => {
         </svg>
       </div>
       <h3 className="mb-1 text-lg font-medium text-gray-700">
-        No Suggestions Available
+        No Friends Available
       </h3>
       <p className="mb-4 text-sm text-gray-500">
-        We couldn't find any connection suggestions for you at the moment
+        You don't have any mutual friends at the moment. Try searching for new
+        connections!
       </p>
       <button
         onClick={() => {
@@ -632,7 +649,7 @@ const FriendSearch = () => {
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        Refresh Suggestions
+        Refresh Friends
       </button>
     </div>
   );
@@ -664,7 +681,6 @@ const FriendSearch = () => {
 
   return (
     <div className="relative flex flex-col w-full max-w-3xl mx-auto bg-orange-50 min-h-screen p-4">
-      {/* Updated header section - removed hover dependency */}
       <div className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3">
         <div className="flex items-center justify-between">
           <button
@@ -757,7 +773,7 @@ const FriendSearch = () => {
                   value={query}
                   onChange={handleSearch}
                   placeholder="Search for friends..."
-                  className="w-full p-2 pl-10 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-                  transparent"
+                  className="w-full p-2 pl-10 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -951,7 +967,7 @@ const FriendSearch = () => {
         ) : (
           <>
             <h2 className="text-lg font-semibold text-gray-800 mb-3">
-              People You May Know
+              Your Friends
             </h2>
             {loadingSuggestions && suggestions.length === 0 ? (
               <div className="flex justify-center p-6">
@@ -991,7 +1007,7 @@ const FriendSearch = () => {
               !suggestionHasMore &&
               suggestions.length > 0 && (
                 <div className="text-center p-4 mt-2">
-                  <p className="text-gray-500">That's everyone we know!</p>
+                  <p className="text-gray-500">That's all your friends!</p>
                 </div>
               )}
           </>
