@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import { FaBookmark, FaCamera, FaImage, FaUsers } from "react-icons/fa";
@@ -110,7 +111,7 @@ export interface UserDetails {
   email: string;
   picture?: string;
   bio?: string;
-  phone?: string;
+  phoneNumber?: string;
   location?: string;
   education?: string;
   occupation?: string;
@@ -122,6 +123,10 @@ export interface UserDetails {
   coverPhoto?: string;
   followers?: string[];
   following?: string[];
+  dateOfBirth?: string;
+  gender?: string;
+  socialLinks?: Array<{ label: string; url: string }>;
+  privacySettings?: string;
 }
 
 // Define interface for profile field
@@ -149,6 +154,16 @@ export interface SavedPost extends Post {
   };
 }
 
+// Add a function to format date from ISO or YYYY-MM-DD to display format
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "Not provided";
+  try {
+    return format(new Date(dateString), "MMMM d, yyyy");
+  } catch (error) {
+    return dateString;
+  }
+};
+
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
@@ -165,6 +180,11 @@ const UserProfile = () => {
     _id: "",
     name: "",
     email: "",
+    phoneNumber: "",
+    dateOfBirth: "",
+    gender: "",
+    socialLinks: [],
+    privacySettings: "",
     interests: [],
   });
 
@@ -183,6 +203,8 @@ const UserProfile = () => {
   >(null);
   const [connectingIds, setConnectingIds] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  const [isEditingInterests, setIsEditingInterests] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -209,14 +231,17 @@ const UserProfile = () => {
   // Calculate profile completion percentage
   const profileFields: ProfileField[] = [
     { field: "name", label: "Name" },
-    { field: "avatar", label: "Profile Picture" },
+    { field: "picture", label: "Profile Picture" },
     { field: "email", label: "Email" },
-    { field: "phone", label: "Phone Number" },
+    { field: "phoneNumber", label: "Phone Number" },
     { field: "location", label: "Location" },
-    { field: "bio", label: "Bio" },
+    { field: "bio", label: "Bio", minLength: 10 },
     { field: "education", label: "Education" },
     { field: "occupation", label: "Occupation" },
     { field: "interests", label: "Interests", minLength: 3 },
+    { field: "dateOfBirth", label: "Date of Birth" },
+    { field: "gender", label: "Gender" },
+    { field: "socialLinks", label: "Social Links" },
   ];
 
   const getProfileCompletion = () => {
@@ -232,6 +257,24 @@ const UserProfile = () => {
           userDetails.interests &&
           userDetails.interests.length >= (field.minLength || 1)
         ) {
+          completedFields++;
+        }
+      } else if (field.field === "socialLinks") {
+        if (
+          userDetails.socialLinks &&
+          userDetails.socialLinks.length >= (field.minLength || 1)
+        ) {
+          completedFields++;
+        }
+      } else if (field.field === "bio") {
+        if (
+          userDetails.bio &&
+          userDetails.bio.length >= (field.minLength || 1)
+        ) {
+          completedFields++;
+        }
+      } else if (field.field === "picture") {
+        if (userDetails.picture || user?.imageUrl) {
           completedFields++;
         }
       } else if (
@@ -261,6 +304,24 @@ const UserProfile = () => {
         ) {
           incompleteFields.push(field.label);
         }
+      } else if (field.field === "socialLinks") {
+        if (
+          !userDetails.socialLinks ||
+          userDetails.socialLinks.length < (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (field.field === "bio") {
+        if (
+          !userDetails.bio ||
+          userDetails.bio.length < (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (field.field === "picture") {
+        if (!userDetails.picture && !user?.imageUrl) {
+          incompleteFields.push(field.label);
+        }
       } else if (
         !userDetails[field.field as keyof UserDetails] ||
         String(userDetails[field.field as keyof UserDetails]).trim() === ""
@@ -286,8 +347,17 @@ const UserProfile = () => {
         location: formData.get("location") as string,
         education: formData.get("education") as string,
         occupation: formData.get("occupation") as string,
-        phone: formData.get("phone") as string,
-        interests: userDetails.interests || [], // Include current interests
+        phoneNumber: formData.get("phoneNumber") as string,
+        interests: userDetails.interests || [],
+        coverPhoto: (user?.unsafeMetadata.coverPhoto as string) || "",
+        picture: user?.imageUrl || "",
+        dateOfBirth:
+          (formData.get("dateOfBirth") as string) ||
+          userDetails.dateOfBirth ||
+          "",
+        socialLinks: userDetails.socialLinks || [],
+        privacySettings: userDetails.privacySettings || "",
+        gender: formData.get("gender") as string,
       };
 
       const token = await getToken();
@@ -311,8 +381,22 @@ const UserProfile = () => {
 
       if (response.status === 200) {
         toast.success("Profile updated successfully");
-        // Update local user data
-        setUserDetails((prev: UserDetails) => ({ ...prev, ...profileData }));
+        // Update local user data with proper typing
+        setUserDetails((prev) => ({
+          ...prev,
+          bio: profileData.bio,
+          location: profileData.location,
+          education: profileData.education,
+          occupation: profileData.occupation,
+          phoneNumber: profileData.phoneNumber,
+          interests: profileData.interests,
+          coverPhoto: profileData.coverPhoto,
+          picture: profileData.picture,
+          dateOfBirth: profileData.dateOfBirth,
+          socialLinks: profileData.socialLinks,
+          privacySettings: profileData.privacySettings,
+          gender: profileData.gender,
+        }));
         setIsEditing(false);
         setShowCompletionForm(false);
 
@@ -332,29 +416,6 @@ const UserProfile = () => {
     }
   };
 
-  // Function to handle adding a new interest
-  const addInterest = () => {
-    const interestInput = document.getElementById(
-      "new-interest"
-    ) as HTMLInputElement;
-    if (interestInput && interestInput.value.trim()) {
-      // Create a new array with all existing interests plus the new one
-      const updatedInterests = [
-        ...(userDetails.interests || []),
-        interestInput.value.trim(),
-      ];
-
-      // Update the user details state with the new interests array
-      setUserDetails((prev) => ({
-        ...prev,
-        interests: updatedInterests,
-      }));
-
-      // Clear the input field
-      interestInput.value = "";
-    }
-  };
-
   // Function to handle removing an interest
   const removeInterest = (indexToRemove: number) => {
     const updatedInterests = (userDetails.interests || []).filter(
@@ -364,6 +425,35 @@ const UserProfile = () => {
       ...prev,
       interests: updatedInterests,
     }));
+  };
+
+  const updateInterests = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      const response = await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { interests: userDetails.interests || [] },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Interests updated successfully");
+        setIsEditingInterests(false);
+      }
+    } catch (error) {
+      console.error("Error updating interests:", error);
+      toast.error("Failed to update interests");
+    }
   };
 
   useEffect(() => {
@@ -699,6 +789,33 @@ const UserProfile = () => {
     fetchSuggestions();
   }, []);
 
+  // Let's check if there are any string socialLinks in the existing user data and convert them
+  useEffect(() => {
+    // Convert any string socialLinks to the new format when user data is loaded
+    if (userDetails?.socialLinks && userDetails.socialLinks.length > 0) {
+      // Use type assertion to handle the potential mixed types during migration
+      const links = userDetails.socialLinks as Array<
+        string | { label: string; url: string }
+      >;
+
+      const needsConversion = links.some((link) => typeof link === "string");
+
+      if (needsConversion) {
+        const convertedLinks = links.map((link) => {
+          if (typeof link === "string") {
+            return { label: "Link", url: link };
+          }
+          return link;
+        });
+
+        setUserDetails((prev) => ({
+          ...prev,
+          socialLinks: convertedLinks as Array<{ label: string; url: string }>,
+        }));
+      }
+    }
+  }, [userDetails?.socialLinks]);
+
   return (
     <>
       {showConfetti && (
@@ -708,7 +825,7 @@ const UserProfile = () => {
       <div className="flex items-start justify-center w-full max-w-8xl rounded-xl">
         <div className="relative flex flex-col w-full ">
           {/* Profile Header */}
-          <div className="sticky top-[68px] md:top-[100px]  z-[5] bg-white rounded-bl-xl rounded-br-xl">
+          <div className="relative  z-[5] bg-white rounded-bl-xl rounded-br-xl">
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center gap-4">
                 <button
@@ -783,10 +900,15 @@ const UserProfile = () => {
                           <p className="text-xs font-medium text-orange-700">
                             Missing information:
                           </p>
-                          <ul className="flex flex-wrap gap-6 pl-4 text-orange-700 list-disc te-xt-xs mt1">
-                            {incompleteFields.map((field, index) => (
-                              <li key={index}>{field}</li>
-                            ))}
+                          <ul className="flex flex-wrap gap-2 pl-4 mt-1 text-xs text-orange-700 list-disc">
+                            {incompleteFields
+                              .slice(0, 5)
+                              .map((field, index) => (
+                                <li key={index}>{field}</li>
+                              ))}
+                            {incompleteFields.length > 5 && (
+                              <li>and {incompleteFields.length - 5} more...</li>
+                            )}
                           </ul>
                         </div>
                       )}
@@ -824,7 +946,7 @@ const UserProfile = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleProfileSubmit}>
+                <form id="profile-edit-form" onSubmit={handleProfileSubmit}>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Prefilled fields */}
                     <div className="space-y-1">
@@ -861,7 +983,7 @@ const UserProfile = () => {
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Phone Number
-                        {!userDetails.phone && (
+                        {!userDetails.phoneNumber && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
@@ -869,9 +991,9 @@ const UserProfile = () => {
                       </label>
                       <input
                         type="tel"
-                        name="phone"
+                        name="phoneNumber"
                         placeholder="Add your phone number"
-                        defaultValue={userDetails.phone}
+                        defaultValue={userDetails.phoneNumber}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
@@ -892,12 +1014,50 @@ const UserProfile = () => {
 
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
-                        Education
-                        {!userDetails?.education && (
+                        Date of Birth
+                        {!userDetails?.dateOfBirth && (
                           <span className="ml-2 text-xs font-normal text-amber-600">
                             (Missing)
                           </span>
                         )}
+                      </label>
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        defaultValue={userDetails?.dateOfBirth}
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="flex items-center text-sm font-medium text-gray-700">
+                        Gender
+                        {!userDetails?.gender && (
+                          <span className="ml-2 text-xs font-normal text-amber-600">
+                            (Missing)
+                          </span>
+                        )}
+                      </label>
+                      <select
+                        name="gender"
+                        defaultValue={userDetails?.gender || ""}
+                        className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option value="" disabled>
+                          Select gender
+                        </option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not-to-say">
+                          Prefer not to say
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-gray-700">
+                        Education
                       </label>
                       <input
                         type="text"
@@ -908,13 +1068,8 @@ const UserProfile = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="flex items-center text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-gray-700">
                         Occupation
-                        {!userDetails?.occupation && (
-                          <span className="ml-2 text-xs font-normal text-amber-600">
-                            (Missing)
-                          </span>
-                        )}
                       </label>
                       <input
                         type="text"
@@ -923,6 +1078,107 @@ const UserProfile = () => {
                         defaultValue={userDetails?.occupation}
                         className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="flex items-center text-sm font-medium text-gray-700">
+                        Social Links
+                        {(!userDetails?.socialLinks ||
+                          userDetails.socialLinks.length === 0) && (
+                          <span className="ml-2 text-xs font-normal text-amber-600">
+                            (Missing)
+                          </span>
+                        )}
+                      </label>
+                      <div className="p-2 border border-orange-200 rounded-md">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {userDetails?.socialLinks?.map(
+                            (
+                              link: { label: string; url: string },
+                              index: number
+                            ) => (
+                              <span
+                                key={index}
+                                className="flex items-center px-3 py-1 text-sm text-blue-500 bg-blue-100 rounded-full"
+                              >
+                                <strong>{link.label}:</strong>{" "}
+                                {link.url.substring(0, 20)}
+                                {link.url.length > 20 ? "..." : ""}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedLinks = [
+                                      ...(userDetails.socialLinks || []),
+                                    ];
+                                    updatedLinks.splice(index, 1);
+                                    setUserDetails((prev) => ({
+                                      ...prev,
+                                      socialLinks: updatedLinks,
+                                    }));
+                                  }}
+                                  className="ml-2 text-blue-500 hover:text-blue-700"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            )
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                            <input
+                              type="text"
+                              placeholder="Platform (e.g., Facebook, Instagram)"
+                              id="new-social-link-label"
+                              className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Profile URL"
+                              id="new-social-link-url"
+                              className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            className="bg-orange-500 hover:bg-orange-500/90"
+                            onClick={() => {
+                              const labelInput = document.getElementById(
+                                "new-social-link-label"
+                              ) as HTMLInputElement;
+                              const urlInput = document.getElementById(
+                                "new-social-link-url"
+                              ) as HTMLInputElement;
+
+                              if (
+                                labelInput &&
+                                urlInput &&
+                                labelInput.value.trim() &&
+                                urlInput.value.trim()
+                              ) {
+                                const updatedLinks = [
+                                  ...(userDetails.socialLinks || []),
+                                  {
+                                    label: labelInput.value.trim(),
+                                    url: urlInput.value.trim(),
+                                  },
+                                ];
+
+                                setUserDetails((prev) => ({
+                                  ...prev,
+                                  socialLinks: updatedLinks,
+                                }));
+
+                                // Clear the input fields
+                                labelInput.value = "";
+                                urlInput.value = "";
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
@@ -953,48 +1209,125 @@ const UserProfile = () => {
                             </span>
                           )}
                       </label>
-                      <div className="p-2 border border-orange-200 rounded-md">
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {userDetails?.interests?.map(
-                            (interest: string, index: number) => (
-                              <span
-                                key={index}
-                                className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
-                              >
-                                {interest}
-                                <button
-                                  type="button"
-                                  onClick={() => removeInterest(index)}
-                                  className="ml-2 text-orange-500 hover:text-orange-700"
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            )
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Add an interest"
-                            id="new-interest"
-                            className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            onKeyPress={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                addInterest();
-                              }
-                            }}
-                          />
+                      <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            Interests
+                          </h3>
                           <Button
-                            type="button"
-                            className="bg-orange-500 hover:bg-orange-500/90"
-                            onClick={addInterest}
+                            variant="ghost"
+                            size="sm"
+                            className="p-0 text-orange-500 hover:text-orange-500/90"
+                            onClick={() =>
+                              setIsEditingInterests(!isEditingInterests)
+                            }
                           >
-                            Add
+                            <FiEdit2 size={16} />
                           </Button>
                         </div>
-                      </div>
+
+                        {isEditingInterests ? (
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {userDetails?.interests?.map(
+                                (interest: string, index: number) => (
+                                  <span
+                                    key={index}
+                                    className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
+                                  >
+                                    {interest}
+                                    <button
+                                      type="button"
+                                      onClick={() => removeInterest(index)}
+                                      className="ml-2 text-orange-500 hover:text-orange-700"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                )
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                placeholder="Add an interest"
+                                id="sidebar-interest"
+                                className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                onKeyPress={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const input = document.getElementById(
+                                      "sidebar-interest"
+                                    ) as HTMLInputElement;
+                                    if (input && input.value.trim()) {
+                                      const updatedInterests = [
+                                        ...(userDetails.interests || []),
+                                        input.value.trim(),
+                                      ];
+                                      setUserDetails((prev) => ({
+                                        ...prev,
+                                        interests: updatedInterests,
+                                      }));
+                                      input.value = "";
+                                    }
+                                  }
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                className="bg-orange-500 hover:bg-orange-500/90"
+                                onClick={() => {
+                                  const input = document.getElementById(
+                                    "sidebar-interest"
+                                  ) as HTMLInputElement;
+                                  if (input && input.value.trim()) {
+                                    const updatedInterests = [
+                                      ...(userDetails.interests || []),
+                                      input.value.trim(),
+                                    ];
+                                    setUserDetails((prev) => ({
+                                      ...prev,
+                                      interests: updatedInterests,
+                                    }));
+                                    input.value = "";
+                                  }
+                                }}
+                              >
+                                Add
+                              </Button>
+                            </div>
+                            <div className="flex justify-end mt-2">
+                              <Button
+                                type="button"
+                                className="bg-orange-500 hover:bg-orange-500/90"
+                                onClick={updateInterests}
+                              >
+                                Save
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {userDetails?.interests &&
+                            userDetails?.interests.length > 0 ? (
+                              userDetails?.interests.map(
+                                (interest: string, index: number) => (
+                                  <span
+                                    key={index}
+                                    className="px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
+                                  >
+                                    {interest}
+                                  </span>
+                                )
+                              )
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                No interests added yet
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </Card>
                     </div>
                   </div>
 
@@ -1088,7 +1421,7 @@ const UserProfile = () => {
                           </p>
                           <p className="flex items-center mt-1 text-xs text-gray-500">
                             <FiCalendar className="mr-1" size={12} /> Joined{" "}
-                            {userDetails?.joinedDate}
+                            {formatDate(userDetails?.joinedDate)}
                           </p>
                         </div>
                       </div>
@@ -1139,30 +1472,115 @@ const UserProfile = () => {
                         variant="ghost"
                         size="sm"
                         className="p-0 text-orange-500 hover:text-orange-500/90"
-                        onClick={() => setIsEditing(true)}
+                        onClick={() =>
+                          setIsEditingInterests(!isEditingInterests)
+                        }
                       >
                         <FiEdit2 size={16} />
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {userDetails?.interests &&
-                      userDetails?.interests.length > 0 ? (
-                        userDetails?.interests.map(
-                          (interest: string, index: number) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
-                            >
-                              {interest}
-                            </span>
+
+                    {isEditingInterests ? (
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {userDetails?.interests?.map(
+                            (interest: string, index: number) => (
+                              <span
+                                key={index}
+                                className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
+                              >
+                                {interest}
+                                <button
+                                  type="button"
+                                  onClick={() => removeInterest(index)}
+                                  className="ml-2 text-orange-500 hover:text-orange-700"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            )
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add an interest"
+                            id="sidebar-interest"
+                            className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const input = document.getElementById(
+                                  "sidebar-interest"
+                                ) as HTMLInputElement;
+                                if (input && input.value.trim()) {
+                                  const updatedInterests = [
+                                    ...(userDetails.interests || []),
+                                    input.value.trim(),
+                                  ];
+                                  setUserDetails((prev) => ({
+                                    ...prev,
+                                    interests: updatedInterests,
+                                  }));
+                                  input.value = "";
+                                }
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            className="bg-orange-500 hover:bg-orange-500/90"
+                            onClick={() => {
+                              const input = document.getElementById(
+                                "sidebar-interest"
+                              ) as HTMLInputElement;
+                              if (input && input.value.trim()) {
+                                const updatedInterests = [
+                                  ...(userDetails.interests || []),
+                                  input.value.trim(),
+                                ];
+                                setUserDetails((prev) => ({
+                                  ...prev,
+                                  interests: updatedInterests,
+                                }));
+                                input.value = "";
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                        <div className="flex justify-end mt-2">
+                          <Button
+                            type="button"
+                            className="bg-orange-500 hover:bg-orange-500/90"
+                            onClick={updateInterests}
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {userDetails?.interests &&
+                        userDetails?.interests.length > 0 ? (
+                          userDetails?.interests.map(
+                            (interest: string, index: number) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
+                              >
+                                {interest}
+                              </span>
+                            )
                           )
-                        )
-                      ) : (
-                        <p className="text-sm text-gray-500">
-                          No interests added yet
-                        </p>
-                      )}
-                    </div>
+                        ) : (
+                          <p className="text-sm text-gray-500">
+                            No interests added yet
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </Card>
 
                   {/* Suggested Friends */}
@@ -1358,8 +1776,8 @@ const UserProfile = () => {
                                 </label>
                                 <input
                                   type="tel"
-                                  name="phone"
-                                  defaultValue={userDetails.phone}
+                                  name="phoneNumber"
+                                  defaultValue={userDetails.phoneNumber}
                                   className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
                               </div>
@@ -1374,16 +1792,179 @@ const UserProfile = () => {
                                   className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
                               </div>
+                              <div className="space-y-1">
+                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                  Date of Birth
+                                  {!userDetails?.dateOfBirth && (
+                                    <span className="ml-2 text-xs font-normal text-amber-600">
+                                      (Missing)
+                                    </span>
+                                  )}
+                                </label>
+                                <input
+                                  type="date"
+                                  name="dateOfBirth"
+                                  defaultValue={userDetails?.dateOfBirth}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                  Gender
+                                  {!userDetails?.gender && (
+                                    <span className="ml-2 text-xs font-normal text-amber-600">
+                                      (Missing)
+                                    </span>
+                                  )}
+                                </label>
+                                <select
+                                  name="gender"
+                                  defaultValue={userDetails?.gender || ""}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                >
+                                  <option value="" disabled>
+                                    Select gender
+                                  </option>
+                                  <option value="male">Male</option>
+                                  <option value="female">Female</option>
+                                  <option value="other">Other</option>
+                                  <option value="prefer-not-to-say">
+                                    Prefer not to say
+                                  </option>
+                                </select>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Education
+                                </label>
+                                <input
+                                  type="text"
+                                  name="education"
+                                  placeholder="Add your education"
+                                  defaultValue={userDetails?.education}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Occupation
+                                </label>
+                                <input
+                                  type="text"
+                                  name="occupation"
+                                  placeholder="Add your occupation"
+                                  defaultValue={userDetails?.occupation}
+                                  className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                />
+                              </div>
                               <div className="space-y-1 md:col-span-2">
                                 <label className="text-sm font-medium text-gray-700">
                                   Bio
                                 </label>
                                 <textarea
                                   name="bio"
-                                  defaultValue={userDetails.bio}
+                                  placeholder="Tell us about yourself"
+                                  defaultValue={userDetails?.bio}
                                   rows={4}
                                   className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
+                              </div>
+                              <div className="space-y-1 md:col-span-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                  Social Links
+                                </label>
+                                <div className="p-2 border border-orange-200 rounded-md">
+                                  <div className="flex flex-wrap gap-2 mb-2">
+                                    {userDetails?.socialLinks?.map(
+                                      (
+                                        link: { label: string; url: string },
+                                        index: number
+                                      ) => (
+                                        <span
+                                          key={index}
+                                          className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
+                                        >
+                                          <strong>{link.label}:</strong>{" "}
+                                          {link.url.substring(0, 20)}
+                                          {link.url.length > 20 ? "..." : ""}
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const updatedLinks = [
+                                                ...(userDetails.socialLinks ||
+                                                  []),
+                                              ];
+                                              updatedLinks.splice(index, 1);
+                                              setUserDetails((prev) => ({
+                                                ...prev,
+                                                socialLinks: updatedLinks,
+                                              }));
+                                            }}
+                                            className="ml-2 text-orange-500 hover:text-orange-700"
+                                          >
+                                            ×
+                                          </button>
+                                        </span>
+                                      )
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                      <input
+                                        type="text"
+                                        placeholder="Platform (e.g., Facebook, Instagram)"
+                                        id="edit-social-link-label"
+                                        className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Profile URL"
+                                        id="edit-social-link-url"
+                                        className="flex-1 p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                      />
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      className="bg-orange-500 hover:bg-orange-500/90"
+                                      onClick={() => {
+                                        const labelInput =
+                                          document.getElementById(
+                                            "edit-social-link-label"
+                                          ) as HTMLInputElement;
+                                        const urlInput =
+                                          document.getElementById(
+                                            "edit-social-link-url"
+                                          ) as HTMLInputElement;
+
+                                        if (
+                                          labelInput &&
+                                          urlInput &&
+                                          labelInput.value.trim() &&
+                                          urlInput.value.trim()
+                                        ) {
+                                          const updatedLinks = [
+                                            ...(userDetails.socialLinks || []),
+                                            {
+                                              label: labelInput.value.trim(),
+                                              url: urlInput.value.trim(),
+                                            },
+                                          ];
+
+                                          setUserDetails((prev) => ({
+                                            ...prev,
+                                            socialLinks: updatedLinks,
+                                          }));
+
+                                          // Clear the input fields
+                                          labelInput.value = "";
+                                          urlInput.value = "";
+                                        }
+                                      }}
+                                    >
+                                      Add
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
                               <div className="flex justify-end mt-2 md:col-span-2">
                                 <Button
@@ -1426,7 +2007,7 @@ const UserProfile = () => {
                               <div className="flex items-center mt-1">
                                 <FiPhone className="mr-2 text-orange-500" />
                                 <p className="text-gray-800">
-                                  {userDetails?.phone}
+                                  {userDetails?.phoneNumber}
                                 </p>
                               </div>
                             </div>
@@ -1441,13 +2022,89 @@ const UserProfile = () => {
                                 </p>
                               </div>
                             </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Date of Birth
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiCalendar className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {formatDate(userDetails?.dateOfBirth)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Gender
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiUser className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.gender
+                                    ? userDetails.gender
+                                        .charAt(0)
+                                        .toUpperCase() +
+                                      userDetails.gender
+                                        .slice(1)
+                                        .replace("-", " ")
+                                    : "Not provided"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Education
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiAward className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.education || "Not provided"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg">
+                              <p className="text-sm font-medium text-gray-500">
+                                Occupation
+                              </p>
+                              <div className="flex items-center mt-1">
+                                <FiUser className="mr-2 text-orange-500" />
+                                <p className="text-gray-800">
+                                  {userDetails?.occupation || "Not provided"}
+                                </p>
+                              </div>
+                            </div>
                             <div className="p-3 border border-orange-100 rounded-lg md:col-span-2">
                               <p className="text-sm font-medium text-gray-500">
                                 Bio
                               </p>
                               <p className="mt-2 text-gray-800">
-                                {userDetails?.bio}
+                                {userDetails?.bio || "No bio provided"}
                               </p>
+                            </div>
+                            <div className="p-3 border border-orange-100 rounded-lg md:col-span-2">
+                              <p className="text-sm font-medium text-gray-500">
+                                Social Links
+                              </p>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {userDetails?.socialLinks &&
+                                userDetails.socialLinks.length > 0 ? (
+                                  userDetails.socialLinks.map((link, index) => (
+                                    <a
+                                      key={index}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3 py-1 text-sm text-orange-500 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
+                                    >
+                                      <strong>{link.label}</strong>
+                                    </a>
+                                  ))
+                                ) : (
+                                  <p className="text-gray-500">
+                                    No social links provided
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )}

@@ -1,11 +1,11 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Post, UserDetails } from "@/pages/v2/adda/userProfile";
+import { UserInfo } from "@/types";
+import { Avatar } from "@radix-ui/react-avatar";
 import { FiHeart, FiMail, FiMapPin, FiPhone, FiUser } from "react-icons/fi";
 import PostCard, { PostData } from "../../home/addPosts/PostCard";
-import { Avatar } from "@radix-ui/react-avatar";
-import { Button } from "@/components/ui/button";
 import RewardsSection from "../rewardsSection";
-import { UserInfo } from "@/types";
-import { Post, UserDetails } from "@/pages/v2/adda/userProfile";
 
 const ProfileActiveTab = ({
   activeTab,
@@ -65,7 +65,7 @@ const ProfileActiveTab = ({
                     <input
                       type="tel"
                       name="phone"
-                      defaultValue={userDetails.phone}
+                      defaultValue={userDetails.phoneNumber}
                       className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EC9600] focus:border-[#EC9600]"
                     />
                   </div>
@@ -121,7 +121,7 @@ const ProfileActiveTab = ({
                   <p className="text-sm font-medium text-gray-500">Phone</p>
                   <div className="flex items-center mt-1">
                     <FiPhone className="text-[#EC9600] mr-2" />
-                    <p className="text-gray-800">{userDetails?.phone}</p>
+                    <p className="text-gray-800">{userDetails?.phoneNumber}</p>
                   </div>
                 </div>
                 <div className="p-3 border border-orange-100 rounded-lg">

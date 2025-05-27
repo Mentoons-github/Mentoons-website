@@ -14,17 +14,30 @@ import {
   ProductBase,
   ProductType,
 } from "@/types/productTypes";
+import { RewardEventType } from "@/types/rewards";
 import { ModalMessage } from "@/utils/enum";
 import { formatDateString } from "@/utils/formateDate";
+import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 
 import { ChevronLeft, ChevronRight, Minus, Plus, ZoomIn } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
+import { FiShare2 } from "react-icons/fi";
 import { IoIosCart } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  EmailIcon,
+  EmailShareButton,
+  FacebookIcon,
+  FacebookShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WhatsappIcon,
+  WhatsappShareButton,
+} from "react-share";
 import { toast } from "sonner";
 
 const ProductDetails = () => {
@@ -38,6 +51,7 @@ const ProductDetails = () => {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [message, setMessage] = useState<string>("");
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // New state for image viewer
   const [selectedImage, setSelectedImage] = useState<number>(0);
@@ -176,6 +190,19 @@ const ProductDetails = () => {
     }
     // handleAddtoCart(event)
     navigate(`/order-summary?productId=${product._id}`);
+  };
+
+  const handleShare = () => {
+    setShowShareModal(!showShareModal);
+  };
+
+  // Function to handle when a share action is completed
+  const handleShareCompleted = (platform: string) => {
+    if (product?._id) {
+      // Trigger the reward middleware to give points for sharing a product
+      triggerReward(RewardEventType.SHARE_PRODUCT, product._id);
+      toast.success(`Shared on ${platform}! You earned reward points.`);
+    }
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -443,39 +470,62 @@ const ProductDetails = () => {
 
         {/* Buy Now Button */}
         {product?.price === 0 ? (
-          <button
-            onClick={() => {
-              if (product?.type === ProductType.COMIC) {
-                window.open(
-                  (product.details as ComicProduct["details"]).sampleUrl,
-                  "_blank"
-                );
-              } else if (product?.type === ProductType.AUDIO_COMIC) {
-                window.open(
-                  (product.details as AudioComicProduct["details"]).sampleUrl,
-                  "_blank"
-                );
-              } else if (product?.type === ProductType.PODCAST) {
-                window.open(
-                  (product.details as PodcastProduct["details"]).sampleUrl,
-                  "_blank"
-                );
-              }
-            }}
-            className="w-full px-4 py-3 ml-4 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-          >
-            Download For Free
-          </button>
+          <div className="flex flex-col w-full gap-4 mt-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (product?.type === ProductType.COMIC) {
+                    window.open(
+                      (product.details as ComicProduct["details"]).sampleUrl,
+                      "_blank"
+                    );
+                  } else if (product?.type === ProductType.AUDIO_COMIC) {
+                    window.open(
+                      (product.details as AudioComicProduct["details"])
+                        .sampleUrl,
+                      "_blank"
+                    );
+                  } else if (product?.type === ProductType.PODCAST) {
+                    window.open(
+                      (product.details as PodcastProduct["details"]).sampleUrl,
+                      "_blank"
+                    );
+                  }
+                }}
+                className="flex-1 px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+              >
+                Download For Free
+              </button>
+
+              <button
+                className="px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+                onClick={handleShare}
+                title="Share this product"
+              >
+                <FiShare2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col w-full gap-4 mt-4">
-            <button
-              className="flex items-center justify-center w-full px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-              onClick={(e) => handleAddtoCart(e)}
-              disabled={isLoading}
-            >
-              <IoIosCart className="w-5 h-5 mr-2" />
-              {isLoading ? "Adding..." : "Add to Cart"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="flex items-center justify-center flex-1 px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                onClick={(e) => handleAddtoCart(e)}
+                disabled={isLoading}
+              >
+                <IoIosCart className="w-5 h-5 mr-2" />
+                {isLoading ? "Adding..." : "Add to Cart"}
+              </button>
+
+              <button
+                className="flex items-center justify-center px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                onClick={handleShare}
+                title="Share this product"
+              >
+                <FiShare2 className="w-5 h-5" />
+              </button>
+            </div>
 
             <button
               className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
@@ -746,6 +796,83 @@ const ProductDetails = () => {
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
+      )}
+
+      {/* Share Modal - Positioned fixed so it doesn't get affected by scrolling */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">Share this product</h3>
+              <button
+                onClick={handleShare}
+                className="text-xl text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6">
+              <FacebookShareButton
+                url={window.location.href}
+                hashtag="#Mentoons"
+                onClick={() => handleShareCompleted("Facebook")}
+              >
+                <FacebookIcon size={50} round />
+                <p className="mt-1 text-xs text-center">Facebook</p>
+              </FacebookShareButton>
+
+              <TwitterShareButton
+                url={window.location.href}
+                title={`Check out ${product.title} on Mentoons!`}
+                onClick={() => handleShareCompleted("Twitter")}
+              >
+                <TwitterIcon size={50} round />
+                <p className="mt-1 text-xs text-center">Twitter</p>
+              </TwitterShareButton>
+
+              <WhatsappShareButton
+                url={window.location.href}
+                title={`Check out ${product.title} on Mentoons!`}
+                onClick={() => handleShareCompleted("WhatsApp")}
+              >
+                <WhatsappIcon size={50} round />
+                <p className="mt-1 text-xs text-center">WhatsApp</p>
+              </WhatsappShareButton>
+
+              <EmailShareButton
+                url={window.location.href}
+                subject={`Check out ${product.title} on Mentoons!`}
+                body={`I thought you might be interested in this product: ${product.title}\n\n${product.description}\n\nCheck it out here: ${window.location.href}`}
+                onClick={() => handleShareCompleted("Email")}
+              >
+                <EmailIcon size={50} round />
+                <p className="mt-1 text-xs text-center">Email</p>
+              </EmailShareButton>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">Or copy link</p>
+              <div className="flex mt-2">
+                <input
+                  type="text"
+                  value={window.location.href}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  readOnly
+                />
+                <button
+                  className="px-4 py-2 text-white rounded-r-md bg-primary hover:bg-primary-dark"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Link copied to clipboard!");
+                    handleShareCompleted("Direct Link");
+                  }}
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -30,10 +30,7 @@ const MobileBottomNav = ({
           <FaUsers className="text-2xl" />
         </button>
 
-        <Link
-          to="/adda/home"
-          className="relative p-2 outline-none cursor-pointer"
-        >
+        <Link to="/adda" className="relative p-2 outline-none cursor-pointer">
           <FiHome className="text-2xl text-[#EC9600]" />
         </Link>
 

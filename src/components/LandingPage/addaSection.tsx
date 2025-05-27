@@ -64,7 +64,7 @@ const AddaSection = () => {
         </div>
 
         <div className="relative flex items-center justify-center w-full gap-5 pt-10 md:justify-start sm:items-center">
-          <Link to="/adda/home">
+          <Link to="/adda">
             <motion.button
               initial={{ opacity: 0, rotate: -10, y: 20 }}
               animate={
