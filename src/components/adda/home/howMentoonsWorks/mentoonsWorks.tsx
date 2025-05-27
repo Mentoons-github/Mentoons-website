@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
 import useInView from "@/hooks/useInView";
+import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const videos = [
   {
@@ -184,7 +184,7 @@ const HowMentoonsWork = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative p-6 md:p-12 flex flex-col items-center bg-white min-h-screen"
+      className="relative flex flex-col items-center min-h-screen p-6 bg-white md:p-12"
     >
       <motion.div
         className="absolute top-0 left-0 w-64 h-64 bg-[#FFF1B3] rounded-full z-0 opacity-50"
@@ -201,12 +201,12 @@ const HowMentoonsWork = () => {
         variants={headingVariants}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
-        className="text-3xl md:text-4xl lg:text-5xl z-10 font-semibold text-gray-800 mb-10 text-center font-inter"
+        className="z-10 mb-10 text-3xl font-semibold text-center text-gray-800 md:text-4xl lg:text-5xl font-inter"
       >
         How Mentoons Work
       </motion.h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl w-full z-10 px-4">
+      <div className="z-10 grid w-full grid-cols-1 gap-8 px-4 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl">
         {videos.map((video, index) => (
           <motion.div
             key={video.id}
@@ -214,7 +214,7 @@ const HowMentoonsWork = () => {
             variants={videoVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            className="flex flex-col items-center bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            className="flex flex-col items-center overflow-hidden transition-shadow duration-300 bg-white shadow-md rounded-xl hover:shadow-lg"
             whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={() => handleMouseLeave(index)}
@@ -226,7 +226,7 @@ const HowMentoonsWork = () => {
                 src={video.src}
                 poster={video.thumbnail}
                 controls
-                className="w-full h-full object-cover"
+                className="object-cover w-full h-full"
                 aria-label={`Video: ${video.title}`}
                 aria-describedby={`video-desc-${video.id}`}
                 playsInline
@@ -268,7 +268,7 @@ const HowMentoonsWork = () => {
                     {isPlaying[index] ? (
                       <button
                         onClick={() => handlePauseClick(index)}
-                        className="w-12 h-12 text-gray-900 bg-white bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-white rounded-full hover:scale-110 transition-transform"
+                        className="w-12 h-12 text-gray-900 transition-transform bg-white bg-opacity-50 rounded-full focus:outline-none focus:ring-2 focus:ring-white hover:scale-110"
                         aria-label={`Pause video: ${video.title}`}
                       >
                         <svg
@@ -289,7 +289,7 @@ const HowMentoonsWork = () => {
                     ) : (
                       <button
                         onClick={() => handlePlayClick(index)}
-                        className="w-12 h-12 text-gray-900 bg-white bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-white rounded-full hover:scale-110 transition-transform"
+                        className="w-12 h-12 text-gray-900 transition-transform bg-white bg-opacity-50 rounded-full focus:outline-none focus:ring-2 focus:ring-white hover:scale-110"
                         aria-label={`Play video: ${video.title}`}
                       >
                         <svg
@@ -310,7 +310,7 @@ const HowMentoonsWork = () => {
                     )}
                     <button
                       onClick={() => handleFullscreenClick(index)}
-                      className="w-12 h-12 text-gray-900 bg-white bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-white rounded-full hover:scale-110 transition-transform"
+                      className="w-12 h-12 text-gray-900 transition-transform bg-white bg-opacity-50 rounded-full focus:outline-none focus:ring-2 focus:ring-white hover:scale-110"
                       aria-label={`Enter fullscreen for video: ${video.title}`}
                     >
                       <svg
@@ -333,12 +333,12 @@ const HowMentoonsWork = () => {
               )}
             </div>
             <div className="p-5 text-center">
-              <h2 className="text-xl font-semibold text-gray-800 font-inter mb-2">
+              <h2 className="mb-2 text-xl font-semibold text-gray-800 font-inter">
                 {video.title}
               </h2>
               <p
                 id={`video-desc-${video.id}`}
-                className="text-gray-600 font-inter text-sm"
+                className="text-sm text-gray-600 font-inter"
               >
                 {video.description}
               </p>
@@ -351,16 +351,16 @@ const HowMentoonsWork = () => {
         variants={buttonVariants}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
-        className="mt-12 z-10"
+        className="z-10 mt-12"
       >
         <button
           onClick={handleBrowsePlansClick}
-          className="inline-flex items-center px-6 py-3 bg-gray-500 text-white font-semibold rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-300"
+          className="inline-flex items-center px-6 py-3 font-semibold text-white transition-all duration-300 bg-gray-500 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
           aria-label="Back to membership plans"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="mr-2 h-5 w-5"
+            className="w-5 h-5 mr-2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

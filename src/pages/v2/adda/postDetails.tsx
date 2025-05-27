@@ -1,4 +1,4 @@
-import Likes from "@/components/adda/home/addPosts/likes/likes";
+import Reactions from "@/components/adda/home/addPosts/likes/reactions";
 import Share from "@/components/adda/home/addPosts/share/share";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
@@ -275,8 +275,7 @@ const PostDetailsPage = () => {
       );
       console.log(response.data);
       toast.success("Comment added successfully");
-      triggerReward(RewardEventType.COMMENT_POST
-        , postId);
+      triggerReward(RewardEventType.COMMENT_POST, postId);
       setNewComment("");
     } catch (err) {
       console.error("Error adding comment:", err);
@@ -378,7 +377,7 @@ const PostDetailsPage = () => {
           {/* User information */}
           <div className="flex items-start gap-4 mb-4">
             <button
-              onClick={() => navigate("/adda/home")}
+              onClick={() => navigate("/adda")}
               className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
             >
               <BiArrowBack className="w-5 h-5" />
@@ -489,7 +488,7 @@ const PostDetailsPage = () => {
               <div
                 onClick={!isSignedIn ? () => setShowAuthModal(true) : undefined}
               >
-                <Likes
+                <Reactions
                   type="post"
                   id={post._id}
                   likeCount={post.likes.length}

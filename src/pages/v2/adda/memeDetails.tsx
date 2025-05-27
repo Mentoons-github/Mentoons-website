@@ -1,4 +1,4 @@
-import Likes from "@/components/adda/home/addPosts/likes/likes";
+import Reactions from "@/components/adda/home/addPosts/likes/reactions";
 import Share from "@/components/adda/home/addPosts/share/share";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -440,7 +440,7 @@ const MemeDetailsPage = () => {
               <div
                 onClick={!isSignedIn ? () => setShowAuthModal(true) : undefined}
               >
-                <Likes type="meme" id={meme._id} likeCount={likeCount} />
+                <Reactions type="post" id={meme._id} likeCount={likeCount} />
               </div>
 
               {/* Comment count */}

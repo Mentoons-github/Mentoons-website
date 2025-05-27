@@ -1,14 +1,15 @@
-import { useCallback, useState } from "react";
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
 import BottomNav from "@/components/adda/home/bottomNav/bottomNav";
 import FriendRequest from "@/components/adda/home/friendRequest/friendRequest";
 import Influencer from "@/components/adda/home/influencer/influencer";
 import Meme from "@/components/adda/home/memeOfTheDay/meme";
 import UserStatus from "@/components/adda/home/userStatus/userStatus";
-import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 import WhatWeOffer from "@/components/adda/home/whatweExplore/weOffer";
+import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 import WelcomeModal from "@/components/adda/welcome/welcome";
+import { useAuth } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
+import { useCallback, useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const AddaLayout = () => {
   const { isSignedIn } = useAuth();
@@ -39,7 +40,7 @@ const AddaLayout = () => {
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          <div className="left-0 flex items-center w-full bg-white z-20">
+          <div className="left-0 z-20 flex items-center w-full bg-white">
             <div className="flex items-center w-full bg-white">
               <div className="flex-grow w-full min-w-0 py-2">
                 <UserStatus />
@@ -94,7 +95,7 @@ const AddaLayout = () => {
                 {isSignedIn && (
                   <div className="p-3 mb-4 bg-white border border-orange-200 rounded-lg sm:p-4">
                     <FriendRequest />
-                    <div className="mt-4 border-t border-orange-100 pt-3">
+                    <div className="pt-3 mt-4 border-t border-orange-100">
                       <ViewAllFriends
                         onNavigate={navigateToFriendRequestsPage}
                       />
@@ -110,6 +111,26 @@ const AddaLayout = () => {
           </div>
         </div>
       </div>
+
+      <motion.button
+        onClick={handleActionButtonClick}
+        initial={{ scale: 1 }}
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "loop",
+          ease: "easeInOut",
+        }}
+        className="fixed z-50 flex items-center justify-center w-16 h-16 transition-transform bg-orange-400 rounded-full shadow-lg bottom-20 right-4 hover:scale-105 md:bottom-4"
+        aria-label="Create new post"
+      >
+        <img
+          src="/assets/home/homepage fillers/sir Illustration.png"
+          alt="Action button icon"
+          className="w-12 h-12"
+        />
+      </motion.button>
 
       {isSignedIn && (
         <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
