@@ -166,7 +166,8 @@ const ProfileDetails = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "posts":
-        return <PostsList posts={userPosts} user={user} />;
+      return <PostsList posts={userPosts} user={user} /> ;
+        
       case "about":
         return <AboutSection user={user} />;
       case "friends":
@@ -177,8 +178,8 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-full px-2 sm:max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto pt-4 sm:pt-6 md:pt-8">
+    <div className="min-h-screen">
+      <div className="max-w-full px-2 pt-4 mx-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl sm:pt-6 md:pt-8">
         <ProfileHeader
           user={user}
           totalPosts={numberOfPosts}

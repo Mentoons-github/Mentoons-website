@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
-import { Form, Formik, FormikProps } from "formik";
+import { Field, Form, Formik, FormikProps } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Edit, FileText, Image, Video, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -429,6 +429,19 @@ const PostUpload = ({
       return;
     }
 
+    if (postType === "photo" || postType === "video") {
+      if (activeTab === 1) {
+        // For photo/video posts, we go from tab 1 straight to tab 2 (preview)
+        const hasMedia = values.media.some((m) => m.file);
+        if (!hasMedia) {
+          toast.error(`Please upload a ${postType} first`);
+          return;
+        }
+        setActiveTab(2);
+      }
+      return;
+    }
+
     const maxTab = 3;
     if (activeTab < maxTab) {
       setActiveTab(activeTab + 1);
@@ -553,9 +566,63 @@ const PostUpload = ({
 
                           {postType === "event" && <EventForm />}
 
-                          {postType !== "event" && postType !== "article" && (
-                            <TextPostForm postType={postType} />
+                          {(postType === "photo" || postType === "video") && (
+                            <div className="flex flex-col w-full gap-6">
+                              <UploadContent
+                                postType={postType}
+                                values={values}
+                                mediaPreview={mediaPreview}
+                                handleMediaUpload={handleMediaUpload}
+                                addMediaField={addMediaField}
+                                removeMediaField={removeMediaField}
+                                setFieldValue={setFieldValue}
+                              />
+
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="w-full"
+                              >
+                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  Write about your {postType}
+                                </label>
+                                <Field
+                                  as="textarea"
+                                  name="content"
+                                  className="w-full h-24 p-4 text-gray-900 bg-white border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
+                                  placeholder={`Write about your ${postType.toLowerCase()}...`}
+                                />
+                              </motion.div>
+
+                              <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.45 }}
+                                className="w-full"
+                              >
+                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  Visibility
+                                </label>
+                                <Field
+                                  as="select"
+                                  name="visibility"
+                                  className="w-full p-3 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                >
+                                  <option value="public">Public</option>
+                                  <option value="friends">Friends Only</option>
+                                  <option value="private">Private</option>
+                                </Field>
+                              </motion.div>
+                            </div>
                           )}
+
+                          {postType !== "event" &&
+                            postType !== "article" &&
+                            postType !== "photo" &&
+                            postType !== "video" && (
+                              <TextPostForm postType={postType} />
+                            )}
                         </motion.div>
                       )}
 
@@ -568,34 +635,87 @@ const PostUpload = ({
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <UploadContent
-                            postType={postType}
-                            values={values}
-                            mediaPreview={mediaPreview}
-                            handleMediaUpload={handleMediaUpload}
-                            addMediaField={addMediaField}
-                            removeMediaField={removeMediaField}
-                            setFieldValue={setFieldValue}
-                          />
+                          {postType === "photo" || postType === "video" ? (
+                            <div className="flex flex-col items-center w-full gap-6">
+                              <div className="w-full p-6 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800">
+                                <h3 className="flex items-center mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                                  <span className="mr-2">📋</span> Preview Your{" "}
+                                  {postType}
+                                </h3>
+
+                                {mediaPreview &&
+                                  mediaPreview.length > 0 &&
+                                  values.media[0]?.type && (
+                                    <div className="flex justify-center mb-4">
+                                      {values.media[0].type === "image" ? (
+                                        <img
+                                          src={mediaPreview[0]}
+                                          alt="Preview"
+                                          className="object-contain rounded-lg shadow-md max-h-64"
+                                        />
+                                      ) : (
+                                        <video
+                                          src={mediaPreview[0]}
+                                          controls
+                                          className="object-contain rounded-lg shadow-md max-h-64"
+                                        />
+                                      )}
+                                    </div>
+                                  )}
+
+                                {values.content && (
+                                  <div className="p-4 mb-4 bg-white rounded-md shadow-sm dark:bg-gray-700">
+                                    <p className="text-gray-700 whitespace-pre-wrap dark:text-gray-300">
+                                      {values.content}
+                                    </p>
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                  <div className="flex items-center">
+                                    <span className="px-2 py-1 mr-2 text-xs text-orange-800 bg-orange-100 rounded dark:bg-orange-900 dark:text-orange-200">
+                                      {postType}
+                                    </span>
+                                    <span className="px-2 py-1 mr-2 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
+                                      {values.visibility || "Public"}
+                                    </span>
+                                  </div>
+                                  <span>Ready to post</span>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <UploadContent
+                              postType={postType}
+                              values={values}
+                              mediaPreview={mediaPreview}
+                              handleMediaUpload={handleMediaUpload}
+                              addMediaField={addMediaField}
+                              removeMediaField={removeMediaField}
+                              setFieldValue={setFieldValue}
+                            />
+                          )}
                         </motion.div>
                       )}
 
-                      {activeTab === 3 && (
-                        <motion.div
-                          key="tab3"
-                          className="w-full h-full"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <PreviewContent
-                            postType={postType}
-                            values={values}
-                            mediaPreview={mediaPreview}
-                          />
-                        </motion.div>
-                      )}
+                      {activeTab === 3 &&
+                        postType !== "photo" &&
+                        postType !== "video" && (
+                          <motion.div
+                            key="tab3"
+                            className="w-full h-full"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <PreviewContent
+                              postType={postType}
+                              values={values}
+                              mediaPreview={mediaPreview}
+                            />
+                          </motion.div>
+                        )}
                     </AnimatePresence>
                   </div>
 
@@ -623,54 +743,103 @@ const PostUpload = ({
                       </motion.button>
                     )}
 
-                    {activeTab < 3 && (
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          handleNextTab(isValid, values);
-                        }}
-                        className="flex items-center gap-2 px-5 py-2 text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
-                      >
-                        Next
-                        <motion.div
-                          initial={{ x: 0 }}
-                          animate={{ x: [0, 5] }}
-                          transition={{
-                            repeat: Infinity,
-                            repeatType: "reverse",
-                            duration: 0.6,
+                    {activeTab < 3 &&
+                      (postType === "photo" || postType === "video" ? (
+                        // For photo/video: Show "Next" on tab 1, "Submit" on tab 2
+                        activeTab === 1 ? (
+                          <motion.button
+                            type="button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              handleNextTab(isValid, values);
+                            }}
+                            className="flex items-center gap-2 px-5 py-2 text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
+                            disabled={!values.media.some((m) => m.file)}
+                          >
+                            Next to Preview
+                            <motion.div
+                              initial={{ x: 0 }}
+                              animate={{ x: [0, 5] }}
+                              transition={{
+                                repeat: Infinity,
+                                repeatType: "reverse",
+                                duration: 0.6,
+                              }}
+                            >
+                              →
+                            </motion.div>
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            type="button"
+                            onClick={handleManualSubmit}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-6 py-2 text-white transition duration-200 bg-green-500 rounded-md dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            disabled={isSubmitting || isUploading}
+                          >
+                            {isUploading
+                              ? "Uploading Media..."
+                              : isSubmitting
+                              ? "Submitting..."
+                              : "Submit Post"}
+                          </motion.button>
+                        )
+                      ) : (
+                        // For other post types: Show Next button
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            handleNextTab(isValid, values);
                           }}
+                          className="flex items-center gap-2 px-5 py-2 text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
                         >
-                          →
-                        </motion.div>
-                      </motion.button>
-                    )}
+                          Next
+                          <motion.div
+                            initial={{ x: 0 }}
+                            animate={{ x: [0, 5] }}
+                            transition={{
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                              duration: 0.6,
+                            }}
+                          >
+                            →
+                          </motion.div>
+                        </motion.button>
+                      ))}
 
-                    {activeTab === 3 && (
-                      <motion.button
-                        type="button"
-                        onClick={
-                          postType === "article"
-                            ? submitArticleDirectly
-                            : handleManualSubmit
-                        }
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-6 py-2 text-white transition duration-200 bg-green-500 rounded-md dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        disabled={isSubmitting || isUploading}
-                      >
-                        {isUploading
-                          ? "Uploading Media..."
-                          : isSubmitting
-                          ? "Submitting..."
-                          : "Submit Post"}
-                      </motion.button>
-                    )}
+                    {activeTab === 3 &&
+                      postType !== "photo" &&
+                      postType !== "video" && (
+                        <motion.button
+                          type="button"
+                          onClick={
+                            postType === "article"
+                              ? submitArticleDirectly
+                              : handleManualSubmit
+                          }
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-6 py-2 text-white transition duration-200 bg-green-500 rounded-md dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          disabled={isSubmitting || isUploading}
+                        >
+                          {isUploading
+                            ? "Uploading Media..."
+                            : isSubmitting
+                            ? "Submitting..."
+                            : "Submit Post"}
+                        </motion.button>
+                      )}
                   </div>
                 </Form>
               </motion.div>

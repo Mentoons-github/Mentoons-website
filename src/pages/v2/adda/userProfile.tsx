@@ -7,11 +7,13 @@ import {
   FiAward,
   FiCalendar,
   FiCheck,
+  FiCheckCircle,
   FiEdit2,
   FiHome,
   FiMail,
   FiMapPin,
   FiPhone,
+  FiStar,
   FiUser,
   FiUsers,
 } from "react-icons/fi";
@@ -23,7 +25,8 @@ import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import { UserInfo } from "@/types";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
-import { errorToast, successToast } from "@/utils/toastResposnse";
+// import { errorToast } from "@/utils/toastResposnse";
+import UserListModal from "@/components/common/modal/userList";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { ArrowLeft } from "lucide-react";
@@ -31,7 +34,6 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import UserListModal from "@/components/common/modal/userList.";
 
 export type PostType =
   | "text"
@@ -121,6 +123,11 @@ export interface UserDetails {
   gender?: string;
   socialLinks?: Array<{ label: string; url: string }>;
   privacySettings?: string;
+  subscription?: {
+    plan: string;
+    status: string;
+    validUntil: string;
+  };
 }
 
 interface ProfileField {
@@ -129,11 +136,12 @@ interface ProfileField {
   minLength?: number;
 }
 
-interface SuggestionInterface {
-  _id: string;
-  name: string;
-  picture: string;
-}
+// Add interface for suggested friends
+// interface SuggestionInterface {
+//   _id: string;
+//   name: string;
+//   picture: string;
+// }
 
 export interface SavedPost extends Post {
   userId?: string;
@@ -183,6 +191,7 @@ const UserProfile = () => {
     socialLinks: [],
     privacySettings: "",
     interests: [],
+    subscription: undefined,
   });
 
   const { getToken } = useAuth();
@@ -192,11 +201,11 @@ const UserProfile = () => {
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
 
-  const [friendSuggestions, setFriendSuggestions] = useState<
-    SuggestionInterface[] | null
-  >(null);
-  const [connectingIds, setConnectingIds] = useState<string[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  // const [friendSuggestions, setFriendSuggestions] = useState<
+  //   SuggestionInterface[] | null
+  // >(null);
+  // const [connectingIds, setConnectingIds] = useState<string[]>([]);
+  // const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const [isEditingInterests, setIsEditingInterests] = useState(false);
 
@@ -205,9 +214,9 @@ const UserProfile = () => {
 
     const fetchFriends = async () => {
       const token = await getToken();
-       if (!token) {
-         throw new Error("No token found");
-       }
+      if (!token) {
+        throw new Error("No token found");
+      }
       try {
         const response = await axiosInstance("/adda/getFriends/", {
           headers: {
@@ -711,70 +720,73 @@ const UserProfile = () => {
     }
   };
 
-  const fetchSuggestions = async () => {
-    if (loadingSuggestions) return;
-    setLoadingSuggestions(true);
+  // Add function to fetch suggestions
+  // const fetchSuggestions = async () => {
+  //   if (loadingSuggestions) return;
+  //   setLoadingSuggestions(true);
 
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.get(
-        `/adda/requestSuggestions?page=1`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const token = await getToken();
+  //     const response = await axiosInstance.get(
+  //       `/adda/requestSuggestions?page=1`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      console.log(response.data);
+  //     console.log(response.data);
 
-      const { suggestions } = response.data.data;
-      setFriendSuggestions(suggestions || []);
-    } catch (error) {
-      console.error("Error fetching friend suggestions:", error);
-      errorToast("Failed to fetch suggestions");
-    } finally {
-      setLoadingSuggestions(false);
-    }
-  };
+  //     // const { suggestions } = response.data.data;
+  //     // setFriendSuggestions(suggestions || []);
+  //   } catch (error) {
+  //     console.error("Error fetching friend suggestions:", error);
+  //     errorToast("Failed to fetch suggestions");
+  //   } finally {
+  //     setLoadingSuggestions(false);
+  //   }
+  // };
 
-  const handleConnect = async (suggestionId: string) => {
-    setConnectingIds((prev) => [...prev, suggestionId]);
+  // // Add handleConnect function
+  // const handleConnect = async (suggestionId: string) => {
+  //   setConnectingIds((prev) => [...prev, suggestionId]);
 
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.post(
-        `/adda/request/${suggestionId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const token = await getToken();
+  //     const response = await axiosInstance.post(
+  //       `/adda/request/${suggestionId}`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (response.data.success === true) {
-        setFriendSuggestions((prevSuggestions) =>
-          prevSuggestions
-            ? prevSuggestions.filter(
-                (suggestion) => suggestion._id !== suggestionId
-              )
-            : null
-        );
+  //     if (response.data.success === true) {
+  //       setFriendSuggestions((prevSuggestions) =>
+  //         prevSuggestions
+  //           ? prevSuggestions.filter(
+  //               (suggestion) => suggestion._id !== suggestionId
+  //             )
+  //           : null
+  //       );
 
-        successToast("Friend request sent successfully");
-      }
-    } catch (error) {
-      console.error("Error sending friend request:", error);
-      errorToast("Failed to send friend request");
-    } finally {
-      setConnectingIds((prev) => prev.filter((id) => id !== suggestionId));
-    }
-  };
+  //       successToast("Friend request sent successfully");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error sending friend request:", error);
+  //     errorToast("Failed to send friend request");
+  //   } finally {
+  //     setConnectingIds((prev) => prev.filter((id) => id !== suggestionId));
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchSuggestions();
-  }, []);
+  // Add useEffect to fetch suggestions when component mounts
+  // useEffect(() => {
+  //   fetchSuggestions();
+  // }, []);
 
   // Let's check if there are any string socialLinks in the existing user data and convert them
   useEffect(() => {
@@ -1401,42 +1413,31 @@ const UserProfile = () => {
                         </div>
                       </div>
 
-                      <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
+                      {/* User Stats */}
+                      <div className="flex justify-around w-full pt-4 mt-4 border-t border-orange-200">
                         <div className="text-center">
                           <p className="text-xl font-bold text-orange-500">
                             {userPosts?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
-                        {/* <div className="text-center">
-                          <p className="text-xl font-bold text-orange-500">
-                            {userDetails?.friends?.length || 0}
-                          </p>
-                          <p className="text-xs text-gray-600">Friends</p>
-                        </div> */}
-                        <button
-                          onClick={() => setModalType("followers")}
-                          className="text-center"
-                        >
-                          <p className="text-xl font-bold text-orange-500">
-                            {userDetails?.followers?.length || 0}
-                          </p>
-                          <p className="text-xs text-gray-600">Followers</p>
-                        </button>
-                        <button
-                          onClick={() => setModalType("following")}
-                          className="text-center"
-                        >
-                          <p className="text-xl font-bold text-orange-500">
-                            {userDetails?.following?.length || 0}
-                          </p>
-                          <p className="text-xs text-gray-600">Following</p>
-                        </button>
+
                         <div className="text-center">
-                          <p className="text-xl font-bold text-orange-500">
-                            {userDetails?.groups?.length || 0}
-                          </p>
-                          <p className="text-xs text-gray-600">Groups</p>
+                          <button onClick={() => setModalType("followers")}>
+                            <p className="text-xl font-bold text-orange-500">
+                              {userDetails?.followers?.length || 0}
+                            </p>
+                            <p className="text-xs text-gray-600">Followers</p>
+                          </button>
+                          <button
+                            onClick={() => setModalType("following")}
+                            className="text-center"
+                          >
+                            <p className="text-xl font-bold text-orange-500">
+                              {userDetails?.following?.length || 0}
+                            </p>
+                            <p className="text-xs text-gray-600">Following</p>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1562,7 +1563,8 @@ const UserProfile = () => {
                     )}
                   </Card>
 
-                  <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
+                  {/* Suggested Friends */}
+                  {/* <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <h3 className="mb-3 text-lg font-semibold text-gray-800">
                       Suggested Friends
                     </h3>
@@ -1638,7 +1640,7 @@ const UserProfile = () => {
                         </div>
                       )}
                     </div>
-                  </Card>
+                  </Card> */}
                 </div>
               </div>
 
@@ -1843,6 +1845,7 @@ const UserProfile = () => {
                                   className="w-full p-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
                               </div>
+
                               <div className="space-y-1 md:col-span-2">
                                 <label className="text-sm font-medium text-gray-700">
                                   Social Links
@@ -2080,6 +2083,56 @@ const UserProfile = () => {
                                 )}
                               </div>
                             </div>
+                            {/* Subscription Info */}
+
+                            {userDetails?.subscription && (
+                              <div className="w-full mt-4 md:col-span-2">
+                                <h3 className="mb-3 font-semibold text-orange-600 text-md">
+                                  Subscription Details
+                                </h3>
+                                <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+                                  <div className="p-3 border border-orange-100 rounded-lg">
+                                    <p className="text-sm font-medium text-gray-500">
+                                      Plan
+                                    </p>
+                                    <div className="flex items-center mt-1">
+                                      <FiStar className="mr-2 text-orange-500" />
+                                      <p className="text-gray-800 capitalize">
+                                        {userDetails.subscription.plan ||
+                                          "Free"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="p-3 border border-orange-100 rounded-lg">
+                                    <p className="text-sm font-medium text-gray-500">
+                                      Status
+                                    </p>
+                                    <div className="flex items-center mt-1">
+                                      <FiCheckCircle className="mr-2 text-orange-500" />
+                                      <p className="text-gray-800 capitalize">
+                                        {userDetails.subscription.status ||
+                                          "Inactive"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {userDetails.subscription.validUntil && (
+                                    <div className="p-3 border border-orange-100 rounded-lg">
+                                      <p className="text-sm font-medium text-gray-500">
+                                        Valid Until
+                                      </p>
+                                      <div className="flex items-center mt-1">
+                                        <FiCalendar className="mr-2 text-orange-500" />
+                                        <p className="text-gray-800">
+                                          {formatDate(
+                                            userDetails.subscription.validUntil
+                                          )}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -2252,7 +2305,7 @@ const UserProfile = () => {
         <UserListModal
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
           title={modalType === "followers" ? "Followers" : "Following"}
-          onClose={() => setModalType(null)}
+          setShowModal={() => setModalType(null)}
         />
       )}
     </>

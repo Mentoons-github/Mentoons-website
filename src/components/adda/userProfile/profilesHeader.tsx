@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import axiosInstance from "@/api/axios";
+import UserListModal from "@/components/common/modal/userList";
 import { User } from "@/types";
+import { errorToast, successToast } from "@/utils/toastResposnse";
+import { useAuth } from "@clerk/clerk-react";
 import {
   Calendar,
-  User as UserIcon,
-  UserPlus,
-  UserMinus,
-  Clock,
   Check,
-  X,
+  Clock,
   Loader2,
+  User as UserIcon,
+  UserMinus,
+  UserPlus,
+  X,
 } from "lucide-react";
-import { errorToast, successToast } from "@/utils/toastResposnse";
-import UserListModal from "@/components/common/modal/userList.";
+import React, { useEffect, useState } from "react";
 
 interface ProfileHeaderProps {
   user: User;
@@ -252,22 +252,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           }
         `}
       </style>
-      <div className="bg-white rounded-lg shadow mb-4">
+      <div className="mb-4 bg-white rounded-lg shadow">
         <div className="h-24 bg-gradient-to-r from-blue-100 to-purple-100"></div>
-        <div className="px-4 pb-4 relative">
-          <div className="flex justify-between items-end -mt-12 mb-4">
+        <div className="relative px-4 pb-4">
+          <div className="flex items-end justify-between mb-4 -mt-12">
             <div className="relative">
               {user.picture ? (
                 <img
                   src={user.picture}
                   alt={user.name}
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="object-cover w-24 h-24 transition-transform duration-200 border-4 border-white rounded-full shadow-md cursor-pointer hover:scale-105"
                   onClick={() => setShowPhotoModal(true)}
                   onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
                 />
               ) : (
                 <div
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-md bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="flex items-center justify-center w-24 h-24 transition-transform duration-200 border-4 border-white rounded-full shadow-md cursor-pointer bg-gradient-to-br from-gray-200 to-gray-300 hover:scale-105"
                   onClick={() => setShowPhotoModal(true)}
                 >
                   <span className="text-2xl font-bold text-gray-500">
@@ -280,7 +280,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 </div>
               )}
               {user.subscription?.plan && user.subscription.plan !== "free" && (
-                <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded-full">
+                <div className="absolute px-2 py-1 text-xs text-white bg-yellow-400 rounded-full -top-2 -right-2">
                   {user.subscription.plan}
                 </div>
               )}
@@ -288,8 +288,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {!isCurrentUser && (
               <div className="flex gap-2">
                 {isStatusLoading ? (
-                  <div className="flex items-center px-4 py-2 rounded-full text-sm bg-gray-50 text-gray-600">
-                    <Loader2 size={14} className="animate-spin mr-2" />{" "}
+                  <div className="flex items-center px-4 py-2 text-sm text-gray-600 rounded-full bg-gray-50">
+                    <Loader2 size={14} className="mr-2 animate-spin" />{" "}
                     Loading...
                   </div>
                 ) : friendStatus === "pending" && !isRequester ? (
@@ -297,7 +297,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     <button
                       onClick={handleAcceptRequest}
                       disabled={isLoading}
-                      className="flex items-center gap-1 px-4 py-2 rounded-full text-sm bg-green-50 text-green-600 hover:bg-green-100"
+                      className="flex items-center gap-1 px-4 py-2 text-sm text-green-600 rounded-full bg-green-50 hover:bg-green-100"
                     >
                       {isLoading ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -310,7 +310,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     <button
                       onClick={handleFriendAction}
                       disabled={isLoading}
-                      className="flex items-center gap-1 px-4 py-2 rounded-full text-sm bg-red-50 text-red-600 hover:bg-red-100"
+                      className="flex items-center gap-1 px-4 py-2 text-sm text-red-600 rounded-full bg-red-50 hover:bg-red-100"
                     >
                       {isLoading ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -343,13 +343,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <h1 className="text-xl font-bold text-gray-900">
               {user.name || "Unnamed User"}
             </h1>
-            <div className="flex flex-col gap-2 text-gray-500 text-sm">
+            <div className="flex flex-col gap-2 text-sm text-gray-500">
               <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-1" /> Joined{" "}
+                <Calendar className="w-4 h-4 mr-1" /> Joined{" "}
                 {formatDate(user.joinedDate)}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-center py-3 border-y border-gray-100">
+            <div className="grid grid-cols-3 gap-2 py-3 text-center border-gray-100 border-y">
               <button onClick={() => setModalType("followers")}>
                 <div className="text-lg font-bold text-gray-900 hover:text-blue-600">
                   {totalFollowers.length}
@@ -378,11 +378,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {user.interests?.length > 0 && (
               <div>
                 <h3 className="text-xs font-medium text-gray-500">Interests</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {user.interests.map((interest, index) => (
                     <span
                       key={index}
-                      className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
+                      className="px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded-full"
                     >
                       {interest}
                     </span>
@@ -397,7 +397,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <UserListModal
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
           title={modalType === "followers" ? "Followers" : "Following"}
-          onClose={() => setModalType(null)}
+          setShowModal={() => setModalType(null)}
         />
       )}
       {showPhotoModal && (
@@ -409,7 +409,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* Close button - positioned outside the image */}
             <button
               onClick={() => setShowPhotoModal(false)}
-              className="absolute -top-4 -right-4 z-10 bg-white rounded-full p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200 shadow-lg"
+              className="absolute z-10 p-2 text-gray-600 transition-colors duration-200 bg-white rounded-full shadow-lg -top-4 -right-4 hover:text-gray-800 hover:bg-gray-100"
             >
               <X size={20} />
             </button>
@@ -420,12 +420,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <img
                   src={user.picture}
                   alt={user.name}
-                  className="w-full h-full object-cover animate-image"
+                  className="object-cover w-full h-full animate-image"
                   onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center animate-image">
-                  <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-500">
+                <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-image">
+                  <span className="text-5xl font-bold text-gray-500 sm:text-6xl md:text-7xl lg:text-8xl">
                     {user.name ? (
                       user.name[0].toUpperCase()
                     ) : (

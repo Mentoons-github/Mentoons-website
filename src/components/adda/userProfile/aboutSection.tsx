@@ -1,5 +1,7 @@
-import React from "react";
+import { Card } from "@/components/ui/card";
 import { User } from "@/types";
+import React from "react";
+import { FiCalendar, FiClock, FiMapPin, FiTag, FiUser } from "react-icons/fi";
 
 interface AboutSectionProps {
   user: User;
@@ -17,100 +19,87 @@ const AboutSection: React.FC<AboutSectionProps> = ({ user }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <Card className="border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
       <div className="p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">About</h2>
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">
-              Basic Information
-            </h3>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <span className="text-gray-500">Name:</span>
-                <span className="ml-2 text-gray-900">
-                  {user.name || "Not provided"}
-                </span>
+        <h3 className="mb-3 font-semibold text-orange-600 text-md">
+          Personal Information
+        </h3>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Basic Info */}
+            <div className="p-3 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Full Name</p>
+              <div className="flex items-center mt-1">
+                <FiUser className="mr-2 text-orange-500" />
+                <p className="text-gray-800">{user.name || "Not provided"}</p>
               </div>
-              <div>
-                <span className="text-gray-500">Location:</span>
-                <span className="ml-2 text-gray-900">
+            </div>
+
+            <div className="p-3 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Location</p>
+              <div className="flex items-center mt-1">
+                <FiMapPin className="mr-2 text-orange-500" />
+                <p className="text-gray-800">
                   {user.location || "Not provided"}
-                </span>
+                </p>
               </div>
-              <div>
-                <span className="text-gray-500">Date of Birth:</span>
-                <span className="ml-2 text-gray-900">
+            </div>
+
+            <div className="p-3 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Date of Birth</p>
+              <div className="flex items-center mt-1">
+                <FiCalendar className="mr-2 text-orange-500" />
+                <p className="text-gray-800">
                   {user.dateOfBirth
                     ? formatDate(user.dateOfBirth)
                     : "Not provided"}
-                </span>
+                </p>
               </div>
-              <div>
-                <span className="text-gray-500">Joined:</span>
-                <span className="ml-2 text-gray-900">
-                  {formatDate(user.joinedDate)}
-                </span>
+            </div>
+
+            <div className="p-3 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Joined Date</p>
+              <div className="flex items-center mt-1">
+                <FiClock className="mr-2 text-orange-500" />
+                <p className="text-gray-800">{formatDate(user.joinedDate)}</p>
               </div>
-              <div>
-                <span className="text-gray-500">Last Active:</span>
-                <span className="ml-2 text-gray-900">
+            </div>
+
+            <div className="p-3 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Last Active</p>
+              <div className="flex items-center mt-1">
+                <FiClock className="mr-2 text-orange-500" />
+                <p className="text-gray-800">
                   {user.lastActive
                     ? formatDate(user.lastActive)
                     : "Not available"}
-                </span>
+                </p>
               </div>
             </div>
           </div>
-
-          {user.subscription && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">
-                Subscription
-              </h3>
-              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-500">Plan:</span>
-                  <span className="ml-2 text-gray-900 capitalize">
-                    {user.subscription.plan || "Free"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Status:</span>
-                  <span className="ml-2 text-gray-900 capitalize">
-                    {user.subscription.status || "Inactive"}
-                  </span>
-                </div>
-                {user.subscription.validUntil && (
-                  <div>
-                    <span className="text-gray-500">Valid Until:</span>
-                    <span className="ml-2 text-gray-900">
-                      {formatDate(user.subscription.validUntil)}
-                    </span>
-                  </div>
-                )}
+          {/* Bio */}
+          {user.bio && (
+            <div className="p-4 mt-4 border border-orange-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-500">Bio</p>
+              <div className="flex mt-2">
+                <p className="text-gray-800 whitespace-pre-line">{user.bio}</p>
               </div>
             </div>
           )}
 
-          {user.bio && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Bio</h3>
-              <p className="mt-2 text-gray-900 whitespace-pre-line">
-                {user.bio}
-              </p>
-            </div>
-          )}
-
+          {/* Interests */}
           {user.interests && user.interests.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Interests</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <div className="p-4 mt-4 border border-orange-100 rounded-lg">
+              <p className="mb-2 text-sm font-medium text-gray-500">
+                Interests
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
                 {user.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                    className="flex items-center px-3 py-1 text-sm text-orange-500 bg-orange-100 rounded-full"
                   >
+                    <FiTag className="mr-1" />
                     {interest}
                   </span>
                 ))}
@@ -119,7 +108,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ user }) => {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

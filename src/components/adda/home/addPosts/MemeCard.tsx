@@ -155,7 +155,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
 
       // Trigger reward for saving a meme (only when saving, not unsaving)
       if (newSavedState) {
-        triggerReward(RewardEventType.SHARE_PRODUCT, meme._id);
+        triggerReward(RewardEventType.SAVED_POST, meme._id);
       }
 
       toast.success(
