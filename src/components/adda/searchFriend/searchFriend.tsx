@@ -6,7 +6,7 @@ import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import FriendCard from "./friendCard";
 
-interface Friend {
+export interface Friend {
   _id: string;
   name: string;
   picture: string;
