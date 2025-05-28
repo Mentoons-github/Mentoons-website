@@ -10,19 +10,24 @@ import {
   XCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { NotificationInterface, NotificationType } from "./notification";
+import { Notification, NotificationType } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 
 interface NotificationCardProps {
-  notification: NotificationInterface;
+  notification: Notification;
   onMarkAsRead: (id: string) => void;
   onDelete: (id: string) => void;
-  onClick: (notification: NotificationInterface) => void;
+  onClick: (notification: Notification) => void;
   onFriendRequestAction: (
     notificationId: string,
     referenceId: string | undefined,
     action: "accept" | "decline"
   ) => void;
+}
+
+interface User {
+  name: string;
+  picture: string;
 }
 
 const NotificationCard = ({
@@ -53,6 +58,17 @@ const NotificationCard = ({
     }
   };
 
+  const isUser = (initiator: string | User): initiator is User => {
+    return typeof initiator !== "string";
+  };
+
+  const initiatorName = isUser(notification.initiatorId)
+    ? notification.initiatorId.name
+    : "Anonymous User";
+  const initiatorPicture = isUser(notification.initiatorId)
+    ? notification.initiatorId.picture
+    : "/default-avatar.png";
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)" }}
@@ -62,7 +78,7 @@ const NotificationCard = ({
       onClick={() => onClick(notification)}
       role="button"
       tabIndex={0}
-      aria-label={`Notification from ${notification.initiatorId.name}`}
+      aria-label={`Notification from ${initiatorName}`}
     >
       <div className="flex items-start w-full gap-4">
         <motion.div
@@ -70,8 +86,8 @@ const NotificationCard = ({
           className="relative overflow-hidden border-2 border-orange-200 rounded-full w-14 h-14 shrink-0 z-[1]"
         >
           <img
-            src={notification.initiatorId?.picture || "/default-avatar.png"}
-            alt={notification.initiatorId?.name || "User"}
+            src={initiatorPicture}
+            alt={initiatorName}
             className="object-cover w-full h-full"
             loading="lazy"
           />
@@ -83,7 +99,7 @@ const NotificationCard = ({
           <div className="flex items-start justify-between mb-2">
             <div className="flex flex-col figtree">
               <span className="font-semibold text-orange-900">
-                {notification.initiatorId?.name || "Anonymous User"}
+                {initiatorName}
               </span>
               <span className="text-sm text-orange-600">
                 {notification.message}

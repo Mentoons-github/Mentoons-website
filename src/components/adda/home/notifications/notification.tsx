@@ -7,9 +7,9 @@ import NotificationCard from "./notificationCard";
 import { useNotifications } from "@/context/adda/notificationContext";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-import { NotificationInterface } from "@/types";
+import { Notification } from "@/types";
 
-const Notification = () => {
+const Notifications = () => {
   const {
     notifications,
     isLoading,
@@ -106,7 +106,7 @@ const Notification = () => {
     }
   };
 
-  const handleNotificationClick = (notification: NotificationInterface) => {
+  const handleNotificationClick = (notification: Notification) => {
     const getNavigationLink = (): string => {
       const { type, referenceId, referenceModel } = notification;
       switch (type) {
@@ -247,4 +247,4 @@ const Notification = () => {
   );
 };
 
-export default Notification;
+export default Notifications;
