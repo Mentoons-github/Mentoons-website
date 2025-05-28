@@ -17,7 +17,6 @@ import {
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
-// Shadcn UI components
 import axiosInstance from "@/api/axios";
 import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
 import RewardsSection from "@/components/adda/userProfile/rewardsSection";
@@ -32,8 +31,8 @@ import { toast } from "sonner";
 import { Avatar } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
+import UserListModal from "@/components/common/modal/userList.";
 
-// Define interface for post type
 export type PostType =
   | "text"
   | "photo"
@@ -42,14 +41,12 @@ export type PostType =
   | "event"
   | "mixed";
 
-// Define interface for media items
 interface MediaItem {
   url: string;
   type: "image" | "video";
   caption?: string;
 }
 
-// Define interface for comment
 interface Comment {
   _id?: string;
   userId?: string;
@@ -64,7 +61,6 @@ interface Comment {
   createdAt?: string;
 }
 
-// Define interface for user info in posts
 interface PostUser {
   _id: string;
   name: string;
@@ -73,7 +69,6 @@ interface PostUser {
   role?: string;
 }
 
-// Define post interface to match PostData
 export interface Post {
   _id: string;
   postType: PostType;
@@ -104,7 +99,6 @@ export interface Post {
   updatedAt?: string;
 }
 
-// Define interface for user details from API
 export interface UserDetails {
   _id: string;
   name: string;
@@ -129,21 +123,18 @@ export interface UserDetails {
   privacySettings?: string;
 }
 
-// Define interface for profile field
 interface ProfileField {
   field: string;
   label: string;
   minLength?: number;
 }
 
-// Add interface for suggested friends
 interface SuggestionInterface {
   _id: string;
   name: string;
   picture: string;
 }
 
-// Update the Post interface to include all fields from saved posts
 export interface SavedPost extends Post {
   userId?: string;
   user: {
@@ -170,6 +161,12 @@ const UserProfile = () => {
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [friends, setFriends] = useState<UserInfo[]>([]);
+  const [modalType, setModalType] = useState<"followers" | "following" | null>(
+    null
+  );
+
+  const [totalFollowers, setTotalFollowers] = useState<string[]>([]);
+  const [totalFollowing, setTotalFollowing] = useState<string[]>([]);
 
   const [userPosts, setUserPosts] = useState<Post[]>([]);
 
@@ -192,9 +189,6 @@ const UserProfile = () => {
   const { user } = useUser();
   console.log(user);
 
-  // const navigate = useNavigate();
-
-  // Create refs for file inputs
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
 
@@ -228,7 +222,6 @@ const UserProfile = () => {
     fetchFriends();
   }, []);
 
-  // Calculate profile completion percentage
   const profileFields: ProfileField[] = [
     { field: "name", label: "Name" },
     { field: "picture", label: "Profile Picture" },
@@ -288,7 +281,6 @@ const UserProfile = () => {
     return Math.round((completedFields / profileFields.length) * 100);
   };
 
-  // Add a function to get the incomplete profile fields
   const getIncompleteFields = () => {
     const incompleteFields: string[] = [];
 
@@ -474,7 +466,6 @@ const UserProfile = () => {
         );
         console.log(response.data.data);
 
-        // Ensure posts data matches our Post interface with required email field
         const formattedPosts = response.data.data.map(
           (post: Partial<Post>) => ({
             ...post,
@@ -483,7 +474,7 @@ const UserProfile = () => {
               _id: user?.id || "",
               name: userDetails.name || "",
               picture: userDetails.picture || "",
-              email: userDetails.email || "", // Ensure email is always included
+              email: userDetails.email || "",
             },
             shares: post.shares || [],
             saves: post.saves || 0,
@@ -517,7 +508,6 @@ const UserProfile = () => {
           }
         );
 
-        // Fix the type issues by explicitly defining the user property
         const formattedSavedPosts = response.data.data.map(
           (post: SavedPost) => ({
             ...post,
@@ -565,13 +555,17 @@ const UserProfile = () => {
           },
         }
       );
-      console.log(response.data);
+      console.log(
+        "user details ==================================>",
+        response.data
+      );
       setUserDetails(response.data.data);
+      setTotalFollowers(response.data.data.followers);
+      setTotalFollowing(response.data.data.following);
     };
     fetchUserDetails();
   }, [user?.id]);
 
-  // Function to handle cover photo upload
   const handleCoverPhotoChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -587,7 +581,6 @@ const UserProfile = () => {
 
         toast.loading("Uploading cover photo...");
 
-        // First upload the file to S3
         const formData = new FormData();
         formData.append("file", file);
 
@@ -617,7 +610,6 @@ const UserProfile = () => {
         });
         console.log("clerkResponse For cover photo", clerkResponse);
 
-        // Now update the user profile with the new cover photo URL
         const updateResponse = await axios.put(
           `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { coverPhoto: fileUrl },
@@ -633,7 +625,6 @@ const UserProfile = () => {
           toast.dismiss();
           toast.success("Cover photo updated successfully");
 
-          // Update local user data with new cover photo URL
           setUserDetails((prev) => ({
             ...prev,
             coverPhoto: fileUrl,
@@ -647,7 +638,6 @@ const UserProfile = () => {
     }
   };
 
-  // Function to handle profile photo upload
   const handleProfilePhotoChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -664,11 +654,9 @@ const UserProfile = () => {
 
         toast.loading("Uploading profile photo...");
 
-        // First upload the file to S3
         const formData = new FormData();
         formData.append("file", file);
 
-        // Update profile image in Clerk with the original file object
         const clerkResponse = await user?.setProfileImage({ file });
         console.log("Clerk update response:", clerkResponse);
 
@@ -691,7 +679,6 @@ const UserProfile = () => {
 
         const fileUrl = uploadResponse.data.data.fileDetails.url;
 
-        // Now update the user profile with the new profile photo URL
         const updateResponse = await axios.put(
           `${import.meta.env.VITE_PROD_URL}/user/profile`,
           { picture: fileUrl },
@@ -707,7 +694,6 @@ const UserProfile = () => {
           toast.dismiss();
           toast.success("Profile photo updated successfully");
 
-          // Update local user data with new profile photo URL
           setUserDetails((prev) => ({
             ...prev,
             picture: fileUrl,
@@ -721,7 +707,6 @@ const UserProfile = () => {
     }
   };
 
-  // Add function to fetch suggestions
   const fetchSuggestions = async () => {
     if (loadingSuggestions) return;
     setLoadingSuggestions(true);
@@ -749,7 +734,6 @@ const UserProfile = () => {
     }
   };
 
-  // Add handleConnect function
   const handleConnect = async (suggestionId: string) => {
     setConnectingIds((prev) => [...prev, suggestionId]);
 
@@ -784,7 +768,6 @@ const UserProfile = () => {
     }
   };
 
-  // Add useEffect to fetch suggestions when component mounts
   useEffect(() => {
     fetchSuggestions();
   }, []);
@@ -829,7 +812,7 @@ const UserProfile = () => {
             <div className="flex items-center justify-between w-full p-3 border border-orange-200 shadow-lg rounded-xl shadow-orange-100/80">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate("/adda")}
+                  onClick={() => navigate(-1)}
                   className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -843,7 +826,6 @@ const UserProfile = () => {
                 variant="outline"
                 onClick={() => {
                   if (isEditing) {
-                    // If editing, find the form and submit it
                     const form = document.getElementById("profile-edit-form");
                     if (form) {
                       const formEvent = new Event("submit", {
@@ -856,7 +838,6 @@ const UserProfile = () => {
                       handleProfileSubmit(formEvent);
                     }
                   } else {
-                    // If not editing, switch to edit mode
                     setIsEditing(true);
                   }
                 }}
@@ -868,7 +849,6 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Profile Completion Alert - Show only if profile is incomplete */}
           {!isProfileComplete && !showCompletionForm && (
             <div className="p-4 mt-4 border border-orange-200 bg-orange-50 rounded-xl">
               <div className="flex items-start">
@@ -925,7 +905,6 @@ const UserProfile = () => {
             </div>
           )}
 
-          {/* Profile Completion Form */}
           {showCompletionForm && (
             <div className="mt-4">
               <Card className="p-6 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
@@ -948,7 +927,6 @@ const UserProfile = () => {
 
                 <form id="profile-edit-form" onSubmit={handleProfileSubmit}>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {/* Prefilled fields */}
                     <div className="space-y-1">
                       <label className="text-sm font-medium text-gray-700">
                         Full Name
@@ -979,7 +957,6 @@ const UserProfile = () => {
                       )}
                     </div>
 
-                    {/* Missing fields highlighted */}
                     <div className="space-y-1">
                       <label className="flex items-center text-sm font-medium text-gray-700">
                         Phone Number
@@ -1352,13 +1329,10 @@ const UserProfile = () => {
             </div>
           )}
 
-          {/* Main content area - only show if not displaying the completion form */}
           {!showCompletionForm && (
             <div className="flex flex-col w-full mt-4 md:gap-4 lg:gap-6">
-              {/* Left sidebar */}
               <div className="w-full ">
                 <div className="sticky top-[130px] flex flex-col gap-4">
-                  {/* User Card */}
                   <Card className="overflow-hidden border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <div
                       className="relative h-24 bg-gradient-to-r from-orange-500 to-orange-400"
@@ -1376,7 +1350,6 @@ const UserProfile = () => {
                       >
                         <FaCamera className="text-white" />
                       </Button>
-                      {/* Hidden file input for cover photo */}
                       <input
                         type="file"
                         ref={coverPhotoInputRef}
@@ -1400,8 +1373,6 @@ const UserProfile = () => {
                         >
                           <FiEdit2 size={14} />
                         </Button>
-
-                        {/* Hidden file input for profile photo */}
                         <input
                           type="file"
                           ref={profilePhotoInputRef}
@@ -1426,7 +1397,6 @@ const UserProfile = () => {
                         </div>
                       </div>
 
-                      {/* User Stats */}
                       <div className="flex justify-between w-full pt-4 mt-4 border-t border-orange-200">
                         <div className="text-center">
                           <p className="text-xl font-bold text-orange-500">
@@ -1434,24 +1404,30 @@ const UserProfile = () => {
                           </p>
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
-                        <div className="text-center">
+                        {/* <div className="text-center">
                           <p className="text-xl font-bold text-orange-500">
                             {userDetails?.friends?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Friends</p>
-                        </div>
-                        <div className="text-center">
+                        </div> */}
+                        <button
+                          onClick={() => setModalType("followers")}
+                          className="text-center"
+                        >
                           <p className="text-xl font-bold text-orange-500">
                             {userDetails?.followers?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Followers</p>
-                        </div>
-                        <div className="text-center">
+                        </button>
+                        <button
+                          onClick={() => setModalType("following")}
+                          className="text-center"
+                        >
                           <p className="text-xl font-bold text-orange-500">
                             {userDetails?.following?.length || 0}
                           </p>
                           <p className="text-xs text-gray-600">Following</p>
-                        </div>
+                        </button>
                         <div className="text-center">
                           <p className="text-xl font-bold text-orange-500">
                             {userDetails?.groups?.length || 0}
@@ -1462,7 +1438,6 @@ const UserProfile = () => {
                     </div>
                   </Card>
 
-                  {/* Interests Section */}
                   <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg font-semibold text-gray-800">
@@ -1583,7 +1558,6 @@ const UserProfile = () => {
                     )}
                   </Card>
 
-                  {/* Suggested Friends */}
                   <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                     <h3 className="mb-3 text-lg font-semibold text-gray-800">
                       Suggested Friends
@@ -1664,9 +1638,7 @@ const UserProfile = () => {
                 </div>
               </div>
 
-              {/* Main Content */}
               <div className="w-full mt-4 md:flex-1 md:mt-0">
-                {/* Navigation Tabs */}
                 <Card className="p-2 mb-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                   <div className="flex pb-1 space-x-2 overflow-x-auto">
                     <button
@@ -1732,9 +1704,7 @@ const UserProfile = () => {
                   </div>
                 </Card>
 
-                {/* Tab Content */}
                 <div className="tab-content">
-                  {/* Profile Info Tab */}
                   {activeTab === "profile" && (
                     <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                       <div className="mb-4">
@@ -2111,7 +2081,6 @@ const UserProfile = () => {
                       </div>
                     </Card>
                   )}
-
                   {/* Posts Tab */}
                   {activeTab === "posts" && (
                     <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
@@ -2132,8 +2101,7 @@ const UserProfile = () => {
                       </div>
                     </Card>
                   )}
-
-                  {/* Friends Tab */}
+                  Friends Tab
                   {activeTab === "friends" && (
                     <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                       <h3 className="mb-4 text-xl font-semibold text-gray-800">
@@ -2174,7 +2142,6 @@ const UserProfile = () => {
                       )}
                     </Card>
                   )}
-
                   {/* Saved Items Tab */}
                   {activeTab === "saved" && (
                     <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
@@ -2191,7 +2158,6 @@ const UserProfile = () => {
                       </div>
                     </Card>
                   )}
-
                   {/* Reward Points Tab */}
                   {activeTab === "rewards" && <RewardsSection />}
                   {/* 
@@ -2278,6 +2244,13 @@ const UserProfile = () => {
           </button>
         </div>
       </div>
+      {modalType && (
+        <UserListModal
+          userIds={modalType === "followers" ? totalFollowers : totalFollowing}
+          title={modalType === "followers" ? "Followers" : "Following"}
+          onClose={() => setModalType(null)}
+        />
+      )}
     </>
   );
 };

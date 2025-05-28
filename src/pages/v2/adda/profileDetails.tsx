@@ -19,7 +19,8 @@ const ProfileDetails = () => {
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [numberOfPosts, setNumberOfPosts] = useState<number>(0);
   const [isFriend, setIsFriend] = useState(false);
-  const [numberOffollowers, setNumberOffollowers] = useState<number>(0);
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [following, setFollowing] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [friends, setFriends] = useState<UserSummary[]>([]);
@@ -52,9 +53,11 @@ const ProfileDetails = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response);
+        
         console.log(response.data.data.isFriend);
         setUser(response.data.data.user);
+        setFollowers(response.data.data.user.followers);
+        setFollowing(response.data.data.user.following);
         setIsFriend(response.data.data.isFriend);
 
         fetchUserPosts(userId);
@@ -82,7 +85,6 @@ const ProfileDetails = () => {
 
         console.log(response.data.data);
         setFriends(response.data.data);
-        setNumberOffollowers(response.data.data.length ?? 0);
         setIsLoading(false);
       } catch (err) {
         console.error("Error fetching posts:", err);
@@ -180,7 +182,8 @@ const ProfileDetails = () => {
         <ProfileHeader
           user={user}
           totalPosts={numberOfPosts}
-          totalFollowing={numberOffollowers}
+          totalFollowing={following}
+          totalFollowers={followers}
           isCurrentUser={user.clerkId === currentUser?.id || isFriend}
         />
 

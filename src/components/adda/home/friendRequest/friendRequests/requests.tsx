@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
 import { FriendRequestResponse } from "@/types";
+import { useNotifications } from "@/context/adda/notificationContext";
 
 export interface RequestSender {
   requestId: string;
@@ -22,6 +23,19 @@ export interface FollowBackUser {
   message?: string;
 }
 
+interface Notification {
+  _id: string;
+  userId: string | { _id: string; name: string };
+  initiatorId: string | { _id: string; name: string };
+  type: string;
+  message: string;
+  referenceId?: string;
+  referenceModel?: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const FriendRequestsList = () => {
   const [requests, setRequests] = useState<RequestSender[] | null>(null);
   const [followBackUsers, setFollowBackUsers] = useState<
@@ -33,6 +47,7 @@ const FriendRequestsList = () => {
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
+  const { updateNotification, removeNotification } = useNotifications();
 
   const fetchFollowBackUsers = async () => {
     setFollowBackLoading(true);
@@ -143,6 +158,9 @@ const FriendRequestsList = () => {
       );
 
       if (response.data.success === true) {
+        const acceptedRequest = requests?.find(
+          (r) => r.requestId === requestId
+        );
         setRequests((prev) =>
           prev
             ? prev.map((request) =>
@@ -157,6 +175,21 @@ const FriendRequestsList = () => {
             : null
         );
         fetchFollowBackUsers();
+
+        // Update notification
+        const notification = response.data.notification;
+        if (notification?.id) {
+          updateNotification(notification.id, {
+            isRead: true,
+            type: "friend_request_accepted",
+            message: `${
+              acceptedRequest?.senderDetails.name || "User"
+            } is now your friend`,
+          });
+        } else {
+          // Fallback: Remove notifications with matching referenceId
+          await removeNotificationByReferenceId(requestId);
+        }
 
         setTimeout(() => {
           setRequests((prev) =>
@@ -218,6 +251,15 @@ const FriendRequestsList = () => {
             : null
         );
 
+        // Remove notification
+        const notification = response.data.notification;
+        if (notification?.id) {
+          removeNotification(notification.id);
+        } else {
+          // Fallback: Remove notifications with matching referenceId
+          await removeNotificationByReferenceId(requestId);
+        }
+
         setTimeout(() => {
           setRequests((prev) =>
             prev
@@ -262,7 +304,6 @@ const FriendRequestsList = () => {
           },
         }
       );
-
       console.log(response);
       if (response.data.success) {
         setFollowBackUsers((prev) =>
@@ -305,7 +346,7 @@ const FriendRequestsList = () => {
     try {
       const token = await getToken();
       const response = await axiosInstance.post(
-        "/adda/declineFollowBack",
+        "/adda/decline-follow-back",
         { targetUserId: userId },
         {
           headers: {
@@ -313,14 +354,13 @@ const FriendRequestsList = () => {
           },
         }
       );
-
       console.log(response);
       if (response.data.success) {
         setFollowBackUsers((prev) =>
           prev
             ? prev.map((user) =>
                 user._id === userId
-                  ? { ...user, status: "declined", message: "Declined!" }
+                  ? { ...user, status: "declined", message: "Declined" }
                   : user
               )
             : null
@@ -362,6 +402,32 @@ const FriendRequestsList = () => {
     },
     [loading, hasMore]
   );
+
+  // Helper function to remove notifications by referenceId
+  const removeNotificationByReferenceId = async (referenceId: string) => {
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.get(
+        `/adda/notifications?referenceId=${referenceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        const notifications: Notification[] = response.data.data;
+        notifications.forEach((notification: Notification) => {
+          if (notification._id) {
+            removeNotification(notification._id);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching notifications by referenceId:", error);
+    }
+  };
 
   if ((!requests && loading) || (!followBackUsers && followBackLoading)) {
     return (
@@ -437,7 +503,7 @@ const FriendRequestsList = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -453,7 +519,7 @@ const FriendRequestsList = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -567,7 +633,7 @@ const FriendRequestsList = () => {
             >
               <path
                 fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                 clipRule="evenodd"
               />
             </svg>
@@ -593,7 +659,7 @@ const FriendRequestsList = () => {
                 clipRule="evenodd"
               />
             </svg>
-            <span className="font-medium">Request Declined</span>
+            <span className="font-medium">Request Declined!</span>
           </div>
         </div>
       );
@@ -674,8 +740,6 @@ const FriendRequestsList = () => {
   return (
     <div className="space-y-6">
       {renderFollowBackSection()}
-
-      {/* Friend Requests section */}
       {requests && requests.length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold text-gray-800">
@@ -686,7 +750,7 @@ const FriendRequestsList = () => {
               <div
                 key={request.requestId}
                 className={getCardClasses(request.status)}
-                ref={index === requests.length - 1 ? lastRequestRef : null}
+                ref={index === requests.length - 1 ? lastRequestRef : undefined}
               >
                 <div className="flex items-center w-full gap-3 mb-3">
                   <div className="w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-50">
@@ -709,7 +773,6 @@ const FriendRequestsList = () => {
                 {getActionButtons(request)}
               </div>
             ))}
-
             {loading && (
               <div className="flex items-center justify-center w-full py-3">
                 <div className="w-5 h-5 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>

@@ -1,143 +1,154 @@
-import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
-import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Bell,
-  Check,
-  Heart,
-  MessageCircle,
-  Share2,
-  Trash2,
-  UserPlus,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Bell } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import NotificationCard from "./notificationCard";
+import { useNotifications } from "@/context/adda/notificationContext";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
+import { Notification } from "@/types";
 
-interface NotificationSender {
-  _id: string;
-  name: string;
-  picture: string;
-}
-
-interface NotificationInterface {
-  _id: string;
-  userId: string;
-  initiatorId: NotificationSender;
-  type: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
-
-const Notification = () => {
-  const [notifications, setNotifications] = useState<NotificationInterface[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+const Notifications = () => {
+  const {
+    notifications,
+    isLoading,
+    markNotificationRead,
+    markAllNotificationsRead,
+    removeNotification,
+    updateNotification,
+  } = useNotifications();
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const observer = useRef<IntersectionObserver | null>(null);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
+  const lastNotificationRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasMore]
+  );
+
+  const fetchMoreNotifications = useCallback(
+    async (pageNum: number) => {
       try {
-        // For testing, use sample data instead of API call
         const token = await getToken();
         const response = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/adda/userNotifications`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
+            params: { page: pageNum, limit: 10 },
           }
         );
-        console.log(response.data);
-        setNotifications(response.data.data);
+
+        const notificationData = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        setHasMore(notificationData.length === 10);
       } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-        toast.error("Failed to load notifications");
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch more notifications:", err);
+        toast.error("Failed to load more notifications. Retrying...");
+        setTimeout(() => fetchMoreNotifications(pageNum), 3000);
+      }
+    },
+    [getToken]
+  );
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchMoreNotifications(page);
+    }
+  }, [page, fetchMoreNotifications]);
+
+  const handleFriendRequestAction = async (
+    notificationId: string,
+    referenceId: string | undefined,
+    action: "accept" | "decline"
+  ) => {
+    if (!referenceId) {
+      toast.error("Invalid friend request");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${
+          import.meta.env.VITE_PROD_URL
+        }/adda/friend-requests/${referenceId}/${action}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (action === "accept") {
+        updateNotification(notificationId, {
+          isRead: true,
+          type: "friend_request_accepted",
+          message: "Friend request accepted",
+        });
+        toast.success("Friend request accepted");
+      } else {
+        removeNotification(notificationId);
+        toast.success("Friend request declined");
+      }
+    } catch (err) {
+      console.error(`Failed to ${action} friend request:`, err);
+      toast.error(`Failed to ${action} friend request`);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    const getNavigationLink = (): string => {
+      const { type, referenceId, referenceModel } = notification;
+      switch (type) {
+        case "friend_request":
+        case "friend_request_accepted":
+        case "friend_request_rejected":
+          return `/friends/requests/${referenceId}`;
+        case "like":
+        case "comment":
+          return referenceModel === "Post" || referenceModel === "Comment"
+            ? `/posts/${referenceId}`
+            : "/feed";
+        default:
+          return "/adda/notifications";
       }
     };
-
-    fetchNotifications();
-  }, [getToken]);
-
-  const markAsRead = async (notificationId: string) => {
-    try {
-      const token = await getToken();
-      const response = await axios.post(
-        `${
-          import.meta.env.VITE_PROD_URL
-        }/adda/userNotifications/${notificationId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notif._id === notificationId ? { ...notif, isRead: true } : notif
-        )
-      );
-      toast.success("Marked as read");
-    } catch (err) {
-      console.error("Failed to mark notification as read:", err);
-      toast.error("Failed to mark as read");
-    }
+    navigate(getNavigationLink());
+    if (!notification.isRead) markNotificationRead(notification._id);
   };
 
-  const deleteNotification = async (notificationId: string) => {
-    try {
-      const token = await getToken();
-      const response = await axios.delete(
-        `${
-          import.meta.env.VITE_PROD_URL
-        }/adda/userNotifications/${notificationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setNotifications((prev) =>
-        prev.filter((notif) => notif._id !== notificationId)
-      );
-      toast.success("Notification deleted");
-    } catch (err) {
-      console.error("Failed to delete notification:", err);
-      toast.error("Failed to delete notification");
-    }
-  };
+  const filteredNotifications = notifications.filter(
+    (notif) => filter === "all" || (filter === "unread" && !notif.isRead)
+  );
 
   return (
-    <div className="relative flex flex-col w-full gap-4 sm:gap-6">
-      {/* Notifications header */}
-      <div className="relative z-10 p-3 bg-white bg-opacity-100 border border-orange-200 rounded-lg shadow-lg  shadow-orange-100/80">
-        <div className="flex items-center justify-start w-full gap-3">
-          <button
-            onClick={() => navigate("/adda")}
-            className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 10 }}
-            className="p-3 rounded-full shadow-lg bg-gradient-to-br from-orange-400 to-orange-500"
-          >
-            <Bell className="w-6 h-6 text-white" />
-          </motion.div>
+    <div className="relative flex flex-col w-full gap-4 sm:gap-6 p-4 max-w-3xl mx-auto">
+      <div className="relative z-10 p-4 bg-white bg-opacity-90 backdrop-blur-sm border border-orange-200 rounded-xl shadow-lg shadow-orange-100/50">
+        <div className="flex items-center justify-between w-full gap-3">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/adda")}
+              className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
+              aria-label="Back to Adda"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 10 }}
+              className="p-3 rounded-full shadow-lg bg-gradient-to-br from-orange-400 to-orange-500"
+            >
+              <Bell className="w-6 h-6 text-white" />
+            </motion.div>
             <div className="flex flex-col figtree">
               <span className="text-xl font-bold text-orange-600">
                 Notifications
@@ -147,49 +158,53 @@ const Notification = () => {
               </span>
             </div>
           </div>
-          {notifications?.length > 0 && (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="px-4 py-2 ml-auto text-sm font-medium text-orange-600 bg-orange-100 rounded-full shadow-sm"
+          <div className="flex items-center gap-2">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as "all" | "unread")}
+              className="px-2 py-1 text-sm text-orange-600 bg-orange-50 rounded-full"
+              aria-label="Filter notifications"
             >
-              {notifications.length}{" "}
-              {notifications.length === 1 ? "notification" : "notifications"}
-            </motion.span>
-          )}
+              <option value="all">All</option>
+              <option value="unread">Unread</option>
+            </select>
+            {notifications.length > 0 && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={markAllNotificationsRead}
+                className="px-4 py-2 text-sm font-medium text-orange-600 bg-orange-100 rounded-full hover:bg-orange-200"
+              >
+                Mark All as Read
+              </motion.button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Notifications list */}
-      {loading ? (
+      {isLoading && page === 1 ? (
         <div className="flex justify-center p-6">
           <div className="flex flex-col w-full gap-4 animate-pulse">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 rounded-lg bg-orange-50"></div>
+              <div key={i} className="h-24 rounded-xl bg-orange-50" />
             ))}
           </div>
         </div>
-      ) : notifications?.length === 0 ? (
+      ) : filteredNotifications.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center w-full p-8 text-center bg-white border border-orange-200 rounded-lg shadow-sm"
+          className="flex flex-col items-center justify-center w-full p-8 text-center bg-white border border-orange-200 rounded-xl shadow-sm"
         >
           <motion.div
-            animate={{
-              y: [0, -10, 0],
-              rotate: [0, 5, 0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 2,
-            }}
+            animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
             className="p-4 mx-auto mb-4 rounded-full shadow-lg bg-gradient-to-br from-orange-400 to-orange-500 w-fit"
           >
             <Bell className="w-12 h-12 text-white" />
           </motion.div>
           <h3 className="mb-2 text-lg font-semibold text-orange-700">
-            No notifications yet
+            No {filter === "unread" ? "unread " : ""}notifications
           </h3>
           <p className="text-orange-600">
             We'll notify you when something new arrives
@@ -198,20 +213,33 @@ const Notification = () => {
       ) : (
         <AnimatePresence>
           <div className="flex flex-col w-full gap-4">
-            {notifications?.map((notification, index) => (
+            {filteredNotifications.map((notification, index) => (
               <motion.div
                 key={notification._id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
                 transition={{ delay: index * 0.1 }}
+                ref={
+                  index === filteredNotifications.length - 1
+                    ? lastNotificationRef
+                    : null
+                }
               >
                 <NotificationCard
                   notification={notification}
-                  onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
+                  onMarkAsRead={markNotificationRead}
+                  onDelete={removeNotification}
+                  onClick={handleNotificationClick}
+                  onFriendRequestAction={handleFriendRequestAction}
                 />
               </motion.div>
             ))}
+            {isLoading && page > 1 && (
+              <div className="flex justify-center p-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600" />
+              </div>
+            )}
           </div>
         </AnimatePresence>
       )}
@@ -219,100 +247,4 @@ const Notification = () => {
   );
 };
 
-const NotificationCard = ({
-  notification,
-  onMarkAsRead,
-  onDelete,
-}: {
-  notification: NotificationInterface;
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
-}) => {
-  const timeAgo = notification.createdAt
-    ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })
-    : "recently";
-  console.log(notification);
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "friend_request_accepted":
-        return <UserPlus className="w-5 h-5 text-orange-500" />;
-      case "like":
-        return <Heart className="w-5 h-5 text-orange-500" />;
-      case "comment":
-        return <MessageCircle className="w-5 h-5 text-orange-500" />;
-      case "friend_request":
-        return <UserPlus className="w-5 h-5 text-orange-500" />;
-      default:
-        return <Share2 className="w-5 h-5 text-orange-500" />;
-    }
-  };
-
-  return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      className="flex flex-col items-center justify-start w-full gap-5 p-5 transition-all duration-200 border border-orange-200 shadow-sm rounded-xl min-h-fit hover:shadow-md"
-    >
-      <div className="flex items-start w-full gap-4">
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          className="relative overflow-hidden border-2 border-orange-200 rounded-full w-14 h-14 shrink-0 z-[1]"
-        >
-          <img
-            src={notification.initiatorId?.picture || "/default-avatar.png"}
-            alt={notification.initiatorId?.name || "User"}
-            className="object-cover w-full h-full"
-          />
-          <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
-            {getNotificationIcon(notification.type)}
-          </div>
-        </motion.div>
-        <div className="flex-1">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex flex-col figtree">
-              <span className="font-semibold text-orange-900">
-                {notification.initiatorId?.name || "Anonymous User"}
-              </span>
-              <span className="text-sm text-orange-600">
-                {notification.message}
-              </span>
-            </div>
-            <motion.span
-              whileHover={{ scale: 1.1 }}
-              className="px-2 py-1 text-xs font-medium text-orange-600 rounded-full bg-orange-50"
-            >
-              {timeAgo}
-            </motion.span>
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-2 mt-3 transition-opacity opacity-0 group-hover:opacity-100"
-          >
-            {!notification.isRead && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onMarkAsRead(notification._id)}
-                className="flex items-center gap-1 px-4 py-2 text-xs font-medium text-orange-600 transition-colors rounded-full hover:bg-orange-100"
-              >
-                <Check className="w-3 h-3" />
-                Mark as read
-              </motion.button>
-            )}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onDelete(notification._id)}
-              className="flex items-center gap-1 px-4 py-2 text-xs font-medium text-orange-600 transition-colors rounded-full hover:bg-orange-100"
-            >
-              <Trash2 className="w-3 h-3" />
-              Delete
-            </motion.button>
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-export default Notification;
+export default Notifications;

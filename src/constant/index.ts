@@ -1207,38 +1207,38 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_03",
-    label: "Profile",
-    // icon: FaUserAlt,
-    url: "/adda/user-profile",
-  },
-  {
-    id: "NL_04",
     label: "Browse Plans",
     // icon: FaCreditCard,
     url: "/mentoons#subscription",
   },
   {
-    id: "NL_05",
+    id: "NL_04",
     label: "Workshops",
     // icon: FaChalkboard,
     url: "/mentoons-workshops",
   },
   {
-    id: "NL_06",
+    id: "NL_05",
     label: "Book Sessions",
     url: "/bookings",
   },
   {
-    id: "NL_07",
+    id: "NL_06",
     label: "Join Us",
     icon: "group",
     url: "/hiring",
   },
   {
-    id: "NL_08",
+    id: "NL_07",
     label: "Podcast",
     icon: "mic",
     url: "/mentoons-podcast",
+  },
+  {
+    id: "NL_08",
+    label: "Profile",
+    icon: FaUserAlt,
+    url: "/adda/user-profile",
   },
   // {
   //   id: "NL_09",

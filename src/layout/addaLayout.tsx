@@ -7,7 +7,6 @@ import WhatWeOffer from "@/components/adda/home/whatweExplore/weOffer";
 import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 import WelcomeModal from "@/components/adda/welcome/welcome";
 import { useAuth } from "@clerk/clerk-react";
-import { motion } from "framer-motion";
 import { useCallback, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -111,26 +110,6 @@ const AddaLayout = () => {
           </div>
         </div>
       </div>
-
-      <motion.button
-        onClick={handleActionButtonClick}
-        initial={{ scale: 1 }}
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          repeatType: "loop",
-          ease: "easeInOut",
-        }}
-        className="fixed z-50 flex items-center justify-center w-16 h-16 transition-transform bg-orange-400 rounded-full shadow-lg bottom-20 right-4 hover:scale-105 md:bottom-4"
-        aria-label="Create new post"
-      >
-        <img
-          src="/assets/home/homepage fillers/sir Illustration.png"
-          alt="Action button icon"
-          className="w-12 h-12"
-        />
-      </motion.button>
 
       {isSignedIn && (
         <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">

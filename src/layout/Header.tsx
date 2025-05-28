@@ -10,7 +10,7 @@ import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaUserCircle } from "react-icons/fa";
 import { FaBars, FaPhone } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { userId } = useAuth();
 
   const title = location.pathname.startsWith("/adda") ? "adda" : "home";
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,10 +33,13 @@ const Header = () => {
   });
 
   const { cart } = useSelector((state: RootState) => state.cart);
-  const { getToken, userId } = useAuth();
+  const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
-  const navLeft = COMMON_NAV.slice(0, 4);
+  const filteredNav = COMMON_NAV.filter(
+    (item) => item.label !== "Profile" || userId
+  );
+  const navLeft = filteredNav.slice(0, 4);
 
   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -66,7 +70,6 @@ const Header = () => {
   useEffect(() => {
     const fetchCart = async () => {
       const token = await getToken();
-
       if (token && userId) {
         const response = await dispatch(getCart({ token, userId }));
         console.log("Response Data", response);
@@ -126,8 +129,8 @@ const Header = () => {
                 href={url}
                 onClick={handleBrowsePlansClick}
                 className="group relative bg-transparent outline-none cursor-pointer text-center 
-             text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
-             items-center gap-1 transition-all duration-300 ease-in-out"
+                text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
+                items-center gap-1 transition-all duration-300 ease-in-out"
               >
                 {Icon && typeof Icon === "function" ? (
                   <Icon className="sm:text-sm md:text-lg" />
@@ -135,7 +138,7 @@ const Header = () => {
                 {label}
                 <span
                   className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                   transition-all duration-300 ease-in-out group-hover:w-full"
+                  transition-all duration-300 ease-in-out group-hover:w-full"
                 ></span>
               </a>
             ) : (
@@ -146,7 +149,9 @@ const Header = () => {
                     onMouseEnter={() => handleHover(label.toLowerCase())}
                     onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
                   >
-                    {dropdown.products && (
+                    {dropdown[
+                      label.toLowerCase() as keyof DropDownInterface
+                    ] && (
                       <DropDown
                         labelType={label.toLowerCase() as "products" | "games"}
                         items={items}
@@ -157,15 +162,13 @@ const Header = () => {
                   <NavLink
                     to={url}
                     className="group relative bg-transparent outline-none cursor-pointer text-center 
-                  text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
-                  items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
+                    text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
+                    items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
                   >
                     {typeof Icon === "function" ? (
                       <Icon className="text-xs md:text-sm flex-shrink-0" />
                     ) : null}
-
                     {label}
-
                     {label === "Mythos" && (
                       <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[8px] md:text-[10px] leading-none text-white whitespace-nowrap">
                         Introducing
@@ -173,7 +176,7 @@ const Header = () => {
                     )}
                     <span
                       className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                    transition-all duration-300 ease-in-out group-hover:w-full"
+                      transition-all duration-300 ease-in-out group-hover:w-full"
                     ></span>
                   </NavLink>
                 )}
@@ -193,7 +196,7 @@ const Header = () => {
         </NavLink>
       </div>
 
-      <div className="flex items-end lg:w-1/3 justify-end gap-2 pr-0 lg:pr-4 xl:pr-6">
+      <div className="flex items-end gap-3 lg:w-1/3 justify-end gap-2 pr-0 lg:pr-4 xl:pr-6">
         <SignedIn>
           <div className="relative cursor-pointer lg:hidden flex flex-shrink-0">
             <NavLink to="/cart">
@@ -203,6 +206,11 @@ const Header = () => {
                   {cart.totalItemCount}
                 </span>
               )}
+            </NavLink>
+          </div>
+          <div className="relative cursor-pointer lg:hidden flex flex-shrink-0">
+            <NavLink to="/adda/user-profile">
+              <FaUserCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </NavLink>
           </div>
         </SignedIn>
@@ -235,7 +243,7 @@ const Header = () => {
           title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
         } items-center gap-4 xl:gap-8 justify-end`}
       >
-        {COMMON_NAV.slice(4).map(({ id, label, url, icon: Icon }) =>
+        {filteredNav.slice(4).map(({ id, label, url, icon: Icon }) =>
           label === "Browse Plans" ? (
             <a
               key={id}
@@ -276,6 +284,19 @@ const Header = () => {
                 />
               )}
             </div>
+          ) : label === "Profile" ? (
+            <NavLink
+              key={id}
+              to={url}
+              className="group relative bg-transparent outline-none cursor-pointer text-center 
+              flex items-center transition-all duration-300 ease-in-out flex-shrink-0"
+            >
+              <FaUserCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white rounded-full" />
+              <span
+                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
+                transition-all duration-300 ease-in-out group-hover:w-full"
+              ></span>
+            </NavLink>
           ) : (
             <NavLink
               key={id}
