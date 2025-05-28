@@ -12,6 +12,7 @@ import { BiComment } from "react-icons/bi";
 import { BsThreeDots } from "react-icons/bs";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdReport, MdBlock } from "react-icons/md"; // Added icons for report and block
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
@@ -164,6 +165,62 @@ const PostCard = ({
     }
   };
 
+  const handleReportAbuse = async () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/reports`,
+        {
+          postId: post._id,
+          reason: "Abuse",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Post reported successfully.");
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      toast.error("Failed to report post. Please try again.");
+    } finally {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleBlockUser = async () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/users/block`,
+        {
+          userId: post.user._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("User blocked successfully.");
+      // Optionally, refresh the feed or remove the post
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      toast.error("Failed to block user. Please try again.");
+    } finally {
+      setShowDropdown(false);
+    }
+  };
+
   const handleCommentSubmit = async () => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
@@ -193,7 +250,6 @@ const PostCard = ({
     };
 
     try {
-      // Optimistically update UI
       setComments((prevComments) => [
         ...(Array.isArray(prevComments) ? prevComments : []),
         newCommentObj,
@@ -201,7 +257,6 @@ const PostCard = ({
       setCommentCount((prev) => prev + 1);
       setNewComment("");
 
-      // Make API call
       const token = await getToken();
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/comments`,
@@ -217,7 +272,6 @@ const PostCard = ({
         }
       );
 
-      // Update with server response
       if (response.data && response.data.data) {
         const serverComment = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
@@ -231,13 +285,11 @@ const PostCard = ({
         setCommentCount(serverComment.data.data.length);
 
         triggerReward(RewardEventType.COMMENT_POST, post._id);
-        // toast.success("Comment added successfully");
       }
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment. Please try again.");
 
-      // Revert optimistic update
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== tempId)
       );
@@ -245,10 +297,9 @@ const PostCard = ({
     }
   };
 
-  // Handle Enter key press for comment submission
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent default Enter behavior (e.g., new line)
+      e.preventDefault();
       handleCommentSubmit();
     }
   };
@@ -282,10 +333,6 @@ const PostCard = ({
       if (newSavedState) {
         triggerReward(RewardEventType.SHARE_PRODUCT, post._id);
       }
-
-      // toast.success(
-      //   newSavedState ? "Post saved successfully" : "Post unsaved successfully"
-      // );
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
       setIsSavedPost(!newSavedState);
@@ -526,44 +573,65 @@ const PostCard = ({
             </div>
             <div className="flex flex-col figtree">
               <span className="Futura Std">{post.user.name}</span>
-              {/* <span className="figtree text-sm text-[#807E7E]">
-                {post.user.email}
-              </span> */}
               <span className="figtree text-[12px] text-[#807E7E]">
                 {new Date(post.createdAt).toLocaleString()}
               </span>
             </div>
           </div>
 
-          {isUser && (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                className="p-2 text-gray-500 rounded-full hover:bg-gray-100"
-                onClick={() => setShowDropdown(!showDropdown)}
-              >
-                <BsThreeDots className="w-5 h-5" />
-              </button>
+          <div className="relative" ref={dropdownRef}>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 text-gray-500 rounded-full hover:bg-orange-100 transition-colors"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
+              <BsThreeDots className="w-5 h-5" />
+            </motion.button>
 
-              {showDropdown && (
-                <div className="absolute right-0 z-10 w-48 mt-2 overflow-hidden bg-white rounded-md shadow-lg">
+            {showDropdown && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute right-0 z-10 w-48 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+              >
+                {isUser ? (
                   <button
-                    className="flex items-center w-full px-4 py-2 text-left text-red-600 transition-colors hover:bg-gray-100"
+                    className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-gray-50 transition-colors"
                     onClick={handleDeletePost}
                   >
                     <RiDeleteBin6Line className="w-5 h-5 mr-2" />
                     Delete Post
                   </button>
-                </div>
-              )}
-            </div>
-          )}
+                ) : (
+                  <>
+                    <button
+                      className="flex items-center w-full px-4 py-3 text-left text-orange-600 hover:bg-gray-50 transition-colors"
+                      onClick={handleReportAbuse}
+                    >
+                      <MdReport className="w-5 h-5 mr-2" />
+                      Report Abuse
+                    </button>
+                    <button
+                      className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-gray-50 transition-colors"
+                      onClick={handleBlockUser}
+                    >
+                      <MdBlock className="w-5 h-5 mr-2" />
+                      Block User
+                    </button>
+                  </>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
 
         {renderPostContent()}
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            {/* <Likes type="post" id={post._id} likeCount={post.likes.length} /> */}
             <Reactions
               type="post"
               id={post._id}
@@ -647,7 +715,7 @@ const PostCard = ({
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={handleKeyDown} // Added onKeyDown handler
+                onKeyDown={handleKeyDown}
                 className="flex-1 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Write a comment..."
               />

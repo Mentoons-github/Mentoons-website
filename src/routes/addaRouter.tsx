@@ -1,9 +1,7 @@
-// import GlobalAuthModal from "@/components/adda/global/globalAuthModal";
 import FriendSearch from "@/components/adda/searchFriend/searchFriend";
 import AddaLayout from "@/layout/addaLayout";
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
-// import ProtectedRoute from "@/components/adda/auth/protectedRoute";
 
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));

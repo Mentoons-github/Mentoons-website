@@ -35,9 +35,11 @@ import {
 import { Contests } from "./home/contests";
 import { IUser } from "./user";
 import {
-  Notification,
-  NotificationContextType,
   NotificationInterface,
+  NotificationSender,
+  NotificationType,
+  ReferenceModel,
+  Notification,
 } from "./adda/notification";
 import {
   SocialLinks,
@@ -74,10 +76,12 @@ export type {
   Conversations,
   Friend,
   Message,
-  Notification,
-  NotificationContextType,
   requestSender,
   FriendRequestResponse,
+  NotificationSender,
+  NotificationType,
+  ReferenceModel,
+  Notification,
   NotificationInterface,
   ApiResponse,
   CreateStatusParams,
