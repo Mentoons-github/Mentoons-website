@@ -1,17 +1,33 @@
 import { fetchProductById } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductBase } from "@/types/productTypes";
-import { ORDER_TYPE } from "@/utils/enum";
+import { ORDER_TYPE, ProductType } from "@/utils/enum";
+import { useRewardActions } from "@/utils/rewardHelper";
 
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
+import { useRewards } from "@/hooks/useRewards";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 // import { useNavigate } from "react-router-dom";
+
+// Define maximum discount limits per product type
+const MAX_DISCOUNT_LIMITS = {
+  [ProductType.MENTOONS_CARDS]: 20, // 20 rupees max discount
+  [ProductType.MENTOONS_BOOKS]: 4, // 4 rupees max discount
+  [ProductType.COMIC]: 4, // 4 rupees max discount
+  [ProductType.AUDIO_COMIC]: 4, // 4 rupees max discount
+  [ProductType.PODCAST]: 4, // 4 rupees max discount
+  [ProductType.ASSESSMENT]: 3, // 3 rupees max discount
+  DEFAULT: 4, // Default max discount
+};
+
+// Conversion rate: how many points = 1 rupee
+const POINTS_TO_RUPEE_RATIO = 10;
 
 const OrderSummary: React.FC = () => {
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -23,6 +39,12 @@ const OrderSummary: React.FC = () => {
     "productId"
   );
   const [productDetail, setProductDetail] = useState<ProductBase>();
+  const { totalPoints } = useRewards();
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const { redeemPoints: handleRedeemPoints, rewardPurchaseProduct } =
+    useRewardActions();
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -45,6 +67,67 @@ const OrderSummary: React.FC = () => {
   }, [productId, dispatch]);
 
   console.log("productDetail :", productDetail);
+
+  // Calculate the maximum discount allowed based on product type
+  const calculateMaxDiscount = () => {
+    if (productDetail) {
+      // For single product purchase
+      return (
+        MAX_DISCOUNT_LIMITS[productDetail.type] || MAX_DISCOUNT_LIMITS.DEFAULT
+      );
+    } else if (cart.items && cart.items.length > 0) {
+      // For cart with multiple items, use the sum of max discounts per item
+      return cart.items.reduce((total, item) => {
+        const maxForItem =
+          MAX_DISCOUNT_LIMITS[item.productType as keyof typeof ProductType] ||
+          MAX_DISCOUNT_LIMITS.DEFAULT;
+        return total + maxForItem;
+      }, 0);
+    }
+    return 0;
+  };
+
+  // Maximum points the user can redeem based on their total points and the max discount
+  const maxRedeemablePoints = Math.min(
+    totalPoints,
+    calculateMaxDiscount() * POINTS_TO_RUPEE_RATIO
+  );
+
+  // Calculate the discount amount based on points
+  const calculateDiscountFromPoints = (points: number) => {
+    return Math.min(points / POINTS_TO_RUPEE_RATIO, calculateMaxDiscount());
+  };
+
+  // Handle points redemption
+  const handleApplyPoints = () => {
+    if (redeemPoints <= 0) {
+      toast.error("Please enter a valid number of points to redeem");
+      return;
+    }
+
+    if (redeemPoints > totalPoints) {
+      toast.error(`You only have ${totalPoints} points available`);
+      return;
+    }
+
+    if (redeemPoints > maxRedeemablePoints) {
+      toast.error(
+        `You can only redeem up to ${maxRedeemablePoints} points for this purchase`
+      );
+      return;
+    }
+
+    const discount = calculateDiscountFromPoints(redeemPoints);
+    setAppliedDiscount(discount);
+    toast.success(`Discount of ₹${discount.toFixed(2)} applied`);
+  };
+
+  // Reset applied discount
+  const handleRemoveDiscount = () => {
+    setRedeemPoints(0);
+    setAppliedDiscount(0);
+    toast.success("Discount removed");
+  };
 
   const [formData] = useState({
     merchant_id: "3545043",
@@ -107,6 +190,14 @@ const OrderSummary: React.FC = () => {
     visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
   };
 
+  // Calculate the final amount after applying discount
+  const calculateFinalAmount = () => {
+    const originalTotal = productDetail
+      ? productDetail.price
+      : cart.totalPrice || 0;
+    return Math.max(0, originalTotal - appliedDiscount);
+  };
+
   const handleProceedToPay = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const token = await getToken();
@@ -131,9 +222,7 @@ const OrderSummary: React.FC = () => {
       ? `${productDetail.title} (1)`
       : cart.items.map((item) => `${item.title} (${item.quantity})`).join(", ");
 
-    const totalAmount = productDetail
-      ? productDetail.price
-      : cart.totalPrice || 0;
+    const totalAmount = calculateFinalAmount();
 
     const orderData = {
       user: userId,
@@ -156,12 +245,15 @@ const OrderSummary: React.FC = () => {
       status: "PENDING",
       firstName: user?.firstName,
       lastName: user?.lastName,
+      // Add reward points details
+      rewardPointsRedeemed: redeemPoints,
+      discountApplied: appliedDiscount,
       // products: productIds,
       // Original payment gateway fields that might be needed
       orderId: formData.order_id,
     };
 
-    console.log("order Date", orderData);
+    console.log("order Data", orderData);
 
     try {
       console.log("Sending order data:", orderData);
@@ -178,6 +270,22 @@ const OrderSummary: React.FC = () => {
       );
       console.log("response", response);
       console.log("response.data", response.data);
+
+      // If payment is successful, deduct the redeemed points
+      if (redeemPoints > 0) {
+        try {
+          // Use the redeemPoints action from useRewardActions
+          handleRedeemPoints(-redeemPoints, orderData.orderId);
+          toast.success(`${redeemPoints} points redeemed successfully!`);
+        } catch (error) {
+          console.error("Error deducting reward points:", error);
+        }
+      }
+
+      // Award points for purchase
+      if (productDetail) {
+        rewardPurchaseProduct(productDetail._id);
+      }
 
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = response.data;
@@ -299,19 +407,91 @@ const OrderSummary: React.FC = () => {
           )}
         </motion.div>
 
+        {/* Reward Points Redemption Section */}
         <motion.div
           className="p-6 mb-8 bg-white rounded-lg shadow-md"
           variants={itemVariants}
         >
-          <h2 className="mb-4 text-2xl font-semibold text-black">Subtotal</h2>
-          <motion.p
-            className="text-2xl font-bold text-black"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ yoyo: Infinity, duration: 1.5 }}
-          >
-            ₹ {productDetail ? productDetail.price : cart.totalPrice || 0}
-          </motion.p>
+          <h2 className="mb-4 text-2xl font-semibold text-black">
+            Redeem Reward Points
+          </h2>
+          <div className="mb-4">
+            <p className="mb-2 text-gray-600">
+              Available Points:{" "}
+              <span className="font-semibold">{totalPoints}</span>
+            </p>
+            <p className="mb-4 text-sm text-gray-500">
+              {`You can redeem up to ${maxRedeemablePoints} points for a discount of ₹${(
+                maxRedeemablePoints / POINTS_TO_RUPEE_RATIO
+              ).toFixed(2)}`}
+            </p>
+
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="number"
+                min="0"
+                max={maxRedeemablePoints}
+                value={redeemPoints}
+                onChange={(e) =>
+                  setRedeemPoints(
+                    Math.min(parseInt(e.target.value) || 0, maxRedeemablePoints)
+                  )
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                placeholder="Enter points to redeem"
+                disabled={appliedDiscount > 0}
+              />
+              {appliedDiscount === 0 ? (
+                <button
+                  onClick={handleApplyPoints}
+                  className="px-4 py-2 text-white rounded-lg bg-primary hover:bg-primary-dark"
+                >
+                  Apply
+                </button>
+              ) : (
+                <button
+                  onClick={handleRemoveDiscount}
+                  className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+
+            {appliedDiscount > 0 && (
+              <div className="p-3 mb-2 text-green-700 bg-green-100 rounded-md">
+                <p>Discount applied: ₹{appliedDiscount.toFixed(2)}</p>
+                <p className="text-sm">{redeemPoints} points redeemed</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="p-6 mb-8 bg-white rounded-lg shadow-md"
+          variants={itemVariants}
+        >
+          <h2 className="mb-4 text-2xl font-semibold text-black">
+            Payment Summary
+          </h2>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Subtotal:</span>
+              <span>
+                ₹ {productDetail ? productDetail.price : cart.totalPrice || 0}
+              </span>
+            </div>
+            {appliedDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Points Discount:</span>
+                <span>-₹ {appliedDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-2 mt-2 text-xl font-bold border-t border-gray-200">
+              <span>Total:</span>
+              <span>₹ {calculateFinalAmount().toFixed(2)}</span>
+            </div>
+          </div>
         </motion.div>
 
         <motion.button

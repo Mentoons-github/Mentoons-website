@@ -26,6 +26,24 @@ export const useRewardActions = () => {
     );
   };
 
+  /**
+   * Special handler for redeeming points that includes the points amount
+   */
+  const handleRedeemPoints = async (
+    points: number,
+    referenceId: string = ""
+  ) => {
+    const token = await getToken();
+    dispatch(
+      addRewardPoints({
+        eventType: RewardEventType.REDEEM_POINTS,
+        reference: referenceId,
+        token: token || undefined,
+        points: points, // This will be a negative value to reduce points
+      })
+    );
+  };
+
   return {
     // Authentication related
     rewardDailyLogin: () => handleRewardAction(RewardEventType.DAILY_LOGIN),
@@ -56,6 +74,8 @@ export const useRewardActions = () => {
       handleRewardAction(RewardEventType.PURCHASE_PRODUCT, productId),
     rewardShareProduct: (productId: string) =>
       handleRewardAction(RewardEventType.SHARE_PRODUCT, productId),
+    redeemPoints: (points: number, orderId: string) =>
+      handleRedeemPoints(points, orderId),
 
     // Session related
     rewardBookSession: (sessionId: string) =>
@@ -93,6 +113,7 @@ export const getRewardEventLabel = (eventType: RewardEventType): string => {
     [RewardEventType.FOLLOW_USER]: "Followed a User",
     [RewardEventType.PURCHASE_PRODUCT]: "Purchased a Product",
     [RewardEventType.SHARE_PRODUCT]: "Shared a Product",
+    [RewardEventType.REDEEM_POINTS]: "Redeemed Points",
     [RewardEventType.BOOK_SESSION]: "Booked a Session",
     [RewardEventType.APPLY_JOB]: "Applied for a Job",
     [RewardEventType.LISTEN_AUDIO_COMIC]: "Listened to an Audio Comic",

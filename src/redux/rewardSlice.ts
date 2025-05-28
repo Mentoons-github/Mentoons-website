@@ -41,6 +41,7 @@ const POINTS_CONFIG = {
   [RewardEventType.LISTEN_PODCAST]: 5,
   [RewardEventType.READ_COMIC]: 5,
   [RewardEventType.SAVED_POST]: 4,
+  [RewardEventType.REDEEM_POINTS]: -1, // Special case, actual points will be sent in the request
 };
 
 const initialState: UserRewardState = {
@@ -113,9 +114,22 @@ export const addRewardPoints = createAsyncThunk(
 
       console.log("Making API request to add reward points:", request);
 
+      // If this is a redemption, use the points value from the request
+      // otherwise use the value from POINTS_CONFIG
+      const pointsToAdd =
+        request.eventType === RewardEventType.REDEEM_POINTS
+          ? request.points || 0 // Use the points from request (negative for redemption)
+          : POINTS_CONFIG[request.eventType];
+
+      // Create a modified request with the calculated points
+      const modifiedRequest = {
+        ...request,
+        points: pointsToAdd,
+      };
+
       const response = await axiosInstance.post(
         "/rewards/add-points",
-        request,
+        modifiedRequest,
         {
           headers: {
             Authorization: `Bearer ${request.token}`,

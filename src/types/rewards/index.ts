@@ -25,6 +25,7 @@ export enum RewardEventType {
   // Purchase related
   PURCHASE_PRODUCT = "purchase_product",
   SHARE_PRODUCT = "share_product",
+  REDEEM_POINTS = "redeem_points",
 
   // Session related
   BOOK_SESSION = "book_session",
@@ -51,6 +52,7 @@ export interface RewardPointsConfig {
   [RewardEventType.FOLLOW_USER]: number;
   [RewardEventType.PURCHASE_PRODUCT]: number;
   [RewardEventType.SHARE_PRODUCT]: number;
+  [RewardEventType.REDEEM_POINTS]: number;
   [RewardEventType.BOOK_SESSION]: number;
   [RewardEventType.APPLY_JOB]: number;
   [RewardEventType.LISTEN_AUDIO_COMIC]: number;
@@ -110,4 +112,5 @@ export interface AddPointsRequest {
   reference?: string;
   description?: string;
   token?: string;
+  points?: number;
 }
