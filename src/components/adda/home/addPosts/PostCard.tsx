@@ -34,7 +34,7 @@ export interface PostData {
   user: {
     _id: string;
     name: string;
-    email: string;
+    email: string | "";
     picture: string;
   };
   content?: string;
@@ -342,7 +342,7 @@ const PostCard = ({
       console.log(response.data);
 
       if (newSavedState) {
-        triggerReward(RewardEventType.SHARE_PRODUCT, post._id);
+        triggerReward(RewardEventType.SAVED_POST, post._id);
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
