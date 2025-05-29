@@ -3,6 +3,7 @@ import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface SuggestionInterface {
   _id: string;
@@ -28,6 +29,8 @@ const FriendSuggestionsList = ({
   const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
   const [page, setPage] = useState<number>(1);
   const [connectingIds, setConnectingIds] = useState<string[]>([]);
+
+  const navigate = useNavigate();
 
   const suggestionsObserver = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
@@ -206,82 +209,86 @@ const FriendSuggestionsList = ({
   }
 
   return (
-    <div className="grid gap-2 sm:gap-3">
+    <div className="grid gap-2">
       {friendSuggestions?.map(({ picture, name, _id }, index) => (
         <div
           key={_id}
-          className="flex flex-col w-full p-3 transition-all duration-200 bg-white border border-orange-100 rounded-lg sm:p-4 sm:rounded-xl hover:shadow-md"
+          className="flex items-center justify-between w-full p-2.5 transition-all duration-200 bg-white border border-orange-100 rounded-lg hover:shadow-sm hover:border-orange-200"
           ref={
             index === friendSuggestions.length - 1 ? lastSuggestionRef : null
           }
         >
-          <div className="flex items-center w-full gap-2 mb-2 sm:gap-3 sm:mb-3">
-            <div className="w-10 h-10 overflow-hidden rounded-full sm:w-12 sm:h-12 ring-2 ring-orange-50">
+          {/* User Info Section */}
+          <div
+            className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer"
+            onClick={() => navigate(`/adda/user/${_id}`)}
+          >
+            <div className="w-8 h-8 overflow-hidden rounded-full ring-1 ring-orange-100 flex-shrink-0">
               <img
                 src={picture}
                 alt={name}
                 className="object-cover w-full h-full"
               />
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-800 sm:text-base">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-gray-800 truncate">
                 {name}
               </h3>
-              <p className="text-xs text-gray-500">Suggested connection</p>
+              <p className="text-xs text-gray-500">Suggested</p>
             </div>
           </div>
-          <div className="flex justify-between w-full gap-2">
-            <button
-              onClick={() => handleConnect(_id)}
-              disabled={connectingIds.includes(_id)}
-              className={`flex items-center justify-center flex-1 gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition-all duration-200 rounded-lg ${
-                connectingIds.includes(_id)
-                  ? "bg-orange-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-              }`}
-            >
-              {connectingIds.includes(_id) ? (
-                <>
-                  <div className="w-3 h-3 border-2 rounded-full sm:w-4 sm:h-4 border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-                  <span>Connecting...</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-3 h-3 sm:w-4 sm:h-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Connect
-                </>
-              )}
-            </button>
-          </div>
+
+          {/* Connect Button */}
+          <button
+            onClick={() => handleConnect(_id)}
+            disabled={connectingIds.includes(_id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white transition-all duration-200 rounded-md flex-shrink-0 ${
+              connectingIds.includes(_id)
+                ? "bg-orange-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 hover:shadow-sm"
+            }`}
+          >
+            {connectingIds.includes(_id) ? (
+              <>
+                <div className="w-3 h-3 border-2 rounded-full border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                <span>Connecting</span>
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-3 h-3"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Connect
+              </>
+            )}
+          </button>
         </div>
       ))}
 
+      {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center w-full py-3 sm:py-4">
-          <div className="w-5 h-5 border-2 rounded-full sm:w-6 sm:h-6 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-          <span className="ml-2 text-xs text-gray-500 sm:text-sm">
-            Loading more suggestions...
-          </span>
+        <div className="flex items-center justify-center w-full py-3">
+          <div className="w-4 h-4 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+          <span className="ml-2 text-xs text-gray-500">Loading more...</span>
         </div>
       )}
 
+      {/* No More Results */}
       {!loading &&
         friendSuggestions &&
         friendSuggestions.length > 0 &&
         !hasMore && (
-          <div className="w-full py-3 text-xs text-center text-gray-500 sm:py-4 sm:text-sm">
-            No more suggestions available
+          <div className="w-full py-2 text-xs text-center text-gray-400">
+            No more suggestions
           </div>
         )}
     </div>

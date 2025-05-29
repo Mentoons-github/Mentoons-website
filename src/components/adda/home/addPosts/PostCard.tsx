@@ -12,11 +12,12 @@ import { BiComment } from "react-icons/bi";
 import { BsThreeDots } from "react-icons/bs";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { MdReport, MdBlock } from "react-icons/md"; // Added icons for report and block
+import { MdReport, MdBlock, MdPersonAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
 import Share from "./share/share";
+import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 
 export type PostType =
   | "text"
@@ -99,13 +100,15 @@ const PostCard = ({
   const [newComment, setNewComment] = useState("");
   const [isSavedPost, setIsSavedPost] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"report" | "block">("report");
+  const [isUserBlocked, setIsUserBlocked] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { showStatus } = useStatusModal();
   const user = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -122,6 +125,29 @@ const PostCard = ({
     };
   }, []);
 
+  // Check if the user is blocked
+  useEffect(() => {
+    const checkBlockedStatus = async () => {
+      if (!isSignedIn) return;
+      try {
+        const token = await getToken();
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}/users/check-blocked/${
+            post.user._id
+          }`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsUserBlocked(response.data.isBlocked);
+      } catch (error) {
+        console.error("Error checking blocked status:", error);
+      }
+    };
+
+    checkBlockedStatus();
+  }, [post.user._id, isSignedIn, getToken]);
+
   const handleDeletePost = async () => {
     try {
       const token = await getToken();
@@ -135,24 +161,15 @@ const PostCard = ({
       );
 
       if (response.data.success === true) {
-        setUserPosts?.((prev) => {
-          const deletedPost = prev.find(
-            (userPost) => userPost._id === post._id
-          );
-          if (deletedPost) {
-            console.log("Deleted post:", deletedPost);
-          }
-
-          return prev.filter((userPost) => userPost._id !== post._id);
-        });
-
+        setUserPosts?.((prev) =>
+          prev.filter((userPost) => userPost._id !== post._id)
+        );
         showStatus("success", "Post deleted successfully.");
+        if (onDelete) {
+          onDelete(post._id);
+        }
       } else {
         showStatus("error", "Failed to delete post.");
-      }
-
-      if (onDelete) {
-        onDelete(post._id);
       }
     } catch (error: any) {
       console.error("Error deleting post:", error);
@@ -165,35 +182,29 @@ const PostCard = ({
     }
   };
 
-  const handleReportAbuse = async () => {
+  const handleReportAbuse = () => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
     }
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/reports`,
-        {
-          postId: post._id,
-          reason: "Abuse",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      toast.success("Post reported successfully.");
-    } catch (error) {
-      console.error("Error reporting post:", error);
-      toast.error("Failed to report post. Please try again.");
-    } finally {
-      setShowDropdown(false);
-    }
+    console.log("Opening Report Abuse modal");
+    setModalType("report");
+    setIsModalOpen(true);
+    setShowDropdown(false);
   };
 
-  const handleBlockUser = async () => {
+  const handleBlockUser = () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
+    console.log("Opening Block User modal");
+    setModalType("block");
+    setIsModalOpen(true);
+    setShowDropdown(false);
+  };
+
+  const handleUnblockUser = async () => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
@@ -201,7 +212,7 @@ const PostCard = ({
     try {
       const token = await getToken();
       await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/users/block`,
+        `${import.meta.env.VITE_PROD_URL}/users/unblock`,
         {
           userId: post.user._id,
         },
@@ -211,11 +222,11 @@ const PostCard = ({
           },
         }
       );
-      toast.success("User blocked successfully.");
-      // Optionally, refresh the feed or remove the post
+      setIsUserBlocked(false);
+      toast.success("User unblocked successfully.");
     } catch (error) {
-      console.error("Error blocking user:", error);
-      toast.error("Failed to block user. Please try again.");
+      console.error("Error unblocking user:", error);
+      toast.error("Failed to unblock user. Please try again.");
     } finally {
       setShowDropdown(false);
     }
@@ -281,8 +292,8 @@ const PostCard = ({
             },
           }
         );
-        setComments(serverComment.data.data);
-        setCommentCount(serverComment.data.data.length);
+        setComments(serverComment.data.data?.data || []);
+        setCommentCount(serverComment.data.data?.length);
 
         triggerReward(RewardEventType.COMMENT_POST, post._id);
       }
@@ -584,7 +595,11 @@ const PostCard = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="p-2 text-gray-500 rounded-full hover:bg-orange-100 transition-colors"
-              onClick={() => setShowDropdown(!showDropdown)}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("Toggling dropdown, current state:", showDropdown);
+                setShowDropdown((prev) => !prev);
+              }}
             >
               <BsThreeDots className="w-5 h-5" />
             </motion.button>
@@ -595,7 +610,7 @@ const PostCard = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute right-0 z-10 w-48 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+                className="absolute right-0 z-50 w-48 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
               >
                 {isUser ? (
                   <button
@@ -616,10 +631,21 @@ const PostCard = ({
                     </button>
                     <button
                       className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-gray-50 transition-colors"
-                      onClick={handleBlockUser}
+                      onClick={
+                        isUserBlocked ? handleUnblockUser : handleBlockUser
+                      }
                     >
-                      <MdBlock className="w-5 h-5 mr-2" />
-                      Block User
+                      {isUserBlocked ? (
+                        <>
+                          <MdPersonAdd className="w-5 h-5 mr-2" />
+                          Unblock User
+                        </>
+                      ) : (
+                        <>
+                          <MdBlock className="w-5 h-5 mr-2" />
+                          Block User
+                        </>
+                      )}
                     </button>
                   </>
                 )}
@@ -732,6 +758,13 @@ const PostCard = ({
       {selectedPost && (
         <Highlight selectedPost={selectedPost} setPost={setSelectedPost} />
       )}
+      <ReportAbuseModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        modalType={modalType}
+        userId={post.user._id}
+        contentId={post._id}
+      />
     </>
   );
 };

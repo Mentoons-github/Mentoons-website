@@ -1,0 +1,110 @@
+import {
+  AlertTriangle,
+  Ban,
+  Eye,
+  FileText,
+  HelpCircle,
+  Mail,
+  MessageSquareWarning,
+  User,
+  Users,
+  UserX,
+  Zap,
+} from "lucide-react";
+
+export const REPORT_REASONS = [
+  {
+    id: "spam",
+    label: "Spam or Unwanted Content",
+    icon: Zap,
+    description: "Repetitive, promotional, or irrelevant content",
+    gradient: "from-red-600 to-pink-600",
+  },
+  {
+    id: "harassment",
+    label: "Harassment or Bullying",
+    icon: UserX,
+    description: "Targeting someone with harmful behavior",
+    gradient: "from-orange-600 to-red-600",
+  },
+  {
+    id: "hate_speech",
+    label: "Hate Speech or Discrimination",
+    icon: MessageSquareWarning,
+    description: "Content promoting hatred or discrimination",
+    gradient: "from-purple-600 to-red-600",
+  },
+  {
+    id: "violence",
+    label: "Violence or Threats",
+    icon: AlertTriangle,
+    description: "Threatening or violent content",
+    gradient: "from-yellow-600 to-orange-600",
+  },
+  {
+    id: "inappropriate",
+    label: "Inappropriate Content",
+    icon: Eye,
+    description: "Content not suitable for the platform",
+    gradient: "from-pink-600 to-purple-600",
+  },
+  {
+    id: "impersonation",
+    label: "Impersonation or Fake Account",
+    icon: User,
+    description: "Pretending to be someone else",
+    gradient: "from-indigo-600 to-purple-600",
+  },
+  {
+    id: "copyright",
+    label: "Copyright Infringement",
+    icon: FileText,
+    description: "Unauthorized use of copyrighted material",
+    gradient: "from-blue-600 to-indigo-600",
+  },
+  {
+    id: "other",
+    label: "Other Reasons",
+    icon: HelpCircle,
+    description: "Something else that violates our policies",
+    gradient: "from-gray-600 to-slate-600",
+  },
+];
+
+export const BLOCK_REASONS = [
+  {
+    id: "dont_want_contact",
+    label: "Prevent Contact",
+    icon: Ban,
+    description: "Stop all communication from this user",
+    gradient: "from-red-600 to-pink-600",
+  },
+  {
+    id: "inappropriate_behavior",
+    label: "Inappropriate Behavior",
+    icon: AlertTriangle,
+    description: "User is behaving inappropriately",
+    gradient: "from-yellow-600 to-orange-600",
+  },
+  {
+    id: "spam_messages",
+    label: "Spam Messages",
+    icon: Mail,
+    description: "User sends unwanted or repetitive messages",
+    gradient: "from-blue-600 to-indigo-600",
+  },
+  {
+    id: "harassment",
+    label: "Harassment or Bullying",
+    icon: Users,
+    description: "User is harassing or bullying others",
+    gradient: "from-orange-600 to-red-600",
+  },
+  {
+    id: "other",
+    label: "Other Reasons",
+    icon: HelpCircle,
+    description: "Another reason for blocking this user",
+    gradient: "from-gray-600 to-slate-600",
+  },
+];

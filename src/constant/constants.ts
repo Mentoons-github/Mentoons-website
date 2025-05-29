@@ -19,6 +19,7 @@ import {
   ASSESSMENT_DATA,
   REPORTS,
 } from "./assessments/assessments";
+import { BLOCK_REASONS, REPORT_REASONS } from "./adda/reportAbuse";
 
 export {
   FAQ,
@@ -45,6 +46,8 @@ export {
   ASSESSMENTS,
   HIRING,
   ASSESSMENT_DATA,
+  BLOCK_REASONS,
+  REPORT_REASONS,
   REPORTS,
   COMIC_COLOR,
   PRODUCTS_BENEFITS,
