@@ -10,8 +10,13 @@ import {
   XCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Notification, NotificationType } from "@/types";
+import {
+  Notification,
+  NotificationType,
+  User,
+} from "@/types/adda/notification";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -25,11 +30,6 @@ interface NotificationCardProps {
   ) => void;
 }
 
-interface User {
-  name: string;
-  picture: string;
-}
-
 const NotificationCard = ({
   notification,
   onMarkAsRead,
@@ -37,6 +37,7 @@ const NotificationCard = ({
   onClick,
   onFriendRequestAction,
 }: NotificationCardProps) => {
+  const navigate = useNavigate();
   const timeAgo = notification.createdAt
     ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })
     : "recently";
@@ -68,6 +69,32 @@ const NotificationCard = ({
   const initiatorPicture = isUser(notification.initiatorId)
     ? notification.initiatorId.picture
     : "/default-avatar.png";
+  const initiatorId = isUser(notification.initiatorId)
+    ? notification.initiatorId._id
+    : notification.initiatorId;
+
+  const handleClick = () => {
+    if (notification.type === "friend_request") {
+      navigate("/adda/notifications");
+    } else if (notification.type === "friend_request_accepted") {
+      navigate(`/adda/user/${initiatorId}`);
+    } else if (
+      notification.type === "like" ||
+      notification.type === "comment"
+    ) {
+      const targetId =
+        notification.type === "like"
+          ? notification.referenceId
+          : notification.referenceModel === "Comment"
+          ? notification.referenceId
+          : notification.referenceId;
+      navigate(`/adda/post/${targetId}`, {
+        state: { initiatorId, referenceModel: notification.referenceModel },
+      });
+    } else {
+      onClick(notification);
+    }
+  };
 
   return (
     <motion.div
@@ -75,7 +102,7 @@ const NotificationCard = ({
       className={`flex flex-col items-center justify-start w-full gap-5 p-5 transition-all duration-300 border border-orange-200 rounded-xl shadow-sm hover:shadow-lg bg-white ${
         !notification.isRead ? "bg-orange-50" : ""
       }`}
-      onClick={() => onClick(notification)}
+      onClick={handleClick}
       role="button"
       tabIndex={0}
       aria-label={`Notification from ${initiatorName}`}

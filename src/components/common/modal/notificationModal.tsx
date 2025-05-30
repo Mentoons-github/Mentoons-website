@@ -156,18 +156,20 @@ const Notification = ({ getToken }: NotificationProps) => {
     await markNotificationRead(notification._id);
 
     const getNavigationLink = (notif: any): string => {
-      const { type, referenceId, referenceModel } = notif;
+      const { type, referenceId, referenceModel, initiatorId } = notif;
+      const userId = typeof initiatorId === "object" ? initiatorId._id : null;
+
       switch (type) {
         case "friend_request":
         case "friend_request_accepted":
         case "friend_request_rejected":
-          return referenceId ? `/friends/requests/${referenceId}` : "/friends";
+          return userId ? `/adda/user/${userId}` : "/adda/notifications";
         case "like":
         case "comment":
           return referenceId &&
             (referenceModel === "Post" || referenceModel === "Comment")
-            ? `/posts/${referenceId}`
-            : "/feed";
+            ? `/adda/posts/${referenceId}`
+            : "/adda/notifications";
         default:
           return "/adda/notifications";
       }
@@ -248,7 +250,7 @@ const Notification = ({ getToken }: NotificationProps) => {
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
           className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999999] overflow-hidden"
         >
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3 text-white">
+          <div className="bg-red-500 px-4 py-3 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold">Notifications</h3>

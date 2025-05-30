@@ -3,7 +3,6 @@ import LoginModal from "@/components/common/modal/loginModal";
 import AddToCartModal from "@/components/modals/AddToCartModal";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
 import { addItemCart } from "@/redux/cartSlice";
-// import { comicsData } from "@/constant/comicsConstants";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import {
@@ -315,8 +314,8 @@ const ComicsPageV2 = () => {
       return false;
     }
 
-  const accessResult = canAccessContent(comic, membershipType, userLimits);
-    
+    const accessResult = canAccessContent(comic, membershipType, userLimits);
+
     if (!accessResult.canAccess) {
       setLimitModalTitle(accessResult.title);
       setLimitModalMessage(accessResult.message);

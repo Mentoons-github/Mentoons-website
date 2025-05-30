@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { FaClock } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
-import Notification from "@/components/common/modal/notificationModal";
+import NotificationModal from "@/components/common/modal/notificationModal";
 
 const PrimaryHeader = () => {
   const location = useLocation();
@@ -71,7 +71,7 @@ const PrimaryHeader = () => {
       <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
         {adda && (
           <SignedIn>
-            <Notification getToken={getToken} />
+            <NotificationModal getToken={getToken} />
           </SignedIn>
         )}
         <AuthButton />
