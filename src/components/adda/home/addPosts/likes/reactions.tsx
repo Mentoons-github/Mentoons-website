@@ -88,6 +88,9 @@ const Reactions = ({
   const [userReaction, setUserReaction] = useState<ReactionType | null>(null);
   const [showReactionSelector, setShowReactionSelector] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showReactionListDropdown, setShowReactionListDropdown] =
+    useState(false);
+  const reactionListDropdownRef = useRef<HTMLDivElement>(null);
   const [reactionCounts, setReactionCounts] = useState<
     Record<ReactionType, number>
   >({
@@ -117,13 +120,21 @@ const Reactions = ({
       ) {
         setShowReactionSelector(false);
       }
+
+      if (
+        showReactionListDropdown &&
+        reactionListDropdownRef.current &&
+        !reactionListDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowReactionListDropdown(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [showReactionListDropdown]);
 
   const toggleReactionSelector = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -256,6 +267,54 @@ const Reactions = ({
     checkReactions();
   }, [type, id, getToken, isSignedIn]);
 
+  // Fetch reaction list when dropdown is opened
+  const [reactionsList, setReactionsList] = useState<
+    {
+      _id: string;
+      user: {
+        _id: string;
+        email: string;
+        name: string;
+        picture: string;
+      };
+      createdAt: string;
+      reactionType: ReactionType;
+    }[]
+  >([]);
+  const [isLoadingReactions, setIsLoadingReactions] = useState(false);
+
+  useEffect(() => {
+    const fetchReactionsList = async () => {
+      if (!showReactionListDropdown) return;
+
+      setIsLoadingReactions(true);
+      try {
+        const token = await getToken();
+        const endpoint = `${
+          import.meta.env.VITE_PROD_URL
+        }/reactions/get-reactions?type=${type}&id=${id}`;
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        const response = await axios.get(endpoint, { headers });
+
+        if (response.status === 200) {
+          setReactionsList(response.data.reactions);
+        }
+      } catch (error) {
+        console.error("Error fetching reactions list:", error);
+        toast.error("Failed to load reactions. Please try again.");
+      } finally {
+        setIsLoadingReactions(false);
+      }
+    };
+
+    fetchReactionsList();
+  }, [showReactionListDropdown, type, id, getToken]);
+
   // Get the default reaction icon (like)
   const getDisplayedReaction = () => {
     if (userReaction) {
@@ -300,7 +359,10 @@ const Reactions = ({
 
       {/* Reaction count */}
       <div className="flex items-center gap-1">
-        <span className="text-[#605F5F] figtree text-sm">
+        <span
+          className="text-[#605F5F] figtree text-sm"
+          onClick={() => setShowReactionListDropdown(!showReactionListDropdown)}
+        >
           {getTotalReactions()}
         </span>
       </div>
@@ -333,6 +395,107 @@ const Reactions = ({
                 </div>
               </motion.div>
             ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Reaction list dropdown */}
+      <AnimatePresence>
+        {showReactionListDropdown && (
+          <motion.div
+            ref={reactionListDropdownRef}
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute left-0 z-50 p-3 bg-white border border-gray-200 shadow-lg rounded-xl"
+            style={{
+              boxShadow: "0px 4px 20px rgba(0,0,0,0.15)",
+              top: "calc(100% + 10px)",
+              minWidth: "250px",
+            }}
+          >
+            <h3 className="mb-3 text-sm font-semibold text-gray-700">
+              Who reacted to this post
+            </h3>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {Object.entries(reactionCounts)
+                .filter(([, count]) => count > 0)
+                .map(([type, count]) => (
+                  <div
+                    key={type}
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full"
+                  >
+                    <span className="flex items-center justify-center w-5 h-5">
+                      {reactionData[type as ReactionType].activeIcon}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        reactionData[type as ReactionType].color
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </div>
+                ))}
+            </div>
+
+            <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+              {isLoadingReactions ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="w-8 h-8 border-t-4 border-orange-500 border-solid rounded-full animate-spin"></div>
+                </div>
+              ) : reactionsList && reactionsList.length > 0 ? (
+                reactionsList.map((reaction, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center justify-between p-2 mb-2 transition-colors border border-gray-100 rounded-lg hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={reaction.user.picture}
+                        alt=""
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        {reaction.user.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center w-6 h-6 ">
+                      {reactionData[reaction.reactionType].activeIcon}
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500">
+                  No reactions yet
+                </div>
+              )}
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="absolute flex items-center justify-center text-gray-500 bg-gray-100 rounded-full top-3 right-3 w-7 h-7 hover:text-gray-700"
+              onClick={() => setShowReactionListDropdown(false)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
