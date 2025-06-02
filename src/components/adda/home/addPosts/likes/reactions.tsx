@@ -210,16 +210,7 @@ const Reactions = ({
           triggerReward(RewardEventType.LOVE_POST, id);
         }
       }
-
-      toast.success(
-        isTogglingOff
-          ? "Reaction removed"
-          : `${reactionType} added successfully`
-      );
     } catch (error) {
-      console.error("Error updating reaction:", error);
-      toast.error("Failed to update reaction. Please try again.");
-
       // Revert UI state on error
       setUserReaction(userReaction);
     }
@@ -407,9 +398,9 @@ const Reactions = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute left-0 z-50 p-3 bg-white border border-gray-200 shadow-lg rounded-xl"
+            className="absolute left-0 z-50 p-3 bg-white border border-orange-200 shadow-lg rounded-xl shadow-orange-100"
             style={{
-              boxShadow: "0px 4px 20px rgba(0,0,0,0.15)",
+              boxShadow: "0px 4px 16px rgba(255, 120, 0, 0.2)",
               top: "calc(100% + 10px)",
               minWidth: "250px",
             }}
@@ -423,7 +414,7 @@ const Reactions = ({
                 .map(([type, count]) => (
                   <div
                     key={type}
-                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full"
+                    className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full"
                   >
                     <span className="flex items-center justify-center w-5 h-5">
                       {reactionData[type as ReactionType].activeIcon}
@@ -451,25 +442,25 @@ const Reactions = ({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-2 mb-2 transition-colors border border-gray-100 rounded-lg hover:bg-gray-50"
+                    className="flex items-center justify-between p-2 mb-2 transition-colors border border-orange-100 rounded-lg hover:bg-orange-100/50"
                   >
                     <div className="flex items-center gap-2">
                       <img
-                        src={reaction.user.picture}
+                        src={reaction?.user?.picture}
                         alt=""
                         className="w-8 h-8 rounded-full"
                       />
                       <span className="text-sm font-medium text-gray-700">
-                        {reaction.user.name}
+                        {reaction?.user?.name}
                       </span>
                     </div>
                     <div className="flex items-center justify-center w-6 h-6 ">
-                      {reactionData[reaction.reactionType].activeIcon}
+                      {reactionData[reaction?.reactionType]?.activeIcon}
                     </div>
                   </motion.div>
                 ))
               ) : (
-                <div className="text-center text-gray-500">
+                <div className="text-center text-orange-500">
                   No reactions yet
                 </div>
               )}
@@ -478,7 +469,7 @@ const Reactions = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute flex items-center justify-center text-gray-500 bg-gray-100 rounded-full top-3 right-3 w-7 h-7 hover:text-gray-700"
+              className="absolute flex items-center justify-center text-gray-500 bg-orange-100 rounded-full top-3 right-3 w-7 h-7 hover:text-orange-700"
               onClick={() => setShowReactionListDropdown(false)}
             >
               <svg

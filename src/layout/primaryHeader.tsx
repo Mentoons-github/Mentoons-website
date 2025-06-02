@@ -1,4 +1,5 @@
 import AuthButton from "@/components/common/authButton";
+import Notification from "@/components/common/modal/notificationModal";
 import {
   ANIMATION_TEXTS_ADDA,
   ANIMATION_TEXTS_HOME,
@@ -8,7 +9,6 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { FaClock } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
-import Notification from "@/components/common/modal/notificationModal";
 
 const PrimaryHeader = () => {
   const location = useLocation();
@@ -39,7 +39,7 @@ const PrimaryHeader = () => {
   };
 
   return (
-    <div className="flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 z-50 font-akshar">
+    <div className="z-50 flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 font-akshar">
       <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:w-1/3 lg:w-1/2">
         <div className="hidden md:inline-flex items-center whitespace-nowrap gap-0 sm:gap-2 text-[10px] md:text-xs lg:text-sm xl:text-base">
           <FaClock className="hidden sm:block" />
