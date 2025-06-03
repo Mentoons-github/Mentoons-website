@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { FaClock } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
 
+
 const PrimaryHeader = () => {
   const location = useLocation();
   const { getToken } = useAuth();
@@ -71,7 +72,7 @@ const PrimaryHeader = () => {
       <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
         {adda && (
           <SignedIn>
-            <Notification getToken={getToken} />
+            <NotificationModal getToken={getToken} />
           </SignedIn>
         )}
         <AuthButton />
