@@ -1422,7 +1422,7 @@ const UserProfile = () => {
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
 
-                        <div className="text-center">
+                        
                           <button onClick={() => setModalType("followers")}>
                             <p className="text-xl font-bold text-orange-500">
                               {userDetails?.followers?.length || 0}
@@ -1438,7 +1438,7 @@ const UserProfile = () => {
                             </p>
                             <p className="text-xs text-gray-600">Following</p>
                           </button>
-                        </div>
+                       
                       </div>
                     </div>
                   </Card>
@@ -2158,7 +2158,7 @@ const UserProfile = () => {
                       </div>
                     </Card>
                   )}
-                  Friends Tab
+                  {/* Friends Tab */}
                   {activeTab === "friends" && (
                     <Card className="p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
                       <h3 className="mb-4 text-xl font-semibold text-gray-800">

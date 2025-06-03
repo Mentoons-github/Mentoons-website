@@ -391,7 +391,7 @@ const Notification = ({ getToken }: NotificationProps) => {
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 bg-gray-50 shadow-t-lg shadow-orange-100">
+            <div className="p-3 border-t border-orange-200 bg-gray-50 shadow-t-lg shadow-orange-100">
               <button
                 onClick={() => {
                   navigate("/adda/notifications");
