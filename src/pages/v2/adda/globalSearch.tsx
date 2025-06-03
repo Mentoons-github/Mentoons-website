@@ -1,46 +1,47 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
 import {
   Users,
   BookOpen,
   ShoppingCart,
   ArrowRight,
-  Filter,
-  Clock,
   TrendingUp,
-  Heart,
-  Share2,
-  Eye,
 } from "lucide-react";
+import { MdCloudDownload } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 import axiosInstance from "@/api/axios";
 import ProductDetailCards from "@/components/products/cards";
 import { useProductActions } from "@/hooks/useProductAction";
 import AddToCartModal from "@/components/modals/AddToCartModal";
 import LoginModal from "@/components/common/modal/loginModal";
+import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
+import ComicViewer from "@/components/common/ComicViewer";
+import { MdClose } from "react-icons/md";
+import {
+  canAccessContent,
+  getUserSubscriptionLimits,
+  updateUserContentAccess,
+  UserSubscriptionLimits,
+} from "@/utils/subscriptionAccess";
 import { ProductBase, AgeCategory } from "@/types/productTypes";
 import PodcastCard from "@/components/podcast/card";
-
-// Define interfaces for data models
-interface ContentItem {
-  _id: string;
-  title: string;
-  thumbnail?: string;
-  ageCategory?: string;
-  description?: string;
-  tags?: string[];
-  episodes?: number;
-  views?: string;
-  rating?: number;
-  isNew?: boolean;
-  orignalProductSrc?: string;
-}
+import ComicCard from "@/components/comics/comicCard";
+import { Friend } from "@/components/adda/searchFriend/searchFriend";
+import { errorToast } from "@/utils/toastResposnse";
+import FriendCard from "@/components/adda/searchFriend/friendCard";
+import SearchHeader from "@/components/adda/searchFriend/searchHeader";
+import FreeDownloadForm from "@/components/comics/FreeDownloadForm";
+import { gamesData } from "@/constant/comicsConstants";
+import { GamesData } from "@/pages/FreeDownload";
+import { v4 as uuidv4 } from "uuid";
 
 interface User {
   _id: string;
   name: string;
   email: string;
-  avatar?: string;
+  picture?: string;
+  clerkId?: string;
   followStatus:
     | "self"
     | "friend"
@@ -51,12 +52,13 @@ interface User {
 }
 
 interface SearchResults {
-  audioComics: ContentItem[];
-  podcasts: ProductBase[]; // Changed to ProductBase
-  comics: ContentItem[];
+  audioComics: ProductBase[];
+  podcasts: ProductBase[];
+  comics: ProductBase[];
   mentoonsCards: ProductBase[];
   mentoonsBooks: ProductBase[];
   users: User[];
+  freeGames: GamesData[];
 }
 
 const SearchResultsPage = () => {
@@ -68,10 +70,8 @@ const SearchResultsPage = () => {
     | "podcasts"
     | "mentoonsCards"
     | "mentoonsBooks"
+    | "freeGames"
   >("all");
-  const [sortBy, setSortBy] = useState<
-    "relevance" | "popular" | "recent" | "rating"
-  >("relevance");
   const [searchResults, setSearchResults] = useState<SearchResults>({
     audioComics: [],
     podcasts: [],
@@ -79,22 +79,43 @@ const SearchResultsPage = () => {
     mentoonsCards: [],
     mentoonsBooks: [],
     users: [],
+    freeGames: gamesData,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showComicModal, setShowComicModal] = useState(false);
+  const [comicToView, setComicToView] = useState<string>("");
+  const [productType, setProductType] = useState<string>("");
+  const [currentProductId, setCurrentProductId] = useState<string>("");
+  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
+    useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState("");
+  const [limitModalTitle, setLimitModalTitle] = useState("");
   const [cartProductTitle, setCartProductTitle] = useState("");
   const [playingPodcastId, setPlayingPodcastId] = useState<string | null>(null);
   const [playbackTracking, setPlaybackTracking] = useState<any>(null);
+  const [dbUser, setDbUser] = useState<any>(null);
+  const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
+    null
+  );
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [showFreeDownloadForm, setShowFreeDownloadForm] =
+    useState<boolean>(false);
+  const [selectedComic, setSelectedComic] = useState<{
+    thumbnail_url: string;
+    pdf_url: string;
+  }>({ thumbnail_url: "", pdf_url: "" });
   const location = useLocation();
   const searchQuery = new URLSearchParams(location.search).get("q") ?? "";
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
   const { handleAddToCart, handleBuyNow, isLoading } = useProductActions({
     setShowLoginModal,
     setShowAddToCartModal,
     setCartProductTitle,
   });
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const defaultAgeCategory: AgeCategory = AgeCategory.CHILD;
 
@@ -108,6 +129,189 @@ const SearchResultsPage = () => {
       "13-19": AgeCategory.TEEN,
     };
     return validCategories[apiAgeCategory || ""] || defaultAgeCategory;
+  };
+
+  const mapUserToFriend = (user: User): Friend => ({
+    _id: user._id,
+    name: user.name,
+    picture: user.picture || "/default-avatar.png",
+    status:
+      user.followStatus === "friend"
+        ? "friends"
+        : user.followStatus === "following"
+        ? "pendingSent"
+        : user.followStatus === "follow back"
+        ? "followBack"
+        : user.followStatus === "pending"
+        ? "pendingReceived"
+        : "connect",
+  });
+
+  const onSendRequest = useCallback(
+    async (friendId: string) => {
+      setIsConnecting(true);
+      try {
+        const token = await getToken();
+        const response = await axiosInstance.post(
+          `/user/friend-request`,
+          { friendId },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.data.success) {
+          setSearchResults((prev) => ({
+            ...prev,
+            users: prev.users.map((user) =>
+              user._id === friendId
+                ? { ...user, followStatus: "pending" }
+                : user
+            ),
+          }));
+        } else {
+          errorToast("Failed to send friend request");
+        }
+      } catch (error) {
+        console.error("Error sending friend request:", error);
+        errorToast("Failed to send friend request");
+      } finally {
+        setIsConnecting(false);
+      }
+    },
+    [getToken]
+  );
+
+  const onCancelRequest = useCallback(
+    async (friendId: string) => {
+      setIsConnecting(true);
+      try {
+        const token = await getToken();
+        const response = await axiosInstance.delete(
+          `/user/friend-request/${friendId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.data.success) {
+          setSearchResults((prev) => ({
+            ...prev,
+            users: prev.users.map((user) =>
+              user._id === friendId
+                ? { ...user, followStatus: "connect" }
+                : user
+            ),
+          }));
+        } else {
+          errorToast("Failed to cancel friend request");
+        }
+      } catch (error) {
+        console.error("Error canceling friend request:", error);
+        errorToast("Failed to cancel friend request");
+      } finally {
+        setIsConnecting(false);
+      }
+    },
+    [getToken]
+  );
+
+  const fetchDBUser = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const response = await axiosInstance.get(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        const userData = response.data.data;
+        setDbUser(userData);
+        const limits = getUserSubscriptionLimits(userData);
+        setUserLimits(limits);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userId, getToken]);
+
+  const updateUserSubscriptionLimits = async (
+    updatedLimits: UserSubscriptionLimits
+  ) => {
+    try {
+      const token = await getToken();
+      if (!userId || !token) return;
+
+      await axiosInstance.patch(
+        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${userId}`,
+        {
+          subscriptionLimits: updatedLimits,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUserLimits(updatedLimits);
+    } catch (error) {
+      console.error("Error updating subscription limits:", error);
+    }
+  };
+
+  const checkContentAccess = (comic: ProductBase): boolean => {
+    if (!userLimits || !userId) {
+      setShowLoginModal(true);
+      return false;
+    }
+
+    const membershipType = dbUser?.subscription.plan || "free";
+    const accessResult = canAccessContent(comic, membershipType, userLimits);
+
+    if (!accessResult.canAccess) {
+      setLimitModalTitle(accessResult.title);
+      setLimitModalMessage(accessResult.message);
+      setShowSubscriptionLimitModal(true);
+      return false;
+    }
+
+    if (comic.product_type !== "Free") {
+      const updatedLimits = updateUserContentAccess(comic, userLimits);
+      updateUserSubscriptionLimits(updatedLimits);
+    }
+
+    return true;
+  };
+
+  const openComicModal = (
+    comicLink: string,
+    comic?: ProductBase | null,
+    productType?: string
+  ) => {
+    if (!comic) {
+      setComicToView(comicLink);
+      setShowComicModal(true);
+      if (productType) setProductType(productType);
+      document.body.style.overflow = "hidden";
+      return;
+    }
+
+    if (checkContentAccess(comic)) {
+      setComicToView(comicLink);
+      setCurrentProductId(comic._id || "");
+      setShowComicModal(true);
+      if (productType) setProductType(productType);
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  const closeComicModal = () => {
+    setShowComicModal(false);
+    setProductType("");
+    setCurrentProductId("");
+    document.body.style.overflow = "auto";
   };
 
   const fetchResult = useCallback(async () => {
@@ -124,6 +328,9 @@ const SearchResultsPage = () => {
           },
         }
       );
+
+      console.log("Raw Backend Response:", response.data);
+
       const transformProduct = (item: any): ProductBase => ({
         ...item,
         ageCategory: mapAgeCategory(item.ageCategory),
@@ -138,22 +345,25 @@ const SearchResultsPage = () => {
           sampleUrl: "",
         },
       });
-      const transformContentItem = (item: any): ContentItem => ({
+      const transformContentItem = (item: any): ProductBase => ({
         ...item,
         ageCategory: mapAgeCategory(item.ageCategory),
         productImages: item.productImages ?? [],
       });
 
-      setSearchResults({
-        ...response.data,
+      const transformedResults = {
+        audioComics: response.data.audioComics.map(transformContentItem),
+        podcasts: response.data.podcasts.map(transformProduct),
+        comics: response.data.comics.map(transformContentItem),
         mentoonsCards: response.data.mentoonsCards.map(transformProduct),
         mentoonsBooks: response.data.mentoonsBooks.map(transformProduct),
-        podcasts: response.data.podcasts.map(transformProduct), // Use transformProduct
-        comics: response.data.comics.map(transformContentItem),
-        audioComics: response.data.audioComics.map(transformContentItem),
-      });
+        users: response.data.users,
+        freeGames: gamesData,
+      };
 
-      console.log(response.data);
+      console.log("Transformed Results:", transformedResults);
+
+      setSearchResults(transformedResults);
     } catch (err) {
       console.error("Fetch Error:", err);
       setError("Failed to fetch search results. Please try again.");
@@ -168,14 +378,17 @@ const SearchResultsPage = () => {
     }
   }, [searchQuery, fetchResult]);
 
-  // PodcastCard Handlers
+  useEffect(() => {
+    fetchDBUser();
+  }, [fetchDBUser]);
+
   const onPlayToggle = useCallback((podcastId: string) => {
     setPlayingPodcastId((prev) => (prev === podcastId ? null : podcastId));
   }, []);
 
   const onCheckAccessAndControlPlayback = useCallback(
     (podcast: ProductBase, audioElement?: HTMLAudioElement | null): boolean => {
-      const hasAccess = true; // Replace with actual auth logic
+      const hasAccess = true; // Update this based on actual access logic
       if (!hasAccess && audioElement) {
         audioElement.pause();
         setShowLoginModal(true);
@@ -200,156 +413,93 @@ const SearchResultsPage = () => {
   );
 
   const filteredResults = useMemo(() => {
-    const query = searchQuery.toLowerCase();
-    const filterItems = <T extends ContentItem | ProductBase>(
-      items: T[]
-    ): T[] =>
-      items.filter(
+    const normalizedQuery = searchQuery.toLowerCase();
+    const collectionKeywords = [
+      "comics",
+      "audio comics",
+      "audioComics",
+      "podcasts",
+      "mentoons cards",
+      "mentoonsCards",
+      "mentoons books",
+      "mentoonsBooks",
+      "books",
+      "card",
+      "products",
+      "free games",
+    ];
+
+    // If the query matches a collection name, return all items in that collection
+    const isCollectionQuery = collectionKeywords.some((keyword) =>
+      normalizedQuery.includes(keyword)
+    );
+
+    const filterItems = <T extends ProductBase>(items: T[]): T[] => {
+      if (isCollectionQuery) {
+        return items; // Return all items if the query matches a collection name
+      }
+      return items.filter(
         (item) =>
-          item.title?.toLowerCase().includes(query) ||
-          item.description?.toLowerCase().includes(query) ||
-          item.tags?.some((tag: string) => tag.toLowerCase().includes(query)) ||
-          (item.ageCategory?.toLowerCase().includes(query) ?? false)
+          item.title?.toLowerCase().includes(normalizedQuery) ||
+          item.description?.toLowerCase().includes(normalizedQuery) ||
+          item.tags?.some((tag: string) =>
+            tag.toLowerCase().includes(normalizedQuery)
+          ) ||
+          (item.ageCategory?.toLowerCase().includes(normalizedQuery) ?? false)
       );
+    };
 
-    const filterUsers = (users: User[]): User[] =>
-      users.filter(
+    const filterUsers = (users: User[]): User[] => {
+      if (isCollectionQuery && normalizedQuery.includes("users")) {
+        return users.filter((user) => user.clerkId !== userId);
+      }
+      return users.filter(
         (user) =>
-          user.name?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query)
+          user.clerkId !== userId &&
+          (user.name?.toLowerCase().includes(normalizedQuery) ||
+            user.email?.toLowerCase().includes(normalizedQuery))
       );
+    };
 
-    return {
+    const filterFreeGames = (games: GamesData[]): GamesData[] => {
+      if (
+        isCollectionQuery &&
+        (normalizedQuery.includes("free games") ||
+          normalizedQuery.includes("game"))
+      ) {
+        return games.filter(
+          (game) => game.name !== "Emergency Contact Numbers"
+        );
+      }
+      return games.filter(
+        (game) =>
+          game.name !== "Emergency Contact Numbers" &&
+          (normalizedQuery.includes("free") ||
+            normalizedQuery.includes("game") ||
+            game.name.toLowerCase().includes(normalizedQuery) ||
+            game.desc.toLowerCase().includes(normalizedQuery))
+      );
+    };
+
+    const filtered = {
       audioComics: filterItems(searchResults.audioComics),
       podcasts: filterItems(searchResults.podcasts),
       comics: filterItems(searchResults.comics),
       mentoonsCards: filterItems(searchResults.mentoonsCards),
       mentoonsBooks: filterItems(searchResults.mentoonsBooks),
       users: filterUsers(searchResults.users),
+      freeGames: filterFreeGames(searchResults.freeGames),
     };
-  }, [searchResults, searchQuery]);
+
+    console.log("Filtered Results:", filtered);
+
+    return filtered;
+  }, [searchResults, searchQuery, userId]);
 
   const totalResults = Object.values(filteredResults)
     .flat()
     .filter((item) => item !== undefined).length;
 
-  // Friend Card
-  const FriendCard = ({ user }: { user: User }) => (
-    <div className="group bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-100 hover:shadow-2xl hover:border-blue-400 transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-      <div className="flex items-start space-x-4">
-        <div className="relative">
-          <img
-            src={user.avatar || "/api/placeholder/40/40"}
-            alt={user.name}
-            className="w-14 h-14 rounded-full object-cover ring-3 ring-blue-200 group-hover:ring-blue-400 transition-all"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-black text-lg truncate group-hover:text-blue-600 transition-colors">
-            {user.name}
-          </h3>
-          <p className="text-sm tevxt-gray-700 mb-2 font-medium">
-            {user.followStatus === "self"
-              ? "You"
-              : user.followStatus === "friend"
-              ? "Friend"
-              : user.followStatus === "following"
-              ? "Following"
-              : user.followStatus === "follow back"
-              ? "Follows You"
-              : user.followStatus === "pending"
-              ? "Request Pending"
-              : "Connect"}
-          </p>
-          <div className="flex space-x-2">
-            {user.followStatus !== "self" && (
-              <button
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-bold hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-lg"
-                disabled={
-                  user.followStatus === "pending" ||
-                  user.followStatus === "friend"
-                }
-              >
-                {user.followStatus === "pending"
-                  ? "Pending"
-                  : user.followStatus === "friend"
-                  ? "Friends"
-                  : user.followStatus === "following"
-                  ? "Unfollow"
-                  : user.followStatus === "follow back"
-                  ? "Follow Back"
-                  : "Add Friend"}
-              </button>
-            )}
-            <button className="px-3 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all transform hover:scale-110 shadow-md">
-              <Share2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ComicCard = ({ item, type }: { item: ContentItem; type: string }) => (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-red-100 hover:shadow-2xl hover:border-red-400 transition-all duration-300 cursor-pointer transform hover:-translate-y-2">
-      <div className="relative aspect-[3/4] overflow-hidden">
-        <img
-          src={item.orignalProductSrc || "/api/placeholder/100/120"}
-          alt={item.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {item.isNew && (
-            <span className="bg-gradient-to-r from-green-600 to-green-700 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce">
-              NEW
-            </span>
-          )}
-          <span className="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-            {item.ageCategory || type}
-          </span>
-        </div>
-        <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-          ⭐ {item.rating || 4.5}
-        </div>
-        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-          <div className="flex items-center justify-between text-white text-sm font-semibold">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1 bg-black/50 px-2 py-1 rounded-full">
-                <Eye className="w-4 h-4" />
-                <span>{item.views || "N/A"}</span>
-              </div>
-              {item.episodes && (
-                <div className="flex items-center space-x-1 bg-black/50 px-2 py-1 rounded-full">
-                  <BookOpen className="w-4 h-4" />
-                  <span>{item.episodes} eps</span>
-                </div>
-              )}
-            </div>
-            <Heart className="w-6 h-6 hover:fill-red-500 hover:text-red-500 transition-colors transform hover:scale-125" />
-          </div>
-        </div>
-      </div>
-      <div className="p-5">
-        <h3 className="font-bold text-black text-lg mb-2 group-hover:text-red-600 transition-colors">
-          {item.title}
-        </h3>
-        <p className="text-sm text-gray-600 mb-4 font-medium">
-          {item.episodes
-            ? `${item.episodes} episodes`
-            : item.ageCategory || type}{" "}
-          • {item.views || "N/A"} views
-        </p>
-        <button className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition-all transform hover:scale-105 hover:shadow-xl">
-          {type === "mentoonsBooks" || type === "mentoonsCards"
-            ? "View Now"
-            : "Read Now"}
-        </button>
-      </div>
-    </div>
-  );
-
-  // Define filters
   const filters = [
     {
       id: "all" as const,
@@ -400,55 +550,20 @@ const SearchResultsPage = () => {
       icon: ShoppingCart,
       color: "from-green-600 to-green-700",
     },
+    {
+      id: "freeGames" as const,
+      label: "Free Games",
+      count: filteredResults.freeGames.length,
+      icon: MdCloudDownload,
+      color: "from-purple-600 to-purple-700",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
-      {/* Header */}
-      <div className="bg-blue-600 shadow-xl border-b-4 border-orange-500 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">
-                Search Results for "
-                <span className="text-orange-300">{searchQuery}</span>"
-              </h1>
-              <div className="flex items-center space-x-4 text-blue-100">
-                <span className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                  <TrendingUp className="w-5 h-5 text-green-400" />
-                  <span className="font-bold">
-                    Found {totalResults} results
-                  </span>
-                </span>
-                <span className="text-blue-200">•</span>
-                <span className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                  <Clock className="w-4 h-4 text-orange-400" />
-                  <span className="font-semibold">Updated just now</span>
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="px-4 py-3 bg-white border-2 border-orange-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-400 font-semibold text-black shadow-lg"
-              >
-                <option value="relevance">Most Relevant</option>
-                <option value="popular">Most Popular</option>
-                <option value="recent">Most Recent</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-              <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 font-bold shadow-xl">
-                <Filter className="w-5 h-5" />
-                <span>Filters</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SearchHeader searchQuery={searchQuery} totalResults={totalResults} />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Loading and Error States */}
         {loading && (
           <div className="text-center py-20">
             <p className="text-2xl font-bold text-black">Loading...</p>
@@ -462,9 +577,9 @@ const SearchResultsPage = () => {
 
         {!loading && !error && (
           <>
-            {/* Filter Tabs */}
             <div className="flex flex-wrap gap-4 mb-10">
               {filters.map((filter) => {
+                if (filter.count === 0 && filter.id !== "all") return null;
                 const Icon = filter.icon;
                 return (
                   <button
@@ -492,9 +607,7 @@ const SearchResultsPage = () => {
               })}
             </div>
 
-            {/* Results Sections */}
             <div className="space-y-16">
-              {/* Users Results */}
               {(activeFilter === "all" || activeFilter === "users") &&
                 filteredResults.users.length > 0 && (
                   <section>
@@ -503,20 +616,21 @@ const SearchResultsPage = () => {
                         <Users className="w-8 h-8 mr-4 text-blue-600" />
                         Users ({filteredResults.users.length})
                       </h2>
-                      <button className="text-blue-700 hover:text-blue-800 font-bold flex items-center space-x-2 bg-blue-100 px-4 py-2 rounded-xl hover:bg-blue-200 transition-all">
-                        <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {filteredResults.users.map((user) => (
-                        <FriendCard key={user._id} user={user} />
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                      {filteredResults.users.map((user, index) => (
+                        <FriendCard
+                          key={user._id}
+                          friend={mapUserToFriend(user)}
+                          index={index}
+                          onSendRequest={onSendRequest}
+                          onCancelRequest={onCancelRequest}
+                          isConnecting={isConnecting}
+                        />
                       ))}
                     </div>
                   </section>
                 )}
-
-              {/* Comics Results */}
               {(activeFilter === "all" || activeFilter === "comics") &&
                 filteredResults.comics.length > 0 && (
                   <section>
@@ -532,13 +646,16 @@ const SearchResultsPage = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                       {filteredResults.comics.map((comic) => (
-                        <ComicCard key={comic._id} item={comic} type="Comics" />
+                        <ComicCard
+                          key={comic._id}
+                          products={[comic]}
+                          carouselRef={carouselRef}
+                          openComicModal={openComicModal}
+                        />
                       ))}
                     </div>
                   </section>
                 )}
-
-              {/* Audio Comics Results */}
               {(activeFilter === "all" || activeFilter === "audioComics") &&
                 filteredResults.audioComics.length > 0 && (
                   <section>
@@ -556,15 +673,14 @@ const SearchResultsPage = () => {
                       {filteredResults.audioComics.map((audioComic) => (
                         <ComicCard
                           key={audioComic._id}
-                          item={audioComic}
-                          type="Audio Comics"
+                          products={[audioComic]}
+                          carouselRef={carouselRef}
+                          openComicModal={openComicModal}
                         />
                       ))}
                     </div>
                   </section>
                 )}
-
-              {/* Podcasts Results */}
               {(activeFilter === "all" || activeFilter === "podcasts") &&
                 filteredResults.podcasts.length > 0 && (
                   <section>
@@ -600,8 +716,6 @@ const SearchResultsPage = () => {
                     </div>
                   </section>
                 )}
-
-              {/* Mentoons Cards Results */}
               {(activeFilter === "all" || activeFilter === "mentoonsCards") &&
                 filteredResults.mentoonsCards.length > 0 && (
                   <section>
@@ -624,8 +738,6 @@ const SearchResultsPage = () => {
                     />
                   </section>
                 )}
-
-              {/* Mentoons Books Results */}
               {(activeFilter === "all" || activeFilter === "mentoonsBooks") &&
                 filteredResults.mentoonsBooks.length > 0 && (
                   <section>
@@ -648,9 +760,68 @@ const SearchResultsPage = () => {
                     />
                   </section>
                 )}
-
-              {/* No Results */}
-              {totalResults === 0 && (
+              {(activeFilter === "all" || activeFilter === "freeGames") &&
+                filteredResults.freeGames.length > 0 && (
+                  <section>
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-3xl font-bold text-black flex items-center">
+                        <MdCloudDownload className="w-8 h-8 mr-4 text-purple-600" />
+                        Free Games ({filteredResults.freeGames.length})
+                      </h2>
+                      <button className="text-purple-700 hover:text-purple-800 font-bold flex items-center space-x-2 bg-purple-100 px-4 py-2 rounded-xl hover:bg-purple-200 transition-all">
+                        <span>View all</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {filteredResults.freeGames.map((item) => (
+                        <motion.div
+                          initial={{ opacity: 0.5 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ duration: 0.5 }}
+                          key={uuidv4()}
+                          className={`${
+                            item.cardStyling && "bg-white"
+                          } shadow-2xl group cursor-pointer text-black rounded-2xl px-5 py-5 space-y-3`}
+                          onClick={() => {
+                            setShowFreeDownloadForm(true);
+                            setSelectedComic({
+                              thumbnail_url: item.thumbnail_url,
+                              pdf_url: item.pdf_url,
+                            });
+                          }}
+                        >
+                          <div
+                            className={`${item.imgStyling} overflow-hidden rounded-2xl`}
+                          >
+                            <img
+                              className="w-full h-[23rem] lg:h-[16rem] rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
+                              src={item.image}
+                              alt="game image"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="text-xl font-semibold tracking-wide">
+                              {item.name}
+                            </div>
+                            <div className="text-sm tracking-wide">
+                              {item.desc}
+                            </div>
+                          </div>
+                          <a
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className="flex items-center justify-end gap-2 pt-4 text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline"
+                          >
+                            Download Now
+                            <MdCloudDownload className="text-2xl text-red-700 group-hover:text-red-500" />
+                          </a>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              {totalResults === 0 && activeFilter === "all" && (
                 <div className="text-center py-20">
                   <div className="w-40 h-40 bg-gradient-to-br from-red-200 via-orange-200 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
                     <BookOpen className="w-20 h-20 text-red-600" />
@@ -669,6 +840,7 @@ const SearchResultsPage = () => {
                       "podcasts",
                       "mentoons cards",
                       "mentoons books",
+                      "free games",
                       "friends",
                     ].map((suggestion) => (
                       <button
@@ -682,21 +854,71 @@ const SearchResultsPage = () => {
                 </div>
               )}
             </div>
+
+            {showComicModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative w-[95%] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden items-center"
+                >
+                  <button
+                    onClick={closeComicModal}
+                    className="absolute z-50 p-2 text-gray-600 transition-colors top-4 right-4 hover:text-gray-900"
+                  >
+                    <MdClose className="text-2xl" />
+                  </button>
+                  <ComicViewer
+                    pdfUrl={comicToView}
+                    productType={productType}
+                    productId={currentProductId}
+                  />
+                </motion.div>
+              </motion.div>
+            )}
+
+            {showAddToCartModal && (
+              <AddToCartModal
+                onClose={() => setShowAddToCartModal(false)}
+                isOpen={showAddToCartModal}
+                productName={cartProductTitle}
+              />
+            )}
+
+            {showLoginModal && (
+              <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+              />
+            )}
+
+            {showSubscriptionLimitModal && (
+              <SubscriptionLimitModal
+                isOpen={showSubscriptionLimitModal}
+                onClose={() => setShowSubscriptionLimitModal(false)}
+                message={limitModalMessage}
+                title={limitModalTitle}
+                planType={dbUser?.subscription.plan || "free"}
+              />
+            )}
+
+            {showFreeDownloadForm && (
+              <FreeDownloadForm
+                page="freedownload"
+                selectedComic={selectedComic}
+                setShowFreeDownloadForm={setShowFreeDownloadForm}
+              />
+            )}
           </>
         )}
-
-        {/* Modals */}
-        {showAddToCartModal && (
-          <AddToCartModal
-            onClose={() => setShowAddToCartModal(false)}
-            isOpen={showAddToCartModal}
-            productName={cartProductTitle}
-          />
-        )}
-        <LoginModal
-          isOpen={showLoginModal}
-          onClose={() => setShowLoginModal(false)}
-        />
       </div>
     </div>
   );

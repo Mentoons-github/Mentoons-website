@@ -1,115 +1,165 @@
 import { motion } from "framer-motion";
-import { FaShoppingCart, FaBolt } from "react-icons/fa";
+import { RefObject, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import AddToCartModal from "../modals/AddToCartModal";
+import LoginModal from "../common/modal/loginModal";
+import { FaBolt, FaShoppingCart } from "react-icons/fa";
 import {
-  ComicProduct,
   AudioComicProduct,
+  ComicProduct,
   ProductBase,
 } from "@/types/productTypes";
 import { formatDateString } from "@/utils/formateDate";
-import AddToCartModal from "@/components/modals/AddToCartModal";
-import LoginModal from "@/components/common/modal/loginModal";
-import { useState } from "react";
+import { addItemCart } from "@/redux/cartSlice";
+import { AppDispatch } from "@/redux/store";
 
 interface ComicCardProps {
-  comic: ProductBase;
-  index: number;
-  handleAddtoCart: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    comic: ProductBase
-  ) => void;
-  handleBuyNow: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    comic: ProductBase
-  ) => void;
+  products: ProductBase[];
+  carouselRef?: RefObject<HTMLDivElement>;
   openComicModal: (
     comicLink: string,
     comic?: ProductBase | null,
     productType?: string
   ) => void;
-  isLoading: boolean;
-  showAddToCartModal: boolean;
-  setShowAddToCartModal: (value: boolean) => void;
-  showLoginModal: boolean;
-  setShowLoginModal: (value: boolean) => void;
 }
 
 const ComicCard = ({
-  comic,
-  index,
-  handleAddtoCart,
-  handleBuyNow,
+  products,
+  carouselRef,
   openComicModal,
-  isLoading,
-  showAddToCartModal,
-  setShowAddToCartModal,
-  showLoginModal,
-  setShowLoginModal,
 }: ComicCardProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [selectedComicTitle, setSelectedComicTitle] = useState("");
+  const { getToken, userId } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  const comic = products[0];
+  if (!comic) return null;
+
+  console.log("Comic:", comic);
+
+  const handleAddtoCart = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    comic: ProductBase
+  ) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    setSelectedComicTitle(comic.title);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setIsLoading(false);
+        setShowLoginModal(true);
+        return;
+      }
+
+      if (userId) {
+        const response = await dispatch(
+          addItemCart({
+            token,
+            userId,
+            productId: comic._id,
+            productType: comic.type,
+            title: comic.title,
+            quantity: 1,
+            price: comic.price,
+            ageCategory: comic.ageCategory,
+            productImage: comic.productImages?.[0].imageUrl,
+            productDetails: comic.details,
+          })
+        );
+        if (response.payload) {
+          setShowAddToCartModal(true);
+        }
+        setIsLoading(false);
+      } else {
+        toast.error("User ID is missing");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error while adding to cart", error);
+      toast.error("Error while adding to cart");
+      setIsLoading(false);
+    }
+  };
+
+  const handleBuyNow = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    comic: ProductBase
+  ) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    const token = await getToken();
+    if (!token) {
+      setIsLoading(false);
+      setShowLoginModal(true);
+      return;
+    }
+    setIsLoading(false);
+    navigate(`/order-summary?productId=${comic._id}`, { replace: true });
+  };
+
   return (
-    <>
-      <motion.div
-        className="flex-shrink-0 w-[320px] h-full relative group"
-        key={comic.title + index}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1 }}
-      >
-        <div className="relative w-full h-full overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
-          {/* Main Image with Gradient Overlay */}
-          <div className="relative h-[60%] overflow-hidden">
-            <img
-              src={
-                comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"
-              }
-              alt={comic.title}
-              className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-
-            {/* Product Type Badge */}
-            <div className="absolute flex gap-2 bottom-4 left-4">
-              {comic.product_type && (
-                <span
-                  className={`
-                    inline-block py-[4px] px-[6px] text-sm font-semibold rounded-lg ml-2 shadow-md text-white animate-[sparkle_2s_ease-in-out_infinite]
-                    ${
-                      comic.product_type === "Free"
-                        ? "bg-gradient-to-r from-green-400 to-green-500"
-                        : comic.product_type === "Prime"
-                        ? "bg-gradient-to-r from-yellow-400 to-orange-500"
-                        : comic.product_type === "Platinum"
-                        ? "bg-gradient-to-r from-gray-400 to-gray-500"
-                        : "bg-gray-700"
-                    }
-                  `}
-                >
-                  {comic.product_type}
-                </span>
-              )}
-              {/* Release Date Badge */}
-              <span className="px-3 py-1 text-sm font-medium rounded-lg bg-white/90">
-                {formatDateString(
-                  (comic.details as ComicProduct["details"])?.releaseDate || ""
-                )}
+    <motion.div
+      className="w-full h-auto relative group"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      ref={carouselRef}
+    >
+      <div className="relative w-full h-full flex flex-col bg-white shadow-lg rounded-xl hover:shadow-2xl transition-all duration-300">
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={comic.productImages?.[0].imageUrl || "/placeholder-image.jpg"}
+            alt={comic.title}
+            className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute flex gap-2 bottom-4 left-4">
+            {comic.product_type && (
+              <span
+                className={`
+                  inline-block py-[3px] px-[5px] text-xs font-semibold rounded-lg ml-2 shadow-md text-white animate-[sparkle_2s_ease-in-out_infinite]
+                  ${
+                    comic.product_type === "Free"
+                      ? "bg-gradient-to-r from-green-400 to-green-500"
+                      : comic.product_type === "Prime"
+                      ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+                      : comic.product_type === "Platinum"
+                      ? "bg-gradient-to-r from-gray-400 to-gray-500"
+                      : "bg-gray-700"
+                  }
+                `}
+              >
+                {comic.product_type}
               </span>
-            </div>
+            )}
+            <span className="px-2 py-1 text-xs font-medium rounded-lg bg-white/90">
+              {formatDateString(
+                (comic.details as ComicProduct["details"])?.releaseDate || ""
+              )}
+            </span>
           </div>
+        </div>
 
-          {/* Content Section */}
-          <div className="p-5">
-            <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-1">
+        <div className="p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 className="mb-2 text-lg font-bold text-gray-900 line-clamp-1">
               {comic?.title}
             </h3>
-
-            <p className="mb-4 text-sm text-gray-600 line-clamp-2">
+            <p className="mb-4 text-xs text-gray-600 line-clamp-2">
               {comic?.description}
             </p>
-
-            {/* Stats Row */}
-            <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+            <div className="flex items-center gap-4 mb-4 text-xs text-gray-600">
               <div className="flex items-center gap-1">
                 <svg
-                  className="w-4 h-4"
+                  className="w-3 h-3"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -129,7 +179,7 @@ const ComicCard = ({
               </div>
               <div className="flex items-center gap-1">
                 <svg
-                  className="w-4 h-4"
+                  className="w-3 h-3"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -140,7 +190,7 @@ const ComicCard = ({
               </div>
               <div className="flex items-center gap-1">
                 <svg
-                  className="w-4 h-4"
+                  className="w-3 h-3"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -149,57 +199,53 @@ const ComicCard = ({
                 <span>{comic.rating}</span>
               </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {comic.product_type && (
+          <div className="flex gap-2 w-full">
+            {comic.product_type ? (
+              <button
+                onClick={() => {
+                  if ("sampleUrl" in comic.details) {
+                    openComicModal(
+                      comic.details.sampleUrl || "",
+                      comic,
+                      comic.product_type
+                    );
+                  }
+                }}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90"
+              >
+                {comic.type === "comic" ? "Read Now" : "Listen Now"}
+              </button>
+            ) : (
+              <>
                 <button
-                  onClick={() => {
-                    if ("sampleUrl" in comic.details) {
-                      openComicModal(
-                        comic.details.sampleUrl || "",
-                        comic,
-                        comic.product_type
-                      );
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90"
+                  onClick={(e) => handleAddtoCart(e, comic)}
+                  disabled={isLoading}
+                  className="flex items-center flex-1 gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90 min-w-0"
                 >
-                  {comic.type === "comic" ? "Read Now" : "Listen Now"}
+                  <FaShoppingCart className="self-center inline-block w-4 h-4" />
+                  {isLoading ? "Adding..." : "Add to Cart"}
                 </button>
-              )}
-
-              {!comic.product_type && (
-                <>
-                  <button
-                    onClick={(e) => handleAddtoCart(e, comic)}
-                    disabled={isLoading}
-                    className="flex items-center flex-1 gap-2 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary whitespace-nowrap"
-                  >
-                    <FaShoppingCart className="self-center inline-block w-4 h-4" />
-                    {isLoading ? "Adding..." : "Add to Cart"}
-                  </button>
-                  <button
-                    onClick={(e) => handleBuyNow(e, comic)}
-                    disabled={isLoading}
-                    className="flex items-center flex-1 gap-2 px-4 py-2 font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 whitespace-nowrap border-primary"
-                  >
-                    <FaBolt className="self-center inline-block w-4 h-4" />
-                    {isLoading ? "Buying..." : "Buy Now"}
-                  </button>
-                </>
-              )}
-            </div>
+                <button
+                  onClick={(e) => handleBuyNow(e, comic)}
+                  disabled={isLoading}
+                  className="flex items-center flex-1 gap-2 px-4 py-2 text-sm font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 min-w-0 border-primary"
+                >
+                  <FaBolt className="self-center inline-block w-4 h-4" />
+                  {isLoading ? "Buying..." : "Buy Now"}
+                </button>
+              </>
+            )}
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Modals */}
       {showAddToCartModal && (
         <AddToCartModal
           onClose={() => setShowAddToCartModal(false)}
           isOpen={showAddToCartModal}
-          productName={comic.title}
+          productName={selectedComicTitle}
         />
       )}
       {showLoginModal && (
@@ -208,7 +254,7 @@ const ComicCard = ({
           onClose={() => setShowLoginModal(false)}
         />
       )}
-    </>
+    </motion.div>
   );
 };
 

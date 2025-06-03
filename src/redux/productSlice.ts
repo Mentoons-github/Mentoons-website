@@ -16,7 +16,7 @@ interface FetchProductsParams {
 }
 
 // Add these to the ProductState interface
-interface ProductState {
+export interface ProductState {
   items: ProductBase[];
   total: number;
   page: number;

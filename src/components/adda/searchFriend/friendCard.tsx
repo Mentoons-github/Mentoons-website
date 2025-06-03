@@ -42,6 +42,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
   const { getToken } = useAuth();
 
   const fetchUserDetails = useCallback(async () => {
+    console.log("fetching users");
     if (isLoadingDetails) return;
     setIsLoadingDetails(true);
     try {
@@ -52,6 +53,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
+      console.log("response recieeved  :", response.data);
       if (response.data.success) {
         setUserDetails(response.data.data);
       } else {

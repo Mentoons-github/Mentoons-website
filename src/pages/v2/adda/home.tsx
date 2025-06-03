@@ -1,4 +1,4 @@
-  import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import WelcomeModal from "@/components/adda/welcome/welcome";
 import AddPosts from "@/components/adda/home/addPosts/addPosts";
 import Posts from "@/components/adda/home/addPosts/posts/posts";
@@ -20,7 +20,9 @@ const AddaHome = () => {
 
   return (
     <>
-      {showModal && <WelcomeModal onClose={() => setShowModal(false)} />}
+      {showModal && !isSignedIn && (
+        <WelcomeModal onClose={() => setShowModal(false)} />
+      )}
       <AddPosts setNewPost={setNewPost} />
       <Posts newPost={newPost} />
     </>
