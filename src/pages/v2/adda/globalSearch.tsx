@@ -388,7 +388,9 @@ const SearchResultsPage = () => {
 
   const onCheckAccessAndControlPlayback = useCallback(
     (podcast: ProductBase, audioElement?: HTMLAudioElement | null): boolean => {
-      const hasAccess = true; // Update this based on actual access logic
+      console.log(podcast);
+
+      const hasAccess = true;
       if (!hasAccess && audioElement) {
         audioElement.pause();
         setShowLoginModal(true);
