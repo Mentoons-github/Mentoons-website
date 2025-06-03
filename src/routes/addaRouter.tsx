@@ -1,5 +1,6 @@
 import FriendSearch from "@/components/adda/searchFriend/searchFriend";
 import AddaLayout from "@/layout/addaLayout";
+import PostPage from "@/pages/v2/adda/postPage";
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -29,6 +30,7 @@ const AddaRouter = () => {
         <Route path="meme/:memeId" element={<MemeDetails />} />
         <Route path="user/:userId" element={<ProfileDetails />} />
         <Route path="search-friend" element={<FriendSearch />} />
+        <Route path="posts/:postId" element={<PostPage />} />
       </Route>
       {/* <GlobalAuthModal /> */}
     </Routes>

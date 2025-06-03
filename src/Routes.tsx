@@ -34,6 +34,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import SearchResultsPage from "./pages/v2/adda/globalSearch.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -88,6 +89,7 @@ const routes = [
   { path: "/adda/*", element: <AddaRouter /> },
   { path: "/bookings", element: <AdvancedBookingSystem /> },
   { path: "/mythos/*", element: <MythosRouter /> },
+  { path: "/search", element: <SearchResultsPage /> },
 ];
 
 const Router = () => {
