@@ -55,6 +55,14 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+   const {
+    notifications,
+    isLoading,
+    markNotificationRead,
+    markAllNotificationsRead,
+    updateNotification,
+    removeNotification,
+  } = useNotifications();
 
   const { notifications, isLoading } = useSelector(
     (state: RootState) => state.notification
