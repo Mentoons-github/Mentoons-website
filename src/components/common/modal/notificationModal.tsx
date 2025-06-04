@@ -1,4 +1,12 @@
-import { useNotifications } from "@/context/adda/notificationContext";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import {
+  markAllNotificationsRead,
+  deleteNotification,
+  markNotificationRead,
+  updateNotification,
+  fetchNotifications,
+} from "@/redux/adda/notificationSlice";
 import { NotificationType } from "@/types";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -37,20 +45,28 @@ interface NotificationProps {
   getToken: () => Promise<string | null>;
 }
 
-const Notification = ({ getToken }: NotificationProps) => {
+const NotificationModal = ({ getToken }: NotificationProps) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const {
-    notifications,
-    isLoading,
-    markNotificationRead,
-    markAllNotificationsRead,
-    updateNotification,
-    removeNotification,
-  } = useNotifications();
+
+  const { notifications, isLoading } = useSelector(
+    (state: RootState) => state.notification
+  );
 
   console.log("notifications :", notifications);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = await getToken();
+      if (token) {
+        dispatch(fetchNotifications({ token, page: 1 }));
+      }
+    };
+    fetchData();
+  }, [dispatch, getToken]);
+
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (
@@ -153,7 +169,12 @@ const Notification = ({ getToken }: NotificationProps) => {
   };
 
   const handleNotificationClick = async (notification: any) => {
-    await markNotificationRead(notification._id);
+    const token = await getToken();
+    if (token) {
+      await dispatch(
+        markNotificationRead({ notificationId: notification._id, token })
+      );
+    }
 
     const getNavigationLink = (notif: any): string => {
       const { type, referenceId, referenceModel, initiatorId } = notif;
@@ -187,9 +208,11 @@ const Notification = ({ getToken }: NotificationProps) => {
   ) => {
     if (!referenceId) return;
     const endpoint = action === "accept" ? "acceptRequest" : "rejectRequest";
+    const token = await getToken();
+
+    if (!token) return;
 
     try {
-      const token = await getToken();
       const response = await axios.patch(
         `${import.meta.env.VITE_PROD_URL}/adda/${endpoint}/${referenceId}`,
         {},
@@ -202,18 +225,23 @@ const Notification = ({ getToken }: NotificationProps) => {
 
       if (response.data.success) {
         if (action === "accept") {
-          updateNotification(notificationId, {
-            isRead: true,
-            type: "friend_request_accepted",
-            message: `${
-              typeof response.data.initiatorId === "object"
-                ? response.data.initiatorId.name
-                : "User"
-            } is now your friend`,
-          });
-          await markNotificationRead(notificationId);
+          dispatch(
+            updateNotification({
+              id: notificationId,
+              data: {
+                isRead: true,
+                type: "friend_request_accepted",
+                message: `${
+                  typeof response.data.initiatorId === "object"
+                    ? response.data.initiatorId.name
+                    : "User"
+                } is now your friend`,
+              },
+            })
+          );
+          dispatch(markNotificationRead({ notificationId, token }));
         } else {
-          removeNotification(notificationId);
+          await dispatch(deleteNotification({ notificationId, token }));
         }
       }
     } catch (error) {
@@ -251,7 +279,6 @@ const Notification = ({ getToken }: NotificationProps) => {
           className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999999] overflow-hidden"
         >
           <div className="px-4 py-3 text-white bg-gradient-to-r from-orange-500 to-orange-600">
-
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold">Notifications</h3>
@@ -262,7 +289,12 @@ const Notification = ({ getToken }: NotificationProps) => {
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
-                    onClick={markAllNotificationsRead}
+                    onClick={async () => {
+                      const token = await getToken();
+                      if (token) {
+                        dispatch(markAllNotificationsRead(token));
+                      }
+                    }}
                     className="px-2 py-1 text-xs transition-colors rounded-full bg-white/20 hover:bg-white/30"
                   >
                     Mark all read
@@ -412,4 +444,4 @@ const Notification = ({ getToken }: NotificationProps) => {
   );
 };
 
-export default Notification;
+export default NotificationModal;
