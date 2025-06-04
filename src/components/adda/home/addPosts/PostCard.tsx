@@ -1,3 +1,4 @@
+import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 import Highlight from "@/components/common/modal/highlight";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useStatusModal } from "@/context/adda/statusModalContext";
@@ -11,13 +12,12 @@ import { useEffect, useRef, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { BsThreeDots } from "react-icons/bs";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
+import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md"; // Added icons for report and block
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { MdReport, MdBlock, MdPersonAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
 import Share from "./share/share";
-import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 
 export type PostType =
   | "text"
@@ -104,6 +104,7 @@ const PostCard = ({
   const [modalType, setModalType] = useState<"report" | "block">("report");
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   const { showStatus } = useStatusModal();
   const user = useUser();
   const { getToken } = useAuth();
@@ -262,8 +263,8 @@ const PostCard = ({
 
     try {
       setComments((prevComments) => [
-        ...(Array.isArray(prevComments) ? prevComments : []),
         newCommentObj,
+        ...(Array.isArray(prevComments) ? prevComments : []),
       ]);
       setCommentCount((prev) => prev + 1);
       setNewComment("");
@@ -292,7 +293,8 @@ const PostCard = ({
             },
           }
         );
-        setComments(serverComment.data.data?.data || []);
+        console.log("Server comment data:", serverComment.data.data);
+        setComments(serverComment.data.data);
         setCommentCount(serverComment.data.data?.length);
 
         triggerReward(RewardEventType.COMMENT_POST, post._id);
@@ -594,7 +596,7 @@ const PostCard = ({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 text-gray-500 rounded-full hover:bg-orange-100 transition-colors"
+              className="p-2 text-gray-500 transition-colors rounded-full hover:bg-orange-100"
               onClick={(e) => {
                 e.stopPropagation();
                 console.log("Toggling dropdown, current state:", showDropdown);
@@ -610,11 +612,11 @@ const PostCard = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute right-0 z-50 w-48 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+                className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
               >
                 {isUser ? (
                   <button
-                    className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-gray-50 transition-colors"
+                    className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
                     onClick={handleDeletePost}
                   >
                     <RiDeleteBin6Line className="w-5 h-5 mr-2" />
@@ -623,14 +625,14 @@ const PostCard = ({
                 ) : (
                   <>
                     <button
-                      className="flex items-center w-full px-4 py-3 text-left text-orange-600 hover:bg-gray-50 transition-colors"
+                      className="flex items-center w-full px-4 py-3 text-left text-orange-600 transition-colors hover:bg-gray-50"
                       onClick={handleReportAbuse}
                     >
                       <MdReport className="w-5 h-5 mr-2" />
                       Report Abuse
                     </button>
                     <button
-                      className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-gray-50 transition-colors"
+                      className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
                       onClick={
                         isUserBlocked ? handleUnblockUser : handleBlockUser
                       }
@@ -676,9 +678,9 @@ const PostCard = ({
               >
                 <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
               </motion.button>
-              <span className="text-[#605F5F] text-sm sm:text-base figtree">
+              <div className="text-[#605F5F] text-sm sm:text-base figtree relative">
                 {commentCount}
-              </span>
+              </div>
             </div>
             <Share
               type="post"
