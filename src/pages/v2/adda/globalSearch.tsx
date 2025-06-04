@@ -32,9 +32,9 @@ import { errorToast } from "@/utils/toastResposnse";
 import FriendCard from "@/components/adda/searchFriend/friendCard";
 import SearchHeader from "@/components/adda/searchFriend/searchHeader";
 import FreeDownloadForm from "@/components/comics/FreeDownloadForm";
-import { gamesData } from "@/constant/comicsConstants";
-import { GamesData } from "@/pages/FreeDownload";
 import { v4 as uuidv4 } from "uuid";
+import { gamesData } from "@/constant/comicsConstants";
+import { highlightText } from "@/utils/highlightText";
 
 interface User {
   _id: string;
@@ -49,6 +49,16 @@ interface User {
     | "follow back"
     | "pending"
     | "connect";
+}
+
+interface GamesData {
+  name: string;
+  desc: string;
+  image: string;
+  thumbnail_url: string;
+  pdf_url: string;
+  cardStyling?: string;
+  imgStyling?: string;
 }
 
 interface SearchResults {
@@ -79,7 +89,7 @@ const SearchResultsPage = () => {
     mentoonsCards: [],
     mentoonsBooks: [],
     users: [],
-    freeGames: gamesData,
+    freeGames: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -351,6 +361,15 @@ const SearchResultsPage = () => {
         productImages: item.productImages ?? [],
       });
 
+      const cleanedQuery = searchQuery.toLowerCase().trim();
+
+      const freeGames =
+        cleanedQuery.includes("free") || cleanedQuery.includes("games")
+          ? gamesData
+          : gamesData.filter((data) =>
+              cleanedQuery.includes(data.name.toLowerCase())
+            );
+
       const transformedResults = {
         audioComics: response.data.audioComics.map(transformContentItem),
         podcasts: response.data.podcasts.map(transformProduct),
@@ -358,11 +377,11 @@ const SearchResultsPage = () => {
         mentoonsCards: response.data.mentoonsCards.map(transformProduct),
         mentoonsBooks: response.data.mentoonsBooks.map(transformProduct),
         users: response.data.users,
-        freeGames: gamesData,
+        freeGames,
       };
 
       console.log("Transformed Results:", transformedResults);
-
+      setActiveFilter("all");
       setSearchResults(transformedResults);
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -389,7 +408,6 @@ const SearchResultsPage = () => {
   const onCheckAccessAndControlPlayback = useCallback(
     (podcast: ProductBase, audioElement?: HTMLAudioElement | null): boolean => {
       console.log(podcast);
-
       const hasAccess = true;
       if (!hasAccess && audioElement) {
         audioElement.pause();
@@ -415,87 +433,32 @@ const SearchResultsPage = () => {
   );
 
   const filteredResults = useMemo(() => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    const collectionKeywords = [
-      "comics",
-      "audio comics",
-      "audioComics",
-      "podcasts",
-      "mentoons cards",
-      "mentoonsCards",
-      "mentoons books",
-      "mentoonsBooks",
-      "books",
-      "card",
-      "products",
-      "free games",
-    ];
+    const normalizedQuery = searchQuery.toLowerCase().trim();
 
-    // If the query matches a collection name, return all items in that collection
-    const isCollectionQuery = collectionKeywords.some((keyword) =>
-      normalizedQuery.includes(keyword)
-    );
-
-    const filterItems = <T extends ProductBase>(items: T[]): T[] => {
-      if (isCollectionQuery) {
-        return items; // Return all items if the query matches a collection name
-      }
-      return items.filter(
-        (item) =>
-          item.title?.toLowerCase().includes(normalizedQuery) ||
-          item.description?.toLowerCase().includes(normalizedQuery) ||
-          item.tags?.some((tag: string) =>
-            tag.toLowerCase().includes(normalizedQuery)
-          ) ||
-          (item.ageCategory?.toLowerCase().includes(normalizedQuery) ?? false)
-      );
-    };
-
-    const filterUsers = (users: User[]): User[] => {
-      if (isCollectionQuery && normalizedQuery.includes("users")) {
-        return users.filter((user) => user.clerkId !== userId);
-      }
-      return users.filter(
-        (user) =>
-          user.clerkId !== userId &&
-          (user.name?.toLowerCase().includes(normalizedQuery) ||
-            user.email?.toLowerCase().includes(normalizedQuery))
-      );
-    };
-
-    const filterFreeGames = (games: GamesData[]): GamesData[] => {
-      if (
-        isCollectionQuery &&
-        (normalizedQuery.includes("free games") ||
-          normalizedQuery.includes("game"))
-      ) {
-        return games.filter(
+    if (normalizedQuery === "free games") {
+      return {
+        audioComics: [],
+        podcasts: [],
+        comics: [],
+        mentoonsCards: [],
+        mentoonsBooks: [],
+        users: [],
+        freeGames: searchResults.freeGames.filter(
           (game) => game.name !== "Emergency Contact Numbers"
-        );
-      }
-      return games.filter(
-        (game) =>
-          game.name !== "Emergency Contact Numbers" &&
-          (normalizedQuery.includes("free") ||
-            normalizedQuery.includes("game") ||
-            game.name.toLowerCase().includes(normalizedQuery) ||
-            game.desc.toLowerCase().includes(normalizedQuery))
-      );
+        ),
+      };
+    }
+    return {
+      audioComics: searchResults.audioComics,
+      podcasts: searchResults.podcasts,
+      comics: searchResults.comics,
+      mentoonsCards: searchResults.mentoonsCards,
+      mentoonsBooks: searchResults.mentoonsBooks,
+      users: searchResults.users.filter((user) => user.clerkId !== userId),
+      freeGames: searchResults.freeGames.filter(
+        (game) => game.name !== "Emergency Contact Numbers"
+      ),
     };
-
-    const filtered = {
-      audioComics: filterItems(searchResults.audioComics),
-      podcasts: filterItems(searchResults.podcasts),
-      comics: filterItems(searchResults.comics),
-      mentoonsCards: filterItems(searchResults.mentoonsCards),
-      mentoonsBooks: filterItems(searchResults.mentoonsBooks),
-      users: filterUsers(searchResults.users),
-      freeGames: filterFreeGames(searchResults.freeGames),
-    };
-
-    console.log("Filtered Results:", filtered);
-
-    return filtered;
   }, [searchResults, searchQuery, userId]);
 
   const totalResults = Object.values(filteredResults)
@@ -628,6 +591,7 @@ const SearchResultsPage = () => {
                           onSendRequest={onSendRequest}
                           onCancelRequest={onCancelRequest}
                           isConnecting={isConnecting}
+                          searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -653,6 +617,7 @@ const SearchResultsPage = () => {
                           products={[comic]}
                           carouselRef={carouselRef}
                           openComicModal={openComicModal}
+                          searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -678,6 +643,7 @@ const SearchResultsPage = () => {
                           products={[audioComic]}
                           carouselRef={carouselRef}
                           openComicModal={openComicModal}
+                          searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -713,6 +679,7 @@ const SearchResultsPage = () => {
                               ? playbackTracking
                               : null
                           }
+                          searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -737,6 +704,7 @@ const SearchResultsPage = () => {
                       handleAddToCart={handleAddToCart}
                       handleBuyNow={handleBuyNow}
                       isLoading={isLoading}
+                      searchQuery={searchQuery}
                     />
                   </section>
                 )}
@@ -759,6 +727,7 @@ const SearchResultsPage = () => {
                       handleAddToCart={handleAddToCart}
                       handleBuyNow={handleBuyNow}
                       isLoading={isLoading}
+                      searchQuery={searchQuery}
                     />
                   </section>
                 )}
@@ -804,10 +773,10 @@ const SearchResultsPage = () => {
                           </div>
                           <div className="space-y-2">
                             <div className="text-xl font-semibold tracking-wide">
-                              {item.name}
+                              {highlightText(item.name, searchQuery)}
                             </div>
                             <div className="text-sm tracking-wide">
-                              {item.desc}
+                              {highlightText(item.desc, searchQuery)}
                             </div>
                           </div>
                           <a
@@ -833,26 +802,8 @@ const SearchResultsPage = () => {
                   </h3>
                   <p className="text-gray-700 mb-10 max-w-md mx-auto text-lg font-medium">
                     We couldn't find anything matching your search. Try
-                    different keywords or explore our suggestions below.
+                    different keywords.
                   </p>
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {[
-                      "comics",
-                      "audio comics",
-                      "podcasts",
-                      "mentoons cards",
-                      "mentoons books",
-                      "free games",
-                      "friends",
-                    ].map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-full hover:from-blue-700 hover:to-red-700 transition-all transform hover:scale-105 font-bold text-lg shadow-lg"
-                      >
-                        Try "{suggestion}"
-                      </button>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>

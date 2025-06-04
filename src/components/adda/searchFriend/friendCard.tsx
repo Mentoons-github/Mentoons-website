@@ -5,6 +5,7 @@ import FriendModal from "@/components/common/modal/userDetailModal";
 import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
 import { errorToast } from "@/utils/toastResposnse";
+import { highlightText } from "@/utils/highlightText";
 
 interface FriendCardProps {
   friend: Friend;
@@ -12,6 +13,7 @@ interface FriendCardProps {
   onSendRequest: (friendId: string) => void;
   onCancelRequest: (friendId: string) => void;
   isConnecting: boolean;
+  searchQuery?: string;
 }
 
 interface UserDetails {
@@ -34,6 +36,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
   onSendRequest,
   onCancelRequest,
   isConnecting,
+  searchQuery = "",
 }) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -42,7 +45,6 @@ const FriendCard: React.FC<FriendCardProps> = ({
   const { getToken } = useAuth();
 
   const fetchUserDetails = useCallback(async () => {
-    console.log("fetching users");
     if (isLoadingDetails) return;
     setIsLoadingDetails(true);
     try {
@@ -54,7 +56,6 @@ const FriendCard: React.FC<FriendCardProps> = ({
         }
       );
 
-      console.log("response recieeved  :", response.data);
       if (response.data.success) {
         setUserDetails(response.data.data);
       } else {
@@ -100,7 +101,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
             }}
           />
           <h3 className="text-sm font-medium text-gray-800 text-center line-clamp-1">
-            {friend.name}
+            {highlightText(friend.name, searchQuery)}
           </h3>
           <p className="text-xs text-gray-500 capitalize mb-3">
             {friend.status.replace(/([A-Z])/g, " $1").trim()}

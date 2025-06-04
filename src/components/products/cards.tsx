@@ -1,5 +1,6 @@
 import { ProductBase } from "@/types/productTypes";
 import { useNavigate } from "react-router-dom";
+import { highlightText } from "@/utils/highlightText";
 
 const ProductDetailCards = ({
   ageCategory,
@@ -7,6 +8,7 @@ const ProductDetailCards = ({
   handleAddToCart,
   handleBuyNow,
   isLoading,
+  searchQuery = "",
 }: {
   ageCategory: string;
   productDetails: ProductBase[];
@@ -19,6 +21,7 @@ const ProductDetailCards = ({
     product: ProductBase
   ) => void;
   isLoading: boolean;
+  searchQuery?: string;
 }) => {
   const navigate = useNavigate();
 
@@ -64,7 +67,7 @@ const ProductDetailCards = ({
             <div className="flex flex-col h-48">
               <div className="h-14 overflow-hidden mb-1">
                 <h3 className="text-lg font-medium line-clamp-2 w-full">
-                  {product.title}
+                  {highlightText(product.title, searchQuery)}
                 </h3>
               </div>
 

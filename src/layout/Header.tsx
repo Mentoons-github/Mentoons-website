@@ -75,13 +75,24 @@ const Header = () => {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent, suggestion?: string) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
+    const query = suggestion || searchQuery.trim();
+    const encoded = encodeURIComponent(query);
+    if (!encoded) return;
+
+    const currentParams = new URLSearchParams(location.search);
+    const currentQ = currentParams.get("q");
+
+    if (currentQ === encoded) {
+      navigate(`/search?q=${encoded}`, { replace: true });
+      navigate(0);
+    } else {
+      navigate(`/search?q=${encoded}`);
     }
+
+    setShowSearch(false);
+    setSearchQuery(""); // Clear search query after submission
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -334,54 +345,6 @@ const Header = () => {
               )}
             </NavLink>
           </div>
-          <div className="relative cursor-pointer lg:hidden flex flex-shrink-0">
-            <div
-              ref={profileDropdownRef}
-              onMouseEnter={handleProfileHover}
-              onMouseLeave={handleProfileContainerLeave}
-              className="relative"
-            >
-              <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                <FaUserCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </motion.div>
-
-              <AnimatePresence>
-                {showProfileDropdown && (
-                  <motion.div
-                    variants={dropdownVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[10001]"
-                  >
-                    <motion.div
-                      custom={0}
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      onClick={handleProfileNavigation}
-                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-3 text-gray-700 transition-colors"
-                    >
-                      <User className="w-4 h-4" />
-                      <span className="text-sm font-medium">Profile</span>
-                    </motion.div>
-
-                    <motion.div
-                      custom={1}
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      onClick={handleLogout}
-                      className="px-4 py-2 hover:bg-red-50 cursor-pointer flex items-center gap-3 text-red-600 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span className="text-sm font-medium">Logout</span>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
         </SignedIn>
 
         <motion.div
@@ -592,13 +555,13 @@ const Header = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="border-t border-gray-100 p-4"
+                    className="border-t border-gray-200 p-4"
                   >
                     <p className="text-sm text-gray-500 mb-2">
                       Press Enter to search
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {["Games", "Comics", "Products", "Subscriptions"].map(
+                      {["Games", "Comics", "Books", "Cards"].map(
                         (suggestion) => (
                           <motion.button
                             key={suggestion}
@@ -607,7 +570,10 @@ const Header = () => {
                             whileTap={{ scale: 0.95 }}
                             onClick={() => {
                               setSearchQuery(suggestion);
-                              handleSearchSubmit(new Event("submit") as any);
+                              handleSearchSubmit(
+                                new Event("submit") as any,
+                                suggestion
+                              );
                             }}
                             className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition-colors"
                           >
