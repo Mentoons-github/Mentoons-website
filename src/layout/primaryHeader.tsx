@@ -1,5 +1,5 @@
 import AuthButton from "@/components/common/authButton";
-import Notification from "@/components/common/modal/notificationModal";
+import NotificationModal from "@/components/common/modal/notificationModal";
 import {
   ANIMATION_TEXTS_ADDA,
   ANIMATION_TEXTS_HOME,

@@ -1,11 +1,8 @@
-
-import { useAuth } from "@clerk/clerk-react";
-import WelcomeModal from "@/components/adda/welcome/welcome";
 import AddPosts from "@/components/adda/home/addPosts/addPosts";
+import WelcomeModal from "@/components/adda/welcome/welcome";
+import { useAuth } from "@clerk/clerk-react";
 
 import Posts from "@/components/adda/home/addPosts/posts/posts";
-import WelcomeModal from "@/components/adda/welcome/welcome";
-import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 
 const AddaHome = () => {

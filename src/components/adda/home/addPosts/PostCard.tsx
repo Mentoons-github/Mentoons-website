@@ -263,8 +263,8 @@ const PostCard = ({
 
     try {
       setComments((prevComments) => [
-        ...(Array.isArray(prevComments) ? prevComments : []),
         newCommentObj,
+        ...(Array.isArray(prevComments) ? prevComments : []),
       ]);
       setCommentCount((prev) => prev + 1);
       setNewComment("");
@@ -293,7 +293,8 @@ const PostCard = ({
             },
           }
         );
-        setComments(serverComment.data.data?.data || []);
+        console.log("Server comment data:", serverComment.data.data);
+        setComments(serverComment.data.data);
         setCommentCount(serverComment.data.data?.length);
 
         triggerReward(RewardEventType.COMMENT_POST, post._id);
@@ -677,10 +678,7 @@ const PostCard = ({
               >
                 <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
               </motion.button>
-              <div
-                className="text-[#605F5F] text-sm sm:text-base figtree relative"
-             
-              >
+              <div className="text-[#605F5F] text-sm sm:text-base figtree relative">
                 {commentCount}
               </div>
             </div>
