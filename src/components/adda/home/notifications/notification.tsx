@@ -4,23 +4,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import NotificationCard from "./notificationCard";
-import { useNotifications } from "@/context/adda/notificationContext";
-import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  removeNotification,
+  updateNotification,
+  deleteNotification,
+} from "@/redux/adda/notificationSlice";
+import axios from "axios";
 import { Notification } from "@/types";
 
 const Notifications = () => {
-  const {
-    notifications,
-    isLoading,
-    markNotificationRead,
-    markAllNotificationsRead,
-    removeNotification,
-    updateNotification,
-  } = useNotifications();
+  const dispatch = useDispatch<AppDispatch>();
+  const { notifications, isLoading, hasMore, error } = useSelector(
+    (state: RootState) => state.notification
+  );
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
@@ -39,36 +43,19 @@ const Notifications = () => {
     [isLoading, hasMore]
   );
 
-  const fetchMoreNotifications = useCallback(
-    async (pageNum: number) => {
-      try {
-        const token = await getToken();
-        const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/adda/userNotifications`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { page: pageNum, limit: 10 },
-          }
-        );
-
-        const notificationData = Array.isArray(response.data.data)
-          ? response.data.data
-          : [];
-        setHasMore(notificationData.length === 10);
-      } catch (err) {
-        console.error("Failed to fetch more notifications:", err);
-        toast.error("Failed to load more notifications. Retrying...");
-        setTimeout(() => fetchMoreNotifications(pageNum), 3000);
-      }
-    },
-    [getToken]
-  );
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const token = await getToken();
+      dispatch(fetchNotifications({ token, page, limit: 10 }));
+    };
+    loadNotifications();
+  }, [dispatch, getToken, page]);
 
   useEffect(() => {
-    if (page > 1) {
-      fetchMoreNotifications(page);
+    if (error) {
+      toast.error(error);
     }
-  }, [page, fetchMoreNotifications]);
+  }, [error]);
 
   const handleFriendRequestAction = async (
     notificationId: string,
@@ -81,7 +68,17 @@ const Notifications = () => {
     }
 
     try {
-      const token = await getToken();
+      const token = (await getToken()) ?? "";
+      if (!token) {
+        toast.error("Authentication token not found");
+        return;
+      }
+
+      const notification = notifications.find((n) => n._id === notificationId);
+      if (notification && !notification.isRead) {
+        await dispatch(markNotificationRead({ notificationId, token }));
+      }
+
       await axios.post(
         `${
           import.meta.env.VITE_PROD_URL
@@ -89,15 +86,22 @@ const Notifications = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (action === "accept") {
-        updateNotification(notificationId, {
-          isRead: true,
-          type: "friend_request_accepted",
-          message: "Friend request accepted",
-        });
+        dispatch(
+          updateNotification({
+            id: notificationId,
+            data: {
+              isRead: true,
+              type: "friend_request_accepted",
+              message: "Friend request accepted",
+            },
+          })
+        );
         toast.success("Friend request accepted");
       } else {
-        removeNotification(notificationId);
+        dispatch(removeNotification(notificationId)); // Remove locally first
+        await dispatch(deleteNotification({ notificationId, token })); // Then delete on backend
         toast.success("Friend request declined");
       }
     } catch (err) {
@@ -106,7 +110,7 @@ const Notifications = () => {
     }
   };
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = async (notification: Notification) => {
     const getNavigationLink = (): string => {
       const { type, referenceId, referenceModel } = notification;
       switch (type) {
@@ -124,7 +128,21 @@ const Notifications = () => {
       }
     };
     navigate(getNavigationLink());
-    if (!notification.isRead) markNotificationRead(notification._id);
+    if (!notification.isRead) {
+      const token = await getToken();
+      if (token) {
+        dispatch(
+          markNotificationRead({
+            notificationId: notification._id,
+            token,
+          })
+        );
+      } else {
+        toast.error("Authentication token not found");
+      }
+    } else {
+      toast.info("Notification already read");
+    }
   };
 
   const filteredNotifications = notifications.filter(
@@ -168,16 +186,20 @@ const Notifications = () => {
               <option value="all">All</option>
               <option value="unread">Unread</option>
             </select>
-            {notifications.length > 0 && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={markAllNotificationsRead}
-                className="px-4 py-2 text-sm font-medium text-orange-600 bg-orange-100 rounded-full hover:bg-orange-200"
-              >
-                Mark All as Read
-              </motion.button>
-            )}
+            {notifications.length > 0 &&
+              notifications.some((n) => !n.isRead) && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={async () => {
+                    const token = (await getToken()) ?? "";
+                    dispatch(markAllNotificationsRead(token));
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-orange-600 bg-orange-100 rounded-full hover:bg-orange-200"
+                >
+                  Mark All as Read
+                </motion.button>
+              )}
           </div>
         </div>
       </div>
@@ -228,8 +250,48 @@ const Notifications = () => {
               >
                 <NotificationCard
                   notification={notification}
-                  onMarkAsRead={markNotificationRead}
-                  onDelete={removeNotification}
+                  onMarkAsRead={async (id) => {
+                    const notification = notifications.find(
+                      (n) => n._id === id
+                    );
+                    if (notification && !notification.isRead) {
+                      const token = await getToken();
+                      if (token) {
+                        dispatch(
+                          markNotificationRead({
+                            notificationId: id,
+                            token,
+                          })
+                        );
+                        toast.success("Notification marked as read");
+                      } else {
+                        toast.error("Authentication token not found");
+                      }
+                    }
+                  }}
+                  onDelete={async (id) => {
+                    const notification = notifications.find(
+                      (n) => n._id === id
+                    );
+                    if (notification && !notification.isRead) {
+                      const token = await getToken();
+                      if (token) {
+                        await dispatch(
+                          markNotificationRead({ notificationId: id, token })
+                        );
+                      }
+                    }
+                    dispatch(removeNotification(id)); // Remove locally first
+                    const token = await getToken();
+                    if (token) {
+                      await dispatch(
+                        deleteNotification({ notificationId: id, token })
+                      );
+                      toast.success("Notification deleted");
+                    } else {
+                      toast.error("Authentication token not found");
+                    }
+                  }}
                   onClick={handleNotificationClick}
                   onFriendRequestAction={handleFriendRequestAction}
                 />

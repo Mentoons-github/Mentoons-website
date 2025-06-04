@@ -1234,12 +1234,12 @@ export const COMMON_NAV: NavLink[] = [
     icon: "mic",
     url: "/mentoons-podcast",
   },
-  {
-    id: "NL_08",
-    label: "Profile",
-    icon: FaUserAlt,
-    url: "/adda/user-profile",
-  },
+  // {
+  //   id: "NL_08",
+  //   label: "Profile",
+  //   icon: FaUserAlt,
+  //   url: "/adda/user-profile",
+  // },
   // {
   //   id: "NL_09",
   //   label: "Share",

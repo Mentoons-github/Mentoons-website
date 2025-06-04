@@ -69,11 +69,9 @@ const PrimaryHeader = () => {
       </div>
 
       <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
-        {adda && (
-          <SignedIn>
-            <NotificationModal getToken={getToken} />
-          </SignedIn>
-        )}
+        <SignedIn>
+          <NotificationModal getToken={getToken} />
+        </SignedIn>
         <AuthButton />
       </div>
     </div>

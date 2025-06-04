@@ -1,6 +1,7 @@
 import { ProductBase } from "@/types/productTypes";
 import { PodcastProduct } from "@/types/productTypes";
 import { IoPlay } from "react-icons/io5";
+import { highlightText } from "@/utils/highlightText";
 
 interface PodcastCardProps {
   podcast: ProductBase;
@@ -13,6 +14,7 @@ interface PodcastCardProps {
   onPlaybackTrackingUpdate: (update: (prev: any) => any) => void;
   onPodcastCompletion: (podcastId: string, podcastType: string) => void;
   playbackTracking: any;
+  searchQuery?: string;
 }
 
 const PodcastCard: React.FC<PodcastCardProps> = ({
@@ -23,6 +25,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
   onPlaybackTrackingUpdate,
   onPodcastCompletion,
   playbackTracking,
+  searchQuery = "",
 }) => {
   return (
     <div
@@ -78,7 +81,6 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
           )}
         </button>
 
-        {/* Audio player (hidden) */}
         {isPlaying && (
           <audio
             src={
@@ -126,7 +128,6 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
           />
         )}
 
-        {/* Category badge */}
         <div className="absolute flex items-center gap-2 bottom-2 left-2">
           <div
             className={`
@@ -199,7 +200,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
               isPlaying ? "text-white" : "text-gray-800"
             }`}
           >
-            {podcast.title}
+            {highlightText(podcast.title, searchQuery)}
           </h3>
           <div className="flex items-center gap-1 text-sm text-orange-500">
             <div className="flex gap-0.5">
@@ -211,8 +212,11 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
           </div>
         </div>
         <p className="text-sm text-gray-600 line-clamp-2">
-          {podcast.description ||
-            "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world."}
+          {highlightText(
+            podcast.description ||
+              "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world.",
+            searchQuery
+          )}
         </p>
         <div
           className={`flex items-center gap-2 ${

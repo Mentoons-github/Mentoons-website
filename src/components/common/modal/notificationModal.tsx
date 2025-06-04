@@ -29,7 +29,16 @@ import {
   X,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useNotifications } from "@/context/adda/notificationContext";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  removeNotification,
+  updateNotification,
+  deleteNotification,
+} from "@/redux/adda/notificationSlice";
 import { NotificationType } from "@/types";
 import axios from "axios";
 
@@ -37,20 +46,28 @@ interface NotificationProps {
   getToken: () => Promise<string | null>;
 }
 
-const Notification = ({ getToken }: NotificationProps) => {
+const NotificationModal = ({ getToken }: NotificationProps) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const {
-    notifications,
-    isLoading,
-    markNotificationRead,
-    markAllNotificationsRead,
-    updateNotification,
-    removeNotification,
-  } = useNotifications();
+
+  const { notifications, isLoading } = useSelector(
+    (state: RootState) => state.notification
+  );
 
   console.log("notifications :", notifications);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const token = await getToken();
+      if (token) {
+        dispatch(fetchNotifications({ token, page: 1 }));
+      }
+    };
+    loadNotifications();
+  }, [dispatch, getToken]);
+
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (
@@ -153,7 +170,14 @@ const Notification = ({ getToken }: NotificationProps) => {
   };
 
   const handleNotificationClick = async (notification: any) => {
-    await markNotificationRead(notification._id);
+    if (!notification.isRead) {
+      const token = await getToken();
+      if (token) {
+        await dispatch(
+          markNotificationRead({ notificationId: notification._id, token })
+        );
+      }
+    }
 
     const getNavigationLink = (notif: any): string => {
       const { type, referenceId, referenceModel, initiatorId } = notif;
@@ -190,6 +214,11 @@ const Notification = ({ getToken }: NotificationProps) => {
 
     try {
       const token = await getToken();
+      if (!token) {
+        console.error("No token available");
+        return;
+      }
+
       const response = await axios.patch(
         `${import.meta.env.VITE_PROD_URL}/adda/${endpoint}/${referenceId}`,
         {},
@@ -202,18 +231,24 @@ const Notification = ({ getToken }: NotificationProps) => {
 
       if (response.data.success) {
         if (action === "accept") {
-          updateNotification(notificationId, {
-            isRead: true,
-            type: "friend_request_accepted",
-            message: `${
-              typeof response.data.initiatorId === "object"
-                ? response.data.initiatorId.name
-                : "User"
-            } is now your friend`,
-          });
-          await markNotificationRead(notificationId);
+          dispatch(
+            updateNotification({
+              id: notificationId,
+              data: {
+                isRead: true,
+                type: "friend_request_accepted",
+                message: `${
+                  typeof response.data.initiatorId === "object"
+                    ? response.data.initiatorId.name
+                    : "User"
+                } is now your friend`,
+              },
+            })
+          );
+          await dispatch(markNotificationRead({ notificationId, token }));
         } else {
-          removeNotification(notificationId);
+          dispatch(removeNotification(notificationId)); // Remove locally first
+          await dispatch(deleteNotification({ notificationId, token })); // Then delete on backend
         }
       }
     } catch (error) {
@@ -261,7 +296,12 @@ const Notification = ({ getToken }: NotificationProps) => {
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
-                    onClick={markAllNotificationsRead}
+                    onClick={async () => {
+                      const token = await getToken();
+                      if (token) {
+                        dispatch(markAllNotificationsRead(token));
+                      }
+                    }}
                     className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full transition-colors"
                   >
                     Mark all read
@@ -411,4 +451,4 @@ const Notification = ({ getToken }: NotificationProps) => {
   );
 };
 
-export default Notification;
+export default NotificationModal;

@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 // import cardProductReducer from "./cardProductSlice";
 import userStatusReducer from "./adda/statusSlice";
+import notificationReducer from "./adda/notificationSlice";
 import careerReducer from "./careerSlice";
 import cartReducer from "./cartSlice";
 import comicsReducer from "./comicSlice";
@@ -27,6 +28,7 @@ export const store = configureStore<{
   userStatus: ReturnType<typeof userStatusReducer>;
   session: ReturnType<typeof sessionReducer>;
   rewards: ReturnType<typeof rewardsReducer>;
+  notification: ReturnType<typeof notificationReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -42,6 +44,7 @@ export const store = configureStore<{
     userStatus: userStatusReducer,
     session: sessionReducer,
     rewards: rewardsReducer,
+    notification: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

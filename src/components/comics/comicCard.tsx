@@ -15,6 +15,7 @@ import {
 import { formatDateString } from "@/utils/formateDate";
 import { addItemCart } from "@/redux/cartSlice";
 import { AppDispatch } from "@/redux/store";
+import { highlightText } from "@/utils/highlightText";
 
 interface ComicCardProps {
   products: ProductBase[];
@@ -24,12 +25,14 @@ interface ComicCardProps {
     comic?: ProductBase | null,
     productType?: string
   ) => void;
+  searchQuery?: string;
 }
 
 const ComicCard = ({
   products,
   carouselRef,
   openComicModal,
+  searchQuery = "",
 }: ComicCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
@@ -41,8 +44,6 @@ const ComicCard = ({
 
   const comic = products[0];
   if (!comic) return null;
-
-  console.log("Comic:", comic);
 
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -151,10 +152,10 @@ const ComicCard = ({
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div>
             <h3 className="mb-2 text-lg font-bold text-gray-900 line-clamp-1">
-              {comic?.title}
+              {highlightText(comic.title, searchQuery)}
             </h3>
             <p className="mb-4 text-xs text-gray-600 line-clamp-2">
-              {comic?.description}
+              {highlightText(comic.description || "", searchQuery)}
             </p>
             <div className="flex items-center gap-4 mb-4 text-xs text-gray-600">
               <div className="flex items-center gap-1">
@@ -196,7 +197,7 @@ const ComicCard = ({
                 >
                   <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                 </svg>
-                <span>{comic.rating}</span>
+                <span>{comic.rating || "4.5"}</span>
               </div>
             </div>
           </div>
@@ -207,7 +208,7 @@ const ComicCard = ({
                 onClick={() => {
                   if ("sampleUrl" in comic.details) {
                     openComicModal(
-                      comic.details.sampleUrl || "",
+                      (comic.details as { sampleUrl: string }).sampleUrl || "",
                       comic,
                       comic.product_type
                     );
