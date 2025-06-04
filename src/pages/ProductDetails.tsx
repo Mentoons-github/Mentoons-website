@@ -311,9 +311,9 @@ const ProductDetails = () => {
   console.log("Product", product);
 
   return (
-    <div className="w-[90%] mx-auto my-20 ">
-      <div className="flex flex-col md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
-        <div className="flex flex-col flex-1 pb-3">
+    <div className="w-[90%] mx-auto my-20 mt-10">
+      <div className="flex flex-col-reverse justify-between md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
+        <div className="flex flex-col flex-1 justify-between">
           <span className="px-4 py-1 mb-2 text-sm font-bold text-white rounded-full sm:px-6 sm:py-2 sm:text-lg md:text-2xl bg-primary w-fit">
             For {product?.ageCategory}
           </span>
@@ -323,10 +323,139 @@ const ProductDetails = () => {
           <p className="pb-4 text-xs sm:text-sm md:text-base lg:text-lg w-full md:w-[90%]">
             {product?.description}
           </p>
+          <div>
+            <span className="font-semibold text-gray-500">Mentoons</span>
+
+            <Rating ratings={Number(product?.rating)} />
+            <p className={`my-2 text-lg font-semibold text-neutral-800 `}>
+              {" "}
+              {product?.price === 0 ? (
+                <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
+                  Free
+                </span>
+              ) : (
+                `₹ ${product?.price}`
+              )}
+              {(product?.title === "Conversation Starter Cards (6-12) years" ||
+                product?.title === "Silent Stories (6-12) years") &&
+                product?.ageCategory === "6-12" && (
+                  <a
+                    href={`${
+                      product?.title ===
+                      "Conversation Starter Cards (6-12) years"
+                        ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
+                        : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
+                    }`}
+                    download
+                    className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+                  >
+                    Download Free Sample
+                  </a>
+                )}
+            </p>
+          </div>
+
+          {/* Quantitu */}
+
+          <div className="flex items-center justify-between gap-2 pb-4">
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center space-x-2">
+                <button
+                  disabled={quantity === 1}
+                  onClick={() => handleUpdateQuantity("-")}
+                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
+                >
+                  <Minus
+                    className={`w-4 h-4  font-bold flex ${
+                      quantity === 1 ? "text-gray-400" : ""
+                    } `}
+                  />
+                </button>
+                <span className="w-8 font-bold text-center">{quantity}</span>
+                <button
+                  onClick={() => handleUpdateQuantity("+")}
+                  disabled={product?.price === 0}
+                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50"
+                >
+                  <Plus className="w-4 h-4 font-bold" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Buy Now Button */}
+          {product?.price === 0 ? (
+            <div className="flex flex-col w-full gap-4 mt-4">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (product?.type === ProductType.COMIC) {
+                      window.open(
+                        (product.details as ComicProduct["details"]).sampleUrl,
+                        "_blank"
+                      );
+                    } else if (product?.type === ProductType.AUDIO_COMIC) {
+                      window.open(
+                        (product.details as AudioComicProduct["details"])
+                          .sampleUrl,
+                        "_blank"
+                      );
+                    } else if (product?.type === ProductType.PODCAST) {
+                      window.open(
+                        (product.details as PodcastProduct["details"])
+                          .sampleUrl,
+                        "_blank"
+                      );
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+                >
+                  Download For Free
+                </button>
+
+                <button
+                  className="px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+                  onClick={handleShare}
+                  title="Share this product"
+                >
+                  <FiShare2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col w-full gap-4 mt-4">
+              <div className="flex gap-2">
+                <button
+                  className="flex items-center justify-center flex-1 px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                  onClick={(e) => handleAddtoCart(e)}
+                  disabled={isLoading}
+                >
+                  <IoIosCart className="w-5 h-5 mr-2" />
+                  {isLoading ? "Adding..." : "Add to Cart"}
+                </button>
+
+                <button
+                  className="flex items-center justify-center px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
+                  onClick={handleShare}
+                  title="Share this product"
+                >
+                  <FiShare2 className="w-5 h-5" />
+                </button>
+              </div>
+
+              <button
+                className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
+                onClick={() => handleBuyNow(product)}
+                disabled={isLoading}
+              >
+                Buy Now
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Product Image Viewer - Amazon Style */}
-        <div className="flex flex-col flex-1 w-full border-[0.5px] border-gray-200 rounded-lg ">
+        <div className="flex flex-col flex-1 w-full border-[0.5px] border-primary rounded-lg shadow-lg shadow-orange-600/15"> 
           {/* Main Image Container */}
           <div
             ref={imageContainerRef}
@@ -409,136 +538,9 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      <div className="border-gray-200">
-        <span className="font-semibold text-gray-500">Mentoons</span>
-
-        <Rating ratings={Number(product?.rating)} />
-        <p className={`my-2 text-lg font-semibold text-neutral-800 `}>
-          {" "}
-          {product?.price === 0 ? (
-            <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
-              Free
-            </span>
-          ) : (
-            `₹ ${product?.price}`
-          )}
-          {(product?.title === "Conversation Starter Cards (6-12) years" ||
-            product?.title === "Silent Stories (6-12) years") &&
-            product?.ageCategory === "6-12" && (
-              <a
-                href={`${
-                  product?.title === "Conversation Starter Cards (6-12) years"
-                    ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
-                    : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
-                }`}
-                download
-                className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-              >
-                Download Free Sample
-              </a>
-            )}
-        </p>
-
-        {/* <p>{product?.description}</p> */}
-        {/* Quantitu */}
-
-        <div className="flex items-center justify-between gap-2 pb-4">
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center space-x-2">
-              <button
-                disabled={quantity === 1}
-                onClick={() => handleUpdateQuantity("-")}
-                className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
-              >
-                <Minus
-                  className={`w-4 h-4  font-bold flex ${
-                    quantity === 1 ? "text-gray-400" : ""
-                  } `}
-                />
-              </button>
-              <span className="w-8 font-bold text-center">{quantity}</span>
-              <button
-                onClick={() => handleUpdateQuantity("+")}
-                disabled={product?.price === 0}
-                className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50"
-              >
-                <Plus className="w-4 h-4 font-bold" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Buy Now Button */}
-        {product?.price === 0 ? (
-          <div className="flex flex-col w-full gap-4 mt-4">
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  if (product?.type === ProductType.COMIC) {
-                    window.open(
-                      (product.details as ComicProduct["details"]).sampleUrl,
-                      "_blank"
-                    );
-                  } else if (product?.type === ProductType.AUDIO_COMIC) {
-                    window.open(
-                      (product.details as AudioComicProduct["details"])
-                        .sampleUrl,
-                      "_blank"
-                    );
-                  } else if (product?.type === ProductType.PODCAST) {
-                    window.open(
-                      (product.details as PodcastProduct["details"]).sampleUrl,
-                      "_blank"
-                    );
-                  }
-                }}
-                className="flex-1 px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-              >
-                Download For Free
-              </button>
-
-              <button
-                className="px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-                onClick={handleShare}
-                title="Share this product"
-              >
-                <FiShare2 className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col w-full gap-4 mt-4">
-            <div className="flex gap-2">
-              <button
-                className="flex items-center justify-center flex-1 px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-                onClick={(e) => handleAddtoCart(e)}
-                disabled={isLoading}
-              >
-                <IoIosCart className="w-5 h-5 mr-2" />
-                {isLoading ? "Adding..." : "Add to Cart"}
-              </button>
-
-              <button
-                className="flex items-center justify-center px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-                onClick={handleShare}
-                title="Share this product"
-              >
-                <FiShare2 className="w-5 h-5" />
-              </button>
-            </div>
-
-            <button
-              className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
-              onClick={() => handleBuyNow(product)}
-              disabled={isLoading}
-            >
-              Buy Now
-            </button>
-          </div>
-        )}
-
+      <div className="border-red-500 ">
         {/* Separator */}
-        <div className="w-full h-[1.25px] my-12 mb-8 bg-primary" />
+        <div className="w-full h-[.5px] my-12 mb-8 bg-primary" />
 
         {/* Product description */}
         <div className="text-lg font-medium text-neutral-800">
@@ -597,7 +599,14 @@ const ProductDetails = () => {
               You will also like this -
             </h2>
             <div className="flex flex-wrap items-center justify-start gap-6 mb-8 rounded-sm">
-              {PRODUCT_TYPE.map((type) => (
+              {PRODUCT_TYPE.filter(
+                (type) =>
+                  type.value !== "audio comic" &&
+                  type.value !== "podcast" &&
+                  type.value !== "workshop" &&
+                  type.value !== "assessment" &&
+                  type.value !== "comic"
+              ).map((type) => (
                 <button
                   key={type.id}
                   className={`border border-primary text-primary
