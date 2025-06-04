@@ -71,41 +71,31 @@ const Workshopv2 = () => {
       );
       if (workshopRegistrationResponse.status === 200) {
         setShowRegistrationModal(true);
+        // Reset the form data after successful submission
+        setFormData({
+          firstname: "",
+          lastname: "",
+          email: "",
+          phone: "",
+          message: "",
+          workshop:
+            selecteCategory === "6-12"
+              ? "Buddy Camp"
+              : selecteCategory === "13-19"
+              ? "Teen Camp"
+              : selecteCategory === "20+"
+              ? "Career Corner"
+              : selecteCategory === "parent"
+              ? "Parent Camp"
+              : "",
+          doubt: "",
+        });
       } else {
         toast.error("Registration Failed");
       }
-
-      setFormData({
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-        message: "",
-        workshop:
-          selecteCategory === "6-12"
-            ? "Buddy Camp"
-            : selecteCategory === "13-19"
-            ? "Teen Camp"
-            : selecteCategory === "20+"
-            ? "Career Corner"
-            : selecteCategory === "parent"
-            ? "Parent Camp"
-            : "",
-        doubt: "",
-      });
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Registration Failed");
-    } finally {
-      setFormData({
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-        message: "",
-        workshop: "",
-        doubt: "",
-      });
     }
   };
 
@@ -565,6 +555,7 @@ const Workshopv2 = () => {
                             className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
                             onChange={handleFormChange}
                             name="firstname"
+                            value={formData.firstname}
                             style={{
                               border: `2px solid ${workshop.registerFormbgColor}`,
                             }}
@@ -583,6 +574,7 @@ const Workshopv2 = () => {
                             className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
                             onChange={handleFormChange}
                             name="lastname"
+                            value={formData.lastname}
                             style={{
                               border: `2px solid ${workshop.registerFormbgColor}`,
                             }}
@@ -606,6 +598,7 @@ const Workshopv2 = () => {
                             }}
                             onChange={handleFormChange}
                             name="email"
+                            value={formData.email}
                           />
                         </div>
                         <div className="flex-1">
@@ -624,6 +617,7 @@ const Workshopv2 = () => {
                             }}
                             onChange={handleFormChange}
                             name="phone"
+                            value={formData.phone}
                           />
                         </div>
                       </div>
@@ -643,6 +637,7 @@ const Workshopv2 = () => {
                             border: `2px solid ${workshop.registerFormbgColor}`,
                           }}
                           onChange={handleFormChange}
+                          value={formData.message}
                         ></textarea>
                       </div>
                       <div className="flex-1 ">

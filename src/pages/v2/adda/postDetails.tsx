@@ -406,7 +406,7 @@ const PostDetailsPage = () => {
 
           {/* Post title */}
           {post.title && (
-            <h1 className="mb-3 text-xl font-bold text-gray-800">
+            <h1 className="mb-3 text-xl font-bold text-gray-800 capitalize">
               {post.title}
             </h1>
           )}
@@ -416,7 +416,7 @@ const PostDetailsPage = () => {
 
           {/* Media content */}
           {post.media && post.media.length > 0 && (
-            <div className="mb-4">
+            <div className="border border-orange-200 rounded-t-lg ">
               {post.media.map((item, index) => (
                 <div key={index} className="mb-2 overflow-hidden rounded-lg">
                   {item.type === "image" ? (
@@ -439,6 +439,18 @@ const PostDetailsPage = () => {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {post.article && (
+            <div className="p-4 mb-4 border border-t-0 border-orange-200 rounded-b-lg bg-orange-50">
+              <p className="font-medium text-gray-700">{post.article.body}</p>
+              <div className="flex justify-start mt-8">
+                <p className="text-sm italic text-orange-500">
+                  {" "}
+                  {post.user.name}
+                </p>
+              </div>
             </div>
           )}
 

@@ -254,7 +254,7 @@ const ComicsPageV2 = () => {
     };
 
     fetchComics();
-  }, [dispatch, selectedOption, option, getToken, products]);
+  }, [dispatch, option]);
 
   const fetchDBUser = useCallback(async () => {
     try {
@@ -840,22 +840,41 @@ const ComicsPageV2 = () => {
 
                     {!comic.product_type && (
                       <>
-                        <button
-                          onClick={(e) => handleAddtoCart(e, comic)}
-                          disabled={isLoading}
-                          className="flex items-center flex-1 gap-2 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primar whitespace-nowrap"
-                        >
-                          <FaShoppingCart className="self-center inline-block w-4 h-4 " />
-                          {isLoading ? "Adding..." : "Add to Cart"}
-                        </button>
-                        <button
-                          onClick={(e) => handleBuyNow(e, comic)}
-                          disabled={isLoading}
-                          className="flex items-center flex-1 gap-2 px-4 py-2 font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 whitespace-nowrap border-primary"
-                        >
-                          <FaBolt className="self-center inline-block w-4 h-4 " />
-                          {isLoading ? "Buying..." : "Buy Now"}
-                        </button>
+                        <div className="flex flex-col">
+                          <div className="flex gap-2 ">
+                            <button
+                              onClick={(e) => handleAddtoCart(e, comic)}
+                              disabled={isLoading}
+                              className="flex items-center flex-1 gap-2 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primar whitespace-nowrap"
+                            >
+                              <FaShoppingCart className="self-center inline-block w-4 h-4 " />
+                              {isLoading ? "Adding..." : "Add to Cart"}
+                            </button>
+                            <button
+                              onClick={(e) => handleBuyNow(e, comic)}
+                              disabled={isLoading}
+                              className="flex items-center flex-1 gap-2 px-4 py-2 font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 whitespace-nowrap border-primary"
+                            >
+                              <FaBolt className="self-center inline-block w-4 h-4 " />
+                              {isLoading ? "Buying..." : "Buy Now"}
+                            </button>
+                          </div>
+                          {/* <button
+                            onClick={() => {
+                              if ("sampleUrl" in comic.details) {
+                                openComicModal(
+                                  comic.details.sampleUrl || "",
+                                  comic,
+                                  comic.product_type
+                                );
+                              }
+                            }}
+                            className="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap"
+                          >
+                            {comic.type === "comic" ? "Read Now" : "Listen Now"}
+                          </button> */}
+                        </div>
+
                         {showAddToCartModal && (
                           <AddToCartModal
                             onClose={() => setShowAddToCartModal(false)}

@@ -1,5 +1,6 @@
 import MemeCard from "@/components/adda/home/addPosts/MemeCard";
 import { Button } from "@/components/ui/button";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -191,9 +192,9 @@ const MemePage = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
 
-  console.log(showAuthModal);
+  const { openAuthModal } = useAuthModal();
+
   // Add click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -230,13 +231,13 @@ const MemePage = () => {
     }
 
     if (!isSignedIn) {
-      setShowAuthModal(true);
+        openAuthModal("sign-in");
       return;
     }
 
     const token = await getToken();
     if (!token) {
-      setShowAuthModal(true);
+      openAuthModal("sign-in");
       return;
     }
 
@@ -286,22 +287,9 @@ const MemePage = () => {
     const fetchMemesFeeds = async () => {
       setLoading(true);
       try {
-        if (!isSignedIn) {
-          setShowAuthModal(true);
-          setLoading(false);
-          return;
-        }
-
-        if (!(await getToken())) {
-          setShowAuthModal(true);
-          setLoading(false);
-          return;
-        }
-
         const response = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/memeFeed`,
           {
-            headers: { Authorization: `Bearer ${await getToken()}` },
             params: {
               page: 1,
               limit: 10,
@@ -322,7 +310,9 @@ const MemePage = () => {
     };
 
     fetchMemesFeeds();
-  }, [getToken, isSignedIn]);
+  }, []);
+
+ 
 
   if (loading) {
     return (
@@ -370,7 +360,14 @@ const MemePage = () => {
           </div>
           <div
             className="flex items-center justify-center p-3 transition-colors border-2 border-orange-300 border-dashed rounded-lg cursor-pointer hover:bg-orange-50 w-fit"
-            onClick={() => setShowMemeModal(true)}
+            onClick={() => {
+              if (!isSignedIn) {
+                openAuthModal("sign-in");
+                return;
+              }
+
+              setShowMemeModal(true);
+            }}
           >
             <div className="flex items-center gap-2">
               <Image className="w-6 h-6 text-orange-400" />

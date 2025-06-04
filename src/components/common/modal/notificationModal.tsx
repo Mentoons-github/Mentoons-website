@@ -1,73 +1,56 @@
+import { useNotifications } from "@/context/adda/notificationContext";
+import { NotificationType } from "@/types";
+import axios from "axios";
+import { motion } from "framer-motion";
+import {
+  AlertTriangle,
+  AtSign,
+  Bell,
+  Calendar,
+  Camera,
+  CheckCircle,
+  Clock,
+  Eye,
+  FileText,
+  Flag,
+  Gift,
+  Heart,
+  MessageCircle,
+  MessageSquare,
+  Settings,
+  Share2,
+  ShieldCheck,
+  ShieldX,
+  Tag,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserX,
+  X,
+  XCircle,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-import {
-  Bell,
-  MessageCircle,
-  AlertTriangle,
-  Clock,
-  UserCheck,
-  UserX,
-  Heart,
-  MessageSquare,
-  Share2,
-  UserPlus,
-  AtSign,
-  Users,
-  Camera,
-  FileText,
-  Calendar,
-  Gift,
-  Eye,
-  Flag,
-  CheckCircle,
-  XCircle,
-  Settings,
-  Tag,
-  ShieldCheck,
-  ShieldX,
-  X,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/redux/store";
-import {
-  fetchNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  removeNotification,
-  updateNotification,
-  deleteNotification,
-} from "@/redux/adda/notificationSlice";
-import { NotificationType } from "@/types";
-import axios from "axios";
 
 interface NotificationProps {
   getToken: () => Promise<string | null>;
 }
 
-const NotificationModal = ({ getToken }: NotificationProps) => {
+const Notification = ({ getToken }: NotificationProps) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-
-  const { notifications, isLoading } = useSelector(
-    (state: RootState) => state.notification
-  );
+  const {
+    notifications,
+    isLoading,
+    markNotificationRead,
+    markAllNotificationsRead,
+    updateNotification,
+    removeNotification,
+  } = useNotifications();
 
   console.log("notifications :", notifications);
-
-  useEffect(() => {
-    const loadNotifications = async () => {
-      const token = await getToken();
-      if (token) {
-        dispatch(fetchNotifications({ token, page: 1 }));
-      }
-    };
-    loadNotifications();
-  }, [dispatch, getToken]);
-
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (
@@ -170,14 +153,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   };
 
   const handleNotificationClick = async (notification: any) => {
-    if (!notification.isRead) {
-      const token = await getToken();
-      if (token) {
-        await dispatch(
-          markNotificationRead({ notificationId: notification._id, token })
-        );
-      }
-    }
+    await markNotificationRead(notification._id);
 
     const getNavigationLink = (notif: any): string => {
       const { type, referenceId, referenceModel, initiatorId } = notif;
@@ -214,11 +190,6 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
 
     try {
       const token = await getToken();
-      if (!token) {
-        console.error("No token available");
-        return;
-      }
-
       const response = await axios.patch(
         `${import.meta.env.VITE_PROD_URL}/adda/${endpoint}/${referenceId}`,
         {},
@@ -231,24 +202,18 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
 
       if (response.data.success) {
         if (action === "accept") {
-          dispatch(
-            updateNotification({
-              id: notificationId,
-              data: {
-                isRead: true,
-                type: "friend_request_accepted",
-                message: `${
-                  typeof response.data.initiatorId === "object"
-                    ? response.data.initiatorId.name
-                    : "User"
-                } is now your friend`,
-              },
-            })
-          );
-          await dispatch(markNotificationRead({ notificationId, token }));
+          updateNotification(notificationId, {
+            isRead: true,
+            type: "friend_request_accepted",
+            message: `${
+              typeof response.data.initiatorId === "object"
+                ? response.data.initiatorId.name
+                : "User"
+            } is now your friend`,
+          });
+          await markNotificationRead(notificationId);
         } else {
-          dispatch(removeNotification(notificationId)); // Remove locally first
-          await dispatch(deleteNotification({ notificationId, token })); // Then delete on backend
+          removeNotification(notificationId);
         }
       }
     } catch (error) {
@@ -268,11 +233,11 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     <div className="relative hidden py-2 md:block" ref={notificationRef}>
       <div
         onClick={() => setShowNotificationModal(!showNotificationModal)}
-        className="relative cursor-pointer p-2 hover:bg-gray-700 rounded-full transition-colors"
+        className="relative p-2 transition-colors rounded-full cursor-pointer hover:bg-gray-700"
       >
         <FaBell className="text-white" />
         {getNotificationCount() > 0 && (
-          <span className="absolute px-2 text-xs text-center text-black bg-yellow-400 rounded-full -top-0 -right-1">
+          <span className="absolute px-2 text-xs text-center text-black bg-orange-400 rounded-full shadow-lg -top-0 -right-1">
             {getNotificationCount()}
           </span>
         )}
@@ -285,31 +250,27 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
           className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999999] overflow-hidden"
         >
-          <div className="bg-red-500 px-4 py-3 text-white">
+          <div className="px-4 py-3 text-white bg-gradient-to-r from-orange-500 to-orange-600">
+
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold">Notifications</h3>
-                <p className="text-blue-100 text-xs">
+                <p className="text-xs text-blue-100">
                   {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
-                    onClick={async () => {
-                      const token = await getToken();
-                      if (token) {
-                        dispatch(markAllNotificationsRead(token));
-                      }
-                    }}
-                    className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full transition-colors"
+                    onClick={markAllNotificationsRead}
+                    className="px-2 py-1 text-xs transition-colors rounded-full bg-white/20 hover:bg-white/30"
                   >
                     Mark all read
                   </button>
                 )}
                 <button
                   onClick={() => setShowNotificationModal(false)}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-1 transition-colors rounded-full hover:bg-white/20"
                 >
                   <X size={16} />
                 </button>
@@ -317,11 +278,11 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
             </div>
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="overflow-y-auto max-h-80">
             {isLoading ? (
               <div className="p-6 text-center text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                <p className="text-sm font-medium mt-2">
+                <div className="w-8 h-8 mx-auto border-b-2 border-gray-900 rounded-full animate-spin"></div>
+                <p className="mt-2 text-sm font-medium">
                   Loading notifications...
                 </p>
               </div>
@@ -342,8 +303,8 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                       key={notification._id}
                       className={`notification-item p-3 cursor-pointer transition-all duration-200 border-l-4 ${
                         notification.isRead
-                          ? "bg-gray-50 hover:bg-gray-100 border-l-gray-200"
-                          : `bg-blue-50 hover:bg-blue-100 ${getPriorityColor(
+                          ? "bg-gray-50 hover:bg-gray-100 border-l-orange-200"
+                          : `bg-gray-50 hover:bg-orange-100 ${getPriorityColor(
                               notification.type
                             )}`
                       }`}
@@ -360,9 +321,9 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                 )}&background=random`
                               }
                               alt={initiator?.name}
-                              className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
+                              className="object-cover w-8 h-8 border-2 border-white rounded-full shadow-sm"
                             />
-                            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
+                            <div className="absolute p-1 bg-white rounded-full shadow-sm -bottom-1 -right-1">
                               {getNotificationIcon(notification.type)}
                             </div>
                           </div>
@@ -385,7 +346,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                               )}
                             </p>
                             {!notification.isRead && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
+                              <div className="flex-shrink-0 w-2 h-2 mt-1 bg-orange-500 rounded-full" />
                             )}
                           </div>
                           <div className="flex items-center justify-between mt-1">
@@ -403,7 +364,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       "accept"
                                     );
                                   }}
-                                  className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                                  className="px-2 py-1 text-xs text-white bg-orange-500 rounded hover:bg-orange-600"
                                 >
                                   Accept
                                 </button>
@@ -416,7 +377,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       "decline"
                                     );
                                   }}
-                                  className="px-2 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                  className="px-2 py-1 text-xs text-gray-700 bg-gray-300 rounded hover:bg-gray-500"
                                 >
                                   Decline
                                 </button>
@@ -433,13 +394,13 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 bg-gray-50 border-t border-gray-200">
+            <div className="p-3 border-t border-orange-200 bg-gray-50 shadow-t-lg shadow-orange-100">
               <button
                 onClick={() => {
                   navigate("/adda/notifications");
                   setShowNotificationModal(false);
                 }}
-                className="w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium"
+                className="w-full text-xs font-medium text-center text-orange-600 hover:text-orange-700"
               >
                 View all notifications
               </button>
@@ -451,4 +412,4 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   );
 };
 
-export default NotificationModal;
+export default Notification;
