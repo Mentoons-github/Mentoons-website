@@ -45,7 +45,7 @@ const Header = () => {
   const filteredNav = COMMON_NAV.filter(
     (item) => item.label !== "Profile" || userId
   );
-  const navLeft = filteredNav.slice(0, 4);
+  const navLeft = filteredNav.slice(0, 5);
 
   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -218,18 +218,6 @@ const Header = () => {
       } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-[9999] w-full font-akshar`}
     >
       <div className="flex items-center lg:w-1/3 justify-start pl-0 lg:pl-4 xl:pl-6">
-        <a
-          href="tel:+919036033300"
-          className={`no-underline ${
-            title === "adda" ? "lg:hidden flex" : "md:hidden flex"
-          } whitespace-nowrap flex-shrink-0`}
-        >
-          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 py-1 flex justify-center items-center gap-1 text-primary">
-            <FaPhone className="flex-shrink-0" />{" "}
-            <span className="flex-shrink-0">+91 90360 33300</span>
-          </div>
-        </a>
-
         <nav
           className={`w-auto flex-shrink-0 ${
             title === "adda"
@@ -237,15 +225,6 @@ const Header = () => {
               : "hidden lg:flex gap-4 xl:gap-8"
           } justify-start items-center`}
         >
-          <a
-            href="tel:+919036033300"
-            className="hidden no-underline xl:block flex-shrink-0"
-          >
-            <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
-              <FaPhone className="flex-shrink-0" />{" "}
-              <span className="flex-shrink-0">+91 90360 33300</span>
-            </div>
-          </a>
           {navLeft.map(({ icon: Icon, id, label, url, items }) =>
             label === "Browse Plans" ? (
               <a
@@ -375,7 +354,7 @@ const Header = () => {
           title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
         } items-center gap-4 xl:gap-8 justify-end`}
       >
-        {filteredNav.slice(4).map(({ id, label, url, icon: Icon }) =>
+        {filteredNav.slice(5).map(({ id, label, url, icon: Icon }) =>
           label === "Browse Plans" ? (
             <a
               key={id}
