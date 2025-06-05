@@ -164,7 +164,14 @@ const Cart: React.FC = () => {
                 People also bought
               </h2>
               <div className="flex items-center justify-start gap-6 rounded-sm flex-wrap mb-8">
-                {PRODUCT_TYPE.map((type) => (
+                {PRODUCT_TYPE.filter(
+                  (type) =>
+                    type.value !== "audio comic" &&
+                    type.value !== "podcast" &&
+                    type.value !== "workshop" &&
+                    type.value !== "assessment" &&
+                    type.value !== "comic"
+                ).map((type) => (
                   <button
                     key={type.id}
                     className={`border border-primary text-primary
