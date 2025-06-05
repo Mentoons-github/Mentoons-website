@@ -27,6 +27,7 @@ import StatusModal from "./components/adda/global/statusModal.tsx";
 import HowMentoonsWork from "./components/adda/home/howMentoonsWorks/mentoonsWorks.tsx";
 import AssessmentQuestions from "./pages/AssessmentQuestions.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import SearchResultsPage from "./pages/v2/adda/globalSearch.tsx";
 import Assessment from "./pages/v2/user/assessment.tsx";
 import ProductsPage from "./pages/v2/user/products/products.tsx";
 import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
@@ -34,7 +35,6 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import SearchResultsPage from "./pages/v2/adda/globalSearch.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
