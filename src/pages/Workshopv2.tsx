@@ -4,9 +4,10 @@ import RegirstrationModal from "@/components/modals/RegistrationModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import { WORKSHOP_FAQ, WORKSHOPS } from "@/constant";
 import { ModalMessage, workshop } from "@/utils/enum";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BiSolidMessage } from "react-icons/bi";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -32,6 +33,10 @@ const Workshopv2 = () => {
   const [enquiryName, setEnquiryName] = useState("");
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
+  const [user, setUser] = useState<any>(null);
+  const { getToken } = useAuth();
+
+  const { user: clerkUser } = useUser();
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -51,6 +56,67 @@ const Workshopv2 = () => {
         : "",
     doubt: "",
   });
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const token = await getToken();
+      console.log("Clerk User ID:", clerkUser?.id);
+      console.log("Token:", token);
+      if (!clerkUser?.id || !token) {
+        toast.error("User not authenticated or token not available");
+        return null;
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/user/user/${clerkUser?.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data.data;
+      } else {
+        toast.error("Failed to fetch user data");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      toast.error("Failed to fetch user data");
+      return null;
+    }
+  }, [getToken, clerkUser]);
+  // Fetch user data when the component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      const userData = await fetchUser();
+      console.log("User data:", userData);
+      if (userData) {
+        console.log("User data fetched:", userData);
+        setUser(userData);
+        setFormData({
+          firstname: userData?.name?.split(" ")[0] || "",
+          lastname: userData?.name?.split(" ")[1] || "",
+          email: userData?.email || "",
+          phone: userData?.phoneNumber || "",
+          message: "",
+          workshop:
+            selecteCategory === "6-12"
+              ? "Buddy Camp"
+              : selecteCategory === "13-19"
+              ? "Teen Camp"
+              : selecteCategory === "20+"
+              ? "Career Corner"
+              : selecteCategory === "parent"
+              ? "Parent Camp"
+              : "",
+          doubt: "",
+        });
+      }
+    };
+    fetchData();
+  }, [fetchUser, clerkUser, selecteCategory]);
 
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
