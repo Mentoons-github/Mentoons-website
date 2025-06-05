@@ -72,6 +72,7 @@ const reactionData: Record<
   },
 };
 
+// Reactions component
 const Reactions = ({
   type,
   id,
