@@ -33,7 +33,8 @@ const Workshopv2 = () => {
   const [enquiryName, setEnquiryName] = useState("");
 
   const [expandedIndex, setExpandedIndex] = useState<number>(0);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>();
+
   const { getToken } = useAuth();
 
   const { user: clerkUser } = useUser();
@@ -848,7 +849,7 @@ const Workshopv2 = () => {
                               name="name"
                               id="name"
                               placeholder="Your Name"
-                              value={enquiryName}
+                              value={user?.name || enquiryName}
                               onChange={(e) => setEnquiryName(e.target.value)}
                               className="w-full p-3 rounded-lg shadow-xl"
                               style={{
@@ -861,7 +862,7 @@ const Workshopv2 = () => {
                               type="email"
                               name="email"
                               id="email"
-                              value={enquiryEmail}
+                              value={user?.email || enquiryEmail}
                               onChange={(e) => setEnquiryEmail(e.target.value)}
                               placeholder="Your Email"
                               className="w-full p-3 rounded-lg shadow-xl"

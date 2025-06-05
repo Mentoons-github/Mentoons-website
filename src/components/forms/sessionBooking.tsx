@@ -1,7 +1,8 @@
 import { useSessionForm } from "@/utils/formik/sessionForm";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios, { AxiosError } from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type HandleSubmit = (values: {
@@ -25,6 +26,8 @@ const SessionBookingForm = ({
   handleSubmit: HandleSubmit;
 }) => {
   const [indianStates, setInidanStates] = useState<IndianState[]>([]);
+  const { getToken } = useAuth();
+  const { user: clerkUser } = useUser();
 
   const formik = useSessionForm((values, formikHelpers) => {
     handleSubmit(values);
@@ -61,6 +64,51 @@ const SessionBookingForm = ({
 
     fetchStates();
   }, []);
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const token = await getToken();
+      if (!clerkUser?.id || !token) {
+        toast.error("User not authenticated");
+        return null;
+      }
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/user/user/${clerkUser?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        return response.data.data;
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      toast.error("Failed to fetch user data");
+      return null;
+    }
+  }, [getToken, clerkUser]);
+  // Initialize form with user data
+  useEffect(() => {
+    const initializeForm = async () => {
+      const userData = await fetchUser();
+      if (userData) {
+        formik.setValues({
+          ...formik.values,
+          name: userData.name || "",
+          email: userData.email || "",
+          phone: userData.phoneNumber || "",
+        });
+      }
+    };
+
+    if (clerkUser) {
+      initializeForm();
+    }
+  }, [clerkUser, fetchUser]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
