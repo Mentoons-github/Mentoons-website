@@ -1098,7 +1098,7 @@ const ComicsPageV2 = () => {
           onClose={() => setShowSubscriptionLimitModal(false)}
           message={limitModalMessage}
           title={limitModalTitle}
-          planType={"free"} // Fall back to 'free' if membershipType causes type issues
+          planType={"free"}
         />
       )}
     </div>

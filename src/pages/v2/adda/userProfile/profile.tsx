@@ -10,7 +10,7 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import PostCard from "@/components/adda/home/addPosts/PostCard";
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
 import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import UserListModal from "@/components/common/modal/userList";
 import ProfileForm from "./profieForm";

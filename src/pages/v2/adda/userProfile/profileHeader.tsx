@@ -1,9 +1,9 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FaCamera } from "react-icons/fa6";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiLoader } from "react-icons/fi";
 import { UserDetails } from "./profile";
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 
 interface ProfileHeaderProps {
   userDetails: UserDetails;
@@ -15,6 +15,9 @@ interface ProfileHeaderProps {
   handleProfilePhotoChange: (
     e: React.ChangeEvent<HTMLInputElement>
   ) => Promise<void>;
+  isEditable?: boolean;
+  maxImageSize?: number;
+  onImageError?: (error: string) => void;
 }
 
 const ProfileHeader = memo(
@@ -24,59 +27,245 @@ const ProfileHeader = memo(
     profilePhotoInputRef,
     handleCoverPhotoChange,
     handleProfilePhotoChange,
-  }: ProfileHeaderProps) => (
-    <div className="relative">
-      <div
-        className="w-full h-80 object-cover rounded-xl shadow-lg"
-        style={{
-          backgroundImage: userDetails.coverImage
-            ? `url(${userDetails.coverImage})`
-            : "linear-gradient(to right, #EC9600, #fbbf24)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <Button
-          className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2"
-          onClick={() => coverPhotoInputRef.current?.click()}
-        >
-          <FaCamera className="text-white" />
-        </Button>
-        <input
-          type="file"
-          ref={coverPhotoInputRef}
-          className="hidden"
-          accept="image/*"
-          onChange={handleCoverPhotoChange}
-        />
-      </div>
-      <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-white shadow-xl flex justify-center items-center">
-        <Avatar className="w-36 h-36 ring-4 ring-white">
-          <img
-            src={
-              userDetails.picture ||
-              "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"
+    isEditable = true,
+    maxImageSize = 5,
+    onImageError,
+  }: ProfileHeaderProps) => {
+    const [isCoverPhotoLoading, setIsCoverPhotoLoading] = useState(false);
+    const [isProfilePhotoLoading, setIsProfilePhotoLoading] = useState(false);
+    const [coverImageError, setCoverImageError] = useState(false);
+    const [profileImageError, setProfileImageError] = useState(false);
+
+    const validateImage = useCallback(
+      (file: File): string | null => {
+        if (file.size > maxImageSize * 1024 * 1024) {
+          return `Image size must be less than ${maxImageSize}MB`;
+        }
+
+        const validTypes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+        ];
+        if (!validTypes.includes(file.type)) {
+          return "Please select a valid image file (JPEG, PNG, or WebP)";
+        }
+
+        return null;
+      },
+      [maxImageSize]
+    );
+
+    const onCoverPhotoChange = useCallback(
+      async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const validationError = validateImage(file);
+        if (validationError) {
+          onImageError?.(validationError);
+          return;
+        }
+
+        setIsCoverPhotoLoading(true);
+        setCoverImageError(false);
+
+        try {
+          await handleCoverPhotoChange(e);
+        } catch (error) {
+          setCoverImageError(true);
+          onImageError?.("Failed to upload cover photo. Please try again.");
+        } finally {
+          setIsCoverPhotoLoading(false);
+        }
+      },
+      [handleCoverPhotoChange, validateImage, onImageError]
+    );
+
+    const onProfilePhotoChange = useCallback(
+      async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const validationError = validateImage(file);
+        if (validationError) {
+          onImageError?.(validationError);
+          return;
+        }
+
+        setIsProfilePhotoLoading(true);
+        setProfileImageError(false);
+
+        try {
+          await handleProfilePhotoChange(e);
+        } catch (error) {
+          setProfileImageError(true);
+          onImageError?.("Failed to upload profile photo. Please try again.");
+        } finally {
+          setIsProfilePhotoLoading(false);
+        }
+      },
+      [handleProfilePhotoChange, validateImage, onImageError]
+    );
+
+    const defaultCoverGradient =
+      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+    const fallbackProfileImage =
+      "https://ui-avatars.com/api/?name=" +
+      encodeURIComponent(userDetails.name || "User") +
+      "&background=f59e0b&color=ffffff&size=250&rounded=true";
+
+    return (
+      <div className="relative group">
+        <div className="relative overflow-hidden rounded-2xl shadow-xl">
+          <div
+            className={`w-full h-80 bg-cover bg-center transition-all duration-500 ${
+              coverImageError ? "opacity-50" : ""
+            }`}
+            style={{
+              backgroundImage:
+                userDetails.coverImage && !coverImageError
+                  ? `url(${userDetails.coverImage})`
+                  : defaultCoverGradient,
+            }}
+            role="img"
+            aria-label={
+              userDetails.coverImage
+                ? "User cover photo"
+                : "Default cover background"
             }
-            alt="profile-picture"
-            className="object-cover"
-          />
-          <Button
-            className="absolute bottom-0 right-0 w-8 h-8 p-0 text-white bg-orange-500 rounded-full hover:bg-orange-600"
-            onClick={() => profilePhotoInputRef.current?.click()}
           >
-            <FiEdit2 size={14} />
-          </Button>
-          <input
-            type="file"
-            ref={profilePhotoInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={handleProfilePhotoChange}
-          />
-        </Avatar>
+            <div className="absolute inset-0 bg-black/10" />
+
+            {isEditable && (
+              <div className="absolute top-6 right-6 flex gap-2">
+                <Button
+                  className={`
+                    bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 
+                    backdrop-blur-md rounded-full p-3 transition-all duration-300
+                    shadow-lg hover:shadow-xl transform hover:scale-105
+                    ${
+                      isCoverPhotoLoading ? "cursor-not-allowed opacity-70" : ""
+                    }
+                  `}
+                  onClick={() => coverPhotoInputRef.current?.click()}
+                  aria-label="Change cover photo"
+                  disabled={isCoverPhotoLoading}
+                  size="sm"
+                >
+                  {isCoverPhotoLoading ? (
+                    <FiLoader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FaCamera className="w-4 h-4" />
+                  )}
+                </Button>
+
+                {/* Progress indicator */}
+                {isCoverPhotoLoading && (
+                  <div className="absolute -bottom-1 left-0 right-0 h-1 bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 animate-pulse" />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <input
+              type="file"
+              ref={coverPhotoInputRef}
+              className="hidden"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={onCoverPhotoChange}
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+          <div className="relative p-2">
+            <div className="w-40 h-40 rounded-full bg-white p-1 shadow-2xl transition-transform duration-300 hover:scale-105">
+              <Avatar className="w-full h-full ring-4 ring-white/50 relative">
+                <img
+                  src={
+                    profileImageError
+                      ? fallbackProfileImage
+                      : userDetails.picture || fallbackProfileImage
+                  }
+                  alt={`${userDetails.name || "User"}'s profile picture`}
+                  className={`
+                    object-cover w-full h-full transition-all duration-300
+                    ${profileImageError ? "opacity-50" : ""}
+                  `}
+                  loading="lazy"
+                  onError={() => setProfileImageError(true)}
+                  onLoad={() => setProfileImageError(false)}
+                />
+              </Avatar>
+            </div>
+
+            {isEditable && (
+              <Button
+                className={`
+                  absolute bottom-0 right-0 w-12 h-12 p-0 
+                  bg-gradient-to-r from-orange-400 to-orange-600 
+                  hover:from-orange-500 hover:to-orange-700
+                  text-white rounded-full shadow-lg hover:shadow-xl
+                  transition-all duration-300 transform hover:scale-110
+                  border-4 border-white z-10
+                  ${
+                    isProfilePhotoLoading ? "cursor-not-allowed opacity-70" : ""
+                  }
+                `}
+                onClick={() => profilePhotoInputRef.current?.click()}
+                aria-label="Change profile picture"
+                disabled={isProfilePhotoLoading}
+              >
+                {isProfilePhotoLoading ? (
+                  <FiLoader className="w-5 h-5 animate-spin" />
+                ) : (
+                  <FiEdit2 className="w-5 h-5" />
+                )}
+              </Button>
+            )}
+
+            <input
+              type="file"
+              ref={profilePhotoInputRef}
+              className="hidden"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={onProfilePhotoChange}
+              aria-hidden="true"
+            />
+
+            {isProfilePhotoLoading && (
+              <div className="absolute inset-2 flex items-center justify-center">
+                <div className="w-44 h-44 rounded-full border-4 border-blue-200">
+                  <div className="w-full h-full rounded-full border-4 border-transparent border-t-blue-500 animate-spin" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {coverImageError && (
+          <div className="absolute top-4 left-4 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg text-sm">
+            Failed to load cover image
+          </div>
+        )}
       </div>
-    </div>
-  )
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.userDetails.coverImage === nextProps.userDetails.coverImage &&
+      prevProps.userDetails.picture === nextProps.userDetails.picture &&
+      prevProps.userDetails.name === nextProps.userDetails.name &&
+      prevProps.isEditable === nextProps.isEditable &&
+      prevProps.maxImageSize === nextProps.maxImageSize
+    );
+  }
 );
+
+ProfileHeader.displayName = "ProfileHeader";
 
 export default ProfileHeader;

@@ -216,17 +216,8 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => scrollToSubscription(), 500);
-    } else {
-      scrollToSubscription();
-    }
+    navigate("/membership");
   };
-  const scrollToSubscription = () =>
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <>

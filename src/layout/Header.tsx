@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Search, X, User, LogOut } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { FaTimes, FaUserCircle } from "react-icons/fa";
-import { FaBars, FaPhone } from "react-icons/fa6";
+import { FaBars } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -51,18 +51,8 @@ const Header = () => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate("/mentoons");
-      setTimeout(() => scrollToSubscription(), 500);
-    } else {
-      scrollToSubscription();
-    }
+    navigate("/membership");
   };
-
-  const scrollToSubscription = () =>
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
 
   const handleSearchToggle = () => {
     setShowSearch(!showSearch);
