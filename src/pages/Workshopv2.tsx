@@ -38,6 +38,7 @@ const Workshopv2 = () => {
   const { getToken } = useAuth();
 
   const { user: clerkUser } = useUser();
+  // console.log("Clerk User:", clerkUser);
 
   const [formData, setFormData] = useState({
     firstname: "",
