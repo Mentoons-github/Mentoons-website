@@ -1,33 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { SignedOut } from "@clerk/clerk-react";
 
 type WelcomeModalProps = {
   onClose: () => void;
 };
 
 const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
-
-  const handleBrowsePlansClick = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    if (location.pathname !== "/mentoons") {
-      navigate("/mentoons");
-      setTimeout(() => scrollToSubscription(), 500);
-    } else {
-      scrollToSubscription();
-    }
-  };
-
-  const scrollToSubscription = () =>
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
     const checkScrollable = () => {
@@ -69,14 +51,26 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
   };
 
   const details = {
-    Workshops:
-      "Engaging sessions for all ages, including music and art therapy, storytelling, revival of ancient values, study skills, and a basic introduction to spirituality.",
-    "Comics & Audio Comics":
-      "Engaging stories that inspire creativity and teach positive values, providing a healthy alternative to excessive screen time and helping children develop focus and imagination.",
-    Podcasts:
-      "Engaging discussions offering practical advice to manage digital distractions, build self-control, and promote emotional well-being for children and families.",
-    Assessments:
-      "Tools to identify and address social media and mobile addiction, offering personalized guidance to improve academic focus and overall personal growth.",
+    Workshops: {
+      description:
+        "Engaging sessions for all ages, including music and art therapy, storytelling, revival of ancient values, study skills, and a basic introduction to spirituality.",
+      link: "/mentoons-workshops",
+    },
+    "Comics & Audio Comics": {
+      description:
+        "Engaging stories that inspire creativity and teach positive values, providing a healthy alternative to excessive screen time and helping children develop focus and imagination.",
+      link: "/mentoons-comics?option=comic",
+    },
+    Podcasts: {
+      description:
+        "Engaging discussions offering practical advice to manage digital distractions, build self-control, and promote emotional well-being for children and families.",
+      link: "/mentoons-podcast",
+    },
+    Assessments: {
+      description:
+        "Tools to identify and address social media and mobile addiction, offering personalized guidance to improve academic focus and overall personal growth.",
+      link: "/assessment-page",
+    },
   };
 
   const itemVariants = {
@@ -162,33 +156,33 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
                 </div>
                 <div>
                   <NavLink
-                    to="/mentoons"
-                    onClick={handleBrowsePlansClick}
+                    to={value.link}
                     className="text-orange-500 font-bold hover:underline"
                   >
                     {key}
                   </NavLink>
-                  : {value}
+                  : {value.description}
                 </div>
               </li>
             ))}
           </ul>
-
-          <div className="flex flex-col justify-center items-center mt-6 gap-4">
-            <NavLink
-              to="/sign-up"
-              className="text-center text-base md:text-lg text-white px-6 md:px-24 py-3 bg-orange-500 rounded-full font-bold w-full md:w-auto"
-            >
-              Take the First Step
-            </NavLink>
-
-            <span className="text-orange-500 text-sm md:text-base">
-              Already have an account?{" "}
-              <NavLink to="/sign-in" className="underline">
-                Log In
+          <SignedOut>
+            <div className="flex flex-col justify-center items-center mt-6 gap-4">
+              <NavLink
+                to="/sign-up"
+                className="text-center text-base md:text-lg text-white px-6 md:px-24 py-3 bg-orange-500 rounded-full font-bold w-full md:w-auto"
+              >
+                Take the First Step
               </NavLink>
-            </span>
-          </div>
+
+              <span className="text-orange-500 text-sm md:text-base">
+                Already have an account?{" "}
+                <NavLink to="/sign-in" className="underline">
+                  Log In
+                </NavLink>
+              </span>
+            </div>
+          </SignedOut>
 
           <p className="text-gray-500 text-xs md:text-sm text-center mt-6 md:mt-8">
             By continuing, you agree to our Terms of Use and Privacy Policy

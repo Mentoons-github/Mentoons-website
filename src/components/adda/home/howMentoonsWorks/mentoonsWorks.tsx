@@ -1,7 +1,7 @@
 import useInView from "@/hooks/useInView";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const videos = [
   {
@@ -55,7 +55,6 @@ const HowMentoonsWork = () => {
   const isMobile = window.innerWidth < 768;
   const { ref: sectionRef, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
   const navigate = useNavigate();
-  const location = useLocation();
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [isPlaying, setIsPlaying] = useState<boolean[]>(
     Array(videos.length).fill(false)
@@ -64,22 +63,11 @@ const HowMentoonsWork = () => {
     Array(videos.length).fill(false)
   );
 
-  const scrollToSubscription = () => {
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const handleBrowsePlansClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (location.pathname !== "/mentoons") {
-      navigate("/mentoons");
-      setTimeout(scrollToSubscription, 500);
-    } else {
-      scrollToSubscription();
-    }
+    navigate("/membership");
   };
 
   const handlePlayClick = (index: number) => {

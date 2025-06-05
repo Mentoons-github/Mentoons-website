@@ -45,12 +45,11 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
     return pointsMapping[eventType] || 0;
   };
 
-  // Show the notification with animation
   useEffect(() => {
     setVisible(true);
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(onClose, 300); // Wait for fade-out animation to complete
+      setTimeout(onClose, 300);
     }, 3000);
 
     return () => clearTimeout(timer);

@@ -64,6 +64,7 @@ const ComicsPageV2 = () => {
   const [dbUser, setDbUser] = useState<any>(null);
 
   const membershipType = dbUser?.subscription.plan;
+
   const [currentProductId, setCurrentProductId] = useState<string>("");
 
   // Subscription limit modal state
@@ -961,7 +962,7 @@ const ComicsPageV2 = () => {
         onClose={() => setShowSubscriptionLimitModal(false)}
         message={limitModalMessage}
         title={limitModalTitle}
-        planType={"free"} // Fall back to 'free' if membershipType causes type issues
+        planType={"free"}
       />
 
       {/* Feature of the Month Section */}
@@ -1097,7 +1098,7 @@ const ComicsPageV2 = () => {
           onClose={() => setShowSubscriptionLimitModal(false)}
           message={limitModalMessage}
           title={limitModalTitle}
-          planType={"free"} // Fall back to 'free' if membershipType causes type issues
+          planType={"free"}
         />
       )}
     </div>

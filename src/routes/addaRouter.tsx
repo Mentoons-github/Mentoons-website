@@ -7,7 +7,7 @@ import { Route, Routes } from "react-router-dom";
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
-const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile"));
+const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile/profile"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
 const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
 const Notification = lazy(
@@ -23,7 +23,6 @@ const AddaRouter = () => {
         <Route index element={<AddaHome />} />
         <Route path="community" element={<AddaGroups />} />
         <Route path="messages" element={<AddaMessages />} />
-        <Route path="user-profile" element={<UserProfile />} />
         <Route path="post/:postId" element={<PostDetails />} />
         <Route path="notifications" element={<Notification />} />
         <Route path="meme" element={<MemePage />} />
@@ -32,7 +31,7 @@ const AddaRouter = () => {
         <Route path="search-friend" element={<FriendSearch />} />
         <Route path="posts/:postId" element={<PostPage />} />
       </Route>
-      {/* <GlobalAuthModal /> */}
+      <Route path="user-profile" element={<UserProfile />} />
     </Routes>
   );
 };

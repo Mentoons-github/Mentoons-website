@@ -1,41 +1,32 @@
-import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { NavLink } from "react-router-dom";
 
 const WhatWeOffer = ({
   onActionButtonClick,
 }: {
   onActionButtonClick: () => void;
 }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const details = {
-    Workshops:
-      "Engaging sessions for all ages, including music and art therapy, storytelling, revival of ancient values.",
-    "Comics & Audio Comics":
-      "Engaging stories that inspire creativity and teach positive values, providing a healthy alternative to excessive screen time and helping children develop focus and imagination.",
-    Podcasts:
-      "Engaging discussions offering practical advice to manage digital distractions, build self-control, and promote emotional well-being for children and families.",
-    Assessments:
-      "Tools to identify and address social media and mobile addiction, offering personalized guidance to improve academic focus and overall personal growth.",
-  };
-
-  const scrollToSubscription = () => {
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleBrowsePlansClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    if (location.pathname !== "/mentoons") {
-      navigate("/mentoons");
-      setTimeout(scrollToSubscription, 500);
-    } else {
-      scrollToSubscription();
-    }
+    Workshops: {
+      description:
+        "Engaging sessions for all ages, including music and art therapy, storytelling, revival of ancient values, study skills, and a basic introduction to spirituality.",
+      link: "/mentoons-workshops",
+    },
+    "Comics & Audio Comics": {
+      description:
+        "Engaging stories that inspire creativity and teach positive values, providing a healthy alternative to excessive screen time and helping children develop focus and imagination.",
+      link: "/mentoons-comics?option=comic",
+    },
+    Podcasts: {
+      description:
+        "Engaging discussions offering practical advice to manage digital distractions, build self-control, and promote emotional well-being for children and families.",
+      link: "/mentoons-podcast",
+    },
+    Assessments: {
+      description:
+        "Tools to identify and address social media and mobile addiction, offering personalized guidance to improve academic focus and overall personal growth.",
+      link: "/assessment-page",
+    },
   };
 
   return (
@@ -68,9 +59,9 @@ const WhatWeOffer = ({
       <ul className="mx-auto space-y-4 mt-6">
         {Object.entries(details).map(([key, value], index) => (
           <li key={index}>
-            <button
+            <NavLink
+              to={value.link}
               className="w-full text-left flex items-start gap-2 md:gap-5 bg-white hover:bg-orange-100 text-gray-700 p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              onClick={handleBrowsePlansClick}
               aria-label={`Learn more about ${key}`}
             >
               <svg
@@ -90,9 +81,9 @@ const WhatWeOffer = ({
               </svg>
               <div>
                 <span className="text-orange-500 font-bold">{key}</span>:{" "}
-                {value}
+                {value.description}
               </div>
-            </button>
+            </NavLink>
           </li>
         ))}
       </ul>

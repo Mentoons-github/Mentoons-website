@@ -14,7 +14,7 @@ import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
 import Home from "./pages/Home";
-import Membership from "./pages/Membership";
+import Membership from "./components/LandingPage/membership/membership.tsx";
 import MentoonsStore from "./pages/MentoonsStore";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
 
@@ -79,7 +79,7 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
-  { path: "/membership", element: <Membership /> },
+  // { path: "/membership", element: <Membership /> },
   { path: "/hiring", element: <CareerPage /> },
   { path: "/assessment-page", element: <Assessment /> },
   { path: "/assessment-questions", element: <AssessmentQuestions /> },
@@ -90,6 +90,7 @@ const routes = [
   { path: "/bookings", element: <AdvancedBookingSystem /> },
   { path: "/mythos/*", element: <MythosRouter /> },
   { path: "/search", element: <SearchResultsPage /> },
+  { path: "/membership", element: <Membership /> },
 ];
 
 const Router = () => {
