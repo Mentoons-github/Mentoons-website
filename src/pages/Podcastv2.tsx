@@ -149,18 +149,8 @@ const Podcastv2 = () => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate("/mentoons");
-      setTimeout(() => scrollToSubscription(), 500);
-    } else {
-      scrollToSubscription();
-    }
+    navigate("/membership");
   };
-
-  const scrollToSubscription = () =>
-    document
-      .getElementById("subscription")
-      ?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,0 +1,965 @@
+import { format } from "date-fns";
+import { useEffect, useRef, useState } from "react";
+import Confetti from "react-confetti";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaBookmark, FaUsers } from "react-icons/fa";
+import { FiAward, FiEdit2, FiHome, FiUser } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import RewardsSection from "@/components/adda/userProfile/rewardsSection";
+import UserListModal from "@/components/common/modal/userList";
+import ProfileForm from "./profieForm";
+import ProfileHeader from "./profileHeader";
+import ProfileCompletion from "./profileCompletion";
+import { triggerReward } from "@/utils/rewardMiddleware";
+import { RewardEventType } from "@/types/rewards";
+import PhotosCard from "./cards/photosCard";
+
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+  caption?: string;
+}
+
+interface PostUser {
+  _id: string;
+  name: string;
+  picture?: string;
+  email?: string;
+}
+
+interface Comment {
+  _id?: string;
+  userId?: string;
+  user?: {
+    _id: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  };
+  content?: string;
+  text?: string;
+  createdAt?: string;
+}
+
+interface Post {
+  _id: string;
+  postType: "text" | "photo" | "video" | "article" | "event" | "mixed";
+  user: PostUser;
+  content?: string;
+  media?: MediaItem[];
+  likes: string[];
+  comments: Comment[];
+  shares: string[];
+  saves?: string[] | number;
+  visibility: "public" | "friends" | "private";
+  createdAt: string;
+}
+
+export interface UserDetails {
+  _id: string;
+  name: string;
+  email: string;
+  picture?: string;
+  bio?: string;
+  phoneNumber?: string;
+  location?: string;
+  education?: string;
+  occupation?: string;
+  interests?: string[];
+  coverImage?: string;
+  followers?: string[];
+  following?: string[];
+  dateOfBirth?: string;
+  gender?: string;
+  socialLinks?: Array<{ label: string; url: string }>;
+  joinedDate?: string;
+}
+
+interface ProfileField {
+  field: keyof UserDetails;
+  label: string;
+  minLength?: number;
+  required?: boolean;
+}
+
+type TabTypes = "profile" | "posts" | "friends" | "rewards" | "saved";
+
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return "Not provided";
+  try {
+    return format(new Date(dateString), "MMMM d, yyyy");
+  } catch {
+    return dateString;
+  }
+};
+
+const profileFields: ProfileField[] = [
+  { field: "name", label: "Name", required: true },
+  { field: "picture", label: "Profile Picture" },
+  { field: "email", label: "Email", required: true },
+  { field: "phoneNumber", label: "Phone Number" },
+  { field: "location", label: "Location" },
+  { field: "bio", label: "Bio", minLength: 10 },
+  { field: "education", label: "Education" },
+  { field: "occupation", label: "Occupation" },
+  { field: "interests", label: "Interests", minLength: 3 },
+  { field: "dateOfBirth", label: "Date of Birth" },
+  { field: "gender", label: "Gender" },
+  { field: "socialLinks", label: "Social Links" },
+];
+
+const Profile = () => {
+  const [activeTab, setActiveTab] = useState<TabTypes>("profile");
+  const [isEditing, setIsEditing] = useState(false);
+  const [showCompletionForm, setShowCompletionForm] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [modalType, setModalType] = useState<"followers" | "following" | null>(
+    null
+  );
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [userSavedPosts, setUserSavedPosts] = useState<Post[]>([]);
+  const [totalFollowers, setTotalFollowers] = useState<string[]>([]);
+  const [totalFollowing, setTotalFollowing] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [userDetails, setUserDetails] = useState<UserDetails>({
+    _id: "",
+    name: "",
+    email: "",
+    phoneNumber: "",
+    dateOfBirth: "",
+    gender: "",
+    socialLinks: [],
+    interests: [],
+  });
+
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  const coverPhotoInputRef = useRef<HTMLInputElement>(null);
+  const profilePhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const profileRef = useRef<HTMLDivElement>(null);
+  const postsRef = useRef<HTMLDivElement>(null);
+  const savedRef = useRef<HTMLDivElement>(null);
+  const rewardsRef = useRef<HTMLDivElement>(null);
+
+  const handleTabChange = (tab: TabTypes) => {
+    setActiveTab(tab);
+    let targetRef: React.RefObject<HTMLDivElement> | null = null;
+    switch (tab) {
+      case "profile":
+        targetRef = profileRef;
+        break;
+      case "posts":
+        targetRef = postsRef;
+        break;
+      case "saved":
+        targetRef = savedRef;
+        break;
+      case "rewards":
+        targetRef = rewardsRef;
+        break;
+      default:
+        break;
+    }
+    if (targetRef?.current) {
+      const offset = 2;
+      const elementPosition =
+        targetRef.current.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: "smooth",
+      });
+      targetRef.current.focus({ preventScroll: true });
+    }
+  };
+
+  const getProfileCompletion = () => {
+    let completedFields = 0;
+    if (!userDetails) return 0;
+
+    profileFields.forEach((field) => {
+      const value = userDetails[field.field];
+      if (field.field === "interests") {
+        if ((value as string[])?.length >= (field.minLength || 1)) {
+          completedFields++;
+        }
+      } else if (field.field === "socialLinks") {
+        if (
+          (value as Array<{ label: string; url: string }>)?.length >=
+          (field.minLength || 1)
+        ) {
+          completedFields++;
+        }
+      } else if (field.field === "bio") {
+        if ((value as string)?.length >= (field.minLength || 1)) {
+          completedFields++;
+        }
+      } else if (field.field === "picture") {
+        if (value || user?.imageUrl) {
+          completedFields++;
+        }
+      } else if (value && String(value).trim() !== "") {
+        completedFields++;
+      }
+    });
+
+    return Math.round((completedFields / profileFields.length) * 100);
+  };
+
+  const getIncompleteFields = () => {
+    const incompleteFields: string[] = [];
+    if (!userDetails) return profileFields.map((field) => field.label);
+
+    profileFields.forEach((field) => {
+      const value = userDetails[field.field];
+      if (field.field === "interests") {
+        if (
+          !(value as string[])?.length ||
+          (value as string[])?.length < (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (field.field === "socialLinks") {
+        if (
+          !(value as Array<{ label: string; url: string }>)?.length ||
+          (value as Array<{ label: string; url: string }>)?.length <
+            (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (field.field === "bio") {
+        if (
+          !(value as string) ||
+          (value as string).length < (field.minLength || 1)
+        ) {
+          incompleteFields.push(field.label);
+        }
+      } else if (field.field === "picture") {
+        if (!value && !user?.imageUrl) {
+          incompleteFields.push(field.label);
+        }
+      } else if (!value || String(value).trim() === "") {
+        incompleteFields.push(field.label);
+      }
+    });
+
+    return incompleteFields;
+  };
+
+  const profileCompletionPercentage = getProfileCompletion();
+  const isProfileComplete = profileCompletionPercentage === 100;
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      setError(null);
+      const token = await getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const [userResponse, postsResponse, savedPostsResponse] =
+          await Promise.all([
+            axios.get(
+              `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
+            axios.get(
+              `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
+            axios.get(`${import.meta.env.VITE_PROD_URL}/feeds/saved`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+
+        setUserDetails(userResponse.data.data);
+        setTotalFollowers(userResponse.data.data.followers || []);
+        setTotalFollowing(userResponse.data.data.following || []);
+
+        setUserPosts(
+          postsResponse.data.data.map((post: Post) => ({
+            ...post,
+            postType: post.postType || "text",
+            user: post.user || {
+              _id: user?.id || "",
+              name: userDetails.name || "",
+              picture: userDetails.picture || "",
+              email: userDetails.email || "",
+            },
+            shares: post.shares || [],
+            saves: post.saves || 0,
+            visibility: post.visibility || "public",
+          }))
+        );
+
+        setUserSavedPosts(
+          savedPostsResponse.data.data.map((post: Post) => ({
+            ...post,
+            postType: post.postType || "text",
+            user: {
+              _id: post.user?._id || "",
+              name: post.user?.name || "User",
+              picture: post.user?.picture || "",
+              email: post.user?.email || "user@example.com",
+            },
+            shares: post.shares || [],
+            saves: post.saves || 0,
+            visibility: post.visibility || "public",
+          }))
+        );
+      } catch (error) {
+        setError("Failed to load profile data");
+        toast.error("Failed to load profile data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchUserData();
+    }
+  }, [
+    user?.id,
+    getToken,
+    userDetails.name,
+    userDetails.picture,
+    userDetails.email,
+  ]);
+
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const profileData = {
+      bio: formData.get("bio") as string,
+      location: formData.get("location") as string,
+      education: formData.get("education") as string,
+      occupation: formData.get("occupation") as string,
+      phoneNumber: formData.get("phoneNumber") as string,
+      interests: userDetails.interests || [],
+      coverPhoto: (user?.unsafeMetadata?.coverPhoto as string) || "",
+      picture: user?.imageUrl || "",
+      dateOfBirth: formData.get("dateOfBirth") as string,
+      socialLinks: userDetails.socialLinks || [],
+      gender: formData.get("gender") as string,
+    };
+
+    const token = await getToken();
+    if (!token) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        profileData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        toast.success("Profile updated successfully");
+        setUserDetails((prev) => ({ ...prev, ...profileData }));
+        setIsEditing(false);
+        setShowCompletionForm(false);
+        triggerReward(RewardEventType.PROFILE_COMPLETION);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
+    } catch {
+      toast.error("Failed to update profile");
+    }
+  };
+
+  const handleCoverPhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const token = await getToken();
+    if (!token) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    try {
+      toast.loading("Uploading cover photo...");
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadResponse = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
+      if (!fileUrl) {
+        toast.dismiss();
+        toast.error("Failed to upload cover photo");
+        return;
+      }
+
+      await user?.update({ unsafeMetadata: { coverPhoto: fileUrl } });
+      await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { coverPhoto: fileUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.dismiss();
+      toast.success("Cover photo updated successfully");
+      setUserDetails((prev) => ({ ...prev, coverPhoto: fileUrl }));
+    } catch {
+      toast.dismiss();
+      toast.error("Failed to upload cover photo");
+    }
+  };
+
+  const handleProfilePhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const token = await getToken();
+    if (!token) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    try {
+      toast.loading("Uploading profile photo...");
+      const formData = new FormData();
+      formData.append("file", file);
+      await user?.setProfileImage({ file });
+      const uploadResponse = await axios.post(
+        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
+      if (!fileUrl) {
+        toast.dismiss();
+        toast.error("Failed to upload profile photo");
+        return;
+      }
+
+      await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { picture: fileUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.dismiss();
+      toast.success("Profile photo updated successfully");
+      setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
+    } catch {
+      toast.dismiss();
+      toast.error("Failed to upload profile photo");
+    }
+  };
+
+  const removeInterest = (indexToRemove: number) => {
+    setUserDetails((prev) => ({
+      ...prev,
+      interests: (prev.interests || []).filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  };
+
+  const updateInterests = async () => {
+    const token = await getToken();
+    if (!token) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { interests: userDetails.interests || [] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        toast.success("Interests updated successfully");
+      }
+    } catch {
+      toast.error("Failed to update interests");
+    }
+  };
+
+  useEffect(() => {
+    if (userDetails?.socialLinks?.some((link) => typeof link === "string")) {
+      const convertedLinks = (
+        userDetails.socialLinks as Array<
+          string | { label: string; url: string }
+        >
+      ).map((link) =>
+        typeof link === "string" ? { label: "Link", url: link } : link
+      );
+      setUserDetails((prev) => ({ ...prev, socialLinks: convertedLinks }));
+    }
+  }, [userDetails?.socialLinks]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {showConfetti && (
+        <Confetti recycle={false} numberOfPieces={500} className="w-full" />
+      )}
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        <ProfileHeader
+          userDetails={userDetails}
+          coverPhotoInputRef={coverPhotoInputRef}
+          profilePhotoInputRef={profilePhotoInputRef}
+          handleCoverPhotoChange={handleCoverPhotoChange}
+          handleProfilePhotoChange={handleProfilePhotoChange}
+        />
+
+        {!isProfileComplete && !showCompletionForm && (
+          <ProfileCompletion
+            profileCompletionPercentage={profileCompletionPercentage}
+            incompleteFields={getIncompleteFields()}
+            setShowCompletionForm={setShowCompletionForm}
+          />
+        )}
+
+        {showCompletionForm && (
+          <ProfileForm
+            userDetails={userDetails}
+            setUserDetails={setUserDetails}
+            setShowCompletionForm={setShowCompletionForm}
+            handleProfileSubmit={handleProfileSubmit}
+            removeInterest={removeInterest}
+            updateInterests={updateInterests}
+          />
+        )}
+
+        <div className="text-center pt-16">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex gap-4">
+              {["profile", "posts"].map((tab) => (
+                <Button
+                  key={tab}
+                  onClick={() => handleTabChange(tab as TabTypes)}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "text-gray-700 hover:text-orange-500 hover:bg-orange-50"
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </Button>
+              ))}
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                {userDetails.name}
+              </h1>
+              <p className="text-gray-600">{userDetails.email}</p>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(!isEditing)}
+                className="mt-3 text-sm text-orange-500 border-orange-500 hover:bg-orange-50"
+              >
+                <FiEdit2 className="mr-2" />{" "}
+                {isEditing ? "Save Changes" : "Edit Profile"}
+              </Button>
+            </div>
+            <div className="flex gap-4">
+              {["saved", "rewards"].map((tab) => (
+                <Button
+                  key={tab}
+                  onClick={() => handleTabChange(tab as TabTypes)}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "text-gray-700 hover:text-orange-500 hover:bg-orange-50"
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-12 py-6 border-y border-gray-200">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-500">
+                {userPosts.length}
+              </div>
+              <div className="text-sm text-gray-600">Posts</div>
+            </div>
+            <button
+              onClick={() => setModalType("followers")}
+              className="text-center"
+            >
+              <div className="text-2xl font-bold text-orange-500">
+                {totalFollowers.length}
+              </div>
+              <div className="text-sm text-gray-600">Followers</div>
+            </button>
+            <button
+              onClick={() => setModalType("following")}
+              className="text-center"
+            >
+              <div className="text-2xl font-bold text-orange-500">
+                {totalFollowing.length}
+              </div>
+              <div className="text-sm text-gray-600">Following</div>
+            </button>
+          </div>
+        </div>
+
+        <div ref={profileRef} tabIndex={-1} className="pt-4">
+          {activeTab === "profile" && (
+            <div className="flex justify-between gap-6">
+              <div className="w-full mx-auto">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <Card className="relative p-6 sm:p-8 border border-orange-100 rounded-xl shadow-lg bg-white overflow-hidden">
+                    <div className="absolute right-0 top-0 w-1/3 h-full hidden lg:block">
+                      <motion.div
+                        className="absolute w-16 h-16 bg-orange-200 rounded-full opacity-30"
+                        animate={{
+                          y: [0, -20, 0],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 0.2,
+                        }}
+                        style={{ right: "10%", top: "20%" }}
+                      />
+                      <motion.div
+                        className="absolute w-12 h-12 bg-orange-300 rounded-full opacity-30"
+                        animate={{
+                          y: [0, 15, 0],
+                          scale: [1, 0.9, 1],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 0.5,
+                        }}
+                        style={{ right: "25%", top: "50%" }}
+                      />
+                      <motion.div
+                        className="absolute w-20 h-20 bg-orange-100 rounded-full opacity-20"
+                        animate={{
+                          y: [0, -10, 0],
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                          duration: 5,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                        style={{ right: "15%", top: "70%" }}
+                      />
+                    </div>
+
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 text-center sm:text-left">
+                      Personal Information
+                    </h2>
+
+                    <AnimatePresence>
+                      {isEditing ? (
+                        <motion.div
+                          key="form"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ProfileForm
+                            userDetails={userDetails}
+                            setUserDetails={setUserDetails}
+                            setShowCompletionForm={setShowCompletionForm}
+                            handleProfileSubmit={handleProfileSubmit}
+                            removeInterest={removeInterest}
+                            updateInterests={updateInterests}
+                          />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="details"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pr-0 lg:pr-48"
+                        >
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Name:</strong>{" "}
+                            {userDetails.name}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.15 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Email:</strong>{" "}
+                            {userDetails.email}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.2 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Phone:</strong>{" "}
+                            {userDetails.phoneNumber || "Not provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.25 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Location:</strong>{" "}
+                            {userDetails.location || "Not provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.3 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">
+                              Date of Birth:
+                            </strong>{" "}
+                            {formatDate(userDetails.dateOfBirth)}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.35 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Gender:</strong>{" "}
+                            {userDetails.gender
+                              ? userDetails.gender.charAt(0).toUpperCase() +
+                                userDetails.gender.slice(1).replace("-", " ")
+                              : "Not provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.4 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Education:</strong>{" "}
+                            {userDetails.education || "Not provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.45 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Occupation:</strong>{" "}
+                            {userDetails.occupation || "Not provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.5 }}
+                            className="text-gray-700 sm:col-span-2"
+                          >
+                            <strong className="font-medium">Bio:</strong>{" "}
+                            {userDetails.bio || "No bio provided"}
+                          </motion.p>
+                          <motion.p
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: 0.55 }}
+                            className="text-gray-700"
+                          >
+                            <strong className="font-medium">Joined:</strong>{" "}
+                            {formatDate(userDetails.joinedDate)}
+                          </motion.p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Card>
+                </motion.div>
+              </div>
+              <PhotosCard userPosts={userPosts} />
+            </div>
+          )}
+        </div>
+
+        <div ref={postsRef} tabIndex={-1} className="pt-4">
+          {activeTab === "posts" && (
+            <Card className="p-6 border border-orange-100 shadow-lg rounded-xl">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                My Posts
+              </h3>
+              <div className="space-y-6">
+                {userPosts.map((post) => (
+                  <PostCard
+                    setUserPosts={setUserPosts}
+                    isUser={true}
+                    key={post._id}
+                    post={post as unknown as PostData}
+                  />
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+
+        <div ref={savedRef} tabIndex={-1} className="pt-4">
+          {activeTab === "saved" && (
+            <Card className="p-6 border border-orange-100 shadow-lg rounded-xl">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Saved Items
+              </h3>
+              {userSavedPosts.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="flex flex-col items-center justify-center py-12 text-center"
+                >
+                  <FaBookmark className="text-4xl text-orange-500 mb-4" />
+                  <p className="text-lg text-gray-600 mb-2">
+                    No saved posts yet!
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Start saving posts to see them here.
+                  </p>
+                  <Button
+                    asChild
+                    className="mt-4 bg-orange-500 text-white hover:bg-orange-600"
+                  >
+                    <Link to="/adda">Explore Posts</Link>
+                  </Button>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {userSavedPosts.map((item) => (
+                    <PostCard
+                      key={item._id}
+                      post={item as unknown as PostData}
+                    />
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+        </div>
+
+        <div ref={rewardsRef} tabIndex={-1} className="pt-4">
+          {activeTab === "rewards" && <RewardsSection />}
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+        <div className="flex items-center justify-between px-6 h-16">
+          {[
+            { tab: "profile", icon: <FiUser className="text-2xl" /> },
+            { tab: "friends", icon: <FaUsers className="text-2xl" /> },
+            {
+              tab: "home",
+              icon: <FiHome className="text-2xl" />,
+              link: "/adda",
+            },
+            { tab: "rewards", icon: <FiAward className="text-2xl" /> },
+            { tab: "saved", icon: <FaBookmark className="text-2xl" /> },
+          ].map(({ tab, icon, link }) =>
+            link ? (
+              <Link
+                key={tab}
+                to={link}
+                className={`p-2 ${
+                  activeTab === tab ? "text-orange-500" : "text-gray-600"
+                }`}
+              >
+                {icon}
+              </Link>
+            ) : (
+              <button
+                key={tab}
+                className={`p-2 ${
+                  activeTab === tab ? "text-orange-500" : "text-gray-600"
+                }`}
+                onClick={() =>
+                  tab === "friends"
+                    ? setModalType("following")
+                    : handleTabChange(tab as TabTypes)
+                }
+              >
+                {icon}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+      {modalType && (
+        <UserListModal
+          userIds={modalType === "followers" ? totalFollowers : totalFollowing}
+          title={modalType === "followers" ? "Followers" : "Following"}
+          setShowModal={() => setModalType(null)}
+        />
+      )}
+    </>
+  );
+};
+
+export default Profile;

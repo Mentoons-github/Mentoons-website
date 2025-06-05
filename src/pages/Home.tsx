@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
 // import NewSection from "@/components/LandingPage/NewSection";
 import AddaSection from "@/components/LandingPage/addaSection";
-import Membership from "@/components/LandingPage/membership/membership";
+// import Membership from "@/components/LandingPage/membership/membership";
 import NewsAndMentor from "@/components/LandingPage/newsAndMentor/newsAndMentor";
 import ComicViewer from "@/components/common/ComicViewer";
 import TopUpArrow from "@/components/common/topUpArrow/upArrow";
@@ -64,7 +64,7 @@ const Home = () => {
         <Community openComicModal={openComicModal} />
       </motion.div>
       {[
-        { Component: Membership, key: "membership" },
+        // { Component: Membership, key: "membership" },
         { Component: NewsAndMentor, key: "newsSubscription" },
       ].map(({ Component, key }) => (
         <motion.div key={key}>

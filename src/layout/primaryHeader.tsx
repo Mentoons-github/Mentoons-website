@@ -7,9 +7,8 @@ import {
 import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import { FaClock } from "react-icons/fa6";
+import { FaClock, FaPhone } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
-
 
 const PrimaryHeader = () => {
   const location = useLocation();
@@ -47,6 +46,15 @@ const PrimaryHeader = () => {
           <h3>Monday - Saturday</h3>
           <span>10:00 AM - 8:00 PM</span>
         </div>
+        <a
+          href="tel:+919036033300"
+          className="hidden no-underline xl:block flex-shrink-0"
+        >
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
+            <FaPhone className="flex-shrink-0" />{" "}
+            <span className="flex-shrink-0">+91 90360 33300</span>
+          </div>
+        </a>
       </div>
 
       <div className="flex items-center justify-center w-1/2 py-2 overflow-hidden md:w-1/4">
