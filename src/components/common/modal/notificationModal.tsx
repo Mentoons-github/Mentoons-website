@@ -6,6 +6,7 @@ import {
   markNotificationRead,
   updateNotification,
   fetchNotifications,
+  clearAllNotifications,
 } from "@/redux/adda/notificationSlice";
 import { NotificationType } from "@/types";
 import axios from "axios";
@@ -36,6 +37,7 @@ import {
   UserX,
   X,
   XCircle,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa6";
@@ -249,6 +251,13 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     }
   };
 
+  const handleClearAllNotifications = async () => {
+    const token = await getToken();
+    if (token) {
+      await dispatch(clearAllNotifications(token));
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const sortedNotifications = [...notifications].sort((a, b) => {
     if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
@@ -288,24 +297,40 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={async () => {
                       const token = await getToken();
                       if (token) {
                         dispatch(markAllNotificationsRead(token));
                       }
                     }}
-                    className="px-2 py-1 text-xs transition-colors rounded-full bg-white/20 hover:bg-white/30"
+                    className="px-3 py-1.5 text-xs font-medium transition-colors rounded-full bg-white/20 hover:bg-white/30"
                   >
                     Mark all read
-                  </button>
+                  </motion.button>
                 )}
-                <button
+                {notifications.length > 0 && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleClearAllNotifications}
+                    className="px-3 py-1.5 text-xs font-medium transition-colors rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-100"
+                    aria-label="Clear all notifications"
+                  >
+                    <Trash2 size={18} className="inline-block mr-1" />
+                    Clear All
+                  </motion.button>
+                )}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowNotificationModal(false)}
-                  className="p-1 transition-colors rounded-full hover:bg-white/20"
+                  className="p-1.5 transition-colors rounded-full hover:bg-white/20"
                 >
-                  <X size={16} />
-                </button>
+                  <X size={18} />
+                </motion.button>
               </div>
             </div>
           </div>

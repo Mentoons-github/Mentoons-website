@@ -10,7 +10,7 @@ import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import {
   FaBolt,
@@ -22,6 +22,15 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import FAQ from "../faq/faq";
+import { debounce } from "lodash";
+
+interface FetchParams {
+  productType?: string;
+  cardType?: string;
+  token: string;
+  search?: string;
+  ageCategory?: string;
+}
 
 const ProductsSkeletonCard = () => (
   <div className="w-full animate-pulse">
@@ -62,6 +71,50 @@ const ProductsLoadingSkeleton = () => (
   </>
 );
 
+const SearchingSkeleton = ({ searchTerm }: { searchTerm: string }) => (
+  <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
+    <div className="relative p-4 mb-6 rounded-full shadow-lg">
+      <FaMagnifyingGlass className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 top-1/2 left-4" />
+      <input
+        type="text"
+        placeholder="search here...."
+        value={searchTerm}
+        className="w-full pl-10 pr-10 border border-transparent outline-none bg-gray-100"
+        disabled
+      />
+      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+        <div className="w-4 h-4 border-2 border-gray-300 rounded-full animate-spin border-t-blue-500"></div>
+      </div>
+    </div>
+
+    <div className="p-8 mt-10 text-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
+      <div className="flex justify-center mb-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-500"></div>
+          <FaMagnifyingGlass className="absolute w-6 h-6 text-blue-500 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 animate-pulse" />
+        </div>
+      </div>
+      <h3 className="text-2xl font-semibold text-blue-700 mb-2">
+        Searching for "{searchTerm}"...
+      </h3>
+      <p className="text-blue-600 text-lg">
+        Please wait while we find the best products for you
+      </p>
+      <div className="flex justify-center mt-6 space-x-1">
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+        <div
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0.1s" }}
+        ></div>
+        <div
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0.2s" }}
+        ></div>
+      </div>
+    </div>
+  </div>
+);
+
 const ErrorDisplay = ({ message }: { message: string }) => (
   <div className="p-8 mt-10 text-center border border-red-300 rounded-lg bg-red-50">
     <h3 className="mb-2 text-xl font-semibold text-red-700">
@@ -78,7 +131,6 @@ const ErrorDisplay = ({ message }: { message: string }) => (
     </button>
   </div>
 );
-
 const ProductsPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -86,35 +138,84 @@ const ProductsPage = () => {
   const productType = searchParams.get("productType") || undefined;
   const cardType = searchParams.get("cardType") || undefined;
   const [selectedCategory, setSelectedCategory] = useState(category);
-
   const section20Ref = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLDivElement | null>(null);
-
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [cartProductTitle, setCartProductTitle] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const {
     items: products,
     loading,
     error,
   } = useSelector((state: RootState) => state.products);
-
   const { handleAddToCart, handleBuyNow, isLoading } = useProductActions({
     setShowLoginModal,
     setShowAddToCartModal,
     setCartProductTitle,
   });
-
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-
   const NAV_HEIGHT = 100;
+
+  // Debounced fetch function
+  const debouncedFetchProducts = useCallback(
+    debounce(
+      async (
+        search: string,
+        category: string | undefined,
+        productType: string | undefined,
+        cardType: string | undefined
+      ) => {
+        try {
+          setIsSearching(true);
+          const token = await getToken();
+          const fetchParams: FetchParams = {
+            token: token ?? "",
+            ...(productType && { productType }),
+            ...(cardType && { cardType }),
+            ...(search && { search }),
+            ...(category && !search && { ageCategory: category }),
+          };
+
+          const result = await dispatch(fetchProducts(fetchParams)).unwrap();
+          console.log("Fetched products:", result);
+          if (sectionRef.current) {
+            const offsetTop =
+              sectionRef.current.getBoundingClientRect().top +
+              window.scrollY -
+              NAV_HEIGHT;
+            window.scrollTo({ top: offsetTop, behavior: "smooth" });
+          }
+        } catch (error: unknown) {
+          console.error("Error fetching products:", error);
+        } finally {
+          setIsSearching(false);
+        }
+      },
+      500
+    ),
+    [dispatch, getToken]
+  );
 
   useEffect(() => {
     setSelectedCategory(category);
   }, [category]);
+
+  useEffect(() => {
+    debouncedFetchProducts(searchTerm, selectedCategory, productType, cardType);
+    return () => {
+      debouncedFetchProducts.cancel();
+    };
+  }, [
+    searchTerm,
+    selectedCategory,
+    productType,
+    cardType,
+    debouncedFetchProducts,
+  ]);
 
   const handleSelectedCategory = async (category: string) => {
     try {
@@ -153,37 +254,9 @@ const ProductsPage = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchMentoonsProduct = async () => {
-      console.log("cardType :", cardType);
-      try {
-        const token = await getToken();
-        if (productType || cardType || category) {
-          await dispatch(
-            fetchProducts({
-              type: productType,
-              cardType,
-              ageCategory: category,
-              token: token!,
-            })
-          );
-          if (sectionRef.current) {
-            const offsetTop =
-              sectionRef.current.getBoundingClientRect().top +
-              window.scrollY -
-              NAV_HEIGHT;
-            window.scrollTo({ top: offsetTop, behavior: "smooth" });
-          }
-        } else {
-          await dispatch(fetchProducts({}));
-        }
-      } catch (error: unknown) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    fetchMentoonsProduct();
-  }, [dispatch, selectedCategory, productType, cardType, getToken]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   const searchLower = searchTerm?.toLowerCase() || "";
 
@@ -245,7 +318,7 @@ const ProductsPage = () => {
     (!selectedCategory && searchLower === "") ||
     products20Plus.length > 0;
 
-  if (loading) {
+  if (loading && !isSearching) {
     return (
       <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
         <ProductsLoadingSkeleton />
@@ -261,6 +334,10 @@ const ProductsPage = () => {
     );
   }
 
+  if (isSearching && searchTerm.trim()) {
+    return <SearchingSkeleton searchTerm={searchTerm} />;
+  }
+
   return (
     <div className="h-auto px-4 py-8 sm:px-8 md:px-12 lg:px-20 sm:py-10 md:py-15">
       <div className="relative p-4 rounded-full shadow-lg">
@@ -269,10 +346,16 @@ const ProductsPage = () => {
           type="text"
           placeholder="search here...."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 border border-transparent outline-none"
+          onChange={handleSearchChange}
+          className="w-full pl-10 pr-10 border border-transparent outline-none"
         />
+        {isSearching && searchTerm.trim() && (
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+            <div className="w-4 h-4 border-2 border-gray-300 rounded-full animate-spin border-t-blue-500"></div>
+          </div>
+        )}
       </div>
+
       {!searchTerm && (
         <>
           <ProductsSlider shopNow={setSearchTerm} />
@@ -316,12 +399,13 @@ const ProductsPage = () => {
                   No products found
                 </h3>
                 <p className="mt-2 text-gray-500">
-                  We couldn't find anything matching your filters. Try searching
-                  with different keywords.
+                  We couldn't find anything matching your search "{searchTerm}".
+                  Try searching with different keywords.
                 </p>
               </div>
             )}
       </div>
+
       {should20PlusBeShown && products20Plus.length > 0 && (
         <div className="mt-20" ref={section20Ref}>
           <h1 className="mb-8 text-3xl font-medium text-center font-akshar sm:text-4xl md:text-5xl sm:text-left">
@@ -393,6 +477,7 @@ const ProductsPage = () => {
           ))}
         </div>
       )}
+
       {selectedCategory === "20+" && products20Plus.length === 0 && (
         <div className="mt-20">
           <h1 className="mb-8 text-5xl font-medium font-akshar">
