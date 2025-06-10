@@ -1,4 +1,5 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
+import PodcastCard from "@/components/podcast/card";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
@@ -16,7 +17,6 @@ import { IoCloseCircleOutline, IoPlay } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import PodcastCard from "@/components/podcast/card";
 
 // Interface for database user
 interface Subscription {
@@ -1197,7 +1197,7 @@ const Podcastv2 = () => {
                     name="name"
                     id="name"
                     placeholder="Your Name"
-                    value={enquiryName}
+                    value={dbUser?.name || enquiryName}
                     onChange={(e) => setEnquiryName(e.target.value)}
                     className="w-full p-4 mb-2 text-black shadow-lg rounded-xl"
                   />
@@ -1206,7 +1206,7 @@ const Podcastv2 = () => {
                     name="email"
                     id="email"
                     placeholder="Your Email"
-                    value={enquiryEmail}
+                    value={dbUser?.email || enquiryEmail}
                     onChange={(e) => setEnquiryEmail(e.target.value)}
                     className="w-full p-4 text-black shadow-lg rounded-xl"
                   />

@@ -1,14 +1,14 @@
-import { motion } from 'framer-motion';
-import React from 'react';
-import { IoMdClose } from 'react-icons/io';
-import { useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
+import React from "react";
+import { IoMdClose } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 interface SubscriptionLimitModalProps {
   isOpen: boolean;
   onClose: () => void;
   message: string;
   title: string;
-  planType: 'free' | 'prime' | 'platinum';
+  planType: "Free" | "Prime" | "Platinum";
 }
 
 const SubscriptionLimitModal: React.FC<SubscriptionLimitModalProps> = ({
@@ -23,16 +23,18 @@ const SubscriptionLimitModal: React.FC<SubscriptionLimitModalProps> = ({
   if (!isOpen) return null;
 
   const planColorMap = {
-    free: 'from-green-400 to-green-500',
-    prime: 'from-yellow-400 to-orange-500',
-    platinum: 'from-gray-400 to-gray-500',
+    Free: "from-green-400 to-green-500",
+    Prime: "from-yellow-400 to-orange-500",
+    Platinum: "from-gray-400 to-gray-500",
   };
 
   const handleBrowsePlans = () => {
     onClose();
-    navigate('/mentoons');
+    navigate("/mentoons");
     setTimeout(() => {
-      document.getElementById('subscription')?.scrollIntoView({ behavior: 'smooth' });
+      document
+        .getElementById("subscription")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 500);
   };
 
@@ -56,9 +58,7 @@ const SubscriptionLimitModal: React.FC<SubscriptionLimitModalProps> = ({
         {/* Badge */}
         <div className="flex justify-center mb-4">
           <span
-            className={`inline-block py-1.5 px-4 text-sm font-semibold rounded-lg text-white bg-gradient-to-r ${
-              planColorMap[planType]
-            }`}
+            className={`inline-block py-1.5 px-4 text-sm font-semibold rounded-lg text-white bg-gradient-to-r ${planColorMap[planType]}`}
           >
             {planType.charAt(0).toUpperCase() + planType.slice(1)} Plan
           </span>
@@ -86,4 +86,4 @@ const SubscriptionLimitModal: React.FC<SubscriptionLimitModalProps> = ({
   );
 };
 
-export default SubscriptionLimitModal; 
+export default SubscriptionLimitModal;

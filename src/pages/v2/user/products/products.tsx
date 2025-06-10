@@ -100,6 +100,7 @@ const ProductsPage = () => {
     error,
   } = useSelector((state: RootState) => state.products);
 
+
   const { handleAddToCart, handleBuyNow, isLoading } = useProductActions({
     setShowLoginModal,
     setShowAddToCartModal,
@@ -184,6 +185,9 @@ const ProductsPage = () => {
 
     fetchMentoonsProduct();
   }, [dispatch, selectedCategory, productType, cardType, getToken]);
+
+  //Fetch User
+
 
   const searchLower = searchTerm?.toLowerCase() || "";
 

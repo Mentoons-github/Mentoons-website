@@ -1,5 +1,6 @@
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
+import { UserSubscriptionLimits } from "@/utils/subscriptionAccess";
 import { useUser } from "@clerk/clerk-react";
 import * as pdfjsLib from "pdfjs-dist";
 import React, { useEffect, useRef, useState } from "react";
@@ -10,17 +11,34 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
+interface DBUser {
+  _id: string;
+  subscription: {
+    plan: string;
+    startDate?: string;
+    endDate?: string;
+  };
+  subscriptionLimits?: UserSubscriptionLimits;
+}
+
 interface ComicViewerProps {
   pdfUrl: string;
   productType?: string;
   productId?: string; // Add productId for reward tracking
+  dbUser?: DBUser | null;
+  userPlan?: string;
+  contentAccess?: boolean;
 }
 
 const ComicViewer: React.FC<ComicViewerProps> = ({
   pdfUrl,
   productType,
   productId,
+  dbUser,
+  userPlan,
+  contentAccess = false,
 }) => {
+  console.log("Pdf Url:", pdfUrl);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,7 +52,44 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
   const { user } = useUser();
 
+  // Check if user has access to the content based on their subscription
+  const hasAccessToContent = (): boolean => {
+    // First check the contentAccess flag passed from parent
+    if (!contentAccess) return false;
+
+    // If product type is "Free", always allow access
+    if (productType === "Free") return true;
+
+    // If no user data, deny access
+    if (!dbUser || !userPlan) return false;
+
+    // Check if user's plan matches the product type
+    // Convert plan names to match product types
+    const planToProductTypeMap: Record<string, string> = {
+      Free: "Free",
+      Prime: "Prime",
+      Platinum: "Platinum",
+    };
+
+    const userProductType = planToProductTypeMap[userPlan] || "Free";
+
+    // For Prime users: can access Free and Prime content
+    // For Platinum users: can access all content
+    if (userProductType === "Platinum") return true;
+    if (
+      userProductType === "Prime" &&
+      (productType === "Free" || productType === "Prime")
+    )
+      return true;
+    if (userProductType === "Free" && productType === "Free") return true;
+
+    return false;
+  };
+
   console.log("User:", user);
+  console.log("User Plan:", userPlan);
+  console.log("Product Type:", productType);
+  console.log("Has Access:", hasAccessToContent());
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -48,15 +103,18 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
         console.error("Error loading PDF:", error);
       }
     };
+    const lsddfsdfsdfs =
+      pdfUrl.toLowerCase().endsWith(".pdf") && hasAccessToContent();
+    console.log("lsddfsdfsdfs", lsddfsdfsdfs);
 
-    if (pdfUrl.toLowerCase().endsWith(".pdf")) {
+    if (pdfUrl.toLowerCase().endsWith(".pdf") && hasAccessToContent()) {
       loadPDF();
       // Reset viewed pages when comic changes
       pagesViewedRef.current = new Set([1]); // Mark first page as viewed
       setReadProgress(0);
       setHasEarnedReward(false);
     }
-  }, [pdfUrl]);
+  }, [pdfUrl, productType, userPlan, dbUser, contentAccess]);
 
   useEffect(() => {
     // Add resize event listener to handle window resizing
@@ -221,7 +279,9 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
   return (
     <>
-      {pdfUrl && pdfUrl.toLowerCase().endsWith(".pdf") ? (
+      {pdfUrl &&
+      pdfUrl.toLowerCase().endsWith(".pdf") &&
+      (productType === "Free" || hasAccessToContent()) ? (
         <div className="flex flex-col w-full h-full p-6">
           <h1 className="mb-4 text-2xl font-bold text-center">
             {pdfUrl
@@ -236,7 +296,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
           {/* Read progress bar */}
           <div className="w-full h-2 mb-4 bg-gray-200 rounded-full">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-300"
+              className="h-full transition-all duration-300 rounded-full bg-primary"
               style={{ width: `${readProgress}%` }}
             ></div>
           </div>
@@ -322,7 +382,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
           {/* Reward message */}
           {hasEarnedReward && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-green-700 animate-pulse">
+            <div className="p-3 mt-4 text-center text-green-700 border border-green-200 rounded-lg bg-green-50 animate-pulse">
               <span className="font-medium">Congratulations!</span> You've
               earned points for reading this comic!
             </div>
@@ -330,7 +390,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
         </div>
       ) : pdfUrl &&
         pdfUrl.toLowerCase().endsWith(".mp4") &&
-        productType === "Free" ? (
+        (productType === "Free" || hasAccessToContent()) ? (
         <div className="flex flex-col items-center justify-center w-full h-full p-6">
           <video
             controls
@@ -341,7 +401,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
           {/* Video completion message */}
           {videoWatched && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-green-700 animate-pulse">
+            <div className="p-3 mt-4 text-center text-green-700 border border-green-200 rounded-lg bg-green-50 animate-pulse">
               <span className="font-medium">Congratulations!</span> You've
               earned points for watching this audio comic!
             </div>
@@ -365,23 +425,32 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
           <div className="relative z-10 max-w-2xl mx-auto">
             <h3 className="mb-6 text-4xl font-bold text-primary luckiest-guy-regular">
-              Subscribe to Access Premium Content or Explore Mentoons store for
-              individual purchases!
+              {!userPlan || userPlan.toLowerCase() === "free"
+                ? "Subscribe to Access Premium Content"
+                : userPlan.toLowerCase() === "prime" &&
+                  productType === "Platinum"
+                ? "Upgrade to Platinum to Access This Content"
+                : "Subscribe to Access Premium Content"}
             </h3>
             <p className="mb-10 text-xl leading-relaxed text-gray-600">
-              Join Mentoons to unlock our full library of educational comics and
-              engaging content designed to help children learn and grow. Get
-              access to exclusive comics, audio stories, and more
+              {!userPlan || userPlan.toLowerCase() === "free"
+                ? "Join Mentoons to unlock our full library of educational comics and engaging content designed to help children learn and grow."
+                : userPlan.toLowerCase() === "prime" &&
+                  productType === "Platinum"
+                ? "This content is exclusively available for Platinum members. Upgrade your membership to access our complete library."
+                : "Get access to exclusive comics, audio stories, and more premium content."}
             </p>
             <button
               onClick={(e) => handleBrowsePlansClick(e)}
               className="px-10 py-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg"
             >
-              Subscribe Now
+              {!userPlan || userPlan.toLowerCase() === "free"
+                ? "Subscribe Now"
+                : "Upgrade Membership"}
             </button>
             <button
               onClick={() => navigate("/product-page")}
-              className="px-10 py-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg ml-4"
+              className="px-10 py-4 ml-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg"
             >
               Explore Mentoons Store
             </button>

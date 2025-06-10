@@ -1,9 +1,10 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import useInView from "@/hooks/useInView";
 import { ModalMessage } from "@/utils/enum";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdMessage } from "react-icons/md";
 import { toast } from "sonner";
 
@@ -18,6 +19,9 @@ const FAQ = ({ data }: { data: object }) => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const queryType = "general"; // Removed unused state setter
+  const [userDetails, setUserDetails] = useState<any>(null);
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
   const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,6 +61,29 @@ const FAQ = ({ data }: { data: object }) => {
       toast.error("Failed to submit message");
     }
   };
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch user details");
+      }
+      setUserDetails(response.data.data);
+    };
+    fetchUserDetails();
+  }, [user?.id]);
 
   return (
     <motion.section
@@ -148,7 +175,7 @@ const FAQ = ({ data }: { data: object }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.55 }}
                 type="text"
-                value={name}
+                value={userDetails?.name || name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
                 placeholder="Your Name"
@@ -158,7 +185,7 @@ const FAQ = ({ data }: { data: object }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 type="email"
-                value={email}
+                value={userDetails?.email || email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
                 placeholder="Your Email"

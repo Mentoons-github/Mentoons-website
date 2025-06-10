@@ -31,12 +31,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+// Define proper types for user data
+interface DBUser {
+  _id: string;
+  subscription: {
+    plan: string;
+    startDate?: string;
+    endDate?: string;
+  };
+  subscriptionLimits?: UserSubscriptionLimits;
+}
+
 const ComicsPageV2 = () => {
   const {
     items: products,
     // loading,
     // error,
   } = useSelector((state: RootState) => state.products);
+  const { user } = useUser();
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -57,13 +69,14 @@ const ComicsPageV2 = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { user } = useUser();
   const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
     null
   );
-  const [dbUser, setDbUser] = useState<any>(null);
+  const [dbUser, setDbUser] = useState<DBUser | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [hasFetchedUser, setHasFetchedUser] = useState(false);
 
-  const membershipType = dbUser?.subscription.plan;
+  const membershipType: string = dbUser?.subscription.plan || "";
 
   const [currentProductId, setCurrentProductId] = useState<string>("");
 
@@ -176,6 +189,7 @@ const ComicsPageV2 = () => {
     comic?: ProductBase | null,
     productType?: string
   ) => {
+    console.log(comicLink, comic, productType);
     if (!comic) {
       // For backwards compatibility - allow opening comics without checking access
       setComicToView(comicLink);
@@ -184,13 +198,15 @@ const ComicsPageV2 = () => {
       document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
       return;
     }
-
+    const contentAccess: boolean = checkContentAccess(comic);
+    console.log("kdjflkajsdflksdflksdjflskdjf", contentAccess);
     // Check user access before opening comic
-    if (checkContentAccess(comic)) {
+    if (contentAccess) {
       setComicToView(comicLink);
       setCurrentProductId(comic._id || ""); // Set the current product ID for reward tracking
       setShowComicModal(true);
-      if (productType) setProductType(productType);
+      if (productType || comic.product_type)
+        setProductType(productType || comic.product_type || "");
       document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
     }
   };
@@ -258,10 +274,16 @@ const ComicsPageV2 = () => {
   }, [dispatch, option]);
 
   const fetchDBUser = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoadingUser(false);
+      return;
+    }
+
+    setIsLoadingUser(true);
     try {
       const token = await getToken();
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -272,13 +294,17 @@ const ComicsPageV2 = () => {
       if (response.status === 200) {
         const userData = response.data.data;
         setDbUser(userData);
+        setHasFetchedUser(true);
 
         // Initialize or retrieve subscription limits
         const limits = getUserSubscriptionLimits(userData);
         setUserLimits(limits);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching user data:", error);
+      toast.error("Failed to load user subscription data");
+    } finally {
+      setIsLoadingUser(false);
     }
   }, [user?.id, getToken]);
 
@@ -288,10 +314,12 @@ const ComicsPageV2 = () => {
   ) => {
     try {
       const token = await getToken();
-      if (!userId || !token) return;
+      if (!user?.id || !token) return;
 
       await axios.patch(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/update-subscription-limits/${
+          user.id
+        }`,
         {
           subscriptionLimits: updatedLimits,
         },
@@ -310,14 +338,37 @@ const ComicsPageV2 = () => {
 
   // Check if user can access content and handle limitations
   const checkContentAccess = (comic: ProductBase): boolean => {
-    if (!userLimits || !user) {
+    console.log(comic, "inside checkContentAccess");
+
+    // Check if user is not authenticated at all
+    if (!user) {
       setShowLoginModal(true);
       return false;
     }
 
+    // Check if user data is still loading
+    if (isLoadingUser) {
+      toast.info("Loading subscription data, please wait...");
+      return false;
+    }
+
+    // Check if user data failed to load
+    if (!userLimits || !dbUser) {
+      // Only retry if we haven't successfully fetched before
+      if (!hasFetchedUser) {
+        toast.info("Loading subscription data...");
+        fetchDBUser();
+      } else {
+        toast.error("Unable to verify subscription. Please refresh the page.");
+      }
+      return false;
+    }
+
     const accessResult = canAccessContent(comic, membershipType, userLimits);
+    console.log("CAn Access result", accessResult);
 
     if (!accessResult.canAccess) {
+      console.log(accessResult.canAccess);
       setLimitModalTitle(accessResult.title);
       setLimitModalMessage(accessResult.message);
       setShowSubscriptionLimitModal(true);
@@ -951,6 +1002,9 @@ const ComicsPageV2 = () => {
               pdfUrl={comicToView}
               productType={productType}
               productId={currentProductId}
+              dbUser={dbUser}
+              userPlan={membershipType}
+              contentAccess={true} // Already checked in openComicModal
             />
           </motion.div>
         </motion.div>
@@ -962,7 +1016,7 @@ const ComicsPageV2 = () => {
         onClose={() => setShowSubscriptionLimitModal(false)}
         message={limitModalMessage}
         title={limitModalTitle}
-        planType={"free"}
+        planType={membershipType as "Free" | "Prime" | "Platinum"}
       />
 
       {/* Feature of the Month Section */}
@@ -1098,7 +1152,7 @@ const ComicsPageV2 = () => {
           onClose={() => setShowSubscriptionLimitModal(false)}
           message={limitModalMessage}
           title={limitModalTitle}
-          planType={"free"}
+          planType={membershipType as "Free" | "Prime" | "Platinum"}
         />
       )}
     </div>
