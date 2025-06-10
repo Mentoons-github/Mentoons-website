@@ -10,3 +10,8 @@ export interface Booking {
   psychologistId?: string;
   completedAt?: string | null;
 }
+
+export interface IndianState {
+  name: string;
+  state_code: string;
+}

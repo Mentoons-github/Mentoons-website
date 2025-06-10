@@ -6,6 +6,7 @@ interface MediaItem {
   url: string;
   caption?: string;
   key: string;
+  createdAt: string; // Added to track recency
 }
 
 const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
@@ -15,6 +16,10 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
   const imageMedia = useMemo<MediaItem[]>(
     () =>
       userPosts
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
         .filter((post) => Array.isArray(post.media) && post.media.length > 0)
         .flatMap((post, postIndex) =>
           post
@@ -29,12 +34,12 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
               url: item.url,
               caption: item.caption,
               key: `${postIndex}-${mediaIndex}-${item.url}`,
+              createdAt: post.createdAt, // Include post's createdAt
             }))
         ),
     [userPosts]
   );
 
-  // Focus modal when it opens
   useEffect(() => {
     if (isSliderOpen) {
       const modal = document.querySelector(".modal") as HTMLDivElement | null;
@@ -87,9 +92,9 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
 
   return (
     <>
-      <div className="bg-white p-6 w-full md:w-1/3 shadow-lg border border-orange-100 rounded-xl hover:shadow-xl transition-shadow duration-300">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+      <div className="bg-white p-4 sm:p-6 shadow-md border border-orange-100 rounded-xl hover:shadow-lg transition-shadow duration-300">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
             <svg
               className="w-5 h-5 text-orange-500"
               fill="none"
@@ -111,17 +116,17 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {imageMedia.slice(0, 9).map((media, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {imageMedia.slice(0, 6).map((media, index) => (
             <div
               key={media.key}
-              className="relative group overflow-hidden rounded-lg aspect-square cursor-pointer"
+              className="relative group overflow-hidden rounded-lg min-h-[150px] sm:min-h-[200px] aspect-square cursor-pointer"
               onClick={() => openSlider(index)}
             >
               <img
                 src={media.url}
                 alt={media.caption || `Photo ${index + 1}`}
-                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110 group-hover:brightness-75"
+                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
                 loading="lazy"
                 onError={(e) => (e.currentTarget.src = "/fallback-image.jpg")}
               />
@@ -145,7 +150,7 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
           ))}
         </div>
 
-        {imageMedia.length > 9 && (
+        {imageMedia.length > 6 && (
           <div className="mt-4 text-center">
             <button
               onClick={() => openSlider(0)}
@@ -243,7 +248,7 @@ const PhotosCard = ({ userPosts }: { userPosts: Post[] }) => {
           </button>
 
           <div
-            className="max-w-4xl max-h-[90vh] mx-4 flex flex-col items-center"
+            className="max-w-5xl max-h-[90vh] mx-4 flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
             <img

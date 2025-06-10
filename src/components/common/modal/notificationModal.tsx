@@ -94,7 +94,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   };
 
   const getNotificationIcon = (type: NotificationType) => {
-    const iconProps = { size: 18, className: "flex-shrink-0" };
+    const iconProps = { size: 20, className: "flex-shrink-0" };
     const iconMap: any = {
       message: { icon: MessageCircle, color: "text-blue-500" },
       alert: { icon: AlertTriangle, color: "text-red-500" },
@@ -264,17 +264,17 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  console.log("sorted notification :", sortedNotifications);
+  console.log("sorted notification :", notifications);
 
   return (
-    <div className="relative hidden py-2 md:block" ref={notificationRef}>
+    <div className="relative hidden py-4 md:block" ref={notificationRef}>
       <div
         onClick={() => setShowNotificationModal(!showNotificationModal)}
-        className="relative p-2 transition-colors rounded-full cursor-pointer hover:bg-gray-700"
+        className="relative p-2 rounded-full cursor-pointer transition-colors hover:bg-gray-800"
       >
         <FaBell className="text-white" />
         {getNotificationCount() > 0 && (
-          <span className="absolute px-2 text-xs text-center text-black bg-orange-400 rounded-full shadow-lg -top-0 -right-1">
+          <span className="absolute px-2 text-xs text-center text-black bg-gray-200 rounded-full shadow-lg -top-0 -right-1">
             {getNotificationCount()}
           </span>
         )}
@@ -285,17 +285,17 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
           initial={{ opacity: 0, scale: 0.95, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
-          className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999999] overflow-hidden"
+          className="absolute right-0 mt-2 w-96 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 z-[99999] overflow-hidden"
         >
-          <div className="px-4 py-3 text-white bg-gradient-to-r from-orange-500 to-orange-600">
+          <div className="px-5 py-4 text-white bg-gradient-to-r from-orange-600 to-orange-400">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold">Notifications</h3>
-                <p className="text-xs text-blue-100">
+                <h3 className="text-base font-semibold">Notifications</h3>
+                <p className="text-sm text-gray-200">
                   {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -306,9 +306,10 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                         dispatch(markAllNotificationsRead(token));
                       }
                     }}
-                    className="px-3 py-1.5 text-xs font-medium transition-colors rounded-full bg-white/20 hover:bg-white/30"
+                    className="px-4 py-2 text-sm font-semibold transition-colors rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300"
+                    aria-label="Mark all notifications as read"
                   >
-                    Mark all read
+                    Mark as read
                   </motion.button>
                 )}
                 {notifications.length > 0 && (
@@ -316,10 +317,10 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleClearAllNotifications}
-                    className="px-3 py-1.5 text-xs font-medium transition-colors rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-100"
+                    className="px-4 py-2 text-sm font-semibold transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 text-white"
                     aria-label="Clear all notifications"
                   >
-                    <Trash2 size={18} className="inline-block mr-1" />
+                    <Trash2 size={20} className="inline-block mr-1" />
                     Clear All
                   </motion.button>
                 )}
@@ -327,29 +328,29 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowNotificationModal(false)}
-                  className="p-1.5 transition-colors rounded-full hover:bg-white/20"
+                  className="p-2 transition-colors rounded-full hover:bg-orange-500"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </motion.button>
               </div>
             </div>
           </div>
 
-          <div className="overflow-y-auto max-h-80">
+          <div className="overflow-y-auto max-h-96 bg-gray-800">
             {isLoading ? (
-              <div className="p-6 text-center text-gray-500">
-                <div className="w-8 h-8 mx-auto border-b-2 border-gray-900 rounded-full animate-spin"></div>
-                <p className="mt-2 text-sm font-medium">
+              <div className="p-8 text-center text-gray-400">
+                <div className="w-10 h-10 mx-auto border-b-2 border-gray-200 rounded-full animate-spin"></div>
+                <p className="mt-3 text-base font-medium">
                   Loading notifications...
                 </p>
               </div>
             ) : sortedNotifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
-                <Bell size={32} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm font-medium">No notifications yet</p>
+              <div className="p-8 text-center text-gray-400">
+                <Bell size={40} className="mx-auto mb-3 text-gray-500" />
+                <p className="text-base font-medium">No notifications yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-700">
                 {sortedNotifications.map((notification) => {
                   const initiator =
                     typeof notification.initiatorId === "object"
@@ -358,16 +359,16 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                   return (
                     <div
                       key={notification._id}
-                      className={`notification-item p-3 cursor-pointer transition-all duration-200 border-l-4 ${
+                      className={`notification-item p-4 cursor-pointer transition-all duration-200 border-l-4 ${
                         notification.isRead
-                          ? "bg-gray-50 hover:bg-gray-100 border-l-orange-200"
-                          : `bg-gray-50 hover:bg-orange-100 ${getPriorityColor(
+                          ? "bg-gray-800 hover:bg-gray-700 border-l-orange-400"
+                          : `bg-gray-800 hover:bg-gray-700 ${getPriorityColor(
                               notification.type
                             )}`
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-3">
                         <div className="flex-shrink-0">
                           <div className="relative">
                             <img
@@ -378,20 +379,20 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                 )}&background=random`
                               }
                               alt={initiator?.name}
-                              className="object-cover w-8 h-8 border-2 border-white rounded-full shadow-sm"
+                              className="object-cover w-10 h-10 border-2 border-gray-900 rounded-full shadow-sm"
                             />
-                            <div className="absolute p-1 bg-white rounded-full shadow-sm -bottom-1 -right-1">
+                            <div className="absolute p-1.5 bg-gray-900 rounded-full shadow-sm -bottom-1 -right-1">
                               {getNotificationIcon(notification.type)}
                             </div>
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-3">
                             <p
-                              className={`text-xs leading-relaxed ${
+                              className={`text-sm leading-relaxed ${
                                 notification.isRead
-                                  ? "text-gray-700"
-                                  : "text-gray-900 font-medium"
+                                  ? "text-gray-400"
+                                  : "text-gray-200 font-medium"
                               }`}
                             >
                               {notification.message}
@@ -403,15 +404,15 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                               )}
                             </p>
                             {!notification.isRead && (
-                              <div className="flex-shrink-0 w-2 h-2 mt-1 bg-orange-500 rounded-full" />
+                              <div className="flex-shrink-0 w-2.5 h-2.5 mt-1 bg-orange-400 rounded-full" />
                             )}
                           </div>
-                          <div className="flex items-center justify-between mt-1">
+                          <div className="flex items-center justify-between mt-2">
                             <span className="text-xs text-gray-500">
                               {formatTimeAgo(notification.createdAt)}
                             </span>
                             {notification.type === "friend_request" && (
-                              <div className="flex gap-1">
+                              <div className="flex gap-2">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -421,7 +422,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       "accept"
                                     );
                                   }}
-                                  className="px-2 py-1 text-xs text-white bg-orange-500 rounded hover:bg-orange-600"
+                                  className="px-3 py-1.5 text-sm text-gray-900 bg-orange-400 rounded-lg hover:bg-orange-500"
                                 >
                                   Accept
                                 </button>
@@ -434,7 +435,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       "decline"
                                     );
                                   }}
-                                  className="px-2 py-1 text-xs text-gray-700 bg-gray-300 rounded hover:bg-gray-500"
+                                  className="px-3 py-1.5 text-sm text-gray-200 bg-gray-600 rounded-lg hover:bg-gray-500"
                                 >
                                   Decline
                                 </button>
@@ -451,13 +452,13 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-orange-200 bg-gray-50 shadow-t-lg shadow-orange-100">
+            <div className="p-4 border-t border-gray-700 bg-gray-900 shadow-t-lg shadow-orange-400/20">
               <button
                 onClick={() => {
                   navigate("/adda/notifications");
                   setShowNotificationModal(false);
                 }}
-                className="w-full text-xs font-medium text-center text-orange-600 hover:text-orange-700"
+                className="w-full text-sm font-medium text-center text-orange-400 hover:text-orange-300"
               >
                 View all notifications
               </button>

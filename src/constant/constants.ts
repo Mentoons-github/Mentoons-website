@@ -20,6 +20,7 @@ import {
   REPORTS,
 } from "./assessments/assessments";
 import { BLOCK_REASONS, REPORT_REASONS } from "./adda/reportAbuse";
+import { INDIAN_STATES } from "./bookings/states";
 
 export {
   FAQ,
@@ -51,4 +52,5 @@ export {
   REPORTS,
   COMIC_COLOR,
   PRODUCTS_BENEFITS,
+  INDIAN_STATES,
 };

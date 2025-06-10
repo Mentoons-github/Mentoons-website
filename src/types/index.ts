@@ -22,7 +22,7 @@ import { DropDownInterface } from "./common/header";
 import { Groups } from "./groups/groups";
 import { Hiring } from "./assessements/assessment";
 import { Color, Membership } from "./home/membership";
-import { Booking } from "./sessionBooking/session";
+import { Booking, IndianState } from "./sessionBooking/session";
 import { JobPosting } from "./jobs/jobs";
 import { PostState, EventDetails } from "./adda/posts";
 import { Conversations, Friend, Message } from "./adda/conversation";
@@ -69,6 +69,7 @@ export type {
   StatusState,
   UserStatusInterface,
   Booking,
+  IndianState,
   IUser,
   JobPosting,
   PostState,

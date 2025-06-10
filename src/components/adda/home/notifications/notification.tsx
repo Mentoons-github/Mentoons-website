@@ -25,6 +25,7 @@ const Notifications = () => {
     (state: RootState) => state.notification
   );
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [showLatestOnly, setShowLatestOnly] = useState(false);
   const [page, setPage] = useState(1);
   const { getToken } = useAuth();
   const navigate = useNavigate();
@@ -146,9 +147,42 @@ const Notifications = () => {
     }
   };
 
-  const filteredNotifications = notifications.filter(
-    (notif) => filter === "all" || (filter === "unread" && !notif.isRead)
-  );
+  const getFilteredNotifications = () => {
+    let filtered = notifications;
+
+    if (showLatestOnly) {
+      const now = new Date();
+      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(
+        (notification) => new Date(notification.createdAt) > twentyFourHoursAgo
+      );
+    }
+
+    return filtered.filter(
+      (notif) => filter === "all" || (filter === "unread" && !notif.isRead)
+    );
+  };
+
+  const handleLatestToggle = () => {
+    setShowLatestOnly(!showLatestOnly);
+    if (!showLatestOnly) {
+      const now = new Date();
+      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const recentCount = notifications.filter(
+        (notification) => new Date(notification.createdAt) > twentyFourHoursAgo
+      ).length;
+
+      if (recentCount === 0) {
+        toast.info("No notifications from the last 24 hours");
+      } else {
+        toast.info(`Showing ${recentCount} notification(s) from last 24 hours`);
+      }
+    } else {
+      toast.info("Showing all notifications");
+    }
+  };
+
+  const filteredNotifications = getFilteredNotifications();
 
   return (
     <div className="relative flex flex-col w-full gap-4 sm:gap-6 p-4 max-w-3xl mx-auto">
@@ -192,32 +226,71 @@ const Notifications = () => {
           </div>
 
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="relative">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as "all" | "unread")}
-                className="appearance-none px-4 py-2.5 pr-10 text-sm font-medium text-orange-700 bg-white/90 backdrop-blur-sm border border-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-300/50 focus:border-orange-300 cursor-pointer"
-                aria-label="Filter notifications"
-              >
-                <option value="all">All Notifications</option>
-                <option value="unread">Unread Only</option>
-              </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-orange-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <select
+                  value={filter}
+                  onChange={(e) =>
+                    setFilter(e.target.value as "all" | "unread")
+                  }
+                  className="appearance-none px-4 py-2.5 pr-10 text-sm font-medium text-orange-700 bg-white/90 backdrop-blur-sm border border-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-300/50 focus:border-orange-300 cursor-pointer"
+                  aria-label="Filter notifications"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                  <option value="all">All Notifications</option>
+                  <option value="unread">Unread Only</option>
+                </select>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg
+                    className="w-4 h-4 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </div>
+
+              <button
+                onClick={handleLatestToggle}
+                className={`group relative px-4 py-2.5 text-sm font-medium rounded-xl shadow-sm hover:shadow-md border overflow-hidden transition-all duration-300 hover:scale-105 ${
+                  showLatestOnly
+                    ? "text-white bg-orange-500 border-orange-500"
+                    : "text-orange-600 bg-white/80 backdrop-blur-sm border-orange-200/50"
+                }`}
+                aria-label="Toggle latest 24h notifications"
+              >
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r transition-opacity duration-300 ${
+                    showLatestOnly
+                      ? "from-orange-600/20 to-orange-700/20 opacity-100"
+                      : "from-orange-500/10 to-orange-600/10 opacity-0 group-hover:opacity-100"
+                  }`}
+                ></div>
+                <span className="relative z-10 flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  {showLatestOnly ? "Show All" : "Latest 24h"}
+                </span>
+              </button>
             </div>
+
             <div className="flex gap-3">
               {notifications.length > 0 &&
                 notifications.some((n) => !n.isRead) && (
@@ -285,7 +358,15 @@ const Notifications = () => {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     <span className="text-sm font-medium text-orange-700">
-                      {notifications.filter((n) => !n.isRead).length > 0 ? (
+                      {showLatestOnly ? (
+                        <>
+                          Showing{" "}
+                          <span className="font-semibold text-orange-600">
+                            {filteredNotifications.length}
+                          </span>{" "}
+                          notification(s) from last 24 hours
+                        </>
+                      ) : notifications.filter((n) => !n.isRead).length > 0 ? (
                         <>
                           <span className="font-semibold text-orange-600">
                             {notifications.filter((n) => !n.isRead).length}
@@ -297,7 +378,7 @@ const Notifications = () => {
                           total
                         </>
                       ) : (
-                        <>All caught up! 🎉</>
+                        <>All Notifications Read 🎉</>
                       )}
                     </span>
                   </div>
@@ -329,10 +410,13 @@ const Notifications = () => {
             <Bell className="w-12 h-12 text-white" />
           </motion.div>
           <h3 className="mb-2 text-lg font-semibold text-orange-700">
-            No {filter === "unread" ? "unread " : ""}notifications
+            No {filter === "unread" ? "unread " : ""}
+            {showLatestOnly ? "recent " : ""}notifications
           </h3>
           <p className="text-orange-600">
-            We'll notify you when something new arrives
+            {showLatestOnly
+              ? "No notifications from the last 24 hours"
+              : "We'll notify you when something new arrives"}
           </p>
         </motion.div>
       ) : (

@@ -133,6 +133,7 @@ const Profile = () => {
     _id: "",
     name: "",
     email: "",
+    picture: "",
     phoneNumber: "",
     dateOfBirth: "",
     gender: "",
@@ -386,11 +387,7 @@ const Profile = () => {
     }
   };
 
-  const handleCoverPhotoChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
+  const handleCoverPhotoChange = async (file: File) => {
     const token = await getToken();
     if (!token) {
       toast.error("Authentication required");
@@ -415,31 +412,28 @@ const Profile = () => {
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) {
         toast.dismiss();
-        toast.error("Failed to upload cover photo");
-        return;
+        throw new Error("Failed to upload cover photo");
       }
 
       await user?.update({ unsafeMetadata: { coverPhoto: fileUrl } });
+
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
-        { coverPhoto: fileUrl },
+        { coverImage: fileUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.dismiss();
       toast.success("Cover photo updated successfully");
-      setUserDetails((prev) => ({ ...prev, coverPhoto: fileUrl }));
-    } catch {
+      setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
+    } catch (error) {
       toast.dismiss();
       toast.error("Failed to upload cover photo");
+      throw error;
     }
   };
 
-  const handleProfilePhotoChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
+  const handleProfilePhotoChange = async (file: File) => {
     const token = await getToken();
     if (!token) {
       toast.error("Authentication required");
@@ -450,7 +444,9 @@ const Profile = () => {
       toast.loading("Uploading profile photo...");
       const formData = new FormData();
       formData.append("file", file);
+
       await user?.setProfileImage({ file });
+
       const uploadResponse = await axios.post(
         "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
         formData,
@@ -465,8 +461,7 @@ const Profile = () => {
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) {
         toast.dismiss();
-        toast.error("Failed to upload profile photo");
-        return;
+        throw new Error("Failed to upload profile photo");
       }
 
       await axios.put(
@@ -478,9 +473,10 @@ const Profile = () => {
       toast.dismiss();
       toast.success("Profile photo updated successfully");
       setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
-    } catch {
+    } catch (error) {
       toast.dismiss();
       toast.error("Failed to upload profile photo");
+      throw error;
     }
   };
 
@@ -530,7 +526,7 @@ const Profile = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-screen">
         Loading...
       </div>
     );
@@ -538,7 +534,7 @@ const Profile = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
+      <div className="flex justify-center items-center min-h-screen text-red-500">
         {error}
       </div>
     );
@@ -547,15 +543,22 @@ const Profile = () => {
   return (
     <>
       {showConfetti && (
-        <Confetti recycle={false} numberOfPieces={500} className="w-full" />
+        <Confetti
+          recycle={false}
+          numberOfPieces={300}
+          className="w-full h-full fixed top-0 left-0 z-50"
+        />
       )}
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <ProfileHeader
           userDetails={userDetails}
           coverPhotoInputRef={coverPhotoInputRef}
           profilePhotoInputRef={profilePhotoInputRef}
           handleCoverPhotoChange={handleCoverPhotoChange}
           handleProfilePhotoChange={handleProfilePhotoChange}
+          isEditable={true}
+          maxImageSize={5}
+          onImageError={(error) => toast.error(error)}
         />
 
         {!isProfileComplete && !showCompletionForm && (
@@ -577,14 +580,14 @@ const Profile = () => {
           />
         )}
 
-        <div className="text-center pt-16">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex gap-4">
+        <div className="text-center pt-8 sm:pt-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-4">
+            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-start">
               {["profile", "posts"].map((tab) => (
                 <Button
                   key={tab}
                   onClick={() => handleTabChange(tab as TabTypes)}
-                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                     activeTab === tab
                       ? "bg-orange-500 text-white shadow-md"
                       : "text-gray-700 hover:text-orange-500 hover:bg-orange-50"
@@ -594,26 +597,28 @@ const Profile = () => {
                 </Button>
               ))}
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">
+            <div className="flex flex-col items-center">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
                 {userDetails.name}
               </h1>
-              <p className="text-gray-600">{userDetails.email}</p>
+              <p className="text-sm sm:text-base text-gray-600">
+                {userDetails.email}
+              </p>
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(!isEditing)}
-                className="mt-3 text-sm text-orange-500 border-orange-500 hover:bg-orange-50"
+                className="mt-2 sm:mt-3 text-xs sm:text-sm text-orange-500 border-orange-500 hover:bg-orange-50"
               >
                 <FiEdit2 className="mr-2" />{" "}
                 {isEditing ? "Save Changes" : "Edit Profile"}
               </Button>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-end">
               {["saved", "rewards"].map((tab) => (
                 <Button
                   key={tab}
                   onClick={() => handleTabChange(tab as TabTypes)}
-                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                     activeTab === tab
                       ? "bg-orange-500 text-white shadow-md"
                       : "text-gray-700 hover:text-orange-500 hover:bg-orange-50"
@@ -625,53 +630,53 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="flex justify-center gap-12 py-6 border-y border-gray-200">
+          <div className="flex justify-center gap-6 sm:gap-12 py-4 sm:py-6 border-y border-gray-200">
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-500">
+              <div className="text-lg sm:text-2xl font-bold text-orange-500">
                 {userPosts.length}
               </div>
-              <div className="text-sm text-gray-600">Posts</div>
+              <div className="text-xs sm:text-sm text-gray-600">Posts</div>
             </div>
             <button
               onClick={() => setModalType("followers")}
               className="text-center"
             >
-              <div className="text-2xl font-bold text-orange-500">
+              <div className="text-lg sm:text-2xl font-bold text-orange-500">
                 {totalFollowers.length}
               </div>
-              <div className="text-sm text-gray-600">Followers</div>
+              <div className="text-xs sm:text-sm text-gray-600">Followers</div>
             </button>
             <button
               onClick={() => setModalType("following")}
               className="text-center"
             >
-              <div className="text-2xl font-bold text-orange-500">
+              <div className="text-lg sm:text-2xl font-bold text-orange-500">
                 {totalFollowing.length}
               </div>
-              <div className="text-sm text-gray-600">Following</div>
+              <div className="text-xs sm:text-sm text-gray-600">Following</div>
             </button>
           </div>
         </div>
 
         <div ref={profileRef} tabIndex={-1} className="pt-4">
           {activeTab === "profile" && (
-            <div className="flex justify-between gap-6">
-              <div className="w-full mx-auto">
+            <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-6">
+              <div className="w-full lg:w-3/5">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                  <Card className="relative p-6 sm:p-8 border border-orange-100 rounded-xl shadow-lg bg-white overflow-hidden">
-                    <div className="absolute right-0 top-0 w-1/3 h-full hidden lg:block">
+                  <Card className="relative p-4 sm:p-6 lg:p-8 border border-orange-100 rounded-xl shadow-md bg-white overflow-hidden">
+                    <div className="absolute right-0 top-0 w-1/3 h-full hidden xl:block">
                       <motion.div
-                        className="absolute w-16 h-16 bg-orange-200 rounded-full opacity-30"
+                        className="absolute w-12 h-12 bg-orange-200 rounded-full opacity-30"
                         animate={{
-                          y: [0, -20, 0],
-                          scale: [1, 1.1, 1],
+                          y: [0, -10, 0],
+                          scale: [1, 1.05, 1],
                         }}
                         transition={{
-                          duration: 4,
+                          duration: 3,
                           repeat: Infinity,
                           ease: "easeInOut",
                           delay: 0.2,
@@ -679,35 +684,22 @@ const Profile = () => {
                         style={{ right: "10%", top: "20%" }}
                       />
                       <motion.div
-                        className="absolute w-12 h-12 bg-orange-300 rounded-full opacity-30"
+                        className="absolute w-10 h-10 bg-orange-300 rounded-full opacity-30"
                         animate={{
-                          y: [0, 15, 0],
-                          scale: [1, 0.9, 1],
+                          y: [0, 10, 0],
+                          scale: [1, 0.95, 1],
                         }}
                         transition={{
-                          duration: 3,
+                          duration: 2.5,
                           repeat: Infinity,
                           ease: "easeInOut",
-                          delay: 0.5,
+                          delay: 0.4,
                         }}
                         style={{ right: "25%", top: "50%" }}
                       />
-                      <motion.div
-                        className="absolute w-20 h-20 bg-orange-100 rounded-full opacity-20"
-                        animate={{
-                          y: [0, -10, 0],
-                          scale: [1, 1.05, 1],
-                        }}
-                        transition={{
-                          duration: 5,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        style={{ right: "15%", top: "70%" }}
-                      />
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 text-center sm:text-left">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6 text-center sm:text-left">
                       Personal Information
                     </h2>
 
@@ -715,10 +707,10 @@ const Profile = () => {
                       {isEditing ? (
                         <motion.div
                           key="form"
-                          initial={{ opacity: 0, x: -20 }}
+                          initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          transition={{ duration: 0.3 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <ProfileForm
                             userDetails={userDetails}
@@ -732,53 +724,53 @@ const Profile = () => {
                       ) : (
                         <motion.div
                           key="details"
-                          initial={{ opacity: 0, x: -20 }}
+                          initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          transition={{ duration: 0.3 }}
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pr-0 lg:pr-48"
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 pr-0 xl:pr-32"
                         >
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Name:</strong>{" "}
                             {userDetails.name}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.15 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.15 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Email:</strong>{" "}
                             {userDetails.email}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.2 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.2 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Phone:</strong>{" "}
                             {userDetails.phoneNumber || "Not provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.25 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.25 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Location:</strong>{" "}
                             {userDetails.location || "Not provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.3 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.3 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">
                               Date of Birth:
@@ -786,10 +778,10 @@ const Profile = () => {
                             {formatDate(userDetails.dateOfBirth)}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.35 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.35 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Gender:</strong>{" "}
                             {userDetails.gender
@@ -798,37 +790,37 @@ const Profile = () => {
                               : "Not provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.4 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.4 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Education:</strong>{" "}
                             {userDetails.education || "Not provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.45 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.45 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Occupation:</strong>{" "}
                             {userDetails.occupation || "Not provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.5 }}
-                            className="text-gray-700 sm:col-span-2"
+                            transition={{ duration: 0.2, delay: 0.5 }}
+                            className="text-gray-700 sm:col-span-2 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Bio:</strong>{" "}
                             {userDetails.bio || "No bio provided"}
                           </motion.p>
                           <motion.p
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: 0.55 }}
-                            className="text-gray-700"
+                            transition={{ duration: 0.2, delay: 0.55 }}
+                            className="text-gray-700 text-sm sm:text-base"
                           >
                             <strong className="font-medium">Joined:</strong>{" "}
                             {formatDate(userDetails.joinedDate)}
@@ -839,18 +831,20 @@ const Profile = () => {
                   </Card>
                 </motion.div>
               </div>
-              <PhotosCard userPosts={userPosts} />
+              <div className="w-full lg:w-2/5">
+                <PhotosCard userPosts={userPosts} />
+              </div>
             </div>
           )}
         </div>
 
         <div ref={postsRef} tabIndex={-1} className="pt-4">
           {activeTab === "posts" && (
-            <Card className="p-6 border border-orange-100 shadow-lg rounded-xl">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <Card className="p-4 sm:p-6 border border-orange-100 shadow-md rounded-xl">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                 My Posts
               </h3>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {userPosts.map((post) => (
                   <PostCard
                     setUserPosts={setUserPosts}
@@ -866,33 +860,33 @@ const Profile = () => {
 
         <div ref={savedRef} tabIndex={-1} className="pt-4">
           {activeTab === "saved" && (
-            <Card className="p-6 border border-orange-100 shadow-lg rounded-xl">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <Card className="p-4 sm:p-6 border border-orange-100 shadow-md rounded-xl">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                 Saved Items
               </h3>
               {userSavedPosts.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="flex flex-col items-center justify-center py-12 text-center"
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="flex flex-col items-center justify-center py-8 sm:py-12 text-center"
                 >
-                  <FaBookmark className="text-4xl text-orange-500 mb-4" />
-                  <p className="text-lg text-gray-600 mb-2">
+                  <FaBookmark className="text-3xl sm:text-4xl text-orange-500 mb-4" />
+                  <p className="text-base sm:text-lg text-gray-600 mb-2">
                     No saved posts yet!
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     Start saving posts to see them here.
                   </p>
                   <Button
                     asChild
-                    className="mt-4 bg-orange-500 text-white hover:bg-orange-600"
+                    className="mt-4 bg-orange-500 text-white hover:bg-orange-600 text-xs sm:text-sm"
                   >
                     <Link to="/adda">Explore Posts</Link>
                   </Button>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                   {userSavedPosts.map((item) => (
                     <PostCard
                       key={item._id}
@@ -911,17 +905,29 @@ const Profile = () => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
-        <div className="flex items-center justify-between px-6 h-16">
+        <div className="flex items-center justify-around px-4 h-14 sm:h-16">
           {[
-            { tab: "profile", icon: <FiUser className="text-2xl" /> },
-            { tab: "friends", icon: <FaUsers className="text-2xl" /> },
+            {
+              tab: "profile",
+              icon: <FiUser className="text-xl sm:text-2xl" />,
+            },
+            {
+              tab: "friends",
+              icon: <FaUsers className="text-xl sm:text-2xl" />,
+            },
             {
               tab: "home",
-              icon: <FiHome className="text-2xl" />,
+              icon: <FiHome className="text-xl sm:text-2xl" />,
               link: "/adda",
             },
-            { tab: "rewards", icon: <FiAward className="text-2xl" /> },
-            { tab: "saved", icon: <FaBookmark className="text-2xl" /> },
+            {
+              tab: "rewards",
+              icon: <FiAward className="text-xl sm:text-2xl" />,
+            },
+            {
+              tab: "saved",
+              icon: <FaBookmark className="text-xl sm:text-2xl" />,
+            },
           ].map(({ tab, icon, link }) =>
             link ? (
               <Link
@@ -929,7 +935,7 @@ const Profile = () => {
                 to={link}
                 className={`p-2 ${
                   activeTab === tab ? "text-orange-500" : "text-gray-600"
-                }`}
+                } hover:text-orange-500 transition-colors`}
               >
                 {icon}
               </Link>
@@ -938,7 +944,7 @@ const Profile = () => {
                 key={tab}
                 className={`p-2 ${
                   activeTab === tab ? "text-orange-500" : "text-gray-600"
-                }`}
+                } hover:text-orange-500 transition-colors`}
                 onClick={() =>
                   tab === "friends"
                     ? setModalType("following")
