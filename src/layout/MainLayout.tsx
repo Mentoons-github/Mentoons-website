@@ -1,11 +1,10 @@
 import Footer from "@/components/comics/Footer";
+import Breadcrumbs from "@/components/common/breadCrumbs/breadCrumbs";
+import { NotificationProvider } from "@/context/adda/provider/notificationProvider";
 import { ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
-import Breadcrumbs from "@/components/common/breadCrumbs/breadCrumbs";
-import { Outlet } from "react-router-dom";
-import { NotificationProvider } from "@/context/adda/provider/notificationProvider";
 
 interface MainLayoutProps {
   children: ReactNode;

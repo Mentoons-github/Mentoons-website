@@ -7,9 +7,9 @@ import { getCart } from "@/redux/cartSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { DropDownInterface } from "@/types";
 import { SignedIn, useAuth } from "@clerk/clerk-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Search, X, User, LogOut } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { LogOut, Search, ShoppingCart, User, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { FaTimes, FaUserCircle } from "react-icons/fa";
 import { FaBars } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
@@ -207,7 +207,7 @@ const Header = () => {
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
       } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-[9999] w-full font-akshar`}
     >
-      <div className="flex items-center lg:w-1/3 justify-start pl-0 lg:pl-4 xl:pl-6">
+      <div className="flex items-center justify-start pl-0 lg:w-1/3 lg:pl-4 xl:pl-6">
         <nav
           className={`w-auto flex-shrink-0 ${
             title === "adda"
@@ -259,7 +259,7 @@ const Header = () => {
                     items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
                   >
                     {typeof Icon === "function" ? (
-                      <Icon className="text-xs md:text-sm flex-shrink-0" />
+                      <Icon className="flex-shrink-0 text-xs md:text-sm" />
                     ) : null}
                     {label}
                     {label === "Mythos" && (
@@ -279,7 +279,7 @@ const Header = () => {
         </nav>
       </div>
 
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex-shrink-0">
+      <div className="absolute flex-shrink-0 transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
         <NavLink to="/">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
@@ -289,24 +289,24 @@ const Header = () => {
         </NavLink>
       </div>
 
-      <div className="flex justify-end items-center gap-3 lg:w-1/3 justify-end gap-2 pr-0 lg:pr-4 xl:pr-6">
+      <div className="flex items-center justify-end gap-3 pr-0 lg:w-1/3 lg:pr-4 xl:pr-6">
         <motion.div
-          className="relative cursor-pointer flex-shrink-0"
+          className="relative flex-shrink-0 cursor-pointer"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
           <div
             onClick={handleSearchToggle}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            className="p-2 transition-colors rounded-full hover:bg-white/10"
           >
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <Search className="w-5 h-5 text-white sm:w-6 sm:h-6" />
           </div>
         </motion.div>
 
         <SignedIn>
-          <div className="relative cursor-pointer lg:hidden flex flex-shrink-0">
+          <div className="relative flex flex-shrink-0 cursor-pointer lg:hidden">
             <NavLink to="/cart">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
               {cart.totalItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {cart.totalItemCount}
@@ -355,7 +355,7 @@ const Header = () => {
               items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
               {Icon && typeof Icon === "function" ? (
-                <Icon className="text-xs md:text-sm flex-shrink-0" />
+                <Icon className="flex-shrink-0 text-xs md:text-sm" />
               ) : null}
               {label}
               <span
@@ -371,7 +371,7 @@ const Header = () => {
               text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
               items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="text-xs md:text-sm flex-shrink-0" />}
+              {Icon && <Icon className="flex-shrink-0 text-xs md:text-sm" />}
               {label}
               <span
                 className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
@@ -395,10 +395,9 @@ const Header = () => {
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="group relative bg-transparent outline-none cursor-pointer text-center 
-                  flex items-center transition-all duration-300 ease-in-out"
+                  className="relative flex items-center text-center transition-all duration-300 ease-in-out bg-transparent outline-none cursor-pointer group"
                 >
-                  <FaUserCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white rounded-full" />
+                  <FaUserCircle className="w-5 h-5 text-white rounded-full sm:w-6 sm:h-6" />
                   <span
                     className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
                     transition-all duration-300 ease-in-out group-hover:w-full"
@@ -420,7 +419,7 @@ const Header = () => {
                         initial="hidden"
                         animate="visible"
                         onClick={handleProfileNavigation}
-                        className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-3 text-gray-700 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2 text-gray-700 transition-colors cursor-pointer hover:bg-gray-50"
                       >
                         <User className="w-4 h-4" />
                         <span className="text-sm font-medium">Profile</span>
@@ -432,7 +431,7 @@ const Header = () => {
                         initial="hidden"
                         animate="visible"
                         onClick={handleLogout}
-                        className="px-4 py-2 hover:bg-red-50 cursor-pointer flex items-center gap-3 text-red-600 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2 text-red-600 transition-colors cursor-pointer hover:bg-red-50"
                       >
                         <LogOut className="w-4 h-4" />
                         <span className="text-sm font-medium">Logout</span>
@@ -450,7 +449,7 @@ const Header = () => {
               text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
               items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="text-xs md:text-sm flex-shrink-0" />}
+              {Icon && <Icon className="flex-shrink-0 text-xs md:text-sm" />}
               {label}
               <span
                 className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
@@ -460,9 +459,9 @@ const Header = () => {
           )
         )}
         <SignedIn>
-          <div className="relative cursor-pointer flex-shrink-0">
+          <div className="relative flex-shrink-0 cursor-pointer">
             <NavLink to="/cart">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
               {cart.totalItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {cart.totalItemCount}
@@ -493,10 +492,10 @@ const Header = () => {
             >
               <form
                 onSubmit={handleSearchSubmit}
-                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden"
+                className="relative overflow-hidden bg-white shadow-2xl rounded-2xl"
               >
                 <div className="flex items-center">
-                  <div className="pl-6 pr-3 py-4">
+                  <div className="py-4 pl-6 pr-3">
                     <Search className="w-6 h-6 text-gray-400" />
                   </div>
                   <input
@@ -513,7 +512,7 @@ const Header = () => {
                     onClick={handleSearchToggle}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="p-3 mr-3 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-3 mr-3 transition-colors rounded-full hover:bg-gray-100"
                   >
                     <X className="w-5 h-5 text-gray-400" />
                   </motion.button>
@@ -524,9 +523,9 @@ const Header = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="border-t border-gray-200 p-4"
+                    className="p-4 border-t border-gray-200"
                   >
-                    <p className="text-sm text-gray-500 mb-2">
+                    <p className="mb-2 text-sm text-gray-500">
                       Press Enter to search
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -544,7 +543,7 @@ const Header = () => {
                                 suggestion
                               );
                             }}
-                            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition-colors"
+                            className="px-3 py-1 text-sm text-gray-700 transition-colors bg-gray-100 rounded-full hover:bg-primary hover:text-white"
                           >
                             {suggestion}
                           </motion.button>

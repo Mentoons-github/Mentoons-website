@@ -30,7 +30,7 @@ const SubscriptionLimitModal: React.FC<SubscriptionLimitModalProps> = ({
 
   const handleBrowsePlans = () => {
     onClose();
-    navigate("/mentoons");
+    navigate("/membership");
     setTimeout(() => {
       document
         .getElementById("subscription")

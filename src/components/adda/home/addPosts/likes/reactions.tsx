@@ -30,8 +30,8 @@ const reactionData: Record<
   }
 > = {
   like: {
-    activeIcon: <FaThumbsUp className="w-4 text-blue-500 sm:w-6 sm:h-6" />,
-    inactiveIcon: <FaThumbsUp className="w-4 text-gray-400 sm:w-6 sm:h-6" />,
+    activeIcon: <FaThumbsUp className="w-8 text-blue-500 m:w-12 sm:h-12" />,
+    inactiveIcon: <FaThumbsUp className="w-8 text-gray-400 sm:w-6 sm:h-6" />,
     label: "Like",
     color: "text-blue-500",
   },
@@ -308,45 +308,69 @@ const Reactions = ({
   }, [showReactionListDropdown, type, id, getToken]);
 
   // Get the default reaction icon (like)
-  const getDisplayedReaction = () => {
-    if (userReaction) {
-      return reactionData[userReaction].activeIcon;
-    }
-    return reactionData.like.inactiveIcon;
-  };
+  // const getDisplayedReaction = () => {
+  //   if (userReaction) {
+  //     return reactionData[userReaction].activeIcon;
+  //   }
+  //   return reactionData.like.inactiveIcon;
+  // };
 
-  const getReactionLabel = () => {
-    if (userReaction) {
-      return reactionData[userReaction].label;
-    }
-    return "Like";
-  };
+  // const getReactionLabel = () => {
+  //   if (userReaction) {
+  //     return reactionData[userReaction].label;
+  //   }
+  //   return "Like";
+  // };
 
   return (
     <div
       ref={containerRef}
-      className="relative flex items-center justify-center gap-3"
+      className="relative flex items-center justify-center gap-3 "
     >
       {/* Main reaction button */}
       <motion.button
-        className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border ${
+        className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border  ${
           userReaction ? "border-orange-500" : "border-orange-400"
         } rounded-full transition-colors`}
         onClick={toggleReactionSelector}
-        whileTap={{ scale: 0.95 }}
-        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
+        }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
-        <span className="flex items-center justify-center w-5 h-5">
-          {getDisplayedReaction()}
-        </span>
-        <span
-          className={`text-sm ${
-            userReaction ? reactionData[userReaction].color : "text-gray-600"
-          }`}
-        >
-          {getReactionLabel()}
-        </span>
+        <div className="flex items-center">
+          {/* User's reaction icon */}
+          {/* Top three most common reactions or default like icon */}
+          <div className="flex -space-x-1">
+            {(() => {
+              const topReactions = Object.entries(reactionCounts)
+                .filter(([, count]) => count > 0)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .slice(0, 3);
+
+              if (topReactions.length === 0) {
+                return (
+                  <span className="flex items-center justify-center w-5 h-5">
+                    {userReaction
+                      ? reactionData[userReaction].activeIcon
+                      : reactionData.like.inactiveIcon}
+                  </span>
+                );
+              }
+
+              return topReactions.map(([type]) => (
+                <span
+                  key={type}
+                  className="flex items-center justify-center w-5 h-5"
+                >
+                  {reactionData[type as ReactionType].activeIcon}
+                </span>
+              ));
+            })()}
+          </div>
+        </div>
       </motion.button>
 
       {/* Reaction count */}
