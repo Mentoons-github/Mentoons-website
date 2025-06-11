@@ -1,54 +1,30 @@
+import { ADDA_NAV_LINKS, NAV_LINKS } from ".";
+import { PARENTS } from "./adda/groups";
 import { PHOTO_POST } from "./adda/posts";
-import { FAQ, FAQ_PRODUCT } from "./faq";
-import { CONSTESTS, COMMUNITY, PLATINUM, PRIME } from "./home/home";
+import { BLOCK_REASONS, REPORT_REASONS } from "./adda/reportAbuse";
+import {
+  ASSESSMENT_DATA,
+  ASSESSMENTS,
+  HIRING,
+  REPORTS,
+} from "./assessments/assessments";
 import {
   ANIMATION_TEXTS_ADDA,
   ANIMATION_TEXTS_HOME,
 } from "./common/animationText";
-import { NAV_LINKS, ADDA_NAV_LINKS } from ".";
-import { PROBLEMS_FACED } from "./mythos/problemsFaced";
-import { BLOGS, NEWS, MYTHOS_NEWS } from "./mythos/blogs";
-import { CONTACT_INFO, CAREER, PLANET } from "./mythos/footer";
-import { PARENTS } from "./adda/groups";
+import { FAQ, FAQ_PRODUCT } from "./faq";
+import { COMMUNITY, CONSTESTS, PLATINUM, PRIME } from "./home/home";
+import { BLOGS, MYTHOS_NEWS, NEWS } from "./mythos/blogs";
+import { CAREER, CONTACT_INFO, PLANET } from "./mythos/footer";
 import { MYTHOS_PLANS } from "./mythos/membershipPlans";
+import { PROBLEMS_FACED } from "./mythos/problemsFaced";
 import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
 import { COMIC_COLOR, PRODUCTS_BENEFITS } from "./products";
-import {
-  ASSESSMENTS,
-  HIRING,
-  ASSESSMENT_DATA,
-  REPORTS,
-} from "./assessments/assessments";
-import { BLOCK_REASONS, REPORT_REASONS } from "./adda/reportAbuse";
 
 export {
-  FAQ,
-  CONSTESTS,
-  COMMUNITY,
-  PLATINUM,
-  PRIME,
-  ANIMATION_TEXTS_ADDA,
-  ANIMATION_TEXTS_HOME,
-  NAV_LINKS,
-  ADDA_NAV_LINKS,
-  PHOTO_POST,
-  PROBLEMS_FACED,
-  BLOGS,
-  NEWS,
-  CONTACT_INFO,
-  CAREER,
-  PLANET,
-  PARENTS,
-  MYTHOS_PLANS,
-  MYTHOS_PODCASTS,
-  FAQ_PRODUCT,
-  MYTHOS_NEWS,
-  ASSESSMENTS,
-  HIRING,
-  ASSESSMENT_DATA,
-  BLOCK_REASONS,
-  REPORT_REASONS,
-  REPORTS,
-  COMIC_COLOR,
-  PRODUCTS_BENEFITS,
+  ADDA_NAV_LINKS, ANIMATION_TEXTS_ADDA,
+  ANIMATION_TEXTS_HOME, ASSESSMENT_DATA, ASSESSMENTS, BLOCK_REASONS, BLOGS, CAREER, COMIC_COLOR, COMMUNITY, CONSTESTS, CONTACT_INFO, FAQ, FAQ_PRODUCT, HIRING, MYTHOS_NEWS, MYTHOS_PLANS,
+  MYTHOS_PODCASTS, NAV_LINKS, NEWS, PARENTS, PHOTO_POST, PLANET, PLATINUM,
+  PRIME, PROBLEMS_FACED, PRODUCTS_BENEFITS, REPORT_REASONS,
+  REPORTS
 };
