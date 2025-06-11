@@ -4,6 +4,7 @@ import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { RewardEventType } from "@/types/rewards";
+import { reactionEventEmitter } from "@/utils/reactionEvents";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useEffect, useRef, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -78,11 +79,19 @@ const Reactions = ({
   id,
   likeCount,
   enabledReactionTypes = ["like", "love", "laugh", "angry", "sad", "fire"],
+  toggleReaction = true,
+  showLikeCount = true,
+  toggleBorder = false,
+  onReactionUpdate,
 }: {
   type: "post" | "meme";
   id: string;
   likeCount: number;
   enabledReactionTypes?: ReactionType[];
+  toggleReaction?: boolean;
+  showLikeCount?: boolean;
+  toggleBorder?: boolean;
+  onReactionUpdate?: (counts: Record<ReactionType, number>) => void;
 }) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
@@ -173,6 +182,9 @@ const Reactions = ({
         updated[reactionType] = updated[reactionType] + 1;
       }
 
+      // Emit event for real-time updates across components
+      reactionEventEmitter.emitReactionUpdate(id, updated);
+
       return updated;
     });
 
@@ -201,6 +213,13 @@ const Reactions = ({
       // Update with server response if available
       if (response.data.reactionCounts) {
         setReactionCounts(response.data.reactionCounts);
+        // Emit event with server-confirmed data
+        reactionEventEmitter.emitReactionUpdate(
+          id,
+          response.data.reactionCounts
+        );
+        // Call callback if provided
+        onReactionUpdate?.(response.data.reactionCounts);
       }
 
       // Trigger reward points only when adding a reaction (not when removing)
@@ -214,6 +233,25 @@ const Reactions = ({
     } catch (error) {
       // Revert UI state on error
       setUserReaction(userReaction);
+      setReactionCounts((prev) => {
+        const reverted = { ...prev };
+
+        // Revert the optimistic update
+        if (userReaction) {
+          // If user had a previous reaction, add it back
+          reverted[userReaction] = reverted[userReaction] + 1;
+        }
+
+        if (!isTogglingOff) {
+          // If we were adding a new reaction, remove it
+          reverted[reactionType] = Math.max(0, reverted[reactionType] - 1);
+        }
+
+        return reverted;
+      });
+
+      console.error("Error updating reaction:", error);
+      toast.error("Failed to update reaction. Please try again.");
     }
   };
 
@@ -243,7 +281,26 @@ const Reactions = ({
         }
 
         if (response.data.reactionCounts) {
-          setReactionCounts(response.data.reactionCounts);
+          // Only update if we don't have a pending optimistic update
+          setReactionCounts((prev) => {
+            // If total reactions in prev state differs from server,
+            // it means we have an optimistic update in progress
+            const prevTotal = Object.values(prev).reduce(
+              (sum, count) => sum + count,
+              0
+            );
+            const serverTotal = Object.values(
+              response.data.reactionCounts as Record<string, number>
+            ).reduce((sum: number, count: number) => sum + count, 0);
+
+            // If counts match or this is initial load (prevTotal was from initial state), use server data
+            if (prevTotal === serverTotal || prevTotal === (likeCount || 0)) {
+              return response.data.reactionCounts;
+            }
+
+            // Otherwise, keep the optimistic update
+            return prev;
+          });
         } else if (response.data.likeCount !== undefined) {
           // Backward compatibility
           setReactionCounts((prev) => ({
@@ -307,20 +364,20 @@ const Reactions = ({
     fetchReactionsList();
   }, [showReactionListDropdown, type, id, getToken]);
 
-  // Get the default reaction icon (like)
-  // const getDisplayedReaction = () => {
-  //   if (userReaction) {
-  //     return reactionData[userReaction].activeIcon;
-  //   }
-  //   return reactionData.like.inactiveIcon;
-  // };
+  //Get the default reaction icon (like)
+  const getDisplayedReaction = () => {
+    if (userReaction) {
+      return reactionData[userReaction].activeIcon;
+    }
+    return reactionData.like.inactiveIcon;
+  };
 
-  // const getReactionLabel = () => {
-  //   if (userReaction) {
-  //     return reactionData[userReaction].label;
-  //   }
-  //   return "Like";
-  // };
+  const getReactionLabel = () => {
+    if (userReaction) {
+      return reactionData[userReaction].label;
+    }
+    return "Like";
+  };
 
   return (
     <div
@@ -329,10 +386,14 @@ const Reactions = ({
     >
       {/* Main reaction button */}
       <motion.button
-        className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border  ${
-          userReaction ? "border-orange-500" : "border-orange-400"
+        className={`flex items-center justify-center gap-2 px-4 py-2 bg-white ${
+          toggleBorder
+            ? userReaction
+              ? "border border-orange-500"
+              : "border border-orange-400"
+            : ""
         } rounded-full transition-colors`}
-        onClick={toggleReactionSelector}
+        onClick={toggleReaction ? toggleReactionSelector : undefined}
         whileTap={{ scale: 0.9 }}
         whileHover={{
           scale: 1.1,
@@ -340,48 +401,66 @@ const Reactions = ({
         }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
-        <div className="flex items-center">
-          {/* User's reaction icon */}
-          {/* Top three most common reactions or default like icon */}
-          <div className="flex -space-x-1">
-            {(() => {
-              const topReactions = Object.entries(reactionCounts)
-                .filter(([, count]) => count > 0)
-                .sort(([, countA], [, countB]) => countB - countA)
-                .slice(0, 3);
+        {!showLikeCount && (
+          <span className="flex items-center justify-center w-5 h-5 mr-1">
+            {getDisplayedReaction()}
+          </span>
+        )}
 
-              if (topReactions.length === 0) {
-                return (
-                  <span className="flex items-center justify-center w-5 h-5">
-                    {userReaction
-                      ? reactionData[userReaction].activeIcon
-                      : reactionData.like.inactiveIcon}
+        {!showLikeCount && (
+          <span className="flex items-center justify-center w-5 h-5 mr-1 text-xs text-gray-500">
+            {getReactionLabel()}
+          </span>
+        )}
+
+        {showLikeCount && (
+          <div className="flex items-center">
+            {/* User's reaction icon */}
+            {/* Top three most common reactions or default like icon */}
+            <div className="flex -space-x-1">
+              {(() => {
+                const topReactions = Object.entries(reactionCounts)
+                  .filter(([, count]) => count > 0)
+                  .sort(([, countA], [, countB]) => countB - countA)
+                  .slice(0, 3);
+
+                if (topReactions.length === 0) {
+                  return (
+                    <span className="flex items-center justify-center w-5 h-5">
+                      {userReaction
+                        ? reactionData[userReaction].activeIcon
+                        : reactionData.like.inactiveIcon}
+                    </span>
+                  );
+                }
+
+                return topReactions.map(([type]) => (
+                  <span
+                    key={type}
+                    className="flex items-center justify-center w-5 h-5"
+                  >
+                    {reactionData[type as ReactionType].activeIcon}
                   </span>
-                );
-              }
-
-              return topReactions.map(([type]) => (
-                <span
-                  key={type}
-                  className="flex items-center justify-center w-5 h-5"
-                >
-                  {reactionData[type as ReactionType].activeIcon}
-                </span>
-              ));
-            })()}
+                ));
+              })()}
+            </div>
           </div>
-        </div>
+        )}
       </motion.button>
 
       {/* Reaction count */}
-      <div className="flex items-center gap-1">
-        <span
-          className="text-[#605F5F] figtree text-sm"
-          onClick={() => setShowReactionListDropdown(!showReactionListDropdown)}
-        >
-          {getTotalReactions()}
-        </span>
-      </div>
+      {showLikeCount && (
+        <div className="flex items-center gap-1">
+          <span
+            className="text-[#605F5F] figtree text-sm"
+            onClick={() =>
+              setShowReactionListDropdown(!showReactionListDropdown)
+            }
+          >
+            {getTotalReactions()}
+          </span>
+        </div>
+      )}
 
       {/* Reaction selector popup */}
       <AnimatePresence>

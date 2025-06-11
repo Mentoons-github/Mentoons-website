@@ -95,12 +95,13 @@ const Footer = () => {
     if (url.includes("#")) {
       const [path, section] = url.split("#");
       console.log(section);
-      const element = document.getElementById(section);
+
       if (location.pathname !== path) {
         // First navigate to the path
         navigate(path);
-        // document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
+        // Wait for navigation to complete and page to load
         setTimeout(() => {
+          const element = document.getElementById(section);
           if (element) {
             const yOffset = -80;
             const y =
@@ -115,18 +116,27 @@ const Footer = () => {
         }, 1000);
       } else {
         // If already on correct path, just scroll
-        const element = document.getElementById(section);
-        if (element) {
-          const headerOffset = 80;
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition =
-            elementPosition + window.pageYOffset - headerOffset;
+        // Small timeout to ensure any ongoing scrolling is complete
+        setTimeout(() => {
+          const element = document.getElementById(section);
+          if (element) {
+            const headerOffset = 80;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition =
+              elementPosition + window.pageYOffset - headerOffset;
 
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth",
-          });
-        }
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          } else {
+            // If element not found, try scrolling to top of page
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }
+        }, 300);
       }
       return;
     }

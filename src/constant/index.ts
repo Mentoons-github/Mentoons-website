@@ -791,6 +791,11 @@ export const FOOTER_PAGELINKS = [
         label: "Conversataion Story Card",
         url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
+      {
+        id: "S_5",
+        label: "Coloring Books",
+        url: `/product-page?productType=${ProductType.MENTOONS_BOOKS}#product`,
+      },
     ],
   },
 
