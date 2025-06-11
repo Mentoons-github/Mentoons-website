@@ -168,7 +168,7 @@ const AddPosts = ({ setNewPost, onPostCreated }: AddPostsProps) => {
           <div className="flex items-center w-full gap-2">
             <input
               type="text"
-              placeholder="Share your thoughts with the Mentoons community..."
+              placeholder="Start your first blogging as a parent"
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               className="flex-grow px-4 py-2 text-sm border-0 font-inter rounded-full focus:outline-none focus:ring-2 focus:ring-[#e37019]"

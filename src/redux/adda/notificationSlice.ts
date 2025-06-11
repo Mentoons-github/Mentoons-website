@@ -110,6 +110,23 @@ export const deleteNotification = createAsyncThunk<
   }
 );
 
+export const clearAllNotifications = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>("notifications/clearAll", async (token, { rejectWithValue }) => {
+  try {
+    await axios.delete(
+      `${import.meta.env.VITE_PROD_URL}/adda/delete-usernotifications`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+  } catch (error) {
+    return rejectWithValue("Failed to clear all notifications");
+  }
+});
+
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,
@@ -186,6 +203,19 @@ const notificationSlice = createSlice({
       })
       .addCase(deleteNotification.rejected, (state, action) => {
         state.error = action.payload || "Failed to delete notification";
+        state.isLoading = false;
+      })
+      .addCase(clearAllNotifications.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(clearAllNotifications.fulfilled, (state) => {
+        state.notifications = [];
+        state.hasMore = false;
+        state.isLoading = false;
+      })
+      .addCase(clearAllNotifications.rejected, (state, action) => {
+        state.error = action.payload || "Failed to clear all notifications";
         state.isLoading = false;
       });
   },

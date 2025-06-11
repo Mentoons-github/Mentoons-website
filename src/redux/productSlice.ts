@@ -64,9 +64,11 @@ export const fetchProducts = createAsyncThunk<
     const state = thunkAPI.getState().products;
     const { search, sortBy, order, page, limit } = state;
 
+    console.log(search, sortBy, order, page, limit);
+
     try {
       const response = await axios.get<{ data: ProductBase[]; total: number }>(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+        `${import.meta.env.VITE_PROD_URL}/products`,
         // "http://localhost:4000/api/v1/products",
 
         {

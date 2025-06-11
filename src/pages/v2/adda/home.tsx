@@ -21,7 +21,7 @@ const AddaHome = () => {
 
   return (
     <>
-      {showModal && !isSignedIn && (
+      {!isSignedIn && showModal && (
         <WelcomeModal onClose={() => setShowModal(false)} />
       )}
       <AddPosts setNewPost={setNewPost} />

@@ -4,17 +4,14 @@ import { FaCamera } from "react-icons/fa6";
 import { FiEdit2, FiLoader } from "react-icons/fi";
 import { UserDetails } from "./profile";
 import { memo, useState, useCallback } from "react";
+import ImageCropperModal from "@/components/common/modal/cropper/cropperModal";
 
 interface ProfileHeaderProps {
   userDetails: UserDetails;
   coverPhotoInputRef: React.RefObject<HTMLInputElement>;
   profilePhotoInputRef: React.RefObject<HTMLInputElement>;
-  handleCoverPhotoChange: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => Promise<void>;
-  handleProfilePhotoChange: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => Promise<void>;
+  handleCoverPhotoChange: (file: File) => Promise<void>;
+  handleProfilePhotoChange: (file: File) => Promise<void>;
   isEditable?: boolean;
   maxImageSize?: number;
   onImageError?: (error: string) => void;
@@ -35,6 +32,10 @@ const ProfileHeader = memo(
     const [isProfilePhotoLoading, setIsProfilePhotoLoading] = useState(false);
     const [coverImageError, setCoverImageError] = useState(false);
     const [profileImageError, setProfileImageError] = useState(false);
+    const [cropperOpen, setCropperOpen] = useState<"cover" | "profile" | null>(
+      null
+    );
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
     const validateImage = useCallback(
       (file: File): string | null => {
@@ -57,56 +58,84 @@ const ProfileHeader = memo(
       [maxImageSize]
     );
 
-    const onCoverPhotoChange = useCallback(
-      async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
+    const openCropper = useCallback(
+      (file: File, type: "cover" | "profile") => {
         const validationError = validateImage(file);
         if (validationError) {
           onImageError?.(validationError);
           return;
         }
 
-        setIsCoverPhotoLoading(true);
-        setCoverImageError(false);
-
-        try {
-          await handleCoverPhotoChange(e);
-        } catch (error) {
-          setCoverImageError(true);
-          onImageError?.("Failed to upload cover photo. Please try again.");
-        } finally {
-          setIsCoverPhotoLoading(false);
-        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImageToCrop(reader.result as string);
+          setCropperOpen(type);
+        };
+        reader.readAsDataURL(file);
       },
-      [handleCoverPhotoChange, validateImage, onImageError]
+      [validateImage, onImageError]
+    );
+
+    const onCoverPhotoChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        openCropper(file, "cover");
+      },
+      [openCropper]
     );
 
     const onProfilePhotoChange = useCallback(
-      async (e: React.ChangeEvent<HTMLInputElement>) => {
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const validationError = validateImage(file);
+        openCropper(file, "profile");
+      },
+      [openCropper]
+    );
+
+    const handleCroppedImage = useCallback(
+      async (croppedFile: File, type: "cover" | "profile") => {
+        const validationError = validateImage(croppedFile);
         if (validationError) {
           onImageError?.(validationError);
+          setCropperOpen(null);
           return;
         }
 
-        setIsProfilePhotoLoading(true);
-        setProfileImageError(false);
-
         try {
-          await handleProfilePhotoChange(e);
+          if (type === "cover") {
+            setIsCoverPhotoLoading(true);
+            setCoverImageError(false);
+            await handleCoverPhotoChange(croppedFile);
+          } else {
+            setIsProfilePhotoLoading(true);
+            setProfileImageError(false);
+            await handleProfilePhotoChange(croppedFile);
+          }
         } catch (error) {
-          setProfileImageError(true);
-          onImageError?.("Failed to upload profile photo. Please try again.");
+          if (type === "cover") {
+            setCoverImageError(true);
+            onImageError?.("Failed to upload cover photo. Please try again.");
+          } else {
+            setProfileImageError(true);
+            onImageError?.("Failed to upload profile photo. Please try again.");
+          }
         } finally {
+          setIsCoverPhotoLoading(false);
           setIsProfilePhotoLoading(false);
+          setCropperOpen(null);
+          setImageToCrop(null);
         }
       },
-      [handleProfilePhotoChange, validateImage, onImageError]
+      [
+        handleCoverPhotoChange,
+        handleProfilePhotoChange,
+        validateImage,
+        onImageError,
+      ]
     );
 
     const defaultCoverGradient =
@@ -161,7 +190,6 @@ const ProfileHeader = memo(
                   )}
                 </Button>
 
-                {/* Progress indicator */}
                 {isCoverPhotoLoading && (
                   <div className="absolute -bottom-1 left-0 right-0 h-1 bg-white/30 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 animate-pulse" />
@@ -251,6 +279,20 @@ const ProfileHeader = memo(
           <div className="absolute top-4 left-4 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg text-sm">
             Failed to load cover image
           </div>
+        )}
+
+        {cropperOpen && imageToCrop && (
+          <ImageCropperModal
+            imageSrc={imageToCrop}
+            aspectRatio={cropperOpen === "cover" ? 16 / 9 : 1}
+            onCrop={(croppedFile) =>
+              handleCroppedImage(croppedFile, cropperOpen)
+            }
+            onCancel={() => {
+              setCropperOpen(null);
+              setImageToCrop(null);
+            }}
+          />
         )}
       </div>
     );

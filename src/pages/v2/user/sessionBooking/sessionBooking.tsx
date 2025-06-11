@@ -64,19 +64,6 @@ const SessionBooking: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // const confirmCancelBooking = () => {
-  //   if (bookingToCancel) {
-  //     const updatedBookings = bookedCalls.filter(
-  //       (booking) => booking._id !== bookingToCancel
-  //     );
-  //     setBookedCalls(updatedBookings);
-  //     setBookedDates(updatedBookings.map((booking) => booking.date));
-  //     toast.success("Booking canceled successfully");
-  //   }
-  //   setIsModalOpen(false);
-  //   setBookingToCancel(null);
-  // };
-
   const showErrorModal = (message: string) => {
     setErrorMessage(message);
     setErrorModalOpen(true);
@@ -110,8 +97,8 @@ const SessionBooking: React.FC = () => {
 
       const paymentData = {
         orderId: `#ASM-${Date.now()}`,
-        totalAmount: 1, //change to 499
-        amount: 1,
+        totalAmount: 499,
+        amount: 499,
         currency: "INR",
         productInfo: "Mentoons One-On-One Session",
         customerName: name,

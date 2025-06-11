@@ -1,6 +1,8 @@
+import { INDIAN_STATES } from "@/constant/constants";
+import { IndianState } from "@/types";
 import { useSessionForm } from "@/utils/formik/sessionForm";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,11 +16,6 @@ type HandleSubmit = (values: {
   state: string;
   description?: string;
 }) => void;
-
-type IndianState = {
-  name: string;
-  state_code: string;
-};
 
 const SessionBookingForm = ({
   handleSubmit,
@@ -35,34 +32,7 @@ const SessionBookingForm = ({
   });
 
   useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const response = await axios.post(
-          "https://countriesnow.space/api/v0.1/countries/states",
-          {
-            country: "India",
-          }
-        );
-
-        const stateDetail = response.data.data.states;
-
-        const states: IndianState[] = stateDetail.map(
-          (state: IndianState) => state
-        );
-
-        console.table(states);
-        setInidanStates(states);
-      } catch (error: unknown) {
-        console.error("error in fetching states :", error);
-        if (error instanceof AxiosError) {
-          toast.error(error.response?.data?.msg || "Failed to fetch states.");
-        } else {
-          toast.error("Something went wrong");
-        }
-      }
-    };
-
-    fetchStates();
+    setInidanStates(INDIAN_STATES);
   }, []);
 
   const fetchUser = useCallback(async () => {

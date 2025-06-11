@@ -53,7 +53,7 @@ const ProfileDetails = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+
         console.log(response.data.data.isFriend);
         setUser(response.data.data.user);
         setFollowers(response.data.data.user.followers);
@@ -166,8 +166,8 @@ const ProfileDetails = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "posts":
-      return <PostsList posts={userPosts} user={user} /> ;
-        
+        return <PostsList posts={userPosts} user={user} />;
+
       case "about":
         return <AboutSection user={user} />;
       case "friends":
