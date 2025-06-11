@@ -52,6 +52,7 @@ import {
   User,
   UserRole,
 } from "./adda/userProfile";
+import { OrderData, OrderItem } from "./order";
 
 export type {
   Color,
@@ -101,6 +102,8 @@ export type {
   User,
   UserRole,
   UserSummary,
+  OrderData,
+  OrderItem,
 };
 
 export { MediaType, PostType };

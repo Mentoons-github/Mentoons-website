@@ -1,362 +1,531 @@
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  MdAutorenew,
+  MdStar,
+  MdCalendarToday,
+  MdShoppingBag,
+} from "react-icons/md";
+import ReviewModal from "../common/modal/reviewModal";
+import { useAuth } from "@clerk/clerk-react";
+import axiosInstance from "@/api/axios";
+import { OrderData, OrderItem } from "@/types";
+import { useNavigate } from "react-router-dom";
 
-interface OrderItem {
-  orderId: string;
-  title: string;
-  sampleProduct: string;
-  price: number;
-  purchasedAt: string;
-  status: "Completed" | "Pending" | "Cancelled";
-  isDownloaded: boolean;
-  hasReviewed: boolean;
-  imageUrl: string;
-}
-
-const orderedItems: OrderItem[] = [
-  {
-    orderId: "order-101",
-    title: "Conversation Starter Cards",
-    sampleProduct: "product 1",
-    price: 199,
-    purchasedAt: "2025-06-07T10:15:00Z",
-    status: "Completed",
-    isDownloaded: false,
-    hasReviewed: false,
-    imageUrl: "https://placehold.co/600x400",
+const contentVariants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
   },
-  {
-    orderId: "order-102",
-    title: "Story Re-teller Cards",
-    sampleProduct: "product 2",
-    price: 199,
-    purchasedAt: "2025-06-06T18:30:00Z",
-    status: "Completed",
-    isDownloaded: true,
-    hasReviewed: true,
-    imageUrl: "https://placehold.co/600x400",
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: [0.22, 1, 0.36, 1],
+      delay: 0.1,
+    },
   },
-  {
-    orderId: "order-103",
-    title: "Silent Stories",
-    sampleProduct: "product 3",
-    price: 199,
-    purchasedAt: "2025-06-05T20:00:00Z",
-    status: "Completed",
-    isDownloaded: false,
-    hasReviewed: false,
-    imageUrl: "https://placehold.co/600x400",
-  },
-];
-
-interface StatusBadgeProps {
-  status: "Completed" | "Pending" | "Cancelled";
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusStyles: { [key in StatusBadgeProps["status"]]: string } = {
-    Completed: "bg-green-100 text-green-800",
-    Pending: "bg-yellow-100 text-yellow-800",
-    Cancelled: "bg-red-100 text-red-800",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        statusStyles[status] || "bg-gray-100 text-gray-800"
-      }`}
-    >
-      {status}
-    </span>
-  );
 };
 
-interface ReviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (review: {
-    orderId: string;
-    rating: number;
-    comment: string;
-  }) => void;
-  orderId: string | null;
-  productTitle: string;
-}
+const AnimatedLoader = () => (
+  <motion.div
+    className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-[99999]"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <div className="text-center">
+      <motion.div
+        className="relative mb-8"
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        {/* Animated Shopping Bag */}
+        <motion.div
+          className="w-20 h-20 mx-auto mb-4 relative"
+          animate={{
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <MdShoppingBag className="w-full h-full text-indigo-600" />
+        </motion.div>
 
-const ReviewModal: React.FC<ReviewModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  orderId,
-  productTitle,
-}) => {
-  const [rating, setRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>("");
+        <motion.div
+          className="absolute inset-0 w-24 h-24 mx-auto border-4 border-indigo-200 border-t-indigo-600 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
+      </motion.div>
 
-  if (!isOpen) return null;
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          Loading Your Orders
+        </h3>
+        <p className="text-gray-600">
+          Please wait while we fetch your order history...
+        </p>
+      </motion.div>
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (rating < 1 || rating > 5) {
-      alert("Please select a rating between 1 and 5.");
-      return;
-    }
-    if (orderId) {
-      onSubmit({ orderId, rating, comment });
-    }
-    setRating(0);
-    setComment("");
-    onClose();
+      {/* Animated Dots */}
+      <motion.div
+        className="flex justify-center mt-4 space-x-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="w-2 h-2 bg-indigo-600 rounded-full"
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: i * 0.2,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </motion.div>
+    </div>
+  </motion.div>
+);
+
+const OrderedItems = () => {
+  const navigate = useNavigate();
+
+  const [groupedOrders, setGroupedOrders] = useState<{
+    [key: string]: OrderData[];
+  }>({});
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{
+    productId: string;
+    productName: string;
+  } | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    const getOrders = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const token = await getToken();
+        if (!token) {
+          console.log("No token found");
+          setError("Authentication required");
+          return;
+        }
+
+        const response = await axiosInstance.get("/order/get-order-history", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Backend response:", response.data);
+        setGroupedOrders(response.data.groupedOrders);
+      } catch (error: any) {
+        console.error("Error fetching orders:", error);
+        setError(
+          error.response?.data?.message ||
+            "Failed to load orders. Please try again."
+        );
+      } finally {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
+      }
+    };
+
+    getOrders();
+  }, [getToken]);
+
+  const getMonthYear = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
   };
 
+  const uniqueMonths = useMemo(() => {
+    const months = Object.values(groupedOrders)
+      .flat()
+      .map((item) => getMonthYear(item.purchaseDate));
+    return [...new Set(months)].sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    );
+  }, [groupedOrders]);
+
+  const filteredOrders = useMemo(() => {
+    if (selectedMonth === "all") {
+      return groupedOrders;
+    }
+    const filtered: { [key: string]: OrderData[] } = {};
+    Object.keys(groupedOrders).forEach((dateKey) => {
+      const orders = groupedOrders[dateKey].filter(
+        (order) => getMonthYear(order.purchaseDate) === selectedMonth
+      );
+      if (orders.length > 0) {
+        filtered[dateKey] = orders;
+      }
+    });
+    return filtered;
+  }, [groupedOrders, selectedMonth]);
+
+  const getTotalPrice = () => {
+    return Object.values(filteredOrders)
+      .flat()
+      .reduce((total, order) => total + order.totalAmount, 0);
+  };
+
+  const getTotalForDate = (orders: OrderData[]) => {
+    return orders.reduce((total, order) => total + order.totalAmount, 0);
+  };
+
+  const handleReviewClick = (item: OrderItem) => {
+    setSelectedItem({
+      productId: item.productId,
+      productName: item.productName,
+    });
+    setShowReviewModal(true);
+  };
+
+  const handleBuyAgain = (productId: string) => {
+    navigate(`/mentoons-store/product/${productId}`);
+  };
+
+  const handleCloseModal = () => {
+    setShowReviewModal(false);
+    setSelectedItem(null);
+  };
+
+  const handleSubmitReview = (productId: string) => {
+    setGroupedOrders((prev) => {
+      const updated: { [key: string]: OrderData[] } = {};
+      Object.keys(prev).forEach((dateKey) => {
+        updated[dateKey] = prev[dateKey].map((order) => ({
+          ...order,
+          items: order.items.map((item) =>
+            item.productId === productId ? { ...item, hasReviewed: true } : item
+          ),
+        }));
+      });
+      return updated;
+    });
+  };
+
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
+  if (isLoading) {
+    return <AnimatedLoader />;
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        className="max-w-6xl mx-auto p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="text-center py-20">
+          <motion.div
+            className="w-16 h-16 mx-auto mb-6 text-red-500"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <MdShoppingBag className="w-full h-full" />
+          </motion.div>
+          <motion.h2
+            className="text-2xl font-bold text-gray-900 mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Oops! Something went wrong
+          </motion.h2>
+          <motion.p
+            className="text-gray-600 mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            {error}
+          </motion.p>
+          <motion.button
+            onClick={handleRetry}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Try Again
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      role="dialog"
-      aria-labelledby="review-modal-title"
-      aria-modal="true"
+    <motion.div
+      className="max-w-6xl mx-auto p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 id="review-modal-title" className="text-xl font-semibold mb-4">
-          Write a Review for {productTitle}
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Rating
-            </label>
-            <div className="flex space-x-1 mt-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className={`text-2xl ${
-                    star <= rating ? "text-yellow-400" : "text-gray-300"
-                  } hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                  aria-label={`Rate ${star} stars`}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="review-comment"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Comment
-            </label>
-            <textarea
-              id="review-comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              rows={4}
-              placeholder="Share your thoughts about the product..."
-              aria-describedby="review-comment-description"
-            />
-            <p
-              id="review-comment-description"
-              className="text-sm text-gray-500 mt-1"
-            >
-              Your feedback helps us improve our products.
+      <motion.div
+        className="mb-8 flex items-center gap-4 flex-wrap"
+        variants={contentVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="flex items-center gap-2">
+          <MdCalendarToday className="w-5 h-5 text-gray-600" />
+          <span className="text-sm font-medium text-gray-700">
+            Filter by month:
+          </span>
+        </div>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+        >
+          <option value="all">All Months</option>
+          {uniqueMonths.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
+        </select>
+      </motion.div>
+
+      <motion.div
+        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-8 mb-8 shadow-lg"
+        variants={contentVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-medium opacity-90 mb-2">
+              {selectedMonth === "all"
+                ? "Total Spent (All Time)"
+                : `Total Spent in ${selectedMonth}`}
+            </h2>
+            <p className="text-3xl font-bold">
+              ₹ {getTotalPrice().toLocaleString()}
             </p>
           </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Submit Review
-            </button>
+          <div className="text-right">
+            <p className="text-sm opacity-90 mb-2">Orders</p>
+            <p className="text-2xl font-semibold">
+              {Object.values(filteredOrders).flat().length}
+            </p>
           </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+        </div>
+      </motion.div>
 
-const OrderedItems: React.FC = () => {
-  const [downloading, setDownloading] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-  const [reviewModal, setReviewModal] = useState<{
-    isOpen: boolean;
-    orderId: string | null;
-    productTitle: string;
-  }>({
-    isOpen: false,
-    orderId: null,
-    productTitle: "",
-  });
-
-  // Format date for display
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  // Handle download button click
-  const handleDownload = async (
-    url: string,
-    isDownloaded: boolean,
-    orderId: string
-  ) => {
-    if (isDownloaded) {
-      alert(`Order ${orderId} has already been downloaded.`);
-      return;
-    }
-
-    setDownloading((prev) => ({ ...prev, [orderId]: true }));
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      window.open(url, "_blank");
-      console.log(`Downloading from ${url}`);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Failed to initiate download. Please try again.");
-    } finally {
-      setDownloading((prev) => ({ ...prev, [orderId]: false }));
-    }
-  };
-
-  // Handle review submission
-  const handleReviewSubmit = (review: {
-    orderId: string;
-    rating: number;
-    comment: string;
-  }) => {
-    console.log(`Review submitted for ${review.orderId}:`, {
-      rating: review.rating,
-      comment: review.comment,
-    });
-    // In a real app, update hasReviewed via backend API
-  };
-
-  // Open review modal
-  const openReviewModal = (orderId: string, productTitle: string) => {
-    setReviewModal({ isOpen: true, orderId, productTitle });
-  };
-
-  // Close review modal
-  const closeReviewModal = () => {
-    setReviewModal({ isOpen: false, orderId: null, productTitle: "" });
-  };
-
-  // Fallback image
-  const FALLBACK_IMAGE = "https://via.placeholder.com/150?text=Product+Image";
-
-  return (
-    <div className="flex flex-col justify-center items-center p-6 w-full">
-      <div className="max-w-7xl w-full space-y-6">
-        {orderedItems.map((item) => (
-          <div
-            key={item.orderId}
-            className="flex flex-col md:flex-row items-start bg-white shadow-md rounded-lg p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300"
-            role="region"
-            aria-labelledby={`order-${item.orderId}`}
+      <AnimatePresence mode="wait">
+        {Object.keys(filteredOrders).length === 0 ? (
+          <motion.div
+            className="text-center py-16 text-gray-600"
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
           >
-            {/* Product Image */}
-            <div className="w-full md:w-32 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-              <img
-                src={item.imageUrl || FALLBACK_IMAGE}
-                alt={`${item.title} product image`}
-                className="w-full h-32 object-cover rounded-md"
-                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                  e.currentTarget.src = FALLBACK_IMAGE;
-                }}
-              />
-            </div>
-
-            {/* Order Details */}
-            <div className="flex flex-col flex-grow space-y-2">
-              <h3
-                id={`order-${item.orderId}`}
-                className="text-lg font-semibold text-gray-900"
-              >
-                Order ID: <span className="text-blue-600">#{item.orderId}</span>
-              </h3>
-              <p className="text-base text-gray-700">
-                {item.sampleProduct}: {item.title}
-              </p>
-              <p className="text-sm text-gray-500">
-                Purchased: {formatDate(item.purchasedAt)}
-              </p>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Status:</span>
-                <StatusBadge status={item.status} />
-              </div>
-            </div>
-
-            {/* Price and Actions */}
-            <div className="flex flex-col items-start md:items-end space-y-2 mt-4 md:mt-0">
-              <span className="text-lg font-medium text-gray-900">
-                ₹{item.price}
-              </span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() =>
-                    handleDownload(
-                      "https://example.com/download",
-                      item.isDownloaded,
-                      item.orderId
-                    )
-                  }
-                  className={`px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 ${
-                    item.isDownloaded || downloading[item.orderId]
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  }`}
-                  disabled={item.isDownloaded || downloading[item.orderId]}
-                  aria-label={
-                    item.isDownloaded
-                      ? `Order ${item.orderId} already downloaded`
-                      : `Download order ${item.orderId}`
-                  }
+            <motion.div
+              className="w-16 h-16 mx-auto mb-4 text-gray-400"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <MdShoppingBag className="w-full h-full" />
+            </motion.div>
+            <p className="text-lg font-medium">
+              No orders found
+              {selectedMonth !== "all" ? ` for ${selectedMonth}` : ""}.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="space-y-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {Object.entries(filteredOrders)
+              .sort(
+                ([dateA], [dateB]) =>
+                  new Date(dateB).getTime() - new Date(dateA).getTime()
+              )
+              .map(([date, orders], index) => (
+                <motion.div
+                  key={date}
+                  className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  {downloading[item.orderId]
-                    ? "Downloading..."
-                    : item.isDownloaded
-                    ? "Downloaded"
-                    : "Download"}
-                </button>
-                {item.status === "Completed" && !item.hasReviewed && (
-                  <button
-                    onClick={() => openReviewModal(item.orderId, item.title)}
-                    className="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
-                    aria-label={`Write a review for order ${item.orderId}`}
-                  >
-                    Write a Review
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <ReviewModal
-        isOpen={reviewModal.isOpen}
-        onClose={closeReviewModal}
-        onSubmit={handleReviewSubmit}
-        orderId={reviewModal.orderId}
-        productTitle={reviewModal.productTitle}
-      />
-    </div>
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                          {date}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {orders.length} order{orders.length > 1 ? "s" : ""}{" "}
+                          placed
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600 mb-1">
+                          Total for {date}
+                        </p>
+                        <p className="text-xl font-bold text-gray-900">
+                          ₹ {getTotalForDate(orders).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-gray-100">
+                    {orders.map((order, orderIndex) => (
+                      <div key={order.orderId} className="p-8">
+                        <div className="space-y-8">
+                          {order.items.map((item, itemIndex) => (
+                            <motion.div
+                              key={`${order.orderId}-${item.productId}`}
+                              className="flex items-start gap-8 p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay:
+                                  index * 0.1 +
+                                  orderIndex * 0.05 +
+                                  itemIndex * 0.03,
+                                duration: 0.4,
+                              }}
+                              whileHover={{ scale: 1.01 }}
+                            >
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={item.productImage || "/placeholder.png"}
+                                  alt={item.productName}
+                                  className="w-36 h-36 object-cover rounded-xl border border-gray-200 shadow-sm"
+                                />
+                              </div>
+
+                              <div className="flex-1 flex items-start justify-between gap-6">
+                                <div className="flex-1">
+                                  <h4 className="text-xl font-semibold text-gray-900 mb-3 leading-tight">
+                                    {item.productName}
+                                  </h4>
+                                  <p className="text-2xl font-bold text-indigo-600 mb-3">
+                                    ₹ {item.price.toLocaleString()}
+                                  </p>
+                                  <div className="space-y-2 mb-4">
+                                    <p className="text-sm text-gray-600">
+                                      <span className="font-medium">
+                                        Quantity:
+                                      </span>{" "}
+                                      {item.quantity}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm text-gray-600 font-medium">
+                                        Order ID:
+                                      </span>
+                                      <span className="text-sm font-mono text-gray-800 bg-gray-200 px-2 py-1 rounded">
+                                        {order.orderId}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col gap-4 ml-auto">
+                                  <motion.button
+                                    onClick={() =>
+                                      handleBuyAgain(item.productId)
+                                    }
+                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 active:bg-orange-800 transition-all shadow-sm min-w-[140px] justify-center"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <MdAutorenew className="w-4 h-4" />
+                                    Buy Again
+                                  </motion.button>
+
+                                  <motion.button
+                                    onClick={() => handleReviewClick(item)}
+                                    disabled={item.hasReviewed}
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-sm min-w-[140px] justify-center ${
+                                      item.hasReviewed
+                                        ? "bg-yellow-100 text-yellow-700 cursor-not-allowed"
+                                        : "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
+                                    }`}
+                                    whileHover={
+                                      !item.hasReviewed ? { scale: 1.05 } : {}
+                                    }
+                                    whileTap={
+                                      !item.hasReviewed ? { scale: 0.95 } : {}
+                                    }
+                                  >
+                                    <MdStar className="w-4 h-4" />
+                                    {item.hasReviewed
+                                      ? "Reviewed"
+                                      : "Write Review"}
+                                  </motion.button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showReviewModal && selectedItem && (
+          <ReviewModal
+            title={selectedItem.productName}
+            productId={selectedItem.productId}
+            onClose={handleCloseModal}
+            onSubmit={handleSubmitReview}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
