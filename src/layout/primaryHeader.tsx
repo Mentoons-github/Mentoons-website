@@ -48,7 +48,7 @@ const PrimaryHeader = () => {
         </div>
         <a
           href="tel:+919036033300"
-          className="hidden no-underline xl:block flex-shrink-0"
+          className="flex-shrink-0 hidden no-underline xl:block"
         >
           <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
             <FaPhone className="flex-shrink-0" />{" "}

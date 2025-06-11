@@ -1,4 +1,4 @@
-import { BiPhone, BiEnvelope, BiMap } from "react-icons/bi";
+import { BiEnvelope, BiMap, BiPhone } from "react-icons/bi";
 
 export const CONTACT_INFO = [
   {
