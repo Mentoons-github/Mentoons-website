@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
-import { FaChevronUp } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { FaArrowUp } from "react-icons/fa";
 
-const TopUpArrow = () => {
-  const [isVisible, setIsVisible] = useState(false);
+const ScrollToTopButton: React.FC = () => {
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const firstSection = document.getElementById("first-section");
-      if (!firstSection) return;
-
-      const sectionBottom = firstSection.getBoundingClientRect().bottom;
-      setIsVisible(sectionBottom <= 0);
+      const scrollPosition = window.scrollY;
+      const firstSectionHeight = window.innerHeight;
+      setShowScrollTop(
+        scrollPosition > firstSectionHeight && scrollPosition > 100
+      );
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -19,26 +18,26 @@ const TopUpArrow = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
-    <motion.div
+    <button
       onClick={scrollToTop}
-      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-      animate={
-        isVisible
-          ? { opacity: 1, scale: 1, y: 0 }
-          : { opacity: 0, scale: 0.9, y: 20 }
-      }
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      whileHover={{ scale: 1.15, y: -3 }}
-      whileTap={{ scale: 0.9 }}
-      className="fixed bottom-5 right-5 w-14 h-14 flex justify-center items-center rounded-full bg-white/80 backdrop-blur-md border border-gray-300 shadow-[0px_8px_15px_rgba(0,0,0,0.2)] z-50 cursor-pointer"
+      className={`fixed bottom-8 right-8 z-[100] p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 ${
+        showScrollTop
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-95 pointer-events-none"
+      }`}
+      style={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
+      aria-label="Scroll to top"
     >
-      <FaChevronUp className="text-gray-700 text-xl" />
-    </motion.div>
+      <FaArrowUp className="w-6 h-6" />
+    </button>
   );
 };
 
-export default TopUpArrow;
+export default ScrollToTopButton;

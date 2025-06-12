@@ -4,6 +4,7 @@ import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, LogOut, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { FaBox } from "react-icons/fa6";
 
 const AuthButton = () => {
   const { user } = useUser();
@@ -36,9 +37,11 @@ const AuthButton = () => {
     }
   };
 
-  const handleProfileNavigation = () => {
+  const handleNavigation = (nav: "profile" | "order") => {
     setShowProfileDropdown(false);
-    navigate("/adda/user-profile");
+    nav === "profile"
+      ? navigate("/adda/user-profile")
+      : navigate("/order-history");
   };
 
   useEffect(() => {
@@ -240,7 +243,7 @@ const AuthButton = () => {
                 <div className="py-2">
                   <motion.div
                     variants={itemVariants}
-                    onClick={handleProfileNavigation}
+                    onClick={() => handleNavigation("profile")}
                     whileHover={{ x: 4 }}
                     className="px-6 py-4 hover:bg-blue-50/80 cursor-pointer flex items-center gap-4 text-slate-700 transition-all duration-200 group"
                   >
@@ -253,6 +256,27 @@ const AuthButton = () => {
                       </span>
                       <p className="text-xs text-slate-500">
                         Manage your personal information
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  <div className="mx-4 my-2 border-t border-slate-200/60"></div>
+
+                  <motion.div
+                    variants={itemVariants}
+                    onClick={() => handleNavigation("order")}
+                    whileHover={{ x: 4 }}
+                    className="px-6 py-4 hover:bg-blue-50/80 cursor-pointer flex items-center gap-4 text-slate-700 transition-all duration-200 group"
+                  >
+                    <div className="w-11 h-11 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-200 shadow-sm">
+                      <FaBox className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-slate-900 block">
+                        Orders
+                      </span>
+                      <p className="text-xs text-slate-500">
+                        Manage your Orders
                       </p>
                     </div>
                   </motion.div>

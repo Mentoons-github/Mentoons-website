@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
+import ScrollToTopButton from "@/components/common/topUpArrow/upArrow";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -32,6 +33,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {children}
         </div>
         {!isAuthRoute && <Footer />}
+        {!isAuthRoute && <ScrollToTopButton />}
       </div>
     </NotificationProvider>
   );

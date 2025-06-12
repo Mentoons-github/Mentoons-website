@@ -31,4 +31,5 @@ export interface OrderData {
     | "UNKNOWN";
   items: OrderItem[];
   transactionId?: string;
+  discount?: number;
 }
