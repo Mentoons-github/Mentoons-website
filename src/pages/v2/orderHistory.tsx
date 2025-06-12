@@ -5,6 +5,7 @@ import {
   MdStar,
   MdCalendarToday,
   MdShoppingBag,
+  MdSort,
 } from "react-icons/md";
 import { FaMoneyBill } from "react-icons/fa6";
 import ReviewModal from "@/components/common/modal/reviewModal";
@@ -14,6 +15,7 @@ import { OrderData, OrderItem } from "@/types";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import InvoiceGenerator from "@/components/products/invoice/invoiceGenerator";
+import Pagination from "@/components/common/pagination/pagination";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -111,6 +113,25 @@ const AnimatedLoader = () => (
   </motion.div>
 );
 
+const FilterLoader = () => (
+  <motion.div
+    className="py-16 text-center"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <motion.div
+      className="w-12 h-12 mx-auto mb-4 text-indigo-600"
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+    >
+      <MdShoppingBag className="w-full h-full" />
+    </motion.div>
+    <p className="text-gray-600">Filtering orders...</p>
+  </motion.div>
+);
+
 const OrderHistory = () => {
   const { getToken } = useAuth();
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -126,13 +147,28 @@ const OrderHistory = () => {
   const [selectedDay, setSelectedDay] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedSort, setSelectedSort] = useState<string>("-purchaseDate");
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  const sortOptions = [
+    { value: "-purchaseDate", label: "Newest First" },
+    { value: "purchaseDate", label: "Oldest First" },
+    { value: "-amount", label: "Price: High to Low" },
+    { value: "amount", label: "Price: Low to High" },
+  ];
 
   useEffect(() => {
     const getOrders = async () => {
       try {
-        setIsLoading(true);
+        if (!isFirstLoad) {
+          setIsFilterLoading(true);
+        }
         setError(null);
 
         const token = await getToken();
@@ -142,12 +178,23 @@ const OrderHistory = () => {
           return;
         }
 
+        const params = {
+          page: currentPage,
+          limit: itemsPerPage,
+          year: selectedYear !== "all" ? selectedYear : undefined,
+          month: selectedMonth !== "all" ? selectedMonth : undefined,
+          day: selectedDay !== "all" ? selectedDay : undefined,
+          sort: selectedSort,
+        };
+
         const response = await axiosInstance.get("/order/get-order-history", {
           headers: { Authorization: `Bearer ${token}` },
+          params,
         });
 
         console.log("Backend response:", response.data);
         setGroupedOrders(response.data.groupedOrders);
+        setTotalItems(response.data.totalItems);
       } catch (error: any) {
         console.error("Error fetching orders:", error);
         setError(
@@ -155,16 +202,29 @@ const OrderHistory = () => {
             "Failed to load orders. Please try again."
         );
       } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
+        if (isFirstLoad) {
+          setTimeout(() => {
+            setIsInitialLoading(false);
+            setIsFirstLoad(false);
+          }, 1000);
+        } else {
+          setIsFilterLoading(false);
+        }
       }
     };
 
     getOrders();
-  }, [getToken]);
+  }, [
+    getToken,
+    currentPage,
+    itemsPerPage,
+    selectedYear,
+    selectedMonth,
+    selectedDay,
+    selectedSort,
+    isFirstLoad,
+  ]);
 
-  // Extract unique years for year filter
   const uniqueYears = useMemo(() => {
     const years = Object.values(groupedOrders)
       .flat()
@@ -172,7 +232,6 @@ const OrderHistory = () => {
     return [...new Set(years)].sort((a, b) => Number(b) - Number(a));
   }, [groupedOrders]);
 
-  // Extract unique months, filtered by selected year
   const uniqueMonths = useMemo(() => {
     const months = Object.values(groupedOrders)
       .flat()
@@ -193,7 +252,6 @@ const OrderHistory = () => {
     );
   }, [groupedOrders, selectedYear]);
 
-  // Extract unique days, filtered by selected year and month
   const uniqueDays = useMemo(() => {
     const days = Object.values(groupedOrders)
       .flat()
@@ -214,32 +272,13 @@ const OrderHistory = () => {
     return [...new Set(days)].sort((a, b) => Number(a) - Number(b));
   }, [groupedOrders, selectedYear, selectedMonth]);
 
-  // Filter orders based on selected year, month, and day
-  const filteredOrders = useMemo(() => {
-    const filtered: { [key: string]: OrderData[] } = {};
-    Object.keys(groupedOrders).forEach((dateKey) => {
-      const orders = groupedOrders[dateKey].filter((order) => {
-        const date = new Date(order.purchaseDate);
-        const yearMatch =
-          selectedYear === "all" ||
-          date.getFullYear().toString() === selectedYear;
-        const monthMatch =
-          selectedMonth === "all" ||
-          date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }) === selectedMonth;
-        const dayMatch =
-          selectedDay === "all" || date.getDate().toString() === selectedDay;
-        return yearMatch && monthMatch && dayMatch;
-      });
-      if (orders.length > 0) filtered[dateKey] = orders;
-    });
-    return filtered;
-  }, [groupedOrders, selectedYear, selectedMonth, selectedDay]);
+  const totalPages = useMemo(
+    () => Math.ceil(totalItems / itemsPerPage),
+    [totalItems, itemsPerPage]
+  );
 
   const getTotalPrice = () => {
-    return Object.values(filteredOrders)
+    return Object.values(groupedOrders)
       .flat()
       .reduce((total, order) => total + order.totalAmount, 0);
   };
@@ -247,6 +286,32 @@ const OrderHistory = () => {
   const getTotalForDate = (orders: OrderData[]) => {
     return orders.reduce((total, order) => total + order.totalAmount, 0);
   };
+
+  const sortedDateGroups = useMemo(() => {
+    const entries = Object.entries(groupedOrders);
+    if (selectedSort === "purchaseDate") {
+      return entries.sort(
+        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+      );
+    } else if (selectedSort === "-purchaseDate") {
+      return entries.sort(
+        (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
+      );
+    } else if (selectedSort === "amount") {
+      return entries.sort((a, b) => {
+        const totalA = getTotalForDate(a[1]);
+        const totalB = getTotalForDate(b[1]);
+        return totalA - totalB;
+      });
+    } else if (selectedSort === "-amount") {
+      return entries.sort((a, b) => {
+        const totalA = getTotalForDate(a[1]);
+        const totalB = getTotalForDate(b[1]);
+        return totalB - totalA;
+      });
+    }
+    return entries;
+  }, [groupedOrders, selectedSort]);
 
   const handleReviewClick = (item: OrderItem) => {
     setSelectedItem({
@@ -259,7 +324,7 @@ const OrderHistory = () => {
   const downloadInvoice = async (order: OrderData) => {
     try {
       setSelectedOrder(order);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
 
       const invoiceElement = invoiceRef.current;
       if (!invoiceElement) {
@@ -344,13 +409,24 @@ const OrderHistory = () => {
     setSelectedYear("all");
     setSelectedMonth("all");
     setSelectedDay("all");
+    setSelectedSort("-purchaseDate");
+    setCurrentPage(1);
   };
 
   const handleRetry = () => {
     window.location.reload();
   };
 
-  if (isLoading) {
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setItemsPerPage(size);
+    setCurrentPage(1);
+  };
+
+  if (isInitialLoading) {
     return <AnimatedLoader />;
   }
 
@@ -421,7 +497,7 @@ const OrderHistory = () => {
               <MdHistory className="w-8 h-8 text-indigo-600" />
             </div>
             <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-              Order History
+              Purchase History
             </h1>
           </div>
           <p className="text-gray-600 text-lg ml-14">
@@ -450,6 +526,7 @@ const OrderHistory = () => {
                 setSelectedYear(e.target.value);
                 setSelectedMonth("all");
                 setSelectedDay("all");
+                setCurrentPage(1);
               }}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
             >
@@ -465,6 +542,7 @@ const OrderHistory = () => {
               onChange={(e) => {
                 setSelectedMonth(e.target.value);
                 setSelectedDay("all");
+                setCurrentPage(1);
               }}
               disabled={selectedYear === "all" && uniqueMonths.length === 0}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm disabled:opacity-50"
@@ -478,7 +556,10 @@ const OrderHistory = () => {
             </select>
             <select
               value={selectedDay}
-              onChange={(e) => setSelectedDay(e.target.value)}
+              onChange={(e) => {
+                setSelectedDay(e.target.value);
+                setCurrentPage(1);
+              }}
               disabled={selectedMonth === "all" && uniqueDays.length === 0}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm disabled:opacity-50"
             >
@@ -486,6 +567,26 @@ const OrderHistory = () => {
               {uniqueDays.map((day) => (
                 <option key={day} value={day}>
                   {day}
+                </option>
+              ))}
+            </select>
+            <div className="flex items-center gap-2">
+              <MdSort className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">
+                Sort by:
+              </span>
+            </div>
+            <select
+              value={selectedSort}
+              onChange={(e) => {
+                setSelectedSort(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -511,14 +612,14 @@ const OrderHistory = () => {
                   {selectedMonth !== "all" ? ` ${selectedMonth}` : ""}
                   {selectedDay !== "all" ? ` on Day ${selectedDay}` : ""}
                 </h2>
-                <p className ="text-3xl font-bold">
+                <p className="text-3xl font-bold">
                   ₹ {getTotalPrice().toLocaleString()}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm opacity-90 mb-2">Orders</p>
                 <p className="text-2xl font-semibold">
-                  {Object.values(filteredOrders).flat().length}
+                  {Object.values(groupedOrders).flat().length}
                 </p>
               </div>
             </div>
@@ -531,7 +632,9 @@ const OrderHistory = () => {
           )}
 
           <AnimatePresence mode="wait">
-            {Object.keys(filteredOrders).length === 0 ? (
+            {isFilterLoading ? (
+              <FilterLoader />
+            ) : sortedDateGroups.length === 0 ? (
               <motion.div
                 className="text-center py-16 text-gray-600"
                 variants={contentVariants}
@@ -562,142 +665,154 @@ const OrderHistory = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {Object.entries(filteredOrders)
-                  .sort(
-                    ([dateA], [dateB]) =>
-                      new Date(dateB).getTime() - new Date(dateA).getTime()
-                  )
-                  .map(([date, orders], index) => (
-                    <motion.div
-                      key={date}
-                      className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                              {date}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {orders.length} order
-                              {orders.length > 1 ? "s" : ""} placed
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-600 mb-1">
-                              Total for {date}
-                            </p>
-                            <p className="text-xl font-bold text-gray-900">
-                              ₹ {getTotalForDate(orders).toLocaleString()}
-                            </p>
-                          </div>
+                {sortedDateGroups.map(([date, orders], index) => (
+                  <motion.div
+                    key={date}
+                    className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                            {date}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {orders.length} order
+                            {orders.length > 1 ? "s" : ""} placed
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600 mb-1">
+                            Total for {date}
+                          </p>
+                          <p className="text-xl font-bold text-gray-900">
+                            ₹ {getTotalForDate(orders).toLocaleString()}
+                          </p>
                         </div>
                       </div>
-                      <div className="divide-y divide-gray-100">
-                        {orders.map((order: OrderData, orderIndex: number) => (
-                          <div key={order.orderId} className="p-8">
-                            <div className="space-y-8">
-                              {order.items.map(
-                                (item: OrderItem, itemIndex: number) => (
-                                  <motion.div
-                                    key={`${order.orderId}-${item.productId}`}
-                                    className="flex items-start gap-8 p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{
-                                      delay:
-                                        index * 0.1 +
-                                        orderIndex * 0.05 +
-                                        itemIndex * 0.03,
-                                      duration: 0.4,
-                                    }}
-                                    whileHover={{ scale: 1.01 }}
-                                  >
-                                    <div className="flex-shrink-0">
-                                      <img
-                                        src={
-                                          item.productImage || "/placeholder.png"
-                                        }
-                                        alt={item.productName}
-                                        className="w-36 h-36 object-cover rounded-xl border border-gray-200"
-                                      />
-                                    </div>
-                                    <div className="flex-1 flex items-start justify-between gap-6">
-                                      <div className="flex-1">
-                                        <h4 className="text-xl font-semibold text-gray-900 mb-3 leading-tight">
-                                          {item.productName}
-                                        </h4>
-                                        <p className="text-2xl font-bold text-indigo-600 mb-3">
-                                          ₹ {item.price.toLocaleString()}
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {orders.map((order: OrderData, orderIndex: number) => (
+                        <div key={order.orderId} className="p-8">
+                          <div className="space-y-8">
+                            {order.items.map(
+                              (item: OrderItem, itemIndex: number) => (
+                                <motion.div
+                                  key={`${order.orderId}-${item.productId}`}
+                                  className="flex items-start gap-8 p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300"
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{
+                                    delay:
+                                      index * 0.1 +
+                                      orderIndex * 0.05 +
+                                      itemIndex * 0.03,
+                                    duration: 0.4,
+                                  }}
+                                  whileHover={{ scale: 1.01 }}
+                                >
+                                  <div className="flex-shrink-0">
+                                    <img
+                                      src={
+                                        item.productImage || "/placeholder.png"
+                                      }
+                                      alt={item.productName}
+                                      className="w-36 h-36 object-cover rounded-xl border border-gray-200"
+                                    />
+                                  </div>
+                                  <div className="flex-1 flex items-start justify-between gap-6">
+                                    <div className="flex-1">
+                                      <h4 className="text-xl font-semibold text-gray-900 mb-3 leading-tight">
+                                        {item.productName}
+                                      </h4>
+                                      <p className="text-2xl font-bold text-indigo-600 mb-3">
+                                        ₹ {item.price.toLocaleString()}
+                                      </p>
+                                      <div className="space-y-2 mb-4">
+                                        <p className="text-sm text-gray-600">
+                                          <span className="font-medium">
+                                            Quantity:
+                                          </span>{" "}
+                                          {item.quantity}
                                         </p>
-                                        <div className="space-y-2 mb-4">
-                                          <p className="text-sm text-gray-600">
-                                            <span className="font-medium">
-                                              Quantity:
-                                            </span>{" "}
-                                            {item.quantity}
-                                          </p>
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-sm text-gray-600 font-medium">
-                                              Order ID:
-                                            </span>
-                                            <span className="text-sm font-mono text-gray-800 bg-gray-50 px-2 py-1 rounded">
-                                              {order.orderId}
-                                            </span>
-                                          </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm text-gray-600 font-medium">
+                                            Order ID:
+                                          </span>
+                                          <span className="text-sm font-mono text-gray-800 bg-gray-50 px-2 py-1 rounded">
+                                            {order.orderId}
+                                          </span>
                                         </div>
                                       </div>
-                                      <div className="flex flex-col gap-4 ml-auto">
-                                        <motion.button
-                                          onClick={() => downloadInvoice(order)}
-                                          className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 active:bg-orange-800 transition-all shadow-sm min-w-[140px] justify-center"
-                                          whileHover={{ scale: 1.05 }}
-                                          whileTap={{ scale: 0.95 }}
-                                        >
-                                          <FaMoneyBill className="w-4 h-4" />
-                                          Download Invoice
-                                        </motion.button>
-                                        <motion.button
-                                          onClick={() => handleReviewClick(item)}
-                                          disabled={item.hasReviewed}
-                                          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-sm min-w-[140px] justify-center ${
-                                            item.hasReviewed
-                                              ? "bg-yellow-100 text-yellow-700 cursor-not-allowed"
-                                              : "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
-                                          }`}
-                                          whileHover={
-                                            item.hasReviewed
-                                              ? undefined
-                                              : { scale: 1.05 }
-                                          }
-                                          whileTap={
-                                            item.hasReviewed
-                                              ? undefined
-                                              : { scale: 0.95 }
-                                          }
-                                        >
-                                          <MdStar className="w-4 h-4" />
-                                          {item.hasReviewed
-                                            ? "Reviewed"
-                                            : "Write Review"}
-                                        </motion.button>
-                                      </div>
                                     </div>
-                                  </motion.div>
-                                )
-                              )}
-                            </div>
+                                    <div className="flex flex-col gap-4 ml-auto">
+                                      <motion.button
+                                        onClick={() => downloadInvoice(order)}
+                                        className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 active:bg-orange-800 transition-all shadow-sm min-w-[140px] justify-center"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                      >
+                                        <FaMoneyBill className="w-4 h-4" />
+                                        Download Invoice
+                                      </motion.button>
+                                      <motion.button
+                                        onClick={() => handleReviewClick(item)}
+                                        disabled={item.hasReviewed}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-sm min-w-[140px] justify-center ${
+                                          item.hasReviewed
+                                            ? "bg-yellow-100 text-yellow-700 cursor-not-allowed"
+                                            : "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
+                                        }`}
+                                        whileHover={
+                                          item.hasReviewed
+                                            ? undefined
+                                            : { scale: 1.05 }
+                                        }
+                                        whileTap={
+                                          item.hasReviewed
+                                            ? undefined
+                                            : { scale: 0.95 }
+                                        }
+                                      >
+                                        <MdStar className="w-4 h-4" />
+                                        {item.hasReviewed
+                                          ? "Reviewed"
+                                          : "Write Review"}
+                                      </motion.button>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
+
+          <div className="mt-5">
+            <p className="text-sm text-gray-600 mb-2">
+              Showing {sortedDateGroups.length} date groups (page {currentPage}{" "}
+              of {totalPages})
+            </p>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              showPageSizeSelector={true}
+              pageSizeOptions={[5, 10, 20, 50]}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
 
           <AnimatePresence>
             {showReviewModal && selectedItem && (

@@ -36,7 +36,6 @@ import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import OrderHistory from "./pages/v2/orderHistory.tsx";
-import InvoiceGenerator from "./components/products/invoice/invoiceGenerator.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -94,7 +93,6 @@ const routes = [
   { path: "/search", element: <SearchResultsPage /> },
   { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
-  { path: "/invoice", element: <InvoiceGenerator /> },
 ];
 
 const Router = () => {

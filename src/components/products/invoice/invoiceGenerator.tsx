@@ -27,7 +27,6 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
       price: item.price,
     }));
 
-    // Use discount from order, default to 0 if undefined
     const discountPercentage = order.discount || 0;
     const subtotal = items.reduce(
       (acc, item) => acc + item.price * item.quantity,
