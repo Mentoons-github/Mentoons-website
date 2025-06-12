@@ -17,6 +17,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
+import ReactionsDisplay from "./likes/ReactionsDisplay";
 import Share from "./share/share";
 
 export type PostType =
@@ -104,6 +105,7 @@ const PostCard = ({
   const [modalType, setModalType] = useState<"report" | "block">("report");
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
 
   const { showStatus } = useStatusModal();
   const user = useUser();
@@ -394,6 +396,13 @@ const PostCard = ({
     checkSavedPost();
   }, [post._id, user?.user?.id, getToken]);
 
+  // Function to handle reaction updates from the interactive component
+  const handleReactionUpdate = (counts: Record<string, number>) => {
+    // Force re-render the display component
+    setReactionUpdateKey((prev) => prev + 1);
+    console.log("Reaction update counts:", counts);
+  };
+
   const charLimit = 100;
 
   const renderPostContent = () => {
@@ -664,6 +673,10 @@ const PostCard = ({
               type="post"
               id={post._id}
               likeCount={post.likes.length}
+              showLikeCount={false}
+              toggleReaction={true}
+              toggleBorder={true}
+              onReactionUpdate={handleReactionUpdate}
             />
             <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
@@ -690,6 +703,12 @@ const PostCard = ({
             />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <ReactionsDisplay
+              key={`reactions-${post._id}-${reactionUpdateKey}`}
+              type="post"
+              id={post._id}
+              initialLikeCount={post.likes.length}
+            />
             <button
               className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
               onClick={handleSavePost}
