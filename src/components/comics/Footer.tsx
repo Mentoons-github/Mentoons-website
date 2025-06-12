@@ -86,18 +86,22 @@ const Footer = () => {
       return;
     }
 
-    //uncomment it==================>
-
-    // sessionStorage.setItem("scrollToLabel", label);
-
-    // window.location.href = url;
+    // Store label in session storage for scrolling
+    sessionStorage.setItem("scrollToLabel", label);
+    window.location.href = url;
+    return; // Stop further execution after setting the URL
     // For regular URLs, check if it's an internal link with a section
     if (url.includes("#")) {
-      const [path, section] = url.split("#");
-      console.log(section);
+      // Split URL properly to preserve query parameters
+      const hashIndex = url.indexOf("#");
+      const path = url.substring(0, hashIndex);
+      const section = url.substring(hashIndex + 1);
 
-      if (location.pathname !== path) {
-        // First navigate to the path
+      console.log("Path with query params:", path);
+      console.log("Section:", section);
+
+      if (location.pathname !== path.split("?")[0]) {
+        // First navigate to the path (with query params)
         navigate(path);
         // Wait for navigation to complete and page to load
         setTimeout(() => {
@@ -113,7 +117,7 @@ const Footer = () => {
               behavior: "smooth",
             });
           }
-        }, 1000);
+        }, 100);
       } else {
         // If already on correct path, just scroll
         // Small timeout to ensure any ongoing scrolling is complete
@@ -136,7 +140,7 @@ const Footer = () => {
               behavior: "smooth",
             });
           }
-        }, 300);
+        }, 100);
       }
       return;
     }
