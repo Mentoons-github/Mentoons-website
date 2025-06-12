@@ -10,7 +10,8 @@ import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import {
   FaBolt,
@@ -22,7 +23,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import FAQ from "../faq/faq";
-import { debounce } from "lodash";
 
 interface FetchParams {
   productType?: string;
@@ -79,25 +79,25 @@ const SearchingSkeleton = ({ searchTerm }: { searchTerm: string }) => (
         type="text"
         placeholder="search here...."
         value={searchTerm}
-        className="w-full pl-10 pr-10 border border-transparent outline-none bg-gray-100"
+        className="w-full pl-10 pr-10 bg-gray-100 border border-transparent outline-none"
         disabled
       />
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+      <div className="absolute transform -translate-y-1/2 right-4 top-1/2">
         <div className="w-4 h-4 border-2 border-gray-300 rounded-full animate-spin border-t-blue-500"></div>
       </div>
     </div>
 
-    <div className="p-8 mt-10 text-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
+    <div className="p-8 mt-10 text-center border border-blue-100 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="flex justify-center mb-4">
         <div className="relative">
           <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-500"></div>
           <FaMagnifyingGlass className="absolute w-6 h-6 text-blue-500 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 animate-pulse" />
         </div>
       </div>
-      <h3 className="text-2xl font-semibold text-blue-700 mb-2">
+      <h3 className="mb-2 text-2xl font-semibold text-blue-700">
         Searching for "{searchTerm}"...
       </h3>
-      <p className="text-blue-600 text-lg">
+      <p className="text-lg text-blue-600">
         Please wait while we find the best products for you
       </p>
       <div className="flex justify-center mt-6 space-x-1">
@@ -350,7 +350,7 @@ const ProductsPage = () => {
           className="w-full pl-10 pr-10 border border-transparent outline-none"
         />
         {isSearching && searchTerm.trim() && (
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+          <div className="absolute transform -translate-y-1/2 right-4 top-1/2">
             <div className="w-4 h-4 border-2 border-gray-300 rounded-full animate-spin border-t-blue-500"></div>
           </div>
         )}
@@ -369,7 +369,7 @@ const ProductsPage = () => {
         </>
       )}
 
-      <div className="mt-20" ref={sectionRef}>
+      <div className="mt-20" ref={sectionRef} id="product">
         {Object.keys(groupedProducts).length > 0
           ? Object.entries(groupedProducts).map(([age, group]) => (
               <div
