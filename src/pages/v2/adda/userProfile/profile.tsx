@@ -1,24 +1,25 @@
+import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import CompleteProfileModal from "@/components/adda/userProfile/CompleteProfileModal";
+import RewardsSection from "@/components/adda/userProfile/rewardsSection";
+import UserListModal from "@/components/common/modal/userList";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { RewardEventType } from "@/types/rewards";
+import { triggerReward } from "@/utils/rewardMiddleware";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
-import { motion, AnimatePresence } from "framer-motion";
 import { FaBookmark, FaUsers } from "react-icons/fa";
 import { FiAward, FiEdit2, FiHome, FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
-import RewardsSection from "@/components/adda/userProfile/rewardsSection";
-import UserListModal from "@/components/common/modal/userList";
-import ProfileForm from "./profieForm";
-import ProfileHeader from "./profileHeader";
-import ProfileCompletion from "./profileCompletion";
-import { triggerReward } from "@/utils/rewardMiddleware";
-import { RewardEventType } from "@/types/rewards";
 import PhotosCard from "./cards/photosCard";
+import ProfileForm from "./profieForm";
+import ProfileCompletion from "./profileCompletion";
+import ProfileHeader from "./profileHeader";
 
 interface MediaItem {
   url: string;
@@ -119,6 +120,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [modalType, setModalType] = useState<"followers" | "following" | null>(
     null
   );
@@ -343,6 +345,14 @@ const Profile = () => {
     userDetails.email,
   ]);
 
+  useEffect(() => {
+    if (!isProfileComplete) {
+      setShowProfileModal(true);
+    } else {
+      localStorage.setItem("profileModalShown", "true");
+    }
+  }, [isProfileComplete]);
+
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -524,9 +534,16 @@ const Profile = () => {
     }
   }, [userDetails?.socialLinks]);
 
+  const handleCompleteProfile = () => {
+    setShowProfileModal(false);
+    setIsEditing(true);
+    localStorage.setItem("profileModalShown", "true");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         Loading...
       </div>
     );
@@ -534,7 +551,7 @@ const Profile = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-red-500">
+      <div className="flex items-center justify-center min-h-screen text-red-500">
         {error}
       </div>
     );
@@ -546,9 +563,16 @@ const Profile = () => {
         <Confetti
           recycle={false}
           numberOfPieces={300}
-          className="w-full h-full fixed top-0 left-0 z-50"
+          className="fixed top-0 left-0 z-50 w-full h-full"
         />
       )}
+      <CompleteProfileModal
+        isOpen={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+        }}
+        onCompleteProfile={handleCompleteProfile}
+      />
       <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <ProfileHeader
           userDetails={userDetails}
@@ -580,9 +604,9 @@ const Profile = () => {
           />
         )}
 
-        <div className="text-center pt-8 sm:pt-12">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-4">
-            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-start">
+        <div className="pt-8 text-center sm:pt-12">
+          <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row sm:mb-6">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 sm:justify-start">
               {["profile", "posts"].map((tab) => (
                 <Button
                   key={tab}
@@ -598,22 +622,22 @@ const Profile = () => {
               ))}
             </div>
             <div className="flex flex-col items-center">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+              <h1 className="text-xl font-bold text-gray-800 sm:text-2xl lg:text-3xl">
                 {userDetails.name}
               </h1>
-              <p className="text-sm sm:text-base text-gray-600">
+              <p className="text-sm text-gray-600 sm:text-base">
                 {userDetails.email}
               </p>
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(!isEditing)}
-                className="mt-2 sm:mt-3 text-xs sm:text-sm text-orange-500 border-orange-500 hover:bg-orange-50"
+                className="mt-2 text-xs text-orange-500 border-orange-500 sm:mt-3 sm:text-sm hover:bg-orange-50"
               >
                 <FiEdit2 className="mr-2" />{" "}
                 {isEditing ? "Save Changes" : "Edit Profile"}
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-end">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 sm:justify-end">
               {["saved", "rewards"].map((tab) => (
                 <Button
                   key={tab}
@@ -630,45 +654,45 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="flex justify-center gap-6 sm:gap-12 py-4 sm:py-6 border-y border-gray-200">
+          <div className="flex justify-center gap-6 py-4 border-gray-200 sm:gap-12 sm:py-6 border-y">
             <div className="text-center">
-              <div className="text-lg sm:text-2xl font-bold text-orange-500">
+              <div className="text-lg font-bold text-orange-500 sm:text-2xl">
                 {userPosts.length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600">Posts</div>
+              <div className="text-xs text-gray-600 sm:text-sm">Posts</div>
             </div>
             <button
               onClick={() => setModalType("followers")}
               className="text-center"
             >
-              <div className="text-lg sm:text-2xl font-bold text-orange-500">
+              <div className="text-lg font-bold text-orange-500 sm:text-2xl">
                 {totalFollowers.length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600">Followers</div>
+              <div className="text-xs text-gray-600 sm:text-sm">Followers</div>
             </button>
             <button
               onClick={() => setModalType("following")}
               className="text-center"
             >
-              <div className="text-lg sm:text-2xl font-bold text-orange-500">
+              <div className="text-lg font-bold text-orange-500 sm:text-2xl">
                 {totalFollowing.length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600">Following</div>
+              <div className="text-xs text-gray-600 sm:text-sm">Following</div>
             </button>
           </div>
         </div>
 
         <div ref={profileRef} tabIndex={-1} className="pt-4">
           {activeTab === "profile" && (
-            <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-6">
+            <div className="flex flex-col justify-between gap-4 lg:flex-row sm:gap-6">
               <div className="w-full lg:w-3/5">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                  <Card className="relative p-4 sm:p-6 lg:p-8 border border-orange-100 rounded-xl shadow-md bg-white overflow-hidden">
-                    <div className="absolute right-0 top-0 w-1/3 h-full hidden xl:block">
+                  <Card className="relative p-4 overflow-hidden bg-white border border-orange-100 shadow-md sm:p-6 lg:p-8 rounded-xl">
+                    <div className="absolute top-0 right-0 hidden w-1/3 h-full xl:block">
                       <motion.div
                         className="absolute w-12 h-12 bg-orange-200 rounded-full opacity-30"
                         animate={{
@@ -699,7 +723,7 @@ const Profile = () => {
                       />
                     </div>
 
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6 text-center sm:text-left">
+                    <h2 className="mb-4 text-lg font-semibold text-center text-gray-800 sm:text-xl lg:text-2xl sm:mb-6 sm:text-left">
                       Personal Information
                     </h2>
 
@@ -728,13 +752,13 @@ const Profile = () => {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 10 }}
                           transition={{ duration: 0.2 }}
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 pr-0 xl:pr-32"
+                          className="grid grid-cols-1 gap-3 pr-0 sm:grid-cols-2 sm:gap-4 lg:gap-6 xl:pr-32"
                         >
                           <motion.p
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.1 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Name:</strong>{" "}
                             {userDetails.name}
@@ -743,7 +767,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.15 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Email:</strong>{" "}
                             {userDetails.email}
@@ -752,7 +776,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.2 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Phone:</strong>{" "}
                             {userDetails.phoneNumber || "Not provided"}
@@ -761,7 +785,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.25 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Location:</strong>{" "}
                             {userDetails.location || "Not provided"}
@@ -770,7 +794,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.3 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">
                               Date of Birth:
@@ -781,7 +805,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.35 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Gender:</strong>{" "}
                             {userDetails.gender
@@ -793,7 +817,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.4 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Education:</strong>{" "}
                             {userDetails.education || "Not provided"}
@@ -802,7 +826,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.45 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Occupation:</strong>{" "}
                             {userDetails.occupation || "Not provided"}
@@ -811,7 +835,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.5 }}
-                            className="text-gray-700 sm:col-span-2 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:col-span-2 sm:text-base"
                           >
                             <strong className="font-medium">Bio:</strong>{" "}
                             {userDetails.bio || "No bio provided"}
@@ -820,7 +844,7 @@ const Profile = () => {
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.2, delay: 0.55 }}
-                            className="text-gray-700 text-sm sm:text-base"
+                            className="text-sm text-gray-700 sm:text-base"
                           >
                             <strong className="font-medium">Joined:</strong>{" "}
                             {formatDate(userDetails.joinedDate)}
@@ -840,8 +864,8 @@ const Profile = () => {
 
         <div ref={postsRef} tabIndex={-1} className="pt-4">
           {activeTab === "posts" && (
-            <Card className="p-4 sm:p-6 border border-orange-100 shadow-md rounded-xl">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+            <Card className="p-4 border border-orange-100 shadow-md sm:p-6 rounded-xl">
+              <h3 className="mb-4 text-lg font-semibold text-gray-800 sm:text-xl">
                 My Posts
               </h3>
               <div className="space-y-4 sm:space-y-6">
@@ -860,8 +884,8 @@ const Profile = () => {
 
         <div ref={savedRef} tabIndex={-1} className="pt-4">
           {activeTab === "saved" && (
-            <Card className="p-4 sm:p-6 border border-orange-100 shadow-md rounded-xl">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+            <Card className="p-4 border border-orange-100 shadow-md sm:p-6 rounded-xl">
+              <h3 className="mb-4 text-lg font-semibold text-gray-800 sm:text-xl">
                 Saved Items
               </h3>
               {userSavedPosts.length === 0 ? (
@@ -869,18 +893,18 @@ const Profile = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="flex flex-col items-center justify-center py-8 sm:py-12 text-center"
+                  className="flex flex-col items-center justify-center py-8 text-center sm:py-12"
                 >
-                  <FaBookmark className="text-3xl sm:text-4xl text-orange-500 mb-4" />
-                  <p className="text-base sm:text-lg text-gray-600 mb-2">
+                  <FaBookmark className="mb-4 text-3xl text-orange-500 sm:text-4xl" />
+                  <p className="mb-2 text-base text-gray-600 sm:text-lg">
                     No saved posts yet!
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-500">
+                  <p className="text-xs text-gray-500 sm:text-sm">
                     Start saving posts to see them here.
                   </p>
                   <Button
                     asChild
-                    className="mt-4 bg-orange-500 text-white hover:bg-orange-600 text-xs sm:text-sm"
+                    className="mt-4 text-xs text-white bg-orange-500 hover:bg-orange-600 sm:text-sm"
                   >
                     <Link to="/adda">Explore Posts</Link>
                   </Button>
