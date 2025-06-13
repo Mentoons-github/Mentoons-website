@@ -1,4 +1,5 @@
 import Reactions from "@/components/adda/home/addPosts/likes/reactions";
+import ReactionsDisplay from "@/components/adda/home/addPosts/likes/ReactionsDisplay";
 import Share from "@/components/adda/home/addPosts/share/share";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
@@ -144,6 +145,7 @@ const PostDetailsPage = () => {
   const [isSavedPost, setIsSavedPost] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const location = useLocation();
@@ -318,6 +320,12 @@ const PostDetailsPage = () => {
     } catch (err) {
       console.error("Error toggling save status:", err);
     }
+  };
+
+  const handleReactionUpdate = (counts: Record<string, number>) => {
+    // Force re-render the display component
+    setReactionUpdateKey((prev) => prev + 1);
+    console.log("Reaction update counts:", counts);
   };
 
   // Format date for display
@@ -504,8 +512,18 @@ const PostDetailsPage = () => {
                   type="post"
                   id={post._id}
                   likeCount={post.likes.length}
+                  showLikeCount={false}
+                  toggleReaction={true}
+                  toggleBorder={true}
+                  onReactionUpdate={handleReactionUpdate}
                 />
               </div>
+              <ReactionsDisplay
+                key={`reactions-${post._id}-${reactionUpdateKey}`}
+                type="post"
+                id={post._id}
+                initialLikeCount={post.likes.length}
+              />
 
               {/* Comment count */}
               <div className="flex items-center gap-2 sm:gap-3">

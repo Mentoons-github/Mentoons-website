@@ -678,7 +678,13 @@ const PostCard = ({
               toggleBorder={true}
               onReactionUpdate={handleReactionUpdate}
             />
-            <div className="flex items-center gap-2 sm:gap-3">
+            <ReactionsDisplay
+              key={`reactions-${post._id}-${reactionUpdateKey}`}
+              type="post"
+              id={post._id}
+              initialLikeCount={post.likes.length}
+            />
+            <div className="flex items-center gap-2 border sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 whileHover={{
@@ -686,10 +692,10 @@ const PostCard = ({
                   boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
                 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="flex items-center justify-center w-8 p-2 border border-orange-400 rounded-full sm:w-12 sm:h-12"
+                className="flex items-center justify-center w-1 border border-red-400 rounded-full sm:w-12 sm:h-12"
                 onClick={() => setShowComments(!showComments)}
               >
-                <BiComment className="w-4 text-orange-500 sm:w-6 sm:h-6" />
+                <BiComment className="w-1 text-orange-500 sm:w-6 sm:h-6" />
               </motion.button>
               <div className="text-[#605F5F] text-sm sm:text-base figtree relative">
                 {commentCount}
@@ -703,12 +709,6 @@ const PostCard = ({
             />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <ReactionsDisplay
-              key={`reactions-${post._id}-${reactionUpdateKey}`}
-              type="post"
-              id={post._id}
-              initialLikeCount={post.likes.length}
-            />
             <button
               className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
               onClick={handleSavePost}
