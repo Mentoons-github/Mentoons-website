@@ -126,10 +126,6 @@ const ProfileDetails = () => {
           })
         );
 
-        console.log(
-          "posts ======================================>",
-          formattedPosts
-        );
         setNumberOfPosts(formattedPosts.length ?? 0);
         setUserPosts(formattedPosts as unknown as Post[]);
         setIsLoading(false);

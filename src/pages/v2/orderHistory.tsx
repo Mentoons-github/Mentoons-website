@@ -132,9 +132,68 @@ const FilterLoader = () => (
   </motion.div>
 );
 
-const OrderHistory = () => {
+// Mock Order Data
+const generateMockOrders = (): { [key: string]: OrderData[] } => {
+  const mockOrders: { [key: string]: OrderData[] } = {};
+  const startDate = new Date(2025, 0, 1); // Start from Jan 1, 2025
+  const numOrders = 50; // Generate 50 orders
+  const products = [
+    { id: "p1", name: "Comic Book Set", price: 499, image: "/comic1.png" },
+    { id: "p2", name: "Adventure Novel", price: 299, image: "/novel1.png" },
+    { id: "p3", name: "Graphic Tee", price: 199, image: "/tee1.png" },
+    { id: "p4", name: "Puzzle Game", price: 399, image: "/puzzle1.png" },
+    { id: "p5", name: "Art Print", price: 149, image: "/print1.png" },
+  ];
+
+  for (let i = 0; i < numOrders; i++) {
+    const daysOffset = Math.floor(i / 2); // Group 2 orders per day
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + daysOffset);
+    const dateKey = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items per order
+    const items: OrderItem[] = Array.from({ length: numItems }, () => {
+      const product = products[Math.floor(Math.random() * products.length)];
+      const quantity = Math.floor(Math.random() * 3) + 1;
+      return {
+        productId: product.id,
+        productName: product.name,
+        productImage: product.image,
+        price: product.price,
+        quantity,
+        hasReviewed: Math.random() > 0.7, // 30% chance reviewed
+      };
+    });
+
+    const totalAmount = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const order: OrderData = {
+      orderId: `MOCK-ORD-${1000 + i}`,
+      purchaseDate: date.toISOString(),
+      totalAmount,
+      items,
+    };
+
+    if (!mockOrders[dateKey]) {
+      mockOrders[dateKey] = [];
+    }
+    mockOrders[dateKey].push(order);
+  }
+
+  return mockOrders;
+};
+
+const OrderHistory: React.FC = () => {
   const { getToken } = useAuth();
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const productsContainerRef = useRef<HTMLDivElement>(null); // Ref for product container
   const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
   const [groupedOrders, setGroupedOrders] = useState<{
     [key: string]: OrderData[];
@@ -151,9 +210,9 @@ const OrderHistory = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
+  const [totalItems, setTotalItems] = useState<number>(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const sortOptions = [
@@ -178,9 +237,14 @@ const OrderHistory = () => {
           return;
         }
 
+        const validPage =
+          isNaN(currentPage) || currentPage < 1 ? 1 : currentPage;
+        const validLimit =
+          isNaN(itemsPerPage) || itemsPerPage < 1 ? 5 : itemsPerPage;
+
         const params = {
-          page: currentPage,
-          limit: itemsPerPage,
+          page: validPage,
+          limit: validLimit,
           year: selectedYear !== "all" ? selectedYear : undefined,
           month: selectedMonth !== "all" ? selectedMonth : undefined,
           day: selectedDay !== "all" ? selectedDay : undefined,
@@ -193,14 +257,66 @@ const OrderHistory = () => {
         });
 
         console.log("Backend response:", response.data);
-        setGroupedOrders(response.data.groupedOrders);
-        setTotalItems(response.data.totalItems);
+
+        const {
+          success,
+          groupedOrders: backendOrders = {},
+          totalItems: backendTotalItems = 0,
+          currentPage: serverPage,
+          itemsPerPage: serverLimit,
+        } = response.data;
+
+        if (!success) {
+          throw new Error(response.data.message || "Failed to fetch orders");
+        }
+
+        // Generate mock orders
+        const mockOrders = generateMockOrders();
+
+        // Merge backend and mock orders (backend takes precedence)
+        const combinedOrders: { [key: string]: OrderData[] } = {
+          ...mockOrders,
+        };
+        Object.keys(backendOrders).forEach((dateKey) => {
+          combinedOrders[dateKey] = [
+            ...(backendOrders[dateKey] || []),
+            ...(combinedOrders[dateKey] || []),
+          ];
+        });
+
+        // Apply pagination to combined orders
+        const allOrders = Object.values(combinedOrders).flat();
+        const totalCombinedItems = allOrders.length;
+        const startIndex = (validPage - 1) * validLimit;
+        const endIndex = startIndex + validLimit;
+        const paginatedOrders = allOrders.slice(startIndex, endIndex);
+
+        // Rebuild groupedOrders for the current page
+        const paginatedGroupedOrders: { [key: string]: OrderData[] } = {};
+        paginatedOrders.forEach((order) => {
+          const dateKey = new Date(order.purchaseDate).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long", day: "numeric" }
+          );
+          if (!paginatedGroupedOrders[dateKey]) {
+            paginatedGroupedOrders[dateKey] = [];
+          }
+          paginatedGroupedOrders[dateKey].push(order);
+        });
+
+        setGroupedOrders(paginatedGroupedOrders);
+        setTotalItems(totalCombinedItems);
+        setCurrentPage(
+          isNaN(serverPage) || serverPage < 1 ? validPage : Number(serverPage)
+        );
+        setItemsPerPage(
+          isNaN(serverLimit) || serverLimit < 1
+            ? validLimit
+            : Number(serverLimit)
+        );
       } catch (error: any) {
         console.error("Error fetching orders:", error);
-        setError(
-          error.response?.data?.message ||
-            "Failed to load orders. Please try again."
-        );
+        setError(error.message || "Failed to load orders. Please try again.");
       } finally {
         if (isFirstLoad) {
           setTimeout(() => {
@@ -226,22 +342,26 @@ const OrderHistory = () => {
   ]);
 
   const uniqueYears = useMemo(() => {
+    if (!groupedOrders || typeof groupedOrders !== "object") return [];
     const years = Object.values(groupedOrders)
       .flat()
-      .map((item) => new Date(item.purchaseDate).getFullYear().toString());
+      .map((item: OrderData) =>
+        new Date(item.purchaseDate).getFullYear().toString()
+      );
     return [...new Set(years)].sort((a, b) => Number(b) - Number(a));
   }, [groupedOrders]);
 
   const uniqueMonths = useMemo(() => {
+    if (!groupedOrders || typeof groupedOrders !== "object") return [];
     const months = Object.values(groupedOrders)
       .flat()
-      .filter((item) => {
+      .filter((item: OrderData) => {
         if (selectedYear === "all") return true;
         return (
           new Date(item.purchaseDate).getFullYear().toString() === selectedYear
         );
       })
-      .map((item) =>
+      .map((item: OrderData) =>
         new Date(item.purchaseDate).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -253,9 +373,10 @@ const OrderHistory = () => {
   }, [groupedOrders, selectedYear]);
 
   const uniqueDays = useMemo(() => {
+    if (!groupedOrders || typeof groupedOrders !== "object") return [];
     const days = Object.values(groupedOrders)
       .flat()
-      .filter((item) => {
+      .filter((item: OrderData) => {
         const date = new Date(item.purchaseDate);
         const yearMatch =
           selectedYear === "all" ||
@@ -268,26 +389,37 @@ const OrderHistory = () => {
           }) === selectedMonth;
         return yearMatch && monthMatch;
       })
-      .map((item) => new Date(item.purchaseDate).getDate().toString());
+      .map((item: OrderData) =>
+        new Date(item.purchaseDate).getDate().toString()
+      );
     return [...new Set(days)].sort((a, b) => Number(a) - Number(b));
   }, [groupedOrders, selectedYear, selectedMonth]);
 
   const totalPages = useMemo(
-    () => Math.ceil(totalItems / itemsPerPage),
+    () => Math.ceil(totalItems / (itemsPerPage || 5)),
     [totalItems, itemsPerPage]
   );
 
   const getTotalPrice = () => {
+    if (!groupedOrders || typeof groupedOrders !== "object") return 0;
     return Object.values(groupedOrders)
       .flat()
-      .reduce((total, order) => total + order.totalAmount, 0);
+      .reduce(
+        (total: number, order: OrderData) => total + order.totalAmount,
+        0
+      );
   };
 
   const getTotalForDate = (orders: OrderData[]) => {
-    return orders.reduce((total, order) => total + order.totalAmount, 0);
+    if (!Array.isArray(orders)) return 0;
+    return orders.reduce(
+      (total: number, order: OrderData) => total + order.totalAmount,
+      0
+    );
   };
 
   const sortedDateGroups = useMemo(() => {
+    if (!groupedOrders || typeof groupedOrders !== "object") return [];
     const entries = Object.entries(groupedOrders);
     if (selectedSort === "purchaseDate") {
       return entries.sort(
@@ -375,7 +507,6 @@ const OrderHistory = () => {
         imgScaledWidth,
         imgScaledHeight
       );
-
       pdf.save(`Mentoons_Invoice_${order.orderId}.pdf`);
       setSelectedOrder(null);
     } catch (error) {
@@ -418,12 +549,35 @@ const OrderHistory = () => {
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      
+      if (productsContainerRef.current) {
+        productsContainerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      } else {
+        // Fallback to scrolling to the top of the page
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
   };
 
   const handlePageSizeChange = (size: number) => {
-    setItemsPerPage(size);
-    setCurrentPage(1);
+    if (size > 0) {
+      setItemsPerPage(size);
+      setCurrentPage(1);
+      // Scroll to the top when page size changes
+      if (productsContainerRef.current) {
+        productsContainerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
   };
 
   if (isInitialLoading) {
@@ -648,7 +802,7 @@ const OrderHistory = () => {
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 >
-                  <MdShoppingBag className="w-full h-full" />
+                  <MdShoppingBag />
                 </motion.div>
                 <p className="text-lg font-medium">
                   No orders found
@@ -664,6 +818,7 @@ const OrderHistory = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
+                ref={productsContainerRef}
               >
                 {sortedDateGroups.map(([date, orders], index) => (
                   <motion.div
@@ -680,8 +835,8 @@ const OrderHistory = () => {
                             {date}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            {orders.length} order
-                            {orders.length > 1 ? "s" : ""} placed
+                            {orders.length} order{orders.length > 1 ? "s" : ""}{" "}
+                            placed
                           </p>
                         </div>
                         <div className="text-right">
