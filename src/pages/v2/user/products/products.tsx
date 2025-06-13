@@ -174,7 +174,7 @@ const ProductsPage = () => {
           const token = await getToken();
           const fetchParams: FetchParams = {
             token: token ?? "",
-            ...(productType && { productType }),
+            ...(productType && { type: productType }),
             ...(cardType && { cardType }),
             ...(search && { search }),
             ...(category && !search && { ageCategory: category }),

@@ -10,6 +10,7 @@ import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
+import ReactionsDisplay from "./likes/ReactionsDisplay";
 import Share from "./share/share";
 
 export interface MemeData {
@@ -60,6 +61,7 @@ const MemeCard = ({ meme }: MemeCardProps) => {
   const [newComment, setNewComment] = useState("");
   const [isSavedMeme, setIsSavedMeme] = useState(false);
   const [likeCount, setLikeCount] = useState(meme.likes.length);
+  const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
 
   const user = useUser();
   const { getToken } = useAuth();
@@ -257,6 +259,12 @@ const MemeCard = ({ meme }: MemeCardProps) => {
     );
   };
 
+  const handleReactionUpdate = (counts: Record<string, number>) => {
+    // Force re-render the display component
+    setReactionUpdateKey((prev) => prev + 1);
+    console.log("Reaction update counts:", counts);
+  };
+
   return (
     <>
       <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
@@ -283,8 +291,22 @@ const MemeCard = ({ meme }: MemeCardProps) => {
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
-            {/* <Likes type="meme" id={ meme._id } likeCount={ likeCount } /> */}
-            <Reactions type="meme" id={meme._id} likeCount={likeCount} />
+            <Reactions
+              type="meme"
+              id={meme._id}
+              likeCount={likeCount}
+              showLikeCount={false}
+              toggleReaction={true}
+              toggleBorder={true}
+              onReactionUpdate={handleReactionUpdate}
+            />
+            <ReactionsDisplay
+              key={`reactions-${meme._id}-${reactionUpdateKey}`}
+              type="meme"
+              id={meme._id}
+              initialLikeCount={likeCount}
+            />
+
             <div className="flex items-center gap-1 sm:gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
