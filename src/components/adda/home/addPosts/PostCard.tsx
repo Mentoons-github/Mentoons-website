@@ -684,7 +684,7 @@ const PostCard = ({
               id={post._id}
               initialLikeCount={post.likes.length}
             />
-            <div className="flex items-center gap-2 border sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 whileHover={{
