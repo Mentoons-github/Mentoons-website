@@ -10,11 +10,11 @@ import OrderSummary from "@/components/OrderSummary";
 import Popup from "./layout/Popup.tsx";
 import AboutMentoons from "./pages/AboutMentoons";
 
+import Membership from "./components/LandingPage/membership/membership.tsx";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
 import Home from "./pages/Home";
-import Membership from "./components/LandingPage/membership/membership.tsx";
 import MentoonsStore from "./pages/MentoonsStore";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
 
@@ -28,6 +28,7 @@ import HowMentoonsWork from "./components/adda/home/howMentoonsWorks/mentoonsWor
 import AssessmentQuestions from "./pages/AssessmentQuestions.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import SearchResultsPage from "./pages/v2/adda/globalSearch.tsx";
+import OrderHistory from "./pages/v2/orderHistory.tsx";
 import Assessment from "./pages/v2/user/assessment.tsx";
 import ProductsPage from "./pages/v2/user/products/products.tsx";
 import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
@@ -35,7 +36,6 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import OrderHistory from "./pages/v2/orderHistory.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 

@@ -1408,23 +1408,21 @@ const UserProfile = () => {
                           <p className="text-xs text-gray-600">Posts</p>
                         </div>
 
-                        
-                          <button onClick={() => setModalType("followers")}>
-                            <p className="text-xl font-bold text-orange-500">
-                              {userDetails?.followers?.length || 0}
-                            </p>
-                            <p className="text-xs text-gray-600">Followers</p>
-                          </button>
-                          <button
-                            onClick={() => setModalType("following")}
-                            className="text-center"
-                          >
-                            <p className="text-xl font-bold text-orange-500">
-                              {userDetails?.following?.length || 0}
-                            </p>
-                            <p className="text-xs text-gray-600">Following</p>
-                          </button>
-                       
+                        <button onClick={() => setModalType("followers")}>
+                          <p className="text-xl font-bold text-orange-500">
+                            {userDetails?.followers?.length || 0}
+                          </p>
+                          <p className="text-xs text-gray-600">Followers</p>
+                        </button>
+                        <button
+                          onClick={() => setModalType("following")}
+                          className="text-center"
+                        >
+                          <p className="text-xl font-bold text-orange-500">
+                            {userDetails?.following?.length || 0}
+                          </p>
+                          <p className="text-xs text-gray-600">Following</p>
+                        </button>
                       </div>
                     </div>
                   </Card>
@@ -2241,6 +2239,8 @@ const UserProfile = () => {
             </div>
           )}
         </div>
+
+        
       </div>
 
       {/* Mobile fixed bottom navigation */}

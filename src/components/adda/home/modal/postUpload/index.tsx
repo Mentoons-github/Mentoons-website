@@ -316,7 +316,50 @@ const PostUpload = ({
         setActiveTab(1);
 
         if (onPostCreated) {
-          onPostCreated(response.data.data.post);
+          console.log("Post creation response data:", response.data);
+
+          // Check if the post data exists in the response
+          if (response.data.data && response.data.data.post) {
+            console.log(
+              "Calling onPostCreated with post:",
+              response.data.data.post
+            );
+            onPostCreated(response.data.data.post);
+          } else if (response.data.data) {
+            // If post is not in data.post, try using data directly
+            console.log(
+              "Post not found in data.post, using data directly:",
+              response.data.data
+            );
+            onPostCreated(response.data.data);
+          } else {
+            // Create a fallback post if no valid data is found
+            console.warn(
+              "No valid post data found in response, creating fallback post"
+            );
+            const fallbackPost = {
+              _id: `temp-${Date.now()}`,
+              postType: postType,
+              title: valuesWithUploadedMedia.title || "",
+              content: valuesWithUploadedMedia.content || "",
+              user: {
+                _id: "unknown",
+                name: "User",
+                role: "User",
+                profilePicture: "",
+              },
+              likes: [],
+              comments: [],
+              shares: [],
+              createdAt: new Date().toISOString(),
+              visibility: valuesWithUploadedMedia.visibility || "public",
+              media: postData.media,
+              article: postType === "article" ? postData.article : undefined,
+              event: postType === "event" ? postData.event : undefined,
+            };
+            console.log("Using fallback post:", fallbackPost);
+            onPostCreated(fallbackPost);
+          }
         }
       } else {
         toast.error("Failed to create post: " + response.data.message);
@@ -392,6 +435,53 @@ const PostUpload = ({
         toast.success("Article posted successfully!");
         onClose(false);
         formikRef.current?.resetForm();
+
+        // Call onPostCreated with the post data
+        if (onPostCreated) {
+          console.log("Article creation response data:", response.data);
+
+          // Check if the post data exists in the response
+          if (response.data.data && response.data.data.post) {
+            console.log(
+              "Calling onPostCreated with article:",
+              response.data.data.post
+            );
+            onPostCreated(response.data.data.post);
+          } else if (response.data.data) {
+            // If post is not in data.post, try using data directly
+            console.log(
+              "Article not found in data.post, using data directly:",
+              response.data.data
+            );
+            onPostCreated(response.data.data);
+          } else {
+            // Create a fallback post if no valid data is found
+            console.warn(
+              "No valid article data found in response, creating fallback post"
+            );
+            const fallbackPost = {
+              _id: `temp-${Date.now()}`,
+              postType: "article",
+              title: valuesWithUploadedMedia.title || "",
+              content: valuesWithUploadedMedia.content || "",
+              user: {
+                _id: "unknown",
+                name: "User",
+                role: "User",
+                profilePicture: "",
+              },
+              likes: [],
+              comments: [],
+              shares: [],
+              createdAt: new Date().toISOString(),
+              visibility: valuesWithUploadedMedia.visibility || "public",
+              media: articleData.media,
+              article: articleData.article,
+            };
+            console.log("Using fallback article post:", fallbackPost);
+            onPostCreated(fallbackPost);
+          }
+        }
       } else {
         throw new Error(`Unexpected response status: ${response.status}`);
       }

@@ -174,7 +174,7 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen ">
       <div className="max-w-full px-2 pt-4 mx-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl sm:pt-6 md:pt-8">
         <ProfileHeader
           user={user}
@@ -183,9 +183,7 @@ const ProfileDetails = () => {
           totalFollowers={followers}
           isCurrentUser={user.clerkId === currentUser?.id || isFriend}
         />
-
         <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
         <div className="mt-4 sm:mt-6">{renderTabContent()}</div>
       </div>
     </div>
