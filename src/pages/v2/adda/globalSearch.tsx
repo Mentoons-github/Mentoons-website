@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { MdCloudDownload } from "react-icons/md";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import axiosInstance from "@/api/axios";
 import ProductDetailCards from "@/components/products/cards";
 import { useProductActions } from "@/hooks/useProductAction";
@@ -528,21 +528,25 @@ const SearchResultsPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
       <SearchHeader searchQuery={searchQuery} totalResults={totalResults} />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-8">
         {loading && (
-          <div className="text-center py-20">
-            <p className="text-2xl font-bold text-black">Loading...</p>
+          <div className="text-center py-12 md:py-20">
+            <p className="text-xl md:text-2xl font-bold text-black">
+              Loading...
+            </p>
           </div>
         )}
         {error && (
-          <div className="text-center py-20">
-            <p className="text-2xl font-bold text-red-600">{error}</p>
+          <div className="text-center py-12 md:py-20">
+            <p className="text-xl md:text-2xl font-bold text-red-600">
+              {error}
+            </p>
           </div>
         )}
 
         {!loading && !error && (
           <>
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-6 md:mb-10">
               {filters.map((filter) => {
                 if (filter.count === 0 && filter.id !== "all") return null;
                 const Icon = filter.icon;
@@ -550,16 +554,19 @@ const SearchResultsPage = () => {
                   <button
                     key={filter.id}
                     onClick={() => setActiveFilter(filter.id)}
-                    className={`flex items-center space-x-3 px-8 py-4 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg ${
+                    className={`flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4 rounded-xl md:rounded-2xl text-sm sm:text-base md:text-lg font-bold transition-all transform hover:scale-105 shadow-lg ${
                       activeFilter === filter.id
                         ? `bg-gradient-to-r ${filter.color} text-white shadow-2xl border-2 border-white`
                         : "bg-white text-black hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <Icon className="w-6 h-6" />
-                    <span className="text-lg">{filter.label}</span>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    <span className="hidden sm:inline">{filter.label}</span>
+                    <span className="sm:hidden">
+                      {filter.label.split(" ")[0]}
+                    </span>
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-bold ${
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${
                         activeFilter === filter.id
                           ? "bg-white/30 text-white"
                           : "bg-gray-200 text-black"
@@ -572,17 +579,17 @@ const SearchResultsPage = () => {
               })}
             </div>
 
-            <div className="space-y-16">
+            <div className="space-y-8 md:space-y-16">
               {(activeFilter === "all" || activeFilter === "users") &&
                 filteredResults.users.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <Users className="w-8 h-8 mr-4 text-blue-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <Users className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-blue-600" />
                         Users ({filteredResults.users.length})
                       </h2>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
                       {filteredResults.users.map((user, index) => (
                         <FriendCard
                           key={user._id}
@@ -597,20 +604,24 @@ const SearchResultsPage = () => {
                     </div>
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "comics") &&
                 filteredResults.comics.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-8 h-8 mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
                         Comics ({filteredResults.comics.length})
                       </h2>
-                      <button className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-4 py-2 rounded-xl hover:bg-red-200 transition-all">
+                      <NavLink
+                        to="/mentoons-comics"
+                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 lg:gap-8">
                       {filteredResults.comics.map((comic) => (
                         <ComicCard
                           key={comic._id}
@@ -623,20 +634,24 @@ const SearchResultsPage = () => {
                     </div>
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "audioComics") &&
                 filteredResults.audioComics.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-8 h-8 mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
                         Audio Comics ({filteredResults.audioComics.length})
                       </h2>
-                      <button className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-4 py-2 rounded-xl hover:bg-red-200 transition-all">
+                      <NavLink
+                        to="/mentoons-comics?option=audio+comic"
+                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 lg:gap-8">
                       {filteredResults.audioComics.map((audioComic) => (
                         <ComicCard
                           key={audioComic._id}
@@ -649,20 +664,24 @@ const SearchResultsPage = () => {
                     </div>
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "podcasts") &&
                 filteredResults.podcasts.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-8 h-8 mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
                         Podcasts ({filteredResults.podcasts.length})
                       </h2>
-                      <button className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-4 py-2 rounded-xl hover:bg-red-200 transition-all">
+                      <NavLink
+                        to="/mentoons-podcast"
+                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                       {filteredResults.podcasts.map((podcast) => (
                         <PodcastCard
                           key={podcast._id}
@@ -685,18 +704,22 @@ const SearchResultsPage = () => {
                     </div>
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "mentoonsCards") &&
                 filteredResults.mentoonsCards.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <ShoppingCart className="w-8 h-8 mr-4 text-green-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-green-600" />
                         Mentoons Cards ({filteredResults.mentoonsCards.length})
                       </h2>
-                      <button className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-4 py-2 rounded-xl hover:bg-green-200 transition-all">
+                      <NavLink
+                        to="/product-page"
+                        className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
                     <ProductDetailCards
                       ageCategory="Mentoons Cards"
@@ -708,18 +731,22 @@ const SearchResultsPage = () => {
                     />
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "mentoonsBooks") &&
                 filteredResults.mentoonsBooks.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <ShoppingCart className="w-8 h-8 mr-4 text-green-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-green-600" />
                         Mentoons Books ({filteredResults.mentoonsBooks.length})
                       </h2>
-                      <button className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-4 py-2 rounded-xl hover:bg-green-200 transition-all">
+                      <NavLink
+                        to="/product-page?productType=mentoons+books#product"
+                        className="text-green-700 hover:                      text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
                     <ProductDetailCards
                       ageCategory="Mentoons Books"
@@ -731,20 +758,24 @@ const SearchResultsPage = () => {
                     />
                   </section>
                 )}
+
               {(activeFilter === "all" || activeFilter === "freeGames") &&
                 filteredResults.freeGames.length > 0 && (
                   <section>
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-black flex items-center">
-                        <MdCloudDownload className="w-8 h-8 mr-4 text-purple-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
+                        <MdCloudDownload className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-purple-600" />
                         Free Games ({filteredResults.freeGames.length})
                       </h2>
-                      <button className="text-purple-700 hover:text-purple-800 font-bold flex items-center space-x-2 bg-purple-100 px-4 py-2 rounded-xl hover:bg-purple-200 transition-all">
+                      <NavLink
+                        to="/free-download"
+                        className="text-purple-700 hover:text-purple-800 font-bold flex items-center space-x-2 bg-purple-100 px-3 md:px-4 py-2 rounded-xl hover:bg-purple-200 transition-all text-sm md:text-base"
+                      >
                         <span>View all</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
+                        <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                      </NavLink>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                       {filteredResults.freeGames.map((item) => (
                         <motion.div
                           initial={{ opacity: 0.5 }}
@@ -752,8 +783,8 @@ const SearchResultsPage = () => {
                           transition={{ duration: 0.5 }}
                           key={uuidv4()}
                           className={`${
-                            item.cardStyling && "bg-white"
-                          } shadow-2xl group cursor-pointer text-black rounded-2xl px-5 py-5 space-y-3`}
+                            item.cardStyling || "bg-white"
+                          } shadow-2xl group cursor-pointer text-black rounded-xl md:rounded-2xl px-3 md:px-5 py-3 md:py-5 space-y-3`}
                           onClick={() => {
                             setShowFreeDownloadForm(true);
                             setSelectedComic({
@@ -763,44 +794,47 @@ const SearchResultsPage = () => {
                           }}
                         >
                           <div
-                            className={`${item.imgStyling} overflow-hidden rounded-2xl`}
+                            className={`${
+                              item.imgStyling || ""
+                            } overflow-hidden rounded-xl md:rounded-2xl`}
                           >
                             <img
-                              className="w-full h-[23rem] lg:h-[16rem] rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
+                              className="w-full h-[14rem] sm:h-[16rem] md:h-[18rem] lg:h-[20rem] rounded-xl md:rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
                               src={item.image}
                               alt="game image"
                             />
                           </div>
-                          <div className="space-y-2">
-                            <div className="text-xl font-semibold tracking-wide">
+                          <div className="space-y-1 md:space-y-2">
+                            <div className="text-base md:text-xl font-semibold tracking-wide">
                               {highlightText(item.name, searchQuery)}
                             </div>
-                            <div className="text-sm tracking-wide">
+                            <div className="text-xs md:text-sm tracking-wide line-clamp-2">
                               {highlightText(item.desc, searchQuery)}
                             </div>
                           </div>
                           <a
                             href="#"
                             onClick={(e) => e.preventDefault()}
-                            className="flex items-center justify-end gap-2 pt-4 text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline"
+                            className="flex items-center justify-end gap-2 pt-2 md:pt-4 text-sm md:text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline"
                           >
                             Download Now
-                            <MdCloudDownload className="text-2xl text-red-700 group-hover:text-red-500" />
+                            <MdCloudDownload className="text-lg md:text-2xl text-red-700 group-hover:text-red-500" />
                           </a>
                         </motion.div>
                       ))}
                     </div>
                   </section>
                 )}
+
               {totalResults === 0 && activeFilter === "all" && (
-                <div className="text-center py-20">
-                  <div className="w-40 h-40 bg-gradient-to-br from-red-200 via-orange-200 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                    <BookOpen className="w-20 h-20 text-red-600" />
+                <div className="text-center py-12 md:py-20">
+                  <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-red-200 via-orange-200 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-xl">
+                    <BookOpen className="w-16 h-16 md:w-20 md:h-20 text-red-600" />
                   </div>
-                  <h3 className="text-3xl font-bold text-black mb-4">
+                  <h3 className="text-2xl md:text-3xl font-bold text-black mb-3 md:mb-4">
                     No results found
                   </h3>
-                  <p className="text-gray-700 mb-10 max-w-md mx-auto text-lg font-medium">
+                  <p className="text-gray-700 mb-6 md:mb-10 max-w-md mx-auto text-base md:text-lg font-medium">
                     We couldn't find anything matching your search. Try
                     different keywords.
                   </p>
@@ -821,13 +855,13 @@ const SearchResultsPage = () => {
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="relative w-[95%] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden items-center"
+                  className="relative w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] h-[80vh] md:h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden"
                 >
                   <button
                     onClick={closeComicModal}
-                    className="absolute z-50 p-2 text-gray-600 transition-colors top-4 right-4 hover:text-gray-900"
+                    className="absolute z-50 p-1.5 md:p-2 text-gray-600 transition-colors top-2 md:top-4 right-2 md:right-4 hover:text-gray-900"
                   >
-                    <MdClose className="text-2xl" />
+                    <MdClose className="text-xl md:text-2xl" />
                   </button>
                   <ComicViewer
                     pdfUrl={comicToView}

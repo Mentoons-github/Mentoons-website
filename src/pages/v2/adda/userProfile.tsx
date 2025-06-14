@@ -136,13 +136,6 @@ interface ProfileField {
   minLength?: number;
 }
 
-// Add interface for suggested friends
-// interface SuggestionInterface {
-//   _id: string;
-//   name: string;
-//   picture: string;
-// }
-
 export interface SavedPost extends Post {
   userId?: string;
   user: {
@@ -153,7 +146,6 @@ export interface SavedPost extends Post {
   };
 }
 
-// Add a function to format date from ISO or YYYY-MM-DD to display format
 const formatDate = (dateString?: string) => {
   if (!dateString) return "Not provided";
   try {
@@ -200,12 +192,6 @@ const UserProfile = () => {
 
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
-
-  // const [friendSuggestions, setFriendSuggestions] = useState<
-  //   SuggestionInterface[] | null
-  // >(null);
-  // const [connectingIds, setConnectingIds] = useState<string[]>([]);
-  // const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const [isEditingInterests, setIsEditingInterests] = useState(false);
 

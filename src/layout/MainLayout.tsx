@@ -22,7 +22,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <NotificationProvider>
       <div className="relative w-full h-full">
-        <div className="absolute top-[50px] left-10 z-[99] hidden lg:block">
+        <div className="absolute top-[115px] left-10 z-[99] hidden lg:block">
           <Breadcrumbs />
         </div>
         <PrimaryHeader />
