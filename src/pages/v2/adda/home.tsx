@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 const AddaHome = () => {
   const { isSignedIn } = useAuth();
   const [showModal, setShowModal] = useState(false);
-  const [newPost, setNewPost] = useState(false);
 
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem("welcomeModalShown");
@@ -23,7 +22,7 @@ const AddaHome = () => {
       {!isSignedIn && showModal && (
         <WelcomeModal onClose={() => setShowModal(false)} />
       )}
-      <PostsContainer />
+      <PostsContainer/>
     </>
   );
 };

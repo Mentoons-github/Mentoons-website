@@ -36,6 +36,7 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import ChatPage from "./pages/v2/adda/chat.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -93,6 +94,7 @@ const routes = [
   { path: "/search", element: <SearchResultsPage /> },
   { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
+  { path: "/chat", element: <ChatPage /> },
 ];
 
 const Router = () => {

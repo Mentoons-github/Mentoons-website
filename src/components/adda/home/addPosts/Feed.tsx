@@ -11,7 +11,12 @@ interface PaginationData {
   hasMore?: boolean;
 }
 
-const Feed = ({ newPost }: { newPost?: boolean }) => {
+interface FeedProps {
+  latestPost?: boolean;
+  onFetchComplete?: () => void;
+}
+
+const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
   const { getToken } = useAuth();
   const [userFeeds, setUserFeeds] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +45,6 @@ const Feed = ({ newPost }: { newPost?: boolean }) => {
           }
         );
 
-        console.log(response.data);
         if (response.data.success) {
           const newPosts = response.data.data;
           const pagination: PaginationData = response.data.pagination;
@@ -56,6 +60,11 @@ const Feed = ({ newPost }: { newPost?: boolean }) => {
           setUserFeeds((prev) =>
             pageNum === 1 ? newPosts : [...prev, ...newPosts]
           );
+
+          // Call onFetchComplete after successful fetch for page 1
+          if (pageNum === 1 && onFetchComplete) {
+            onFetchComplete();
+          }
         } else {
           setError("Failed to load feed data");
         }
@@ -70,13 +79,15 @@ const Feed = ({ newPost }: { newPost?: boolean }) => {
         setIsLoading(false);
       }
     },
-    [getToken]
+    [getToken, onFetchComplete]
   );
+
   useEffect(() => {
-    if (newPost) {
+    if (latestPost) {
       fetchUserFeeds(1);
     }
-  }, [newPost]);
+  }, [latestPost, fetchUserFeeds]);
+
   useEffect(() => {
     fetchUserFeeds(1);
   }, [fetchUserFeeds]);
