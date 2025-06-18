@@ -19,6 +19,54 @@ import { FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 
+const videos = [
+  {
+    id: 1,
+    src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/Sarah%2C+35+Years%2C+Elementary+School+Teacher.mp4",
+    thumbnail:
+      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/thumbnails/how+mentoons+works+4.jpg",
+    title: "Sarah's Assessment Approach",
+    description:
+      "Watch Sarah, an elementary school educator, share how Mentoons helped her develop more effective assessment methods and track student growth through creative storytelling.",
+  },
+  {
+    id: 2,
+    src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/Raj%2C+42+Years%2C+IT+Manager%2C+Podcast+%26+Convo+Ca.mp4",
+    thumbnail:
+      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/thumbnails/how+mentoons+works+1.jpg",
+    title: "Raj's Journey with Mentoons",
+    description:
+      "Meet Raj, a 42-year-old IT Manager who discovered how Mentoons transformed his approach to conversations and podcasting, enhancing his communication skills both at work and home.",
+  },
+  {
+    id: 3,
+    src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/Olivia%2C+28+Years%2C+Psychologist.mp4",
+    thumbnail:
+      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/thumbnails/Untitled_Artwork+47.png",
+    title: "Olivia's Professional Growth",
+    description:
+      "Discover how Olivia, a 28-year-old psychologist, uses Mentoons to enhance her practice and connect better with clients through innovative storytelling techniques.",
+  },
+  {
+    id: 4,
+    src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/Samantha%2C+35+Years%2C+Elementary+School+Teacher.mp4",
+    thumbnail:
+      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/thumbnails/how+mentoons+works+3.jpg",
+    title: "Samantha's Teaching Transformation",
+    description:
+      "See how Samantha, a 35-year-old elementary school teacher, revolutionized her classroom dynamics using Mentoons to foster better family conversations and student engagement.",
+  },
+  {
+    id: 5,
+    src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/Rajesh+K+42+Years+old+IT+Manager.mp4",
+    thumbnail:
+      "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/how_Mentoons_Works/thumbnails/how+mentoons+works+5.jpg",
+    title: "Rajesh's Success Story",
+    description:
+      "Learn how Rajesh, an experienced IT Manager, leveraged Mentoons' comics and stories to improve team communication and leadership effectiveness in his organization.",
+  },
+];
+
 const UserStatus = () => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
@@ -35,6 +83,9 @@ const UserStatus = () => {
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<(typeof videos)[0] | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -51,6 +102,7 @@ const UserStatus = () => {
   ) => {
     setSelectedStatusGroup(statusGroup);
     setCurrentStatusIndex(index);
+    setSelectedVideo(null);
     if (
       !statusGroup.isOwner &&
       statusGroup.statuses &&
@@ -60,6 +112,12 @@ const UserStatus = () => {
       const statusToWatch = statusGroup.statuses[index];
       dispatch(sendWatchedStatus({ statusId: statusToWatch._id, token }));
     }
+  };
+
+  const handleVideoClick = (video: (typeof videos)[0]) => {
+    setSelectedVideo(video);
+    setSelectedStatusGroup(null);
+    setCurrentStatusIndex(0);
   };
 
   const handleNextStatus = async () => {
@@ -261,9 +319,29 @@ const UserStatus = () => {
                 )}
               </SwiperSlide>
             ))}
+            {videos.map((video) => (
+              <SwiperSlide
+                key={`video-${video.id}`}
+                className="!w-fit flex flex-col gap-1 flex-shrink-0"
+                style={{ justifyItems: "center" }}
+              >
+                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full outline outline-[#EC9600] flex justify-center items-center">
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    className="object-cover w-full h-full rounded-full cursor-pointer"
+                    onClick={() => handleVideoClick(video)}
+                  />
+                </div>
+                <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
+                  {video.title}
+                </span>
+              </SwiperSlide>
+            ))}
           </Swiper>
         </div>
       </div>
+
       {selectedStatusGroup && selectedStatusGroup.statuses.length > 0 && (
         <Status
           status={{
@@ -291,6 +369,33 @@ const UserStatus = () => {
           currentIndex={currentStatusIndex}
         />
       )}
+
+      {selectedVideo && (
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-[999999999]">
+          <div className="relative w-full max-w-2xl p-4">
+            <button
+              className="absolute top-2 -right-5 text-white text-2xl"
+              onClick={() => setSelectedVideo(null)}
+            >
+              ×
+            </button>
+            <video
+              className="w-full h-auto rounded-lg"
+              controls
+              autoPlay
+              poster={selectedVideo.thumbnail}
+            >
+              <source src={selectedVideo.src} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <div className="mt-4 text-white">
+              <h3 className="text-lg font-semibold">{selectedVideo.title}</h3>
+              <p className="text-sm">{selectedVideo.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedFile && (
         <MediaPreviewModal
           isSuccess={isSuccess}

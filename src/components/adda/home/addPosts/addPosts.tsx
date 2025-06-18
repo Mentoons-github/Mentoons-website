@@ -46,16 +46,17 @@ interface PostData {
 
 interface AddPostsProps {
   onPostCreated?: (post: PostData) => void;
-  setNewPost?: (val: boolean) => void;
+  setLatestPost?: (val: boolean) => void;
+  setPendingPost?: (post: PostData) => void;
 }
 
-// Define the ref interface
 interface AddPostsRef {
   handlePost: (type: "photo" | "video" | "event" | "article") => void;
+  setPendingPost?: (post: PostData) => void;
 }
 
 const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
-  ({ setNewPost, onPostCreated }, ref) => {
+  ({ setLatestPost, onPostCreated, setPendingPost }, ref) => {
     const { isSignedIn } = useUser();
     const { getToken } = useAuth();
     const { openAuthModal } = useAuthModal();
@@ -77,19 +78,18 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       setIsOpen(true);
     };
 
-    // Expose methods to parent component via ref
     useImperativeHandle(ref, () => ({
       handlePost,
+      setPendingPost,
     }));
 
     const handlePostComplete = (newPost: PostData) => {
-      if (setNewPost) {
-        setNewPost(true);
-        setTimeout(() => {
-          setNewPost(false);
-        }, 3000);
+      if (setLatestPost) {
+        setLatestPost(true);
       }
-
+      if (setPendingPost) {
+        setPendingPost(newPost);
+      }
       setIsOpen(false);
       setSelectedPostType(null);
       if (onPostCreated) {
@@ -134,88 +134,44 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
           toast.success("Text post created successfully!");
           setTextContent("");
 
-          // Log the entire response for debugging
-          console.log(
-            "Full API response:",
-            JSON.stringify(response.data, null, 2)
-          );
-
-          // Check all possible paths where the post data might be
           let postData = null;
-
           if (response.data.data && response.data.data.post) {
             postData = response.data.data.post;
-            console.log("Found post at response.data.data.post");
           } else if (response.data.post) {
             postData = response.data.post;
-            console.log("Found post at response.data.post");
           } else if (
             response.data.data &&
             typeof response.data.data === "object"
           ) {
             postData = response.data.data;
-            console.log("Using response.data.data as post");
           }
 
-          console.log("Extracted post data:", postData);
+          const structuredPost: PostData = {
+            ...postData,
+            _id: postData?._id || `temp-${Date.now()}`,
+            postType: postData?.postType || "text",
+            user: postData?.user || {
+              _id: user?.id || "unknown",
+              name: user?.fullName || "User",
+              role: "User",
+              profilePicture: user?.imageUrl || "",
+            },
+            likes: postData?.likes || [],
+            comments: postData?.comments || [],
+            shares: postData?.shares || [],
+            createdAt: postData?.createdAt || new Date().toISOString(),
+            visibility: postData?.visibility || "public",
+            content: postData?.content || textContent,
+          };
 
+          if (setPendingPost) {
+            setPendingPost(structuredPost);
+          }
+          if (setLatestPost) {
+            setLatestPost(true);
+          }
           if (onPostCreated) {
-            if (postData) {
-              // Create a properly structured post object
-              const structuredPost: PostData = {
-                ...postData,
-                // Ensure required properties exist
-                _id: postData._id || `temp-${Date.now()}`,
-                postType: postData.postType || "text",
-                user: postData.user || {
-                  _id: user?.id || "unknown",
-                  name: user?.fullName || "User",
-                  role: "User",
-                  profilePicture: user?.imageUrl || "",
-                },
-                likes: postData.likes || [],
-                comments: postData.comments || [],
-                shares: postData.shares || [],
-                createdAt: postData.createdAt || new Date().toISOString(),
-                visibility: postData.visibility || "public",
-              };
-
-              console.log(
-                "Sending structured post to onPostCreated:",
-                structuredPost
-              );
-              onPostCreated(structuredPost);
-            } else {
-              console.error("Could not find post data in API response");
-
-              // Create a fallback post object when API doesn't return expected format
-              const fallbackPost: PostData = {
-                _id: `temp-${Date.now()}`,
-                postType: "text",
-                content: textContent,
-                user: {
-                  _id: user?.id || "unknown",
-                  name: user?.fullName || "User",
-                  role: "User",
-                  profilePicture: user?.imageUrl || "",
-                },
-                likes: [],
-                comments: [],
-                shares: [],
-                createdAt: new Date().toISOString(),
-                visibility: "public",
-              };
-
-              console.log("Using fallback post:", fallbackPost);
-              onPostCreated(fallbackPost);
-            }
-          }
-
-          if (setNewPost) {
-            setNewPost(true);
-            setTimeout(() => {
-              setNewPost(false);
-            }, 3000);
+            onPostCreated(structuredPost);
           }
         } else {
           toast.error("Failed to create post: " + response.data.message);
@@ -236,7 +192,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
     return (
       <>
-        <div className="relative flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl z-[20]">
+        <div className="relative flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl z-10">
           <div className="flex items-center w-full gap-3">
             <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
               {user?.imageUrl ? (

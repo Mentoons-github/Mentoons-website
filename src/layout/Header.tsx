@@ -1,24 +1,23 @@
-import DropDown from "@/components/common/nav/dropdown";
-import NavButton from "@/components/common/nav/navButton";
-import Sidebar from "@/components/common/sidebar";
-import ShareModal from "@/components/modals/ShareModal";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { LogOut, Search, ShoppingCart, User, X } from "lucide-react";
+import { FaTimes, FaUserCircle, FaBars } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { COMMON_NAV } from "@/constant";
 import { getCart } from "@/redux/cartSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { DropDownInterface } from "@/types";
-import { SignedIn, useAuth } from "@clerk/clerk-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Search, ShoppingCart, User, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { FaTimes, FaUserCircle } from "react-icons/fa";
-import { FaBars } from "react-icons/fa6";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import DropDown from "@/components/common/nav/dropdown";
+import NavButton from "@/components/common/nav/navButton";
+import Sidebar from "@/components/common/sidebar";
+import ShareModal from "@/components/modals/ShareModal";
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, signOut } = useAuth();
+  const { userId, signOut, getToken } = useAuth();
 
   const title = location.pathname.startsWith("/adda") ? "adda" : "home";
   const [isScrolled, setIsScrolled] = useState(false);
@@ -39,7 +38,6 @@ const Header = () => {
   });
 
   const { cart } = useSelector((state: RootState) => state.cart);
-  const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
   const filteredNav = COMMON_NAV.filter(
@@ -65,7 +63,10 @@ const Header = () => {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent, suggestion?: string) => {
+  const handleSearchSubmit = (
+    e: React.FormEvent<HTMLFormElement>,
+    suggestion?: string
+  ) => {
     e.preventDefault();
     const query = suggestion || searchQuery.trim();
     const encoded = encodeURIComponent(query);
@@ -82,10 +83,10 @@ const Header = () => {
     }
 
     setShowSearch(false);
-    setSearchQuery(""); // Clear search query after submission
+    setSearchQuery("");
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setShowSearch(false);
       setSearchQuery("");
@@ -145,7 +146,7 @@ const Header = () => {
       const token = await getToken();
       if (token && userId) {
         const response = await dispatch(getCart({ token, userId }));
-        console.log("Response Data", response);
+        console.log("Cart Response:", response);
       }
     };
 
@@ -165,26 +166,19 @@ const Header = () => {
       opacity: 0,
       y: -10,
       scale: 0.95,
-      transition: {
-        duration: 0.2,
-      },
+      transition: { duration: 0.2 },
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
+      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
       opacity: 0,
       y: -10,
       scale: 0.95,
-      transition: {
-        duration: 0.15,
-      },
+      transition: { duration: 0.15 },
     },
   };
 
@@ -203,6 +197,7 @@ const Header = () => {
 
   return (
     <header
+      id="header"
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
       } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-[9999] w-full font-akshar`}
@@ -221,22 +216,17 @@ const Header = () => {
                 key={id}
                 href={url}
                 onClick={handleBrowsePlansClick}
-                className="group relative bg-transparent outline-none cursor-pointer text-center 
-                text-[12px] sm:text-sm md:text-base font-semibold text-white flex 
-                items-center gap-1 transition-all duration-300 ease-in-out"
+                className="group relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out"
               >
-                {Icon && typeof Icon === "function" ? (
+                {Icon && typeof Icon === "function" && (
                   <Icon className="sm:text-sm md:text-lg" />
-                ) : null}
+                )}
                 {label}
-                <span
-                  className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                  transition-all duration-300 ease-in-out group-hover:w-full"
-                ></span>
+                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
               </a>
             ) : (
               <div key={id} className="relative flex-shrink-0">
-                {items && items?.length ? (
+                {items && items.length ? (
                   <NavButton
                     label={label}
                     onMouseEnter={() => handleHover(label.toLowerCase())}
@@ -254,23 +244,18 @@ const Header = () => {
                 ) : (
                   <NavLink
                     to={url}
-                    className="group relative bg-transparent outline-none cursor-pointer text-center 
-                    text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
-                    items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
+                    className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
                   >
-                    {typeof Icon === "function" ? (
+                    {Icon && typeof Icon === "function" && (
                       <Icon className="flex-shrink-0 text-xs md:text-sm" />
-                    ) : null}
+                    )}
                     {label}
                     {label === "Mythos" && (
                       <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[8px] md:text-[10px] leading-none text-white whitespace-nowrap">
                         Introducing
                       </span>
                     )}
-                    <span
-                      className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                      transition-all duration-300 ease-in-out group-hover:w-full"
-                    ></span>
+                    <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
                   </NavLink>
                 )}
               </div>
@@ -307,7 +292,7 @@ const Header = () => {
           <div className="relative flex flex-shrink-0 cursor-pointer lg:hidden">
             <NavLink to="/cart">
               <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
-              {cart.totalItemCount > 0 && (
+              {(cart?.totalItemCount ?? 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {cart.totalItemCount}
                 </span>
@@ -350,36 +335,28 @@ const Header = () => {
               key={id}
               href={url}
               onClick={handleBrowsePlansClick}
-              className="group relative bg-transparent outline-none cursor-pointer text-center 
-              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
-              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && typeof Icon === "function" ? (
+              {Icon && typeof Icon === "function" && (
                 <Icon className="flex-shrink-0 text-xs md:text-sm" />
-              ) : null}
+              )}
               {label}
-              <span
-                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                transition-all duration-300 ease-in-out group-hover:w-full"
-              ></span>
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
             </a>
           ) : label === "Share" ? (
             <div
               key={id}
               onClick={() => setShowShareModal(true)}
-              className="group relative bg-transparent outline-none cursor-pointer text-center 
-              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
-              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="flex-shrink-0 text-xs md:text-sm" />}
+              {Icon && typeof Icon === "function" && (
+                <Icon className="flex-shrink-0 text-xs md:text-sm" />
+              )}
               {label}
-              <span
-                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                transition-all duration-300 ease-in-out group-hover:w-full"
-              ></span>
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
               {showShareModal && (
                 <ShareModal
-                  onClose={() => setShowShareModal((prev) => !prev)}
+                  onClose={() => setShowShareModal(false)}
                   isOpen={showShareModal}
                   link={window.location.href}
                 />
@@ -398,10 +375,7 @@ const Header = () => {
                   className="relative flex items-center text-center transition-all duration-300 ease-in-out bg-transparent outline-none cursor-pointer group"
                 >
                   <FaUserCircle className="w-5 h-5 text-white rounded-full sm:w-6 sm:h-6" />
-                  <span
-                    className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                    transition-all duration-300 ease-in-out group-hover:w-full"
-                  ></span>
+                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
                 </motion.div>
 
                 <AnimatePresence>
@@ -445,16 +419,13 @@ const Header = () => {
             <NavLink
               key={id}
               to={url}
-              className="group relative bg-transparent outline-none cursor-pointer text-center 
-              text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex 
-              items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
             >
-              {Icon && <Icon className="flex-shrink-0 text-xs md:text-sm" />}
+              {Icon && typeof Icon === "function" && (
+                <Icon className="flex-shrink-0 text-xs md:text-sm" />
+              )}
               {label}
-              <span
-                className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white 
-                transition-all duration-300 ease-in-out group-hover:w-full"
-              ></span>
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
             </NavLink>
           )
         )}
@@ -462,7 +433,7 @@ const Header = () => {
           <div className="relative flex-shrink-0 cursor-pointer">
             <NavLink to="/cart">
               <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
-              {cart.totalItemCount > 0 && (
+              {(cart?.totalItemCount ?? 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {cart.totalItemCount}
                 </span>
@@ -504,7 +475,7 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
-                    placeholder="Search for games, comics, products..."
+                    placeholder="Search for games, comics, podcasts..."
                     className="flex-1 py-4 pr-4 text-lg text-gray-900 placeholder-gray-500 bg-transparent border-none outline-none"
                   />
                   <motion.button

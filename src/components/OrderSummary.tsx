@@ -511,7 +511,7 @@ const OrderSummary: React.FC = () => {
         className="flex items-center justify-center hidden md:block md:w-1/2"
         variants={itemVariants}
       >
-        <NavLink to="/assesment-page">
+        <NavLink to="/assessment-page">
           <img
             src="/assets/assesments/assessment/Assessment .png"
             alt="Order Illustration"

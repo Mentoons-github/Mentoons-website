@@ -7,8 +7,8 @@ import {
 import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import { FaClock, FaPhone } from "react-icons/fa6";
-import { useLocation } from "react-router-dom";
+import { FaClock, FaMessage, FaPhone } from "react-icons/fa6";
+import { NavLink, useLocation } from "react-router-dom";
 
 const PrimaryHeader = () => {
   const location = useLocation();
@@ -77,8 +77,11 @@ const PrimaryHeader = () => {
         </motion.div>
       </div>
 
-      <div className="flex items-end justify-end w-auto gap-10 md:w-1/2">
+      <div className="flex items-center justify-end w-auto gap-10 md:w-1/2">
         <SignedIn>
+          <NavLink to="/chat">
+            <FaMessage />
+          </NavLink>
           <NotificationModal getToken={getToken} />
         </SignedIn>
         <AuthButton />

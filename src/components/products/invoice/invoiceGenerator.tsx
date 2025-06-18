@@ -22,7 +22,6 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
     const items = order.items.map((item) => ({
       id: item.productId,
       name: item.productName,
-      image: item.productImage || "https://placehold.co/400",
       quantity: item.quantity,
       price: item.price,
     }));
@@ -37,25 +36,25 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
     const total = subtotal - discountAmount;
 
     return (
-      <div className="min-h-screen bg-gray-100 py-8">
+      <div>
         <style>
           {`
             @media print {
+              @page {
+                margin: 0 !important;
+              }
               html, body {
                 height: auto !important;
                 overflow: visible !important;
                 margin: 0 !important;
                 padding: 0 !important;
               }
-              
               body * {
                 visibility: hidden;
               }
-              
               #invoice, #invoice * {
                 visibility: visible;
               }
-              
               #invoice {
                 position: absolute;
                 left: 0;
@@ -71,11 +70,6 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
                 height: auto !important;
                 page-break-after: avoid !important;
               }
-              
-              .no-print {
-                display: none !important;
-              }
-              
               .invoice-container {
                 font-size: 11pt !important;
                 padding: 0 !important;
@@ -85,54 +79,50 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
                 max-width: none !important;
                 background: white !important;
               }
-              
+              .invoice-header {
+                gap: 0.5rem !important;
+                margin-top: 0 !important;
+              }
+              .invoice-header .text-right p {
+                margin-top: 0.25rem !important;
+              }
+              .logo-img {
+                width: 150px !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
               table {
                 page-break-inside: auto;
                 width: 100% !important;
                 border-spacing: 0;
               }
-              
               th, td {
                 vertical-align: middle !important;
                 line-height: 1.2 !important;
               }
-              
-              img {
-                max-width: 100%;
-                height: auto;
-              }
-              
               .bg-gray-100 {
                 background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
               }
-              
               .bg-gray-50 {
                 background: #f9f9f9 !important;
               }
-              
               .bg-blue-50 {
                 background: #eff6ff !important;
               }
-              
               .bg-gradient-to-r {
                 background: #2563eb !important;
               }
-              
               .min-h-screen {
                 min-height: auto !important;
               }
-              
               .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 1rem !important;
+                margin-top: 0.5rem !important;
               }
-              
               .mt-8 {
-                margin-top: 1.5rem !important;
-              }
-              
-              .py-8 {
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
+                margin-top: 1rem !important;
               }
             }
           `}
@@ -142,37 +132,32 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
           ref={ref}
           className="invoice-container max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-2xl space-y-6"
         >
-          <div className="invoice-header flex flex-col sm:flex-row justify-center items-center gap-6">
-            <div className="text-center">
+          <div className="invoice-header flex flex-col sm:flex-row justify-between items-start gap-6">
+            <div className="flex-shrink-0">
+              <img
+                src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+                alt="Mentoons Logo"
+                className="logo-img w-36 h-auto"
+              />
+            </div>
+            <div className="text-right">
               <h1 className="text-3xl font-extrabold text-blue-600">
                 Mentoons
               </h1>
               <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                399, 2nd Cross Rd, Opposite The Paul Hotel, HBCS Colony,
-                <br />
-                Amarjyoti Layout, Domlur,
+                399, 2nd Cross Rd, Opposite The Paul Hotel, <br />
+                HBCS Colony, Amarjyoti Layout, Domlur,
                 <br />
                 Bengaluru, Karnataka 560071
               </p>
             </div>
           </div>
-
           <div className="flex justify-between items-center text-sm text-gray-600">
             <p>
               <span className="font-medium">Date:</span> {generationDate}
             </p>
-            <div className="no-print space-x-4">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
-                Download PDF
-              </button>
-              <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
-                Print
-              </button>
-            </div>
           </div>
-
           <div className="border-t-2 border-blue-500"></div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-700">Bill To:</h2>
@@ -194,11 +179,9 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
               </p>
             </div>
           </div>
-
           <div className="invoice-title bg-blue-600 text-white text-xl font-bold py-3 px-5 rounded-lg text-center">
             INVOICE
           </div>
-
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead className="bg-gray-100">
@@ -263,7 +246,6 @@ const InvoiceGenerator = forwardRef<HTMLDivElement, InvoiceGeneratorProps>(
               </tfoot>
             </table>
           </div>
-
           <div className="invoice-footer mt-8 pt-6 border-t-2 border-gray-200 text-center">
             <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg">
               <h3 className="text-lg font-bold text-blue-800 mb-2">

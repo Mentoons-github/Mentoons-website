@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 interface ProfileHeaderProps {
   user: User;
@@ -42,6 +43,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     null
   );
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showCoverModal, setShowCoverModal] = useState(false);
+
+  const isValidCoverImage =
+    user.coverImage && !user.coverImage.includes("via.placeholder.com");
 
   useEffect(() => {
     if (isCurrentUser) {
@@ -49,21 +54,31 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       return;
     }
 
-    const checkFriendStatus = async () => {
+    const checkFriendStatus = async (retries = 2): Promise<void> => {
       try {
         const token = await getToken();
+        if (!token) throw new Error("Authentication token not found");
+
         const response = await axiosInstance.get(
           `/adda/check-friend-status/${user._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        const { status, isRequester, requestId } = response.data.data;
+        const { status, isRequester, requestId } = response.data.data || {};
         setFriendStatus(status || "none");
         setIsRequester(isRequester || false);
         setRequestId(requestId);
       } catch (error) {
+        console.error("Error checking friend status:", error);
+        if (retries > 0) {
+          console.log(
+            `Retrying friend status check... (${retries} attempts left)`
+          );
+          return checkFriendStatus(retries - 1);
+        }
         setFriendStatus("none");
+        errorToast("Failed to load friend status");
       } finally {
         setIsStatusLoading(false);
       }
@@ -85,16 +100,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      const endpoint =
-        friendStatus === "accepted" || friendStatus === "one_way"
-          ? `/adda/unfriend/${user._id}`
-          : friendStatus === "pending" && isRequester
-          ? `/adda/cancelRequest/${user._id}`
-          : friendStatus === "pending"
-          ? `/adda/rejectRequest/${requestId}`
-          : `/adda/request/${user._id}`;
-      const method =
-        friendStatus === "pending" && !isRequester ? "patch" : "post";
+      if (!token) throw new Error("Authentication token not found");
+
+      const isUnfriend =
+        friendStatus === "accepted" || friendStatus === "one_way";
+      const isCancel = friendStatus === "pending" && isRequester;
+      const isReject = friendStatus === "pending" && !isRequester;
+
+      const endpoint = isUnfriend
+        ? `/adda/unfriend/${user._id}`
+        : isCancel
+        ? `/adda/cancelRequest/${user._id}`
+        : isReject
+        ? `/adda/rejectRequest/${requestId}`
+        : `/adda/request/${user._id}`;
+      const method = isReject ? "patch" : "post";
 
       const response = await axiosInstance({
         method,
@@ -104,19 +124,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
       setFriendStatus(
         response.data.status ||
-          (friendStatus === "accepted" || friendStatus === "one_way"
+          (isUnfriend
             ? "none"
-            : friendStatus === "pending" && isRequester
+            : isCancel
             ? "none"
-            : friendStatus === "pending"
+            : isReject
             ? "rejected"
             : "pending")
       );
-      setIsRequester(
-        response.data.isRequester ||
-          friendStatus === "none" ||
-          friendStatus === "rejected"
-      );
+      setIsRequester(response.data.isRequester || !isUnfriend);
       successToast(response.data.message || "Friend status updated");
     } catch (error) {
       errorToast("Friend action failed");
@@ -129,6 +145,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
+      if (!token) throw new Error("Authentication token not found");
+
       await axiosInstance.patch(
         `/adda/acceptRequest/${requestId}`,
         {},
@@ -146,8 +164,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   const getFriendButtonConfig = () => {
-    if (!friendStatus) return null;
-
     const configs: Record<
       FriendStatus,
       { text: string; icon: JSX.Element; classes: string; action?: () => void }
@@ -155,7 +171,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       accepted: {
         text: "Unfriend",
         icon: <UserMinus size={14} />,
-        classes: "bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-200",
+        classes:
+          "bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-200 border-red-200",
         action: handleFriendAction,
       },
       pending: isRequester
@@ -163,57 +180,62 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             text: "Cancel Request",
             icon: <X size={14} />,
             classes:
-              "bg-yellow-50 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-200",
+              "bg-yellow-50 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-200 border-yellow-200",
             action: handleFriendAction,
           }
         : {
             text: "Respond to Request",
             icon: <Clock size={14} />,
             classes:
-              "bg-yellow-50 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-200",
+              "bg-yellow-50 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-200 border-yellow-200",
           },
       rejected: {
         text: "Send Request",
         icon: <UserPlus size={14} />,
         classes:
-          "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200",
+          "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200 border-blue-200",
         action: handleFriendAction,
       },
       one_way: {
         text: "Unfriend",
         icon: <UserMinus size={14} />,
         classes:
-          "bg-purple-50 text-purple-600 hover:bg-purple-100 focus:ring-purple-200",
+          "bg-purple-50 text-purple-600 hover:bg-purple-100 focus:ring-purple-200 border-purple-200",
         action: handleFriendAction,
       },
       none: {
         text: "Add Friend",
         icon: <UserPlus size={14} />,
         classes:
-          "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200",
+          "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200 border-blue-200",
         action: handleFriendAction,
       },
     };
 
-    return configs[friendStatus];
+    return configs[friendStatus] || null;
   };
 
   const buttonConfig = getFriendButtonConfig();
 
-  const handleModalBackdropClick = (e: React.MouseEvent) => {
+  const handleModalBackdropClick = (
+    e: React.MouseEvent,
+    modalType: "photo" | "cover"
+  ) => {
     if (e.target === e.currentTarget) {
-      setShowPhotoModal(false);
+      if (modalType === "photo") setShowPhotoModal(false);
+      else setShowCoverModal(false);
     }
   };
 
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && showPhotoModal) {
-        setShowPhotoModal(false);
+      if (e.key === "Escape") {
+        if (showPhotoModal) setShowPhotoModal(false);
+        if (showCoverModal) setShowCoverModal(false);
       }
     };
 
-    if (showPhotoModal) {
+    if (showPhotoModal || showCoverModal) {
       document.addEventListener("keydown", handleEscKey);
       document.body.style.overflow = "hidden";
     }
@@ -222,45 +244,56 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       document.removeEventListener("keydown", handleEscKey);
       document.body.style.overflow = "unset";
     };
-  }, [showPhotoModal]);
+  }, [showPhotoModal, showCoverModal]);
 
   return (
     <>
       <style>
         {`
           @keyframes fadeInScale {
-            from {
-              opacity: 0;
-              transform: scale(0.9);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
           }
           @keyframes imagePop {
-            from {
-              transform: scale(0.8);
-              opacity: 0.5;
-            }
-            to {
-              transform: scale(1);
-              opacity: 1;
-            }
+            from { transform: scale(0.8); opacity: 0.5; }
+            to { transform: scale(1); opacity: 1; }
           }
-          .animate-modal {
-            animation: fadeInScale 0.3s ease-out forwards;
+          @keyframes coverFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
-          .animate-image {
-            animation: imagePop 0.4s ease-out forwards;
-          }
+          .animate-modal { animation: fadeInScale 0.3s ease-out forwards; }
+          .animate-image { animation: imagePop 0.4s ease-out forwards; }
+          .animate-cover { animation: coverFade 0.5s ease-out forwards; }
         `}
       </style>
 
-      <div className="w-full bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-        <div className="h-20 sm:h-24 md:h-28 lg:h-32 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 relative">
-          <div className="absolute inset-0 bg-black bg-opacity-10"></div>
-        </div>
+      <motion.div
+        className="w-full bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className={`h-20 sm:h-24 md:h-28 lg:h-32 relative ${
+            isValidCoverImage ? "bg-cover bg-center cursor-pointer" : "bg-black"
+          }`}
+          onClick={
+            isValidCoverImage ? () => setShowCoverModal(true) : undefined
+          }
+          style={
+            isValidCoverImage
+              ? { backgroundImage: `url(${user.coverImage})` }
+              : undefined
+          }
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {isValidCoverImage && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 animate-cover"></div>
+          )}
+        </motion.div>
 
         <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-3 sm:pb-6">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-3 sm:mb-6 -mt-8 sm:-mt-12">
@@ -290,7 +323,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </span>
                 </div>
               )}
-
               {user.subscription?.plan && user.subscription.plan !== "free" && (
                 <div className="absolute -top-0.5 -right-0.5 sm:-top-2 sm:-right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold text-white bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-md">
                   {user.subscription.plan.toUpperCase()}
@@ -306,10 +338,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </div>
                 ) : friendStatus === "pending" && !isRequester ? (
                   <>
-                    <button
+                    <motion.button
                       onClick={handleAcceptRequest}
                       disabled={isLoading}
                       className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-green-600 rounded-full bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all duration-200 border border-green-200 font-medium min-w-[60px] sm:min-w-auto"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       {isLoading ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -319,11 +353,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                           <span className="hidden sm:inline">Accept</span>
                         </>
                       )}
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={handleFriendAction}
                       disabled={isLoading}
                       className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-red-600 rounded-full bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200 border border-red-200 font-medium min-w-[60px] sm:min-w-auto"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       {isLoading ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -333,13 +369,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                           <span className="hidden sm:inline">Reject</span>
                         </>
                       )}
-                    </button>
+                    </motion.button>
                   </>
                 ) : buttonConfig?.action ? (
-                  <button
+                  <motion.button
                     onClick={buttonConfig.action}
                     disabled={isLoading}
-                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 focus:outline-none focus:ring-2 border font-medium min-w-[80px] sm:min-w-auto ${buttonConfig.classes}`}
+                    className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 border font-semibold ${buttonConfig.classes}`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     {isLoading ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -359,77 +397,71 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         </span>
                       </>
                     )}
-                  </button>
+                  </motion.button>
                 ) : null}
               </div>
             )}
           </div>
           <div className="space-y-3 sm:space-y-4">
-  
             <div>
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 text-center sm:text-left">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-1 sm:mb-2 text-center sm:text-left">
                 {user.name || "Unnamed User"}
-              </h1>
-              <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-500">
+              </h2>
+              <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-600">
                 <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span>Joined {formatDate(user.joinedDate)}</span>
               </div>
             </div>
-
-            <div className="grid grid-cols-3 gap-1 sm:gap-4 py-2 sm:py-4 border-t border-b border-gray-100">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 py-3 sm:p-4 border-t border-b border-gray-200">
               <button
                 onClick={() => setModalType("followers")}
-                className="group text-center p-1 sm:p-2 rounded-lg transition-all duration-200 hover:bg-gray-50"
+                className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="text-sm sm:text-lg md:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
                   {totalFollowers.length}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-500">
+                <div className="text-xs sm:text-sm text-gray-600">
                   Followers
                 </div>
               </button>
-
               <button
                 onClick={() => setModalType("following")}
-                className="group text-center p-1 sm:p-2 rounded-lg transition-all duration-200 hover:bg-gray-50"
+                className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="text-sm sm:text-lg md:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
                   {totalFollowing.length}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-500">
+                <div className="text-xs sm:text-sm text-gray-600">
                   Following
                 </div>
               </button>
-
-              <div className="text-center p-1 sm:p-2">
-                <div className="text-sm sm:text-lg md:text-xl font-bold text-gray-900">
+              <div className="text-center p-2">
+                <div className="text-sm sm:text-lg font-semibold text-gray-800">
                   {totalPosts}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-500">Posts</div>
+                <div className="text-xs sm:text-sm text-gray-600">Posts</div>
               </div>
             </div>
-
             {user.bio && (
-              <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">
                   About
                 </h3>
-                <p className="text-xs sm:text-base text-gray-800 leading-relaxed">
+                <p className="text-sm text-gray-800 leading-relaxed">
                   {user.bio}
                 </p>
               </div>
             )}
-
             {user.interests?.length > 0 && (
               <div>
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-3">
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">
                   Interests
                 </h3>
-                <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="flex flex-wrap gap-2">
                   {user.interests.map((interest, index) => (
                     <span
                       key={index}
-                      className="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm text-blue-700 bg-blue-50 rounded-full border border-blue-200 font-medium hover:bg-blue-100 transition-colors"
+                      className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-blue-700 bg-blue-50 rounded-full border border-blue-200 font-medium hover:bg-blue-100 transition-colors"
                     >
                       {interest}
                     </span>
@@ -439,7 +471,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
       {modalType && (
         <UserListModal
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
@@ -450,17 +482,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       {showPhotoModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"
-          onClick={handleModalBackdropClick}
+          onClick={(e) => handleModalBackdropClick(e, "photo")}
         >
           <div className="relative">
-            {/* Close button */}
             <button
               onClick={() => setShowPhotoModal(false)}
-              className="absolute z-10 p-2 sm:p-3 text-gray-600 transition-all duration-200 bg-white rounded-full shadow-xl -top-3 -right-3 sm:-top-4 sm:-right-4 hover:text-gray-800 hover:bg-gray-100 hover:scale-110"
+              className="absolute z-10 p-2 sm:p-3 text-gray-600 bg-white rounded-full shadow-xl -top-3 -right-3 sm:-top-4 sm:-right-4 hover:text-gray-800 hover:bg-gray-100 hover:scale-110 transition-all"
             >
               <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-
             <div className="w-[80vw] h-[80vw] max-w-[280px] max-h-[280px] sm:w-[70vw] sm:h-[70vw] sm:max-w-[400px] sm:max-h-[400px] md:max-w-[500px] md:max-h-[500px] lg:max-w-[600px] lg:max-h-[600px] rounded-full overflow-hidden shadow-2xl animate-modal">
               {user.picture ? (
                 <img
@@ -471,7 +501,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-image">
-                  <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-500">
+                  <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-500">
                     {user.name ? (
                       user.name[0].toUpperCase()
                     ) : (
@@ -480,6 +510,29 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </span>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showCoverModal && isValidCoverImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"
+          onClick={(e) => handleModalBackdropClick(e, "cover")}
+        >
+          <div className="relative">
+            <button
+              onClick={() => setShowCoverModal(false)}
+              className="absolute z-10 p-2 sm:p-3 text-gray-600 bg-white rounded-full shadow-xl -top-3 -right-3 sm:-top-4 sm:-right-4 hover:text-gray-800 hover:bg-gray-100 hover:scale-110 transition-all"
+            >
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <div className="w-[90vw] max-w-[1200px] h-[50vh] max-h-[400px] sm:h-[60vh] sm:max-h-[600px] rounded-lg overflow-hidden shadow-2xl animate-modal">
+              <img
+                src={user.coverImage}
+                alt="Cover image"
+                className="object-cover w-full h-full animate-image"
+                onError={() => setShowCoverModal(false)}
+              />
             </div>
           </div>
         </div>

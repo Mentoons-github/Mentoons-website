@@ -160,7 +160,6 @@ const ProductsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const NAV_HEIGHT = 100;
 
-  // Debounced fetch function
   const debouncedFetchProducts = useCallback(
     debounce(
       async (
@@ -174,10 +173,10 @@ const ProductsPage = () => {
           const token = await getToken();
           const fetchParams: FetchParams = {
             token: token ?? "",
-            ...(productType && { type: productType }),
-            ...(cardType && { cardType }),
-            ...(search && { search }),
-            ...(category && !search && { ageCategory: category }),
+            ...(search && { search: search.trim() }),
+            ...(!search && category && { ageCategory: category }),
+            ...(!search && productType && { type: productType }),
+            ...(!search && cardType && { cardType }),
           };
 
           const result = await dispatch(fetchProducts(fetchParams)).unwrap();
@@ -219,43 +218,48 @@ const ProductsPage = () => {
 
   const handleSelectedCategory = async (category: string) => {
     try {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (category === "all") {
-        searchParams.delete("category");
-        if (sectionRef.current) {
-          const offsetTop =
-            sectionRef.current.getBoundingClientRect().top +
-            window.scrollY -
-            NAV_HEIGHT;
-          window.scrollTo({ top: offsetTop, behavior: "smooth" });
-        }
-      } else {
+      const searchParams = new URLSearchParams();
+      if (category !== "all") {
         searchParams.set("category", category);
-        if (category === "20+" && section20Ref.current) {
-          const offsetTop =
-            section20Ref.current.getBoundingClientRect().top +
-            window.scrollY -
-            NAV_HEIGHT;
-          window.scrollTo({ top: offsetTop, behavior: "smooth" });
-        } else if (sectionRef.current) {
-          const offsetTop =
-            sectionRef.current.getBoundingClientRect().top +
-            window.scrollY -
-            NAV_HEIGHT;
-          window.scrollTo({ top: offsetTop, behavior: "smooth" });
-        }
       }
+
       navigate({
         search: searchParams.toString(),
       });
       setSelectedCategory(category === "all" ? undefined : category);
+
+      if (category === "20+" && section20Ref.current) {
+        const offsetTop =
+          section20Ref.current.getBoundingClientRect().top +
+          window.scrollY -
+          NAV_HEIGHT;
+        window.scrollTo({ top: offsetTop, behavior: "smooth" });
+      } else if (sectionRef.current) {
+        const offsetTop =
+          sectionRef.current.getBoundingClientRect().top +
+          window.scrollY -
+          NAV_HEIGHT;
+        window.scrollTo({ top: offsetTop, behavior: "smooth" });
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+
+    const searchParams = new URLSearchParams();
+    if (selectedCategory && selectedCategory !== "all") {
+      searchParams.set("category", selectedCategory);
+    }
+    if (newSearchTerm.trim()) {
+      searchParams.set("search", newSearchTerm.trim());
+    }
+    navigate({
+      search: searchParams.toString(),
+    });
   };
 
   const searchLower = searchTerm?.toLowerCase() || "";
@@ -347,8 +351,25 @@ const ProductsPage = () => {
           placeholder="search here...."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-full pl-10 pr-10 border border-transparent outline-none"
+          className="w-full pl-10 pr-16 border border-transparent outline-none"
         />
+        {searchTerm && (
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              const searchParams = new URLSearchParams();
+              if (selectedCategory && selectedCategory !== "all") {
+                searchParams.set("category", selectedCategory);
+              }
+              navigate({
+                search: searchParams.toString(),
+              });
+            }}
+            className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 right-10 top-1/2"
+          >
+            ✕
+          </button>
+        )}
         {isSearching && searchTerm.trim() && (
           <div className="absolute transform -translate-y-1/2 right-4 top-1/2">
             <div className="w-4 h-4 border-2 border-gray-300 rounded-full animate-spin border-t-blue-500"></div>
