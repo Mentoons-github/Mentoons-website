@@ -10,6 +10,7 @@ import { RewardsProvider } from "./context/RewardsContext";
 import { getCart } from "./redux/cartSlice";
 import { AppDispatch, store } from "./redux/store";
 import { userLoggedIn } from "./redux/userSlice";
+import { SocketProvider } from "./context/adda/provider/socketProvider";
 
 const AppContent = () => {
   const { getToken, userId } = useAuth();
@@ -51,9 +52,11 @@ const AppContent = () => {
 const App = () => {
   return (
     <Provider store={store}>
-      <RewardsProvider>
-        <AppContent />
-      </RewardsProvider>
+      <SocketProvider>
+        <RewardsProvider>
+          <AppContent />
+        </RewardsProvider>
+      </SocketProvider>
     </Provider>
   );
 };
