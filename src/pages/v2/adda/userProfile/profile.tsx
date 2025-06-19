@@ -270,7 +270,8 @@ const Profile = () => {
         setIsLoading(false);
         return;
       }
-
+      console.log(token, "-----------------------------")
+      console.log(user?.id,'user.===========================================================')
       try {
         const [userResponse, postsResponse, savedPostsResponse] =
           await Promise.all([

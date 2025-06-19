@@ -1,14 +1,5 @@
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
-import {
-  BsEmojiSmile,
-  BsPaperclip,
   BsThreeDotsVertical,
   BsDownload,
   BsX,
@@ -18,9 +9,15 @@ import {
   BsCheck,
 } from "react-icons/bs";
 import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
-import { FaMicrophone, FaPaperPlane } from "react-icons/fa6";
 import { MdSearch } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
+import ChatFooter from "./chatFooter";
+import { FaPause, FaPlay } from "react-icons/fa6";
+import { useAuth } from "@clerk/clerk-react";
+import axiosInstance from "@/api/axios";
+import { User } from "@/types";
+import useSocket from "@/utils/socket/socket";
+// import useSocket from "@/utils/socket/socket";
 
 export interface ChatUser {
   id: number;
@@ -46,36 +43,14 @@ export interface Messages {
 }
 
 interface ChatProps {
-  selectedUser: ChatUser;
-  messages: Messages;
-  isTyping: boolean;
-  messagesEndRef: RefObject<HTMLDivElement>;
-  fileInputRef: RefObject<HTMLInputElement>;
-  message: string;
-  setMessage: Dispatch<SetStateAction<string>>;
-  setIsRecording: Dispatch<SetStateAction<boolean>>;
-  isRecording: boolean;
-  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSendMessage: () => void;
-  renderMessage: (msg: Message) => JSX.Element;
-  setMessages?: Dispatch<SetStateAction<Messages>>;
+  selectedUser: string;
 }
 
-const Chat = ({
-  selectedUser,
-  messages,
-  isTyping,
-  messagesEndRef,
-  fileInputRef,
-  message,
-  setMessage,
-  setIsRecording,
-  isRecording,
-  handleFileUpload,
-  handleSendMessage,
-  renderMessage,
-  setMessages,
-}: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
+  console.log("first", selectedUser);
+  const { getToken } = useAuth();
+
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
@@ -83,8 +58,189 @@ const Chat = ({
   const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
     null
   );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Messages>({});
+
+  const [playingAudio, setPlayingAudio] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+
+  const fetchUserData = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const response = await axiosInstance.get(`/user/friend/${selectedUser}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log(response.data.data.isFriend);
+      setUser(response.data.data.user);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      setError(err instanceof Error ? err.message : "Failed to load user data");
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !selectedUser) return;
+
+    const newMessage: Message = {
+      id: Date.now(),
+      text: message,
+      sender: "me",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: "text",
+    };
+
+    setMessages((prev) => ({
+      ...prev,
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage],
+    }));
+
+    setMessage("");
+
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedUser) return;
+
+    const fileURL = URL.createObjectURL(file);
+    const fileType = file.type.startsWith("image/")
+      ? "image"
+      : file.type.startsWith("audio/")
+      ? "audio"
+      : "file";
+
+    const newMessage: Message = {
+      id: Date.now(),
+      text: fileURL,
+      sender: "me",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: fileType,
+      fileName: file.name,
+    };
+
+    setMessages((prev) => ({
+      ...prev,
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage],
+    }));
+  };
+
+  const toggleAudioPlay = (messageId: number) => {
+    setPlayingAudio(playingAudio === messageId ? null : messageId);
+  };
+
+  const renderMessage = (msg: Message) => {
+    const isMe = msg.sender === "me";
+
+    return (
+      <motion.div
+        key={msg.id}
+        initial={{ opacity: 0, y: 20, scale: 0.8 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className={`flex ${isMe ? "justify-end" : "justify-start"} mb-4`}
+      >
+        <div
+          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+            isMe
+              ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
+              : "bg-gray-100 text-gray-800"
+          } shadow-md`}
+        >
+          {msg.type === "text" && <p className="text-sm">{msg.text}</p>}
+          {msg.type === "image" && (
+            <div className="rounded-lg overflow-hidden">
+              <img
+                src={msg.text}
+                alt="Shared image"
+                className="w-full h-auto max-w-48"
+              />
+            </div>
+          )}
+          {msg.type === "audio" && (
+            <div className="flex items-center gap-2 py-1">
+              <button
+                onClick={() => toggleAudioPlay(msg.id)}
+                className={`p-2 rounded-full ${
+                  isMe ? "bg-white/20" : "bg-blue-500 text-white"
+                }`}
+              >
+                {playingAudio === msg.id ? (
+                  <FaPause size={12} />
+                ) : (
+                  <FaPlay size={12} />
+                )}
+              </button>
+              <div className="flex-1 h-1 bg-white/30 rounded-full">
+                <div className="h-full w-1/3 bg-white rounded-full"></div>
+              </div>
+              <span className="text-xs opacity-70">0:15</span>
+            </div>
+          )}
+          <p
+            className={`text-xs mt-1 ${
+              isMe ? "text-white/70" : "text-gray-500"
+            }`}
+          >
+            {msg.time}
+          </p>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const socket = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+    socket.connect();
+
+    socket.on("receive_private_message", ({ from, message, createdAt }) => {
+      if (from === selectedUser) {
+        setMessages((prev) => [
+          ...prev,
+          { from, message, createdAt },
+        ]);
+      }
+    });
+
+    return () => {
+      socket.off("receive_private_message");
+      socket.disconnect();
+    };
+  });
 
   const handleAction = (action: string) => {
     console.log(`Action selected: ${action}`);
@@ -184,7 +340,7 @@ const Chat = ({
       };
       setMessages((prev) => ({
         ...prev,
-        [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage],
+        [selectedUser]: [...(prev[selectedUser] || []), newMessage],
       }));
 
       setRecordedAudio(null);
@@ -328,26 +484,26 @@ const Chat = ({
         <div className="flex items-center gap-4">
           <div className="relative">
             <img
-              src={selectedUser.profilePicture}
-              alt={selectedUser.name}
+              src={user?.picture}
+              alt={user?.name}
               className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
             />
-            {selectedUser.online && (
+            {/* {selectedUser.online && (
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
-            )}
+            )} */}
           </div>
           <div className="flex flex-col">
             <h1 className="text-lg font-semibold text-gray-800">
-              {selectedUser.name}
+              {user?.name}
             </h1>
             <div className="flex items-center gap-2">
-              <span
+              {/* <span
                 className={`text-sm ${
                   selectedUser.online ? "text-green-600" : "text-gray-500"
                 }`}
               >
                 {selectedUser.online ? "Online" : "Last seen 1h ago"}
-              </span>
+              </span> */}
             </div>
           </div>
         </div>
@@ -415,32 +571,8 @@ const Chat = ({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
-        {messages[selectedUser.id]?.map(enhancedRenderMessage)}
+        {messages[selectedUser]?.map(enhancedRenderMessage)}
 
-        <AnimatePresence>
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="flex justify-start mb-4"
-            >
-              <div className="bg-gray-100 px-4 py-3 rounded-2xl shadow-md">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
       <AnimatePresence>
@@ -504,95 +636,17 @@ const Chat = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept="image/*,audio/*"
-          className="hidden"
-        />
-
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-3 text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 rounded-full transition-all"
-          disabled={isRecording || recordedAudio !== null}
-        >
-          <BsPaperclip size={18} />
-        </button>
-
-        <div className="flex-1 flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-300 transition-all">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" &&
-              !isRecording &&
-              !recordedAudio &&
-              handleSendMessage()
-            }
-            placeholder={
-              isRecording
-                ? "Recording..."
-                : recordedAudio
-                ? "Audio recorded - preview above"
-                : "Type a message..."
-            }
-            className="outline-none bg-transparent flex-1 text-sm text-gray-700 placeholder-gray-400"
-            disabled={isRecording || recordedAudio !== null}
-          />
-          <BsEmojiSmile
-            className={`cursor-pointer transition-colors ${
-              isRecording || recordedAudio
-                ? "text-gray-300"
-                : "text-gray-400 hover:text-yellow-500"
-            }`}
-          />
-        </div>
-
-        <button
-          onClick={() => setIsRecording(!isRecording)}
-          disabled={recordedAudio !== null}
-          className={`p-3 rounded-full transition-all ${
-            isRecording
-              ? "bg-red-500 text-white animate-pulse"
-              : recordedAudio
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-indigo-500 hover:bg-indigo-50"
-          }`}
-        >
-          <FaMicrophone size={18} />
-        </button>
-
-        <motion.button
-          whileHover={{
-            scale:
-              recordedAudio ||
-              (!message.trim() && !recordedAudio) ||
-              isRecording
-                ? 1
-                : 1.05,
-          }}
-          whileTap={{
-            scale:
-              recordedAudio ||
-              (!message.trim() && !recordedAudio) ||
-              isRecording
-                ? 1
-                : 0.95,
-          }}
-          onClick={handleSendMessage}
-          disabled={
-            (!message.trim() && !recordedAudio) ||
-            isRecording ||
-            recordedAudio !== null
-          }
-          className="p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:shadow-lg hover:shadow-orange-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FaPaperPlane size={16} />
-        </motion.button>
-      </div>
+      <ChatFooter
+        fileInputRef={fileInputRef}
+        message={message}
+        setMessage={setMessage}
+        handleFileUpload={handleFileUpload}
+        handleSendMessage={handleSendMessage}
+        isRecording={isRecording}
+        recordedAudio={recordedAudio}
+        // setRecordedAudio = {setRecordedAudio}
+        setIsRecording={setIsRecording}
+      />
       <AnimatePresence>
         {enlargedImage && (
           <motion.div
