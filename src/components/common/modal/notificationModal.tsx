@@ -264,8 +264,6 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  console.log("sorted notification :", notifications);
-
   return (
     <div className="relative hidden py-4 md:block" ref={notificationRef}>
       <div
