@@ -37,8 +37,6 @@ import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import ChatPage from "./pages/v2/adda/chat.tsx";
-import Chat from "./components/adda/messages/chat/chat.tsx";
-import Welcome from "./components/adda/messages/chat/welcome.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 

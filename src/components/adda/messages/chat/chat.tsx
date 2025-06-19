@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   BsThreeDotsVertical,
   BsDownload,
@@ -60,11 +60,11 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Messages>({});
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [playingAudio, setPlayingAudio] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -120,10 +120,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
       type: "text",
     };
 
-    setMessages((prev) => ({
-      ...prev,
-      [selectedUser]: [...(prev[selectedUser] || []), newMessage],
-    }));
+ setMessages(prev => [...prev, newMessage]);
+
 
     setMessage("");
 
@@ -152,10 +150,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
       fileName: file.name,
     };
 
-    setMessages((prev) => ({
-      ...prev,
-      [selectedUser]: [...(prev[selectedUser] || []), newMessage],
-    }));
+    setMessages(prev => [...prev, newMessage]);
   };
 
   const toggleAudioPlay = (messageId: number) => {
@@ -227,7 +222,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!socket) return;
     socket.connect();
 
-    socket.on("receive_private_message", ({ from, message, createdAt }) => {
+    socket.on("receive_message", ({ from, message, createdAt }) => {
       if (from === selectedUser) {
         setMessages((prev) => [
           ...prev,
@@ -237,7 +232,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     });
 
     return () => {
-      socket.off("receive_private_message");
+      socket.off("receive_message");
       socket.disconnect();
     };
   });
@@ -338,10 +333,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         type: "audio",
         fileName: `audio_${Date.now()}.webm`,
       };
-      setMessages((prev) => ({
-        ...prev,
-        [selectedUser]: [...(prev[selectedUser] || []), newMessage],
-      }));
+      setMessages(prev => [...prev, newMessage]);
 
       setRecordedAudio(null);
       setIsRecording(false);
@@ -478,10 +470,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     return renderMessage(msg);
   };
 
+  if(error){
+    console.log(error,'error from profile')
+  }
+
   return (
     <>
       <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-4">
+          {isLoading&&(
+            <div>Loading</div>
+          )}
           <div className="relative">
             <img
               src={user?.picture}
@@ -571,7 +570,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
-        {messages[selectedUser]?.map(enhancedRenderMessage)}
+        {messages?.map(enhancedRenderMessage)}
 
         <div ref={messagesEndRef} />
       </div>

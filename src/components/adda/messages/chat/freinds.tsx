@@ -29,6 +29,10 @@ const Friends = () => {
   const [error, setError] = useState<string | null>(null);
 
 
+  
+  console.log(totalCount,totalPages,loading,error)
+
+
   const limit = 10;
   const { getToken } = useAuth();
 
