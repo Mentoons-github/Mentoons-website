@@ -1,9 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Define types to match backend model
 interface CartItem {
-  productId: string; // Just the ID, not the full product
+  productId: string;
   productType: string;
   title: string;
   ageCategory?: string;
@@ -65,7 +64,6 @@ export const getCart = createAsyncThunk(
           },
         }
       );
-      console.log("ThunkActionResult", response.data);
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch the Cart");
@@ -122,7 +120,6 @@ export const addItemCart = createAsyncThunk(
         }
       );
       return response.data;
-      console.log("ThunkActionResult Add", response.data);
     } catch (error) {
       throw new Error("Failed to add the product to the Cart");
     }
@@ -302,10 +299,6 @@ export const cartSlice = createSlice({
       state.apiStatus = "failed";
     });
 
-    // Handle addItemCart, removeItemFromCart, updateItemQuantity similarly
-    // Make sure to update all the fields from the response
-
-    // Example for addItemCart:
     builder.addCase(addItemCart.pending, (state) => {
       state.loading = true;
       state.error = null;
