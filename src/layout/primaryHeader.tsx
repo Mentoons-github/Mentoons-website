@@ -4,15 +4,37 @@ import {
   ANIMATION_TEXTS_ADDA,
   ANIMATION_TEXTS_HOME,
 } from "@/constant/constants";
+import useSocket from "@/hooks/adda/useSocket";
+import { addNotification } from "@/redux/adda/notificationSlice";
+import { NotificationInterface } from "@/types";
 import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { FaClock, FaMessage, FaPhone } from "react-icons/fa6";
 import { NavLink, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const PrimaryHeader = () => {
+  const socket = useSocket();
   const location = useLocation();
   const { getToken } = useAuth();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("receive_notification", (notification: NotificationInterface) => {
+      console.log(
+        "Live notification received:==================================================================>",
+        notification
+      );
+      dispatch(addNotification(notification));
+    });
+
+    return () => {
+      socket.off("receive_notification");
+    };
+  }, [socket, dispatch]);
 
   const adda = useMemo(
     () => location.pathname.startsWith("/adda"),

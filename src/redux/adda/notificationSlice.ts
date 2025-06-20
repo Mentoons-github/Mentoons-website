@@ -150,7 +150,11 @@ const notificationSlice = createSlice({
         (n) => n._id !== action.payload
       );
     },
+    addNotification: (state, action: PayloadAction<Notification>) => {
+      state.notifications.unshift(action.payload);
+    },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchNotifications.pending, (state) => {
@@ -221,6 +225,6 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { updateNotification, removeNotification } =
+export const { updateNotification, removeNotification, addNotification } =
   notificationSlice.actions;
 export default notificationSlice.reducer;
