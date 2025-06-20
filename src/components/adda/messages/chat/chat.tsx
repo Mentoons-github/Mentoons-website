@@ -1,14 +1,5 @@
+import { useState, useEffect, useRef } from "react";
 import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
-import {
-  BsEmojiSmile,
-  BsPaperclip,
   BsThreeDotsVertical,
   BsDownload,
   BsX,
@@ -18,9 +9,14 @@ import {
   BsCheck,
 } from "react-icons/bs";
 import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
-import { FaMicrophone, FaPaperPlane } from "react-icons/fa6";
 import { MdSearch } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
+import ChatFooter from "./chatFooter";
+// import { FaPause, FaPlay } from "react-icons/fa6";
+import { useAuth } from "@clerk/clerk-react";
+import axiosInstance from "@/api/axios";
+import { User } from "@/types";
+import useSocket from "@/hooks/adda/useSocket";
 
 export interface ChatUser {
   id: number;
@@ -33,12 +29,12 @@ export interface ChatUser {
 }
 
 export interface Message {
-  id: number;
-  text: string;
-  sender: "me" | "other";
-  time: string;
-  type: "text" | "image" | "audio" | "file";
-  fileName?: string;
+  message: string; // The text or file URL (image/audio/file)
+  senderId?: string; // Who sent it
+  receiverId: string; // Who received it
+  timestamp: string; // When it was sent
+  fileType?: "text" | "image" | "audio" | "file"; // Optional type
+  fileName?: string; // Optional filename (for downloads)
 }
 
 export interface Messages {
@@ -46,36 +42,13 @@ export interface Messages {
 }
 
 interface ChatProps {
-  selectedUser: ChatUser;
-  messages: Messages;
-  isTyping: boolean;
-  messagesEndRef: RefObject<HTMLDivElement>;
-  fileInputRef: RefObject<HTMLInputElement>;
-  message: string;
-  setMessage: Dispatch<SetStateAction<string>>;
-  setIsRecording: Dispatch<SetStateAction<boolean>>;
-  isRecording: boolean;
-  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSendMessage: () => void;
-  renderMessage: (msg: Message) => JSX.Element;
-  setMessages?: Dispatch<SetStateAction<Messages>>;
+  selectedUser: string;
 }
 
-const Chat = ({
-  selectedUser,
-  messages,
-  isTyping,
-  messagesEndRef,
-  fileInputRef,
-  message,
-  setMessage,
-  setIsRecording,
-  isRecording,
-  handleFileUpload,
-  handleSendMessage,
-  renderMessage,
-  setMessages,
-}: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
+  const { getToken } = useAuth();
+
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
@@ -83,8 +56,113 @@ const Chat = ({
   const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
     null
   );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileURL, setSelectedFileURL] = useState<string | null>(null);
+
+  // const [playingAudio, setPlayingAudio] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+
+  const fetchUserData = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const response = await axiosInstance.get(`/user/friend/${selectedUser}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log(response.data.data.isFriend);
+      setUser(response.data.data.user);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      setError(err instanceof Error ? err.message : "Failed to load user data");
+      setIsLoading(false);
+    }
+  };
+  console.log(user, "usera;ksdjf");
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const socket = useSocket();
+  console.log(socket, "socket");
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("receive_message", (data) => {
+      const { senderId, message, timestamp, fileType, fileName } = data;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          senderId,
+          receiverId: user?._id || "",
+          message,
+          timestamp: timestamp || new Date().toISOString(),
+          fileType,
+          fileName,
+        },
+      ]);
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [socket, selectedUser, user]);
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !selectedUser || !socket || !user) return;
+
+    socket.emit("send_message", {
+      receiverId: selectedUser,
+      fileType: "text",
+      message: message,
+      timestamp: new Date().toISOString(),
+    });
+
+    // console.log(message,'message')
+
+    // const newMessage: Message = {
+    //   receiverId: selectedUser,
+    //   message: message,
+    //   timestamp: new Date().toISOString(),
+    // };
+
+    // setMessages((prev) => [...prev, newMessage]);
+    setMessage("");
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    setSelectedFileURL(URL.createObjectURL(file));
+  };
 
   const handleAction = (action: string) => {
     console.log(`Action selected: ${action}`);
@@ -170,22 +248,13 @@ const Chat = ({
   };
 
   const sendRecordedAudio = () => {
-    if (recordedAudio && setMessages) {
-      const newMessage: Message = {
-        id: Date.now(),
-        text: recordedAudio,
-        sender: "me",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        type: "audio",
+    if (recordedAudio && socket && user) {
+      socket.emit("send_message", {
+        receiverId: selectedUser,
+        fileType: "audio",
+        message: recordedAudio,
         fileName: `audio_${Date.now()}.webm`,
-      };
-      setMessages((prev) => ({
-        ...prev,
-        [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage],
-      }));
+      });
 
       setRecordedAudio(null);
       setIsRecording(false);
@@ -218,136 +287,56 @@ const Chat = ({
     }
   };
 
-  const enhancedRenderMessage = (msg: Message) => {
-    if (msg.type === "image" && msg.text) {
-      return (
-        <motion.div
-          key={msg.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`flex ${
-            msg.sender === "me" ? "justify-end" : "justify-start"
-          } mb-4`}
-        >
-          <div
-            className={`max-w-xs lg:max-w-md rounded-2xl shadow-md overflow-hidden ${
-              msg.sender === "me"
-                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            <div className="relative group p-2">
-              <img
-                src={msg.text}
-                alt="Shared image"
-                className="w-full h-auto max-h-64 object-contain rounded-lg cursor-pointer transition-transform hover:scale-105"
-                onClick={() => setEnlargedImage(msg.text)}
-              />
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    downloadFile(msg.text, msg.fileName || "image.jpg");
-                  }}
-                  className="p-1 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
-                >
-                  <BsDownload size={12} />
-                </button>
-              </div>
-            </div>
-            <div className="px-3 pb-2">
-              <span
-                className={`text-xs ${
-                  msg.sender === "me"
-                    ? "text-white text-opacity-70"
-                    : "text-gray-500"
-                }`}
-              >
-                {msg.time}
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      );
-    }
+  if (error) {
+    console.log(error, "error from profile");
+  }
 
-    if (msg.type === "audio" && msg.text) {
-      return (
-        <motion.div
-          key={msg.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`flex ${
-            msg.sender === "me" ? "justify-end" : "justify-start"
-          } mb-4`}
-        >
-          <div
-            className={`max-w-xs lg:max-w-md rounded-2xl shadow-md ${
-              msg.sender === "me"
-                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            <div className="relative group p-2">
-              <audio src={msg.text} controls className="w-full rounded-lg" />
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() =>
-                    downloadFile(msg.text, msg.fileName || "audio.webm")
-                  }
-                  className="p-1 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
-                >
-                  <BsDownload size={12} />
-                </button>
-              </div>
-            </div>
-            <div className="px-3 pb-2">
-              <span
-                className={`text-xs ${
-                  msg.sender === "me"
-                    ? "text-white text-opacity-70"
-                    : "text-gray-500"
-                }`}
-              >
-                {msg.time}
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      );
-    }
+  const handleSendFile = () => {
+    if (!selectedFile || !selectedFileURL || !socket || !user) return;
 
-    return renderMessage(msg);
+    let fileType: Message["fileType"] = "file";
+    if (selectedFile.type.startsWith("image/")) fileType = "image";
+    else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
+
+    socket.emit("send_message", {
+      receiverId: selectedUser,
+      fileType: fileType,
+      fileName: selectedFile.name,
+      message: selectedFileURL,
+      timestamp: new Date().toISOString(),
+    });
+
+    setSelectedFile(null);
+    setSelectedFileURL(null);
   };
 
   return (
     <>
       <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-4">
+          {isLoading && <div>Loading</div>}
           <div className="relative">
             <img
-              src={selectedUser.profilePicture}
-              alt={selectedUser.name}
+              src={user?.picture}
+              alt={user?.name}
               className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
             />
-            {selectedUser.online && (
+            {/* {selectedUser.online && (
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
-            )}
+            )} */}
           </div>
           <div className="flex flex-col">
             <h1 className="text-lg font-semibold text-gray-800">
-              {selectedUser.name}
+              {user?.name}
             </h1>
             <div className="flex items-center gap-2">
-              <span
+              {/* <span
                 className={`text-sm ${
                   selectedUser.online ? "text-green-600" : "text-gray-500"
                 }`}
               >
                 {selectedUser.online ? "Online" : "Last seen 1h ago"}
-              </span>
+              </span> */}
             </div>
           </div>
         </div>
@@ -415,32 +404,75 @@ const Chat = ({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
-        {messages[selectedUser.id]?.map(enhancedRenderMessage)}
+        {/* {messages?.map(enhancedRenderMessage)} */}
 
-        <AnimatePresence>
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="flex justify-start mb-4"
+        {messages.map((msg, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`flex ${
+              msg.senderId !== selectedUser ? "justify-end" : "justify-start"
+            } mb-4`}
+          >
+            <div
+              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
+                msg.senderId !== selectedUser
+                  ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
+                  : "bg-gray-100 text-gray-800"
+              }`}
             >
-              <div className="bg-gray-100 px-4 py-3 rounded-2xl shadow-md">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
+              {msg.fileType === "image" && (
+                <img
+                  src={msg.message}
+                  alt="Image"
+                  className="w-full h-auto rounded-md mb-2"
+                />
+              )}
+
+              {msg.fileType === "audio" && (
+                <audio
+                  src={msg.message}
+                  controls
+                  className="w-full rounded-md mb-2"
+                />
+              )}
+
+              {msg.fileType === "file" && (
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm truncate">{msg.fileName}</p>
+                  <button
+                    className="ml-2 p-1 bg-white text-black rounded"
+                    onClick={() =>
+                      downloadFile(msg.message, msg.fileName || "file")
+                    }
+                  >
+                    Download
+                  </button>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              )}
+
+              {(!msg.fileType || msg.fileType === "text") && (
+                <p className="text-sm">{msg.message}</p>
+              )}
+
+              <p
+                className={`text-xs mt-1 ${
+                  msg.senderId !== selectedUser
+                    ? "text-white/70"
+                    : "text-gray-500"
+                }`}
+              >
+                {new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </motion.div>
+        ))}
+
         <div ref={messagesEndRef} />
       </div>
       <AnimatePresence>
@@ -504,95 +536,71 @@ const Chat = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept="image/*,audio/*"
-          className="hidden"
-        />
+      <AnimatePresence>
+        {selectedFileURL && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex items-center gap-3 py-3 px-4 bg-yellow-50 border border-yellow-200 rounded-lg mx-2 mb-2"
+          >
+            <div className="flex-1">
+              {selectedFile?.type.startsWith("image/") && (
+                <img
+                  src={selectedFileURL}
+                  alt="Preview"
+                  className="max-w-[150px] rounded-md"
+                />
+              )}
+              {selectedFile?.type.startsWith("audio/") && (
+                <audio src={selectedFileURL} controls className="w-full" />
+              )}
+              {selectedFile?.type.startsWith("video/") && (
+                <video
+                  src={selectedFileURL}
+                  controls
+                  className="w-full max-w-[200px]"
+                />
+              )}
+              {!selectedFile?.type.startsWith("image/") &&
+                !selectedFile?.type.startsWith("audio/") && (
+                  <p className="text-sm text-gray-700">{selectedFile?.name}</p>
+                )}
+            </div>
 
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-3 text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 rounded-full transition-all"
-          disabled={isRecording || recordedAudio !== null}
-        >
-          <BsPaperclip size={18} />
-        </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSelectedFile(null);
+                  setSelectedFileURL(null);
+                }}
+                className="p-2 text-red-500 hover:bg-red-100 rounded-full"
+              >
+                <BsTrash size={16} />
+              </button>
 
-        <div className="flex-1 flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-300 transition-all">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" &&
-              !isRecording &&
-              !recordedAudio &&
-              handleSendMessage()
-            }
-            placeholder={
-              isRecording
-                ? "Recording..."
-                : recordedAudio
-                ? "Audio recorded - preview above"
-                : "Type a message..."
-            }
-            className="outline-none bg-transparent flex-1 text-sm text-gray-700 placeholder-gray-400"
-            disabled={isRecording || recordedAudio !== null}
-          />
-          <BsEmojiSmile
-            className={`cursor-pointer transition-colors ${
-              isRecording || recordedAudio
-                ? "text-gray-300"
-                : "text-gray-400 hover:text-yellow-500"
-            }`}
-          />
-        </div>
+              <button
+                onClick={handleSendFile}
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600"
+              >
+                <BsCheck size={18} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <button
-          onClick={() => setIsRecording(!isRecording)}
-          disabled={recordedAudio !== null}
-          className={`p-3 rounded-full transition-all ${
-            isRecording
-              ? "bg-red-500 text-white animate-pulse"
-              : recordedAudio
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-indigo-500 hover:bg-indigo-50"
-          }`}
-        >
-          <FaMicrophone size={18} />
-        </button>
-
-        <motion.button
-          whileHover={{
-            scale:
-              recordedAudio ||
-              (!message.trim() && !recordedAudio) ||
-              isRecording
-                ? 1
-                : 1.05,
-          }}
-          whileTap={{
-            scale:
-              recordedAudio ||
-              (!message.trim() && !recordedAudio) ||
-              isRecording
-                ? 1
-                : 0.95,
-          }}
-          onClick={handleSendMessage}
-          disabled={
-            (!message.trim() && !recordedAudio) ||
-            isRecording ||
-            recordedAudio !== null
-          }
-          className="p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:shadow-lg hover:shadow-orange-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FaPaperPlane size={16} />
-        </motion.button>
-      </div>
+      <ChatFooter
+        fileInputRef={fileInputRef}
+        message={message}
+        setMessage={setMessage}
+        handleFileUpload={handleFileUpload}
+        handleSendMessage={handleSendMessage}
+        isRecording={isRecording}
+        recordedAudio={recordedAudio}
+        // setRecordedAudio = {setRecordedAudio}
+        setIsRecording={setIsRecording}
+      />
       <AnimatePresence>
         {enlargedImage && (
           <motion.div

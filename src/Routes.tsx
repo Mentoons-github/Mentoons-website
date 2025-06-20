@@ -95,6 +95,7 @@ const routes = [
   { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
   { path: "/chat", element: <ChatPage /> },
+  { path: "/chat/:selectedUser", element: <ChatPage /> },
 ];
 
 const Router = () => {
