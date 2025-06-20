@@ -21,6 +21,7 @@ import { Notification } from "@/types";
 
 const Notifications = () => {
   const dispatch = useDispatch<AppDispatch>();
+
   const { notifications, isLoading, hasMore, error } = useSelector(
     (state: RootState) => state.notification
   );
@@ -44,6 +45,7 @@ const Notifications = () => {
     },
     [isLoading, hasMore]
   );
+
 
   useEffect(() => {
     const loadNotifications = async () => {

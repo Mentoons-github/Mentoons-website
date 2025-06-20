@@ -11,13 +11,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     const connectSocket = async () => {
       const token = await getToken();
 
-      const newSocket = io("http://localhost:4000", {
+      const newSocket = io(import.meta.env.VITE_DEV_URL, {
         transports: ["websocket"],
         withCredentials: true,
         auth: { token },
       });
 
-      setSocket(newSocket)
+      setSocket(newSocket);
 
       newSocket.on("connect", () => {
         console.log("Socket connected:", newSocket.id);
@@ -35,8 +35,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   }, [getToken]);
 
   return (
-    <SocketContext.Provider value={socket}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
 };
