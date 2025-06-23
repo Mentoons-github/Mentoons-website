@@ -72,6 +72,7 @@ const Friends = () => {
             withCredentials: true,
           }
         );
+        console.log("response :", response.data.data);
         setConversations(response.data.data);
       } catch (err) {
         console.error("Error fetching conversations:", err);

@@ -6,6 +6,7 @@ import {
   BsPause,
   BsTrash,
   BsCheck,
+  BsThreeDotsVertical,
 } from "react-icons/bs";
 import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
 import { MdSearch } from "react-icons/md";
@@ -430,6 +431,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               </div>
               <div className="flex items-center gap-4 relative">
                 <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
+                <BsThreeDotsVertical
+                  className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
+                  onClick={() => setIsModalOpen(true)}
+                />
                 <ChatMenuModal
                   buttonRef={buttonRef}
                   handleAction={handleAction}
@@ -593,64 +598,15 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 </motion.div>
               )}
             </AnimatePresence>
-            <AnimatePresence>
-              {selectedFileURL && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex items-center gap-3 py-3 px-4 bg-yellow-50 border border-yellow-200 rounded-lg mx-2 mb-2"
-                >
-                  <div className="flex-1">
-                    {selectedFile?.type.startsWith("image/") && (
-                      <img
-                        src={selectedFileURL}
-                        alt="Preview"
-                        className="max-w-[150px] rounded-md"
-                      />
-                    )}
-                    {selectedFile?.type.startsWith("audio/") && (
-                      <audio
-                        src={selectedFileURL}
-                        controls
-                        className="w-full"
-                      />
-                    )}
-                    {selectedFile?.type.startsWith("video/") && (
-                      <video
-                        src={selectedFileURL}
-                        controls
-                        className="w-full max-w-[200px]"
-                      />
-                    )}
-                    {!selectedFile?.type.startsWith("image/") &&
-                      !selectedFile?.type.startsWith("audio/") &&
-                      !selectedFile?.type.startsWith("video/") && (
-                        <p className="text-sm text-gray-700">
-                          {selectedFile?.name}
-                        </p>
-                      )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedFile(null);
-                        setSelectedFileURL(null);
-                      }}
-                      className="p-2 text-red-500 hover:bg-red-100 rounded-full"
-                    >
-                      <BsTrash size={16} />
-                    </button>
-                    <button
-                      onClick={handleSendFile}
-                      className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600"
-                    >
-                      <BsCheck size={18} />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <FilePreview
+              selectedFile={selectedFile}
+              selectedFileURL={selectedFileURL}
+              onCancel={() => {
+                setSelectedFile(null);
+                setSelectedFileURL(null);
+              }}
+              onSend={handleSendFile}
+            />
             <ChatFooter
               fileInputRef={fileInputRef}
               message={message}
@@ -662,15 +618,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               setIsRecording={setIsRecording}
               selectedFile={selectedFile}
             />
-            <FilePreview
-              selectedFile={selectedFile}
-              selectedFileURL={selectedFileURL}
-              onCancel={() => {
-                setSelectedFile(null);
-                setSelectedFileURL(null);
-              }}
-              onSend={handleSendFile}
-            />
+
             <AnimatePresence>
               {enlargedImage && (
                 <motion.div
