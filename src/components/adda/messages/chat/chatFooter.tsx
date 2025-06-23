@@ -11,6 +11,7 @@ interface ChatFooterProps {
   isRecording: boolean;
   recordedAudio: null | string;
   setIsRecording: Dispatch<SetStateAction<boolean>>;
+  selectedFile: File | null;
 }
 
 const ChatFooter: React.FC<ChatFooterProps> = ({
@@ -22,6 +23,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
   isRecording,
   recordedAudio,
   setIsRecording,
+  selectedFile,
 }) => {
   return (
     <div className="flex items-center gap-2 p-4 bg-white border-t">
@@ -63,8 +65,15 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
 
       <button
         onClick={handleSendMessage}
-        disabled={(!message.trim() && !recordedAudio) || isRecording}
-        className="bg-orange-500 text-white rounded-full p-3"
+        disabled={
+          (!message.trim() && !recordedAudio && !selectedFile) || isRecording
+        }
+        className={`rounded-full p-3 text-white 
+    ${
+      (!message.trim() && !recordedAudio && !selectedFile) || isRecording
+        ? "bg-orange-300 cursor-not-allowed"
+        : "bg-orange-500 hover:bg-orange-600"
+    }`}
       >
         <FaPaperPlane size={16} />
       </button>

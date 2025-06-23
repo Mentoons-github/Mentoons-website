@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  BsThreeDotsVertical,
   BsDownload,
   BsX,
   BsPlay,
   BsPause,
   BsTrash,
   BsCheck,
-  BsForward, // Added for forwarding icon
 } from "react-icons/bs";
 import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
 import { MdSearch } from "react-icons/md";
@@ -19,6 +17,12 @@ import { User } from "@/types";
 import useSocket from "@/hooks/adda/useSocket";
 import MorphingBubbleIndicator from "./TypingIndicator";
 import { FaShare } from "react-icons/fa6";
+import { uploadFile } from "@/redux/fileUploadSlice";
+import { sendFileMessage, sendTextMessage } from "@/services/chatServices";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import FilePreview from "./filePreview";
+import ChatMenuModal from "@/components/modals/ChatMenuModal";
 
 export interface ChatUser {
   id: number;
@@ -35,7 +39,7 @@ export interface Message {
   senderId?: string;
   receiverId: string;
   timestamp: string;
-  fileType?: "text" | "image" | "audio" | "video" | "file"; // Added video to fileType
+  fileType?: "text" | "image" | "audio" | "video" | "file";
   fileName?: string;
 }
 
@@ -49,6 +53,8 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  // const {data:messages} = useSelector((state:RootState)=>state.conversation)
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
@@ -116,14 +122,24 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
-      const { senderId, message, timestamp, fileType, fileName } = data;
+      const {
+        // chatId,
+        // conversationId,
+        senderId,
+        receiverId,
+        message,
+        timestamp,
+        fileType,
+        fileName,
+      } = data;
+
       setMessages((prev) => [
         ...prev,
         {
           senderId,
-          receiverId: user?._id || "",
+          receiverId,
           message,
-          timestamp: timestamp || new Date().toISOString(),
+          timestamp,
           fileType,
           fileName,
         },
@@ -135,17 +151,34 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     };
   }, [socket, selectedUser, user]);
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !selectedUser || !socket || !user) return;
+  const handleSendMessage = async () => {
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      const resultAction = await dispatch(
+        uploadFile({ file: selectedFile, getToken })
+      );
 
-    socket.emit("send_message", {
-      receiverId: selectedUser,
-      fileType: "text",
-      message: message,
-      timestamp: new Date().toISOString(),
-    });
+      if (uploadFile.fulfilled.match(resultAction)) {
+        const uploadedUrl = resultAction.payload.data.fileDetails?.url;
+        sendFileMessage(
+          socket!,
+          selectedUser,
+          uploadedUrl,
+          selectedFile.name,
+          "image"
+        );
+      } else {
+        console.error("File upload failed:", resultAction.payload);
+      }
 
-    setMessage("");
+      setSelectedFile(null);
+      setSelectedFileURL(null);
+      return;
+    }
+
+    if (message.trim() && selectedUser && socket && user) {
+      sendTextMessage(socket, selectedUser, message);
+      setMessage("");
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,39 +194,11 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     setIsModalOpen(false);
   };
 
-  // Added handleForwardMessage function
   const handleForwardMessage = (msg: Message) => {
     console.log(`Forwarding message: ${msg.message} of type ${msg.fileType}`);
     // Implement forwarding logic here, e.g., emit a socket event or open a forward modal
     // Example: socket.emit("forward_message", { message: msg, receiverId: selectedUser });
   };
-
-  const menuItems = [
-    {
-      label: "Report Abuse",
-      icon: "🚩",
-      hoverBg: "hover:bg-red-50",
-      action: "Report Abuse",
-    },
-    {
-      label: "Block User",
-      icon: "🚫",
-      hoverBg: "hover:bg-red-50",
-      action: "Block User",
-    },
-    {
-      label: "Mute User",
-      icon: "🔇",
-      hoverBg: "hover:bg-yellow-50",
-      action: "Mute User",
-    },
-    {
-      label: "Cancel",
-      icon: "❌",
-      hoverBg: "hover:bg-gray-50",
-      action: "Cancel",
-    },
-  ];
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
 
@@ -331,24 +336,38 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const handleSendFile = () => {
-    if (!selectedFile || !selectedFileURL || !socket || !user) return;
+  if (error) {
+    console.log(error, "error from profile");
+  }
 
-    let fileType: Message["fileType"] = "file";
-    if (selectedFile.type.startsWith("image/")) fileType = "image";
-    else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
-    else if (selectedFile.type.startsWith("video/")) fileType = "video"; // Added video support
+  const handleSendFile = async () => {
+    if (!selectedFile || !socket || !user) return;
 
-    socket.emit("send_message", {
-      receiverId: selectedUser,
-      fileType: fileType,
-      fileName: selectedFile.name,
-      message: selectedFileURL,
-      timestamp: new Date().toISOString(),
-    });
+    const resultAction = await dispatch(
+      uploadFile({ file: selectedFile, getToken })
+    );
 
-    setSelectedFile(null);
-    setSelectedFileURL(null);
+    if (uploadFile.fulfilled.match(resultAction)) {
+      const uploadedUrl = resultAction.payload.data.fileDetails?.url;
+      console.log(resultAction.payload.data.fileDetails?.url, "urllllll");
+
+      let fileType: "image" | "audio" | "file" = "file";
+      if (selectedFile.type.startsWith("image/")) fileType = "image";
+      else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
+
+      sendFileMessage(
+        socket,
+        selectedUser,
+        uploadedUrl,
+        selectedFile.name,
+        fileType
+      );
+
+      setSelectedFile(null);
+      setSelectedFileURL(null);
+    } else {
+      console.error("File upload failed:", resultAction.payload);
+    }
   };
 
   // Skeleton Loader Component
@@ -411,62 +430,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               </div>
               <div className="flex items-center gap-4 relative">
                 <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
-                <div className="relative">
-                  <button
-                    ref={buttonRef}
-                    onClick={() => setIsModalOpen(!isModalOpen)}
-                    className="p-1 rounded hover:bg-gray-100 transition-colors"
-                  >
-                    <BsThreeDotsVertical className="text-xl text-gray-500 hover:text-indigo-500 transition-colors" />
-                  </button>
-                  <AnimatePresence>
-                    {isModalOpen && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="fixed inset-0 bg-black bg-opacity-20 z-40"
-                          onClick={() => setIsModalOpen(false)}
-                        />
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
-                          className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-200 w-48 py-2 z-50"
-                        >
-                          {menuItems.map((item, index) => (
-                            <motion.button
-                              key={item.action}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{
-                                duration: 0.3,
-                                delay: index * 0.1,
-                                ease: "easeOut",
-                              }}
-                              onClick={() => handleAction(item.action)}
-                              className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
-                                item.hoverBg
-                              } ${
-                                index !== menuItems.length - 1
-                                  ? "border-b border-gray-100"
-                                  : ""
-                              }`}
-                            >
-                              <span className="text-base">{item.icon}</span>
-                              <span className="text-sm font-medium text-gray-700">
-                                {item.label}
-                              </span>
-                            </motion.button>
-                          ))}
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
+                <ChatMenuModal
+                  buttonRef={buttonRef}
+                  handleAction={handleAction}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                />
               </div>
             </div>
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
@@ -691,6 +660,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               isRecording={isRecording}
               recordedAudio={recordedAudio}
               setIsRecording={setIsRecording}
+              selectedFile={selectedFile}
+            />
+            <FilePreview
+              selectedFile={selectedFile}
+              selectedFileURL={selectedFileURL}
+              onCancel={() => {
+                setSelectedFile(null);
+                setSelectedFileURL(null);
+              }}
+              onSend={handleSendFile}
             />
             <AnimatePresence>
               {enlargedImage && (

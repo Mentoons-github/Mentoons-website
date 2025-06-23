@@ -13,6 +13,7 @@ import rewardsReducer from "./rewardSlice";
 import sessionReducer from "./sessionSlice";
 import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
+import conversationReducer from './adda/conversationSlice'
 
 export const store = configureStore<{
   comics: ReturnType<typeof comicsReducer>;
@@ -29,6 +30,7 @@ export const store = configureStore<{
   session: ReturnType<typeof sessionReducer>;
   rewards: ReturnType<typeof rewardsReducer>;
   notification: ReturnType<typeof notificationReducer>;
+  conversation: ReturnType<typeof conversationReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -45,6 +47,7 @@ export const store = configureStore<{
     session: sessionReducer,
     rewards: rewardsReducer,
     notification: notificationReducer,
+    conversation:conversationReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
