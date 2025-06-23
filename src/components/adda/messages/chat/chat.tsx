@@ -7,6 +7,7 @@ import {
   BsTrash,
   BsCheck,
   BsThreeDotsVertical,
+  BsFileEarmarkText,
 } from "react-icons/bs";
 import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
 import { MdSearch } from "react-icons/md";
@@ -20,10 +21,16 @@ import MorphingBubbleIndicator from "./TypingIndicator";
 import { FaShare } from "react-icons/fa6";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { sendFileMessage, sendTextMessage } from "@/services/chatServices";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import FilePreview from "./filePreview";
 import ChatMenuModal from "@/components/modals/ChatMenuModal";
+import {
+  fetchConversation,
+  fetchConversationId,
+} from "@/redux/adda/conversationSlice";
+import { getDateLabel } from "@/utils/formateDate";
+import { SkeletonLoader } from "./skelton";
 
 export interface ChatUser {
   id: number;
@@ -39,7 +46,7 @@ export interface Message {
   message: string;
   senderId?: string;
   receiverId: string;
-  timestamp: string;
+  createdAt: string;
   fileType?: "text" | "image" | "audio" | "video" | "file";
   fileName?: string;
 }
@@ -52,10 +59,20 @@ interface ChatProps {
   selectedUser: string;
 }
 
+interface GroupedMessages {
+  [key: string]: Message[];
+}
+
+
 const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-  // const {data:messages} = useSelector((state:RootState)=>state.conversation)
+  const conversationMessages = useSelector(
+    (state: RootState) => state.conversation.data
+  );
+  const [newMessages, setNewMessages] = useState<Message[]>([]);
+
+  const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
@@ -73,17 +90,35 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileURL, setSelectedFileURL] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
 
+  useEffect(() => {
+    const fetchConversationData = async () => {
+      const token = await getToken();
+      if (!token || !selectedUser) return;
+
+      const result = await dispatch(
+        fetchConversationId({ selectedUserId: selectedUser, token })
+      );
+
+      if (fetchConversationId.fulfilled.match(result)) {
+        const conversationId = result.payload.conversationId;
+
+        dispatch(fetchConversation({ conversationId, token }));
+      }
+    };
+
+    fetchConversationData();
+  }, [dispatch, getToken, selectedUser]);
+
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      setMessages([]);
+      // setMessages([]);
       const token = await getToken();
       if (!token) {
         throw new Error("No token found");
@@ -111,7 +146,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!isLoading) {
       scrollToBottom();
     }
-  }, [messages, isLoading]);
+  }, [isLoading]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -123,24 +158,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
-      const {
-        // chatId,
-        // conversationId,
-        senderId,
-        receiverId,
-        message,
-        timestamp,
-        fileType,
-        fileName,
-      } = data;
+      const { senderId, receiverId, message, createdAt, fileType, fileName } =
+        data;
 
-      setMessages((prev) => [
+      setNewMessages((prev) => [
         ...prev,
         {
           senderId,
           receiverId,
           message,
-          timestamp,
+          createdAt: createdAt || new Date().toISOString(),
           fileType,
           fileName,
         },
@@ -153,7 +180,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   }, [socket, selectedUser, user]);
 
   const handleSendMessage = async () => {
-    if (selectedFile && selectedFile.type.startsWith("image/")) {
+    if (selectedFile) {
+      let fileType: "image" | "video" | "file" = "file";
+
+      if (selectedFile.type.startsWith("image/")) {
+        fileType = "image";
+      } else if (selectedFile.type.startsWith("video/")) {
+        fileType = "video";
+      } else {
+        fileType = "file";
+      }
+
       const resultAction = await dispatch(
         uploadFile({ file: selectedFile, getToken })
       );
@@ -165,7 +202,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
           selectedUser,
           uploadedUrl,
           selectedFile.name,
-          "image"
+          fileType
         );
       } else {
         console.error("File upload failed:", resultAction.payload);
@@ -352,7 +389,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
       const uploadedUrl = resultAction.payload.data.fileDetails?.url;
       console.log(resultAction.payload.data.fileDetails?.url, "urllllll");
 
-      let fileType: "image" | "audio" | "file" = "file";
+      let fileType: "image" | "audio" | "video" | "file" = "file";
       if (selectedFile.type.startsWith("image/")) fileType = "image";
       else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
 
@@ -371,34 +408,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  // Skeleton Loader Component
-  const SkeletonLoader = () => (
-    <div className="animate-pulse">
-      <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-          <div className="flex flex-col">
-            <div className="w-24 h-4 bg-gray-200 rounded"></div>
-            <div className="w-16 h-3 bg-gray-200 rounded mt-2"></div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-          <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
-        {[...Array(3)].map((_, index) => (
-          <div key={index} className="flex justify-start mb-4">
-            <div className="max-w-xs bg-gray-200 rounded-2xl p-4">
-              <div className="w-32 h-4 bg-gray-300 rounded"></div>
-              <div className="w-16 h-3 bg-gray-300 rounded mt-2"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const groupedMessages:GroupedMessages = {};
+
+  [...conversationMessages, ...newMessages].forEach((msg) => {
+    const label = getDateLabel(msg.createdAt);
+    if (!groupedMessages[label]) {
+      groupedMessages[label] = [];
+    }
+    groupedMessages[label].push(msg);
+  });
+
 
   return (
     <AnimatePresence mode="wait">
@@ -444,94 +463,116 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
-              {messages.map((msg, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${
-                    msg.senderId !== selectedUser
-                      ? "justify-end"
-                      : "justify-start"
-                  } mb-4 items-end`}
-                >
-                  <div
-                    className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
-                      msg.senderId !== selectedUser
-                        ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {msg.fileType === "image" && (
-                      <img
-                        src={msg.message}
-                        alt="Image"
-                        className="w-full h-auto rounded-md mb-2 cursor-pointer"
-                        onClick={() => setEnlargedImage(msg.message)}
-                      />
-                    )}
-                    {msg.fileType === "audio" && (
-                      <audio
-                        src={msg.message}
-                        controls
-                        className="w-full rounded-md mb-2"
-                      />
-                    )}
-                    {msg.fileType === "video" && (
-                      <video
-                        src={msg.message}
-                        controls
-                        className="w-full max-w-[200px] rounded-md mb-2"
-                      />
-                    )}
-                    {msg.fileType === "file" && (
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm truncate">{msg.fileName}</p>
-                        <button
-                          className="ml-2 p-1 bg-white text-black rounded"
-                          onClick={() =>
-                            downloadFile(msg.message, msg.fileName || "file")
-                          }
-                        >
-                          Download
-                        </button>
-                      </div>
-                    )}
-                    {(!msg.fileType || msg.fileType === "text") && (
-                      <p className="text-sm">{msg.message}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-1">
-                      <p
-                        className={`text-xs ${
+              {Object.entries(groupedMessages).map(([dateLabel, messages]) => (
+                <div key={dateLabel}>
+                  <div className="flex justify-center my-6">
+                    <span className="text-sm bg-gray-800 text-gray-200 px-3 py-1 rounded-full">
+                      {dateLabel}
+                    </span>
+                  </div>
+
+                  {messages.map((msg, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`flex ${
+                        msg.senderId !== selectedUser
+                          ? "justify-end"
+                          : "justify-start"
+                      } mb-4 items-end`}
+                    >
+                      <div
+                        className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
                           msg.senderId !== selectedUser
-                            ? "text-white/70"
-                            : "text-gray-500"
+                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
+                            : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  {(msg.fileType === "image" ||
-                    msg.fileType === "audio" ||
-                    msg.fileType === "video") && (
-                    <button
-                      onClick={() => handleForwardMessage(msg)}
-                      className={`ml-2 p-2 rounded-full transition-colors ${
-                        msg.senderId !== selectedUser
-                          ? "text-white bg-green-600"
-                          : "text-gray-500 hover:bg-gray-200"
-                      }`}
-                      title="Forward"
-                    >
-                      <FaShare size={20} />
-                    </button>
-                  )}
-                </motion.div>
+                        {msg.fileType === "image" && (
+                          <img
+                            src={msg.message}
+                            alt="Image"
+                            className="rounded-md mb-2 max-w-[300px] max-h-[250px] object-cover"
+                            onClick={() => setEnlargedImage(msg.message)}
+                          />
+                        )}
+                        {msg.fileType === "audio" && (
+                          <audio
+                            src={msg.message}
+                            controls
+                            className="w-full rounded-md mb-2"
+                          />
+                        )}
+                        {msg.fileType === "video" && (
+                          <video
+                            src={msg.message}
+                            controls
+                            className="w-full max-w-[300px] max-h-[250px] object-cover rounded-md mb-2"
+                          />
+                        )}
+                        {msg.fileType === "file" && (
+                          <a
+                            href={msg.message}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center justify-center mb-2 p-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                          >
+                            <div className="flex items-center mb-2">
+                              <div className="bg-blue-100 p-3 rounded-full">
+                                <BsFileEarmarkText
+                                  size={40}
+                                  className="text-blue-500"
+                                />
+                              </div>
+                              <div className="ml-3">
+                                <p className="text-sm text-gray-800 font-medium truncate max-w-[180px]">
+                                  {msg.fileName}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="text-xs text-blue-500">Tap to open</p>
+                          </a>
+                        )}
+
+                        {(!msg.fileType || msg.fileType === "text") && (
+                          <p className="text-sm">{msg.message}</p>
+                        )}
+                        <div className="flex items-center justify-between mt-1">
+                          <p
+                            className={`text-xs ${
+                              msg.senderId !== selectedUser
+                                ? "text-white/70"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {new Date(msg.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {(msg.fileType === "image" ||
+                        msg.fileType === "audio" ||
+                        msg.fileType === "file" ||
+                        msg.fileType === "video") && (
+                        <button
+                          onClick={() => handleForwardMessage(msg)}
+                          className={`ml-2 p-2 rounded-full transition-colors ${
+                            msg.senderId !== selectedUser
+                              ? "text-white bg-green-600"
+                              : "text-gray-500 hover:bg-gray-200"
+                          }`}
+                          title="Forward"
+                        >
+                          <FaShare size={20} />
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
               ))}
               <MorphingBubbleIndicator isTyping={otherUserTyping} />
               <div ref={messagesEndRef} />
@@ -601,6 +642,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
             <FilePreview
               selectedFile={selectedFile}
               selectedFileURL={selectedFileURL}
+              isUpload={fileUpload.loading}
               onCancel={() => {
                 setSelectedFile(null);
                 setSelectedFileURL(null);
@@ -617,6 +659,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               recordedAudio={recordedAudio}
               setIsRecording={setIsRecording}
               selectedFile={selectedFile}
+              isUpload={fileUpload.loading}
             />
 
             <AnimatePresence>
