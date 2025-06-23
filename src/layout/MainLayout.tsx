@@ -21,6 +21,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/adda" ||
     location.pathname === "/chat";
 
+  const isChatPage = location.pathname.startsWith("/chat");
+
+  const showFooter = !isAuthRoute && !isChatPage;
+
   return (
     <NotificationProvider>
       <div className="relative w-full h-full">
@@ -36,8 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <Outlet />
           {children}
         </div>
-        {!isAuthRoute && <Footer />}
-        {!isAuthRoute && <ScrollToTopButton />}
+        {showFooter && <Footer />}
+        {showFooter && <ScrollToTopButton />}
       </div>
     </NotificationProvider>
   );
