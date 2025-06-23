@@ -8,12 +8,12 @@ export interface Friend {
 }
 
 export interface Message {
-  _id: string;
-  conversationId: string;
-  sender: string;
-  text: string;
-  createdAt: string;
-  read: boolean;
+  message: string;
+  senderId?: string;
+  receiverId: string;
+  timestamp: string;
+  fileType?: "text" | "image" | "audio" | "file";
+  fileName?: string;
 }
 
 export interface Conversations {
