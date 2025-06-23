@@ -5,7 +5,7 @@ import { FaMicrophone, FaPaperPlane } from "react-icons/fa6";
 interface ChatFooterProps {
   fileInputRef: RefObject<HTMLInputElement>;
   message: string;
-  setMessage: Dispatch<SetStateAction<string>>;
+  handleMessageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSendMessage: () => void;
   isRecording: boolean;
@@ -17,7 +17,7 @@ interface ChatFooterProps {
 const ChatFooter: React.FC<ChatFooterProps> = ({
   fileInputRef,
   message,
-  setMessage,
+  handleMessageChange,
   handleFileUpload,
   handleSendMessage,
   isRecording,
@@ -46,7 +46,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
         type="text"
         value={message}
         disabled={isRecording || !!recordedAudio}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={(e) => handleMessageChange(e)}
         placeholder={isRecording ? "Recording..." : "Type a message..."}
         className="flex-1 border rounded-full px-4 py-2 text-sm"
       />
