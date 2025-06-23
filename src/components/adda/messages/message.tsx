@@ -9,14 +9,22 @@ import {
 // import Picker from "@emoji-mart/react";
 // import data from "@emoji-mart/data";
 import axiosInstance from "@/api/axios";
-import { Friend, Message as MessageType } from "@/types";
+import { Friend } from "@/types";
 
 interface MessageBoxProps {
   selectedUser: Friend | null;
 }
+interface MessageI {
+  _id: string,
+      conversationId: string, // Will be set by the server
+      sender: string, // Replace with actual current user ID from auth
+      text: string,
+      createdAt: string,
+      read: boolean,
+}
 
 const MessageBox = ({ selectedUser }: MessageBoxProps) => {
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<MessageI[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +85,7 @@ const MessageBox = ({ selectedUser }: MessageBoxProps) => {
     if (!newMessage.trim() || !selectedUser) return;
 
     const currentTime = new Date().toISOString();
-    const userMessage: MessageType = {
+    const userMessage: MessageI = {
       _id: `temp-${Date.now()}`,
       conversationId: "", // Will be set by the server
       sender: "currentUser", // Replace with actual current user ID from auth

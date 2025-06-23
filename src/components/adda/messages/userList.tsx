@@ -131,7 +131,7 @@ const UserList = ({
                       )}
                     </div>
                     <p className="text-sm truncate w-full text-gray-500">
-                      {lastMessage ? lastMessage.text : "Start a conversation"}
+                      {lastMessage ? lastMessage.message : "Start a conversation"}
                     </p>
                   </div>
                 </div>
