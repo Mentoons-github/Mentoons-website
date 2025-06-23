@@ -3,6 +3,7 @@ import { Message } from "@/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
+// Slice state interface
 interface MessageI {
   data: Message[];
   error: string | null;
@@ -15,16 +16,25 @@ const initialState: MessageI = {
   status: "idle",
 };
 
+
 export const fetchConversation = createAsyncThunk<
-  Message[],
-  string,
-  { rejectValue: string }
+  Message[], 
+  { conversationId: string; token: string }, 
+  { rejectValue: string } 
 >(
   "conversation/fetchConversation",
-  async (selectedUser, { rejectWithValue }) => {
+  async ({ conversationId, token }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/conversation/${selectedUser}`);
-      return response.data;
+      const response = await axiosInstance.get(
+        `/conversation/${conversationId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError;
       return rejectWithValue(
@@ -37,6 +47,7 @@ export const fetchConversation = createAsyncThunk<
   }
 );
 
+// Slice
 const conversationSlice = createSlice({
   name: "conversation",
   initialState,
