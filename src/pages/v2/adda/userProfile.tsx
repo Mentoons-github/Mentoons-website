@@ -554,10 +554,7 @@ const UserProfile = () => {
           },
         }
       );
-      console.log(
-        "user details ==================================>",
-        response.data
-      );
+
       setUserDetails(response.data.data);
       setTotalFollowers(response.data.data.followers);
       setTotalFollowing(response.data.data.following);

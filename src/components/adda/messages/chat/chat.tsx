@@ -17,6 +17,12 @@ import { useAuth } from "@clerk/clerk-react";
 import axiosInstance from "@/api/axios";
 import { User } from "@/types";
 import useSocket from "@/hooks/adda/useSocket";
+import ChatMenuModal from "@/components/modals/ChatMenuModal";
+import { sendFileMessage, sendTextMessage } from "@/services/chatServices";
+import { uploadFile } from "@/redux/fileUploadSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import FilePreview from "./filePreview";
 
 export interface ChatUser {
   id: number;
@@ -47,6 +53,8 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  // const {data:messages} = useSelector((state:RootState)=>state.conversation)
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
@@ -72,6 +80,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
 
+  
+
   const fetchUserData = async () => {
     try {
       const token = await getToken();
@@ -85,7 +95,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         },
       });
 
-      console.log(response.data.data.isFriend);
       setUser(response.data.data.user);
     } catch (err) {
       console.error("Error fetching user:", err);
@@ -93,7 +102,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
       setIsLoading(false);
     }
   };
-  console.log(user, "usera;ksdjf");
 
   useEffect(() => {
     fetchUserData();
@@ -108,25 +116,35 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   };
 
   const socket = useSocket();
-  console.log(socket, "socket");
 
   useEffect(() => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
-      const { senderId, message, timestamp, fileType, fileName } = data;
+      const {
+        // chatId,
+        // conversationId,
+        senderId,
+        receiverId,
+        message,
+        timestamp,
+        fileType,
+        fileName,
+      } = data;
 
       setMessages((prev) => [
         ...prev,
         {
           senderId,
-          receiverId: user?._id || "",
+          receiverId,
           message,
-          timestamp: timestamp || new Date().toISOString(),
+          timestamp,
           fileType,
           fileName,
         },
       ]);
+
+      // You can also store conversationId locally if needed for future messages.
     });
 
     return () => {
@@ -134,26 +152,36 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     };
   }, [socket, selectedUser, user]);
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !selectedUser || !socket || !user) return;
+  const handleSendMessage = async () => {
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      // If image file selected, upload and send as image message
+      
+      const resultAction = await dispatch(
+        uploadFile({ file: selectedFile, getToken })
+      );
 
-    socket.emit("send_message", {
-      receiverId: selectedUser,
-      fileType: "text",
-      message: message,
-      timestamp: new Date().toISOString(),
-    });
+      if (uploadFile.fulfilled.match(resultAction)) {
+        const uploadedUrl = resultAction.payload.data.fileDetails?.url;
+        sendFileMessage(
+          socket!,
+          selectedUser,
+          uploadedUrl,
+          selectedFile.name,
+          "image"
+        );
+      } else {
+        console.error("File upload failed:", resultAction.payload);
+      }
 
-    // console.log(message,'message')
+      setSelectedFile(null);
+      setSelectedFileURL(null);
+      return;
+    }
 
-    // const newMessage: Message = {
-    //   receiverId: selectedUser,
-    //   message: message,
-    //   timestamp: new Date().toISOString(),
-    // };
-
-    // setMessages((prev) => [...prev, newMessage]);
-    setMessage("");
+    if (message.trim() && selectedUser && socket && user) {
+      sendTextMessage(socket, selectedUser, message);
+      setMessage("");
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,33 +196,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     console.log(`Action selected: ${action}`);
     setIsModalOpen(false);
   };
-
-  const menuItems = [
-    {
-      label: "Report Abuse",
-      icon: "🚩",
-      hoverBg: "hover:bg-red-50",
-      action: "Report Abuse",
-    },
-    {
-      label: "Block User",
-      icon: "🚫",
-      hoverBg: "hover:bg-red-50",
-      action: "Block User",
-    },
-    {
-      label: "Mute User",
-      icon: "🔇",
-      hoverBg: "hover:bg-yellow-50",
-      action: "Mute User",
-    },
-    {
-      label: "Cancel",
-      icon: "❌",
-      hoverBg: "hover:bg-gray-50",
-      action: "Cancel",
-    },
-  ];
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
 
@@ -291,23 +292,34 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     console.log(error, "error from profile");
   }
 
-  const handleSendFile = () => {
-    if (!selectedFile || !selectedFileURL || !socket || !user) return;
+  const handleSendFile = async () => {
+    if (!selectedFile || !socket || !user) return;
 
-    let fileType: Message["fileType"] = "file";
-    if (selectedFile.type.startsWith("image/")) fileType = "image";
-    else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
+    const resultAction = await dispatch(
+      uploadFile({ file: selectedFile, getToken })
+    );
 
-    socket.emit("send_message", {
-      receiverId: selectedUser,
-      fileType: fileType,
-      fileName: selectedFile.name,
-      message: selectedFileURL,
-      timestamp: new Date().toISOString(),
-    });
+    if (uploadFile.fulfilled.match(resultAction)) {
+      const uploadedUrl = resultAction.payload.data.fileDetails?.url;
+      console.log(resultAction.payload.data.fileDetails?.url, "urllllll");
 
-    setSelectedFile(null);
-    setSelectedFileURL(null);
+      let fileType: "image" | "audio" | "file" = "file";
+      if (selectedFile.type.startsWith("image/")) fileType = "image";
+      else if (selectedFile.type.startsWith("audio/")) fileType = "audio";
+
+      sendFileMessage(
+        socket,
+        selectedUser,
+        uploadedUrl,
+        selectedFile.name,
+        fileType
+      );
+
+      setSelectedFile(null);
+      setSelectedFileURL(null);
+    } else {
+      console.error("File upload failed:", resultAction.payload);
+    }
   };
 
   return (
@@ -342,65 +354,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         </div>
         <div className="flex items-center gap-4 relative">
           <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
+          <BsThreeDotsVertical
+            className="text-xl text-gray-500 hover:text-indigo-500 transition-colors"
+            onClick={() => setIsModalOpen(true)}
+          />
 
-          <div className="relative">
-            <button
-              ref={buttonRef}
-              onClick={() => setIsModalOpen(!isModalOpen)}
-              className="p-1 rounded hover:bg-gray-100 transition-colors"
-            >
-              <BsThreeDotsVertical className="text-xl text-gray-500 hover:text-indigo-500 transition-colors" />
-            </button>
-
-            <AnimatePresence>
-              {isModalOpen && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed inset-0 bg-black bg-opacity-20 z-40"
-                    onClick={() => setIsModalOpen(false)}
-                  />
-
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-200 w-48 py-2 z-50"
-                  >
-                    {menuItems.map((item, index) => (
-                      <motion.button
-                        key={item.action}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          duration: 0.3,
-                          delay: index * 0.1,
-                          ease: "easeOut",
-                        }}
-                        onClick={() => handleAction(item.action)}
-                        className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
-                          item.hoverBg
-                        } ${
-                          index !== menuItems.length - 1
-                            ? "border-b border-gray-100"
-                            : ""
-                        }`}
-                      >
-                        <span className="text-base">{item.icon}</span>
-                        <span className="text-sm font-medium text-gray-700">
-                          {item.label}
-                        </span>
-                      </motion.button>
-                    ))}
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
+          <ChatMenuModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            handleAction={handleAction}
+            buttonRef={buttonRef}
+          />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
@@ -413,12 +377,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className={`flex ${
-              msg.senderId !== selectedUser ? "justify-end" : "justify-start"
+              msg.receiverId === selectedUser ? "justify-end" : "justify-start"
             } mb-4`}
           >
             <div
               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
-                msg.senderId !== selectedUser
+                msg.receiverId === selectedUser
                   ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
                   : "bg-gray-100 text-gray-800"
               }`}
@@ -427,7 +391,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 <img
                   src={msg.message}
                   alt="Image"
-                  className="w-full h-auto rounded-md mb-2"
+                  className="rounded-md mb-2 max-w-[300px] max-h-[300px] object-cover"
                 />
               )}
 
@@ -474,121 +438,84 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         ))}
 
         <div ref={messagesEndRef} />
-      </div>
-      <AnimatePresence>
-        {isRecording && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="flex items-center justify-center py-2 bg-red-50 border border-red-200 rounded-lg mx-2 mb-2"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-red-600 font-medium">
-                Recording... {formatDuration(recordingDuration)}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {recordedAudio && !isRecording && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="flex items-center gap-3 py-3 px-4 bg-blue-50 border border-blue-200 rounded-lg mx-2 mb-2"
-          >
-            <button
-              onClick={togglePreview}
-              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+        <AnimatePresence>
+          {isRecording && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex absolute bottom-24 items-center justify-center py-2 bg-red-50 border border-red-200 rounded-lg mx-2 mb-2"
             >
-              {isPlayingPreview ? <BsPause size={14} /> : <BsPlay size={14} />}
-            </button>
-
-            <div className="flex-1">
-              <div className="text-sm text-blue-700 font-medium">
-                Audio Preview
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-red-600 font-medium">
+                  Recording... {formatDuration(recordingDuration)}
+                </span>
               </div>
-              <div className="text-xs text-blue-600">
-                Tap play to listen before sending
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {recordedAudio && !isRecording && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex items-center gap-3 py-3 px-4 bg-blue-50 border border-blue-200 rounded-lg mx-2 mb-2"
+            >
               <button
-                onClick={discardRecording}
-                className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-all"
-                title="Discard recording"
+                onClick={togglePreview}
+                className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
               >
-                <BsTrash size={14} />
-              </button>
-
-              <button
-                onClick={sendRecordedAudio}
-                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
-                title="Send recording"
-              >
-                <BsCheck size={16} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {selectedFileURL && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="flex items-center gap-3 py-3 px-4 bg-yellow-50 border border-yellow-200 rounded-lg mx-2 mb-2"
-          >
-            <div className="flex-1">
-              {selectedFile?.type.startsWith("image/") && (
-                <img
-                  src={selectedFileURL}
-                  alt="Preview"
-                  className="max-w-[150px] rounded-md"
-                />
-              )}
-              {selectedFile?.type.startsWith("audio/") && (
-                <audio src={selectedFileURL} controls className="w-full" />
-              )}
-              {selectedFile?.type.startsWith("video/") && (
-                <video
-                  src={selectedFileURL}
-                  controls
-                  className="w-full max-w-[200px]"
-                />
-              )}
-              {!selectedFile?.type.startsWith("image/") &&
-                !selectedFile?.type.startsWith("audio/") && (
-                  <p className="text-sm text-gray-700">{selectedFile?.name}</p>
+                {isPlayingPreview ? (
+                  <BsPause size={14} />
+                ) : (
+                  <BsPlay size={14} />
                 )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setSelectedFile(null);
-                  setSelectedFileURL(null);
-                }}
-                className="p-2 text-red-500 hover:bg-red-100 rounded-full"
-              >
-                <BsTrash size={16} />
               </button>
 
-              <button
-                onClick={handleSendFile}
-                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600"
-              >
-                <BsCheck size={18} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div className="flex-1">
+                <div className="text-sm text-blue-700 font-medium">
+                  Audio Preview
+                </div>
+                <div className="text-xs text-blue-600">
+                  Tap play to listen before sending
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={discardRecording}
+                  className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-all"
+                  title="Discard recording"
+                >
+                  <BsTrash size={14} />
+                </button>
+
+                <button
+                  onClick={sendRecordedAudio}
+                  className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+                  title="Send recording"
+                >
+                  <BsCheck size={16} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+
+          <FilePreview
+            selectedFile={selectedFile}
+            selectedFileURL={selectedFileURL}
+            onCancel={() => {
+              setSelectedFile(null);
+              setSelectedFileURL(null);
+            }}
+            onSend={handleSendFile}
+          />
+        </AnimatePresence>
+      </div>
 
       <ChatFooter
         fileInputRef={fileInputRef}
@@ -598,6 +525,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         handleSendMessage={handleSendMessage}
         isRecording={isRecording}
         recordedAudio={recordedAudio}
+        selectedFile={selectedFile}
         // setRecordedAudio = {setRecordedAudio}
         setIsRecording={setIsRecording}
       />

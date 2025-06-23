@@ -60,8 +60,8 @@ export const fileUploadSlice = createSlice({
     builder.addCase(uploadFile.fulfilled, (state, action) => {
       state.loading = false;
       state.success = true;
-      console.log(action.payload?.data?.imageUrl, "action.payload");
-      state.file = action.payload?.data?.imageUrl;
+      console.log(action.payload?.data?.fileDetails?.url, "action.payload");
+      state.file = action.payload?.data?.fileDetails?.url;
     });
     builder.addCase(uploadFile.rejected, (state, action) => {
       state.loading = false;
