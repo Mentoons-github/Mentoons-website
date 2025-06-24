@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BsDownload,
   BsX,
@@ -25,8 +25,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import FilePreview from "./filePreview";
 import ChatMenuModal from "@/components/modals/ChatMenuModal";
-import { SocketOnlineUser } from "./freinds";
-import ShareUserModal from "../share/shareModal";
 import {
   fetchConversation,
   fetchConversationId,
@@ -96,9 +94,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [selectedFileURL, setSelectedFileURL] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<SocketOnlineUser[]>([]);
-  const [forwardOpen, setForwardOpen] = useState(false);
-  const [messageToSend, setMessageToSend] = useState<Message | null>(null);
   const buttonRef = useRef(null);
 
   useEffect(() => {
@@ -184,22 +179,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     };
   }, [socket, selectedUser, user]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    // Listen for online users
-    socket.on("online_users", (data: SocketOnlineUser[]) => {
-      console.log("Online users updated:", data);
-      setOnlineUsers(data);
-    });
-
-    socket.emit("online_users");
-
-    return () => {
-      socket.off("online_users");
-    };
-  }, [socket]);
-
   const handleSendMessage = async () => {
     if (selectedFile) {
       let fileType: "image" | "video" | "file" = "file";
@@ -240,10 +219,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const isSelectedUserOnline = useMemo(() => {
-    return onlineUsers.some((user) => user.friend?._id === selectedUser);
-  }, [onlineUsers, selectedUser]);
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -258,8 +233,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   };
 
   const handleForwardMessage = (msg: Message) => {
-    setForwardOpen(true);
-    setMessageToSend(msg);
+    console.log(`Forwarding message: ${msg.message} of type ${msg.fileType}`);
+    // Implement forwarding logic here, e.g., emit a socket event or open a forward modal
+    // Example: socket.emit("forward_message", { message: msg, receiverId: selectedUser });
   };
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
@@ -457,49 +433,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
           <SkeletonLoader />
         ) : (
           <>
-            <div className="flex justify-between items-center mb-6 px-4 pb-4 border-b border-gray-200">
-              {/* Left section */}
+            <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <img
                     src={user?.picture}
-                    alt={user?.name || "User Avatar"}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-md"
+                    alt={user?.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-lg font-semibold text-gray-900">
+                  <h1 className="text-lg font-semibold text-gray-800">
                     {user?.name}
                   </h1>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full ${
-                        isSelectedUserOnline ? "bg-green-500" : "bg-gray-400"
-                      }`}
-                    ></span>
-                    <span className="text-sm font-medium text-gray-600">
-                      {isSelectedUserOnline ? "Online" : "Offline"}
-                    </span>
-                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 relative">
-                <button
-                  className="p-2 rounded-full hover:bg-gray-100 transition"
-                  aria-label="Search"
-                >
-                  <MdSearch className="text-2xl text-gray-600 hover:text-indigo-500 transition-colors" />
-                </button>
-
-                <button
-                  className="p-2 rounded-full hover:bg-gray-100 transition"
-                  aria-label="Menu"
+              <div className="flex items-center gap-4 relative">
+                <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
+                <BsThreeDotsVertical
+                  className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
                   onClick={() => setIsModalOpen(true)}
-                  ref={buttonRef}
-                >
-                  <BsThreeDotsVertical className="text-2xl text-gray-600 hover:text-indigo-500 transition-colors" />
-                </button>
-
+                />
                 <ChatMenuModal
                   buttonRef={buttonRef}
                   handleAction={handleAction}
@@ -508,7 +462,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 />
               </div>
             </div>
-
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
               {Object.entries(groupedMessages).map(([dateLabel, messages]) => (
                 <div key={dateLabel}>
@@ -753,28 +706,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
           </>
         )}
       </motion.div>
-      {forwardOpen && messageToSend && (
-        <ShareUserModal
-          allowMultiSelect={true}
-          onClose={() => {
-            setForwardOpen(false);
-            setMessageToSend(null);
-          }}
-          messageToForward={messageToSend}
-          onShare={(selectedUserId, message) => {
-            if (socket && user) {
-              socket.emit("send_message", {
-                receiverId: selectedUserId,
-                message: message.message,
-                fileType: message.fileType,
-                fileName: message.fileName,
-              });
-            }
-            setForwardOpen(false);
-            setMessageToSend(null);
-          }}
-        />
-      )}
     </AnimatePresence>
   );
 };
