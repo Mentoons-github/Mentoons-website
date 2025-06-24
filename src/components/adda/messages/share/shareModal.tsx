@@ -207,7 +207,7 @@ const ShareUserModal: React.FC<ShareUserModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999999] p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white w-full max-w-md h-[85vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">

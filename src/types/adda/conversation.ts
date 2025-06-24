@@ -11,8 +11,8 @@ export interface Message {
   message: string;
   senderId?: string;
   receiverId: string;
-  timestamp: string;
-  fileType?: "text" | "image" | "audio" | "file";
+  createdAt: string;
+  fileType?: "text" | "image" | "audio" | "file" | "video";
   fileName?: string;
 }
 

@@ -22,7 +22,6 @@ export const uploadFile = createAsyncThunk(
     { rejectWithValue }
   ) => {
     const { file, getToken } = payload;
-    console.log(file, "File to be uploaded");
     try {
       const formData = new FormData();
       formData.append("file", file);

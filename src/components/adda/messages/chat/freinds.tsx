@@ -19,6 +19,7 @@ interface UserConversation {
   conversation_id: string;
   friend: Friend;
   lastMessage: string;
+  messageType: string;
   updatedAt: Date;
   createdAt: Date;
   isRead?: boolean;
@@ -403,7 +404,15 @@ const Friends = () => {
                 </h1>
                 <p className="text-xs text-gray-500 truncate">
                   {item.type === "conversation"
-                    ? item.data.lastMessage || "Start chatting..."
+                    ? item.data.messageType === "image"
+                      ? "Image"
+                      : item.data.messageType === "video"
+                      ? "Video"
+                       : item.data.messageType === "file"
+                      ? "File"
+                      : item.data.messageType === "audio"
+                      ? "Audio"
+                      : item.data.lastMessage || "Start chatting..."
                     : "Start chatting..."}
                 </p>
               </div>
