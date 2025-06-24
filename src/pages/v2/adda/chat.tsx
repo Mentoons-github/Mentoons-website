@@ -6,18 +6,39 @@ import { useParams } from "react-router-dom";
 
 const ChatPage = () => {
   const { selectedUser } = useParams();
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 md:p-6 gap-4 md:gap-6 overflow-hidden">
-      <Friends />
 
-      <motion.div
-        initial={{ x: 100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="flex-1 bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-6 flex flex-col border border-white/20"
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden p-6">
+      <div
+        className={`${
+          selectedUser ? "hidden" : "block"
+        } md:hidden w-full h-full p-4`}
       >
-        {selectedUser ? <Chat selectedUser={selectedUser} /> : <Welcome />}
-      </motion.div>
+        <Friends />
+      </div>
+
+      <div
+        className={`${
+          selectedUser ? "block" : "hidden"
+        } md:hidden w-full h-full`}
+      >
+        {selectedUser && <Chat selectedUser={selectedUser} />}
+      </div>
+
+      <div className="hidden md:flex w-full h-full gap-0">
+        <div className="w-16 lg:w-80 xl:w-96 border-r border-gray-200/50 bg-white/80 backdrop-blur-lg">
+          <Friends />
+        </div>
+
+        <motion.div
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex-1 bg-white/80 backdrop-blur-lg flex flex-col border-l border-white/20"
+        >
+          {selectedUser ? <Chat selectedUser={selectedUser} /> : <Welcome />}
+        </motion.div>
+      </div>
     </div>
   );
 };

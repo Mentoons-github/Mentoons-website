@@ -23,3 +23,11 @@ export interface Conversations {
   lastMessage?: string;
   updatedAt: string;
 }
+
+export interface Online_users {
+  _id: string;
+  name: string;
+  picture: string;
+  hasConversation: boolean;
+  conversationId: string;
+}
