@@ -8,22 +8,20 @@ interface MessageI {
   data: Message[];
   error: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
-  conversationId:string
+  conversationId: string;
 }
 
 const initialState: MessageI = {
   data: [],
   error: null,
   status: "idle",
-  conversationId:''
+  conversationId: "",
 };
 
-
-
 export const fetchConversationId = createAsyncThunk<
-  { conversationId: string },  
-  { selectedUserId: string; token: string },  
-  { rejectValue: string }  
+  { conversationId: string },
+  { selectedUserId: string; token: string },
+  { rejectValue: string }
 >(
   "conversation/fetchConversationId",
   async ({ selectedUserId, token }, { rejectWithValue }) => {
@@ -50,12 +48,10 @@ export const fetchConversationId = createAsyncThunk<
   }
 );
 
-
-
 export const fetchConversation = createAsyncThunk<
-  Message[], 
-  { conversationId: string; token: string }, 
-  { rejectValue: string } 
+  Message[],
+  { conversationId: string; token: string },
+  { rejectValue: string }
 >(
   "conversation/fetchConversation",
   async ({ conversationId, token }, { rejectWithValue }) => {
@@ -86,7 +82,11 @@ export const fetchConversation = createAsyncThunk<
 const conversationSlice = createSlice({
   name: "conversation",
   initialState,
-  reducers: {},
+  reducers: {
+    addNewMessage: (state, action) => {
+      state.data.push(action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchConversation.pending, (state) => {
@@ -116,3 +116,5 @@ const conversationSlice = createSlice({
 });
 
 export default conversationSlice.reducer;
+
+export const { addNewMessage } = conversationSlice.actions;

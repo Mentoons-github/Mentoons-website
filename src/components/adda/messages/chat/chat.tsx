@@ -30,6 +30,7 @@ import ShareUserModal from "../share/shareModal";
 import {
   fetchConversation,
   fetchConversationId,
+  addNewMessage,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
@@ -65,14 +66,12 @@ interface GroupedMessages {
   [key: string]: Message[];
 }
 
-
 const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const conversationMessages = useSelector(
     (state: RootState) => state.conversation.data
   );
-  const [newMessages, setNewMessages] = useState<Message[]>([]);
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
@@ -163,20 +162,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
-      const { senderId, receiverId, message, createdAt, fileType, fileName } =
-        data;
-
-      setNewMessages((prev) => [
-        ...prev,
-        {
-          senderId,
-          receiverId,
-          message,
-          createdAt: createdAt || new Date().toISOString(),
-          fileType,
-          fileName,
-        },
-      ]);
+      dispatch(addNewMessage(data));
     });
 
     return () => {
@@ -350,13 +336,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
+    console.log("message typing");
 
     if (!socket || !user) return;
+
+    console.log("typing :", typing);
 
     if (!typing) {
       socket.emit("typing", {
         receiverId: selectedUser,
       });
+      console.log("user is typing");
       setTyping(true);
     }
 
@@ -368,6 +358,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
       socket.emit("stopped_typing", {
         receiverId: selectedUser,
       });
+      console.log("user stopped typing");
       setTyping(false);
     }, 1000);
   };
@@ -432,16 +423,15 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const groupedMessages:GroupedMessages = {};
+  const groupedMessages: GroupedMessages = {};
 
-  [...conversationMessages, ...newMessages].forEach((msg) => {
+  conversationMessages.forEach((msg) => {
     const label = getDateLabel(msg.createdAt);
     if (!groupedMessages[label]) {
       groupedMessages[label] = [];
     }
     groupedMessages[label].push(msg);
   });
-
 
   return (
     <AnimatePresence mode="wait">
