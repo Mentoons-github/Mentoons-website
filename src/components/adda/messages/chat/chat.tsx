@@ -29,9 +29,11 @@ import {
   fetchConversation,
   fetchConversationId,
   addNewMessage,
+  markMessagesAsRead,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
+import { BiCheck, BiCheckDouble } from "react-icons/bi";
 
 export interface ChatUser {
   id: number;
@@ -50,6 +52,8 @@ export interface Message {
   createdAt: string;
   fileType?: "text" | "image" | "audio" | "video" | "file";
   fileName?: string;
+  isRead: boolean;
+  isDelivered: boolean;
 }
 
 export interface Messages {
@@ -91,9 +95,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [message, setMessage] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileURL, setSelectedFileURL] = useState<string | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+
+  const socket = useSocket();
 
   useEffect(() => {
     const fetchConversationData = async () => {
@@ -106,13 +113,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
 
       if (fetchConversationId.fulfilled.match(result)) {
         const conversationId = result.payload.conversationId;
+        setCurrentConversation(conversationId);
 
         dispatch(fetchConversation({ conversationId, token }));
+        if (socket) {
+          socket.emit("mark_as_read", { conversationId });
+        }
       }
     };
 
     fetchConversationData();
-  }, [dispatch, getToken, selectedUser]);
+  }, [dispatch, getToken, selectedUser, socket]);
 
   const fetchUserData = async () => {
     try {
@@ -151,19 +162,35 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const socket = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+
+    console.log("messsage reading");
+
+    socket.on("messages_read", ({ conversationId, userId }) => {
+      dispatch(markMessagesAsRead({ conversationId, userId }));
+    });
+
+    return () => {
+      socket.off("messages_read");
+    };
+  }, [socket, dispatch]);
 
   useEffect(() => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
       dispatch(addNewMessage(data));
+
+      if (currentConversation === data.conversationId) {
+        socket.emit("mark_as_read", { conversationId: data.conversationId });
+      }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [socket, selectedUser, user]);
+  }, [socket, selectedUser, user, dispatch, currentConversation]);
 
   const handleSendMessage = async () => {
     if (selectedFile) {
@@ -542,6 +569,25 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                               minute: "2-digit",
                             })}
                           </p>
+
+                          {msg.senderId !== selectedUser && (
+                            <div className="ml-2 flex items-center">
+                              {msg.isRead ? (
+                                // Blue double tick if read
+                                <span className="text-blue-500">
+                                  <BiCheckDouble />
+                                </span>
+                              ) : msg.isDelivered ? (
+                                <span className="text-gray-300">
+                                  <BiCheckDouble />
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">
+                                  <BiCheck />
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       {(msg.fileType === "image" ||
