@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BsDownload,
   BsX,
@@ -25,15 +25,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import FilePreview from "./filePreview";
 import ChatMenuModal from "@/components/modals/ChatMenuModal";
-import { SocketOnlineUser } from "./freinds";
-import ShareUserModal from "../share/shareModal";
 import {
   fetchConversation,
   fetchConversationId,
   addNewMessage,
+  markMessagesAsRead,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
+import { BiCheck, BiCheckDouble } from "react-icons/bi";
 
 export interface ChatUser {
   id: number;
@@ -52,6 +52,8 @@ export interface Message {
   createdAt: string;
   fileType?: "text" | "image" | "audio" | "video" | "file";
   fileName?: string;
+  isRead: boolean;
+  isDelivered: boolean;
 }
 
 export interface Messages {
@@ -93,12 +95,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [message, setMessage] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileURL, setSelectedFileURL] = useState<string | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<SocketOnlineUser[]>([]);
-  const [forwardOpen, setForwardOpen] = useState(false);
-  const [messageToSend, setMessageToSend] = useState<Message | null>(null);
   const buttonRef = useRef(null);
+
+  const socket = useSocket();
 
   useEffect(() => {
     const fetchConversationData = async () => {
@@ -111,13 +113,17 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
 
       if (fetchConversationId.fulfilled.match(result)) {
         const conversationId = result.payload.conversationId;
+        setCurrentConversation(conversationId);
 
         dispatch(fetchConversation({ conversationId, token }));
+        if (socket) {
+          socket.emit("mark_as_read", { conversationId });
+        }
       }
     };
 
     fetchConversationData();
-  }, [dispatch, getToken, selectedUser]);
+  }, [dispatch, getToken, selectedUser, socket]);
 
   const fetchUserData = async () => {
     try {
@@ -156,35 +162,35 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const socket = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+
+    console.log("messsage reading");
+
+    socket.on("messages_read", ({ conversationId, userId }) => {
+      dispatch(markMessagesAsRead({ conversationId, userId }));
+    });
+
+    return () => {
+      socket.off("messages_read");
+    };
+  }, [socket, dispatch]);
 
   useEffect(() => {
     if (!socket) return;
 
     socket.on("receive_message", (data) => {
       dispatch(addNewMessage(data));
+
+      if (currentConversation === data.conversationId) {
+        socket.emit("mark_as_read", { conversationId: data.conversationId });
+      }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [socket, selectedUser, user]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    // Listen for online users
-    socket.on("online_users", (data: SocketOnlineUser[]) => {
-      console.log("Online users updated:", data);
-      setOnlineUsers(data);
-    });
-
-    socket.emit("online_users");
-
-    return () => {
-      socket.off("online_users");
-    };
-  }, [socket]);
+  }, [socket, selectedUser, user, dispatch, currentConversation]);
 
   const handleSendMessage = async () => {
     if (selectedFile) {
@@ -226,10 +232,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const isSelectedUserOnline = useMemo(() => {
-    return onlineUsers.some((user) => user.friend?._id === selectedUser);
-  }, [onlineUsers, selectedUser]);
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -244,8 +246,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   };
 
   const handleForwardMessage = (msg: Message) => {
-    setForwardOpen(true);
-    setMessageToSend(msg);
+    console.log(`Forwarding message: ${msg.message} of type ${msg.fileType}`);
+    // Implement forwarding logic here, e.g., emit a socket event or open a forward modal
+    // Example: socket.emit("forward_message", { message: msg, receiverId: selectedUser });
   };
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
@@ -447,49 +450,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
           <SkeletonLoader />
         ) : (
           <>
-            <div className="flex justify-between items-center mb-6 px-4 pb-4 border-b border-gray-200">
-              {/* Left section */}
+            <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <img
                     src={user?.picture}
-                    alt={user?.name || "User Avatar"}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-md"
+                    alt={user?.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-lg font-semibold text-gray-900">
+                  <h1 className="text-lg font-semibold text-gray-800">
                     {user?.name}
                   </h1>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full ${
-                        isSelectedUserOnline ? "bg-green-500" : "bg-gray-400"
-                      }`}
-                    ></span>
-                    <span className="text-sm font-medium text-gray-600">
-                      {isSelectedUserOnline ? "Online" : "Offline"}
-                    </span>
-                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 relative">
-                <button
-                  className="p-2 rounded-full hover:bg-gray-100 transition"
-                  aria-label="Search"
-                >
-                  <MdSearch className="text-2xl text-gray-600 hover:text-indigo-500 transition-colors" />
-                </button>
-
-                <button
-                  className="p-2 rounded-full hover:bg-gray-100 transition"
-                  aria-label="Menu"
+              <div className="flex items-center gap-4 relative">
+                <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
+                <BsThreeDotsVertical
+                  className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
                   onClick={() => setIsModalOpen(true)}
-                  ref={buttonRef}
-                >
-                  <BsThreeDotsVertical className="text-2xl text-gray-600 hover:text-indigo-500 transition-colors" />
-                </button>
-
+                />
                 <ChatMenuModal
                   buttonRef={buttonRef}
                   handleAction={handleAction}
@@ -498,7 +479,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 />
               </div>
             </div>
-
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
               {Object.entries(groupedMessages).map(([dateLabel, messages]) => (
                 <div key={dateLabel}>
@@ -589,6 +569,25 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                               minute: "2-digit",
                             })}
                           </p>
+
+                          {msg.senderId !== selectedUser && (
+                            <div className="ml-2 flex items-center">
+                              {msg.isRead ? (
+                                // Blue double tick if read
+                                <span className="text-blue-500">
+                                  <BiCheckDouble />
+                                </span>
+                              ) : msg.isDelivered ? (
+                                <span className="text-gray-300">
+                                  <BiCheckDouble />
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">
+                                  <BiCheck />
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       {(msg.fileType === "image" ||
@@ -743,28 +742,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
           </>
         )}
       </motion.div>
-      {forwardOpen && messageToSend && (
-        <ShareUserModal
-          allowMultiSelect={true}
-          onClose={() => {
-            setForwardOpen(false);
-            setMessageToSend(null);
-          }}
-          messageToForward={messageToSend}
-          onShare={(selectedUserId, message) => {
-            if (socket && user) {
-              socket.emit("send_message", {
-                receiverId: selectedUserId,
-                message: message.message,
-                fileType: message.fileType,
-                fileName: message.fileName,
-              });
-            }
-            setForwardOpen(false);
-            setMessageToSend(null);
-          }}
-        />
-      )}
     </AnimatePresence>
   );
 };

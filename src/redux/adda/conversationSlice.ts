@@ -86,6 +86,19 @@ const conversationSlice = createSlice({
     addNewMessage: (state, action) => {
       state.data.push(action.payload);
     },
+    markMessagesAsRead: (state, action) => {
+      const { conversationId, userId } = action.payload;
+
+      state.data = state.data.map((msg) => {
+        if (
+          msg.conversationId === conversationId &&
+          msg.receiverId === userId
+        ) {
+          return { ...msg, isRead: true };
+        }
+        return msg;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -117,4 +130,4 @@ const conversationSlice = createSlice({
 
 export default conversationSlice.reducer;
 
-export const { addNewMessage } = conversationSlice.actions;
+export const { addNewMessage, markMessagesAsRead } = conversationSlice.actions;
