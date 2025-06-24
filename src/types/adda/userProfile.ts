@@ -54,6 +54,7 @@ export interface User {
   subscription?: Subscription;
   posts: string[];
   role: UserRole | string;
+  isOnline?: boolean;
 }
 
 export interface Media {

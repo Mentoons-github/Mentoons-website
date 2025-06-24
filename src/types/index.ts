@@ -25,7 +25,12 @@ import { Color, Membership } from "./home/membership";
 import { Booking, IndianState } from "./sessionBooking/session";
 import { JobPosting } from "./jobs/jobs";
 import { PostState, EventDetails } from "./adda/posts";
-import { Conversations, Friend, Message } from "./adda/conversation";
+import {
+  Conversations,
+  Friend,
+  Message,
+  Online_users,
+} from "./adda/conversation";
 import {
   FooterLists,
   JoinCardsProps,
@@ -77,6 +82,7 @@ export type {
   EventDetails,
   Conversations,
   Friend,
+  Online_users,
   Message,
   requestSender,
   FriendRequestResponse,
