@@ -12,6 +12,7 @@ interface ChatFooterProps {
   recordedAudio: null | string;
   setIsRecording: Dispatch<SetStateAction<boolean>>;
   selectedFile: File | null;
+  isUpload:boolean
 }
 
 const ChatFooter: React.FC<ChatFooterProps> = ({
@@ -24,6 +25,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
   recordedAudio,
   setIsRecording,
   selectedFile,
+  isUpload
 }) => {
   return (
     <div className="flex items-center gap-2 p-4 bg-white border-t">
@@ -32,7 +34,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
         ref={fileInputRef}
         onChange={handleFileUpload}
         className="hidden"
-        accept="image/*,audio/*,application/*"
+        accept="image/*,audio/*,application/*,video/*"
       />
 
       <button
@@ -66,11 +68,11 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
       <button
         onClick={handleSendMessage}
         disabled={
-          (!message.trim() && !recordedAudio && !selectedFile) || isRecording
+          (!message.trim() && !recordedAudio && !selectedFile && isUpload) || isRecording
         }
         className={`rounded-full p-3 text-white 
     ${
-      (!message.trim() && !recordedAudio && !selectedFile) || isRecording
+      (!message.trim() && !recordedAudio && !selectedFile) || isRecording || isUpload
         ? "bg-orange-300 cursor-not-allowed"
         : "bg-orange-500 hover:bg-orange-600"
     }`}
