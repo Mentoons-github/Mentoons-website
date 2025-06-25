@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 
-const MorphingBubbleIndicator = ({ isTyping }: { isTyping: boolean }) => {
-  if (!isTyping) return null;
+const MorphingBubbleIndicator = () => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
