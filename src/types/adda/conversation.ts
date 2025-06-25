@@ -8,15 +8,15 @@ export interface Friend {
 }
 
 export interface Message {
-  conversationId:string;
+  conversationId: string;
   message: string;
   senderId?: string;
   receiverId: string;
   createdAt: string;
   fileType?: "text" | "image" | "audio" | "file" | "video";
   fileName?: string;
-  isRead:boolean;
-  isDelivered:boolean;
+  isRead: boolean;
+  isDelivered: boolean;
 }
 
 export interface Conversations {

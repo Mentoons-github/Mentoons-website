@@ -15,7 +15,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 const PrimaryHeader = () => {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const location = useLocation();
   const { getToken } = useAuth();
   const dispatch = useDispatch();

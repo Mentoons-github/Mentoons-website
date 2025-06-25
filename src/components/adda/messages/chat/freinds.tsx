@@ -1,4 +1,5 @@
 import axiosInstance from "@/api/axios";
+import useSocket from "@/hooks/adda/useSocket";
 import { useAuth } from "@clerk/clerk-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
@@ -48,6 +49,8 @@ function useDebounce<T>(value: T, delay: number): T {
 
 const Friends = () => {
   const { selectedUser } = useParams();
+  const { onlineUsers } = useSocket();
+  console.log("onilen users :--------------->", onlineUsers);
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
@@ -253,7 +256,7 @@ const Friends = () => {
                       ? "Image"
                       : item.data.messageType === "video"
                       ? "Video"
-                       : item.data.messageType === "file"
+                      : item.data.messageType === "file"
                       ? "File"
                       : item.data.messageType === "audio"
                       ? "Audio"
