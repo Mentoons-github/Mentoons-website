@@ -38,6 +38,8 @@ type MergedResult =
   | { type: "conversation"; data: UserConversation }
   | { type: "friend"; data: Friend };
 
+type FilterType = "all" | "online" | "read" | "unread";
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -60,8 +62,16 @@ const Friends = () => {
   const [conversations, setConversations] = useState<UserConversation[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   const debouncedSearch = useDebounce(searchTerm, 500);
+
+  const filters: { key: FilterType; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "online", label: "Online" },
+    { key: "read", label: "Read" },
+    { key: "unread", label: "Unread" },
+  ];
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -174,6 +184,52 @@ const Friends = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           aria-label="Search chats"
         />
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="relative flex items-center gap-1 p-1.5 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
+        {filters.map((filter) => (
+          <motion.button
+            key={filter.key}
+            onClick={() => setActiveFilter(filter.key)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`relative flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
+              activeFilter === filter.key
+                ? "text-white shadow-lg"
+                : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
+            }`}
+          >
+            {activeFilter === filter.key && (
+              <motion.div
+                layoutId="activeFilter"
+                className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl"
+                initial={false}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+
+            <motion.div
+              className="absolute inset-0 bg-orange-100/60 rounded-xl opacity-0"
+              whileHover={{ opacity: activeFilter === filter.key ? 0 : 1 }}
+              transition={{ duration: 0.2 }}
+            />
+
+            <span className="relative z-10 tracking-wide font-sans">
+              {filter.label}
+            </span>
+
+            {activeFilter === filter.key && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 w-2 h-2 bg-orange-300 rounded-full shadow-sm z-20"
+              />
+            )}
+          </motion.button>
+        ))}
+
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-amber-500/5 rounded-2xl pointer-events-none" />
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
