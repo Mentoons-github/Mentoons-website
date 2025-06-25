@@ -578,7 +578,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                                   <BiCheckDouble />
                                 </span>
                               ) : msg.isDelivered ? (
-                                <span className="text-gray-300">
+                                <span className="text-gray-400">
                                   <BiCheckDouble />
                                 </span>
                               ) : (
