@@ -7,13 +7,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const NotificationPopup = () => {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [newNotification, setNewNotification] =
     useState<NotificationInterface | null>(null);
   const [progress, setProgress] = useState(100);
   const [isExiting, setIsExiting] = useState(false);
+
+  const playNotificationSound = () => {
+    const audio = new Audio(
+      "/assets/adda/notification/bell-notification-337658.mp3"
+    );
+
+    audio.play().catch((err) => console.log(`audio played failed : ${err}`));
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -24,6 +32,8 @@ const NotificationPopup = () => {
       setShowPopup(true);
       setIsExiting(false);
       setProgress(100);
+
+      playNotificationSound();
     };
 
     socket.on("receive_notification", handleNewNotification);

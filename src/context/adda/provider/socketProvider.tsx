@@ -6,6 +6,7 @@ import SocketContext from "../socket";
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const { getToken } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   useEffect(() => {
     const connectSocket = async () => {
@@ -22,6 +23,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       newSocket.on("connect", () => {
         console.log("Socket connected:", newSocket.id);
       });
+
+      newSocket.on("online_users", (users: string[]) => {
+        console.log("Online users updated:", users);
+        setOnlineUsers(users);
+      });
     };
 
     connectSocket();
@@ -35,6 +41,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   }, [getToken]);
 
   return (
-    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
+      {children}
+    </SocketContext.Provider>
   );
 };

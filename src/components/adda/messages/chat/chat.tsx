@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ChatFooter from "./chatFooter";
 import { useAuth } from "@clerk/clerk-react";
 import axiosInstance from "@/api/axios";
-import { User } from "@/types";
+import { Message, User } from "@/types";
 import useSocket from "@/hooks/adda/useSocket";
 import MorphingBubbleIndicator from "./TypingIndicator";
 import { FaShare } from "react-icons/fa6";
@@ -34,6 +34,7 @@ import {
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
 import { BiCheck, BiCheckDouble } from "react-icons/bi";
+import ShareUserModal from "../share/shareModal";
 
 export interface ChatUser {
   id: number;
@@ -43,17 +44,6 @@ export interface ChatUser {
   profilePicture: string;
   new: boolean;
   online: boolean;
-}
-
-export interface Message {
-  message: string;
-  senderId?: string;
-  receiverId: string;
-  createdAt: string;
-  fileType?: "text" | "image" | "audio" | "video" | "file";
-  fileName?: string;
-  isRead: boolean;
-  isDelivered: boolean;
 }
 
 export interface Messages {
@@ -99,8 +89,13 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+  // NEW: State for ShareUserModal
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [messageToForward, setMessageToForward] = useState<Message | null>(
+    null
+  );
 
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   useEffect(() => {
     const fetchConversationData = async () => {
@@ -128,7 +123,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      // setMessages([]);
       const token = await getToken();
       if (!token) {
         throw new Error("No token found");
@@ -167,9 +161,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
 
     console.log("messsage reading");
 
-    socket.on("messages_read", ({ conversationId, userId }) => {
-      dispatch(markMessagesAsRead({ conversationId, userId }));
-    });
+    socket.on(
+      "messages_read",
+      ({
+        conversationId,
+        userId,
+      }: {
+        conversationId: string;
+        userId: string;
+      }) => {
+        dispatch(markMessagesAsRead({ conversationId, userId }));
+      }
+    );
 
     return () => {
       socket.off("messages_read");
@@ -179,7 +182,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("receive_message", (data) => {
+    socket.on("receive_message", (data: any) => {
       dispatch(addNewMessage(data));
 
       if (currentConversation === data.conversationId) {
@@ -246,9 +249,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   };
 
   const handleForwardMessage = (msg: Message) => {
-    console.log(`Forwarding message: ${msg.message} of type ${msg.fileType}`);
-    // Implement forwarding logic here, e.g., emit a socket event or open a forward modal
-    // Example: socket.emit("forward_message", { message: msg, receiverId: selectedUser });
+    setMessageToForward(msg);
+    setIsShareModalOpen(true);
+  };
+
+  const handleShareMessage = (selectedUserIds: string[], message: Message) => {
+    if (!socket || !message) return;
+
+    selectedUserIds.forEach((receiverId) => {
+      socket.emit("send_message", {
+        receiverId,
+        message: message.message,
+        fileType: message.fileType || "text",
+        fileName: message.fileName,
+      });
+    });
+
+    console.log(
+      `Forwarded message to users: ${selectedUserIds.join(", ")}, Message: ${
+        message.message
+      }, Type: ${message.fileType}`
+    );
   };
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
@@ -319,13 +340,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("typing", ({ userId }) => {
+    socket.on("typing", ({ userId }: { userId: string }) => {
       if (userId === selectedUser) {
+        console.log("user is typing");
         setOtherUserTyping(true);
       }
     });
 
-    socket.on("stopped_typing", ({ userId }) => {
+    socket.on("stopped_typing", ({ userId }: { userId: string }) => {
       if (userId === selectedUser) {
         setOtherUserTyping(false);
       }
@@ -573,7 +595,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                           {msg.senderId !== selectedUser && (
                             <div className="ml-2 flex items-center">
                               {msg.isRead ? (
-                                // Blue double tick if read
                                 <span className="text-blue-500">
                                   <BiCheckDouble />
                                 </span>
@@ -610,8 +631,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                   ))}
                 </div>
               ))}
-              <MorphingBubbleIndicator isTyping={otherUserTyping} />
+
               <div ref={messagesEndRef} />
+              {otherUserTyping && <MorphingBubbleIndicator />}
             </div>
             <AnimatePresence>
               {isRecording && (
@@ -697,6 +719,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               selectedFile={selectedFile}
               isUpload={fileUpload.loading}
             />
+
+            {isShareModalOpen && messageToForward && (
+              <ShareUserModal
+                onClose={() => {
+                  setIsShareModalOpen(false);
+                  setMessageToForward(null);
+                }}
+                messageToForward={messageToForward}
+                onShare={handleShareMessage}
+                allowMultiSelect={true}
+              />
+            )}
 
             <AnimatePresence>
               {enlargedImage && (
