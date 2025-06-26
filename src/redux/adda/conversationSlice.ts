@@ -26,11 +26,8 @@ interface MessageI {
   conversations: UserConversation[];
   data: Message[];
   error: string | null;
-  status: "idle" | "loading" | "succeeded" | "failed" | "conversationLoading";
+  status: "idle" | "loading" | "succeeded" | "failed " | "conversationLoading";
   conversationId: string;
-  // New fields for infinite scroll
-  loadingMore: boolean;
-  hasMore: boolean;
 }
 
 const initialState: MessageI = {
@@ -39,9 +36,6 @@ const initialState: MessageI = {
   error: null,
   status: "idle",
   conversationId: "",
-  // Initialize new fields
-  loadingMore: false,
-  hasMore: true,
 };
 
 export const fetchConversationId = createAsyncThunk<
@@ -74,31 +68,24 @@ export const fetchConversationId = createAsyncThunk<
   }
 );
 
-// Updated fetchConversation with pagination support
 export const fetchConversation = createAsyncThunk<
-  { messages: Message[]; hasMore: boolean },
-  { conversationId: string; token: string; before?: string },
+  Message[],
+  { conversationId: string; token: string },
   { rejectValue: string }
 >(
   "conversation/fetchConversation",
-  async ({ conversationId, token, before }, { rejectWithValue }) => {
+  async ({ conversationId, token }, { rejectWithValue }) => {
     try {
-      const url = before 
-        ? `/conversation/${conversationId}?before=${before}`
-        : `/conversation/${conversationId}`;
-        
-      const response = await axiosInstance.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      const messages = response.data.data;
-      // If we got less than 50 messages, there are no more to fetch
-      const hasMore = messages.length === 50;
-      
-      return { messages, hasMore };
+      const response = await axiosInstance.get(
+        `/conversation/${conversationId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError;
       return rejectWithValue(
@@ -181,6 +168,8 @@ const conversationSlice = createSlice({
       state,
       action: PayloadAction<{ conversationId: string; userId: string }>
     ) => {
+
+      
       const convo = state.conversations.find(
         (c) => c.conversation_id === action.payload.conversationId,
       );
@@ -206,49 +195,18 @@ const conversationSlice = createSlice({
         }
       }
     },
-    // New reducer to reset conversation state when switching conversations
-    resetConversation: (state) => {
-      state.data = [];
-      state.hasMore = true;
-      state.loadingMore = false;
-      state.status = "idle";
-      state.error = null;
-    },
   },
   extraReducers: (builder) => {
     builder
-      // Updated fetchConversation cases
-      .addCase(fetchConversation.pending, (state, action) => {
-        // Check if this is initial load or loading more
-        if (action.meta.arg.before) {
-          state.loadingMore = true;
-        } else {
-          state.status = "loading";
-        }
-        state.error = null;
+      .addCase(fetchConversation.pending, (state) => {
+        state.status = "loading";
       })
       .addCase(fetchConversation.fulfilled, (state, action) => {
-        const { messages, hasMore } = action.payload;
-        
-        if (action.meta.arg.before) {
-          // Loading more messages - prepend to beginning (reverse order for chronological display)
-          state.data = [...messages.reverse(), ...state.data];
-          state.loadingMore = false;
-        } else {
-          // Initial load - replace all messages (reverse for chronological display)
-          state.data = messages.reverse();
-          state.status = "succeeded";
-        }
-        
-        state.hasMore = hasMore;
+        state.data = action.payload.reverse();
+        state.status = "succeeded";
         state.error = null;
       })
       .addCase(fetchConversation.rejected, (state, action) => {
-        if (action.meta.arg.before) {
-          state.loadingMore = false;
-        } else {
-          state.status = "failed";
-        }
         state.error = action.payload || "Failed to fetch conversation";
       })
 
@@ -285,5 +243,4 @@ export const {
   updateLastMessage,
   resetUnreadCount,
   incrementUnreadCount,
-  resetConversation,
 } = conversationSlice.actions;
