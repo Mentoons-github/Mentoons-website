@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   BsDownload,
   BsX,
@@ -30,6 +36,10 @@ import {
   fetchConversationId,
   addNewMessage,
   markMessagesAsRead,
+  updateLastMessage,
+  resetUnreadCount,
+  incrementUnreadCount,
+  resetConversation,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
@@ -52,6 +62,7 @@ export interface Messages {
 
 interface ChatProps {
   selectedUser: string;
+  conversationMessages: Message[];
 }
 
 interface GroupedMessages {
@@ -61,11 +72,14 @@ interface GroupedMessages {
 const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-  const conversationMessages = useSelector(
-    (state: RootState) => state.conversation.data
-  );
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
+  const {
+    data: messages,
+    status,
+    loadingMore,
+    hasMore,
+  } = useSelector((state: RootState) => state.conversation);
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
@@ -89,18 +103,111 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   // NEW: State for ShareUserModal
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [messageToForward, setMessageToForward] = useState<Message | null>(
     null
   );
 
-  const { socket } = useSocket();
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const [previousScrollHeight, setPreviousScrollHeight] = useState(0);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { socket, mongoUserId } = useSocket();
+
+  const loadMoreMessages = useCallback(async () => {
+    if (!currentConversation || loadingMore || !hasMore || status === "loading")
+      return;
+
+    const token = await getToken();
+    if (!token || messages.length === 0) return;
+
+    // Get the oldest message's createdAt as the 'before' parameter
+    const oldestMessage = messages[0];
+    const before = oldestMessage.createdAt;
+
+    // Store current scroll position
+    const container = messagesContainerRef.current;
+    if (container) {
+      setPreviousScrollHeight(container.scrollHeight);
+    }
+
+    dispatch(
+      fetchConversation({
+        conversationId: currentConversation,
+        token,
+        before,
+      })
+    );
+  }, [
+    currentConversation,
+    loadingMore,
+    hasMore,
+    messages,
+    dispatch,
+    getToken,
+    status,
+  ]);
+
+  const handleScroll = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    setIsUserScrolling(true);
+
+    // Check if user scrolled to top (with small threshold)
+    if (
+      container.scrollTop <= 100 &&
+      hasMore &&
+      !loadingMore &&
+      status !== "loading"
+    ) {
+      loadMoreMessages();
+    }
+
+    if (scrollTimerRef.current) {
+      clearTimeout(scrollTimerRef.current);
+    }
+    // Clear scrolling flag after a delay
+    scrollTimerRef.current = setTimeout(() => {
+      setIsUserScrolling(false);
+    }, 150);
+  }, [loadMoreMessages, hasMore, loadingMore, status]);
+
+  useEffect(() => {
+    if (!loadingMore || !messagesContainerRef.current) return;
+
+    const container = messagesContainerRef.current;
+    const newScrollHeight = container.scrollHeight;
+
+    if (previousScrollHeight > 0 && newScrollHeight > previousScrollHeight) {
+      // Maintain scroll position after prepending messages
+      container.scrollTop = newScrollHeight - previousScrollHeight;
+      setPreviousScrollHeight(0);
+    }
+  }, [loadingMore, previousScrollHeight]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    container.addEventListener("scroll", handleScroll);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+      }
+    };
+  }, [handleScroll]);
 
   useEffect(() => {
     const fetchConversationData = async () => {
       const token = await getToken();
       if (!token || !selectedUser) return;
+
+      dispatch(resetConversation());
 
       const result = await dispatch(
         fetchConversationId({ selectedUserId: selectedUser, token })
@@ -114,6 +221,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         if (socket) {
           socket.emit("mark_as_read", { conversationId });
         }
+        dispatch(
+          resetUnreadCount({
+            conversationId: conversationId,
+            userId: mongoUserId,
+          })
+        );
       }
     };
 
@@ -147,19 +260,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (!isLoading) {
-      scrollToBottom();
-    }
-  }, [isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
     if (!socket) return;
-
-    console.log("messsage reading");
 
     socket.on(
       "messages_read",
@@ -182,18 +283,41 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("receive_message", (data: any) => {
+    socket.on("receive_message", (data: Message) => {
       dispatch(addNewMessage(data));
+
+      dispatch(
+        updateLastMessage({
+          conversationId: data.conversationId,
+          message: data.message,
+          fileType: data.fileType,
+          updatedAt: data.createdAt,
+        })
+      );
 
       if (currentConversation === data.conversationId) {
         socket.emit("mark_as_read", { conversationId: data.conversationId });
+
+        dispatch(
+          resetUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId,
+          })
+        );
+      } else {
+        dispatch(
+          incrementUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId, // 👈 Use your own userId
+          })
+        );
       }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [socket, selectedUser, user, dispatch, currentConversation]);
+  }, [socket, selectedUser, user, dispatch, currentConversation, mongoUserId]);
 
   const handleSendMessage = async () => {
     if (selectedFile) {
@@ -448,15 +572,67 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const groupedMessages: GroupedMessages = {};
+  const groupedMessages = useMemo(() => {
+    const groups: GroupedMessages = {};
 
-  conversationMessages.forEach((msg) => {
-    const label = getDateLabel(msg.createdAt);
-    if (!groupedMessages[label]) {
-      groupedMessages[label] = [];
+    messages.forEach((msg) => {
+      const label = getDateLabel(msg.createdAt);
+      if (!groups[label]) {
+        groups[label] = [];
+      }
+      groups[label].push(msg);
+    });
+
+    return groups;
+  }, [messages]);
+
+  useEffect(() => {
+    if (
+      !isUserScrolling &&
+      messagesContainerRef.current &&
+      !loadingMore &&
+      status === "succeeded"
+    ) {
+      const container = messagesContainerRef.current;
+      // Only auto-scroll if we're near the bottom already or it's initial load
+      const isNearBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 100;
+      if (isNearBottom || messages.length <= 50) {
+        const timeout = setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 0);
+        return () => clearTimeout(timeout);
+      }
     }
-    groupedMessages[label].push(msg);
-  });
+  }, [groupedMessages, isUserScrolling, loadingMore, status, messages.length]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || loadingMore || isUserScrolling) return;
+
+    // Detect whether user is near bottom
+    const isNearBottom =
+      container.scrollTop + container.clientHeight >=
+      container.scrollHeight - 100;
+
+    // Only scroll if it's near bottom or very few messages
+    if ((isNearBottom || messages.length <= 50) && !loadingMore) {
+      const timeout = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [messages.length, groupedMessages, loadingMore, isUserScrolling]);
 
   return (
     <AnimatePresence mode="wait">
@@ -501,7 +677,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 />
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25">
+            <div
+              ref={messagesContainerRef}
+              className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-[url('/assets/adda/chat/background/d393ffb1117aaf22c62eaf8cf1f09587a6148e88.png')] bg-contain bg-no-repeat bg-center bg-gray-900 bg-opacity-25"
+            >
               {Object.entries(groupedMessages).map(([dateLabel, messages]) => (
                 <div key={dateLabel}>
                   <div className="flex justify-center my-6">
@@ -510,125 +689,133 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                     </span>
                   </div>
 
-                  {messages.map((msg, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={`flex ${
-                        msg.senderId !== selectedUser
-                          ? "justify-end"
-                          : "justify-start"
-                      } mb-4 items-end`}
-                    >
-                      <div
-                        className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
+                  {messages
+                    .sort(
+                      (a, b) =>
+                        new Date(a.createdAt).getTime() -
+                        new Date(b.createdAt).getTime()
+                    )
+                    .map((msg, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={`flex ${
                           msg.senderId !== selectedUser
-                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                            ? "justify-end"
+                            : "justify-start"
+                        } mb-4 items-end`}
                       >
-                        {msg.fileType === "image" && (
-                          <img
-                            src={msg.message}
-                            alt="Image"
-                            className="rounded-md mb-2 max-w-[300px] max-h-[250px] object-cover"
-                            onClick={() => setEnlargedImage(msg.message)}
-                          />
-                        )}
-                        {msg.fileType === "audio" && (
-                          <audio
-                            src={msg.message}
-                            controls
-                            className="w-full rounded-md mb-2"
-                          />
-                        )}
-                        {msg.fileType === "video" && (
-                          <video
-                            src={msg.message}
-                            controls
-                            className="w-full max-w-[300px] max-h-[250px] object-cover rounded-md mb-2"
-                          />
-                        )}
-                        {msg.fileType === "file" && (
-                          <a
-                            href={msg.message}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex flex-col items-center justify-center mb-2 p-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                          >
-                            <div className="flex items-center mb-2">
-                              <div className="bg-blue-100 p-3 rounded-full">
-                                <BsFileEarmarkText
-                                  size={40}
-                                  className="text-blue-500"
-                                />
-                              </div>
-                              <div className="ml-3">
-                                <p className="text-sm text-gray-800 font-medium truncate max-w-[180px]">
-                                  {msg.fileName}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="text-xs text-blue-500">Tap to open</p>
-                          </a>
-                        )}
-
-                        {(!msg.fileType || msg.fileType === "text") && (
-                          <p className="text-sm">{msg.message}</p>
-                        )}
-                        <div className="flex items-center justify-between mt-1">
-                          <p
-                            className={`text-xs ${
-                              msg.senderId !== selectedUser
-                                ? "text-white/70"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-
-                          {msg.senderId !== selectedUser && (
-                            <div className="ml-2 flex items-center">
-                              {msg.isRead ? (
-                                <span className="text-blue-500">
-                                  <BiCheckDouble />
-                                </span>
-                              ) : msg.isDelivered ? (
-                                <span className="text-gray-400">
-                                  <BiCheckDouble />
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">
-                                  <BiCheck />
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {(msg.fileType === "image" ||
-                        msg.fileType === "audio" ||
-                        msg.fileType === "file" ||
-                        msg.fileType === "video") && (
-                        <button
-                          onClick={() => handleForwardMessage(msg)}
-                          className={`ml-2 p-2 rounded-full transition-colors ${
+                        <div
+                          className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
                             msg.senderId !== selectedUser
-                              ? "text-white bg-green-600"
-                              : "text-gray-500 hover:bg-gray-200"
+                              ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
+                              : "bg-gray-100 text-gray-800"
                           }`}
-                          title="Forward"
                         >
-                          <FaShare size={20} />
-                        </button>
-                      )}
-                    </motion.div>
-                  ))}
+                          {msg.fileType === "image" && (
+                            <img
+                              src={msg.message}
+                              alt="Image"
+                              className="rounded-md mb-2 max-w-[300px] max-h-[250px] object-cover"
+                              onClick={() => setEnlargedImage(msg.message)}
+                            />
+                          )}
+                          {msg.fileType === "audio" && (
+                            <audio
+                              src={msg.message}
+                              controls
+                              className="w-full rounded-md mb-2"
+                            />
+                          )}
+                          {msg.fileType === "video" && (
+                            <video
+                              src={msg.message}
+                              controls
+                              className="w-full max-w-[300px] max-h-[250px] object-cover rounded-md mb-2"
+                            />
+                          )}
+                          {msg.fileType === "file" && (
+                            <a
+                              href={msg.message}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex flex-col items-center justify-center mb-2 p-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                            >
+                              <div className="flex items-center mb-2">
+                                <div className="bg-blue-100 p-3 rounded-full">
+                                  <BsFileEarmarkText
+                                    size={40}
+                                    className="text-blue-500"
+                                  />
+                                </div>
+                                <div className="ml-3">
+                                  <p className="text-sm text-gray-800 font-medium truncate max-w-[180px]">
+                                    {msg.fileName}
+                                  </p>
+                                </div>
+                              </div>
+                              <p className="text-xs text-blue-500">
+                                Tap to open
+                              </p>
+                            </a>
+                          )}
+
+                          {(!msg.fileType || msg.fileType === "text") && (
+                            <p className="text-sm">{msg.message}</p>
+                          )}
+                          <div className="flex items-center justify-between mt-1">
+                            <p
+                              className={`text-xs ${
+                                msg.senderId !== selectedUser
+                                  ? "text-white/70"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {new Date(msg.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+
+                            {msg.senderId !== selectedUser && (
+                              <div className="ml-2 flex items-center">
+                                {msg.isRead ? (
+                                  <span className="text-blue-500">
+                                    <BiCheckDouble />
+                                  </span>
+                                ) : msg.isDelivered ? (
+                                  <span className="text-gray-400">
+                                    <BiCheckDouble />
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">
+                                    <BiCheck />
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {(msg.fileType === "image" ||
+                          msg.fileType === "audio" ||
+                          msg.fileType === "file" ||
+                          msg.fileType === "video") && (
+                          <button
+                            onClick={() => handleForwardMessage(msg)}
+                            className={`ml-2 p-2 rounded-full transition-colors ${
+                              msg.senderId !== selectedUser
+                                ? "text-white bg-green-600"
+                                : "text-gray-500 hover:bg-gray-200"
+                            }`}
+                            title="Forward"
+                          >
+                            <FaShare size={20} />
+                          </button>
+                        )}
+                      </motion.div>
+                    ))}
                 </div>
               ))}
 

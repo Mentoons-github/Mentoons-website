@@ -7,6 +7,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const { getToken } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [mongoUserId, setMongoUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const connectSocket = async () => {
@@ -17,6 +18,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         withCredentials: true,
         auth: { token },
       });
+
+      newSocket.on("mongo_user_id", ({ userId }) => {
+      setMongoUserId(userId);
+      console.log("MongoDB user ID from socket:", userId);
+    });
 
       setSocket(newSocket);
 
@@ -41,7 +47,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   }, [getToken]);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers }}>
+    <SocketContext.Provider value={{ socket, onlineUsers, mongoUserId }}>
       {children}
     </SocketContext.Provider>
   );

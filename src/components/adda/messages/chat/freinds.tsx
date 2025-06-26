@@ -1,9 +1,13 @@
 import axiosInstance from "@/api/axios";
 import useSocket from "@/hooks/adda/useSocket";
+import { fetchAllConversations } from "@/redux/adda/conversationSlice";
+import { AppDispatch, RootState } from "@/redux/store";
+import { Message } from "@/types";
 import { useAuth } from "@clerk/clerk-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
 import { FaSearch } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 interface Friend {
@@ -20,18 +24,23 @@ interface UserConversation {
   friend: Friend;
   lastMessage: string;
   messageType: string;
-  updatedAt: Date;
-  createdAt: Date;
+  updatedAt: string;
+  createdAt: string;
+  unreadCounts: { [userId: string]: number };
 }
 
-interface ConversationResponse {
-  data: UserConversation[];
-}
+// interface ConversationResponse {
+//   data: UserConversation[];
+// }
 
 interface FriendsResponse {
   data: {
     friends: Friend[];
   };
+}
+
+interface FriendsProps {
+  lastMessage: Message | null;
 }
 
 type MergedResult =
@@ -49,53 +58,53 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-const Friends = () => {
+const Friends: React.FC<FriendsProps> = () => {
   const { selectedUser } = useParams();
-  const { onlineUsers } = useSocket();
-  console.log("onilen users :--------------->", onlineUsers);
+  const { onlineUsers, mongoUserId } = useSocket();
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { conversations, status } = useSelector(
+    (state: RootState) => state.conversation
+  );
+
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<UserConversation[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const filters: { key: FilterType; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "online", label: "Online" },
-    { key: "read", label: "Read" },
-    { key: "unread", label: "Unread" },
+  const unreadCount = conversations.filter(
+    (conv) => (conv.unreadCounts?.[mongoUserId] || 0) > 0
+  ).length;
+
+  const readCount = conversations.filter(
+    (conv) => (conv.unreadCounts?.[mongoUserId] || 0) === 0
+  ).length;
+
+  const onlineCount = conversations.filter((conv) =>
+    onlineUsers.some((u: { _id: string }) => u._id === conv.friend._id)
+  ).length;
+
+  const totalCount = conversations.length;
+
+  const filters: { key: FilterType; label: string; count: number }[] = [
+    { key: "all", label: "All", count: totalCount },
+    { key: "online", label: "Online", count: onlineCount },
+    { key: "read", label: "Read", count: readCount },
+    { key: "unread", label: "Unread", count: unreadCount },
   ];
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = await getToken();
-        const response = await axiosInstance.get<ConversationResponse>(
-          "/conversation",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
-          }
-        );
-        console.log("response :", response.data.data);
-        setConversations(response.data.data);
-      } catch (err) {
-        console.error("Error fetching conversations:", err);
-        setError("Failed to fetch conversations. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+    const fetch = async () => {
+      const token = await getToken();
+      if (!token) return;
+      dispatch(fetchAllConversations({ token }));
     };
-    fetchConversations();
+    fetch();
   }, [getToken]);
 
   useEffect(() => {
@@ -117,7 +126,6 @@ const Friends = () => {
           }
         );
 
-        console.log("response ==========>", response.data.data?.friends);
         setFriends(response.data.data?.friends);
       } catch (err: unknown) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
@@ -132,13 +140,32 @@ const Friends = () => {
     return () => controller.abort();
   }, [debouncedSearch, getToken]);
 
-  const filteredConversations = useMemo(
-    () =>
-      conversations.filter((conv) =>
-        conv.friend.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-      ),
-    [conversations, debouncedSearch]
-  );
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((conv) => {
+      const nameMatch = conv.friend.name
+        .toLowerCase()
+        .includes(debouncedSearch.toLowerCase());
+
+      const isOnline = onlineUsers.some(
+        (u: { _id: string }) => u._id === conv.friend._id
+      );
+
+      const unreadCount = conv.unreadCounts?.[mongoUserId] || 0;
+      console.log(unreadCount, "unreadcouont");
+
+      switch (activeFilter) {
+        case "online":
+          return nameMatch && isOnline;
+        case "read":
+          return nameMatch && unreadCount === 0;
+        case "unread":
+          return nameMatch && unreadCount > 0;
+        case "all":
+        default:
+          return nameMatch;
+      }
+    });
+  }, [conversations, debouncedSearch, activeFilter, onlineUsers]);
 
   const conversationFriendIds = useMemo(
     () => conversations.map((conv) => conv.friend._id),
@@ -167,6 +194,7 @@ const Friends = () => {
     [filteredConversations, filteredNewFriends]
   );
 
+
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
@@ -186,7 +214,6 @@ const Friends = () => {
         />
       </div>
 
-      {/* Filter Tabs */}
       <div className="relative flex items-center gap-1 p-1.5 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
         {filters.map((filter) => (
           <motion.button
@@ -194,7 +221,7 @@ const Friends = () => {
             onClick={() => setActiveFilter(filter.key)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`relative flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
+            className={`relative flex-1 px-2 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
               activeFilter === filter.key
                 ? "text-white shadow-lg"
                 : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
@@ -215,8 +242,13 @@ const Friends = () => {
               transition={{ duration: 0.2 }}
             />
 
-            <span className="relative z-10 tracking-wide font-sans">
+            <span className="relative z-10 tracking-wide font-sans flex items-center gap-1">
               {filter.label}
+              {filter.count > 0 && (
+                <span className="text-[10px] bg-white/90 text-gray-700 font-bold px-1.5 py-0.5 rounded-full shadow">
+                  {filter.count}
+                </span>
+              )}
             </span>
 
             {activeFilter === filter.key && (
@@ -234,17 +266,19 @@ const Friends = () => {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         <AnimatePresence>
-          {(loading || friendsLoading) && (
+          {(status == "conversationLoading" || friendsLoading) && (
             <div className="text-center py-5">Loading...</div>
           )}
           {error && (
             <div className="text-red-500 text-center py-5">{error}</div>
           )}
-          {mergedResults.length === 0 && !loading && !friendsLoading && (
-            <div className="text-center text-gray-500 py-5">
-              No results found.
-            </div>
-          )}
+          {mergedResults.length === 0 &&
+            status !== "conversationLoading" &&
+            !friendsLoading && (
+              <div className="text-center text-gray-500 py-5">
+                No results found.
+              </div>
+            )}
           {mergedResults.map((item, index) => (
             <motion.div
               key={
@@ -321,18 +355,22 @@ const Friends = () => {
                 </p>
               </div>
 
-              <div className="absolute top-3 right-3">
-                {item.type === "conversation" ? (
-                  <span className="text-xs text-gray-400">
-                    {new Date(item.data.updatedAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                ) : (
-                  <span className="text-xs text-blue-500 font-semibold">
-                    New
-                  </span>
+              <div className="absolute top-3 right-3 flex items-center gap-1">
+                {item.type === "conversation" && (
+                  <>
+                    <span className="text-xs text-gray-400">
+                      {new Date(item.data.updatedAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+
+                    {item.data.unreadCounts?.[mongoUserId] > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                        {item.data.unreadCounts[mongoUserId]}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </motion.div>
