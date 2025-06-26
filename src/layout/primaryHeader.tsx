@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaClock, FaMessage, FaPhone } from "react-icons/fa6";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-// import axiosInstance from "@/api/axios";
+import axiosInstance from "@/api/axios";
 import PlatinumMembershipModal from "@/components/common/modal/platinumSubscriptionModal";
 
 const PrimaryHeader = () => {
@@ -43,24 +43,24 @@ const PrimaryHeader = () => {
   }, [socket, dispatch]);
 
   const handleMessageClick = async () => {
-    // try {
-      // const token = await getToken();
-      // const res = await axiosInstance.get("/user/subscription-status", {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
+    try {
+      const token = await getToken();
+      const res = await axiosInstance.get("/user/subscription-status", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // const { isValid, plan } = res.data.data;
-      // const isPlatinum = plan.toLowerCase() === "platinum";
+      const { isValid, plan } = res.data.data;
+      const isPlatinum = plan.toLowerCase() === "platinum";
 
-      // if (isValid && isPlatinum) {
+      if (isValid && isPlatinum) {
         setUnreadCount(0);
         navigate("/chat");
-    //   } else {
-    //     setMembershipModal(true);
-    //   }
-    // } catch (err) {
-    //   setMembershipModal(true);
-    // }
+      } else {
+        setMembershipModal(true);
+      }
+    } catch (err) {
+      setMembershipModal(true);
+    }
   };
 
   const adda = useMemo(
