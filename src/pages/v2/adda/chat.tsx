@@ -3,8 +3,10 @@ import Friends from "@/components/adda/messages/chat/freinds";
 import Welcome from "@/components/adda/messages/chat/welcome";
 import ShareUserModal from "@/components/adda/messages/share/shareModal";
 import { Message } from "@/types";
-import { motion } from "framer-motion";
 import { useState } from "react";
+import { RootState } from "@/redux/store";
+import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import useSocket from "@/hooks/adda/useSocket";
 
@@ -28,6 +30,11 @@ const ChatPage = () => {
       });
     });
   };
+  const conversationMessages = useSelector(
+    (state: RootState) => state.conversation.data
+  );
+
+  const lastMessage = conversationMessages[conversationMessages.length - 1];
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden p-6">
@@ -36,7 +43,7 @@ const ChatPage = () => {
           selectedUser ? "hidden" : "block"
         } md:hidden w-full h-full p-4`}
       >
-        <Friends />
+        <Friends lastMessage={lastMessage} />
       </div>
 
       <div
@@ -47,6 +54,7 @@ const ChatPage = () => {
         {selectedUser && (
           <Chat
             selectedUser={selectedUser}
+            conversationMessages={conversationMessages}
             openForward={(msg: Message) => {
               setMessageToForward(msg);
               setForwardModalOpen(true);
@@ -57,7 +65,7 @@ const ChatPage = () => {
 
       <div className="hidden md:flex w-full h-full gap-0">
         <div className="w-16 lg:w-80 xl:w-96 border-r border-gray-200/50 bg-white/80 backdrop-blur-lg">
-          <Friends />
+          <Friends lastMessage={lastMessage} />
         </div>
 
         <motion.div
@@ -69,6 +77,7 @@ const ChatPage = () => {
           {selectedUser ? (
             <Chat
               selectedUser={selectedUser}
+              conversationMessages={conversationMessages}
               openForward={(msg: Message) => {
                 setMessageToForward(msg);
                 setForwardModalOpen(true);

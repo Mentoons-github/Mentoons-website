@@ -1,17 +1,38 @@
 import axiosInstance from "@/api/axios";
 import { Message } from "@/types";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
-// Slice state interface
+interface Friend {
+  _id: string;
+  name: string;
+  picture?: string;
+  email?: string;
+  bio?: string;
+  isOnline?: boolean;
+}
+
+interface UserConversation {
+  conversation_id: string;
+  friend: Friend;
+  lastMessage: string;
+  messageType: string;
+  updatedAt: string;
+  createdAt: string;
+  unreadCounts: { [userId: string]: number };
+  isBlocked?: boolean;
+}
+
 interface MessageI {
+  conversations: UserConversation[];
   data: Message[];
   error: string | null;
-  status: "idle" | "loading" | "succeeded" | "failed";
+  status: "idle" | "loading" | "succeeded" | "failed " | "conversationLoading";
   conversationId: string;
 }
 
 const initialState: MessageI = {
+  conversations: [],
   data: [],
   error: null,
   status: "idle",
@@ -78,6 +99,30 @@ export const fetchConversation = createAsyncThunk<
   }
 );
 
+export const fetchAllConversations = createAsyncThunk<
+  UserConversation[],
+  { token: string },
+  { rejectValue: string }
+>("conversationList/fetchAll", async ({ token }, { rejectWithValue }) => {
+  try {
+    const res = await axiosInstance.get("/conversation", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data.data;
+  } catch (err: unknown) {
+    const error = err as AxiosError;
+    return rejectWithValue(
+      error.response?.data
+        ? (error.response.data as { message?: string }).message ||
+            "Failed to fetch conversation"
+        : "Failed to fetch conversation"
+    );
+  }
+});
+
 // Slice
 const conversationSlice = createSlice({
   name: "conversation",
@@ -99,6 +144,56 @@ const conversationSlice = createSlice({
         return msg;
       });
     },
+    updateLastMessage: (
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        message: string;
+        fileType?: string;
+        updatedAt: string;
+      }>
+    ) => {
+      const index = state.conversations.findIndex(
+        (c) => c.conversation_id === action.payload.conversationId
+      );
+      if (index !== -1) {
+        state.conversations[index] = {
+          ...state.conversations[index],
+          lastMessage: action.payload.message,
+          messageType: action.payload.fileType ?? "text",
+          updatedAt: action.payload.updatedAt,
+        };
+      }
+    },
+    incrementUnreadCount: (
+      state,
+      action: PayloadAction<{ conversationId: string; userId: string }>
+    ) => {
+      const convo = state.conversations.find(
+        (c) => c.conversation_id === action.payload.conversationId
+      );
+      if (convo) {
+        console.log("increment unread count");
+        const userId = action.payload.userId;
+        convo.unreadCounts = convo.unreadCounts || {};
+        convo.unreadCounts[userId] = (convo.unreadCounts[userId] || 0) + 1;
+      }
+    },
+
+    resetUnreadCount: (
+      state,
+      action: PayloadAction<{ conversationId: string; userId: string }>
+    ) => {
+      const convo = state.conversations.find(
+        (c) => c.conversation_id === action.payload.conversationId
+      );
+      if (convo) {
+        const userId = action.payload.userId;
+        if (convo.unreadCounts && convo.unreadCounts[userId]) {
+          convo.unreadCounts[userId] = 0;
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -106,13 +201,12 @@ const conversationSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchConversation.fulfilled, (state, action) => {
-        state.data = action.payload;
+        state.data = action.payload.reverse();
         state.status = "succeeded";
         state.error = null;
       })
       .addCase(fetchConversation.rejected, (state, action) => {
         state.error = action.payload || "Failed to fetch conversation";
-        state.status = "failed";
       })
 
       //fetch conversation id
@@ -124,10 +218,28 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchConversationId.rejected, (state, action) => {
         state.error = action.payload || "Failed to fetch conversation id";
+      })
+
+      .addCase(fetchAllConversations.pending, (state) => {
+        state.status = "conversationLoading";
+        state.error = null;
+      })
+      .addCase(fetchAllConversations.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.conversations = action.payload;
+      })
+      .addCase(fetchAllConversations.rejected, (state, action) => {
+        state.error = action.payload || "Failed to load conversation list";
       });
   },
 });
 
 export default conversationSlice.reducer;
 
-export const { addNewMessage, markMessagesAsRead } = conversationSlice.actions;
+export const {
+  addNewMessage,
+  markMessagesAsRead,
+  updateLastMessage,
+  resetUnreadCount,
+  incrementUnreadCount,
+} = conversationSlice.actions;

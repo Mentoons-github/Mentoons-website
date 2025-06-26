@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   BsDownload,
   BsX,
-  BsPlay,
-  BsPause,
-  BsTrash,
-  BsCheck,
+  // BsPlay,
+  // BsPause,
+  // BsTrash,
+  // BsCheck,
   BsThreeDotsVertical,
   BsFileEarmarkText,
 } from "react-icons/bs";
@@ -30,6 +30,9 @@ import {
   fetchConversationId,
   addNewMessage,
   markMessagesAsRead,
+  updateLastMessage,
+  resetUnreadCount,
+  incrementUnreadCount,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
@@ -52,18 +55,16 @@ export interface Messages {
 interface ChatProps {
   selectedUser: string;
   openForward: (msg: Message) => void;
+  conversationMessages: Message[];
 }
 
 interface GroupedMessages {
   [key: string]: Message[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMessages }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-  const conversationMessages = useSelector(
-    (state: RootState) => state.conversation.data
-  );
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
@@ -71,10 +72,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
-  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
-    null
-  );
+  // const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  // const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
+  //   null
+  // );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -95,7 +96,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
   //   null
   // );
 
-  const { socket } = useSocket();
+  const { socket, mongoUserId } = useSocket();
 
   useEffect(() => {
     const fetchConversationData = async () => {
@@ -114,6 +115,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
         if (socket) {
           socket.emit("mark_as_read", { conversationId });
         }
+        dispatch(
+          resetUnreadCount({
+            conversationId: conversationId,
+            userId: mongoUserId,
+          })
+        );
       }
     };
 
@@ -147,19 +154,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (!isLoading) {
-      scrollToBottom();
-    }
-  }, [isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
     if (!socket) return;
-
-    console.log("messsage reading");
 
     socket.on(
       "messages_read",
@@ -187,15 +182,38 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
 
       dispatch(addNewMessage(data));
 
+      dispatch(
+        updateLastMessage({
+          conversationId: data.conversationId,
+          message: data.message,
+          fileType: data.fileType,
+          updatedAt: data.createdAt,
+        })
+      );
+
       if (currentConversation === data.conversationId) {
         socket.emit("mark_as_read", { conversationId: data.conversationId });
+
+        dispatch(
+          resetUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId,
+          })
+        );
+      } else {
+        dispatch(
+          incrementUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId, // 👈 Use your own userId
+          })
+        );
       }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [socket, selectedUser, user, dispatch, currentConversation]);
+  }, [socket, selectedUser, user, dispatch, currentConversation, mongoUserId]);
 
   const handleSendMessage = async () => {
     if (selectedFile) {
@@ -300,34 +318,34 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const togglePreview = () => {
-    if (!recordedAudio) return;
+  // const togglePreview = () => {
+  //   if (!recordedAudio) return;
 
-    if (isPlayingPreview) {
-      previewAudio?.pause();
-      setIsPlayingPreview(false);
-    } else {
-      const audio = new Audio(recordedAudio);
-      audio.onended = () => setIsPlayingPreview(false);
-      audio.play();
-      setPreviewAudio(audio);
-      setIsPlayingPreview(true);
-    }
-  };
+  //   if (isPlayingPreview) {
+  //     previewAudio?.pause();
+  //     setIsPlayingPreview(false);
+  //   } else {
+  //     const audio = new Audio(recordedAudio);
+  //     audio.onended = () => setIsPlayingPreview(false);
+  //     audio.play();
+  //     setPreviewAudio(audio);
+  //     setIsPlayingPreview(true);
+  //   }
+  // };
 
-  const sendRecordedAudio = () => {
-    if (recordedAudio && socket && user) {
-      socket.emit("send_message", {
-        receiverId: selectedUser,
-        fileType: "audio",
-        message: recordedAudio,
-        fileName: `audio_${Date.now()}.webm`,
-      });
+  // const sendRecordedAudio = () => {
+  //   if (recordedAudio && socket && user) {
+  //     socket.emit("send_message", {
+  //       receiverId: selectedUser,
+  //       fileType: "audio",
+  //       message: recordedAudio,
+  //       fileName: `audio_${Date.now()}.webm`,
+  //     });
 
-      setRecordedAudio(null);
-      setIsRecording(false);
-    }
-  };
+  //     setRecordedAudio(null);
+  //     setIsRecording(false);
+  //   }
+  // };
 
   useEffect(() => {
     if (!socket) return;
@@ -380,14 +398,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
     }, 1000);
   };
 
-  const discardRecording = () => {
-    if (previewAudio) {
-      previewAudio.pause();
-      setIsPlayingPreview(false);
-    }
-    setRecordedAudio(null);
-    setIsRecording(false);
-  };
+  // const discardRecording = () => {
+  //   if (previewAudio) {
+  //     previewAudio.pause();
+  //     setIsPlayingPreview(false);
+  //   }
+  //   setRecordedAudio(null);
+  //   setIsRecording(false);
+  // };
 
   const downloadFile = async (url: string, fileName: string) => {
     try {
@@ -440,15 +458,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
     }
   };
 
-  const groupedMessages: GroupedMessages = {};
+  const groupedMessages = useMemo(() => {
+    const groups: GroupedMessages = {};
 
-  conversationMessages.forEach((msg) => {
-    const label = getDateLabel(msg.createdAt);
-    if (!groupedMessages[label]) {
-      groupedMessages[label] = [];
-    }
-    groupedMessages[label].push(msg);
-  });
+    conversationMessages.forEach((msg) => {
+      const label = getDateLabel(msg.createdAt);
+      if (!groups[label]) {
+        groups[label] = [];
+      }
+      groups[label].push(msg);
+    });
+
+    return groups;
+  }, [conversationMessages]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [groupedMessages]);
+  
 
   return (
     <AnimatePresence mode="wait">
@@ -509,14 +539,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                       className={`flex ${
-                        msg.senderId !== selectedUser
+                        msg.senderId === mongoUserId
                           ? "justify-end"
                           : "justify-start"
                       } mb-4 items-end`}
                     >
                       <div
                         className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
-                          msg.senderId !== selectedUser
+                          msg.senderId === mongoUserId
                             ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
                             : "bg-gray-100 text-gray-800"
                         }`}
@@ -603,7 +633,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
                                   <BiCheckDouble />
                                 </span>
                               ) : msg.isDelivered ? (
-                                <span className="text-gray-300">
+                                <span className="text-gray-400">
                                   <BiCheckDouble />
                                 </span>
                               ) : (
@@ -656,7 +686,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
                 </motion.div>
               )}
             </AnimatePresence>
-            <AnimatePresence>
+            {/* <AnimatePresence>
               {recordedAudio && !isRecording && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -700,7 +730,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+            </AnimatePresence> */}
             <FilePreview
               selectedFile={selectedFile}
               selectedFileURL={selectedFileURL}
