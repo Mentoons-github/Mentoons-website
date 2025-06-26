@@ -18,7 +18,7 @@ export const sendFileMessage = (
   receiverId: string,
   fileUrl: string,
   fileName: string,
-  fileType: "image" | "audio" | "file" |"video"
+  fileType: "image" | "audio" | "file" | "video"
 ) => {
   socket.emit("send_message", {
     receiverId,

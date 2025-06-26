@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   BsDownload,
   BsX,
@@ -30,6 +30,9 @@ import {
   fetchConversationId,
   addNewMessage,
   markMessagesAsRead,
+  updateLastMessage,
+  resetUnreadCount,
+  incrementUnreadCount,
 } from "@/redux/adda/conversationSlice";
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
@@ -52,18 +55,16 @@ export interface Messages {
 
 interface ChatProps {
   selectedUser: string;
+  conversationMessages: Message[];
 }
 
 interface GroupedMessages {
   [key: string]: Message[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-  const conversationMessages = useSelector(
-    (state: RootState) => state.conversation.data
-  );
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
@@ -95,7 +96,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     null
   );
 
-  const { socket } = useSocket();
+  const { socket, mongoUserId } = useSocket();
 
   useEffect(() => {
     const fetchConversationData = async () => {
@@ -114,6 +115,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
         if (socket) {
           socket.emit("mark_as_read", { conversationId });
         }
+        dispatch(
+          resetUnreadCount({
+            conversationId: conversationId,
+            userId: mongoUserId,
+          })
+        );
       }
     };
 
@@ -147,19 +154,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (!isLoading) {
-      scrollToBottom();
-    }
-  }, [isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
     if (!socket) return;
-
-    console.log("messsage reading");
 
     socket.on(
       "messages_read",
@@ -182,18 +177,41 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("receive_message", (data: any) => {
+    socket.on("receive_message", (data: Message) => {
       dispatch(addNewMessage(data));
+
+      dispatch(
+        updateLastMessage({
+          conversationId: data.conversationId,
+          message: data.message,
+          fileType: data.fileType,
+          updatedAt: data.createdAt,
+        })
+      );
 
       if (currentConversation === data.conversationId) {
         socket.emit("mark_as_read", { conversationId: data.conversationId });
+
+        dispatch(
+          resetUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId,
+          })
+        );
+      } else {
+        dispatch(
+          incrementUnreadCount({
+            conversationId: data.conversationId,
+            userId: mongoUserId, // 👈 Use your own userId
+          })
+        );
       }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [socket, selectedUser, user, dispatch, currentConversation]);
+  }, [socket, selectedUser, user, dispatch, currentConversation, mongoUserId]);
 
   const handleSendMessage = async () => {
     if (selectedFile) {
@@ -448,15 +466,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     }
   };
 
-  const groupedMessages: GroupedMessages = {};
+  const groupedMessages = useMemo(() => {
+    const groups: GroupedMessages = {};
 
-  conversationMessages.forEach((msg) => {
-    const label = getDateLabel(msg.createdAt);
-    if (!groupedMessages[label]) {
-      groupedMessages[label] = [];
-    }
-    groupedMessages[label].push(msg);
-  });
+    conversationMessages.forEach((msg) => {
+      const label = getDateLabel(msg.createdAt);
+      if (!groups[label]) {
+        groups[label] = [];
+      }
+      groups[label].push(msg);
+    });
+
+    return groups;
+  }, [conversationMessages]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [groupedMessages]);
+  
 
   return (
     <AnimatePresence mode="wait">
@@ -517,14 +547,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                       className={`flex ${
-                        msg.senderId !== selectedUser
+                        msg.senderId === mongoUserId
                           ? "justify-end"
                           : "justify-start"
                       } mb-4 items-end`}
                     >
                       <div
                         className={`flex flex-col max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md ${
-                          msg.senderId !== selectedUser
+                          msg.senderId === mongoUserId
                             ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
                             : "bg-gray-100 text-gray-800"
                         }`}
@@ -599,7 +629,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                                   <BiCheckDouble />
                                 </span>
                               ) : msg.isDelivered ? (
-                                <span className="text-gray-300">
+                                <span className="text-gray-400">
                                   <BiCheckDouble />
                                 </span>
                               ) : (
