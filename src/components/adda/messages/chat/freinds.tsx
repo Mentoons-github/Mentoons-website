@@ -22,6 +22,7 @@ interface UserConversation {
   messageType: string;
   updatedAt: Date;
   createdAt: Date;
+  isBlocked?: boolean;
 }
 
 interface ConversationResponse {
@@ -134,9 +135,11 @@ const Friends = () => {
 
   const filteredConversations = useMemo(
     () =>
-      conversations.filter((conv) =>
-        conv.friend.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-      ),
+      conversations
+        .filter((conv) => !conv.isBlocked)
+        .filter((conv) =>
+          conv.friend.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+        ),
     [conversations, debouncedSearch]
   );
 

@@ -1,31 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { menuItems } from "@/utils/menuItems";
+import ReportAbuseModal from "../common/modal/BlockAndReportModal";
 
 interface ChatMenuModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
-  handleAction: (action: string) => void;
   buttonRef: React.RefObject<HTMLButtonElement>;
+  conversationId: string;
 }
 
 const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
   isModalOpen,
   setIsModalOpen,
-  handleAction,
+  conversationId,
   buttonRef,
 }) => {
+  const [modalType, setModalType] = useState<
+    "report" | "block" | "unblock" | null
+  >(null);
+
+  const handleAction = (action: string) => {
+    switch (action) {
+      case "Report Abuse":
+        setModalType("report");
+        break;
+      case "Block User":
+        setModalType("block");
+        break;
+      case "Unblock User":
+        setModalType("unblock");
+        break;
+      case "Mute User":
+        break;
+      default:
+        break;
+    }
+
+    setIsModalOpen(false);
+  };
   return (
     <div className="relative">
       <button
         ref={buttonRef}
         onClick={() => setIsModalOpen(!isModalOpen)}
         className="p-1 rounded hover:bg-gray-100 transition-colors"
-      >
-        {/* <i className="text-xl text-gray-500 hover:text-indigo-500 transition-colors">
-          ⋮
-        </i> */}
-      </button>
+      ></button>
 
       <AnimatePresence>
         {isModalOpen && (
@@ -74,6 +94,15 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
           </>
         )}
       </AnimatePresence>
+      {modalType && (
+        <ReportAbuseModal
+          isOpen={!!modalType}
+          setIsOpen={() => setModalType(null)}
+          modalType={modalType}
+          contentId={conversationId}
+          reportType="conversation"
+        />
+      )}
     </div>
   );
 };

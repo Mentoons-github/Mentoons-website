@@ -28,8 +28,7 @@ const AppContent = () => {
     const fetchCart = async () => {
       const token = await getToken();
       if (token && userId) {
-        const response = await dispatch(getCart({ token, userId }));
-        console.log("Response Data", response);
+        await dispatch(getCart({ token, userId }));
       }
     };
 

@@ -38,6 +38,7 @@ import {
   X,
   XCircle,
   Trash2,
+  Check,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa6";
@@ -52,12 +53,9 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-
   const { notifications, isLoading } = useSelector(
     (state: RootState) => state.notification
   );
-
-  console.log("notifications :", notifications);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -268,12 +266,12 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     <div className="relative hidden py-4 md:block" ref={notificationRef}>
       <div
         onClick={() => setShowNotificationModal(!showNotificationModal)}
-        className="relative p-2 rounded-full cursor-pointer transition-colors hover:bg-gray-800"
+        className="relative p-2 rounded-full cursor-pointer transition-all duration-200 hover:bg-gray-700/50 hover:scale-105 active:scale-95"
       >
-        <FaBell className="text-white" />
+        <FaBell className="text-white text-lg" />
         {getNotificationCount() > 0 && (
-          <span className="absolute px-2 text-xs text-center text-black bg-gray-200 rounded-full shadow-lg -top-0 -right-1">
-            {getNotificationCount()}
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full min-w-[20px] h-[20px] flex items-center justify-center px-1 shadow-lg border-2 border-gray-600 animate-pulse">
+            {getNotificationCount() > 99 ? "99+" : getNotificationCount()}
           </span>
         )}
       </div>
@@ -286,52 +284,57 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
           className="absolute right-0 mt-2 w-96 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 z-[99999] overflow-hidden"
         >
           <div className="px-5 py-4 text-white bg-gradient-to-r from-orange-600 to-orange-400">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="text-base font-semibold">Notifications</h3>
                 <p className="text-sm text-gray-200">
                   {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowNotificationModal(false)}
+                className="p-2 transition-colors rounded-full hover:bg-orange-500 flex-shrink-0"
+              >
+                <X size={20} />
+              </motion.button>
+            </div>
+
+            {/* Action buttons row */}
+            {(unreadCount > 0 || notifications.length > 0) && (
+              <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={async () => {
                       const token = await getToken();
                       if (token) {
                         dispatch(markAllNotificationsRead(token));
                       }
                     }}
-                    className="px-4 py-2 text-sm font-semibold transition-colors rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300 flex-shrink-0"
                     aria-label="Mark all notifications as read"
                   >
-                    Mark as read
+                    <Check size={14} />
+                    Mark all read
                   </motion.button>
                 )}
                 {notifications.length > 0 && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleClearAllNotifications}
-                    className="px-4 py-2 text-sm font-semibold transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 text-white"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors rounded-lg bg-red-600 hover:bg-red-700 text-white flex-shrink-0"
                     aria-label="Clear all notifications"
                   >
-                    <Trash2 size={20} className="inline-block mr-1" />
-                    Clear All
+                    <Trash2 size={14} />
+                    Clear all
                   </motion.button>
                 )}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowNotificationModal(false)}
-                  className="p-2 transition-colors rounded-full hover:bg-orange-500"
-                >
-                  <X size={20} />
-                </motion.button>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="overflow-y-auto max-h-96 bg-gray-800">

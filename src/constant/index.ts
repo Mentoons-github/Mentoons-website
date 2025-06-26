@@ -989,9 +989,9 @@ export const EMPLOYEES = [
   },
   {
     id: "EMP_5",
-    name: "Dheeraj",
+    name: "Mohammed Jasim",
     designation: "Fullstack Developer",
-    imageUrl: "/assets/images/dheeraj.png",
+    imageUrl: "/assets/images/Jasim.png",
   },
 ];
 
@@ -1217,9 +1217,9 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_04",
-    label: "Browse Plans",
-    // icon: FaCreditCard,
-    url: "/mentoons#subscription",
+    label: "Podcast",
+    icon: "mic",
+    url: "/mentoons-podcast",
   },
   {
     id: "NL_05",
@@ -1240,9 +1240,9 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_08",
-    label: "Podcast",
-    icon: "mic",
-    url: "/mentoons-podcast",
+    label: "Browse Plans",
+    // icon: FaCreditCard,
+    url: "/mentoons#subscription",
   },
   // {
   //   id: "NL_08",

@@ -17,6 +17,7 @@ export interface Message {
   fileName?: string;
   isRead: boolean;
   isDelivered: boolean;
+  isForwarded?:boolean
 }
 
 export interface Conversations {

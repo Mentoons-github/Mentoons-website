@@ -23,68 +23,6 @@ const AboutMentoons = () => {
     }
   }, []);
 
-  // const mentorVideos = [
-  //   {
-  //     title: "Sarah",
-  //     thumbnail: "/assets/images/persona-2.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Sarah%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-  //     description:
-  //       "Discover how Sarah inspires young minds as an elementary school teacher.",
-  //   },
-  //   {
-  //     title: "Raj",
-  //     thumbnail: "/assets/images/persona-1.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Raj%2C+42+Years%2C+IT+Manager%2C+Podcast+%26+Convo+Ca.mp4",
-  //     description:
-  //       "Raj shares his journey of mentorship and fostering innovation in IT.",
-  //   },
-  //   {
-  //     title: "Emma",
-  //     thumbnail: "/assets/images/persona-3.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Emma%2C+28+Years%2C+Psychologist.mp4",
-  //     description:
-  //       "Emma reveals her creative approach to empowering mental well-being.",
-  //   },
-  //   {
-  //     title: "Samantha",
-  //     thumbnail: "/assets/images/persona-6.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Samantha%2C+35+Years%2C+Elementary+School+Teacher(1).mp4",
-  //     description:
-  //       "Explore Samantha's impactful teaching methods in elementary education.",
-  //   },
-  //   {
-  //     title: "Rajesh",
-  //     thumbnail: "/assets/images/persona-4.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Rajesh+K+42+Years+old+(IT+Manager).mp4",
-  //     description:
-  //       "Rajesh discusses how mentorship drives success in the IT world.",
-  //   },
-  //   {
-  //     title: "Olivia",
-  //     thumbnail: "/assets/images/persona-5.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Flat+Image+Stories+for+Mentoons/Olivia%2C+28+Years%2C+Psychologist(1).mp4",
-  //     description:
-  //       "Olivia shares her passion for helping others through psychology.",
-  //   },
-  // ];
-
-  // const newMentorVideos = [
-  //   {
-  //     title: "Kumar Archit",
-  //     thumbnail: "/assets/images/persona-1.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/KUMAR_SIR.mp4",
-  //     description:
-  //       "Exploring the transformative power of mentorship and personal growth.",
-  //   },
-  //   {
-  //     title: "Nithya Raghunath",
-  //     thumbnail: "/assets/images/persona-2.jpg",
-  //     src: "https://mentoons-website.s3.ap-northeast-1.amazonaws.com/Mentors/NITHYA+MA'AM.mp4",
-  //     description:
-  //       "Building meaningful connections and inspiring potential in others.",
-  //   },
-  // ];
-
   const closeVideoModal = () => {
     setSelectedVideo(null);
   };
@@ -138,7 +76,6 @@ const AboutMentoons = () => {
           </div>
         </div>
       </div>
-      {/* How it helps kids */}
       <section className="p-4 py-6 pb-24 md:p-12 lg:p-24">
         <div className="flex flex-col items-start justify-center gap-6 ">
           <div>

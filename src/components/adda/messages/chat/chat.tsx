@@ -34,7 +34,6 @@ import {
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
 import { BiCheck, BiCheckDouble } from "react-icons/bi";
-import ShareUserModal from "../share/shareModal";
 
 export interface ChatUser {
   id: number;
@@ -52,13 +51,14 @@ export interface Messages {
 
 interface ChatProps {
   selectedUser: string;
+  openForward: (msg: Message) => void;
 }
 
 interface GroupedMessages {
   [key: string]: Message[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser, openForward }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const conversationMessages = useSelector(
@@ -90,10 +90,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
   // NEW: State for ShareUserModal
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [messageToForward, setMessageToForward] = useState<Message | null>(
-    null
-  );
+  // const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // const [messageToForward, setMessageToForward] = useState<Message | null>(
+  //   null
+  // );
 
   const { socket } = useSocket();
 
@@ -183,6 +183,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     if (!socket) return;
 
     socket.on("receive_message", (data: any) => {
+      if (data.conversationId !== currentConversation) return;
+
       dispatch(addNewMessage(data));
 
       if (currentConversation === data.conversationId) {
@@ -243,34 +245,24 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     setSelectedFileURL(URL.createObjectURL(file));
   };
 
-  const handleAction = (action: string) => {
-    console.log(`Action selected: ${action}`);
-    setIsModalOpen(false);
-  };
+  // const handleShareMessage = (selectedUserIds: string[], message: Message) => {
+  //   if (!socket || !message) return;
 
-  const handleForwardMessage = (msg: Message) => {
-    setMessageToForward(msg);
-    setIsShareModalOpen(true);
-  };
+  //   selectedUserIds.forEach((receiverId) => {
+  //     socket.emit("send_message", {
+  //       receiverId,
+  //       message: message.message,
+  //       fileType: message.fileType || "text",
+  //       fileName: message.fileName,
+  //     });
+  //   });
 
-  const handleShareMessage = (selectedUserIds: string[], message: Message) => {
-    if (!socket || !message) return;
-
-    selectedUserIds.forEach((receiverId) => {
-      socket.emit("send_message", {
-        receiverId,
-        message: message.message,
-        fileType: message.fileType || "text",
-        fileName: message.fileName,
-      });
-    });
-
-    console.log(
-      `Forwarded message to users: ${selectedUserIds.join(", ")}, Message: ${
-        message.message
-      }, Type: ${message.fileType}`
-    );
-  };
+  //   console.log(
+  //     `Forwarded message to users: ${selectedUserIds.join(", ")}, Message: ${
+  //       message.message
+  //     }, Type: ${message.fileType}`
+  //   );
+  // };
 
   const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
 
@@ -495,9 +487,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 />
                 <ChatMenuModal
                   buttonRef={buttonRef}
-                  handleAction={handleAction}
                   isModalOpen={isModalOpen}
                   setIsModalOpen={setIsModalOpen}
+                  conversationId={currentConversation}
                 />
               </div>
             </div>
@@ -592,6 +584,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                             })}
                           </p>
 
+                          {msg.isForwarded && (
+                            <p
+                              className={`text-xs italic ${
+                                msg.senderId !== selectedUser
+                                  ? "text-white/70"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              Forwarded
+                            </p>
+                          )}
+
                           {msg.senderId !== selectedUser && (
                             <div className="ml-2 flex items-center">
                               {msg.isRead ? (
@@ -616,7 +620,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                         msg.fileType === "file" ||
                         msg.fileType === "video") && (
                         <button
-                          onClick={() => handleForwardMessage(msg)}
+                          onClick={() => openForward(msg)}
                           className={`ml-2 p-2 rounded-full transition-colors ${
                             msg.senderId !== selectedUser
                               ? "text-white bg-green-600"
@@ -720,7 +724,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
               isUpload={fileUpload.loading}
             />
 
-            {isShareModalOpen && messageToForward && (
+            {/* {isShareModalOpen && messageToForward && (
               <ShareUserModal
                 onClose={() => {
                   setIsShareModalOpen(false);
@@ -730,7 +734,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
                 onShare={handleShareMessage}
                 allowMultiSelect={true}
               />
-            )}
+            )} */}
 
             <AnimatePresence>
               {enlargedImage && (

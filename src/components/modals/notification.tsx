@@ -1,6 +1,6 @@
 import { FiBell, FiX } from "react-icons/fi";
 import useSocket from "@/hooks/adda/useSocket";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NotificationInterface } from "@/types";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,12 +15,17 @@ const NotificationPopup = () => {
   const [progress, setProgress] = useState(100);
   const [isExiting, setIsExiting] = useState(false);
 
-  const playNotificationSound = () => {
-    const audio = new Audio(
-      "/assets/adda/notification/bell-notification-337658.mp3"
-    );
+  const audioRef = useRef(
+    new Audio("/assets/adda/notification/bell-notification-337658.mp3")
+  );
 
-    audio.play().catch((err) => console.log(`audio played failed : ${err}`));
+  const playNotificationSound = () => {
+    audioRef.current.play().catch((err: DOMException | Error) => {
+      console.log(`Audio play failed: ${err.message}`);
+      if (err.name === "NotAllowedError") {
+        console.log("Autoplay blocked. User interaction required.");
+      }
+    });
   };
 
   useEffect(() => {

@@ -1,12 +1,18 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BLOCK_REASONS, REPORT_REASONS } from "@/constant/constants";
-import { X, Shield, Flag, HelpCircle } from "lucide-react";
+import {
+  X,
+  Shield,
+  Flag,
+  HelpCircle,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
-import { toast } from "sonner";
 
 interface ReportAbuseModalProps {
   isOpen: boolean;
@@ -14,11 +20,17 @@ interface ReportAbuseModalProps {
   modalType: "report" | "block" | "unblock";
   userId?: string;
   contentId?: string;
+  reportType?: string;
 }
 
 interface FormValues {
   selectedReason: string;
   customReason: string;
+}
+
+interface ResponseState {
+  type: "success" | "error" | null;
+  message: string;
 }
 
 const ReportAbuseModal = ({
@@ -27,8 +39,13 @@ const ReportAbuseModal = ({
   modalType,
   userId,
   contentId,
+  reportType = "post",
 }: ReportAbuseModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [response, setResponse] = useState<ResponseState>({
+    type: null,
+    message: "",
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const textareaSectionRef = useRef<HTMLDivElement>(null);
@@ -79,24 +96,41 @@ const ReportAbuseModal = ({
 
   const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
+    setResponse({ type: null, message: "" });
+
     try {
       const token = await getToken();
       let endpoint: string;
       let payload: any;
 
       if (modalType === "report") {
-        if (!contentId || !userId) {
-          throw new Error("Missing post ID or user ID for report");
+        const type = reportType || "post";
+
+        if (type === "post" && !contentId) {
+          throw new Error("Missing post ID for post report");
         }
-        endpoint = `${import.meta.env.VITE_PROD_URL}/adda/report-user`;
+        if (type === "conversation" && !contentId) {
+          throw new Error("Missing conversation ID for conversation report");
+        }
+
+        endpoint =
+          type === "post"
+            ? `${import.meta.env.VITE_PROD_URL}/adda/report-user`
+            : `${import.meta.env.VITE_PROD_URL}/adda/report-conversation`;
+
         payload = {
-          friendId: userId,
-          postId: contentId,
+          ...(type === "post"
+            ? { postId: contentId }
+            : { conversationId: contentId }),
           reason:
             values.selectedReason === "other"
               ? values.customReason
               : values.selectedReason,
         };
+
+        if (userId && type === "post") {
+          payload.friendId = userId;
+        }
       } else if (modalType === "block") {
         if (!userId) {
           throw new Error("Missing user ID for block");
@@ -105,12 +139,20 @@ const ReportAbuseModal = ({
         payload = {
           userId,
         };
+
+        if (contentId) {
+          payload.conversationId = contentId;
+        }
       } else if (modalType === "unblock") {
         if (!userId) {
           throw new Error("Missing user ID for unblock");
         }
         endpoint = `${import.meta.env.VITE_PROD_URL}/user/unblock`;
         payload = { userId };
+
+        if (contentId) {
+          payload.conversationId = contentId;
+        }
       } else {
         throw new Error("Invalid modal type");
       }
@@ -123,29 +165,37 @@ const ReportAbuseModal = ({
       });
 
       if (response.data.success) {
-        setIsOpen(false);
-        toast.success(
-          modalType === "report"
-            ? "Report submitted successfully! We'll review it soon."
-            : modalType === "block"
-            ? "User blocked successfully! They can no longer contact you."
-            : "User unblocked successfully!"
-        );
+        setResponse({
+          type: "success",
+          message:
+            response.data.message ||
+            (modalType === "report"
+              ? "Report submitted successfully! We'll review it soon."
+              : modalType === "block"
+              ? "User blocked successfully! They can no longer contact you."
+              : "User unblocked successfully!"),
+        });
       } else {
-        throw new Error(`Failed to ${modalType} user/content`);
+        setResponse({
+          type: "error",
+          message:
+            response.data.message || `Failed to ${modalType} user/content`,
+        });
       }
     } catch (error: any) {
       console.error(`Error during ${modalType}:`, error);
-      toast.error(
-        error?.response?.data?.message ||
+      setResponse({
+        type: "error",
+        message:
+          error?.response?.data?.message ||
           `An error occurred while ${
             modalType === "report"
               ? "submitting the report"
               : modalType === "block"
               ? "blocking the user"
               : "unblocking the user"
-          }. Please try again.`
-      );
+          }. Please try again.`,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -264,6 +314,68 @@ const ReportAbuseModal = ({
               className="flex-1 overflow-y-auto p-6 space-y-6"
               style={{ scrollBehavior: "smooth" }}
             >
+              {/* Response Display */}
+              <AnimatePresence>
+                {response.type && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { duration: 0.3, ease: "easeOut" },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -20,
+                      scale: 0.95,
+                      transition: { duration: 0.2 },
+                    }}
+                    className={`p-4 rounded-xl border-l-4 ${
+                      response.type === "success"
+                        ? "bg-green-50 border-green-400"
+                        : "bg-red-50 border-red-400"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex-shrink-0 ${
+                          response.type === "success"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {response.type === "success" ? (
+                          <CheckCircle className="w-5 h-5" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p
+                          className={`text-sm font-medium ${
+                            response.type === "success"
+                              ? "text-green-800"
+                              : "text-red-800"
+                          }`}
+                        >
+                          {response.type === "success" ? "Success" : "Error"}
+                        </p>
+                        <p
+                          className={`text-sm mt-1 ${
+                            response.type === "success"
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }`}
+                        >
+                          {response.message}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}

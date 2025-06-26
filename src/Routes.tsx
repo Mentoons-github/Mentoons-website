@@ -102,7 +102,6 @@ const Router = () => {
   //get the openModal from urlsearch
   const urlSearchParams = new URLSearchParams(window.location.search);
   const openModal = urlSearchParams.get("openModal");
-  console.log(openModal);
   // Check if user is newly registered
   const isNewUser =
     openModal === "true" || localStorage.getItem("Signed up") === "true";

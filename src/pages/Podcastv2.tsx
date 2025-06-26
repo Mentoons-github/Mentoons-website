@@ -1,4 +1,5 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
+import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
 import PodcastCard from "@/components/podcast/card";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
@@ -13,12 +14,10 @@ import axios from "axios";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { IoCloseCircleOutline, IoPlay } from "react-icons/io5";
+import { IoPlay } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-// Interface for database user
 interface Subscription {
   plan: string;
   validUntil: string;
@@ -37,7 +36,6 @@ interface DBUser {
   subscription: Subscription;
 }
 
-// Type to track podcast playback behavior
 interface PlaybackTrackingState {
   startTime: number;
   paused: boolean;
@@ -51,26 +49,31 @@ const Podcastv2 = () => {
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const [playingPodcastId, setPlayingPodcastId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [enquiryEmail, setEnquiryEmail] = useState("");
   const [enquiryName, setEnquiryName] = useState("");
-  const [showMembershipModal, setShowMembershipModal] =
-    useState<boolean>(false);
-  const { isSignedIn, user } = useUser();
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  console.log(isScrolled);
+  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
+    useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState("");
+  const [limitModalTitle, setLimitModalTitle] = useState("");
+  const [currentProductId, setCurrentProductId] = useState<string>("");
   const [filteredPodcast, setFilteredPodcast] = useState<ProductBase[]>([]);
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
   const [playbackTracking, setPlaybackTracking] =
     useState<PlaybackTrackingState | null>(null);
-  const [showQuotaModal, setShowQuotaModal] = useState(false);
-  const [quotaModalMessage, setQuotaModalMessage] = useState("");
   const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
+  const { isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: products } = useSelector((state: RootState) => state.products);
+
+  const membershipType: "free" | "prime" | "platinum" = dbUser?.subscription
+    ?.plan
+    ? (dbUser.subscription.plan.toLowerCase() as "free" | "prime" | "platinum")
+    : "free";
 
   const handleScroll = () => {
     const carousel = carouselRef.current;
@@ -86,14 +89,6 @@ const Podcastv2 = () => {
     setMessage(e.target.value);
   };
 
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.addEventListener("scroll", handleScroll);
-      return () => carousel.removeEventListener("scroll", handleScroll);
-    }
-  }, []);
-
   const handleSelectedCategory = (category: string) => {
     setSelectedCategory(category);
   };
@@ -106,7 +101,7 @@ const Podcastv2 = () => {
       const queryResponse = await axios.post(
         "https://mentoons-backend-zlx3.onrender.com/api/v1/query",
         {
-          message: message,
+          message,
           name: enquiryName,
           email: enquiryEmail,
           queryType: "podcast",
@@ -120,218 +115,125 @@ const Podcastv2 = () => {
     }
   };
 
-  const handlePodcastCompletion = (podcastId: string, podcastType: string) => {
-    podcastType = podcastType.toLowerCase();
-    if (isSignedIn && dbUser) {
-      const subscription = dbUser.subscription;
-      if (hasQuotaForPodcastType(podcastType, subscription)) {
-        if (
-          playbackTracking &&
-          playbackTracking.podcastId === podcastId &&
-          !playbackTracking.paused &&
-          !playbackTracking.skipped
-        ) {
-          if (podcastType !== "free") {
-            updateContentConsumption(podcastType);
-          }
-          triggerReward(RewardEventType.LISTEN_PODCAST, podcastId);
-          toast.success("You earned points for completing this podcast!");
-        }
-      } else {
-        const message = getQuotaMessage(podcastType, subscription);
-        setQuotaModalMessage(message);
-        setShowQuotaModal(true);
-      }
-    }
-  };
-
-  const handleBrowsePlansClick = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    navigate("/membership");
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
-  const staggerContainer = {
-    animate: { transition: { staggerChildren: 0.1 } },
-  };
-
-  const scaleIn = {
-    initial: { scale: 0.8, opacity: 0 },
-    animate: { scale: 1, opacity: 1, transition: { duration: 0.6 } },
-  };
-
-  const { scrollYProgress } = useScroll();
-  const { getToken } = useAuth();
-  const dispatch = useDispatch<AppDispatch>();
-  const { items: products } = useSelector((state: RootState) => state.products);
-
-  useEffect(() => {
-    const fetchPodcast = async () => {
-      try {
-        const token = await getToken();
-        await dispatch(
-          fetchProducts({ type: ProductType.PODCAST, token: token! })
-        );
-      } catch (error) {
-        console.error("Error fetching podcast data:", error);
-      }
-    };
-    fetchPodcast();
-  }, [dispatch, getToken]);
-
-  useEffect(() => {
-    const filteredPodcast = products.filter(
-      (podcast) =>
-        (podcast?.details as PodcastProduct["details"])?.category ===
-        selectedCategory
-    );
-    setFilteredPodcast(filteredPodcast);
-  }, [products, selectedCategory]);
-
   const fetchDBUser = useCallback(async () => {
     try {
       const token = await getToken();
       const response = await axios.get(
         `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {
         setDbUser(response.data.data);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching user data:", error);
     }
   }, [user?.id, getToken]);
 
-  useEffect(() => {
-    fetchDBUser();
-  }, [fetchDBUser, user?.id, getToken]);
+  const checkAccessAndControlPlayback = useCallback(
+    async (podcast: ProductBase, audioElement?: HTMLAudioElement | null) => {
+      const podcastId = String(podcast._id);
+      const podcastType = String(podcast.product_type || "free").toLowerCase();
 
-  const isFreePlanValid = useCallback(
-    (subscription: Subscription | undefined): boolean => {
-      if (!subscription) return false;
-      if (subscription.plan !== "free") return true;
-      if (subscription.isActive === false) return false;
-      if (subscription.validUntil) {
-        const validUntil = new Date(subscription.validUntil);
-        const now = new Date();
-        return now <= validUntil;
-      }
-      return false;
-    },
-    []
-  );
-
-  const hasQuotaForPodcastType = useCallback(
-    (podcastType: string, subscription: Subscription | undefined): boolean => {
-      if (!subscription) return false;
-      const normalizedPodcastType = podcastType.toLowerCase();
-      const normalizedPlan = subscription.plan.toLowerCase();
-      const consumedContent = subscription.consumedContent || {
-        prime: 0,
-        platinum: 0,
-      };
-      const lastResetDate = consumedContent.lastResetDate
-        ? new Date(consumedContent.lastResetDate)
-        : null;
-      const currentDate = new Date();
-      const needsReset =
-        !lastResetDate ||
-        lastResetDate.getMonth() !== currentDate.getMonth() ||
-        lastResetDate.getFullYear() !== currentDate.getFullYear();
-
-      if (needsReset) {
-        console.log("Monthly quota reset needed");
+      if (!isSignedIn) {
+        setTimeout(() => {
+          if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+            const timeNow = Date.now();
+            if (timeNow - modalShownTimestamp > 5000) {
+              setLimitModalTitle("Sign In Required");
+              setLimitModalMessage("Please sign in to access this podcast.");
+              setShowSubscriptionLimitModal(true);
+              setModalShownTimestamp(timeNow);
+            }
+          }
+        }, 45000);
+        return false;
       }
 
-      if (normalizedPlan === "free") {
-        return (
-          normalizedPodcastType === "free" && isFreePlanValid(subscription)
+      if (!dbUser) {
+        toast.info("Loading user data...");
+        fetchDBUser();
+        return false;
+      }
+
+      try {
+        const token = await getToken();
+        const response = await axios.post(
+          `${import.meta.env.VITE_PROD_URL}/subscription/access`,
+          { type: "podcasts", itemId: podcast._id },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-      } else if (normalizedPlan === "prime") {
-        if (normalizedPodcastType === "free") return true;
-        if (normalizedPodcastType === "prime") {
-          return (consumedContent.prime || 0) < 5;
+        const { access, reason } = response.data;
+        if (access) {
+          setPlaybackTracking({
+            startTime: Date.now(),
+            paused: false,
+            skipped: false,
+            podcastId,
+            podcastType,
+          });
+          return true;
+        }
+
+        const timeNow = Date.now();
+        if (timeNow - modalShownTimestamp <= 5000) {
+          return false;
+        }
+
+        if (reason === "upgrade") {
+          setLimitModalTitle("Upgrade Your Plan");
+          setLimitModalMessage(
+            `You've reached the podcast limit for your ${membershipType} plan. Upgrade to access more content!`
+          );
+        } else if (reason === "charge") {
+          setLimitModalTitle("Purchase Content");
+          setLimitModalMessage(
+            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+          );
+        }
+        setCurrentProductId(podcast._id || "");
+        setShowSubscriptionLimitModal(true);
+        setModalShownTimestamp(timeNow);
+
+        if (audioElement && !audioElement.paused) {
+          audioElement.pause();
+          setPlayingPodcastId(null);
         }
         return false;
-      } else if (normalizedPlan === "platinum") {
-        if (normalizedPodcastType === "free") return true;
-        if (normalizedPodcastType === "prime") {
-          return (consumedContent.prime || 0) < 5;
-        }
-        if (normalizedPodcastType === "platinum") {
-          return (consumedContent.platinum || 0) < 8;
-        }
+      } catch (error) {
+        console.error("Error checking access:", error);
+        toast.error("Failed to verify access. Please try again.");
+        return false;
       }
-      return false;
     },
-    [isFreePlanValid]
+    [
+      isSignedIn,
+      dbUser,
+      getToken,
+      modalShownTimestamp,
+      membershipType,
+      fetchDBUser,
+    ]
   );
 
-  const getQuotaMessage = useCallback(
-    (podcastType: string, subscription: Subscription | undefined): string => {
-      if (!subscription) return "Please subscribe to access this content";
-      const normalizedPodcastType = podcastType.toLowerCase();
-      const normalizedPlan = subscription.plan.toLowerCase();
-
-      if (normalizedPlan === "free") {
-        if (
-          normalizedPodcastType === "prime" ||
-          normalizedPodcastType === "platinum"
-        ) {
-          return `Upgrade to ${normalizedPodcastType} subscription to access this content`;
-        }
-        if (!isFreePlanValid(subscription)) {
-          return "Your free trial has expired. Please upgrade to continue accessing content.";
-        }
-      } else if (normalizedPlan === "prime") {
-        if (normalizedPodcastType === "platinum") {
-          return "Upgrade to Platinum subscription to access this premium content";
-        }
-        if (
-          normalizedPodcastType === "prime" &&
-          (subscription.consumedContent?.prime || 0) >= 5
-        ) {
-          return "You've reached your monthly limit of 5 Prime podcasts. Please wait for next month or upgrade to Platinum.";
-        }
-      } else if (normalizedPlan === "platinum") {
-        if (
-          normalizedPodcastType === "prime" &&
-          (subscription.consumedContent?.prime || 0) >= 5
-        ) {
-          return "You've reached your monthly limit of 5 Prime podcasts. Please wait for next month.";
-        }
-        if (
-          normalizedPodcastType === "platinum" &&
-          (subscription.consumedContent?.platinum || 0) >= 8
-        ) {
-          return "You've reached your monthly limit of 8 Platinum podcasts. Please wait for next month.";
-        }
+  const handlePodcastCompletion = (podcastId: string, podcastType: string) => {
+    podcastType = podcastType.toLowerCase();
+    if (
+      isSignedIn &&
+      dbUser &&
+      playbackTracking &&
+      playbackTracking.podcastId === podcastId &&
+      !playbackTracking.paused &&
+      !playbackTracking.skipped
+    ) {
+      if (podcastType !== "free") {
+        updateContentConsumption(podcastType);
       }
-      return "";
-    },
-    [isFreePlanValid]
-  );
+      triggerReward(RewardEventType.LISTEN_PODCAST, podcastId);
+      toast.success("You earned points for completing this podcast!");
+    }
+  };
 
   const updateContentConsumption = useCallback(
     async (podcastType: string) => {
@@ -351,102 +253,65 @@ const Podcastv2 = () => {
 
         localStorage.setItem(consumptionKey, JSON.stringify(consumption));
 
-        if (dbUser.subscription) {
-          const consumedContent = dbUser.subscription.consumedContent || {
-            prime: 0,
-            platinum: 0,
+        const updatedUser = { ...dbUser };
+        const consumedContent = dbUser.subscription.consumedContent || {
+          prime: 0,
+          platinum: 0,
+        };
+        if (podcastType === "prime") {
+          updatedUser.subscription.consumedContent = {
+            ...consumedContent,
+            prime: (consumedContent.prime || 0) + 1,
           };
-          const updatedUser = { ...dbUser };
-          if (podcastType === "prime") {
-            updatedUser.subscription.consumedContent = {
-              ...consumedContent,
-              prime: (consumedContent.prime || 0) + 1,
-            };
-          } else if (podcastType === "platinum") {
-            updatedUser.subscription.consumedContent = {
-              ...consumedContent,
-              platinum: (consumedContent.platinum || 0) + 1,
-            };
-          }
-          setDbUser(updatedUser);
+        } else if (podcastType === "platinum") {
+          updatedUser.subscription.consumedContent = {
+            ...consumedContent,
+            platinum: (consumedContent.platinum || 0) + 1,
+          };
         }
+        setDbUser(updatedUser);
         fetchDBUser();
       } catch (error) {
         console.error("Error updating content consumption:", error);
       }
     },
-    [dbUser, isSignedIn, getToken, fetchDBUser]
+    [dbUser, isSignedIn, fetchDBUser]
   );
 
-  const checkAccessAndControlPlayback = useCallback(
-    (podcast: ProductBase, audioElement?: HTMLAudioElement | null) => {
-      const podcastId = String(podcast._id);
-      const podcastType = String(podcast.product_type || "free").toLowerCase();
-
-      if (
-        isSignedIn &&
-        dbUser &&
-        !hasQuotaForPodcastType(podcastType, dbUser.subscription)
-      ) {
-        const currentTime = Date.now();
-        if (currentTime - modalShownTimestamp > 5000) {
-          const message = getQuotaMessage(podcastType, dbUser.subscription);
-          setQuotaModalMessage(message);
-          setShowQuotaModal(true);
-          setModalShownTimestamp(currentTime);
-        }
-        if (audioElement && !audioElement.paused) {
-          audioElement.pause();
-          setTimeout(() => {
-            if (audioElement && !audioElement.paused) {
-              audioElement.pause();
-              const timeNow = Date.now();
-              if (timeNow - modalShownTimestamp > 5000) {
-                const message = getQuotaMessage(
-                  podcastType,
-                  dbUser.subscription
-                );
-                setQuotaModalMessage(message);
-                setShowQuotaModal(true);
-                setModalShownTimestamp(timeNow);
-              }
-            }
-          }, 45000);
-          return false;
-        }
-        return false;
-      } else if (!isSignedIn && audioElement) {
-        setTimeout(() => {
-          if (audioElement && !audioElement.paused) {
-            audioElement.pause();
-            const timeNow = Date.now();
-            if (timeNow - modalShownTimestamp > 5000) {
-              setShowMembershipModal(true);
-              setModalShownTimestamp(timeNow);
-            }
-          }
-        }, 45000);
+  useEffect(() => {
+    const fetchPodcast = async () => {
+      try {
+        const token = await getToken();
+        await dispatch(
+          fetchProducts({ type: ProductType.PODCAST, token: token! })
+        );
+      } catch (error) {
+        console.error("Error fetching podcast data:", error);
       }
+    };
+    fetchPodcast();
+  }, [dispatch, getToken]);
 
-      if (isSignedIn) {
-        setPlaybackTracking({
-          startTime: Date.now(),
-          paused: false,
-          skipped: false,
-          podcastId,
-          podcastType,
-        });
-      }
-      return true;
-    },
-    [
-      dbUser,
-      getQuotaMessage,
-      hasQuotaForPodcastType,
-      isSignedIn,
-      modalShownTimestamp,
-    ]
-  );
+  useEffect(() => {
+    const filtered = products.filter(
+      (podcast) =>
+        (podcast?.details as PodcastProduct["details"])?.category ===
+        selectedCategory
+    );
+    setFilteredPodcast(filtered);
+  }, [products, selectedCategory]);
+
+  useEffect(() => {
+    fetchDBUser();
+  }, [fetchDBUser, user?.id]);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener("scroll", handleScroll);
+      return () => carousel.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   return (
     <>
@@ -454,12 +319,12 @@ const Podcastv2 = () => {
       <div className="w-[90%] mx-auto mt-16">
         <motion.div
           className="items-start gap-8 md:flex"
-          initial="initial"
-          whileInView="animate"
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
+          transition={{ duration: 0.6 }}
         >
-          <motion.div className="flex-1" variants={fadeInUp}>
+          <div className="flex-1">
             <h1 className="py-8 text-5xl font-semibold text-primary md:text-6xl">
               Trending Podcast
             </h1>
@@ -476,8 +341,8 @@ const Podcastv2 = () => {
                 className="w-full"
               />
             </div>
-          </motion.div>
-          <motion.div className="flex-1" variants={fadeInUp}>
+          </div>
+          <div className="flex-1">
             <h2 className="py-4 text-4xl font-semibold text-center luckiest-guy-regular text-neutral-700">
               PODCAST ONLY FOR YOU
             </h2>
@@ -486,30 +351,22 @@ const Podcastv2 = () => {
               alt="Right side hero image"
               className="flex items-center justify-center w-full"
             />
-          </motion.div>
+          </div>
         </motion.div>
-
         <motion.div
           className="flex flex-col py-12"
-          initial="initial"
-          whileInView="animate"
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          variants={staggerContainer}
+          transition={{ duration: 0.6 }}
         >
-          <motion.h2
-            variants={fadeInUp}
-            className="pb-12 text-3xl font-semibold text-center"
-          >
+          <h2 className="pb-12 text-3xl font-semibold text-center">
             This is What You Get
-          </motion.h2>
-          <motion.div
-            className="flex flex-col items-center gap-4 md:flex-row md:justify-around"
-            variants={staggerContainer}
-          >
+          </h2>
+          <div className="flex flex-col items-center gap-4 md:flex-row md:justify-around">
             {PODCAST_OFFERINGS.map((podcast) => (
               <motion.div
                 key={podcast.label}
-                variants={scaleIn}
                 className="flex flex-col items-center gap-4 border p-4 rounded-xl w-[280px] h-[280px] justify-center"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -527,9 +384,8 @@ const Podcastv2 = () => {
                 </p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </motion.div>
-
         <motion.div
           className="flex flex-col gap-12"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -549,7 +405,7 @@ const Podcastv2 = () => {
                     selectedCategory === category.lable
                       ? `ring-4 ring-orange-300 shadow-xl shadow-orange-200`
                       : ""
-                  } `}
+                  }`}
                   onClick={() => handleSelectedCategory(category.lable)}
                 >
                   <img
@@ -564,7 +420,6 @@ const Podcastv2 = () => {
               ))}
             </div>
           </div>
-
           <motion.div
             className="my-12"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -572,175 +427,135 @@ const Podcastv2 = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="relative">
-              {filteredPodcast.length > 0 && (
-                <div className="relative">
-                  <div className="relative overflow-hidden rounded-3xl shadow-lg bg-gradient-to-br from-orange-400 via-[#FF6C6C] to-pink-500 transition-all duration-300">
-                    <div className="absolute top-0 right-0 w-32 h-32 translate-x-1/2 -translate-y-1/2 bg-orange-300 rounded-full opacity-20 md:w-64 md:h-64"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-1/2 translate-y-1/2 bg-pink-300 rounded-full opacity-20 md:w-48 md:h-48"></div>
-                    <div className="flex flex-col items-start p-5 md:flex-row md:p-8">
-                      <div className="relative flex-1 p-2 md:p-4 group">
-                        <img
-                          src={
-                            filteredPodcast[currentPodcastIndex]
-                              ?.productImages?.[0].imageUrl ||
-                            "/assets/podcastv2/podcast-thumbnail-social.png"
-                          }
-                          alt={
-                            filteredPodcast[currentPodcastIndex]?.title ||
-                            "Podcast Thumbnail"
-                          }
-                          className="relative z-10 object-cover w-full transition-transform duration-300 transform shadow-xl rounded-2xl max-w- group-hover:scale-95"
-                        />
+            {filteredPodcast.length > 0 && (
+              <div className="relative">
+                <div className="relative overflow-hidden rounded-3xl shadow-lg bg-gradient-to-br from-orange-400 via-[#FF6C6C] to-pink-500">
+                  <div className="absolute top-0 right-0 w-32 h-32 translate-x-1/2 -translate-y-1/2 bg-orange-300 rounded-full opacity-20 md:w-64 md:h-64"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-1/2 translate-y-1/2 bg-pink-300 rounded-full opacity-20 md:w-48 md:h-48"></div>
+                  <div className="flex flex-col items-start p-5 md:flex-row md:p-8">
+                    <div className="relative flex-1 p-2 md:p-4 group">
+                      <img
+                        src={
+                          filteredPodcast[currentPodcastIndex]
+                            ?.productImages?.[0].imageUrl ||
+                          "/assets/podcastv2/podcast-thumbnail-social.png"
+                        }
+                        alt={
+                          filteredPodcast[currentPodcastIndex]?.title ||
+                          "Podcast Thumbnail"
+                        }
+                        className="relative z-10 object-cover w-full transition-transform duration-300 transform shadow-xl rounded-2xl max-w- group-hover:scale-95"
+                      />
+                    </div>
+                    <div className="flex-1 p-4 text-white md:p-6">
+                      <div className="flex items-center mb-3">
+                        <div className="w-2 h-2 mr-2 bg-white rounded-full animate-pulse"></div>
+                        <span className="text-sm font-medium tracking-wider uppercase opacity-80">
+                          {selectedCategory.toUpperCase()}
+                        </span>
                       </div>
-                      <div className="flex-1 p-4 text-white md:p-6">
-                        <div className="flex items-center mb-3">
-                          <div className="w-2 h-2 mr-2 bg-white rounded-full animate-pulse"></div>
-                          <span className="text-sm font-medium tracking-wider uppercase opacity-80">
-                            {selectedCategory.toUpperCase()}
-                          </span>
-                        </div>
-                        <h2
-                          className="py-4 font-bold leading-none text-4xl sm:text-4xl md:text-5xl lg:text-6xl relative pr-2 after:content-[attr(data-badge)]
-                          after:hidden
-                          data-[badge]:after:inline-block
-                          after:py-[4px]
-                          after:px-[6px]
-                          after:leading-none
-                          after:text-white
-                          after:text-sm
-                          after:font-semibold
-                          after:rounded
-                          after:ml-2
-                          after:shadow-md
-                          after:absolute
-                          after:animate-[sparkle_2s_ease-in-out_infinite]
-                          [--badge-bg:theme(colors.yellow.300)]
-                          [--badge-text:theme(colors.yellow.800)]
-                          data-[badge=Free]:after:bg-gradient-to-r
-                          data-[badge=Free]:after:from-green-400
-                          data-[badge=Free]:after:to-green-500
-                          data-[badge=free]:after:bg-gradient-to-r
-                          data-[badge=free]:after:from-green-400
-                          data-[badge=free]:after:to-green-500
-                          data-[badge=Prime]:after:bg-gradient-to-r
-                          data-[badge=Prime]:after:from-yellow-400
-                          data-[badge=Prime]:after:to-orange-500
-                          data-[badge=prime]:after:bg-gradient-to-r
-                          data-[badge=prime]:after:from-yellow-400
-                          data-[badge=prime]:after:to-orange-500
-                          data-[badge=Platinum]:after:bg-gradient-to-r
-                          data-[badge=Platinum]:after:from-gray-400
-                          data-[badge=Platinum]:after:to-gray-500
-                          data-[badge=platinum]:after:bg-gradient-to-r
-                          data-[badge=platinum]:after:from-gray-400
-                          data-[badge=platinum]:after:to-gray-500"
-                          data-badge={
-                            filteredPodcast[currentPodcastIndex].product_type ||
-                            undefined
-                          }
-                        >
-                          {filteredPodcast[currentPodcastIndex]?.title ||
-                            "Negative impact of Mobile phone"}
-                        </h2>
-                        <p className="mb-6 text-base leading-relaxed md:text-lg text-white/90">
-                          {filteredPodcast[currentPodcastIndex]?.description ||
-                            "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world."}
-                        </p>
-                        <div className="flex items-center mb-3">
-                          <span className="font-medium tracking-wider opacity-80 text-md text-italic luckiest-guy-regular">
-                            {(
+                      <h2
+                        className="py-4 font-bold leading-none text-4xl sm:text-4xl md:text-5xl lg:text-6xl relative pr-2"
+                        data-badge={
+                          filteredPodcast[currentPodcastIndex].product_type ||
+                          undefined
+                        }
+                      >
+                        {filteredPodcast[currentPodcastIndex]?.title ||
+                          "Negative impact of Mobile phone"}
+                      </h2>
+                      <p className="mb-6 text-base leading-relaxed md:text-lg text-white/90">
+                        {filteredPodcast[currentPodcastIndex]?.description ||
+                          "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world."}
+                      </p>
+                      <div className="flex items-center mb-3">
+                        <span className="font-medium tracking-wider opacity-80 text-md text-italic luckiest-guy-regular">
+                          {(
+                            filteredPodcast[currentPodcastIndex]
+                              .details as PodcastProduct["details"]
+                          )?.host || "Mentoons"}
+                        </span>
+                      </div>
+                      <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20">
+                        <audio
+                          key={currentPodcastIndex}
+                          className="w-full"
+                          controls
+                          controlsList="nodownload"
+                          preload="metadata"
+                          src={
+                            (
                               filteredPodcast[currentPodcastIndex]
                                 .details as PodcastProduct["details"]
-                            )?.host || "Mentoons"}
-                          </span>
-                        </div>
-                        <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20 ">
-                          <audio
-                            key={currentPodcastIndex}
-                            className="w-full"
-                            controls
-                            controlsList="nodownload"
-                            preload="metadata"
-                            src={
-                              (
-                                filteredPodcast[currentPodcastIndex]
-                                  .details as PodcastProduct["details"]
-                              )?.sampleUrl || "#"
-                            }
-                            onPlay={(e) => {
-                              const hasAccess = checkAccessAndControlPlayback(
+                            )?.sampleUrl || "#"
+                          }
+                          onPlay={async (e) => {
+                            const hasAccess =
+                              await checkAccessAndControlPlayback(
                                 filteredPodcast[currentPodcastIndex],
                                 e.currentTarget
                               );
-                              if (!hasAccess) {
-                                e.currentTarget.pause();
-                                setPlayingPodcastId(null);
-                              }
-                            }}
-                            onPause={() => {
-                              if (
-                                playbackTracking &&
-                                playbackTracking.podcastId ===
-                                  String(
-                                    filteredPodcast[currentPodcastIndex]._id
-                                  )
-                              ) {
-                                setPlaybackTracking((prev) =>
-                                  prev ? { ...prev, paused: true } : null
-                                );
-                              }
-                            }}
-                            onSeeked={() => {
-                              if (
-                                playbackTracking &&
-                                playbackTracking.podcastId ===
-                                  String(
-                                    filteredPodcast[currentPodcastIndex]._id
-                                  )
-                              ) {
-                                setPlaybackTracking((prev) =>
-                                  prev ? { ...prev, skipped: true } : null
-                                );
-                              }
-                            }}
-                            onEnded={() => {
+                            if (!hasAccess) {
+                              e.currentTarget.pause();
                               setPlayingPodcastId(null);
-                              handlePodcastCompletion(
-                                String(
-                                  filteredPodcast[currentPodcastIndex]._id
-                                ),
-                                String(
-                                  filteredPodcast[currentPodcastIndex]
-                                    .product_type || "free"
-                                )
+                            }
+                          }}
+                          onPause={() => {
+                            if (
+                              playbackTracking &&
+                              playbackTracking.podcastId ===
+                                String(filteredPodcast[currentPodcastIndex]._id)
+                            ) {
+                              setPlaybackTracking((prev) =>
+                                prev ? { ...prev, paused: true } : null
                               );
-                            }}
-                          >
-                            Your browser does not support the audio element.
-                          </audio>
-                        </div>
+                            }
+                          }}
+                          onSeeked={() => {
+                            if (
+                              playbackTracking &&
+                              playbackTracking.podcastId ===
+                                String(filteredPodcast[currentPodcastIndex]._id)
+                            ) {
+                              setPlaybackTracking((prev) =>
+                                prev ? { ...prev, skipped: true } : null
+                              );
+                            }
+                          }}
+                          onEnded={() => {
+                            setPlayingPodcastId(null);
+                            handlePodcastCompletion(
+                              String(filteredPodcast[currentPodcastIndex]._id),
+                              String(
+                                filteredPodcast[currentPodcastIndex]
+                                  .product_type || "free"
+                              )
+                            );
+                          }}
+                        >
+                          Your browser does not support the audio element.
+                        </audio>
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-center gap-4 mt-6">
                     <button
-                      onClick={() => {
+                      onClick={() =>
                         setCurrentPodcastIndex((prev) =>
                           prev > 0 ? prev - 1 : filteredPodcast.length - 1
-                        );
-                      }}
+                        )
+                      }
                       className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:-translate-x-1"
                       aria-label="Previous podcast"
                     >
                       <IoIosArrowBack className="text-2xl text-orange-500" />
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={() =>
                         setCurrentPodcastIndex((prev) =>
                           prev < filteredPodcast.length - 1 ? prev + 1 : 0
-                        );
-                      }}
+                        )
+                      }
                       className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:translate-x-1"
                       aria-label="Next podcast"
                     >
@@ -748,16 +563,23 @@ const Podcastv2 = () => {
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
-
         <motion.div
           className="relative my-20"
           style={{
-            scale: useTransform(scrollYProgress, [0.4, 0.8], [1, 1]),
-            opacity: useTransform(scrollYProgress, [0.4, 0.8], [1, 1]),
+            scale: useTransform(
+              useScroll().scrollYProgress,
+              [0.4, 0.8],
+              [1, 1]
+            ),
+            opacity: useTransform(
+              useScroll().scrollYProgress,
+              [0.4, 0.8],
+              [1, 1]
+            ),
           }}
         >
           <h2 className="relative z-10 pb-6 text-4xl font-bold text-primary">
@@ -809,9 +631,8 @@ const Podcastv2 = () => {
           <button
             onClick={() => {
               const carousel = carouselRef.current;
-              if (carousel) {
+              if (carousel)
                 carousel.scrollBy({ left: -310, behavior: "smooth" });
-              }
             }}
             className="absolute left-0 p-3 transition-all duration-300 -translate-y-1/2 bg-white rounded-full shadow-xl top-1/2 hover:bg-orange-100 hover:scale-110 hover:-translate-x-1"
             style={{ display: isAtStart ? "none" : "block" }}
@@ -822,9 +643,8 @@ const Podcastv2 = () => {
           <button
             onClick={() => {
               const carousel = carouselRef.current;
-              if (carousel) {
+              if (carousel)
                 carousel.scrollBy({ left: 310, behavior: "smooth" });
-              }
             }}
             className="absolute right-0 p-3 transition-all duration-300 -translate-y-1/2 bg-white rounded-full shadow-xl top-1/2 hover:bg-orange-100 hover:scale-110 hover:translate-x-1"
             style={{ display: isAtEnd ? "none" : "block" }}
@@ -833,7 +653,6 @@ const Podcastv2 = () => {
             <IoIosArrowForward className="text-2xl text-orange-500" />
           </button>
         </motion.div>
-
         <motion.div
           className="relative my-24 overflow-hidden shadow-2xl bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl"
           initial={{ opacity: 0, y: 100 }}
@@ -899,80 +718,30 @@ const Podcastv2 = () => {
                 </div>
                 <div className="mt-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <span
-                      className="py-[3px] 
-                        px-[5px] 
-                        text-xs 
-                        font-semibold 
-                        rounded 
-                        shadow-md
-                        capitalize text-green-600 bg-green-200 backdrop-blur-sm"
-                    >
+                    <span className="py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize text-green-600 bg-green-200 backdrop-blur-sm">
                       NEW RELEASE
                     </span>
                     <div
-                      className={`
-                        py-[3px] 
-                        px-[5px] 
-                        text-xs 
-                        font-semibold 
-                        rounded 
-                        shadow-md
-                        capitalize
-                        ${
-                          (
-                            filteredPodcast[0]
-                              .details as PodcastProduct["details"]
-                          )?.category === "mobile addiction"
-                            ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
-                            : (
-                                filteredPodcast[0]
-                                  .details as PodcastProduct["details"]
-                              )?.category === "electronic gadgets"
-                            ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
-                            : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
-                        }
-                      `}
+                      className={`py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize ${
+                        (
+                          filteredPodcast[0]
+                            .details as PodcastProduct["details"]
+                        )?.category === "mobile addiction"
+                          ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
+                          : (
+                              filteredPodcast[0]
+                                .details as PodcastProduct["details"]
+                            )?.category === "electronic gadgets"
+                          ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
+                          : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
+                      }`}
                     >
                       {(filteredPodcast[0].details as PodcastProduct["details"])
                         ?.category || "Category"}
                     </div>
                   </div>
                   <h2
-                    className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl after:content-[attr(data-badge)]
-                    after:hidden
-                    data-[badge]:after:inline-block
-                    after:py-[4px]
-                    after:px-[6px]
-                    after:leading-none
-                    after:text-white
-                    after:text-sm
-                    after:font-semibold
-                    after:rounded
-                    after:ml-2
-                    after:shadow-md
-                    after:absolute
-                    after:animate-[sparkle_2s_ease-in-out_infinite]
-                    [--badge-bg:theme(colors.yellow.300)]
-                    [--badge-text:theme(colors.yellow.800)]
-                    data-[badge=Free]:after:bg-gradient-to-r
-                    data-[badge=Free]:after:from-green-400
-                    data-[badge=Free]:after:to-green-500
-                    data-[badge=free]:after:bg-gradient-to-r
-                    data-[badge=free]:after:from-green-400
-                    data-[badge=free]:after:to-green-500
-                    data-[badge=Prime]:after:bg-gradient-to-r
-                    data-[badge=Prime]:after:from-yellow-400
-                    data-[badge=Prime]:after:to-orange-500
-                    data-[badge=prime]:after:bg-gradient-to-r
-                    data-[badge=prime]:after:from-yellow-400
-                    data-[badge=prime]:after:to-orange-500
-                    data-[badge=Platinum]:after:bg-gradient-to-r
-                    data-[badge=Platinum]:after:from-gray-400
-                    data-[badge=Platinum]:after:to-gray-500
-                    data-[badge=platinum]:after:bg-gradient-to-r
-                    data-[badge=platinum]:after:from-gray-400
-                    data-[badge=platinum]:after:to-gray-500"
+                    className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl"
                     data-badge={
                       filteredPodcast[currentPodcastIndex].product_type ||
                       undefined
@@ -983,7 +752,7 @@ const Podcastv2 = () => {
                   </h2>
                   <p className="mb-4 text-lg text-white/90 line-clamp-3">
                     {filteredPodcast[0]?.description ||
-                      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives. Each episode explores how smartphones, tablets, and other gadgets....."}
+                      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives. Each episode explores how smartphones, tablets, and other gadgets..."}
                   </p>
                   <div className="flex items-center mb-6 text-sm text-white/80">
                     <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
@@ -1050,8 +819,8 @@ const Podcastv2 = () => {
                         )?.sampleUrl || "#"
                       }
                       autoPlay
-                      onPlay={(e) => {
-                        const hasAccess = checkAccessAndControlPlayback(
+                      onPlay={async (e) => {
+                        const hasAccess = await checkAccessAndControlPlayback(
                           filteredPodcast[0],
                           e.currentTarget
                         );
@@ -1170,7 +939,6 @@ const Podcastv2 = () => {
             </div>
           </div>
         </motion.div>
-
         <motion.div
           className="flex flex-col items-start gap-8 p-12 mb-16 text-white rounded-3xl bg-primary md:flex-row"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -1217,14 +985,14 @@ const Podcastv2 = () => {
                     id="message"
                     placeholder="Write here"
                     rows={3}
-                    onChange={(e) => handleMessageChange(e)}
+                    onChange={handleMessageChange}
                     className="w-full p-4 text-black shadow-lg rounded-xl"
-                  ></textarea>
+                  />
                 </div>
                 <button
                   type="submit"
-                  className="px-12 py-3 text-lg font-semibold text-white bg-blue-600 rounded-xl w-fit"
-                  onClick={(e) => handleSubmit(e)}
+                  className="px-12 py-3 text-lg font-semibold text-white bg-primary rounded-xl w-fit hover:bg-primary/90"
+                  onClick={handleSubmit}
                 >
                   Submit
                 </button>
@@ -1240,42 +1008,15 @@ const Podcastv2 = () => {
           </div>
         </motion.div>
       </div>
-      {showMembershipModal && (
-        <div
-          className="fixed inset-0 z-[999] bg-black bg-opacity-50 flex items-center justify-center"
-          onClick={() => setShowMembershipModal(false)}
-        >
-          <div
-            className="bg-white p-8 rounded-lg relative sm:max-w-[425px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="absolute top-0 right-0 m-4 text-3xl rounded text-muted-foreground"
-              onClick={() => setShowMembershipModal(false)}
-            >
-              <IoCloseCircleOutline />
-            </button>
-            <div className="py-4 space-y-4">
-              <p className="text-2xl font-bold text-center text-muted-foreground">
-                To listen more, buy Mentoons membership
-              </p>
-              <p className="text-center text-md text-muted-foreground">
-                Get unlimited access to our complete library of audio content
-                and exclusive features.
-              </p>
-            </div>
-            <a
-              href={"#subscription"}
-              className="block w-full px-4 py-3 text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
-              onClick={(e) => {
-                setShowMembershipModal(false);
-                handleBrowsePlansClick(e);
-              }}
-            >
-              View Membership Plans
-            </a>
-          </div>
-        </div>
+      {showSubscriptionLimitModal && (
+        <SubscriptionLimitModal
+          isOpen={showSubscriptionLimitModal}
+          onClose={() => setShowSubscriptionLimitModal(false)}
+          message={limitModalMessage}
+          title={limitModalTitle}
+          planType={membershipType}
+          productId={currentProductId}
+        />
       )}
       {showEnquiryModal && (
         <EnquiryModal
@@ -1283,42 +1024,6 @@ const Podcastv2 = () => {
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
-      )}
-      {showQuotaModal && (
-        <div
-          className="fixed inset-0 z-[999] bg-black bg-opacity-50 flex items-center justify-center"
-          onClick={() => setShowQuotaModal(false)}
-        >
-          <div
-            className="bg-white p-8 rounded-lg relative sm:max-w-[425px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="absolute top-0 right-0 m-4 text-3xl rounded text-muted-foreground"
-              onClick={() => setShowQuotaModal(false)}
-            >
-              <IoCloseCircleOutline />
-            </button>
-            <div className="py-4 space-y-4">
-              <p className="text-2xl font-bold text-center text-muted-foreground">
-                Subscription Limit Reached
-              </p>
-              <p className="text-center text-md text-muted-foreground">
-                {quotaModalMessage}
-              </p>
-            </div>
-            <a
-              href={"#subscription"}
-              className="block w-full px-4 py-3 text-lg font-semibold text-center text-white transition-all duration-300 bg-primary hover:scale-105"
-              onClick={(e) => {
-                setShowQuotaModal(false);
-                handleBrowsePlansClick(e);
-              }}
-            >
-              View Subscription Plans
-            </a>
-          </div>
-        </div>
       )}
     </>
   );

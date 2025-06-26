@@ -9,32 +9,59 @@ import { addNotification } from "@/redux/adda/notificationSlice";
 import { NotificationInterface } from "@/types";
 import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaClock, FaMessage, FaPhone } from "react-icons/fa6";
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+// import axiosInstance from "@/api/axios";
+import PlatinumMembershipModal from "@/components/common/modal/platinumSubscriptionModal";
 
 const PrimaryHeader = () => {
   const { socket } = useSocket();
   const location = useLocation();
   const { getToken } = useAuth();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [membershipModal, setMembershipModal] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
 
     socket.on("receive_notification", (notification: NotificationInterface) => {
-      console.log(
-        "Live notification received:==================================================================>",
-        notification
-      );
       dispatch(addNotification(notification));
     });
 
+    socket.on("unread_message_count", ({ count }: { count: number }) => {
+      setUnreadCount(count);
+    });
+
     return () => {
+      socket.off("unread_message_count");
       socket.off("receive_notification");
     };
   }, [socket, dispatch]);
+
+  const handleMessageClick = async () => {
+    // try {
+      // const token = await getToken();
+      // const res = await axiosInstance.get("/user/subscription-status", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+
+      // const { isValid, plan } = res.data.data;
+      // const isPlatinum = plan.toLowerCase() === "platinum";
+
+      // if (isValid && isPlatinum) {
+        setUnreadCount(0);
+        navigate("/chat");
+    //   } else {
+    //     setMembershipModal(true);
+    //   }
+    // } catch (err) {
+    //   setMembershipModal(true);
+    // }
+  };
 
   const adda = useMemo(
     () => location.pathname.startsWith("/adda"),
@@ -101,13 +128,26 @@ const PrimaryHeader = () => {
 
       <div className="flex items-center justify-end w-auto gap-10 md:w-1/2">
         <SignedIn>
-          <NavLink to="/chat">
+          <button onClick={handleMessageClick} className="relative">
             <FaMessage />
-          </NavLink>
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </button>
           <NotificationModal getToken={getToken} />
         </SignedIn>
         <AuthButton />
       </div>
+      <PlatinumMembershipModal
+        isOpen={membershipModal}
+        onClose={() => setMembershipModal(false)}
+        onNavigate={() => {
+          setMembershipModal(false);
+          navigate("/membership");
+        }}
+      />
     </div>
   );
 };

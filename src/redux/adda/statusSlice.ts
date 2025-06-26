@@ -35,7 +35,7 @@ export const fetchStatus = createAsyncThunk<
         },
       }
     );
-    console.log("Fetched status response:", response.data);
+
     return response.data.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
