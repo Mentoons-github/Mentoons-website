@@ -73,7 +73,6 @@ const FreeDownloadForm: React.FC<FreeDownloadFormProps> = ({
           response.data?.message || "Comic sent successfully to your email!"
         );
         setShowSuccess(true);
-        toast.success("Comic sent successfully to your email!");
 
         setTimeout(() => {
           setShowFreeDownloadForm(false);

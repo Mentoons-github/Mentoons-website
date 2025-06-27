@@ -30,16 +30,6 @@ interface UserConversation {
   unreadCounts: { [userId: string]: number };
 }
 
-// interface ConversationResponse {
-//   data: UserConversation[];
-// }
-
-interface FriendsResponse {
-  data: {
-    friends: Friend[];
-  };
-}
-
 interface FriendsProps {
   lastMessage: Message | null;
 }
@@ -49,6 +39,12 @@ type MergedResult =
   | { type: "friend"; data: Friend };
 
 type FilterType = "all" | "online" | "read" | "unread";
+
+interface FriendsResponse {
+  data: {
+    friends: Friend[];
+  };
+}
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -62,9 +58,10 @@ function useDebounce<T>(value: T, delay: number): T {
 const Friends: React.FC<FriendsProps> = () => {
   const { selectedUser } = useParams();
   const { onlineUsers, mongoUserId } = useSocket();
+
+  console.log("omline users from backend : ", onlineUsers);
   const navigate = useNavigate();
   const { getToken } = useAuth();
-
   const dispatch = useDispatch<AppDispatch>();
   const { conversations, status } = useSelector(
     (state: RootState) => state.conversation
@@ -126,7 +123,6 @@ const Friends: React.FC<FriendsProps> = () => {
             signal: controller.signal,
           }
         );
-
         setFriends(response.data.data?.friends);
       } catch (err: unknown) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
@@ -148,14 +144,10 @@ const Friends: React.FC<FriendsProps> = () => {
         const nameMatch = conv.friend.name
           .toLowerCase()
           .includes(debouncedSearch.toLowerCase());
-
         const isOnline = onlineUsers.some(
           (u: { _id: string }) => u._id === conv.friend._id
         );
-
         const unreadCount = conv.unreadCounts?.[mongoUserId] || 0;
-        console.log(unreadCount, "unreadcouont");
-
         switch (activeFilter) {
           case "online":
             return nameMatch && isOnline;
@@ -202,28 +194,28 @@ const Friends: React.FC<FriendsProps> = () => {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="w-full max-w-[350px] bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-6 flex flex-col gap-5 border border-white/20"
+      className="w-full sm:max-w-[300px] md:max-w-[350px] bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 border border-white/20 h-full"
     >
-      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
-        <FaSearch className="text-gray-400" />
+      <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
+        <FaSearch className="text-gray-400 text-sm sm:text-base" />
         <input
           type="text"
           placeholder="Search chats..."
-          className="outline-none bg-transparent w-full text-sm text-gray-700 placeholder-gray-400"
+          className="outline-none bg-transparent w-full text-xs sm:text-sm text-gray-700 placeholder-gray-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           aria-label="Search chats"
         />
       </div>
 
-      <div className="relative flex items-center gap-1 p-1.5 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
+      <div className="relative flex items-center gap-1 p-1 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
         {filters.map((filter) => (
           <motion.button
             key={filter.key}
             onClick={() => setActiveFilter(filter.key)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`relative flex-1 px-2 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
+            className={`relative flex-1 px-2 py-2 text-[10px] sm:text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
               activeFilter === filter.key
                 ? "text-white shadow-lg"
                 : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
@@ -237,22 +229,19 @@ const Friends: React.FC<FriendsProps> = () => {
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               />
             )}
-
             <motion.div
               className="absolute inset-0 bg-orange-100/60 rounded-xl opacity-0"
               whileHover={{ opacity: activeFilter === filter.key ? 0 : 1 }}
               transition={{ duration: 0.2 }}
             />
-
             <span className="relative z-10 tracking-wide font-sans flex items-center gap-1">
               {filter.label}
               {filter.count > 0 && (
-                <span className="text-[10px] bg-white/90 text-gray-700 font-bold px-1.5 py-0.5 rounded-full shadow">
+                <span className="text-[8px] sm:text-[10px] bg-white/90 text-gray-700 font-bold px-1 sm:px-1.5 py-0.5 rounded-full shadow">
                   {filter.count}
                 </span>
               )}
             </span>
-
             {activeFilter === filter.key && (
               <motion.div
                 initial={{ scale: 0 }}
@@ -262,22 +251,25 @@ const Friends: React.FC<FriendsProps> = () => {
             )}
           </motion.button>
         ))}
-
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-amber-500/5 rounded-2xl pointer-events-none" />
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         <AnimatePresence>
           {(status == "conversationLoading" || friendsLoading) && (
-            <div className="text-center py-5">Loading...</div>
+            <div className="text-center py-4 sm:py-5 text-xs sm:text-sm">
+              Loading...
+            </div>
           )}
           {error && (
-            <div className="text-red-500 text-center py-5">{error}</div>
+            <div className="text-red-500 text-center py-4 sm:py-5 text-xs sm:text-sm">
+              {error}
+            </div>
           )}
           {mergedResults.length === 0 &&
             status !== "conversationLoading" &&
             !friendsLoading && (
-              <div className="text-center text-gray-500 py-5">
+              <div className="text-center text-gray-500 py-4 sm:py-5 text-xs sm:text-sm">
                 No results found.
               </div>
             )}
@@ -306,7 +298,7 @@ const Friends: React.FC<FriendsProps> = () => {
                   }`
                 )
               }
-              className={`relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer mb-3 transition-all ${
+              className={`relative flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl cursor-pointer mb-2 sm:mb-3 transition-all ${
                 selectedUser ===
                 (item.type === "conversation"
                   ? item.data.friend._id
@@ -327,22 +319,21 @@ const Friends: React.FC<FriendsProps> = () => {
                       ? item.data.friend.name
                       : item.data.name
                   }
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-100"
                 />
                 {(item.type === "conversation"
                   ? item.data.friend.isOnline
                   : item.data.isOnline) && (
-                  <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+                  <span className="absolute -bottom-1 -right-1 w-3 sm:w-4 h-3 sm:h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
                 )}
               </div>
-
               <div className="flex flex-col flex-grow min-w-0">
-                <h1 className="text-sm font-semibold text-gray-800">
+                <h1 className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
                   {item.type === "conversation"
                     ? item.data.friend.name
                     : item.data.name}
                 </h1>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-[10px] sm:text-xs text-gray-500 truncate">
                   {item.type === "conversation"
                     ? item.data.messageType === "image"
                       ? "Image"
@@ -356,19 +347,17 @@ const Friends: React.FC<FriendsProps> = () => {
                     : "Start chatting..."}
                 </p>
               </div>
-
-              <div className="absolute top-3 right-3 flex items-center gap-1">
+              <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1">
                 {item.type === "conversation" && (
                   <>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-[10px] sm:text-xs text-gray-400">
                       {new Date(item.data.updatedAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </span>
-
                     {item.data.unreadCounts?.[mongoUserId] > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                      <span className="ml-1 sm:ml-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded-full min-w-[14px] sm:min-w-[16px] text-center">
                         {item.data.unreadCounts[mongoUserId]}
                       </span>
                     )}

@@ -8,7 +8,7 @@ interface PodcastCardProps {
   onCheckAccessAndControlPlayback: (
     podcast: ProductBase,
     audioElement?: HTMLAudioElement | null
-  ) => Promise<boolean>;
+  ) => boolean | Promise<boolean>;
   onPlaybackTrackingUpdate: (update: (prev: any) => any) => void;
   onPodcastCompletion: (podcastId: string, podcastType: string) => void;
   playbackTracking: any;

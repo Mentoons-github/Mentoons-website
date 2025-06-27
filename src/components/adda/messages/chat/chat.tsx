@@ -9,8 +9,6 @@ import {
   BsThreeDotsVertical,
   BsFileEarmarkText,
 } from "react-icons/bs";
-import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
-import { MdSearch } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatFooter from "./chatFooter";
 import { useAuth } from "@clerk/clerk-react";
@@ -62,16 +60,17 @@ interface GroupedMessages {
   [key: string]: Message[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMessages }) => {
+const Chat: React.FC<ChatProps> = ({
+  selectedUser,
+  openForward,
+  conversationMessages,
+}) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
-  const [recordingDuration, setRecordingDuration] = useState(0);
-  const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
   // const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   // const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
   //   null
@@ -282,42 +281,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMes
   //   );
   // };
 
-  const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setRecordingDuration(0);
-    }
-
-    return () => clearInterval(interval);
-  }, [isRecording]);
-
-  useEffect(() => {
-    if (isRecording) {
-      startRecording();
-      setRecordedAudio(null);
-    } else {
-      stopRecording();
-    }
-  }, [isRecording, startRecording, stopRecording]);
-
-  useEffect(() => {
-    if (audioUrl && !isRecording) {
-      setRecordedAudio(audioUrl);
-    }
-  }, [audioUrl, isRecording]);
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   // const togglePreview = () => {
   //   if (!recordedAudio) return;
 
@@ -478,7 +441,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMes
     }, 0);
     return () => clearTimeout(timeout);
   }, [groupedMessages]);
-  
 
   return (
     <AnimatePresence mode="wait">
@@ -510,7 +472,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMes
                 </div>
               </div>
               <div className="flex items-center gap-4 relative">
-                <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
                 <BsThreeDotsVertical
                   className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
                   onClick={() => setIsModalOpen(true)}
@@ -669,23 +630,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMes
               <div ref={messagesEndRef} />
               {otherUserTyping && <MorphingBubbleIndicator />}
             </div>
-            <AnimatePresence>
-              {isRecording && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex items-center justify-center py-2 bg-red-50 border border-red-200 rounded-lg mx-2 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-red-600 font-medium">
-                      Recording... {formatDuration(recordingDuration)}
-                    </span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             {/* <AnimatePresence>
               {recordedAudio && !isRecording && (
                 <motion.div
@@ -747,9 +691,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser,  openForward, conversationMes
               handleMessageChange={handleMessageChange}
               handleFileUpload={handleFileUpload}
               handleSendMessage={handleSendMessage}
-              isRecording={isRecording}
-              recordedAudio={recordedAudio}
-              setIsRecording={setIsRecording}
               selectedFile={selectedFile}
               isUpload={fileUpload.loading}
             />
