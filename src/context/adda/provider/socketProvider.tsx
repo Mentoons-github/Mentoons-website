@@ -31,7 +31,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       });
 
       newSocket.on("online_users", (users: string[]) => {
-        console.log("Online users updated:", users);
         setOnlineUsers(users);
       });
     };

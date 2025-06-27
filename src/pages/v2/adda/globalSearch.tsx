@@ -698,7 +698,7 @@ const SearchResultsPage = () => {
                               ? playbackTracking
                               : null
                           }
-                          searchQuery={searchQuery}
+                          // searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -894,6 +894,7 @@ const SearchResultsPage = () => {
                 message={limitModalMessage}
                 title={limitModalTitle}
                 planType={dbUser?.subscription.plan || "free"}
+                productId={"sample"}
               />
             )}
 

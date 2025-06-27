@@ -2,15 +2,13 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   BsDownload,
   BsX,
-  BsPlay,
-  BsPause,
-  BsTrash,
-  BsCheck,
+  // BsPlay,
+  // BsPause,
+  // BsTrash,
+  // BsCheck,
   BsThreeDotsVertical,
   BsFileEarmarkText,
 } from "react-icons/bs";
-import { useAudioRecorder } from "@/hooks/adda/useAudioRecorder";
-import { MdSearch } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatFooter from "./chatFooter";
 import { useAuth } from "@clerk/clerk-react";
@@ -37,7 +35,6 @@ import {
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
 import { BiCheck, BiCheckDouble } from "react-icons/bi";
-import ShareUserModal from "../share/shareModal";
 
 export interface ChatUser {
   id: number;
@@ -55,6 +52,7 @@ export interface Messages {
 
 interface ChatProps {
   selectedUser: string;
+  openForward: (msg: Message) => void;
   conversationMessages: Message[];
 }
 
@@ -62,20 +60,21 @@ interface GroupedMessages {
   [key: string]: Message[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
+const Chat: React.FC<ChatProps> = ({
+  selectedUser,
+  openForward,
+  conversationMessages,
+}) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
-  const [recordingDuration, setRecordingDuration] = useState(0);
-  const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
-  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
-    null
-  );
+  // const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  // const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
+  //   null
+  // );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -91,10 +90,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
   // NEW: State for ShareUserModal
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [messageToForward, setMessageToForward] = useState<Message | null>(
-    null
-  );
+  // const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // const [messageToForward, setMessageToForward] = useState<Message | null>(
+  //   null
+  // );
 
   const { socket, mongoUserId } = useSocket();
 
@@ -177,7 +176,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("receive_message", (data: Message) => {
+    socket.on("receive_message", (data: any) => {
+      if (data.conversationId !== currentConversation) return;
+
       dispatch(addNewMessage(data));
 
       dispatch(
@@ -261,99 +262,53 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
     setSelectedFileURL(URL.createObjectURL(file));
   };
 
-  const handleAction = (action: string) => {
-    console.log(`Action selected: ${action}`);
-    setIsModalOpen(false);
-  };
+  // const handleShareMessage = (selectedUserIds: string[], message: Message) => {
+  //   if (!socket || !message) return;
 
-  const handleForwardMessage = (msg: Message) => {
-    setMessageToForward(msg);
-    setIsShareModalOpen(true);
-  };
+  //   selectedUserIds.forEach((receiverId) => {
+  //     socket.emit("send_message", {
+  //       receiverId,
+  //       message: message.message,
+  //       fileType: message.fileType || "text",
+  //       fileName: message.fileName,
+  //     });
+  //   });
 
-  const handleShareMessage = (selectedUserIds: string[], message: Message) => {
-    if (!socket || !message) return;
+  //   console.log(
+  //     `Forwarded message to users: ${selectedUserIds.join(", ")}, Message: ${
+  //       message.message
+  //     }, Type: ${message.fileType}`
+  //   );
+  // };
 
-    selectedUserIds.forEach((receiverId) => {
-      socket.emit("send_message", {
-        receiverId,
-        message: message.message,
-        fileType: message.fileType || "text",
-        fileName: message.fileName,
-      });
-    });
+  // const togglePreview = () => {
+  //   if (!recordedAudio) return;
 
-    console.log(
-      `Forwarded message to users: ${selectedUserIds.join(", ")}, Message: ${
-        message.message
-      }, Type: ${message.fileType}`
-    );
-  };
+  //   if (isPlayingPreview) {
+  //     previewAudio?.pause();
+  //     setIsPlayingPreview(false);
+  //   } else {
+  //     const audio = new Audio(recordedAudio);
+  //     audio.onended = () => setIsPlayingPreview(false);
+  //     audio.play();
+  //     setPreviewAudio(audio);
+  //     setIsPlayingPreview(true);
+  //   }
+  // };
 
-  const { startRecording, stopRecording, audioUrl } = useAudioRecorder();
+  // const sendRecordedAudio = () => {
+  //   if (recordedAudio && socket && user) {
+  //     socket.emit("send_message", {
+  //       receiverId: selectedUser,
+  //       fileType: "audio",
+  //       message: recordedAudio,
+  //       fileName: `audio_${Date.now()}.webm`,
+  //     });
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setRecordingDuration(0);
-    }
-
-    return () => clearInterval(interval);
-  }, [isRecording]);
-
-  useEffect(() => {
-    if (isRecording) {
-      startRecording();
-      setRecordedAudio(null);
-    } else {
-      stopRecording();
-    }
-  }, [isRecording, startRecording, stopRecording]);
-
-  useEffect(() => {
-    if (audioUrl && !isRecording) {
-      setRecordedAudio(audioUrl);
-    }
-  }, [audioUrl, isRecording]);
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const togglePreview = () => {
-    if (!recordedAudio) return;
-
-    if (isPlayingPreview) {
-      previewAudio?.pause();
-      setIsPlayingPreview(false);
-    } else {
-      const audio = new Audio(recordedAudio);
-      audio.onended = () => setIsPlayingPreview(false);
-      audio.play();
-      setPreviewAudio(audio);
-      setIsPlayingPreview(true);
-    }
-  };
-
-  const sendRecordedAudio = () => {
-    if (recordedAudio && socket && user) {
-      socket.emit("send_message", {
-        receiverId: selectedUser,
-        fileType: "audio",
-        message: recordedAudio,
-        fileName: `audio_${Date.now()}.webm`,
-      });
-
-      setRecordedAudio(null);
-      setIsRecording(false);
-    }
-  };
+  //     setRecordedAudio(null);
+  //     setIsRecording(false);
+  //   }
+  // };
 
   useEffect(() => {
     if (!socket) return;
@@ -406,14 +361,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
     }, 1000);
   };
 
-  const discardRecording = () => {
-    if (previewAudio) {
-      previewAudio.pause();
-      setIsPlayingPreview(false);
-    }
-    setRecordedAudio(null);
-    setIsRecording(false);
-  };
+  // const discardRecording = () => {
+  //   if (previewAudio) {
+  //     previewAudio.pause();
+  //     setIsPlayingPreview(false);
+  //   }
+  //   setRecordedAudio(null);
+  //   setIsRecording(false);
+  // };
 
   const downloadFile = async (url: string, fileName: string) => {
     try {
@@ -486,7 +441,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
     }, 0);
     return () => clearTimeout(timeout);
   }, [groupedMessages]);
-  
 
   return (
     <AnimatePresence mode="wait">
@@ -518,16 +472,15 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4 relative">
-                <MdSearch className="text-xl text-gray-500 cursor-pointer hover:text-indigo-500 transition-colors" />
                 <BsThreeDotsVertical
                   className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
                   onClick={() => setIsModalOpen(true)}
                 />
                 <ChatMenuModal
                   buttonRef={buttonRef}
-                  handleAction={handleAction}
                   isModalOpen={isModalOpen}
                   setIsModalOpen={setIsModalOpen}
+                  conversationId={currentConversation}
                 />
               </div>
             </div>
@@ -622,6 +575,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
                             })}
                           </p>
 
+                          {msg.isForwarded && (
+                            <p
+                              className={`text-xs italic ${
+                                msg.senderId !== selectedUser
+                                  ? "text-white/70"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              Forwarded
+                            </p>
+                          )}
+
                           {msg.senderId !== selectedUser && (
                             <div className="ml-2 flex items-center">
                               {msg.isRead ? (
@@ -646,7 +611,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
                         msg.fileType === "file" ||
                         msg.fileType === "video") && (
                         <button
-                          onClick={() => handleForwardMessage(msg)}
+                          onClick={() => openForward(msg)}
                           className={`ml-2 p-2 rounded-full transition-colors ${
                             msg.senderId !== selectedUser
                               ? "text-white bg-green-600"
@@ -665,24 +630,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
               <div ref={messagesEndRef} />
               {otherUserTyping && <MorphingBubbleIndicator />}
             </div>
-            <AnimatePresence>
-              {isRecording && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex items-center justify-center py-2 bg-red-50 border border-red-200 rounded-lg mx-2 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-red-600 font-medium">
-                      Recording... {formatDuration(recordingDuration)}
-                    </span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <AnimatePresence>
+            {/* <AnimatePresence>
               {recordedAudio && !isRecording && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -726,7 +674,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+            </AnimatePresence> */}
             <FilePreview
               selectedFile={selectedFile}
               selectedFileURL={selectedFileURL}
@@ -743,14 +691,11 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
               handleMessageChange={handleMessageChange}
               handleFileUpload={handleFileUpload}
               handleSendMessage={handleSendMessage}
-              isRecording={isRecording}
-              recordedAudio={recordedAudio}
-              setIsRecording={setIsRecording}
               selectedFile={selectedFile}
               isUpload={fileUpload.loading}
             />
 
-            {isShareModalOpen && messageToForward && (
+            {/* {isShareModalOpen && messageToForward && (
               <ShareUserModal
                 onClose={() => {
                   setIsShareModalOpen(false);
@@ -760,7 +705,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, conversationMessages }) => {
                 onShare={handleShareMessage}
                 allowMultiSelect={true}
               />
-            )}
+            )} */}
 
             <AnimatePresence>
               {enlargedImage && (

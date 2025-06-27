@@ -145,8 +145,7 @@ const Header = () => {
     const fetchCart = async () => {
       const token = await getToken();
       if (token && userId) {
-        const response = await dispatch(getCart({ token, userId }));
-        console.log("Cart Response:", response);
+        await dispatch(getCart({ token, userId }));
       }
     };
 

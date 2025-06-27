@@ -1,7 +1,5 @@
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
-import { UserSubscriptionLimits } from "@/utils/subscriptionAccess";
-import { useUser } from "@clerk/clerk-react";
 import * as pdfjsLib from "pdfjs-dist";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,29 +14,22 @@ interface DBUser {
   subscription: {
     plan: string;
     startDate?: string;
-    endDate?: string;
   };
-  subscriptionLimits?: UserSubscriptionLimits;
 }
 
 interface ComicViewerProps {
   pdfUrl: string;
   productType?: string;
-  productId?: string; // Add productId for reward tracking
+  productId?: string;
   dbUser?: DBUser | null;
   userPlan?: string;
-  contentAccess?: boolean;
 }
 
 const ComicViewer: React.FC<ComicViewerProps> = ({
   pdfUrl,
-  productType,
   productId,
-  dbUser,
   userPlan,
-  contentAccess = false,
 }) => {
-  console.log("Pdf Url:", pdfUrl);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,47 +40,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
   const [readProgress, setReadProgress] = useState(0);
   const [hasEarnedReward, setHasEarnedReward] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
-
-  const { user } = useUser();
-
-  // Check if user has access to the content based on their subscription
-  const hasAccessToContent = (): boolean => {
-    // First check the contentAccess flag passed from parent
-    if (!contentAccess) return false;
-
-    // If product type is "Free", always allow access
-    if (productType === "Free") return true;
-
-    // If no user data, deny access
-    if (!dbUser || !userPlan) return false;
-
-    // Check if user's plan matches the product type
-    // Convert plan names to match product types
-    const planToProductTypeMap: Record<string, string> = {
-      Free: "Free",
-      Prime: "Prime",
-      Platinum: "Platinum",
-    };
-
-    const userProductType = planToProductTypeMap[userPlan] || "Free";
-
-    // For Prime users: can access Free and Prime content
-    // For Platinum users: can access all content
-    if (userProductType === "Platinum") return true;
-    if (
-      userProductType === "Prime" &&
-      (productType === "Free" || productType === "Prime")
-    )
-      return true;
-    if (userProductType === "Free" && productType === "Free") return true;
-
-    return false;
-  };
-
-  console.log("User:", user);
-  console.log("User Plan:", userPlan);
-  console.log("Product Type:", productType);
-  console.log("Has Access:", hasAccessToContent());
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -103,38 +53,28 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
         console.error("Error loading PDF:", error);
       }
     };
-    const lsddfsdfsdfs =
-      pdfUrl.toLowerCase().endsWith(".pdf") && hasAccessToContent();
-    console.log("lsddfsdfsdfs", lsddfsdfsdfs);
-
-    if (pdfUrl.toLowerCase().endsWith(".pdf") && hasAccessToContent()) {
+    if (pdfUrl.toLowerCase().endsWith(".pdf")) {
       loadPDF();
-      // Reset viewed pages when comic changes
-      pagesViewedRef.current = new Set([1]); // Mark first page as viewed
+      pagesViewedRef.current = new Set([1]);
       setReadProgress(0);
       setHasEarnedReward(false);
     }
-  }, [pdfUrl, productType, userPlan, dbUser, contentAccess]);
+  }, [pdfUrl]);
 
   useEffect(() => {
-    // Add resize event listener to handle window resizing
     const handleResize = () => {
       if (pdfDoc) {
         renderPage(currentPage, pdfDoc);
       }
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [currentPage, pdfDoc]);
 
-  // Update read progress whenever pages are viewed
   useEffect(() => {
     if (numPages > 0) {
       const progress = (pagesViewedRef.current.size / numPages) * 100;
       setReadProgress(Math.round(progress));
-
-      // Check if all pages have been viewed and reward hasn't been given yet
       if (progress >= 100 && !hasEarnedReward && productId) {
         triggerReward(RewardEventType.READ_COMIC, productId);
         setHasEarnedReward(true);
@@ -147,46 +87,27 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
     pdf: pdfjsLib.PDFDocumentProxy
   ) => {
     if (!canvasRef.current || !containerRef.current) return;
-
     const page = await pdf.getPage(pageNum);
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-
     if (!context) return;
-
-    // Get container dimensions
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
-
-    // Get the original viewport
     const originalViewport = page.getViewport({ scale: 1.0 });
-
-    // Calculate scale to fit width and height
     const scaleX = containerWidth / originalViewport.width;
     const scaleY = containerHeight / originalViewport.height;
-
-    // Use the smaller scale to ensure the entire page fits
-    const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 to add a small margin
-
+    const scale = Math.min(scaleX, scaleY) * 0.95;
     const scaledViewport = page.getViewport({ scale });
     canvas.height = scaledViewport.height;
     canvas.width = scaledViewport.width;
-
-    const renderContext = {
-      canvasContext: context,
-      viewport: scaledViewport,
-    };
-
+    const renderContext = { canvasContext: context, viewport: scaledViewport };
     await page.render(renderContext).promise;
-
-    // Add this page to viewed pages
     pagesViewedRef.current.add(pageNum);
     setReadProgress((pagesViewedRef.current.size / numPages) * 100);
   };
 
   const changePage = async (delta: number) => {
     if (!pdfDoc) return;
-
     const newPage = currentPage + delta;
     if (newPage >= 1 && newPage <= numPages) {
       setCurrentPage(newPage);
@@ -196,64 +117,36 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
   const handlePrint = async () => {
     if (!pdfDoc) return;
-
     const printContainer = document.createElement("div");
     printContainer.style.display = "none";
     document.body.appendChild(printContainer);
-
     try {
       const style = document.createElement("style");
       style.textContent = `
         @media print {
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          canvas {
-            width: 100% !important;
-            height: 100% !important;
-            max-height: 297mm !important; /* A4 height */
-            max-width: 210mm !important;  /* A4 width */
-            object-fit: contain;
-            page-break-after: always;
-            margin: 0;
-            padding: 0;
-            display: block;
-          }
+          @page { size: A4; margin: 0; }
+          canvas { width: 100% !important; height: 100% !important; max-height: 297mm !important; max-width: 210mm !important; object-fit: contain; page-break-after: always; margin: 0; padding: 0; display: block; }
         }
       `;
       printContainer.appendChild(style);
-
       for (let i = 1; i <= numPages; i++) {
         const canvas = document.createElement("canvas");
         const page = await pdfDoc.getPage(i);
-
         const viewport = page.getViewport({ scale: 2.0 });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-
         const context = canvas.getContext("2d");
         if (!context) continue;
-
-        await page.render({
-          canvasContext: context,
-          viewport: viewport,
-        }).promise;
-
+        await page.render({ canvasContext: context, viewport: viewport })
+          .promise;
         printContainer.appendChild(canvas);
-        // Mark all pages as viewed when printing
         pagesViewedRef.current.add(i);
       }
-
-      // Update read progress after printing all pages
       setReadProgress(100);
-
-      // Award points if user prints (which means they've viewed all pages)
       if (productId && !hasEarnedReward) {
         triggerReward(RewardEventType.READ_COMIC, productId);
         setHasEarnedReward(true);
       }
-
       window.print();
     } finally {
       document.body.removeChild(printContainer);
@@ -262,26 +155,20 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
 
   const handleVideoEnded = () => {
     setVideoWatched(true);
-
-    // Trigger reward for audio comic completion
-    if (productId && !hasEarnedReward && productType === "Free") {
+    if (productId && !hasEarnedReward) {
       triggerReward(RewardEventType.LISTEN_AUDIO_COMIC, productId);
       setHasEarnedReward(true);
     }
   };
 
-  const handleBrowsePlansClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleBrowsePlansClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     navigate("/membership");
   };
 
   return (
     <>
-      {pdfUrl &&
-      pdfUrl.toLowerCase().endsWith(".pdf") &&
-      (productType === "Free" || hasAccessToContent()) ? (
+      {pdfUrl && pdfUrl.toLowerCase().endsWith(".pdf") ? (
         <div className="flex flex-col w-full h-full p-6">
           <h1 className="mb-4 text-2xl font-bold text-center">
             {pdfUrl
@@ -292,22 +179,18 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
               .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(" ") || "View comic"}
           </h1>
-
-          {/* Read progress bar */}
           <div className="w-full h-2 mb-4 bg-gray-200 rounded-full">
             <div
               className="h-full transition-all duration-300 rounded-full bg-primary"
               style={{ width: `${readProgress}%` }}
             ></div>
           </div>
-
           <div
             ref={containerRef}
             className="relative flex items-center justify-center flex-1 overflow-hidden rounded-lg shadow-md bg-neutral-50"
           >
             <canvas ref={canvasRef} className="max-h-full" />
           </div>
-
           <div className="flex items-center justify-center gap-6 mt-4 font-light">
             <button
               onClick={() => changePage(-1)}
@@ -356,7 +239,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
                 />
               </svg>
             </button>
-
             <button
               onClick={handlePrint}
               className="p-2 transition-colors text-neutral-600 hover:text-neutral-900"
@@ -379,8 +261,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
               </svg>
             </button>
           </div>
-
-          {/* Reward message */}
           {hasEarnedReward && (
             <div className="p-3 mt-4 text-center text-green-700 border border-green-200 rounded-lg bg-green-50 animate-pulse">
               <span className="font-medium">Congratulations!</span> You've
@@ -388,9 +268,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
             </div>
           )}
         </div>
-      ) : pdfUrl &&
-        pdfUrl.toLowerCase().endsWith(".mp4") &&
-        (productType === "Free" || hasAccessToContent()) ? (
+      ) : pdfUrl && pdfUrl.toLowerCase().endsWith(".mp4") ? (
         <div className="flex flex-col items-center justify-center w-full h-full p-6">
           <video
             controls
@@ -398,8 +276,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
             src={pdfUrl}
             onEnded={handleVideoEnded}
           />
-
-          {/* Video completion message */}
           {videoWatched && (
             <div className="p-3 mt-4 text-center text-green-700 border border-green-200 rounded-lg bg-green-50 animate-pulse">
               <span className="font-medium">Congratulations!</span> You've
@@ -409,7 +285,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
         </div>
       ) : (
         <div className="relative flex flex-col items-center justify-center h-full p-8 overflow-hidden text-center">
-          {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 -translate-x-12 -translate-y-16 rounded-full bg-primary/10" />
           <div className="absolute bottom-0 left-0 w-40 h-40 translate-x-8 translate-y-20 rounded-full bg-primary/10" />
           <img
@@ -422,31 +297,22 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
             alt=""
             className="absolute w-16 bottom-8 right-8 animate-pulse"
           />
-
           <div className="relative z-10 max-w-2xl mx-auto">
             <h3 className="mb-6 text-4xl font-bold text-primary luckiest-guy-regular">
-              {!userPlan || userPlan.toLowerCase() === "free"
-                ? "Subscribe to Access Premium Content"
-                : userPlan.toLowerCase() === "prime" &&
-                  productType === "Platinum"
-                ? "Upgrade to Platinum to Access This Content"
-                : "Subscribe to Access Premium Content"}
+              {userPlan === "platinum"
+                ? "Purchase Content"
+                : "Subscribe to Access Content"}
             </h3>
             <p className="mb-10 text-xl leading-relaxed text-gray-600">
-              {!userPlan || userPlan.toLowerCase() === "free"
-                ? "Join Mentoons to unlock our full library of educational comics and engaging content designed to help children learn and grow."
-                : userPlan.toLowerCase() === "prime" &&
-                  productType === "Platinum"
-                ? "This content is exclusively available for Platinum members. Upgrade your membership to access our complete library."
-                : "Get access to exclusive comics, audio stories, and more premium content."}
+              {userPlan === "platinum"
+                ? "You've reached your content limit. Purchase this content for ₹1 to continue."
+                : "Join Mentoons or upgrade your plan to unlock our full library of educational comics and engaging content."}
             </p>
             <button
-              onClick={(e) => handleBrowsePlansClick(e)}
+              onClick={handleBrowsePlansClick}
               className="px-10 py-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg"
             >
-              {!userPlan || userPlan.toLowerCase() === "free"
-                ? "Subscribe Now"
-                : "Upgrade Membership"}
+              {userPlan === "platinum" ? "Purchase Now" : "Subscribe Now"}
             </button>
             <button
               onClick={() => navigate("/product-page")}
@@ -455,8 +321,6 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
               Explore Mentoons Store
             </button>
           </div>
-
-          {/* Additional decorative illustrations */}
           <div className="absolute w-24 h-24 left-12 top-1/2 opacity-20">
             <img
               src="/assets/comic-V2/comic-doodle.png"

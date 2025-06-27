@@ -371,16 +371,20 @@ export const TeamSlider: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="text-center space-y-1 group"
           >
-            <div className="overflow-hidden relative rounded-full">
+            <div className="overflow-hidden relative rounded-full mx-auto w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 xl:w-52 xl:h-52 2xl:w-[21rem] 2xl:h-[21rem]">
               <img
-                className="rounded-full w-[40rem] border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out"
+                className="rounded-full w-full h-full border-4 border-white group-hover:scale-110 transition-all duration-300 ease-in-out object-cover"
                 src={employee.imageUrl}
                 alt=""
               />
             </div>
             <div>
-              <div className="font-semibold text-xl">{employee.name}</div>
-              <div className="text-base">{employee.designation}</div>
+              <div className="font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
+                {employee.name}
+              </div>
+              <div className="text-xs sm:text-sm md:text-base">
+                {employee.designation}
+              </div>
             </div>
           </motion.div>
         </SwiperSlide>
