@@ -13,14 +13,7 @@ import {
 import { formatDateString } from "@/utils/formateDate";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaBolt } from "react-icons/fa6";
-
 import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
-import {
-  canAccessContent,
-  getUserSubscriptionLimits,
-  updateUserContentAccess,
-  UserSubscriptionLimits,
-} from "@/utils/subscriptionAccess";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -30,24 +23,18 @@ import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import axiosInstance from "@/api/axios";
 
-// Define proper types for user data
 interface DBUser {
   _id: string;
   subscription: {
     plan: string;
     startDate?: string;
-    endDate?: string;
   };
-  subscriptionLimits?: UserSubscriptionLimits;
 }
 
 const ComicsPageV2 = () => {
-  const {
-    items: products,
-    // loading,
-    // error,
-  } = useSelector((state: RootState) => state.products);
+  const { items: products } = useSelector((state: RootState) => state.products);
   const { user } = useUser();
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
@@ -58,7 +45,6 @@ const ComicsPageV2 = () => {
   const [comicToView, setComicToView] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  // const [ageCategory, setAgeCategory] = useState<string>("");
   const [productType, setProductType] = useState<string>("");
   const option =
     new URLSearchParams(window.location.search).get("option") || "comic";
@@ -69,34 +55,19 @@ const ComicsPageV2 = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
-    null
-  );
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [hasFetchedUser, setHasFetchedUser] = useState(false);
-
-  const membershipType: string = dbUser?.subscription.plan || "";
-
-  const [currentProductId, setCurrentProductId] = useState<string>("");
-
-  // Subscription limit modal state
   const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
     useState(false);
   const [limitModalMessage, setLimitModalMessage] = useState("");
   const [limitModalTitle, setLimitModalTitle] = useState("");
+  const [currentProductId, setCurrentProductId] = useState<string>("");
 
-  const maxComicsToRead = membershipType === "platinum" ? 5 : products.length;
-  const accessibleComics = products.slice(0, maxComicsToRead);
+  const membershipType = dbUser?.subscription.plan.toLowerCase() || "free";
 
-  console.log(accessibleComics);
-  console.log(selectedComic);
-  // Add refs for scroll animations
   const heroRef = useRef(null);
   const trendingRef = useRef(null);
-  const featureRef = useRef(null);
-
-  // Scroll progress animations
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -111,13 +82,14 @@ const ComicsPageV2 = () => {
     setSelectedOption(option);
   };
 
-  // const handleAgeCategory = (category: string) => {
-  //   setAgeCategory(category);
-  // };
-
   const handleScroll = () => {
     const carousel = carouselRef.current;
     if (carousel) {
+      console.log({
+        scrollLeft: carousel.scrollLeft,
+        clientWidth: carousel.clientWidth,
+        scrollWidth: carousel.scrollWidth,
+      });
       setIsAtStart(carousel.scrollLeft === 0);
       setIsAtEnd(
         carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1
@@ -125,46 +97,158 @@ const ComicsPageV2 = () => {
     }
   };
 
+  const checkContentAccess = async (product: ProductBase): Promise<boolean> => {
+    if (!user) {
+      setTimeout(() => setShowLoginModal(true), 100);
+      return false;
+    }
+    if (isLoadingUser) {
+      toast.info("Loading user data, please wait...");
+      return false;
+    }
+    if (!dbUser || !userId) {
+      if (!hasFetchedUser) {
+        toast.info("Loading user data...");
+        fetchDBUser();
+      } else {
+        toast.error("Unable to verify user. Please refresh the page.");
+      }
+      return false;
+    }
+    try {
+      const token = await getToken();
+      const type =
+        product.type === "comic"
+          ? "comics"
+          : product.type === "audio comic"
+          ? "audioComics"
+          : "podcasts";
+      const response = await axiosInstance.post(
+        `${import.meta.env.VITE_PROD_URL}/subscription/access`,
+        { type, itemId: product._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const { access, reason } = response.data;
+      if (access) {
+        return true;
+      }
+      if (reason === "upgrade") {
+        setLimitModalTitle("Upgrade Your Plan");
+        setLimitModalMessage(
+          `You've reached the ${type} limit for your ${membershipType} plan. Upgrade to access more content!`
+        );
+      } else if (reason === "charge") {
+        setLimitModalTitle("Purchase Content");
+        setLimitModalMessage(
+          `You've reached the ${type} limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+        );
+      }
+      setCurrentProductId(product._id || "");
+      setShowSubscriptionLimitModal(true);
+      return false;
+    } catch (error) {
+      console.error("Error checking access:", error);
+      toast.error("Failed to verify access. Please try again.");
+      return false;
+    }
+  };
+
+  const openComicModal = async (
+    comicLink: string,
+    comic?: ProductBase | null,
+    productType?: string
+  ) => {
+    if (!comic) {
+      setComicToView(comicLink);
+      setShowComicModal(true);
+      if (productType) setProductType(productType);
+      document.body.style.overflow = "hidden";
+      return;
+    }
+    const canAccess = await checkContentAccess(comic);
+    if (canAccess) {
+      setComicToView(comicLink);
+      setCurrentProductId(comic._id || "");
+      setShowComicModal(true);
+      if (productType || comic.product_type)
+        setProductType(productType || comic.product_type || "");
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  const closeComicModal = () => {
+    setShowComicModal(false);
+    setProductType("");
+    setCurrentProductId("");
+    document.body.style.overflow = "auto";
+  };
+
+  const fetchDBUser = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoadingUser(false);
+      return;
+    }
+    setIsLoadingUser(true);
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.status === 200) {
+        setDbUser(response.data.data);
+        setHasFetchedUser(true);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      toast.error("Failed to load user data");
+    } finally {
+      setIsLoadingUser(false);
+    }
+  }, [user?.id, getToken]);
+
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     comic: ProductBase
   ) => {
     e.stopPropagation();
+    if (comic.product_type) {
+      toast.error("This content is available only through subscription.");
+      return;
+    }
     setIsLoading(true);
     try {
       const token = await getToken();
-      if (!token) {
-        setIsLoading(false);
+      if (!token || !userId) {
         setShowLoginModal(true);
+        setIsLoading(false);
         return;
       }
-
-      if (userId) {
-        const response = await dispatch(
-          addItemCart({
-            token,
-            userId,
-            productId: comic._id,
-            productType: comic.type,
-            title: comic.title,
-            quantity: 1,
-            price: comic.price,
-            ageCategory: comic.ageCategory,
-            productImage: comic.productImages?.[0].imageUrl,
-            productDetails: comic.details,
-          })
-        );
-        if (response.payload) {
-          setShowAddToCartModal(true);
-        }
-        setIsLoading(false);
+      const response = await dispatch(
+        addItemCart({
+          token,
+          userId,
+          productId: comic._id,
+          productType: comic.type,
+          title: comic.title,
+          quantity: 1,
+          price: comic.price,
+          ageCategory: comic.ageCategory,
+          productImage: comic.productImages?.[0].imageUrl,
+          productDetails: comic.details,
+        })
+      );
+      if (response.payload) {
+        setSelectedComic(comic);
+        setShowAddToCartModal(true);
+        toast.success("Added to cart!");
       } else {
-        toast.error("User ID is missing");
-        setIsLoading(false);
+        toast.error("Failed to add to cart.");
       }
     } catch (error) {
-      console.error("Error while adding to cart", error);
+      console.error("Error adding to cart:", error);
       toast.error("Error while adding to cart");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -174,59 +258,27 @@ const ComicsPageV2 = () => {
     product: ProductBase
   ) => {
     e.stopPropagation();
-    const token = await getToken();
-    if (!token) {
+    if (product.product_type) {
+      toast.error("This content is available only through subscription.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setShowLoginModal(true);
+        setIsLoading(false);
+        return;
+      }
+      navigate(`/order-summary?productId=${product._id}`, { replace: true });
+    } catch (error) {
+      console.error("Error navigating to order summary:", error);
+      toast.error("Error processing purchase");
+    } finally {
       setIsLoading(false);
-      setShowLoginModal(true);
-      return;
-    }
-    // handleAddtoCart(event)
-    navigate(`/order-summary?productId=${product._id}`, { replace: true });
-  };
-
-  const openComicModal = (
-    comicLink: string,
-    comic?: ProductBase | null,
-    productType?: string
-  ) => {
-    console.log(comicLink, comic, productType);
-    if (!comic) {
-      // For backwards compatibility - allow opening comics without checking access
-      setComicToView(comicLink);
-      setShowComicModal(true);
-      if (productType) setProductType(productType);
-      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
-      return;
-    }
-    const contentAccess: boolean = checkContentAccess(comic);
-    console.log("kdjflkajsdflksdflksdjflskdjf", contentAccess);
-    // Check user access before opening comic
-    if (contentAccess) {
-      setComicToView(comicLink);
-      setCurrentProductId(comic._id || ""); // Set the current product ID for reward tracking
-      setShowComicModal(true);
-      if (productType || comic.product_type)
-        setProductType(productType || comic.product_type || "");
-      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
     }
   };
 
-  const closeComicModal = () => {
-    setShowComicModal(false);
-    setProductType("");
-    setCurrentProductId("");
-    document.body.style.overflow = "auto"; // Re-enable scrolling
-  };
-
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.addEventListener("scroll", handleScroll);
-      return () => carousel.removeEventListener("scroll", handleScroll);
-    }
-  }, []);
-
-  // Function to pause all videos
   const pauseAllVideos = () => {
     videoRefs.current.forEach((video) => {
       if (video && !video.paused) {
@@ -236,167 +288,43 @@ const ComicsPageV2 = () => {
     setIsPlaying(false);
   };
 
-  console.log(selectedComic);
-
   useEffect(() => {
     const fetchComics = async () => {
       try {
-        // Fetch products with the current filters
         const token = await getToken();
         if (selectedOption) {
-          const cards = await dispatch(
-            fetchProducts({
-              type: selectedOption,
-              // ageCategory: ageCategory,
-              token: token!,
-            })
+          await dispatch(
+            fetchProducts({ type: selectedOption, token: token! })
           );
-          console.log(cards.payload);
-          console.log("Product", products);
           setSelectedComic(products[0]);
-          // setTimeout(() => {
-          //   if (productSectionRef.current) {
-          //     productSectionRef.current.scrollIntoView({
-          //       behavior: "smooth",
-          //       block: "start",
-          //     });
-          //   }
-          // }, 100);
         } else {
           await dispatch(fetchProducts({}));
         }
-      } catch (error: unknown) {
+      } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchComics();
-  }, [dispatch, option]);
+  }, [dispatch, option, selectedOption, getToken]);
 
-  const fetchDBUser = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoadingUser(false);
-      return;
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener("scroll", handleScroll);
+      return () => carousel.removeEventListener("scroll", handleScroll);
     }
-
-    setIsLoadingUser(true);
-    try {
-      const token = await getToken();
-      const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data.data);
-      if (response.status === 200) {
-        const userData = response.data.data;
-        setDbUser(userData);
-        setHasFetchedUser(true);
-
-        // Initialize or retrieve subscription limits
-        const limits = getUserSubscriptionLimits(userData);
-        setUserLimits(limits);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      toast.error("Failed to load user subscription data");
-    } finally {
-      setIsLoadingUser(false);
-    }
-  }, [user?.id, getToken]);
-
-  // Update user subscription limits in the database
-  const updateUserSubscriptionLimits = async (
-    updatedLimits: UserSubscriptionLimits
-  ) => {
-    try {
-      const token = await getToken();
-      if (!user?.id || !token) return;
-
-      await axios.patch(
-        `${import.meta.env.VITE_PROD_URL}/user/update-subscription-limits/${
-          user.id
-        }`,
-        {
-          subscriptionLimits: updatedLimits,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setUserLimits(updatedLimits);
-    } catch (error) {
-      console.error("Error updating subscription limits:", error);
-    }
-  };
-
-  // Check if user can access content and handle limitations
-  const checkContentAccess = (comic: ProductBase): boolean => {
-    console.log(comic, "inside checkContentAccess");
-
-    // Check if user is not authenticated at all
-    if (!user) {
-      setShowLoginModal(true);
-      return false;
-    }
-
-    // Check if user data is still loading
-    if (isLoadingUser) {
-      toast.info("Loading subscription data, please wait...");
-      return false;
-    }
-
-    // Check if user data failed to load
-    if (!userLimits || !dbUser) {
-      // Only retry if we haven't successfully fetched before
-      if (!hasFetchedUser) {
-        toast.info("Loading subscription data...");
-        fetchDBUser();
-      } else {
-        toast.error("Unable to verify subscription. Please refresh the page.");
-      }
-      return false;
-    }
-
-    const accessResult = canAccessContent(comic, membershipType, userLimits);
-    console.log("CAn Access result", accessResult);
-
-    if (!accessResult.canAccess) {
-      console.log(accessResult.canAccess);
-      setLimitModalTitle(accessResult.title);
-      setLimitModalMessage(accessResult.message);
-      setShowSubscriptionLimitModal(true);
-      return false;
-    }
-
-    // If accessible, update limits for premium content
-    if (comic.product_type !== "Free") {
-      const updatedLimits = updateUserContentAccess(comic, userLimits);
-      updateUserSubscriptionLimits(updatedLimits);
-    }
-
-    return true;
-  };
+  }, []);
 
   useEffect(() => {
     fetchDBUser();
-  }, [fetchDBUser, user?.id, getToken]);
+  }, [fetchDBUser]);
 
   return (
     <div>
-      {/* Progress bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 z-50 h-1 origin-left bg-primary"
         style={{ scaleX }}
       />
-
-      {/* Hero section */}
       <motion.div
         ref={heroRef}
         initial={{ opacity: 0, y: 50 }}
@@ -418,19 +346,17 @@ const ComicsPageV2 = () => {
         </div>
         <div className="flex-1">
           <h2 className="py-4 text-3xl text-center luckiest-guy-regular">
-            CHOOSE COMICS BEST FOR YOU!
+            CHOOSE COMICS Beste FOR YOU!
           </h2>
           <div className="flex items-center justify-center w-full p-4 lg:pr-24">
             <img
               src="/assets/comic-V2/comic-hero-v2.png"
               alt="comic page hero Image"
-              className="w-full h-auto "
+              className="w-full h-auto"
             />
           </div>
         </div>
       </motion.div>
-
-      {/* Second Section Reading Comics and Audio comics */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -443,32 +369,28 @@ const ComicsPageV2 = () => {
         </h2>
         <div className="flex items-center justify-center gap-6 pb-6">
           <button
-            className={`flex items-center justify-center gap-3 px-5 py-2  rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 font-medium ${
+            className={`flex items-center justify-center p-5 py-2 rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 font-medium ${
               selectedOption === "comic" &&
               "ring-4 ring-yellow-400 shadow-xl shadow-yellow-100"
             }`}
             onClick={() => handleSelectedOption("comic")}
           >
-            <span className="w-1 h-1 bg-black rounded-full" />
-            E-Comics
+            <span className="w-1 h-1 bg-black rounded-full" /> E-Comics
           </button>
           <button
-            className={`flex items-center justify-center gap-3 px-5 py-2  rounded-full bg-rose-200 border border-rose-500  hover:ring-4 hover:ring-rose-500 transition-all duration-200  font-medium ${
+            className={`flex items-center justify-center gap-3 px-5 py-2 rounded-full bg-rose-200 border border-rose-500 hover:ring-4 hover:ring-rose-500 transition-all duration-200 font-medium ${
               selectedOption === "audio comic" &&
               "ring-4 ring-rose-500 shadow-xl shadow-rose-100"
             }`}
             onClick={() => handleSelectedOption("audio comic")}
           >
-            <span className="w-1 h-1 bg-black rounded-full" />
-            Audio Comic
+            <span className="w-1 h-1 bg-black rounded-full" /> Audio Comics
           </button>
         </div>
-        <p className="pb-8 text-xs text-center text-gray-500">
+        <p className="pb-12 text-xs text-center text-gray-500">
           pdf format - download, print and your comic is ready!
         </p>
       </motion.div>
-
-      {/* //dynamic content section */}
       {selectedOption === "comic" && (
         <div className="flex items-center justify-center pb-6 w-[95%] md:w-[90%] mx-auto h-[700px] md:h-[800px] bg-yellow-100 mb-16 relative overflow-hidden">
           <div className="absolute w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] rounded-full bg-primary -bottom-50 -left-[300px] md:-left-96"></div>
@@ -513,23 +435,7 @@ const ComicsPageV2 = () => {
               after:ml-2
               after:shadow-md
               after:absolute
-              after:animate-[sparkle_2s_ease-in-out_infinite]
-              [--badge-bg:theme(colors.yellow.300)]
-              [--badge-text:theme(colors.yellow.800)]
-
-              data-[badge=Free]:after:bg-gradient-to-r
-              data-[badge=Free]:after:from-green-400
-              data-[badge=Free]:after:to-green-500
-              
-
-              data-[badge=Prime]:after:bg-gradient-to-r
-              data-[badge=Prime]:after:from-yellow-400
-              data-[badge=Prime]:after:to-orange-500
-
-              data-[badge=Platinum]:after:bg-gradient-to-r
-              data-[badge=Platinum]:after:from-gray-400
-              data-[badge=Platinum]:after:to-gray-500"
-                        data-badge={product.product_type || undefined}
+              after:animate-[sparkle_2s_ease-in-out_infinite]"
                       >
                         {product.title}
                       </h2>
@@ -559,7 +465,6 @@ const ComicsPageV2 = () => {
           </div>
         </div>
       )}
-      {/* Audio comics video */}
       {selectedOption === "audio comic" && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -658,7 +563,7 @@ const ComicsPageV2 = () => {
                           e.stopPropagation();
                           const video = e.currentTarget.parentElement
                             ?.previousElementSibling as HTMLVideoElement;
-                          if (video && comic.product_type === "Free") {
+                          if (video) {
                             if (video.paused) {
                               video.play();
                               setIsPlaying(true);
@@ -743,8 +648,6 @@ const ComicsPageV2 = () => {
           </div>
         </motion.div>
       )}
-
-      {/* Trending comics  Carousel  */}
       <motion.div
         ref={trendingRef}
         initial={{ opacity: 0, y: 50 }}
@@ -769,7 +672,6 @@ const ComicsPageV2 = () => {
               transition={{ delay: index * 0.1 }}
             >
               <div className="relative w-full h-full overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
-                {/* Main Image with Gradient Overlay */}
                 <div className="relative h-[60%] overflow-hidden">
                   <img
                     src={
@@ -780,49 +682,22 @@ const ComicsPageV2 = () => {
                     className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-
-                  {/* Product Type Badge */}
                   <div className="absolute flex gap-2 bottom-4 left-4">
-                    {comic.product_type && (
-                      <span
-                        className={`
-    inline-block py-[4px] px-[6px] text-sm font-semibold rounded-lg ml-2 shadow-md text-white animate-[sparkle_2s_ease-in-out_infinite]
-    ${
-      comic.product_type === "Free"
-        ? "bg-gradient-to-r from-green-400 to-green-500"
-        : comic.product_type === "Prime"
-        ? "bg-gradient-to-r from-yellow-400 to-orange-500"
-        : comic.product_type === "Platinum"
-        ? "bg-gradient-to-r from-gray-400 to-gray-500"
-        : "bg-gray-700"
-    }
-  `}
-                      >
-                        {comic.product_type}
-                      </span>
-                    )}
-                    {/* Release Date Badge */}
                     <span className="px-3 py-1 text-sm font-medium rounded-lg bg-white/90">
                       {formatDateString(
                         (comic.details as ComicProduct["details"])
                           ?.releaseDate || ""
                       )}
                     </span>
-                    {/* Rating Badge */}
                   </div>
                 </div>
-
-                {/* Content Section */}
                 <div className="p-5">
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-1 ">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-1">
                     {comic?.title}
                   </h3>
-
                   <p className="mb-4 text-sm text-gray-600 line-clamp-2">
                     {comic?.description}
                   </p>
-
-                  {/* Stats Row */}
                   <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <svg
@@ -830,7 +705,7 @@ const ComicsPageV2 = () => {
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477 4.5 1.253" />
                       </svg>
                       {comic.type === "comic" && (
                         <span>
@@ -854,10 +729,10 @@ const ComicsPageV2 = () => {
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07 .207 .07 .431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path d="M15 12 a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      <span>{Math.floor(Math.random() * 20)}+ views</span>
+                      <span>{Math.floor(Math.random() * 20)} views</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <svg
@@ -865,14 +740,12 @@ const ComicsPageV2 = () => {
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04 .701.663 .321.988l-4.204 3.602a.563.563 0 00-.182 .557l1.285 5.385 a.562.562 0 01-.84 .61l-4.725-2.885 a.563.563 0 00-.586 0L6.982 20.54 a.562.562 0 01-.84-.61l1.285-5.386 a.562.562 0 00-.182-.557l-4.204-3.602 a.563.563 0 01 .321-.988l5.518-.442 a.563.563 0 00 .475-.345L11.48 3.5z" />
                       </svg>
                       <span>{comic.rating}</span>
                     </div>
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 ">
+                  <div className="flex gap-2">
                     {comic.product_type && (
                       <button
                         onClick={() => {
@@ -889,7 +762,6 @@ const ComicsPageV2 = () => {
                         {comic.type === "comic" ? "Read Now" : "Listen Now"}
                       </button>
                     )}
-
                     {!comic.product_type && (
                       <>
                         <div className="flex flex-col">
@@ -911,35 +783,7 @@ const ComicsPageV2 = () => {
                               {isLoading ? "Buying..." : "Buy Now"}
                             </button>
                           </div>
-                          {/* <button
-                            onClick={() => {
-                              if ("sampleUrl" in comic.details) {
-                                openComicModal(
-                                  comic.details.sampleUrl || "",
-                                  comic,
-                                  comic.product_type
-                                );
-                              }
-                            }}
-                            className="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap"
-                          >
-                            {comic.type === "comic" ? "Read Now" : "Listen Now"}
-                          </button> */}
                         </div>
-
-                        {showAddToCartModal && (
-                          <AddToCartModal
-                            onClose={() => setShowAddToCartModal(false)}
-                            isOpen={showAddToCartModal}
-                            productName={comic.title}
-                          />
-                        )}
-                        {
-                          <LoginModal
-                            isOpen={showLoginModal}
-                            onClose={() => setShowLoginModal(false)}
-                          />
-                        }
                       </>
                     )}
                   </div>
@@ -948,11 +792,11 @@ const ComicsPageV2 = () => {
             </motion.div>
           ))}
         </div>
-        {/* Navigation buttons */}
         <button
           onClick={() => {
             const carousel = carouselRef.current;
             if (carousel) {
+              console.log("Left arrow clicked");
               carousel.scrollBy({ left: -300, behavior: "smooth" });
             }
           }}
@@ -965,6 +809,7 @@ const ComicsPageV2 = () => {
           onClick={() => {
             const carousel = carouselRef.current;
             if (carousel) {
+              console.log("right arrow clicked");
               carousel.scrollBy({ left: 300, behavior: "smooth" });
             }
           }}
@@ -974,8 +819,6 @@ const ComicsPageV2 = () => {
           <IoIosArrowForward className="text-2xl" />
         </button>
       </motion.div>
-
-      {/* Comic Viewer Modal */}
       {showComicModal && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -985,112 +828,36 @@ const ComicsPageV2 = () => {
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="relative w-[95%] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden items-center"
           >
             <button
               onClick={closeComicModal}
-              className="absolute z-50 p-2 text-gray-600 transition-colors top-4 right-4 hover:text-gray-900"
+              className="absolute z-4 p-2 top-4 right-2 text-gray-600 transition-colors hover:bg-gray-100 rounded-full"
             >
               <MdClose className="text-2xl" />
             </button>
-
             <ComicViewer
               pdfUrl={comicToView}
               productType={productType}
               productId={currentProductId}
               dbUser={dbUser}
               userPlan={membershipType}
-              contentAccess={true} // Already checked in openComicModal
             />
           </motion.div>
         </motion.div>
       )}
-
-      {/* Subscription Limit Modal */}
       <SubscriptionLimitModal
         isOpen={showSubscriptionLimitModal}
         onClose={() => setShowSubscriptionLimitModal(false)}
         message={limitModalMessage}
         title={limitModalTitle}
-        planType={membershipType as "Free" | "Prime" | "Platinum"}
+        planType={membershipType as "free" | "prime" | "platinum"}
+        productId={currentProductId}
       />
-
-      {/* Feature of the Month Section */}
-      <motion.div
-        ref={featureRef}
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6 }}
-        className="w-[95%] md:w-[90%] mx-auto mb-20 flex flex-col md:flex-row gap-8"
-      >
-        <div className="relative flex items-center justify-center flex-1 h-full">
-          <div className="flex flex-col items-center justify-center py-16 text-6xl font-semibold text-center md:py-32 md:text-7xl lg:text-9xl text-nuetural-800 luckiest-guy-regular">
-            <span>FEATURE</span>
-            <span>OF THE</span>
-            <span>MONTH</span>
-          </div>
-          <img
-            src="/assets/comic-V2/star-1.png "
-            alt="star-1"
-            className="absolute top-0 left-0 w-16 md:w-24"
-          />
-          <img
-            src="/assets/comic-V2/star-2.png"
-            alt=""
-            className="absolute bottom-0 right-0 w-16 md:w-24"
-          />
-        </div>
-        <div className="flex-1 p-6 mt-12 ">
-          <div className="items-start flex-1 gap-10 pb-4 sm:flex ">
-            <div className="mb-4">
-              <img
-                src={
-                  products?.[0]?.productImages?.[0].imageUrl ||
-                  "/placeholder-image.jpg"
-                }
-                alt={products?.[0]?.title}
-                className="w-96"
-              />
-            </div>
-            <div>
-              <h2 className="pb-1 text-4xl font-semibold">
-                {products?.[0]?.title}
-              </h2>
-            </div>
-          </div>
-          <div className="pt-4">
-            <div className="pb-2 font-semibold text-gray-500 text-md">
-              {" "}
-              {formatDateString(
-                (products?.[0]?.details as ComicProduct["details"])
-                  ?.releaseDate || ""
-              )}
-            </div>
-            <p className="text-lg font-medium">{products[0]?.description}</p>
-            <div className="flex items-center justify-between pt-10">
-              <button
-                className="py-4 font-semibold text-white rounded-full shadow-xl px-7 bg-primary"
-                onClick={() =>
-                  openComicModal(
-                    (products[0].details as ComicProduct["details"])
-                      ?.sampleUrl || "",
-                    products[0]
-                  )
-                }
-              >
-                READ MORE
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* why we matter */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1108,11 +875,11 @@ const ComicsPageV2 = () => {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="flex items-start gap-4 p-4 md:items-center"
             >
-              <figure className="">
+              <figure>
                 <img src={point.icon} alt="icon" className="w-24 md:w-24" />
               </figure>
               <div>
-                <p className="text-2xl">
+                <p className="text-xl md:text-2xl">
                   <span className="text-2xl font-bold">{point.lable}:</span>{" "}
                   {point.description}
                 </p>
@@ -1120,39 +887,23 @@ const ComicsPageV2 = () => {
             </motion.div>
           ))}
         </div>
-        <div className="relative items-start justify-center flex-1">
-          <h2 className="pt-8 text-6xl md:text-8xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_black] pr-8">
+        <div className="relative flex-1">
+          <h2 className="pt-8 text-5xl md:text-7xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_1px_black] pr-8">
             Why our workshops matter?
           </h2>
-          {/* <figure className="flex items-center justify-end w-full p-4 pt-0">
-            <img src="/assets/workshopv2/man-thinking.png" alt="" />
-          </figure> */}
         </div>
       </motion.div>
-
-      {/* Modals */}
       {showLoginModal && (
         <LoginModal
           isOpen={showLoginModal}
           onClose={() => setShowLoginModal(false)}
         />
       )}
-
       {showAddToCartModal && (
         <AddToCartModal
           onClose={() => setShowAddToCartModal(false)}
           isOpen={showAddToCartModal}
           productName={selectedComic?.title || ""}
-        />
-      )}
-
-      {showSubscriptionLimitModal && (
-        <SubscriptionLimitModal
-          isOpen={showSubscriptionLimitModal}
-          onClose={() => setShowSubscriptionLimitModal(false)}
-          message={limitModalMessage}
-          title={limitModalTitle}
-          planType={membershipType as "Free" | "Prime" | "Platinum"}
         />
       )}
     </div>

@@ -75,7 +75,6 @@ const UserStatus = () => {
   const statusGroups = useSelector(
     (state: RootState) => state.userStatus.statusGroups || []
   );
-  console.log("Fetched status groups:", statusGroups);
   const [selectedStatusGroup, setSelectedStatusGroup] =
     useState<UserStatusInterface | null>(null);
   const [currentStatusIndex, setCurrentStatusIndex] = useState(0);

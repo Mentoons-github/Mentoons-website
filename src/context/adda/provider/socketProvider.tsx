@@ -70,6 +70,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error("Error connecting socket:", error);
       }
+
     };
 
     connectSocket();

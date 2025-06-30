@@ -785,6 +785,7 @@ const PostCard = ({
         modalType={modalType}
         userId={post.user._id}
         contentId={post._id}
+        reportType="post"
       />
     </>
   );

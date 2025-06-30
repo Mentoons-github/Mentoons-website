@@ -1,6 +1,6 @@
-import React, { Dispatch, RefObject, SetStateAction, useCallback } from "react";
+import React, { RefObject, useCallback } from "react";
 import { BsPaperclip } from "react-icons/bs";
-import { FaMicrophone, FaPaperPlane, FaStop } from "react-icons/fa6";
+import { FaPaperPlane } from "react-icons/fa6";
 
 interface ChatFooterProps {
   fileInputRef: RefObject<HTMLInputElement>;
@@ -8,12 +8,8 @@ interface ChatFooterProps {
   handleMessageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSendMessage: () => void;
-  isRecording: boolean;
-  recordedAudio: string | null;
-  setIsRecording: Dispatch<SetStateAction<boolean>>;
   selectedFile: File | null;
   isUpload: boolean;
-  onClearRecording?: () => void;
   maxMessageLength?: number;
   disabled?: boolean;
 }
@@ -24,12 +20,8 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
   handleMessageChange,
   handleFileUpload,
   handleSendMessage,
-  isRecording,
-  recordedAudio,
-  setIsRecording,
   selectedFile,
   isUpload,
-  onClearRecording,
   maxMessageLength = 3000,
   disabled = false,
 }) => {
@@ -44,18 +36,16 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
     },
     [
       message,
-      isRecording,
-      recordedAudio,
       selectedFile,
       disabled,
       handleSendMessage,
     ]
   );
 
-  const handleRecordingToggle = useCallback(() => {
-    if (disabled) return;
-    setIsRecording((prev) => !prev);
-  }, [disabled, setIsRecording]);
+  // const handleRecordingToggle = useCallback(() => {
+  //   if (disabled) return;
+  //   setIsRecording((prev) => !prev);
+  // }, [disabled, setIsRecording]);
 
   const handleFileButtonClick = useCallback(() => {
     if (disabled) return;
@@ -68,30 +58,19 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
     }
   }, [
     message,
-    recordedAudio,
     selectedFile,
-    isRecording,
     isUpload,
     disabled,
     handleSendMessage,
   ]);
 
   const canSend = Boolean(
-    (message.trim() || recordedAudio || selectedFile) &&
-      !isRecording &&
+    (message.trim() || selectedFile) &&
       !isUpload
   );
 
-  const isInputDisabled = disabled || isRecording || Boolean(recordedAudio);
+  const isInputDisabled = disabled
   const isOverLimit = message.length > maxMessageLength;
-
-  const getInputPlaceholder = () => {
-    if (disabled) return "Chat is disabled";
-    if (isRecording) return "Recording your voice message...";
-    if (recordedAudio)
-      return "Voice message ready - click send or record again";
-    return "Type your message here...";
-  };
 
   const getInputClassName = () => {
     const baseClasses =
@@ -101,14 +80,6 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
       return `${baseClasses} border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed`;
     }
 
-    if (isRecording) {
-      return `${baseClasses} border-red-300 bg-red-50 text-red-700 placeholder-red-400 cursor-not-allowed`;
-    }
-
-    if (recordedAudio) {
-      return `${baseClasses} border-green-300 bg-green-50 text-green-700 placeholder-green-400 cursor-not-allowed`;
-    }
-
     if (isOverLimit) {
       return `${baseClasses} border-red-300 bg-red-50 text-red-700 focus:border-red-400 focus:ring-4 focus:ring-red-50`;
     }
@@ -116,24 +87,24 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
     return `${baseClasses} border-gray-200 bg-white hover:border-gray-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-50`;
   };
 
-  const getMicrophoneButtonClassName = () => {
-    const baseClasses =
-      "w-12 h-12 border rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
+  // const getMicrophoneButtonClassName = () => {
+  //   const baseClasses =
+  //     "w-12 h-12 border rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-    if (disabled) {
-      return `${baseClasses} bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed`;
-    }
+  //   if (disabled) {
+  //     return `${baseClasses} bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed`;
+  //   }
 
-    if (isRecording) {
-      return `${baseClasses} bg-red-500 hover:bg-red-600 border-red-500 text-white shadow-lg focus:ring-red-300`;
-    }
+  //   if (isRecording) {
+  //     return `${baseClasses} bg-red-500 hover:bg-red-600 border-red-500 text-white shadow-lg focus:ring-red-300`;
+  //   }
 
-    if (recordedAudio) {
-      return `${baseClasses} bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed`;
-    }
+  //   if (recordedAudio) {
+  //     return `${baseClasses} bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed`;
+  //   }
 
-    return `${baseClasses} bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-300 focus:ring-gray-300`;
-  };
+  //   return `${baseClasses} bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-300 focus:ring-gray-300`;
+  // };
 
   const getSendButtonClassName = () => {
     const baseClasses =
@@ -180,7 +151,6 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
           disabled={isInputDisabled}
           onChange={handleMessageChange}
           onKeyDown={handleKeyDown}
-          placeholder={getInputPlaceholder()}
           className={getInputClassName()}
           maxLength={maxMessageLength}
           aria-label="Message input"
@@ -188,7 +158,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
           aria-describedby={isOverLimit ? "message-error" : undefined}
         />
 
-        {message.length > 0 && !isRecording && !recordedAudio && (
+        {message.length > 0 && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <span
               className={`text-xs ${
@@ -208,47 +178,6 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
             Message exceeds maximum length
           </div>
         )}
-      </div>
-
-      <div className="flex items-center gap-2">
-        {recordedAudio && onClearRecording && (
-          <button
-            type="button"
-            onClick={onClearRecording}
-            disabled={disabled}
-            className="w-12 h-12 border rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-300 focus:ring-gray-300"
-            aria-label="Clear voice recording"
-            title="Clear voice recording"
-          >
-            <FaStop size={16} />
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={handleRecordingToggle}
-          disabled={disabled || Boolean(recordedAudio)}
-          className={getMicrophoneButtonClassName()}
-          aria-label={
-            isRecording
-              ? "Stop recording voice message"
-              : "Start recording voice message"
-          }
-          title={
-            recordedAudio
-              ? "Voice message ready"
-              : isRecording
-              ? "Stop recording"
-              : "Record voice message"
-          }
-        >
-          <FaMicrophone
-            size={16}
-            className={`transition-all duration-200 ${
-              isRecording ? "animate-pulse" : ""
-            }`}
-          />
-        </button>
       </div>
 
       <button

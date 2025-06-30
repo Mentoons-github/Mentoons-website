@@ -20,6 +20,7 @@ interface UserConversation {
   updatedAt: string;
   createdAt: string;
   unreadCounts: { [userId: string]: number };
+  isBlocked?: boolean;
 }
 
 interface MessageI {
@@ -168,19 +169,17 @@ const conversationSlice = createSlice({
       state,
       action: PayloadAction<{ conversationId: string; userId: string }>
     ) => {
-
-      
       const convo = state.conversations.find(
-        (c) => c.conversation_id === action.payload.conversationId,
+        (c) => c.conversation_id === action.payload.conversationId
       );
       if (convo) {
-        console.log('increment unread count')
+        console.log("increment unread count");
         const userId = action.payload.userId;
         convo.unreadCounts = convo.unreadCounts || {};
         convo.unreadCounts[userId] = (convo.unreadCounts[userId] || 0) + 1;
       }
     },
-    
+
     resetUnreadCount: (
       state,
       action: PayloadAction<{ conversationId: string; userId: string }>

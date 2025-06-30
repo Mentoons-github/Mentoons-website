@@ -114,7 +114,7 @@ const ShareUserModal: React.FC<ShareUserModalProps> = ({
       setShowSuccess(true);
       setTimeout(() => {
         onClose();
-      }, 2000); // Close modal after 2 seconds
+      }, 2000); 
     } catch (err) {
       console.error("Error sharing:", err);
       setError("Failed to share content. Please try again.");

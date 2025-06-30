@@ -24,6 +24,7 @@ interface UserConversation {
   friend: Friend;
   lastMessage: string;
   messageType: string;
+  isBlocked?: boolean;
   updatedAt: string;
   createdAt: string;
   unreadCounts: { [userId: string]: number };
@@ -45,6 +46,12 @@ type MergedResult =
 
 type FilterType = "all" | "online" | "read" | "unread";
 
+interface FriendsResponse {
+  data: {
+    friends: Friend[];
+  };
+}
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -57,9 +64,10 @@ function useDebounce<T>(value: T, delay: number): T {
 const Friends: React.FC<FriendsProps> = () => {
   const { selectedUser } = useParams();
   const { onlineUsers, mongoUserId } = useSocket();
+
+  console.log("omline users from backend : ", onlineUsers);
   const navigate = useNavigate();
   const { getToken } = useAuth();
-
   const dispatch = useDispatch<AppDispatch>();
   const { conversations, status } = useSelector(
     (state: RootState) => state.conversation
@@ -127,6 +135,7 @@ const Friends: React.FC<FriendsProps> = () => {
         );
 
         setFriends(response.data.data?.friends || []);
+
       } catch (err: unknown) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Error fetching friends:", err);
@@ -163,6 +172,7 @@ const Friends: React.FC<FriendsProps> = () => {
     });
   }, [conversations, debouncedSearch, activeFilter, onlineUsers, mongoUserId]);
 
+
   const conversationFriendIds = useMemo(
     () => conversations.map((conv) => conv.friend._id),
     [conversations]
@@ -195,33 +205,34 @@ const Friends: React.FC<FriendsProps> = () => {
     console.log("Online users updated in Friends component:", onlineUsers);
   }, [onlineUsers]);
 
+
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="w-full max-w-[350px] bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-6 flex flex-col gap-5 border border-white/20"
+      className="w-full sm:max-w-[300px] md:max-w-[350px] bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 border border-white/20 h-full"
     >
-      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
-        <FaSearch className="text-gray-400" />
+      <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
+        <FaSearch className="text-gray-400 text-sm sm:text-base" />
         <input
           type="text"
           placeholder="Search chats..."
-          className="outline-none bg-transparent w-full text-sm text-gray-700 placeholder-gray-400"
+          className="outline-none bg-transparent w-full text-xs sm:text-sm text-gray-700 placeholder-gray-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           aria-label="Search chats"
         />
       </div>
 
-      <div className="relative flex items-center gap-1 p-1.5 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
+      <div className="relative flex items-center gap-1 p-1 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
         {filters.map((filter) => (
           <motion.button
             key={filter.key}
             onClick={() => setActiveFilter(filter.key)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`relative flex-1 px-2 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
+            className={`relative flex-1 px-2 py-2 text-[10px] sm:text-xs font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
               activeFilter === filter.key
                 ? "text-white shadow-lg"
                 : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
@@ -235,22 +246,19 @@ const Friends: React.FC<FriendsProps> = () => {
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               />
             )}
-
             <motion.div
               className="absolute inset-0 bg-orange-100/60 rounded-xl opacity-0"
               whileHover={{ opacity: activeFilter === filter.key ? 0 : 1 }}
               transition={{ duration: 0.2 }}
             />
-
             <span className="relative z-10 tracking-wide font-sans flex items-center gap-1">
               {filter.label}
               {filter.count > 0 && (
-                <span className="text-[10px] bg-white/90 text-gray-700 font-bold px-1.5 py-0.5 rounded-full shadow">
+                <span className="text-[8px] sm:text-[10px] bg-white/90 text-gray-700 font-bold px-1 sm:px-1.5 py-0.5 rounded-full shadow">
                   {filter.count}
                 </span>
               )}
             </span>
-
             {activeFilter === filter.key && (
               <motion.div
                 initial={{ scale: 0 }}
@@ -260,7 +268,6 @@ const Friends: React.FC<FriendsProps> = () => {
             )}
           </motion.button>
         ))}
-
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-amber-500/5 rounded-2xl pointer-events-none" />
       </div>
 
@@ -268,14 +275,17 @@ const Friends: React.FC<FriendsProps> = () => {
         <AnimatePresence>
           {(status === "conversationLoading" || friendsLoading) && (
             <div className="text-center py-5">Loading...</div>
+
           )}
           {error && (
-            <div className="text-red-500 text-center py-5">{error}</div>
+            <div className="text-red-500 text-center py-4 sm:py-5 text-xs sm:text-sm">
+              {error}
+            </div>
           )}
           {mergedResults.length === 0 &&
             status !== "conversationLoading" &&
             !friendsLoading && (
-              <div className="text-center text-gray-500 py-5">
+              <div className="text-center text-gray-500 py-4 sm:py-5 text-xs sm:text-sm">
                 No results found.
               </div>
             )}
@@ -366,6 +376,7 @@ const Friends: React.FC<FriendsProps> = () => {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
+
                       </span>
 
                       {item.data.unreadCounts?.[mongoUserId] > 0 && (

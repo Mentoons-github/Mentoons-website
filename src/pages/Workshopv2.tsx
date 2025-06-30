@@ -1069,7 +1069,7 @@ const WorkshopInfoCarousel = () => {
                 "Digital-free play challenges",
                 "Painting & role-playing to understand emotions",
               ],
-              image: "/assets/workshopv2/workshop-carousel-1.png",
+              image: "/assets/workshopv2/buddycamp/buddy-camp-logo.png",
             },
             {
               title: "Workshops Held For Ages 13-19",
@@ -1080,7 +1080,7 @@ const WorkshopInfoCarousel = () => {
                 "Social detox challenges",
                 "Peer-led discussion circles",
               ],
-              image: "/assets/workshopv2/workshop-carousel-2.png",
+              image: "/assets/workshopv2/teencamp/teen-camp-logo.png",
             },
             {
               title: "Workshops Held For Ages 20+",
@@ -1092,7 +1092,7 @@ const WorkshopInfoCarousel = () => {
                 "Dopamine detox exercises",
                 "Habit loop rewiring",
               ],
-              image: "/assets/workshopv2/workshop-carousel-3.png",
+              image: "/assets/workshopv2/careercorner/career-corner-logo.png",
             },
           ].map((item, index) => (
             <div
