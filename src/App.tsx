@@ -51,7 +51,7 @@ const AppContent = () => {
   useEffect(() => {
     if (!socket) return;
     socket.on("receive_message", (data:Message) => {
-      console.log("📩 Global receive_message:", data);
+      console.log(" Global receive_message:", data);
       dispatch(addNewMessage(data));
       dispatch(
         updateLastMessage({

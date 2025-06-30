@@ -65,4 +65,5 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
+  friendRequestStatus :string;
 }

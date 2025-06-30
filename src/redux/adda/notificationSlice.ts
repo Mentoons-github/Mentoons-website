@@ -7,14 +7,38 @@ interface NotificationState {
   isLoading: boolean;
   error: string | null;
   hasMore: boolean;
+  status: string;
 }
 
 const initialState: NotificationState = {
   notifications: [],
+  status: "",
   isLoading: false,
   error: null,
   hasMore: true,
 };
+
+export const fetchFriendRequest = createAsyncThunk<
+  { status: string },
+  { token: string; requestId: string },
+  { rejectValue: string }
+>(
+  "notifications/fetchFriendRequest",
+  async ({ token, requestId }, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/adda/request/${requestId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(res.data.data.request,'its status of friend request')
+      return res.data.data.request;
+    } catch (error) {
+      return rejectWithValue("Failed to fetch friend request details");
+    }
+  }
+);
 
 export const fetchNotifications = createAsyncThunk<
   { notifications: Notification[]; hasMore: boolean },
@@ -157,6 +181,18 @@ const notificationSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+      .addCase(fetchFriendRequest.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchFriendRequest.fulfilled, (state,action) => {
+        state.status = action.payload.status;
+        state.isLoading = false;
+      })
+      .addCase(fetchFriendRequest.rejected, (state, action) => {
+        state.error = action.payload || "Failed to clear all notifications";
+        state.isLoading = false;
+      })
       .addCase(fetchNotifications.pending, (state) => {
         state.isLoading = true;
         state.error = null;

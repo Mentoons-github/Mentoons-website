@@ -213,6 +213,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     const token = await getToken();
 
     if (!token) return;
+    console.log(token);
 
     try {
       const response = await axios.patch(
@@ -241,7 +242,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
               },
             })
           );
-          dispatch(markNotificationRead({ notificationId, token }));
+          await dispatch(markNotificationRead({ notificationId, token }));
         } else {
           await dispatch(deleteNotification({ notificationId, token }));
         }
@@ -410,34 +411,48 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                               {formatTimeAgo(notification.createdAt)}
                             </span>
                             {notification.type === "friend_request" && (
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleFriendRequestAction(
-                                      notification._id,
-                                      notification.referenceId,
-                                      "accept"
-                                    );
-                                  }}
-                                  className="px-3 py-1.5 text-sm text-gray-900 bg-orange-400 rounded-lg hover:bg-orange-500"
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleFriendRequestAction(
-                                      notification._id,
-                                      notification.referenceId,
-                                      "decline"
-                                    );
-                                  }}
-                                  className="px-3 py-1.5 text-sm text-gray-200 bg-gray-600 rounded-lg hover:bg-gray-500"
-                                >
-                                  Decline
-                                </button>
-                              </div>
+                              <>
+                                {notification.friendRequestStatus ===
+                                "accepted" ? (
+                                  <span className="text-sm text-green-400 font-medium">
+                                    You accepted this friend request
+                                  </span>
+                                ) : notification.friendRequestStatus ===
+                                  "rejected" ? (
+                                  <span className="text-sm text-red-400 font-medium">
+                                    You rejected this friend request
+                                  </span>
+                                ) : (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleFriendRequestAction(
+                                          notification._id,
+                                          notification.referenceId,
+                                          "accept"
+                                        );
+                                      }}
+                                      className="px-3 py-1.5 text-sm text-gray-900 bg-orange-400 rounded-lg hover:bg-orange-500"
+                                    >
+                                      Accept
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleFriendRequestAction(
+                                          notification._id,
+                                          notification.referenceId,
+                                          "decline"
+                                        );
+                                      }}
+                                      className="px-3 py-1.5 text-sm text-gray-200 bg-gray-600 rounded-lg hover:bg-gray-500"
+                                    >
+                                      Decline
+                                    </button>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
