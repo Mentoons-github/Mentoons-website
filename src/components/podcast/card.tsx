@@ -143,7 +143,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
             {(podcast.details as PodcastProduct["details"])?.category ||
               "Category"}
           </div>
-          <div
+          {/* <div
             className={`py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize
               data-[type=Free]:bg-gradient-to-r data-[type=Free]:from-green-400 data-[type=Free]:to-green-500 data-[type=Free]:text-white
               data-[type=Prime]:bg-gradient-to-r data-[type=Prime]:from-yellow-400 data-[type=Prime]:to-orange-500 data-[type=Prime]:text-white
@@ -151,7 +151,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
             data-type={productType}
           >
             {productType}
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="space-y-2">

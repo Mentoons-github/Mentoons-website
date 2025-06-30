@@ -187,28 +187,6 @@ const Cart: React.FC = () => {
               </div>
             </div>
 
-            {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
-              {products?.length > 0 ? (
-                products
-                  .filter((product) => product.type === recommendationsFilter)
-                  .map((product) => {
-                    return (
-                      <div
-                        className="flex justify-center w-full"
-                        key={product._id}
-                      >
-                        <ProductCard
-                          key={product._id}
-                          productDetails={product}
-                        />
-                      </div>
-                    );
-                  })
-              ) : (
-                <div>No Product found</div>
-              )}
-            </div> */}
-
             <div className="relative">
               {scrollPosition > 0 && (
                 <button

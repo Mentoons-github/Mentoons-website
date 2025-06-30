@@ -1,5 +1,4 @@
 import Footer from "@/components/comics/Footer";
-import Breadcrumbs from "@/components/common/breadCrumbs/breadCrumbs";
 import { NotificationProvider } from "@/context/adda/provider/notificationProvider";
 import { ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
@@ -30,9 +29,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="relative w-full h-full">
         <div className="absolute top-0 left-0 right-0 z-[99999]">
           <NotificationPopup />
-        </div>
-        <div className="absolute top-[115px] left-10 hidden lg:block">
-          <Breadcrumbs />
         </div>
         <PrimaryHeader />
         <Header />

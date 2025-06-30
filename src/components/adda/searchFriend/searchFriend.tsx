@@ -11,6 +11,8 @@ export interface Friend {
   name: string;
   picture: string;
   status:
+    | "self"
+    | "guest"
     | "connect"
     | "friends"
     | "followBack"

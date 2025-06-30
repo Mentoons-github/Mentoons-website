@@ -35,6 +35,7 @@ import FreeDownloadForm from "@/components/comics/FreeDownloadForm";
 import { v4 as uuidv4 } from "uuid";
 import { gamesData } from "@/constant/comicsConstants";
 import { highlightText } from "@/utils/highlightText";
+import { useAuthModal } from "@/context/adda/authModalContext";
 
 interface User {
   _id: string;
@@ -48,7 +49,8 @@ interface User {
     | "following"
     | "follow back"
     | "pending"
-    | "connect";
+    | "connect"
+    | "guest";
 }
 
 interface GamesData {
@@ -120,6 +122,7 @@ const SearchResultsPage = () => {
   const location = useLocation();
   const searchQuery = new URLSearchParams(location.search).get("q") ?? "";
   const { getToken, userId } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const { handleAddToCart, handleBuyNow, isLoading } = useProductActions({
     setShowLoginModal,
     setShowAddToCartModal,
@@ -146,7 +149,9 @@ const SearchResultsPage = () => {
     name: user.name,
     picture: user.picture || "/default-avatar.png",
     status:
-      user.followStatus === "friend"
+      user.clerkId === userId
+        ? "self"
+        : user.followStatus === "friend"
         ? "friends"
         : user.followStatus === "following"
         ? "pendingSent"
@@ -154,14 +159,22 @@ const SearchResultsPage = () => {
         ? "followBack"
         : user.followStatus === "pending"
         ? "pendingReceived"
-        : "connect",
+        : user.followStatus === "connect"
+        ? "connect"
+        : "guest",
   });
 
   const onSendRequest = useCallback(
     async (friendId: string) => {
+      console.log("sending request");
       setIsConnecting(true);
       try {
         const token = await getToken();
+        if (!token) {
+          console.log("token found :", token);
+          openAuthModal("sign-in");
+          return;
+        }
         const response = await axiosInstance.post(
           `/user/friend-request`,
           { friendId },
@@ -254,7 +267,7 @@ const SearchResultsPage = () => {
       if (!userId || !token) return;
 
       await axiosInstance.patch(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${userId}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${userId}`,
         {
           subscriptionLimits: updatedLimits,
         },
