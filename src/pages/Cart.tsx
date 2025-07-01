@@ -148,7 +148,7 @@ const Cart: React.FC = () => {
                     Your cart is empty
                   </p>
                   <Link
-                    to="/mentoons-store"
+                    to="/product-page"
                     className="p-2 px-6 text-lg font-medium text-white transition-colors duration-300 rounded-full bg-primary hover:bg-primary-dark"
                   >
                     Visit our store to add some items!
@@ -186,28 +186,6 @@ const Cart: React.FC = () => {
                 ))}
               </div>
             </div>
-
-            {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
-              {products?.length > 0 ? (
-                products
-                  .filter((product) => product.type === recommendationsFilter)
-                  .map((product) => {
-                    return (
-                      <div
-                        className="flex justify-center w-full"
-                        key={product._id}
-                      >
-                        <ProductCard
-                          key={product._id}
-                          productDetails={product}
-                        />
-                      </div>
-                    );
-                  })
-              ) : (
-                <div>No Product found</div>
-              )}
-            </div> */}
 
             <div className="relative">
               {scrollPosition > 0 && (
@@ -295,7 +273,7 @@ const Cart: React.FC = () => {
             Your cart is empty
           </p>
           <Link
-            to="/mentoons-store"
+            to="/product-page"
             className="p-2 px-6 text-lg font-medium text-white transition-colors duration-300 rounded-full bg-primary hover:bg-primary-dark"
           >
             Visit our store to add some items!

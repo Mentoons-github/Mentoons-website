@@ -38,6 +38,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
   isConnecting,
   searchQuery = "",
 }) => {
+  console.log("friendRecieved : ", friend);
+
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
@@ -49,6 +51,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
     setIsLoadingDetails(true);
     try {
       const token = await getToken();
+      if (!token) return;
       const response = await axiosInstance.get(
         `/user/other-user/${friend._id}`,
         {
@@ -124,7 +127,11 @@ const FriendCard: React.FC<FriendCardProps> = ({
             </div>
           ) : (
             <button
-              onClick={() => onSendRequest(friend._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onSendRequest(friend._id);
+              }}
               disabled={isConnecting || friend.status === "followBack"}
               className={`w-full px-3 py-1.5 text-sm font-medium text-white ${
                 isConnecting
@@ -140,6 +147,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
                 </div>
               ) : friend.status === "followBack" ? (
                 "Follow Back"
+              ) : friend.status === "connect" ? (
+                "Connect"
               ) : (
                 "Connect"
               )}
@@ -147,17 +156,19 @@ const FriendCard: React.FC<FriendCardProps> = ({
           )}
         </div>
       </motion.div>
-      <div className="absolute top-0 right-1/6">
-        <FriendModal
-          friend={friend}
-          userDetails={userDetails}
-          isVisible={isHovered}
-          onSendRequest={onSendRequest}
-          onCancelRequest={onCancelRequest}
-          isConnecting={isConnecting}
-          isLoadingDetails={isLoadingDetails}
-        />
-      </div>
+      {friend.status !== "guest" && (
+        <div className="absolute top-0 right-1/6">
+          <FriendModal
+            friend={friend}
+            userDetails={userDetails}
+            isVisible={isHovered}
+            onSendRequest={onSendRequest}
+            onCancelRequest={onCancelRequest}
+            isConnecting={isConnecting}
+            isLoadingDetails={isLoadingDetails}
+          />
+        </div>
+      )}
     </div>
   );
 };
