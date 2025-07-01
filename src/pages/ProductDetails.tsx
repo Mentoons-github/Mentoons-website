@@ -89,7 +89,10 @@ const ProductDetails = () => {
           return;
         }
         const productResponse = await dispatch(fetchProductById(productId));
-        console.log("ProductResponse", productResponse.payload);
+        console.log(
+          "ProductResponse =====================================================================>",
+          productResponse.payload
+        );
         if (
           typeof productResponse.payload === "object" &&
           productResponse.payload !== null
@@ -455,7 +458,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Image Viewer - Amazon Style */}
-        <div className="flex flex-col flex-1 w-full border-[0.5px] border-primary rounded-lg shadow-lg shadow-orange-600/15"> 
+        <div className="flex flex-col flex-1 w-full border-[0.5px] border-primary rounded-lg shadow-lg shadow-orange-600/15">
           {/* Main Image Container */}
           <div
             ref={imageContainerRef}
@@ -544,51 +547,55 @@ const ProductDetails = () => {
 
         {/* Product description */}
         <div className="text-lg font-medium text-neutral-800">
-          {/* use map here */}
-          <div className="flex ">
-            <div className="flex-1 ">Language:</div>
-            <div className="flex-1">
-              {(product.type === ProductType.COMIC ||
-                product.type === ProductType.AUDIO_COMIC) &&
-                (
-                  product.details as
-                    | ComicProduct["details"]
-                    | AudioComicProduct["details"]
-                )?.language === "en" &&
-                "English"}
-            </div>
-          </div>
-          <div className="flex pt-2 ">
-            <div className="flex-1">Print Length:</div>
-            <div className="flex-1">
-              {product.type === ProductType.COMIC
-                ? (product.details as ComicProduct["details"])?.pages
-                : "Not Available"}
-            </div>
-          </div>
-          <div className="flex pt-2 ">
-            <div className="flex-1">Launch date:</div>
-            <div className="flex-1">
-              {product.type === ProductType.COMIC ||
-              product.type === ProductType.AUDIO_COMIC
-                ? formatDateString(
-                    (
-                      product.details as
-                        | ComicProduct["details"]
-                        | AudioComicProduct["details"]
-                    )?.releaseDate ?? ""
-                  ) || "Not Available"
-                : "Not Available"}
-            </div>
-          </div>
-          <div className="flex pt-2 ">
-            <div className="flex-1 ">Reading age:</div>
-            <div className="flex-1">{product.ageCategory}</div>
-          </div>
-          <div className="flex py-2">
-            <div className="flex-1">Dimensions:</div>
-            <div className="flex-1">6 x 18 x 9 inches</div>
-          </div>
+          <h2 className="pb-4 text-2xl font-semibold">Product Details</h2>
+          {product &&
+            [
+              {
+                label: "Language",
+                value:
+                  product.type === ProductType.COMIC ||
+                  product.type === ProductType.AUDIO_COMIC ||
+                  product.type === ProductType.PODCAST ||
+                  product.type === ProductType.MENTOONS_BOOKS
+                    ? product.details.language === "en"
+                      ? "English"
+                      : product.details.language || "Not Available"
+                    : "Not Applicable",
+              },
+              {
+                label: "Print Length",
+                value:
+                  product.type === ProductType.COMIC ||
+                  product.type === ProductType.MENTOONS_BOOKS
+                    ? `${product.details.pages || "Not Available"} pages`
+                    : "Not Available",
+              },
+              {
+                label: "Launch Date",
+                value:
+                  product.type === ProductType.COMIC ||
+                  product.type === ProductType.AUDIO_COMIC ||
+                  product.type === ProductType.PODCAST ||
+                  product.type === ProductType.MENTOONS_BOOKS
+                    ? product.details.releaseDate
+                      ? formatDateString(product.details.releaseDate)
+                      : "Not Available"
+                    : product.type === ProductType.WORKSHOP
+                    ? product.details.schedule
+                      ? formatDateString(product.details.schedule)
+                      : "Not Available"
+                    : "Not Available",
+              },
+              {
+                label: "Reading Age",
+                value: product.ageCategory || "Not Specified",
+              },
+            ].map((item, index) => (
+              <div key={index} className="flex py-2">
+                <div className="flex-1 font-semibold">{item.label}:</div>
+                <div className="flex-1">{item.value}</div>
+              </div>
+            ))}
         </div>
 
         {/* You may also like this section */}
@@ -621,24 +628,6 @@ const ProductDetails = () => {
               ))}
             </div>
           </div>
-          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto">
-            {recommendedProducts?.length > 0 ? (
-              recommendedProducts
-                .filter((item) => item.type === recommendationsFilter)
-                .map((product) => {
-                  return (
-                    <div
-                      className="flex justify-center w-full"
-                      key={product._id}
-                    >
-                      <ProductCard productDetails={product} />
-                    </div>
-                  );
-                })
-            ) : (
-              <div>No Product found</div>
-            )}
-          </div> */}
 
           <div className="relative">
             {scrollPosition > 0 && (

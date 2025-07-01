@@ -148,7 +148,7 @@ const Cart: React.FC = () => {
                     Your cart is empty
                   </p>
                   <Link
-                    to="/mentoons-store"
+                    to="/product-page"
                     className="p-2 px-6 text-lg font-medium text-white transition-colors duration-300 rounded-full bg-primary hover:bg-primary-dark"
                   >
                     Visit our store to add some items!
@@ -273,7 +273,7 @@ const Cart: React.FC = () => {
             Your cart is empty
           </p>
           <Link
-            to="/mentoons-store"
+            to="/product-page"
             className="p-2 px-6 text-lg font-medium text-white transition-colors duration-300 rounded-full bg-primary hover:bg-primary-dark"
           >
             Visit our store to add some items!
