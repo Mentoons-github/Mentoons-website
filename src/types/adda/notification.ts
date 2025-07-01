@@ -44,6 +44,7 @@ export interface NotificationInterface {
   createdAt: string;
   updatedAt: string;
   __v?: number;
+  friendRequestStatus:string
 }
 
 export type ReferenceModel = "User" | "Post" | "FriendRequest" | "Comment";
@@ -65,4 +66,5 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
+  friendRequestStatus :string;
 }

@@ -30,6 +30,12 @@ interface UserConversation {
   unreadCounts: { [userId: string]: number };
 }
 
+interface FriendsResponse {
+  data: {
+    friends: Friend[];
+  };
+}
+
 interface FriendsProps {
   lastMessage: Message | null;
 }
@@ -75,6 +81,10 @@ const Friends: React.FC<FriendsProps> = () => {
 
   const debouncedSearch = useDebounce(searchTerm, 500);
 
+  const isUserOnline = (userId: string) => {
+    return onlineUsers.some((user: { _id: string }) => user._id === userId);
+  };
+
   const unreadCount = conversations.filter(
     (conv) => (conv.unreadCounts?.[mongoUserId] || 0) > 0
   ).length;
@@ -84,7 +94,7 @@ const Friends: React.FC<FriendsProps> = () => {
   ).length;
 
   const onlineCount = conversations.filter((conv) =>
-    onlineUsers.some((u: { _id: string }) => u._id === conv.friend._id)
+    isUserOnline(conv.friend._id)
   ).length;
 
   const totalCount = conversations.length;
@@ -103,7 +113,7 @@ const Friends: React.FC<FriendsProps> = () => {
       dispatch(fetchAllConversations({ token }));
     };
     fetch();
-  }, [getToken]);
+  }, [getToken, dispatch]);
 
   useEffect(() => {
     if (!debouncedSearch) {
@@ -123,7 +133,9 @@ const Friends: React.FC<FriendsProps> = () => {
             signal: controller.signal,
           }
         );
-        setFriends(response.data.data?.friends);
+
+        setFriends(response.data.data?.friends || []);
+
       } catch (err: unknown) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Error fetching friends:", err);
@@ -138,29 +150,28 @@ const Friends: React.FC<FriendsProps> = () => {
   }, [debouncedSearch, getToken]);
 
   const filteredConversations = useMemo(() => {
-    return conversations
-      .filter((conv) => !conv.isBlocked)
-      .filter((conv) => {
-        const nameMatch = conv.friend.name
-          .toLowerCase()
-          .includes(debouncedSearch.toLowerCase());
-        const isOnline = onlineUsers.some(
-          (u: { _id: string }) => u._id === conv.friend._id
-        );
-        const unreadCount = conv.unreadCounts?.[mongoUserId] || 0;
-        switch (activeFilter) {
-          case "online":
-            return nameMatch && isOnline;
-          case "read":
-            return nameMatch && unreadCount === 0;
-          case "unread":
-            return nameMatch && unreadCount > 0;
-          case "all":
-          default:
-            return nameMatch;
-        }
-      });
-  }, [conversations, debouncedSearch, activeFilter, onlineUsers]);
+    return conversations.filter((conv) => {
+      const nameMatch = conv.friend.name
+        .toLowerCase()
+        .includes(debouncedSearch.toLowerCase());
+
+      const isOnline = isUserOnline(conv.friend._id);
+      const unreadCount = conv.unreadCounts?.[mongoUserId] || 0;
+
+      switch (activeFilter) {
+        case "online":
+          return nameMatch && isOnline;
+        case "read":
+          return nameMatch && unreadCount === 0;
+        case "unread":
+          return nameMatch && unreadCount > 0;
+        case "all":
+        default:
+          return nameMatch;
+      }
+    });
+  }, [conversations, debouncedSearch, activeFilter, onlineUsers, mongoUserId]);
+
 
   const conversationFriendIds = useMemo(
     () => conversations.map((conv) => conv.friend._id),
@@ -188,6 +199,12 @@ const Friends: React.FC<FriendsProps> = () => {
     ],
     [filteredConversations, filteredNewFriends]
   );
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Online users updated in Friends component:", onlineUsers);
+  }, [onlineUsers]);
+
 
   return (
     <motion.div
@@ -256,10 +273,9 @@ const Friends: React.FC<FriendsProps> = () => {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         <AnimatePresence>
-          {(status == "conversationLoading" || friendsLoading) && (
-            <div className="text-center py-4 sm:py-5 text-xs sm:text-sm">
-              Loading...
-            </div>
+          {(status === "conversationLoading" || friendsLoading) && (
+            <div className="text-center py-5">Loading...</div>
+
           )}
           {error && (
             <div className="text-red-500 text-center py-4 sm:py-5 text-xs sm:text-sm">
@@ -273,99 +289,107 @@ const Friends: React.FC<FriendsProps> = () => {
                 No results found.
               </div>
             )}
-          {mergedResults.map((item, index) => (
-            <motion.div
-              key={
-                item.type === "conversation"
-                  ? item.data.conversation_id
-                  : item.data._id
-              }
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{
-                y: -2,
-                backgroundColor: "#f8fafc",
-                boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
-              }}
-              onClick={() =>
-                navigate(
-                  `/chat/${
-                    item.type === "conversation"
-                      ? item.data.friend._id
-                      : item.data._id
-                  }`
-                )
-              }
-              className={`relative flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl cursor-pointer mb-2 sm:mb-3 transition-all ${
-                selectedUser ===
-                (item.type === "conversation"
-                  ? item.data.friend._id
-                  : item.data._id)
-                  ? "bg-indigo-50 border-2 border-indigo-200"
-                  : "hover:bg-gray-50 border-2"
-              }`}
-            >
-              <div className="relative">
-                <img
-                  src={
-                    (item.type === "conversation"
-                      ? item.data.friend.picture
-                      : item.data.picture) || "https://via.placeholder.com/48"
-                  }
-                  alt={
-                    item.type === "conversation"
+          {mergedResults.map((item, index) => {
+            const isOnline = item.type === "conversation" 
+              ? isUserOnline(item.data.friend._id)
+              : isUserOnline(item.data._id);
+
+            return (
+              <motion.div
+                key={
+                  item.type === "conversation"
+                    ? item.data.conversation_id
+                    : item.data._id
+                }
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{
+                  y: -2,
+                  backgroundColor: "#f8fafc",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                }}
+                onClick={() =>
+                  navigate(
+                    `/chat/${
+                      item.type === "conversation"
+                        ? item.data.friend._id
+                        : item.data._id
+                    }`
+                  )
+                }
+                className={`relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer mb-3 transition-all ${
+                  selectedUser ===
+                  (item.type === "conversation"
+                    ? item.data.friend._id
+                    : item.data._id)
+                    ? "bg-indigo-50 border-2 border-indigo-200"
+                    : "hover:bg-gray-50 border-2"
+                }`}
+              >
+                <div className="relative">
+                  <img
+                    src={
+                      (item.type === "conversation"
+                        ? item.data.friend.picture
+                        : item.data.picture) || "https://via.placeholder.com/48"
+                    }
+                    alt={
+                      item.type === "conversation"
+                        ? item.data.friend.name
+                        : item.data.name
+                    }
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                  />
+                  {isOnline && (
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+                  )}
+                </div>
+
+                <div className="flex flex-col flex-grow min-w-0">
+                  <h1 className="text-sm font-semibold text-gray-800">
+                    {item.type === "conversation"
                       ? item.data.friend.name
-                      : item.data.name
-                  }
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-100"
-                />
-                {(item.type === "conversation"
-                  ? item.data.friend.isOnline
-                  : item.data.isOnline) && (
-                  <span className="absolute -bottom-1 -right-1 w-3 sm:w-4 h-3 sm:h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
-                )}
-              </div>
-              <div className="flex flex-col flex-grow min-w-0">
-                <h1 className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
-                  {item.type === "conversation"
-                    ? item.data.friend.name
-                    : item.data.name}
-                </h1>
-                <p className="text-[10px] sm:text-xs text-gray-500 truncate">
-                  {item.type === "conversation"
-                    ? item.data.messageType === "image"
-                      ? "Image"
-                      : item.data.messageType === "video"
-                      ? "Video"
-                      : item.data.messageType === "file"
-                      ? "File"
-                      : item.data.messageType === "audio"
-                      ? "Audio"
-                      : item.data.lastMessage || "Start chatting..."
-                    : "Start chatting..."}
-                </p>
-              </div>
-              <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1">
-                {item.type === "conversation" && (
-                  <>
-                    <span className="text-[10px] sm:text-xs text-gray-400">
-                      {new Date(item.data.updatedAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                    {item.data.unreadCounts?.[mongoUserId] > 0 && (
-                      <span className="ml-1 sm:ml-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded-full min-w-[14px] sm:min-w-[16px] text-center">
-                        {item.data.unreadCounts[mongoUserId]}
+                      : item.data.name}
+                  </h1>
+                  <p className="text-xs text-gray-500 truncate">
+                    {item.type === "conversation"
+                      ? item.data.messageType === "image"
+                        ? "Image"
+                        : item.data.messageType === "video"
+                        ? "Video"
+                        : item.data.messageType === "file"
+                        ? "File"
+                        : item.data.messageType === "audio"
+                        ? "Audio"
+                        : item.data.lastMessage || "Start chatting..."
+                      : "Start chatting..."}
+                  </p>
+                </div>
+
+                <div className="absolute top-3 right-3 flex items-center gap-1">
+                  {item.type === "conversation" && (
+                    <>
+                      <span className="text-xs text-gray-400">
+                        {new Date(item.data.updatedAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+
                       </span>
-                    )}
-                  </>
-                )}
-              </div>
-            </motion.div>
-          ))}
+
+                      {item.data.unreadCounts?.[mongoUserId] > 0 && (
+                        <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                          {item.data.unreadCounts[mongoUserId]}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </div>
     </motion.div>
