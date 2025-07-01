@@ -557,9 +557,11 @@ const ProductDetails = () => {
                   product.type === ProductType.AUDIO_COMIC ||
                   product.type === ProductType.PODCAST ||
                   product.type === ProductType.MENTOONS_BOOKS
-                    ? product.details.language === "en"
-                      ? "English"
-                      : product.details.language || "Not Available"
+                    ? "language" in product.details
+                      ? product.details.language === "en"
+                        ? "English"
+                        : product.details.language || "Not Available"
+                      : "Not Available"
                     : "Not Applicable",
               },
               {
@@ -567,7 +569,9 @@ const ProductDetails = () => {
                 value:
                   product.type === ProductType.COMIC ||
                   product.type === ProductType.MENTOONS_BOOKS
-                    ? `${product.details.pages || "Not Available"} pages`
+                    ? "pages" in product.details
+                      ? `${product.details.pages || "Not Available"} pages`
+                      : "Not Available"
                     : "Not Available",
               },
               {
@@ -577,11 +581,12 @@ const ProductDetails = () => {
                   product.type === ProductType.AUDIO_COMIC ||
                   product.type === ProductType.PODCAST ||
                   product.type === ProductType.MENTOONS_BOOKS
-                    ? product.details.releaseDate
+                    ? "releaseDate" in product.details &&
+                      product.details.releaseDate
                       ? formatDateString(product.details.releaseDate)
                       : "Not Available"
                     : product.type === ProductType.WORKSHOP
-                    ? product.details.schedule
+                    ? "schedule" in product.details && product.details.schedule
                       ? formatDateString(product.details.schedule)
                       : "Not Available"
                     : "Not Available",
