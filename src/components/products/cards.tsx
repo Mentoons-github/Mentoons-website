@@ -1,6 +1,7 @@
-import { ProductBase } from "@/types/productTypes";
 import { useNavigate } from "react-router-dom";
 import { highlightText } from "@/utils/highlightText";
+import { ProductBase } from "@/types/productTypes";
+import NewBadge from "../common/badge/new";
 
 const ProductDetailCards = ({
   ageCategory,
@@ -34,7 +35,7 @@ const ProductDetailCards = ({
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {productDetails.map((product, index) => (
           <div
-            className="bg-white rounded-xl shadow-md p-4 flex flex-col border-2 border-gray-600 h-96 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-[#EC9600] hover:scale-[1.02] cursor-pointer"
+            className="bg-white rounded-xl shadow-md p-4 flex flex-col border-2 border-gray-600 h-96 transition-all duration-300 hover:shadow-xl hover:border-[#EC9600] hover:scale-[1.02] cursor-pointer"
             key={index}
             onClick={() => navigate(`/mentoons-store/product/${product._id}`)}
           >
@@ -44,6 +45,8 @@ const ProductDetailCards = ({
                 alt={product.title}
                 className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
               />
+              {/* Ultra Creative New Badge */}
+              {product.isNew && <NewBadge />}
               <div className="absolute top-1 right-1">
                 {(product?.title ===
                   "Conversation Starter Cards (6-12) years" ||
@@ -86,7 +89,7 @@ const ProductDetailCards = ({
                   Add To Cart
                 </button>
                 <button
-                  className="bg-white hover:bg-gray-100 border border-[#EC9600] text-[#EC9600] py-2 rounded-lg transition-all duration-300 hover:shadow-md hover:translate-y-px hover:bg-yellow-50"
+                  className="bg-white hover:bg-gray-100 border border-[#EC9600] text-[#EC9600] py-2 rounded-lg transition-all duration-300 convex-shadow hover:translate-y-px hover:bg-yellow-50"
                   onClick={(e) => handleBuyNow(e, product)}
                   disabled={isLoading}
                 >

@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { AxiosError } from "axios";
+import SubscriptionModalManager, {
+  AccessCheckResponse,
+} from "@/components/protected/subscriptionManager";
 
 interface ProfileHeaderProps {
   user: User;
@@ -44,6 +48,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   );
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showCoverModal, setShowCoverModal] = useState(false);
+  const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
 
   const isValidCoverImage =
     user.coverImage && !user.coverImage.includes("via.placeholder.com");
@@ -135,7 +143,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       setIsRequester(response.data.isRequester || !isUnfriend);
       successToast(response.data.message || "Friend status updated");
     } catch (error) {
-      errorToast("Friend action failed");
+      if (error instanceof AxiosError) {
+        const accessCheck: AccessCheckResponse = error.response?.data?.error;
+        console.log("accessCheck =================>: ", accessCheck);
+        if (accessCheck?.upgradeRequired) {
+          setAccessCheck(accessCheck);
+          setShowModal(true);
+        } else {
+          errorToast(
+            error.response?.data.error || "Failed to send friend request"
+          );
+        }
+      } else {
+        errorToast("Friend action failed");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -156,8 +177,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       );
       setFriendStatus("accepted");
       successToast("Friend request accepted");
-    } catch (error) {
+    } catch (error: unknown) {
       errorToast("Failed to accept friend request");
+      if (error instanceof AxiosError) {
+        const accessCheck: AccessCheckResponse = error.response?.data?.error;
+        console.log("accessCheck =================>: ", accessCheck);
+        if (accessCheck?.upgradeRequired) {
+          setAccessCheck(accessCheck);
+          setShowModal(true);
+        } else {
+          errorToast(
+            error.response?.data.error || "Failed to send friend request"
+          );
+        }
+      } else {
+        errorToast("Failed to send friend request");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -537,6 +572,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       )}
+      <SubscriptionModalManager
+        accessCheck={accessCheck}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </>
   );
 };
