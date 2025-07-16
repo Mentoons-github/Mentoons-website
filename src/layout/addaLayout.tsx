@@ -39,7 +39,7 @@ const AddaLayout = () => {
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          <div className="left-0 z-20 flex items-center w-full bg-white">
+          <div className="left-0 flex items-center w-full bg-white">
             <div className="flex items-center w-full bg-white">
               <div className="flex-grow w-full min-w-0 py-2">
                 <UserStatus />

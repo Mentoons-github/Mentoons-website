@@ -21,6 +21,7 @@ import { PROBLEMS_FACED } from "./mythos/problemsFaced";
 import { MYTHOS_PODCASTS } from "./podcasts/podcasts";
 import { COMIC_COLOR, PRODUCTS_BENEFITS } from "./products";
 import { INDIAN_STATES } from "./bookings/states";
+import { QUIZ_ITEMS, QUIZ_DATA, ICON_SETS } from "./assessments/quiz";
 
 export {
   ADDA_NAV_LINKS,
@@ -50,7 +51,10 @@ export {
   PRIME,
   PROBLEMS_FACED,
   PRODUCTS_BENEFITS,
+  QUIZ_ITEMS,
   REPORT_REASONS,
   REPORTS,
   INDIAN_STATES,
+  QUIZ_DATA,
+  ICON_SETS,
 };

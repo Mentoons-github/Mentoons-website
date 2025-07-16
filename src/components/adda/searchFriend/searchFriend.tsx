@@ -5,6 +5,10 @@ import axiosInstance from "@/api/axios";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import FriendCard from "./friendCard";
+import { AxiosError } from "axios";
+import SubscriptionModalManager, {
+  AccessCheckResponse,
+} from "@/components/protected/subscriptionManager";
 
 export interface Friend {
   _id: string;
@@ -61,6 +65,10 @@ const FriendSearch = () => {
   const [requestCount, setRequestCount] = useState<number>(0);
   const [loadingRequests, setLoadingRequests] = useState<boolean>(false);
   const [hasFriends, setHasFriends] = useState<boolean>(true);
+  const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -303,6 +311,20 @@ const FriendSearch = () => {
       } catch (error) {
         console.error("Failed to send friend request:", error);
         errorToast("Failed to send friend request");
+        if (error instanceof AxiosError) {
+          const accessCheck: AccessCheckResponse = error.response?.data?.error;
+          console.log("accessCheck =================>: ", accessCheck);
+          if (accessCheck?.upgradeRequired) {
+            setAccessCheck(accessCheck);
+            setShowModal(true);
+          } else {
+            errorToast(
+              error.response?.data.error || "Failed to send friend request"
+            );
+          }
+        } else {
+          errorToast("Failed to send friend request");
+        }
       } finally {
         setConnectingIds((prev) => prev.filter((id) => id !== friendId));
       }
@@ -457,6 +479,20 @@ const FriendSearch = () => {
       }
     } catch (error) {
       console.error("Error accepting friend request:", error);
+      if (error instanceof AxiosError) {
+        const accessCheck: AccessCheckResponse = error.response?.data?.error;
+        console.log("accessCheck =================>: ", accessCheck);
+        if (accessCheck?.upgradeRequired) {
+          setAccessCheck(accessCheck);
+          setShowModal(true);
+        } else {
+          errorToast(
+            error.response?.data.error || "Failed to send friend request"
+          );
+        }
+      } else {
+        errorToast("Failed to send friend request");
+      }
       setRequests((prev) =>
         prev.map((request) =>
           request.requestId === requestId
@@ -1054,6 +1090,11 @@ const FriendSearch = () => {
           </>
         )}
       </div>
+      <SubscriptionModalManager
+        accessCheck={accessCheck}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 };

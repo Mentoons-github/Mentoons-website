@@ -37,6 +37,8 @@ import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import ChatPage from "./pages/v2/adda/chat.tsx";
+import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
+import QuizPage from "./pages/quiz.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -71,10 +73,24 @@ const routes = [
       </ProtectedRoute>
     ),
   },
-  { path: "/mentoons-comics", element: <ComicsPageV2 /> },
+  {
+    path: "/mentoons-comics",
+    element: (
+      <SubscriptionGuard>
+        <ComicsPageV2 />
+      </SubscriptionGuard>
+    ),
+  },
   { path: "/free-download", element: <FreeDownload /> },
   { path: "/mentoons-workshops", element: <Workshopv2 /> },
-  { path: "/mentoons-podcast", element: <Podcastv2 /> },
+  {
+    path: "/mentoons-podcast",
+    element: (
+      <SubscriptionGuard>
+        <Podcastv2 />
+      </SubscriptionGuard>
+    ),
+  },
   { path: "/faq", element: <FAQ /> },
   { path: "/website-plans", element: <Plans /> },
   { path: "/mentoons-store", element: <MentoonsStore /> },
@@ -83,7 +99,14 @@ const routes = [
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   // { path: "/membership", element: <Membership /> },
   { path: "/hiring", element: <CareerPage /> },
-  { path: "/assessment-page", element: <Assessment /> },
+  {
+    path: "/assessment-page",
+    element: (
+      <SubscriptionGuard>
+        <Assessment />
+      </SubscriptionGuard>
+    ),
+  },
   { path: "/assessment-questions", element: <AssessmentQuestions /> },
   { path: "/order-summary", element: <OrderSummary /> },
   { path: "/payment-status", element: <PaymentStatusPage /> },
@@ -96,6 +119,7 @@ const routes = [
   { path: "/order-history", element: <OrderHistory /> },
   { path: "/chat", element: <ChatPage /> },
   { path: "/chat/:selectedUser", element: <ChatPage /> },
+  { path: "/quiz/:quizType", element: <QuizPage /> },
 ];
 
 const Router = () => {

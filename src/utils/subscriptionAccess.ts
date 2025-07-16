@@ -94,6 +94,7 @@ export const canAccessContent = (
   membershipType: string,
   userLimits: UserSubscriptionLimits
 ): { canAccess: boolean; message: string; title: string } => {
+  console.log("checking");
   const planLimits =
     SUBSCRIPTION_PLAN_LIMITS[membershipType.toLowerCase()] ||
     SUBSCRIPTION_PLAN_LIMITS.free;

@@ -199,7 +199,7 @@ const Header = () => {
       id="header"
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-      } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-[9999] w-full font-akshar`}
+      } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
     >
       <div className="flex items-center justify-start pl-0 lg:w-1/3 lg:pl-4 xl:pl-6">
         <nav

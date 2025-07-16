@@ -3,6 +3,7 @@ import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
 import { FriendRequestResponse } from "@/types";
 import { useNotifications } from "@/context/adda/notificationContext";
+import SubscriptionModalManager from "@/components/protected/subscriptionManager";
 
 export interface RequestSender {
   requestId: string;
@@ -36,6 +37,16 @@ interface Notification {
   updatedAt: string;
 }
 
+interface AccessCheckResponse {
+  allowed: boolean;
+  upgradeRequired?: boolean;
+  upgradeTo?: string;
+  planType?: "free" | "prime" | "platinum";
+  modalType?: "freeToPrime" | "primeToPlatinum" | "freeToPlatinum";
+  message?: string;
+  currentPrimeConnections?: number;
+}
+
 const FriendRequestsList = () => {
   const [requests, setRequests] = useState<RequestSender[] | null>(null);
   const [followBackUsers, setFollowBackUsers] = useState<
@@ -45,6 +56,10 @@ const FriendRequestsList = () => {
   const [followBackLoading, setFollowBackLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
   const { updateNotification, removeNotification } = useNotifications();
@@ -199,8 +214,13 @@ const FriendRequestsList = () => {
           );
         }, 1500);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting friend request:", error);
+      const accessCheck: AccessCheckResponse = error.response?.data?.error;
+      if (accessCheck?.upgradeRequired) {
+        setAccessCheck(accessCheck);
+        setShowModal(true);
+      }
       setRequests((prev) =>
         prev
           ? prev.map((request) =>
@@ -322,8 +342,13 @@ const FriendRequestsList = () => {
           );
         }, 1500);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending follow back request:", error);
+      const accessCheck: AccessCheckResponse = error.response?.data?.error;
+      if (accessCheck?.upgradeRequired) {
+        setAccessCheck(accessCheck);
+        setShowModal(true);
+      }
       setFollowBackUsers((prev) =>
         prev
           ? prev.map((user) =>
@@ -790,6 +815,12 @@ const FriendRequestsList = () => {
           </div>
         </div>
       )}
+      <SubscriptionModalManager
+        accessCheck={accessCheck}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        productId=""
+      />
     </div>
   );
 };

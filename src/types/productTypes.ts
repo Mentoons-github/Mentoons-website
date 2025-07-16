@@ -33,6 +33,7 @@ export interface ProductBase {
   orignalProductSrc?: string;
   ageCategory: AgeCategory;
   type: ProductType;
+  isNew?: boolean;
   product_type?: "Free" | "Prime" | "Platinum";
   tags?: string[];
   rating: number;

@@ -25,6 +25,7 @@ import { Color, Membership } from "./home/membership";
 import { Booking, IndianState } from "./sessionBooking/session";
 import { JobPosting } from "./jobs/jobs";
 import { PostState, EventDetails } from "./adda/posts";
+import { QuizType } from "./assessements/quiz";
 import {
   Conversations,
   Friend,
@@ -60,6 +61,7 @@ import {
 import { OrderData, OrderItem } from "./order";
 
 export type {
+  QuizType,
   Color,
   Contests,
   DropDownInterface,
