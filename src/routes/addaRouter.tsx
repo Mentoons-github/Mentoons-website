@@ -46,7 +46,6 @@ const AddaRouter = () => {
         <Route
           path="/"
           element={
-            // Wrap AddaLayout in Suspense to ensure its children are loaded
             <Suspense fallback={loadingFallback}>
               <AddaLayout />
             </Suspense>

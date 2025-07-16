@@ -38,6 +38,7 @@ import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import ChatPage from "./pages/v2/adda/chat.tsx";
 import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
+import QuizPage from "./pages/quiz.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 
@@ -118,6 +119,7 @@ const routes = [
   { path: "/order-history", element: <OrderHistory /> },
   { path: "/chat", element: <ChatPage /> },
   { path: "/chat/:selectedUser", element: <ChatPage /> },
+  { path: "/quiz/:quizType", element: <QuizPage /> },
 ];
 
 const Router = () => {
