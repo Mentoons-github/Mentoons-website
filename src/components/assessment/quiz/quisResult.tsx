@@ -21,10 +21,10 @@ interface QuizResultProps {
   onRetake: () => void;
 }
 
-interface QuizAnswersProps {
-  quiz: QuizData;
-  answers: Record<number, string>;
-}
+// interface QuizAnswersProps {
+//   quiz: QuizData;
+//   answers: Record<number, string>;
+// }
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
