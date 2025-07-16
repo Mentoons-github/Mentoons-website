@@ -49,28 +49,28 @@ const itemVariants: Variants = {
   },
 };
 
-const QuizAnswers: React.FC<QuizAnswersProps> = ({ quiz, answers }) => (
-  <div className="bg-gray-50 rounded-2xl p-6">
-    <h3 className="font-semibold text-gray-800 mb-3">Your Responses:</h3>
-    <div className="space-y-2">
-      {quiz.questions.map((question, index) => (
-        <div key={question.id} className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Question {index + 1}</span>
-          <span className="text-sm font-medium">
-            {answers[index]}{" "}
-            {answers[index] === question.correctAnswer ? (
-              <span className="text-green-500">✓</span>
-            ) : (
-              <span className="text-red-500">
-                ✗ (Correct: {question.correctAnswer})
-              </span>
-            )}
-          </span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+// const QuizAnswers: React.FC<QuizAnswersProps> = ({ quiz, answers }) => (
+//   <div className="bg-gray-50 rounded-2xl p-6">
+//     <h3 className="font-semibold text-gray-800 mb-3">Your Responses:</h3>
+//     <div className="space-y-2">
+//       {quiz.questions.map((question, index) => (
+//         <div key={question.id} className="flex justify-between items-center">
+//           <span className="text-sm text-gray-600">Question {index + 1}</span>
+//           <span className="text-sm font-medium">
+//             {answers[index]}{" "}
+//             {answers[index] === question.correctAnswer ? (
+//               <span className="text-green-500">✓</span>
+//             ) : (
+//               <span className="text-red-500">
+//                 ✗ (Correct: {question.correctAnswer})
+//               </span>
+//             )}
+//           </span>
+//         </div>
+//       ))}
+//     </div>
+//   </div>
+// );
 
 const QuizResult: React.FC<QuizResultProps> = ({
   quiz,
