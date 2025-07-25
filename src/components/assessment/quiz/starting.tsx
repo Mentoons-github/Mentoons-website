@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BackgroundIcons, containerVariants, itemVariants } from "@/utils/assessment/quizAndAssessment";
-import { QuizData } from "@/pages/quiz";
+import {
+  BackgroundIcons,
+  containerVariants,
+  itemVariants,
+} from "@/utils/assessment/quizAndAssessment";
+import { QuizData } from "@/pages/quiz/quiz";
 
 interface QuizStartingProps {
   quiz: QuizData;

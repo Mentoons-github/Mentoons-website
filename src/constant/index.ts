@@ -1229,17 +1229,22 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_06",
+    label: "Quiz",
+    url: "/quiz",
+  },
+  {
+    id: "NL_07",
     label: "Book Sessions",
     url: "/bookings",
   },
   {
-    id: "NL_07",
+    id: "NL_08",
     label: "Join Us",
     icon: "group",
     url: "/hiring",
   },
   {
-    id: "NL_08",
+    id: "NL_09",
     label: "Browse Plans",
     // icon: FaCreditCard,
     url: "/mentoons#subscription",
