@@ -123,8 +123,8 @@ const routes = [
   { path: "/chat/:selectedUser", element: <ChatPage /> },
   { path: "/quiz", element: <QuizHome /> },
   { path: "/quiz/:quizType/:difficulty", element: <QuizPage /> },
-  // { path: "/puzzle", element: <Puzzle /> },
-  // { path: "/puzzle/play", element: <PuzzleContent /> },
+  { path: "/puzzle", element: <Puzzle /> },
+  { path: "/puzzle/play", element: <PuzzleContent /> },
 ];
 
 const Router = () => {
