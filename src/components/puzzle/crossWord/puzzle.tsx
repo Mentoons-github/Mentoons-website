@@ -187,39 +187,41 @@ const CrossWordPuzzle = () => {
   };
 
   const moveToNextCell = (row: number, col: number) => {
-    let r = row;
-    let c = col;
+    console.log(row, col);
+    // let r = row;
+    // let c = col;
 
-  //   while (true) {
-  //     if (direction === "across") c++;
-  //     else r++;
+    // while (true) {
+    //   if (direction === "across") c++;
+    //   else r++;
 
-  //     if (r >= grid.length || c >= grid[0].length) return;
-  //     const nextCell = grid[r]?.[c];
-  //     if (nextCell && nextCell.answer) {
-  //       inputRefs.current[r][c]?.focus();
-  //       setActiveCell([r, c]);
-  //       break;
-  //     }
-  //   }
-  // };
+    //   if (r >= grid.length || c >= grid[0].length) return;
+    //   const nextCell = grid[r]?.[c];
+    //   if (nextCell && nextCell.answer) {
+    //     inputRefs.current[r][c]?.focus();
+    //     setActiveCell([r, c]);
+    //     break;
+    //   }
+    // }
+  };
 
   const moveToPreviousCell = (row: number, col: number) => {
-    let r = row;
-    let c = col;
+    console.log(row, col);
+    // let r = row;
+    // let c = col;
 
-    while (true) {
-      if (direction === "across") c--;
-      else r--;
+    // while (true) {
+    //   if (direction === "across") c--;
+    //   else r--;
 
-      if (r < 0 || c < 0) return;
-      const prevCell = grid[r]?.[c];
-      if (prevCell && prevCell.answer) {
-        inputRefs.current[r][c]?.focus();
-        setActiveCell([r, c]);
-        break;
-      }
-    }
+    //   if (r < 0 || c < 0) return;
+    //   const prevCell = grid[r]?.[c];
+    //   if (prevCell && prevCell.answer) {
+    //     inputRefs.current[r][c]?.focus();
+    //     setActiveCell([r, c]);
+    //     break;
+    //   }
+    // }
   };
 
   const isCorrect = (row: number, col: number) => {
@@ -272,7 +274,7 @@ const CrossWordPuzzle = () => {
     const emptyCell = cells.find(([r, c]) => !userInput[r][c]);
 
     if (emptyCell) {
-      const [r, c] = emptyCell;
+      // const [r, c] = emptyCell;
       // const updated = [...userInput];
       // updated[r][c] = grid[r][c]?.answer || "";
       // setUserInput(updated);
