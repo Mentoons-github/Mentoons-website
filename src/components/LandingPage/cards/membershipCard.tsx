@@ -48,9 +48,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
     }
   };
 
-  console.log(user?.fullName);
-
   const handleMembership = async (membership: Membership) => {
+    console.log("mem :", membership.type);
     console.log("Membership handling initiated");
     try {
       setPaymentError(null);
@@ -65,11 +64,12 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       startGatewayTimeoutCheck();
 
       const requestStartTime = Date.now();
+      const total = membership.type === "Prime" ? 129 : 279;
 
       const subscriptionData = {
         orderId: `#ORD-${Date.now()}`,
-        totalAmount: 1,
-        amount: 1,
+        totalAmount: total,
+        amount: total,
         currency: "INR",
         productInfo: `Mentoons ${membership.type} Membership`,
         customerName:
