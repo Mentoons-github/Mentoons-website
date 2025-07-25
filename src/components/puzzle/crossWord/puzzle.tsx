@@ -116,9 +116,9 @@ const CrossWordPuzzle = () => {
     val: string,
     autoAdvance = true
   ) => {
-    const updated = [...userInput];
-    updated[row][col] = val.toUpperCase().slice(0, 1);
-    setUserInput(updated);
+    // const updated = [...userInput];
+    // updated[row][col] = val.toUpperCase().slice(0, 1);
+    // setUserInput(updated);
 
     if (val && autoAdvance) {
       moveToNextCell(row, col);
@@ -190,19 +190,19 @@ const CrossWordPuzzle = () => {
     let r = row;
     let c = col;
 
-    while (true) {
-      if (direction === "across") c++;
-      else r++;
+  //   while (true) {
+  //     if (direction === "across") c++;
+  //     else r++;
 
-      if (r >= grid.length || c >= grid[0].length) return;
-      const nextCell = grid[r]?.[c];
-      if (nextCell && nextCell.answer) {
-        inputRefs.current[r][c]?.focus();
-        setActiveCell([r, c]);
-        break;
-      }
-    }
-  };
+  //     if (r >= grid.length || c >= grid[0].length) return;
+  //     const nextCell = grid[r]?.[c];
+  //     if (nextCell && nextCell.answer) {
+  //       inputRefs.current[r][c]?.focus();
+  //       setActiveCell([r, c]);
+  //       break;
+  //     }
+  //   }
+  // };
 
   const moveToPreviousCell = (row: number, col: number) => {
     let r = row;
@@ -273,9 +273,9 @@ const CrossWordPuzzle = () => {
 
     if (emptyCell) {
       const [r, c] = emptyCell;
-      const updated = [...userInput];
-      updated[r][c] = grid[r][c]?.answer || "";
-      setUserInput(updated);
+      // const updated = [...userInput];
+      // updated[r][c] = grid[r][c]?.answer || "";
+      // setUserInput(updated);
       setHints((prev) => new Set([...prev, clueNumber]));
     }
   };
