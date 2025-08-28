@@ -160,6 +160,10 @@ const Header = () => {
     setDropDown((prev) => ({ ...prev, [menu]: false }));
   };
 
+  if (location.pathname.startsWith("/employee")) {
+    return null;
+  }
+
   const dropdownVariants = {
     hidden: {
       opacity: 0,

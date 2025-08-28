@@ -797,7 +797,7 @@ const SearchResultsPage = () => {
                         Mentoons Cards ({filteredResults.mentoonsCards.length})
                       </h2>
                       <NavLink
-                        to="/product-page"
+                        to="/product"
                         className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
                       >
                         <span>View all</span>
@@ -824,7 +824,7 @@ const SearchResultsPage = () => {
                         Mentoons Books ({filteredResults.mentoonsBooks.length})
                       </h2>
                       <NavLink
-                        to="/product-page?productType=mentoons+books#product"
+                        to="/product?productType=mentoons+books#product"
                         className="text-green-700 hover:                      text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
                       >
                         <span>View all</span>

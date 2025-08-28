@@ -769,32 +769,32 @@ export const FOOTER_PAGELINKS = [
   {
     id: "FP_2",
     title: "Mentoons Products",
-    url: "/product-page",
+    url: "/product",
     items: [
       {
         id: "S_1",
         label: "Conversation Starter Cards",
-        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
       },
       {
         id: "S_2",
         label: "Story Re-Teller Cards",
-        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
       },
       {
         id: "S_3",
         label: "Silent Stories",
-        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
       },
       {
         id: "S_4",
         label: "Conversataion Story Card",
-        url: `/product-page?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
       {
         id: "S_5",
         label: "Coloring Books",
-        url: `/product-page?productType=${ProductType.MENTOONS_BOOKS}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_BOOKS}#product`,
       },
     ],
   },
@@ -1229,17 +1229,22 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_06",
+    label: "Quiz",
+    url: "/quiz",
+  },
+  {
+    id: "NL_07",
     label: "Book Sessions",
     url: "/bookings",
   },
   {
-    id: "NL_07",
+    id: "NL_08",
     label: "Join Us",
     icon: "group",
     url: "/hiring",
   },
   {
-    id: "NL_08",
+    id: "NL_09",
     label: "Browse Plans",
     // icon: FaCreditCard,
     url: "/mentoons#subscription",

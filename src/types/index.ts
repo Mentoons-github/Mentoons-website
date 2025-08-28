@@ -59,6 +59,7 @@ import {
   UserRole,
 } from "./adda/userProfile";
 import { OrderData, OrderItem } from "./order";
+import { Cell, Clue } from "./puzzle/crossWord";
 
 export type {
   QuizType,
@@ -112,6 +113,8 @@ export type {
   UserSummary,
   OrderData,
   OrderItem,
+  Cell,
+  Clue
 };
 
 export { MediaType, PostType };

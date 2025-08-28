@@ -55,6 +55,7 @@ export interface User {
   posts: string[];
   role: UserRole | string;
   isOnline?: boolean;
+  isBlocked?: boolean;
 }
 
 export interface Media {

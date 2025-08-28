@@ -36,20 +36,25 @@ import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
 import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import ChatPage from "./pages/v2/adda/chat.tsx";
 import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
-import QuizPage from "./pages/quiz.tsx";
-
+import QuizPage from "./pages/quiz/quiz.tsx";
+import EmployeeRouter from "./routes/employeeRouter.tsx";
+import AdminRouter from "./routes/adminRouter.tsx";
 const Cart = lazy(() => import("./pages/Cart"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 
-const FreeDownload = lazy(() => import("./pages/FreeDownload"));
+const FreeDownload = lazy(() => import("./pages/v2/user/freeDownloads.tsx"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const QuizHome = lazy(() => import("./pages/quiz/quizHome.tsx"));
+const ChatPage = lazy(() => import("./pages/v2/adda/chat.tsx"));
+const Puzzle = lazy(() => import("./pages/v2/puzzle/puzzle.tsx"));
+const PuzzleContent = lazy(() => import("./pages/v2/puzzle/puzzleContent.tsx"));
+const WordCrossPuzzle = lazy(() => import("./pages/v2/puzzle/wordCross.tsx"));
 
 const routes = [
   { path: "/", element: <Navigate to="/adda" replace /> },
@@ -62,7 +67,7 @@ const routes = [
     element: <HowMentoonsWork />,
   },
   {
-    path: "/product-page",
+    path: "/product",
     element: <ProductsPage />,
   },
   {
@@ -119,7 +124,13 @@ const routes = [
   { path: "/order-history", element: <OrderHistory /> },
   { path: "/chat", element: <ChatPage /> },
   { path: "/chat/:selectedUser", element: <ChatPage /> },
-  { path: "/quiz/:quizType", element: <QuizPage /> },
+  { path: "/quiz", element: <QuizHome /> },
+  { path: "/quiz/:quizType/:difficulty", element: <QuizPage /> },
+  { path: "/puzzle", element: <Puzzle /> },
+  { path: "/puzzle/play", element: <PuzzleContent /> },
+  { path: "/wordCross/:difficulty/:puzzleType", element: <WordCrossPuzzle /> },
+  { path: "/employee/*", element: <EmployeeRouter /> },
+  { path: "/admin/*", element: <AdminRouter /> },
 ];
 
 const Router = () => {
@@ -150,7 +161,8 @@ const Router = () => {
               key={index}
               path={route.path}
               element={
-                route.path.startsWith("/mythos") ? (
+                route.path.startsWith("/employee") ||
+                route.path.startsWith("/admin") ? (
                   route.element
                 ) : (
                   <MainLayout>{route.element}</MainLayout>

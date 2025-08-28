@@ -1,13 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   BackgroundIcons,
   containerVariants,
 } from "@/utils/assessment/quizAndAssessment";
-import { QuizData } from "@/pages/quiz";
+import { QuizData } from "@/pages/quiz/quiz";
 
 interface QuizQuestionProps {
   quiz: QuizData;
-  quizType: string;
+  quizType: "easy" | "medium" | "hard";
   backgroundIcons: Array<{
     id: number;
     x: number;
@@ -23,6 +24,8 @@ interface QuizQuestionProps {
   progress: number;
   onAnswerSelect: (answer: string) => void;
   onNext: () => void;
+  onPaymentPrompt: () => void;
+  hasPaid: boolean;
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
@@ -36,7 +39,40 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   progress,
   onAnswerSelect,
   onNext,
+  onPaymentPrompt,
+  hasPaid,
 }) => {
+  const FREE_QUESTION_LIMIT = 5;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const questions = quiz.questionsByDifficulty[quizType];
+  const question = questions[currentQuestion];
+
+  useEffect(() => {
+    if (
+      currentQuestion >= FREE_QUESTION_LIMIT &&
+      !hasPaid &&
+      isAnswerSubmitted
+    ) {
+      console.log("limit reached");
+      setShowPaymentModal(true);
+      onPaymentPrompt();
+    } else {
+      setShowPaymentModal(false);
+    }
+  }, [currentQuestion, hasPaid, isAnswerSubmitted, onPaymentPrompt]);
+
+  // Handle payment (mock for now)
+  const handlePayment = () => {
+    setShowPaymentModal(false);
+    onPaymentPrompt(); 
+  };
+
+  // Return null if no question is available
+  if (!question || currentQuestion >= questions.length) {
+    return null;
+  }
+
   const progressVariants = {
     hidden: { width: 0 },
     visible: {
@@ -48,8 +84,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       },
     },
   };
-
-  const question = quiz.questions[currentQuestion];
 
   return (
     <motion.div
@@ -79,9 +113,11 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               <span className="text-2xl">{quiz.icon}</span>
               <span className="font-semibold text-gray-800">{quiz.title}</span>
             </div>
-            <span className="text-sm text-gray-500">
-              {currentQuestion + 1} of {quiz.questions.length}
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-500">
+                {currentQuestion + 1} of {questions.length}
+              </span>
+            </div>
           </div>
         </div>
         <div className="p-8">
@@ -170,13 +206,48 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               disabled={!isAnswerSubmitted}
               className={`py-3 px-8 bg-gradient-to-r ${quiz.gradientFrom} ${quiz.gradientTo} text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
             >
-              {currentQuestion === quiz.questions.length - 1
-                ? "Finish"
-                : "Next"}
+              {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
             </button>
           </div>
         </div>
       </motion.div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full text-center"
+          >
+            <h2 className="text-2xl font-bold text-yellow-600 mb-4">
+              Free Limit Reached
+            </h2>
+            <p className="text-gray-700 mb-6">
+              You've answered the 5 free questions. Pay ₹9 to unlock all{" "}
+              {questions.length} questions and continue the quiz!
+            </p>
+            <button
+              onClick={handlePayment}
+              className="py-3 px-8 bg-green-500 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all"
+            >
+              Pay ₹9 to Continue
+            </button>
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="mt-4 ml-4 py-2 px-4 bg-gray-200 rounded-xl"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
