@@ -126,7 +126,7 @@ const paymentHistory: Payment[] = [
 const EmployeeSalaryPanel = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isPayslipOpen, setIsPayslipOpen] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<Date | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null); // Fix: Changed type from Date to Payment
   const [showHelp, setShowHelp] = useState(false);
 
   const calculateGrowth = () => {
@@ -143,7 +143,8 @@ const EmployeeSalaryPanel = () => {
 
   const annualGrowth = calculateGrowth().toFixed(1);
 
-  const openPayslip = (payment) => {
+  const openPayslip = (payment: Payment) => {
+    // Fix: Changed parameter type to Payment
     setSelectedPayment(payment);
     setIsPayslipOpen(true);
   };
