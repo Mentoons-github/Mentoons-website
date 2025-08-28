@@ -3,11 +3,11 @@ import "./banner.css";
 
 const WorkshopBanner = () => {
   return (
-    <div className="relative bg-primary min-h-[80vh] flex items-start justify-center overflow-hidden">
+    <div className="relative bg-primary min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center justify-center overflow-hidden">
       <motion.img
         src="/assets/workshopv2/fillers/pencil_boy.png.png"
         alt="happy-boy"
-        className="absolute w-15 h-20 left-20 top-10 z-20"
+        className="absolute w-12 h-16 sm:w-15 sm:h-20 lg:w-20 lg:h-28 left-4 sm:left-10 lg:left-20 top-6 sm:top-8 lg:top-10 z-20"
         initial={{ opacity: 0, x: -50, rotate: -10 }}
         animate={{
           opacity: 1,
@@ -22,11 +22,11 @@ const WorkshopBanner = () => {
         whileHover={{ scale: 1.1, rotate: 10 }}
       />
 
-      <motion.div className="absolute right-20 bottom-20 z-20">
+      <motion.div className="absolute right-4 sm:right-10 lg:right-20 bottom-4 sm:bottom-10 lg:bottom-20 z-20">
         <motion.img
           src="/assets/workshopv2/fillers/SVG.png"
           alt="happy-boy"
-          className="relative w-36 h-36"
+          className="relative w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36"
           initial={{ opacity: 0, scale: 0.5, rotate: 180 }}
           animate={{
             opacity: 1,
@@ -42,9 +42,9 @@ const WorkshopBanner = () => {
         />
       </motion.div>
 
-      <div className="relative z-10 mt-20">
+      <div className="relative z-10 mt-12 sm:mt-16 lg:mt-20">
         <motion.div
-          className="absolute inset-0 text-[12rem] font-extrabold font-sans text-white/10 blur-sm"
+          className="absolute inset-0 text-[4rem] sm:text-[8rem] lg:text-[12rem] font-extrabold font-sans text-white/10 blur-sm"
           initial={{ y: 10 }}
           animate={{
             y: [-15, 25, -15],
@@ -70,7 +70,7 @@ const WorkshopBanner = () => {
             },
             opacity: { duration: 1.5 },
           }}
-          className="relative text-transparent text-[12rem] font-extrabold font-sans bg-[url('/assets/assesments/Exercise/exercise-02.jpg')] bg-clip-text bg-cover bg-center"
+          className="relative text-transparent text-[4rem] sm:text-[8rem] lg:text-[12rem] font-extrabold font-sans bg-[url('/assets/assesments/Exercise/exercise-02.jpg')] bg-clip-text bg-cover bg-center"
           style={{
             filter: "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))",
             textShadow: "0 0 20px rgba(255,255,255,0.3)",
@@ -84,7 +84,7 @@ const WorkshopBanner = () => {
         </motion.h1>
 
         <motion.div
-          className="absolute inset-0 text-[12rem] font-extrabold font-sans text-white/5 blur-2xl"
+          className="absolute inset-0 text-[6rem] sm:text-[8rem] lg:text-[12rem] font-extrabold font-sans text-white/5 blur-2xl"
           animate={{
             opacity: [0.5, 1, 0.5],
           }}
@@ -94,12 +94,13 @@ const WorkshopBanner = () => {
         </motion.div>
       </div>
 
-      <div className="custom-shape-divider-bottom-1756203234">
+      <div className="custom-shape-divider-bottom-1756203234 absolute bottom-0 w-full">
         <svg
           data-name="Layer 1"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
+          className="w-full h-[60px] sm:h-[80px] lg:h-[120px]"
         >
           <path
             d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
@@ -107,8 +108,9 @@ const WorkshopBanner = () => {
           ></path>
         </svg>
       </div>
+
       <motion.div
-        className="absolute top-1/2 left-10 w-4 h-4 border-2 border-white/30 rounded-full"
+        className="absolute top-1/2 left-4 sm:left-6 lg:left-10 w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 rounded-full"
         animate={{
           rotate: 360,
           scale: [1, 1.2, 1],
@@ -120,7 +122,7 @@ const WorkshopBanner = () => {
       />
 
       <motion.div
-        className="absolute top-1/3 right-10 w-6 h-1 bg-white/20 rounded-full"
+        className="absolute top-1/3 right-4 sm:right-6 lg:right-10 w-4 h-1 sm:w-6 sm:h-1 bg-white/20 rounded-full"
         animate={{
           scaleX: [1, 1.5, 1],
           opacity: [0.2, 0.8, 0.2],
