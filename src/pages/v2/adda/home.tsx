@@ -22,7 +22,7 @@ const AddaHome = () => {
       {!isSignedIn && showModal && (
         <WelcomeModal onClose={() => setShowModal(false)} />
       )}
-      <PostsContainer/>
+      <PostsContainer />
     </>
   );
 };

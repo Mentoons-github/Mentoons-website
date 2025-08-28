@@ -10,6 +10,8 @@ import SideTab from "@/components/puzzle/sideTab";
 import { PUZZLE_DIFFICULTY } from "@/constant/puzzle/puzzleDifficulties";
 import axiosInstance from "@/api/axios";
 import RewardProgressBar from "@/components/rewards/RewardProgressBar";
+import { useAuth } from "@clerk/clerk-react";
+import { canPlaceItem, formatTime, getItemPositions, getLinePath, placeItem } from "@/services/puzzleService";
 
 interface Position {
   row: number;
@@ -24,6 +26,7 @@ export interface WordPosition {
 
 const KidsWordSearch: React.FC = () => {
   const location = useLocation();
+  const { getToken } = useAuth();
   const queryParams = new URLSearchParams(location.search);
   const difficulty = queryParams.get("difficulty") as
     | "Easy"
@@ -91,7 +94,7 @@ const KidsWordSearch: React.FC = () => {
   const [showFailureModal, setShowFailureModal] = useState<boolean>(false);
   const [pointsAwarded, setPointsAwarded] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(180); // 3 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState<number>(180);
   const [isTimerActive, setIsTimerActive] = useState<boolean>(true);
 
   const getRandomLetter = (): string =>
@@ -140,53 +143,6 @@ const KidsWordSearch: React.FC = () => {
     setShowFailureModal(false); // Reset failure modal
   };
 
-  const canPlaceItem = (
-    grid: string[][],
-    itemChars: string[],
-    row: number,
-    col: number,
-    direction: "horizontal" | "vertical",
-    size: number
-  ): boolean => {
-    const positions = getItemPositions(row, col, direction, itemChars.length);
-    return positions.every(([r, c], index) => {
-      if (r < 0 || r >= size || c < 0 || c >= size) return false;
-      return grid[r][c] === "" || grid[r][c] === itemChars[index];
-    });
-  };
-
-  const getItemPositions = (
-    row: number,
-    col: number,
-    direction: "horizontal" | "vertical",
-    length: number
-  ): [number, number][] => {
-    const positions: [number, number][] = [];
-    for (let i = 0; i < length; i++) {
-      switch (direction) {
-        case "horizontal":
-          positions.push([row, col + i]);
-          break;
-        case "vertical":
-          positions.push([row + i, col]);
-          break;
-      }
-    }
-    return positions;
-  };
-
-  const placeItem = (
-    grid: string[][],
-    itemChars: string[],
-    row: number,
-    col: number,
-    direction: "horizontal" | "vertical"
-  ): void => {
-    const positions = getItemPositions(row, col, direction, itemChars.length);
-    positions.forEach(([r, c], i) => {
-      grid[r][c] = itemChars[i];
-    });
-  };
 
   useEffect(() => {
     createGrid();
@@ -234,7 +190,7 @@ const KidsWordSearch: React.FC = () => {
     };
 
     try {
-      const token = localStorage.getItem("authToken");
+      const token = await getToken();
       if (!token) {
         setErrorMessage("You must be logged in to earn points");
         setShowRewardModal(true);
@@ -288,26 +244,6 @@ const KidsWordSearch: React.FC = () => {
     setCurrentDragPath([]);
   };
 
-  const getLinePath = (start: Position, end: Position): string[] => {
-    const path: string[] = [];
-    const rowDiff = end.row - start.row;
-    const colDiff = end.col - start.col;
-
-    if (rowDiff !== 0 && colDiff !== 0) return [];
-
-    const rowStep = rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff);
-    const colStep = colDiff === 0 ? 0 : colDiff / Math.abs(colDiff);
-    const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
-
-    for (let i = 0; i <= steps; i++) {
-      const row = start.row + i * rowStep;
-      const col = start.col + i * colStep;
-      path.push(`${row}-${col}`);
-    }
-
-    return path;
-  };
-
   const checkForItemInPath = (): void => {
     const pathLetters = currentDragPath
       .map((cellKey) => {
@@ -326,13 +262,6 @@ const KidsWordSearch: React.FC = () => {
         setFoundItems((prev) => new Set([...prev, item]));
       }
     });
-  };
-
-  // Format time display
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (

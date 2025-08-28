@@ -13,10 +13,12 @@ const Puzzle = ({ puzzle }: { puzzle: "word" | "crossWord" }) => {
     useState<PuzzleButton>("socialMedia");
 
   const handlePlay = (difficulty: string) => {
-    //change the navigation tomorrow
-    navigate(
-      `/puzzle/play?difficulty=${difficulty}&puzzleType=${selectedButton}`
-    );
+    const url =
+      puzzle === "word"
+        ? `/puzzle/play?difficulty=${difficulty}&puzzleType=${selectedButton}`
+        : `/wordCross/${difficulty}/${selectedButton}`;
+
+    navigate(url);
   };
 
   const puzzleText = {

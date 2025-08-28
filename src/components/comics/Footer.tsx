@@ -22,8 +22,8 @@ import MapComponent from "./MapComponent";
 
 interface ApiResponse {
   success: boolean;
-  data?: unknown; // You can replace 'any' with the actual data type you expect
-  message?: string; // Optional error or success message
+  data?: unknown;
+  message?: string;
 }
 
 interface FormValues {
@@ -52,7 +52,6 @@ const Footer = () => {
         }
       );
 
-      // The data from the response is in response.data
       const res: ApiResponse = response.data;
       if (res.success) {
         setShowNewsletterModal(true);
@@ -86,13 +85,11 @@ const Footer = () => {
       return;
     }
 
-    // Store label in session storage for scrolling
     sessionStorage.setItem("scrollToLabel", label);
     window.location.href = url;
-    return; // Stop further execution after setting the URL
-    // For regular URLs, check if it's an internal link with a section
+    return;
+
     if (url.includes("#")) {
-      // Split URL properly to preserve query parameters
       const hashIndex = url.indexOf("#");
       const path = url.substring(0, hashIndex);
       const section = url.substring(hashIndex + 1);
@@ -101,9 +98,7 @@ const Footer = () => {
       console.log("Section:", section);
 
       if (location.pathname !== path.split("?")[0]) {
-        // First navigate to the path (with query params)
         navigate(path);
-        // Wait for navigation to complete and page to load
         setTimeout(() => {
           const element = document.getElementById(section);
           if (element) {
@@ -119,8 +114,6 @@ const Footer = () => {
           }
         }, 100);
       } else {
-        // If already on correct path, just scroll
-        // Small timeout to ensure any ongoing scrolling is complete
         setTimeout(() => {
           const element = document.getElementById(section);
           if (element) {
@@ -134,7 +127,6 @@ const Footer = () => {
               behavior: "smooth",
             });
           } else {
-            // If element not found, try scrolling to top of page
             window.scrollTo({
               top: 0,
               behavior: "smooth",
@@ -145,7 +137,6 @@ const Footer = () => {
       return;
     }
 
-    // For regular URLs without sections
     if (location.pathname !== url) {
       navigate(url);
     }
@@ -216,15 +207,61 @@ const Footer = () => {
             </div>
           ))}
         </div>
+
+        <div className="bg-gradient-to-br from-orange-600 to-orange-400 p-6 rounded-2xl shadow-2xl flex flex-col items-center mb-6 lg:mb-0 border-2 border-orange-200/40 transition-all duration-300 hover:shadow-orange-500/30">
+          <div className="text-center mb-4">
+            <p className="text-orange-50 text-base font-medium tracking-wide">
+              Scan to Contribute ₹1
+            </p>
+            <p className="text-orange-100 text-xs mt-1">
+              Support us with a quick scan!
+            </p>
+          </div>
+          <div className="relative p-4 bg-white rounded-xl shadow-inner group">
+            <img
+              src="/assets/adda/QRCode/qrCode.jpg"
+              className="w-40 h-40 rounded-lg transition-transform duration-300 group-hover:scale-105"
+              alt="QR Code for contributing 1 rupee"
+            />
+            <div className="absolute -top-3 -right-3 bg-orange-600 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+              ₹1
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-orange-500/20 rounded-xl">
+              <span className="text-white text-xs font-medium">Scan Now</span>
+            </div>
+          </div>
+          <div className="flex items-center text-orange-100 text-sm mt-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2 text-orange-200"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Instant & Secure</span>
+          </div>
+          <div className="relative group">
+            <span className="absolute hidden group-hover:block -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2">
+              Scan with your phone to contribute
+            </span>
+          </div>
+        </div>
+
         <div className="flex flex-col items-start justify-start flex-[0.24] mx-auto gap-4 ">
           <Formik
-            initialValues={{ email: "" }} // Must match FormValues type
+            initialValues={{ email: "" }}
             validationSchema={validationSchema}
-            onSubmit={handleSubmit} // Correctly passing the handleSubmit
+            onSubmit={handleSubmit}
           >
-            {(
-              { isSubmitting, isValid, dirty } // Added isValid and dirty
-            ) => (
+            {({ isSubmitting, isValid, dirty }) => (
               <Form className="flex flex-col w-full gap-4">
                 <div className="box-border w-full">
                   <Field
@@ -242,7 +279,7 @@ const Footer = () => {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || !isValid || !dirty} // Enable only if valid and dirty
+                  disabled={isSubmitting || !isValid || !dirty}
                   className="w-full p-2 text-white transition-all duration-300 bg-orange-600 rounded-full cursor-pointer whitespace-nowrap hover:bg-orange-700 text-ellipsis"
                 >
                   Be the first to be Informed

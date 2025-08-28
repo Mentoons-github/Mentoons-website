@@ -4,7 +4,7 @@ import PuzzleItems from "@/components/puzzle/puzzles";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaChevronUp, FaPuzzlePiece } from "react-icons/fa6";
-import CrossWordPuzzle from "@/components/puzzle/crossWord/puzzle";
+// import CrossWordPuzzle from "@/components/puzzle/crossWord/header";
 
 export type PuzzleType = "word" | "crossWord";
 
@@ -231,17 +231,6 @@ const Puzzle = () => {
               exit="hidden"
             >
               <PuzzleItems puzzle={showPuzzleType} />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-center py-20"
-              >
-                <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                  Crossword Puzzles
-                </h1>
-                <CrossWordPuzzle />
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

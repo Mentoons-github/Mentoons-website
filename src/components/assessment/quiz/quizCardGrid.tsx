@@ -4,7 +4,6 @@ import { QUIZ_ITEMS } from "@/constant/constants";
 import {
   fadeContainer,
   fadeItem,
-  cardHoverEffect,
   liftText,
   bounceIcon,
 } from "@/animation/assessmentsAndQuiz/quiz";
@@ -12,7 +11,7 @@ import { QuizType } from "@/types";
 import { useNavigate } from "react-router-dom";
 
 const QuizCardGrid = () => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleQuizStart = (
@@ -45,6 +44,10 @@ const QuizCardGrid = () => {
     },
   };
 
+  const handleCardClick = (index: number) => {
+    setClickedIndex((prev) => (prev === index ? null : index));
+  };
+
   return (
     <div className="relative w-full px-4 sm:px-6 md:px-8 py-6 max-w-7xl mx-auto">
       <motion.div
@@ -58,18 +61,15 @@ const QuizCardGrid = () => {
             key={item.id}
             variants={fadeItem}
             initial="rest"
-            whileHover="hover"
             animate="rest"
-            onHoverStart={() => setHoveredIndex(index)}
-            onHoverEnd={() => setHoveredIndex(null)}
-            className="relative group"
+            onClick={() => handleCardClick(index)}
+            className="relative cursor-pointer"
           >
             <motion.div
-              variants={cardHoverEffect}
               className={`relative h-72 rounded-xl overflow-hidden ${item.bgColor} shadow-lg`}
               style={{
                 boxShadow:
-                  hoveredIndex === index
+                  clickedIndex === index
                     ? `0 15px 30px ${item.shadowColor}, 0 0 25px ${item.glowColor}`
                     : `0 6px 20px ${item.shadowColor}`,
               }}
@@ -113,15 +113,13 @@ const QuizCardGrid = () => {
                   </motion.p>
                 </div>
 
-                {/* Difficulty buttons - always visible but animated */}
+                {/* Difficulty buttons - toggle on click */}
                 <motion.div
-                  className="flex flex-col items-center gap-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: hoveredIndex === index ? 1 : 0,
-                    y: hoveredIndex === index ? 0 : 20,
-                  }}
-                  transition={{ duration: 0.3 }}
+                  className={`flex flex-col items-center gap-3 transition-opacity duration-300 ${
+                    clickedIndex === index
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-5"
+                  }`}
                 >
                   <p className="text-white text-sm font-semibold">
                     Choose Difficulty:
@@ -133,10 +131,11 @@ const QuizCardGrid = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border-2 ${difficultyStyles[difficulty].border} ${difficultyStyles[difficulty].hoverBg} bg-black/20 backdrop-blur-sm text-white transition-all`}
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click from toggling
                           item.value &&
-                          handleQuizStart(item.value as QuizType, difficulty)
-                        }
+                            handleQuizStart(item.value as QuizType, difficulty);
+                        }}
                       >
                         {difficulty.charAt(0).toUpperCase() +
                           difficulty.slice(1)}
@@ -145,15 +144,6 @@ const QuizCardGrid = () => {
                   </div>
                 </motion.div>
               </div>
-
-              {/* Hover effects */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
-                animate={{
-                  x: hoveredIndex === index ? "200%" : "-100%",
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
             </motion.div>
           </motion.div>
         ))}
