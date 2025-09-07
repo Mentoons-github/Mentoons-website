@@ -3,6 +3,7 @@ import Loader from "@/components/common/Loader";
 import SubscriptionGuard from "@/components/protected/subscriptionGuard";
 import AddaLayout from "@/layout/addaLayout";
 import PostPage from "@/pages/v2/adda/postPage";
+import Profile from "@/pages/v2/profile";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -10,7 +11,7 @@ import { Route, Routes } from "react-router-dom";
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
-const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile/profile"));
+// const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile/profile"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
 const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
 const Notification = lazy(
@@ -76,7 +77,7 @@ const AddaRouter = () => {
           <Route path="search-friend" element={<FriendSearch />} />
           <Route path="posts/:postId" element={<PostPage />} />
         </Route>
-        <Route path="user-profile" element={<UserProfile />} />
+        <Route path="user-profile" element={<Profile />} />
       </Routes>
     </Suspense>
   );

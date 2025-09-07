@@ -3,7 +3,7 @@ import "./banner.css";
 
 const WorkshopBanner = () => {
   return (
-    <div className="relative bg-primary min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <div className="relative bg-primary min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center justify-center overflow-hidden border-none">
       <motion.img
         src="/assets/workshopv2/fillers/pencil_boy.png.png"
         alt="happy-boy"

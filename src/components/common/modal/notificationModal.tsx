@@ -2,14 +2,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
 import {
   markAllNotificationsRead,
-  deleteNotification,
   markNotificationRead,
-  updateNotification,
   fetchNotifications,
   clearAllNotifications,
 } from "@/redux/adda/notificationSlice";
-import { NotificationType } from "@/types";
-import axios from "axios";
+import {
+  acceptFriendRequest,
+  declineFriendRequest,
+  fetchFriendRequests,
+} from "@/redux/adda/friendRequest";
+import { Notification, NotificationType } from "@/types";
 import { motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -43,6 +45,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
+import SubscriptionModalManager from "@/components/protected/subscriptionManager";
 
 interface NotificationProps {
   getToken: () => Promise<string | null>;
@@ -53,8 +56,12 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const { notifications, isLoading } = useSelector(
     (state: RootState) => state.notification
+  );
+  const { accessCheck } = useSelector(
+    (state: RootState) => state.friendRequests
   );
 
   useEffect(() => {
@@ -168,7 +175,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     return date.toLocaleDateString();
   };
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     const token = await getToken();
     if (token) {
       await dispatch(
@@ -176,7 +183,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
       );
     }
 
-    const getNavigationLink = (notif: any): string => {
+    const getNavigationLink = (notif: Notification): string => {
       const { type, referenceId, referenceModel, initiatorId } = notif;
       const userId = typeof initiatorId === "object" ? initiatorId._id : null;
 
@@ -206,43 +213,29 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     referenceId: string | undefined,
     action: "accept" | "decline"
   ) => {
+    console.log(notificationId);
     if (!referenceId) return;
-    const endpoint = action === "accept" ? "acceptRequest" : "rejectRequest";
     const token = await getToken();
-
     if (!token) return;
-    console.log(token);
 
     try {
-      const response = await axios.patch(
-        `${import.meta.env.VITE_PROD_URL}/adda/${endpoint}/${referenceId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      if (action === "accept") {
+        const result = await dispatch(
+          acceptFriendRequest({ requestId: referenceId, token })
+        );
+        if (acceptFriendRequest.fulfilled.match(result)) {
+          dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+        } else if (acceptFriendRequest.rejected.match(result)) {
+          setShowModal(true);
         }
-      );
-
-      if (response.data.success) {
-        if (action === "accept") {
-          dispatch(
-            updateNotification({
-              id: notificationId,
-              data: {
-                isRead: true,
-                type: "friend_request_accepted",
-                message: `${
-                  typeof response.data.initiatorId === "object"
-                    ? response.data.initiatorId.name
-                    : "User"
-                } is now your friend`,
-              },
-            })
-          );
-          await dispatch(markNotificationRead({ notificationId, token }));
-        } else {
-          await dispatch(deleteNotification({ notificationId, token }));
+      } else {
+        const result = await dispatch(
+          declineFriendRequest({ requestId: referenceId, token })
+        );
+        if (declineFriendRequest.fulfilled.match(result)) {
+          dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+        } else if (declineFriendRequest.rejected.match(result)) {
+          setShowModal(true);
         }
       }
     } catch (error) {
@@ -254,6 +247,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
     const token = await getToken();
     if (token) {
       await dispatch(clearAllNotifications(token));
+      dispatch(fetchNotifications({ token, page: 1 }));
     }
   };
 
@@ -302,7 +296,6 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
               </motion.button>
             </div>
 
-            {/* Action buttons row */}
             {(unreadCount > 0 || notifications.length > 0) && (
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
@@ -313,6 +306,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                       const token = await getToken();
                       if (token) {
                         dispatch(markAllNotificationsRead(token));
+                        dispatch(fetchNotifications({ token, page: 1 }));
                       }
                     }}
                     className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300 flex-shrink-0"
@@ -353,7 +347,7 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
               </div>
             ) : (
               <div className="divide-y divide-gray-700">
-                {sortedNotifications.map((notification) => {
+                {sortedNotifications.map((notification: Notification) => {
                   const initiator =
                     typeof notification.initiatorId === "object"
                       ? notification.initiatorId
@@ -466,6 +460,15 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
               </div>
             )}
           </div>
+
+          {showModal && (
+            <SubscriptionModalManager
+              accessCheck={accessCheck}
+              isOpen={showModal}
+              onClose={() => setShowModal(false)}
+              productId=""
+            />
+          )}
 
           {notifications.length > 0 && (
             <div className="p-4 border-t border-gray-700 bg-gray-900 shadow-t-lg shadow-orange-400/20">

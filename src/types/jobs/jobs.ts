@@ -7,4 +7,7 @@ export interface JobPosting {
   skillsRequired: string[];
   applicationCount: number;
   thumbnail: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  whatWeOffer?: string[];
 }

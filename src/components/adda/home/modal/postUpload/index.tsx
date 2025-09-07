@@ -33,8 +33,8 @@ const PostUpload = ({
   const [profileError, setProfileError] = useState<{
     message: string;
     missingFields: string[];
-  } | null>(null); // State to store profile error
-  const navigate = useNavigate(); // Hook for navigation
+  } | null>(null); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     setActiveTab(1);
