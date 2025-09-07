@@ -40,6 +40,7 @@ import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
 import QuizPage from "./pages/quiz/quiz.tsx";
 import EmployeeRouter from "./routes/employeeRouter.tsx";
 import AdminRouter from "./routes/adminRouter.tsx";
+import Profile from "./pages/v2/profile.tsx";
 const Cart = lazy(() => import("./pages/Cart"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -131,6 +132,7 @@ const routes = [
   { path: "/wordCross/:difficulty/:puzzleType", element: <WordCrossPuzzle /> },
   { path: "/employee/*", element: <EmployeeRouter /> },
   { path: "/admin/*", element: <AdminRouter /> },
+  { path: "/prof", element: <Profile /> },
 ];
 
 const Router = () => {

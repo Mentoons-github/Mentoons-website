@@ -6,7 +6,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
 
 import React, { FormEvent, useState } from "react";
-import { IoAdd } from "react-icons/io5";
+import { IoAdd, IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -246,128 +246,178 @@ export function JobApplicationForm({
       toast.error("An error occurred while submitting your application");
     }
   };
-  if (loading) return <Loader />;
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col">
-      <div className="flex flex-col w-full mb-4">
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Name"
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
-        />
-        {formErrors.name && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Email"
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
-        />
-        {formErrors.email && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <input
-          type="tel"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          placeholder="Phone Number"
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
-        />
-        {formErrors.phone && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300">
+      <div className="relative w-full max-w-lg p-6 mx-4 bg-white rounded-2xl shadow-2xl sm:max-w-xl">
+        <button
+          onClick={() => setIsFormOpen(false)}
+          className="absolute p-2 text-gray-500 transition-colors duration-200 rounded-full top-4 right-4 hover:text-gray-800 hover:bg-gray-100"
         >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-          <option value="Prefer not to say">Prefer not to say</option>
-        </select>
-        {formErrors.gender && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.gender}</p>
+          <IoClose className="text-2xl" />
+        </button>
+        <h2 className="mb-4 text-xl font-semibold text-gray-800 md:text-2xl">
+          Apply for the Position
+        </h2>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your name"
+                  className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent"
+                />
+                {formErrors.name && (
+                  <p className="mt-1 text-xs text-red-500">{formErrors.name}</p>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent"
+                />
+                {formErrors.email && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formErrors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-gray-700">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                  className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent"
+                />
+                {formErrors.phone && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formErrors.phone}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-gray-700">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+                {formErrors.gender && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formErrors.gender}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Portfolio Link
+              </label>
+              <input
+                type="url"
+                name="portfolioLink"
+                value={formData.portfolioLink}
+                onChange={handleChange}
+                placeholder="Enter your portfolio link"
+                className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent"
+              />
+              {formErrors.portfolioLink && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formErrors.portfolioLink}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Cover Note
+              </label>
+              <textarea
+                name="coverNote"
+                value={formData.coverNote}
+                onChange={handleChange}
+                placeholder="Write your cover note (max 500 characters)"
+                className="p-2 text-base text-gray-800 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#60C6E6] focus:border-transparent min-h-[80px]"
+              />
+              {formErrors.coverNote && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formErrors.coverNote}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Resume
+              </label>
+              <input
+                type="file"
+                id="resume"
+                name="resume"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+              />
+              <label htmlFor="resume">
+                <Button
+                  type="button"
+                  onClick={() => document.getElementById("resume")?.click()}
+                  className="w-full p-2 text-base text-white transition-all duration-300 bg-gray-600 rounded-lg hover:bg-gray-700"
+                >
+                  {formData.resume ? formData.resume.name : "Upload Resume"}
+                </Button>
+              </label>
+              {formErrors.resume && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.resume}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full p-2 mt-4 text-base text-white transition-all duration-300 bg-gradient-to-b from-[#60C6E6] to-[#3D8196] rounded-lg hover:opacity-90"
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit Application"}
+            </Button>
+          </form>
         )}
       </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <input
-          type="url"
-          name="portfolioLink"
-          value={formData.portfolioLink}
-          onChange={handleChange}
-          placeholder="Portfolio Link"
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
-        />
-        {formErrors.portfolioLink && (
-          <p className="mt-1 text-sm text-red-500">
-            {formErrors.portfolioLink}
-          </p>
-        )}
-      </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <textarea
-          name="coverNote"
-          value={formData.coverNote}
-          onChange={handleChange}
-          placeholder="Cover Note"
-          className="p-3 text-base text-black bg-white border rounded-lg outline-black"
-        />
-        {formErrors.coverNote && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.coverNote}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col w-full mb-4">
-        <input
-          type="file"
-          id="resume"
-          name="resume"
-          onChange={handleFileChange}
-          accept=".pdf,.doc,.docx"
-          className="hidden"
-        />
-        <label htmlFor="resume">
-          <Button
-            type="button"
-            onClick={() => document.getElementById("resume")?.click()}
-            className="w-full p-3 mb-4 text-base text-black transition-all duration-300 rounded-lg bg-slate-200 hover:bg-slate-300"
-          >
-            {formData.resume ? formData.resume.name : "Upload Resume"}
-          </Button>
-        </label>
-        {formErrors.resume && (
-          <p className="mt-1 text-sm text-red-500">{formErrors.resume}</p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        className="w-full mt-4 bg-gradient-to-b from-[#60C6E6] to-[#3D8196] text-white hover:opacity-90 snap-center transition-all duration-300"
-        disabled={loading}
-      >
-        {loading ? "Submitting..." : "Submit"}
-      </Button>
-    </form>
+    </div>
   );
 }

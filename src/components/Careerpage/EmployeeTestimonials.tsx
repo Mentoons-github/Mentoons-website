@@ -10,7 +10,9 @@ const EmployeeTestimonials = () => {
           <div className="w-full max-w-[24rem] transform transition-all duration-300 hover:scale-105">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <video
-                src={`${import.meta.env.VITE_STATIC_URL}static/Abhishek%20Testimonial.mp4`}
+                src={`${
+                  import.meta.env.VITE_STATIC_URL
+                }static/Abhishek%20Testimonial.mp4`}
                 className="w-full h-[20rem] object-cover"
                 controls
                 poster="/assets/Career/abhi.png"
@@ -27,7 +29,9 @@ const EmployeeTestimonials = () => {
           <div className="w-full max-w-[24rem] transform transition-all duration-300 hover:scale-105">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <video
-                src={`${import.meta.env.VITE_STATIC_URL}static/Ayushi Testimonial.mp4`}
+                src={`${
+                  import.meta.env.VITE_STATIC_URL
+                }static/Ayushi Testimonial.mp4`}
                 className="w-full h-[20rem] object-cover"
                 controls
                 poster="/assets/Career/ayushi.png"

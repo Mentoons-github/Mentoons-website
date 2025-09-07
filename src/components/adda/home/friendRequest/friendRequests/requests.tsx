@@ -1,423 +1,66 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import axiosInstance from "@/api/axios";
+import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
-import { FriendRequestResponse } from "@/types";
-import { useNotifications } from "@/context/adda/notificationContext";
 import SubscriptionModalManager from "@/components/protected/subscriptionManager";
-
-export interface RequestSender {
-  requestId: string;
-  senderDetails: {
-    _id: string;
-    name: string;
-    picture: string;
-  };
-  status?: "pending" | "accepting" | "declining" | "accepted" | "declined";
-  message?: string;
-}
-
-export interface FollowBackUser {
-  _id: string;
-  name: string;
-  picture: string;
-  status?: "following" | "following-in-progress" | "declining" | "declined";
-  message?: string;
-}
-
-interface Notification {
-  _id: string;
-  userId: string | { _id: string; name: string };
-  initiatorId: string | { _id: string; name: string };
-  type: string;
-  message: string;
-  referenceId?: string;
-  referenceModel?: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface AccessCheckResponse {
-  allowed: boolean;
-  upgradeRequired?: boolean;
-  upgradeTo?: string;
-  planType?: "free" | "prime" | "platinum";
-  modalType?: "freeToPrime" | "primeToPlatinum" | "freeToPlatinum";
-  message?: string;
-  currentPrimeConnections?: number;
-}
+import { AppDispatch } from "@/redux/store";
+import {
+  fetchFriendRequests,
+  fetchFollowBackUsers,
+  acceptFriendRequest,
+  declineFriendRequest,
+  sendFollowBackRequest,
+  declineFollowBackRequest,
+  resetRequests,
+  resetFollowBackUsers,
+} from "@/redux/adda/friendRequest";
+import { RootState } from "@/redux/store";
+import { RequestSender, FollowBackUser } from "@/types/adda/friendRequest";
 
 const FriendRequestsList = () => {
-  const [requests, setRequests] = useState<RequestSender[] | null>(null);
-  const [followBackUsers, setFollowBackUsers] = useState<
-    FollowBackUser[] | null
-  >(null);
-  const [loading, setLoading] = useState(false);
-  const [followBackLoading, setFollowBackLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
-    null
-  );
-  const [showModal, setShowModal] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { getToken } = useAuth()
+  const {
+    requests,
+    followBackUsers,
+    loading,
+    followBackLoading,
+    hasMore,
+    page,
+    accessCheck,
+    error,
+  } = useSelector((state: RootState) => state.friendRequests);
   const observer = useRef<IntersectionObserver | null>(null);
-  const { getToken } = useAuth();
-  const { updateNotification, removeNotification } = useNotifications();
-
-  const fetchFollowBackUsers = async () => {
-    setFollowBackLoading(true);
-    const token = await getToken();
-
-    try {
-      const response = await axiosInstance.get("/adda/getFollowBackUsers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log("Follow back users:", response.data.data);
-
-      if (response.data.success && response.data.data) {
-        const transformedUsers = response.data.data.map((user: any) => ({
-          _id: user._id,
-          name: user.name,
-          picture: user.picture,
-        }));
-
-        setFollowBackUsers(transformedUsers);
-      } else {
-        setFollowBackUsers([]);
-      }
-    } catch (error) {
-      console.error("Error fetching follow back users:", error);
-      setFollowBackUsers([]);
-    }
-
-    setFollowBackLoading(false);
-  };
-
-  const fetchRequests = async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-
-    const token = await getToken();
-    try {
-      const response = await axiosInstance.get(
-        `/adda/getMyFriendRequests?page=${page}&limit=10`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const { pendingReceived, totalPages } = response.data.data;
-
-      const transformedRequests = pendingReceived.map(
-        (data: FriendRequestResponse) => ({
-          requestId: data._id,
-          senderDetails: {
-            _id: data.senderId._id,
-            name: data.senderId.name,
-            picture: data.senderId.picture,
-          },
-          status: "pending",
-        })
-      );
-
-      if (transformedRequests && transformedRequests.length > 0) {
-        setRequests((prev) =>
-          prev ? [...prev, ...transformedRequests] : transformedRequests
-        );
-        setPage((prev) => prev + 1);
-
-        if (page >= totalPages) {
-          setHasMore(false);
-        }
-      } else {
-        setHasMore(false);
-      }
-    } catch (error) {
-      console.log("Error fetching friend requests:", error);
-      setHasMore(false);
-    }
-    setLoading(false);
-  };
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    fetchRequests();
-    fetchFollowBackUsers();
-  }, []);
-
-  const handleAccept = async (requestId: string) => {
-    setRequests((prev) =>
-      prev
-        ? prev.map((request) =>
-            request.requestId === requestId
-              ? { ...request, status: "accepting" }
-              : request
-          )
-        : null
-    );
-
-    try {
+    const fetchData = async () => {
       const token = await getToken();
-      const response = await axiosInstance.patch(
-        `/adda/acceptRequest/${requestId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success === true) {
-        const acceptedRequest = requests?.find(
-          (r) => r.requestId === requestId
-        );
-        setRequests((prev) =>
-          prev
-            ? prev.map((request) =>
-                request.requestId === requestId
-                  ? {
-                      ...request,
-                      status: "accepted",
-                      message: "Request accepted!",
-                    }
-                  : request
-              )
-            : null
-        );
-        fetchFollowBackUsers();
-
-        // Update notification
-        const notification = response.data.notification;
-        if (notification?.id) {
-          updateNotification(notification.id, {
-            isRead: true,
-            type: "friend_request_accepted",
-            message: `${
-              acceptedRequest?.senderDetails.name || "User"
-            } is now your friend`,
-          });
-        } else {
-          // Fallback: Remove notifications with matching referenceId
-          await removeNotificationByReferenceId(requestId);
-        }
-
-        setTimeout(() => {
-          setRequests((prev) =>
-            prev
-              ? prev.filter((request) => request.requestId !== requestId)
-              : null
-          );
-        }, 1500);
+      if (token) {
+        dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+        dispatch(fetchFollowBackUsers(token));
       }
-    } catch (error: any) {
-      console.error("Error accepting friend request:", error);
-      const accessCheck: AccessCheckResponse = error.response?.data?.error;
-      if (accessCheck?.upgradeRequired) {
-        setAccessCheck(accessCheck);
-        setShowModal(true);
-      }
-      setRequests((prev) =>
-        prev
-          ? prev.map((request) =>
-              request.requestId === requestId
-                ? { ...request, status: "pending" }
-                : request
-            )
-          : null
-      );
-    }
-  };
+    };
+    fetchData();
+    return () => {
+      dispatch(resetRequests());
+      dispatch(resetFollowBackUsers());
+    };
+  }, [dispatch, getToken]);
 
-  const handleDecline = async (requestId: string) => {
-    setRequests((prev) =>
-      prev
-        ? prev.map((request) =>
-            request.requestId === requestId
-              ? { ...request, status: "declining" }
-              : request
-          )
-        : null
-    );
-
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.patch(
-        `/adda/rejectRequest/${requestId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success === true) {
-        setRequests((prev) =>
-          prev
-            ? prev.map((request) =>
-                request.requestId === requestId
-                  ? {
-                      ...request,
-                      status: "declined",
-                      message: "Request declined",
-                    }
-                  : request
-              )
-            : null
-        );
-
-        // Remove notification
-        const notification = response.data.notification;
-        if (notification?.id) {
-          removeNotification(notification.id);
-        } else {
-          // Fallback: Remove notifications with matching referenceId
-          await removeNotificationByReferenceId(requestId);
-        }
-
-        setTimeout(() => {
-          setRequests((prev) =>
-            prev
-              ? prev.filter((request) => request.requestId !== requestId)
-              : null
-          );
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Error declining friend request:", error);
-      setRequests((prev) =>
-        prev
-          ? prev.map((request) =>
-              request.requestId === requestId
-                ? { ...request, status: "pending" }
-                : request
-            )
-          : null
-      );
-    }
-  };
-
-  const handleFollowBack = async (userId: string) => {
-    setFollowBackUsers((prev) =>
-      prev
-        ? prev.map((user) =>
-            user._id === userId
-              ? { ...user, status: "following-in-progress" }
-              : user
-          )
-        : null
-    );
-
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.post(
-        `/adda/request/${userId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response);
-      if (response.data.success) {
-        setFollowBackUsers((prev) =>
-          prev
-            ? prev.map((user) =>
-                user._id === userId
-                  ? { ...user, status: "following", message: "Following!" }
-                  : user
-              )
-            : null
-        );
-
-        setTimeout(() => {
-          setFollowBackUsers((prev) =>
-            prev ? prev.filter((user) => user._id !== userId) : null
-          );
-        }, 1500);
-      }
-    } catch (error: any) {
-      console.error("Error sending follow back request:", error);
-      const accessCheck: AccessCheckResponse = error.response?.data?.error;
-      if (accessCheck?.upgradeRequired) {
-        setAccessCheck(accessCheck);
-        setShowModal(true);
-      }
-      setFollowBackUsers((prev) =>
-        prev
-          ? prev.map((user) =>
-              user._id === userId ? { ...user, status: undefined } : user
-            )
-          : null
-      );
-    }
-  };
-
-  const handleDeclineFollowBack = async (userId: string) => {
-    setFollowBackUsers((prev) =>
-      prev
-        ? prev.map((user) =>
-            user._id === userId ? { ...user, status: "declining" } : user
-          )
-        : null
-    );
-
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.post(
-        "/adda/decline-follow-back",
-        { targetUserId: userId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response);
-      if (response.data.success) {
-        setFollowBackUsers((prev) =>
-          prev
-            ? prev.map((user) =>
-                user._id === userId
-                  ? { ...user, status: "declined", message: "Declined" }
-                  : user
-              )
-            : null
-        );
-
-        setTimeout(() => {
-          setFollowBackUsers((prev) =>
-            prev ? prev.filter((user) => user._id !== userId) : null
-          );
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Error declining follow back request:", error);
-      setFollowBackUsers((prev) =>
-        prev
-          ? prev.map((user) =>
-              user._id === userId ? { ...user, status: undefined } : user
-            )
-          : null
-      );
-    }
-  };
-
+  // Handle infinite scroll
   const lastRequestRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (loading) return;
+      if (loading || !hasMore) return;
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasMore) {
-            fetchRequests();
+            getToken().then((token) => {
+              if (token) {
+                dispatch(fetchFriendRequests({ page, limit: 10, token }));
+              }
+            });
           }
         },
         { threshold: 0.8 }
@@ -425,43 +68,53 @@ const FriendRequestsList = () => {
 
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore]
+    [loading, hasMore, page, dispatch, getToken]
   );
 
-  // Helper function to remove notifications by referenceId
-  const removeNotificationByReferenceId = async (referenceId: string) => {
-    try {
-      const token = await getToken();
-      const response = await axiosInstance.get(
-        `/adda/notifications?referenceId=${referenceId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success && response.data.data) {
-        const notifications: Notification[] = response.data.data;
-        notifications.forEach((notification: Notification) => {
-          if (notification._id) {
-            removeNotification(notification._id);
-          }
-        });
+  const handleAccept = async (requestId: string) => {
+    const token = await getToken();
+    if (token) {
+      const result = await dispatch(acceptFriendRequest({ requestId, token }));
+      if (acceptFriendRequest.fulfilled.match(result)) {
+        // Notification updates are handled in the thunk
+        dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+        dispatch(fetchFollowBackUsers(token));
+      } else if (acceptFriendRequest.rejected.match(result)) {
+        setShowModal(true);
       }
-    } catch (error) {
-      console.error("Error fetching notifications by referenceId:", error);
     }
   };
 
-  if ((!requests && loading) || (!followBackUsers && followBackLoading)) {
-    return (
-      <div className="flex items-center justify-center w-full py-8">
-        <div className="w-6 h-6 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-        <span className="ml-2 text-sm text-gray-500">Loading...</span>
-      </div>
-    );
-  }
+  const handleDecline = async (requestId: string) => {
+    const token = await getToken();
+    if (token) {
+      const result = await dispatch(declineFriendRequest({ requestId, token }));
+      if (declineFriendRequest.fulfilled.match(result)) {
+        // Notification updates are handled in the thunk
+        dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+      } else if (declineFriendRequest.rejected.match(result)) {
+        setShowModal(true);
+      }
+    }
+  };
+
+  const handleFollowBack = async (userId: string) => {
+    const token = await getToken();
+    if (token) {
+      dispatch(sendFollowBackRequest({ userId, token })).then((result) => {
+        if (sendFollowBackRequest.rejected.match(result)) {
+          setShowModal(true);
+        }
+      });
+    }
+  };
+
+  const handleDeclineFollowBack = async (userId: string) => {
+    const token = await getToken();
+    if (token) {
+      dispatch(declineFollowBackRequest({ userId, token }));
+    }
+  };
 
   const renderFollowBackSection = () => {
     if (!followBackUsers || followBackLoading) return null;
@@ -474,7 +127,7 @@ const FriendRequestsList = () => {
           People to Follow Back
         </h2>
         <div className="grid gap-3">
-          {followBackUsers.map((user) => (
+          {followBackUsers.map((user: FollowBackUser) => (
             <div
               key={user._id}
               className={`flex flex-col sm:flex-row sm:items-center w-full p-4 border rounded-xl ${
@@ -544,7 +197,7 @@ const FriendRequestsList = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zM8.707 7.293a1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 0 101.414 1.414L10 11.414l1.293 1.293a1 0 001.414-1.414L11.414 10l1.293-1.293a1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -680,7 +333,7 @@ const FriendRequestsList = () => {
             >
               <path
                 fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                d="M10 18a8 8 0 100-16 8 0 000 16zM8.707 7.293a1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 0 101.414 1.414L10 11.414l1.293 1.293a1 0 001.414-1.414L11.414 10l1.293-1.293a1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                 clipRule="evenodd"
               />
             </svg>
@@ -732,6 +385,15 @@ const FriendRequestsList = () => {
     );
   };
 
+  if ((!requests && loading) || (!followBackUsers && followBackLoading)) {
+    return (
+      <div className="flex items-center justify-center w-full py-8">
+        <div className="w-6 h-6 border-2 rounded-full border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+        <span className="ml-2 text-sm text-gray-500">Loading...</span>
+      </div>
+    );
+  }
+
   if (
     (!requests || requests.length === 0) &&
     (!followBackUsers || followBackUsers.length === 0)
@@ -771,7 +433,7 @@ const FriendRequestsList = () => {
             Friend Requests
           </h2>
           <div className="grid gap-3">
-            {requests.map((request, index) => (
+            {requests.map((request: RequestSender, index: number) => (
               <div
                 key={request.requestId}
                 className={getCardClasses(request.status)}
@@ -794,7 +456,6 @@ const FriendRequestsList = () => {
                     </p>
                   </div>
                 </div>
-
                 {getActionButtons(request)}
               </div>
             ))}
@@ -806,7 +467,6 @@ const FriendRequestsList = () => {
                 </span>
               </div>
             )}
-
             {!hasMore && requests.length > 0 && (
               <div className="text-center py-2 text-sm text-gray-500">
                 No more friend requests to load
@@ -815,12 +475,19 @@ const FriendRequestsList = () => {
           </div>
         </div>
       )}
-      <SubscriptionModalManager
-        accessCheck={accessCheck}
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        productId=""
-      />
+      {accessCheck && (
+        <SubscriptionModalManager
+          accessCheck={accessCheck}
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          productId=""
+        />
+      )}
+      {error && (
+        <div className="text-center py-2 text-sm text-red-500">
+          Error: {error}
+        </div>
+      )}
     </div>
   );
 };

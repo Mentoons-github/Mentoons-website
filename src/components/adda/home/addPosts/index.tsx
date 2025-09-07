@@ -14,12 +14,10 @@ const PostsContainer = () => {
   >(null);
   const addPostsRef = useRef<any>(null);
 
-  // Function to reset newPost state
   const resetNewPost = () => {
     setNewPost(false);
   };
 
-  // Helper to check if first post modal should be shown
   const checkAndShowFirstPostModal = (
     postType: "text" | "photo" | "video" | "event" | "article" | "mixed"
   ) => {

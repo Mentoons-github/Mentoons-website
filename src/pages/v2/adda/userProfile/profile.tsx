@@ -270,8 +270,11 @@ const Profile = () => {
         setIsLoading(false);
         return;
       }
-      console.log(token, "-----------------------------")
-      console.log(user?.id,'user.===========================================================')
+      console.log(token, "-----------------------------");
+      console.log(
+        user?.id,
+        "user.==========================================================="
+      );
       try {
         const [userResponse, postsResponse, savedPostsResponse] =
           await Promise.all([
@@ -594,16 +597,15 @@ const Profile = () => {
           />
         )}
 
-        {showCompletionForm && (
-          <ProfileForm
-            userDetails={userDetails}
-            setUserDetails={setUserDetails}
-            setShowCompletionForm={setShowCompletionForm}
-            handleProfileSubmit={handleProfileSubmit}
-            removeInterest={removeInterest}
-            updateInterests={updateInterests}
-          />
-        )}
+        <ProfileForm
+          isOpen={showCompletionForm}
+          userDetails={userDetails}
+          setUserDetails={setUserDetails}
+          setShowCompletionForm={setShowCompletionForm}
+          handleProfileSubmit={handleProfileSubmit}
+          removeInterest={removeInterest}
+          updateInterests={updateInterests}
+        />
 
         <div className="pt-8 text-center sm:pt-12">
           <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row sm:mb-6">
@@ -738,6 +740,7 @@ const Profile = () => {
                           transition={{ duration: 0.2 }}
                         >
                           <ProfileForm
+                            isOpen={isEditing}
                             userDetails={userDetails}
                             setUserDetails={setUserDetails}
                             setShowCompletionForm={setShowCompletionForm}

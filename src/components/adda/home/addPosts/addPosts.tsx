@@ -5,8 +5,8 @@ import axios from "axios";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import PostUpload from "../modal/postUpload";
+import ErrorModal from "../../modal/error";
 
 interface PostData {
   _id: string;
@@ -67,6 +67,14 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
     >(null);
     const [textContent, setTextContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [errorModalProps, setErrorModalProps] = useState<{
+      error: string;
+      action: "nav" | "retry" | "custom";
+      link?: string;
+      actionText?: string;
+      onAction?: () => void;
+    }>({ error: "", action: "nav" });
     const navigate = useNavigate();
 
     const handlePost = (type: "photo" | "video" | "event" | "article") => {
@@ -99,12 +107,24 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
     const handleTextSubmit = async () => {
       if (!isSignedIn) {
-        openAuthModal("sign-in");
+        setErrorModalProps({
+          error: "Please sign in to create a post.",
+          action: "nav",
+          link: "/adda/user-profile",
+          actionText: "Go to Profile",
+        });
+        setIsErrorModalOpen(true);
         return;
       }
 
       if (!textContent.trim()) {
-        toast.error("Please enter some text to post");
+        setErrorModalProps({
+          error: "Please enter some text to post.",
+          action: "custom",
+          actionText: "OK",
+          onAction: () => {},
+        });
+        setIsErrorModalOpen(true);
         return;
       }
 
@@ -112,7 +132,13 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       try {
         const token = await getToken();
         if (!token) {
-          toast.error("Authentication failed. Please log in again.");
+          setErrorModalProps({
+            error: "Authentication failed. Please log in again.",
+            action: "nav",
+            link: "/adda/user-profile",
+            actionText: "Go to Profile",
+          });
+          setIsErrorModalOpen(true);
           return;
         }
 
@@ -131,7 +157,6 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
         });
 
         if (response.data.success) {
-          toast.success("Text post created successfully!");
           setTextContent("");
 
           let postData = null;
@@ -174,17 +199,24 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
             onPostCreated(structuredPost);
           }
         } else {
-          toast.error("Failed to create post: " + response.data.message);
+          setErrorModalProps({
+            error: "Failed to create post: " + response.data.message,
+            action: "retry",
+            actionText: "Try Again",
+            onAction: handleTextSubmit,
+          });
+          setIsErrorModalOpen(true);
         }
       } catch (error) {
         console.error("Text post creation failed:", error);
-        let errorMessage = "Unknown error";
-        if (axios.isAxiosError(error) && error.response) {
-          errorMessage = error.response.data?.message || error.message;
-        } else if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        toast.error(`Failed to create text post: ${errorMessage}`);
+        setErrorModalProps({
+          error: `Complete your profile and start posting`,
+          action: "nav",
+          actionText: "Edit Profile",
+          link: "/adda/user-profile",
+          onAction: handleTextSubmit,
+        });
+        setIsErrorModalOpen(true);
       } finally {
         setIsSubmitting(false);
       }
@@ -265,6 +297,16 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
             onPostCreated={handlePostComplete}
           />
         )}
+
+        <ErrorModal
+          isOpen={isErrorModalOpen}
+          onClose={() => setIsErrorModalOpen(false)}
+          error={errorModalProps.error}
+          action={errorModalProps.action}
+          link={errorModalProps.link}
+          actionText={errorModalProps.actionText}
+          onAction={errorModalProps.onAction}
+        />
       </>
     );
   }
