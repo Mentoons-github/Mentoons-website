@@ -38,7 +38,7 @@ import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
 import QuizPage from "./pages/quiz/quiz.tsx";
-import EmployeeRouter from "./routes/employeeRouter.tsx";
+// import EmployeeRouter from "./routes/employeeRouter.tsx";
 import AdminRouter from "./routes/adminRouter.tsx";
 import Profile from "./pages/v2/profile.tsx";
 const Cart = lazy(() => import("./pages/Cart"));
@@ -130,7 +130,7 @@ const routes = [
   { path: "/puzzle", element: <Puzzle /> },
   { path: "/puzzle/play", element: <PuzzleContent /> },
   { path: "/wordCross/:difficulty/:puzzleType", element: <WordCrossPuzzle /> },
-  { path: "/employee/*", element: <EmployeeRouter /> },
+  // { path: "/employee/*", element: <EmployeeRouter /> },
   { path: "/admin/*", element: <AdminRouter /> },
   { path: "/prof", element: <Profile /> },
 ];

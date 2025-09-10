@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react"; 
 import AdminHeader from "@/components/admin/header";
 import AdminSidebar from "@/components/admin/sidebar";
-import { Outlet } from "react-router-dom";
 import { MessageCircle, X } from "lucide-react";
 
-const AdminLayout: React.FC = () => {
+interface AdminLayoutProps {
+  children?: ReactNode;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -20,7 +23,6 @@ const AdminLayout: React.FC = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    // Simulate loading time
     const timer = setTimeout(() => setIsLoading(false), 1000);
 
     return () => {
@@ -33,7 +35,6 @@ const AdminLayout: React.FC = () => {
     setIsSidebarCollapsed(collapsed);
   };
 
-  // Loading screen
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -88,7 +89,7 @@ const AdminLayout: React.FC = () => {
           <div className="p-4 lg:p-6 max-w-7xl mx-auto w-full">
             {/* Page Content */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[calc(100vh-200px)]">
-              <Outlet />
+              {children} 
             </div>
           </div>
 

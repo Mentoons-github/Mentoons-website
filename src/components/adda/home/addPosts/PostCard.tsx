@@ -1,5 +1,4 @@
 import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
-import Highlight from "@/components/common/modal/highlight";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { Post } from "@/pages/v2/adda/userProfile";
@@ -12,13 +11,14 @@ import { useEffect, useRef, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { BsThreeDots } from "react-icons/bs";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa6";
-import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md"; // Added icons for report and block
+import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Reactions from "./likes/reactions";
 import ReactionsDisplay from "./likes/ReactionsDisplay";
 import Share from "./share/share";
+import PostContent from "./renderPostContent";
 
 export type PostType =
   | "text"
@@ -94,8 +94,6 @@ const PostCard = ({
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<string | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>(post.comments);
   const [commentCount, setCommentCount] = useState(post.comments.length);
   const [newComment, setNewComment] = useState("");
@@ -403,181 +401,6 @@ const PostCard = ({
     console.log("Reaction update counts:", counts);
   };
 
-  const charLimit = 100;
-
-  const renderPostContent = () => {
-    switch (post.postType) {
-      case "text":
-        return (
-          <p className="figtree text-[#3E3E59] text-base w-full break-words">
-            {isExpanded
-              ? post.content
-              : post.content?.slice(0, charLimit) +
-                (post.content && post.content.length > charLimit ? "..." : "")}
-            {post.content && post.content.length > charLimit && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="ml-2 text-blue-500"
-              >
-                {isExpanded ? "Read Less" : "Read More"}
-              </button>
-            )}
-          </p>
-        );
-      case "photo":
-        return (
-          <div className="w-full">
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
-            {post.media && post.media.length > 0 && (
-              <img
-                src={post.media[0].url}
-                alt={post.title || "Photo"}
-                className="object-cover w-full h-auto rounded-lg"
-                onClick={() => setSelectedPost(post.media?.[0].url || null)}
-              />
-            )}
-          </div>
-        );
-      case "video":
-        return (
-          <div className="w-full">
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
-            {post.media &&
-              post.media.length > 0 &&
-              post.media[0].type === "video" && (
-                <div className="relative w-full overflow-hidden">
-                  <video
-                    controls={true}
-                    src={post.media[0].url}
-                    className="object-contain w-full rounded-lg h-96"
-                    onClick={() => setSelectedPost(post.media?.[0].url || null)}
-                  />
-                </div>
-              )}
-          </div>
-        );
-      case "article":
-        return (
-          <div
-            className="w-full"
-            onClick={() => navigate(`/adda/post/${post._id}`)}
-          >
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
-            {post.article && (
-              <div className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50">
-                <img
-                  src={post.article.coverImage}
-                  alt={post.title || "Article"}
-                  className="object-cover w-full h-32 mb-2 rounded-lg"
-                />
-                <h3 className="font-medium text-orange-500">
-                  {post.title || "Read Article"}
-                </h3>
-                {post.article.body && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    {post.article.body.substring(0, 100)}...
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      case "event":
-        return (
-          <div
-            className="w-full"
-            onClick={() => navigate(`/adda/post/${post._id}`)}
-          >
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
-            {post.event && (
-              <div className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50">
-                <img
-                  src={post.event.coverImage}
-                  alt={post.title || "Event"}
-                  className="object-cover w-full h-32 mb-2 rounded-lg"
-                />
-                <h3 className="font-medium text-orange-600">
-                  {post.title || "Event"}
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {new Date(post.event.startDate).toLocaleDateString()} -{" "}
-                  {new Date(post.event.endDate).toLocaleDateString()}
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  Venue: {post.event.venue}
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  {post.event.description.substring(0, 100)}...
-                </p>
-              </div>
-            )}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <>
       <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
@@ -665,7 +488,7 @@ const PostCard = ({
           </div>
         </div>
 
-        {renderPostContent()}
+        <PostContent post={post} />
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
@@ -776,9 +599,6 @@ const PostCard = ({
           </motion.div>
         )}
       </div>
-      {selectedPost && (
-        <Highlight selectedPost={selectedPost} setPost={setSelectedPost} />
-      )}
       <ReportAbuseModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}

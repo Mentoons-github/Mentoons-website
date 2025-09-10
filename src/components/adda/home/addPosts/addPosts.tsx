@@ -224,47 +224,51 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
     return (
       <>
-        <div className="relative flex flex-col items-center justify-start w-full p-4 border border-orange-200 shadow-lg shadow-orange-100/80 rounded-xl">
-          <div className="flex items-center w-full gap-3">
-            <div className="flex-shrink-0 w-10 h-10 overflow-hidden bg-transparent rounded-full">
+        <div className="relative flex flex-col w-full p-5 bg-white border border-orange-200 rounded-2xl shadow-md shadow-orange-100/70">
+          {/* Top Section: Avatar + Blog Input */}
+          <div className="flex items-start gap-4">
+            {/* User Avatar */}
+            <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-200">
               {user?.imageUrl ? (
                 <img
                   onClick={() => navigate("/adda/user-profile")}
                   src={user?.imageUrl}
                   alt={user?.fullName || "User"}
-                  className="object-cover w-full h-full rounded-full cursor-pointer"
+                  className="object-cover w-full h-full cursor-pointer"
                 />
               ) : (
-                <FiUser className="w-8 h-8 text-gray-500" />
+                <FiUser className="w-10 h-10 text-gray-400" />
               )}
             </div>
 
-            <div className="flex items-center w-full gap-2">
-              <input
-                type="text"
-                placeholder="Start your first blogging as a parent"
+            {/* Blog Input */}
+            <div className="flex flex-col w-full gap-3">
+              <textarea
+                rows={5}
+                placeholder="✍️ Share your thoughts or first blog as a parent..."
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                className="flex-grow px-4 py-2 text-sm border-0 font-inter rounded-full focus:outline-none focus:ring-2 focus:ring-[#e37019]"
+                className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
               />
-              {textContent.trim() && (
+              <div className="flex justify-end">
                 <button
                   onClick={handleTextSubmit}
-                  disabled={isSubmitting}
-                  className="px-4 py-1 text-sm font-medium text-orange-600 bg-white border border-orange-300 rounded-full hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || !textContent.trim()}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
-                  {isSubmitting ? "Sending..." : "Send"}
+                  {isSubmitting ? "Publishing..." : "Publish"}
                 </button>
-              )}
+              </div>
             </div>
           </div>
 
-          <hr className="w-full my-3 border-orange-200" />
+          {/* Divider */}
+          <hr className="w-full my-4 border-t border-orange-100" />
 
-          <div className="flex flex-wrap items-center justify-between w-full gap-2">
+          {/* Post Options */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             {PHOTO_POST.map(({ icon, purpose }, index) => (
               <button
-                className="flex items-center gap-2 p-1 transition-colors rounded-lg outline-none cursor-pointer hover:bg-gray-100"
                 key={index}
                 onClick={() =>
                   handlePost(
@@ -275,15 +279,14 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
                       | "article"
                   )
                 }
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 transition rounded-lg hover:bg-orange-50 hover:text-orange-600"
               >
                 <img
                   src={icon}
                   alt={purpose}
                   className="w-5 h-5 sm:w-6 sm:h-6"
                 />
-                <span className="figtree text-xs sm:text-sm font-medium text-[#605F5F]">
-                  {purpose}
-                </span>
+                <span className="figtree">{purpose}</span>
               </button>
             ))}
           </div>

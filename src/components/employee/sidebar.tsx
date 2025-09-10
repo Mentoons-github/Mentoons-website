@@ -7,6 +7,7 @@ const EmployeeSidebar = () => {
     { name: "Request Leave", icon: "📜" },
     { name: "YourTeam", icon: "👥" },
     { name: "Salary", icon: "🪙" },
+    { name: "Session_Calls", icon: "📞" },
     // { name: "Incentive", icon: "💳" },
   ];
 

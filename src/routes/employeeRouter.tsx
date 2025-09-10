@@ -7,6 +7,7 @@ import EmployeeTasks from "@/pages/employee/tasks/tasks";
 import EmployeeLeaveRequest from "@/pages/employee/leaveRequest/leaveRequest";
 import EmployeeYourTeamPanel from "@/pages/employee/yourTeamPanel/teamPanel";
 import EmployeeSalaryPanel from "@/pages/employee/salary/salary";
+import PsychologistTask from "@/pages/employee/psychologistTask/psychologistTask";
 
 const EmployeeRouter = () => {
   return (
@@ -14,10 +15,11 @@ const EmployeeRouter = () => {
       <Routes>
         <Route path="/" element={<Employeelayout />}>
           <Route path="dashboard" element={<EmployeeDashboard />} />
-          <Route path="task" element={<EmployeeTasks />} />
+          <Route path="tasks" element={<EmployeeTasks />} />
           <Route path="request-leave" element={<EmployeeLeaveRequest />} />
           <Route path="yourteam" element={<EmployeeYourTeamPanel />} />
           <Route path="salary" element={<EmployeeSalaryPanel />} />
+          <Route path="session_calls" element={<PsychologistTask />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
       </Routes>

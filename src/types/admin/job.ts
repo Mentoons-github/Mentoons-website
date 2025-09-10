@@ -9,6 +9,9 @@ export interface JobData {
   thumbnail: string | File | null;
   applicationCount?: number;
   applicationDetails?: JobApplication[];
+  responsibilities?: string[];
+  requirements?: string[];
+  whatWeOffer?: string[];
 }
 
 export interface JobApplication {
@@ -21,4 +24,32 @@ export interface JobApplication {
   coverNote: string;
   resume: string;
   coverLetterLink: string;
+  createdAt: string;
+  jobTitle: string;
+}
+
+export interface JobApplicationResponse {
+  success: boolean;
+  data: {
+    jobs: JobApplication[];
+    currentPage: number;
+    totalPages: number;
+    totalJobs: number;
+  };
+}
+export interface singleJobDataResponse {
+  success: boolean;
+  data: JobData;
+}
+
+export interface JobDataResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    jobs: JobData[];
+    currentPage: number;
+    totalPages: number;
+    totalJobs: number;
+    message?: string;
+  };
 }

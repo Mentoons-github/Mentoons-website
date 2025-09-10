@@ -28,7 +28,10 @@ interface DynamicTableProps<T> {
   formatHeader?: (key: string) => string;
   idKey?: keyof T;
   isLoading?: boolean;
-  itemType: "user" | "product" | "enquiry" | "employee";
+  itemType: "user" | "product" | "enquiry" | "employee" | "job";
+  selectedItems?: Set<string>;
+  onSelectItem?: (id: string, isSelected: boolean) => void;
+  onSelectAll?: (isSelected: boolean) => void;
 }
 
 const DynamicTable = <T extends Record<string, any>>({
@@ -50,10 +53,17 @@ const DynamicTable = <T extends Record<string, any>>({
   idKey = "_id" as keyof T,
   isLoading = false,
   itemType = "user",
+  selectedItems = new Set(),
+  onSelectItem,
+  onSelectAll,
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [isUser, setIsUser] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  const isAllSelected =
+    data.length > 0 &&
+    data.every((item) => selectedItems.has(String(item[idKey])));
 
   const getTableColumns = () => {
     if (!data || data.length === 0) return [];
@@ -123,7 +133,11 @@ const DynamicTable = <T extends Record<string, any>>({
     if (itemType === "user") {
       setSelectedItem(item);
       setIsUser(true);
-    } else if (itemType === "product" || itemType === "enquiry") {
+    } else if (
+      itemType === "product" ||
+      itemType === "enquiry" ||
+      itemType === "job"
+    ) {
       console.log("view setting");
       onView?.(item);
     }
@@ -136,6 +150,17 @@ const DynamicTable = <T extends Record<string, any>>({
     ) : (
       <ChevronDown className="w-4 h-4" />
     );
+  };
+
+  const handleSelectAllChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSelectAll?.(e.target.checked);
+  };
+
+  const handleSelectChange = (
+    id: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    onSelectItem?.(id, e.target.checked);
   };
 
   if (isLoading) {
@@ -201,6 +226,16 @@ const DynamicTable = <T extends Record<string, any>>({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              {itemType === "job" && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAllChange}
+                    className="rounded text-blue-600 focus:ring-blue-500"
+                  />
+                </th>
+              )}
               {columns.map((column) => (
                 <th
                   key={column}
@@ -219,59 +254,69 @@ const DynamicTable = <T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((item, index) => (
-              <tr
-                key={String(item[idKey] || index)}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                {columns.map((column) => (
-                  <td
-                    key={column}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                  >
-                    <div
-                      className="max-w-xs truncate"
-                      title={String(item[column] || "")}
+            {data.map((item, index) => {
+              const itemId = String(item[idKey] || index);
+              return (
+                <tr key={itemId} className="hover:bg-gray-50 transition-colors">
+                  {itemType === "job" && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(itemId)}
+                        onChange={(e) => handleSelectChange(itemId, e)}
+                        className="rounded text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                  )}
+                  {columns.map((column) => (
+                    <td
+                      key={column}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
                     >
-                      {(formatCell || defaultFormatCell)(
-                        item[column],
-                        column,
-                        item
+                      <div
+                        className="max-w-xs truncate"
+                        title={String(item[column] || "")}
+                      >
+                        {(formatCell || defaultFormatCell)(
+                          item[column],
+                          column,
+                          item
+                        )}
+                      </div>
+                    </td>
+                  ))}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleView(item)}
+                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {itemType === "product" && onEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {itemType !== "user" && onDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
                   </td>
-                ))}
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleView(item)}
-                      className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                      title="View"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    {itemType === "product" && onEdit && (
-                      <button
-                        onClick={() => onEdit(item)}
-                        className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    )}
-                    {itemType !== "user" && onDelete && (
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

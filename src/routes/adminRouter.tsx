@@ -1,4 +1,4 @@
-import AdminLayout from "@/layout/admin/layout";
+import AdminProtectedRoute from "@/components/admin/auth/adminRoute";
 import AddEditEmployeePage from "@/pages/admin/addEmployee";
 import AddProduct from "@/pages/admin/addProduct";
 import AllottedCalls from "@/pages/admin/allottedCalls";
@@ -6,10 +6,14 @@ import DashboardAnalytics from "@/pages/admin/dashboard";
 import EmployeeTable from "@/pages/admin/employee/employeeTable";
 import TaskAssignmentSystem from "@/pages/admin/employeeTask";
 import GeneralQueries from "@/pages/admin/generalQueries";
+import CreateJob from "@/pages/admin/jobs/addJob";
+import AllJobs from "@/pages/admin/jobs/all_jobs";
+import ViewApplications from "@/pages/admin/jobs/viewApplication";
 import AdminLoginWrapper from "@/pages/admin/login/adminLoginWrapper";
 import Newsletter from "@/pages/admin/newsLetter";
 import ProductSalesDashboard from "@/pages/admin/productSales";
 import ProductTable from "@/pages/admin/productTable";
+import SessionEnquiries from "@/pages/admin/sessionAllocation/session";
 import AdminTaskDashboard from "@/pages/admin/taskSubmissions";
 import Users from "@/pages/admin/users";
 import ViewProduct from "@/pages/admin/viewProducts";
@@ -23,7 +27,7 @@ const AdminRouter = () => {
     <Suspense fallback={<h1>Loading...</h1>}>
       <Routes>
         <Route path="/login" element={<AdminLoginWrapper />} />
-        <Route element={<AdminLayout />}>
+        <Route element={<AdminProtectedRoute />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardAnalytics />} />
           <Route path="users" element={<Users />} />
@@ -40,6 +44,10 @@ const AdminRouter = () => {
           <Route path="employee/add" element={<AddEditEmployeePage />} />
           <Route path="employee-table" element={<EmployeeTable />} />
           <Route path="task-submissions" element={<AdminTaskDashboard />} />
+          <Route path="all-jobs" element={<AllJobs />} />
+          <Route path="hiring-form" element={<CreateJob />} />
+          <Route path="view-applications" element={<ViewApplications />} />
+          <Route path="session-enquiry" element={<SessionEnquiries />} />
         </Route>
       </Routes>
     </Suspense>

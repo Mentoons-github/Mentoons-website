@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useUser, useSignIn, useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import AdminLogin from "./login";
+import Loader from "@/components/common/admin/loader";
 
 const AdminLoginWrapper = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const AdminLoginWrapper = () => {
     handleSessionCheck();
   }, [isLoaded, isSignedIn, user, navigate, signOut]);
 
-  if (!ready) return <p>Loading...</p>;
+  if (!ready) return <Loader />;
 
   return <AdminLogin />;
 };

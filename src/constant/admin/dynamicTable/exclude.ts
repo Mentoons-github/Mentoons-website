@@ -28,4 +28,15 @@ export const EXCLUDE_PRODUCT_ITEMS = [
 
 export const EXCLUDE_ENQUIRY_ITEMS = ["lastName", "email", "_id"];
 
-export const EXCLUDE_EMPLOYEE_DATA = []
+export const EXCLUDE_EMPLOYEE_DATA = [];
+
+export const EXCLUDE_JOBS = [
+  "createdAt",
+  "jobDescription",
+  "requirements",
+  "responsibilities",
+  "skillsRequired",
+  "whatWeOffer",
+  "_id",
+  "updatedAt",
+];

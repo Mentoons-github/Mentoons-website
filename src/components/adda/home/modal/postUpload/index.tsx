@@ -39,7 +39,7 @@ const PostUpload = ({
   useEffect(() => {
     setActiveTab(1);
     setMediaPreview([]);
-    setProfileError(null); // Reset profile error when post type changes
+    setProfileError(null);
   }, [postType]);
 
   useEffect(() => {

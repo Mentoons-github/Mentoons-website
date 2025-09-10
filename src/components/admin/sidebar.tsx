@@ -12,6 +12,7 @@ import {
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaPhone } from "react-icons/fa6";
 
 interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -68,6 +69,10 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           "/admin/task-assign",
           "/admin/task-submissions",
         ],
+      },
+      {
+        title: "Session Call",
+        paths: ["/admin/session-enquiry"],
       },
     ];
 
@@ -232,6 +237,14 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Employees"}
           toggleSection={() => toggleSection("Employees")}
+        />
+        <SidebarSection
+          icon={<FaPhone size={collapsed ? 20 : 16} />}
+          title="Session Call"
+          items={[{ href: "/admin/session-enquiry", label: "Call Enquiry" }]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Session Call"}
+          toggleSection={() => toggleSection("Session Call")}
         />
       </nav>
 
