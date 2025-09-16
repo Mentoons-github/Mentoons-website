@@ -87,6 +87,10 @@ const PrimaryHeader = () => {
     },
   };
 
+  if (location.pathname.startsWith("/employee")) {
+    return null;
+  }
+
   return (
     <div className="z-50 flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 font-akshar">
       <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:w-1/3 lg:w-1/2">

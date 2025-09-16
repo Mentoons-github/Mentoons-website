@@ -12,7 +12,7 @@ const FrequentlyAskeQuestion = () => {
 
   const getOpenPositionsData = async () => {
     try {
-      await dispatch(getOpenPositions());
+      await dispatch(getOpenPositions({}));
       toast.success("Open Positions fetched successfully");
     } catch (error: unknown) {
       if (error instanceof Error) {

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -36,6 +36,8 @@ import { v4 as uuidv4 } from "uuid";
 import { gamesData } from "@/constant/comicsConstants";
 import { highlightText } from "@/utils/highlightText";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { toast } from "sonner";
+import axios from "axios";
 
 interface User {
   _id: string;
@@ -112,6 +114,8 @@ const SearchResultsPage = () => {
   const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
     null
   );
+  const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
+  const { isSignedIn } = useUser();
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [showFreeDownloadForm, setShowFreeDownloadForm] =
     useState<boolean>(false);
@@ -418,18 +422,84 @@ const SearchResultsPage = () => {
     setPlayingPodcastId((prev) => (prev === podcastId ? null : podcastId));
   }, []);
 
-  const onCheckAccessAndControlPlayback = useCallback(
-    (podcast: ProductBase, audioElement?: HTMLAudioElement | null): boolean => {
-      console.log(podcast);
-      const hasAccess = true;
-      if (!hasAccess && audioElement) {
-        audioElement.pause();
-        setShowLoginModal(true);
+  const checkAccessAndControlPlayback = useCallback(
+    async (podcast: ProductBase, audioElement?: HTMLAudioElement | null) => {
+      const podcastId = String(podcast._id);
+      const podcastType = String(podcast.product_type || "free").toLowerCase();
+
+      if (!isSignedIn) {
+        setTimeout(() => {
+          if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+            const timeNow = Date.now();
+            if (timeNow - modalShownTimestamp > 5000) {
+              setLimitModalTitle("Sign In Required");
+              setLimitModalMessage("Please sign in to access this podcast.");
+              setShowSubscriptionLimitModal(true);
+              setModalShownTimestamp(timeNow);
+            }
+          }
+        }, 45000);
         return false;
       }
-      return true;
+
+      if (!dbUser) {
+        toast.info("Loading user data...");
+        fetchDBUser();
+        return false;
+      }
+
+      try {
+        const token = await getToken();
+        const response = await axios.post(
+          `${import.meta.env.VITE_PROD_URL}/subscription/access`,
+          { type: "podcasts", itemId: podcast._id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { access, reason } = response.data;
+        if (access) {
+          setPlaybackTracking({
+            startTime: Date.now(),
+            paused: false,
+            skipped: false,
+            podcastId,
+            podcastType,
+          });
+          return true;
+        }
+
+        const timeNow = Date.now();
+        if (timeNow - modalShownTimestamp <= 5000) {
+          return false;
+        }
+
+        if (reason === "upgrade") {
+          setLimitModalTitle("Upgrade Your Plan");
+          setLimitModalMessage(
+            `You've reached the podcast limit. Upgrade to access more content!`
+          );
+        } else if (reason === "charge") {
+          setLimitModalTitle("Purchase Content");
+          setLimitModalMessage(
+            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+          );
+        }
+        setCurrentProductId(podcast._id || "");
+        setShowSubscriptionLimitModal(true);
+        setModalShownTimestamp(timeNow);
+
+        if (audioElement && !audioElement.paused) {
+          audioElement.pause();
+          setPlayingPodcastId(null);
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking access:", error);
+        toast.error("Failed to verify access. Please try again.");
+        return false;
+      }
     },
-    [setShowLoginModal]
+    [isSignedIn, dbUser, getToken, modalShownTimestamp, fetchDBUser]
   );
 
   const onPlaybackTrackingUpdate = useCallback((update: (prev: any) => any) => {
@@ -702,7 +772,7 @@ const SearchResultsPage = () => {
                           isPlaying={playingPodcastId === podcast._id}
                           onPlayToggle={onPlayToggle}
                           onCheckAccessAndControlPlayback={
-                            onCheckAccessAndControlPlayback
+                            checkAccessAndControlPlayback
                           }
                           onPlaybackTrackingUpdate={onPlaybackTrackingUpdate}
                           onPodcastCompletion={onPodcastCompletion}
@@ -727,7 +797,7 @@ const SearchResultsPage = () => {
                         Mentoons Cards ({filteredResults.mentoonsCards.length})
                       </h2>
                       <NavLink
-                        to="/product-page"
+                        to="/product"
                         className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
                       >
                         <span>View all</span>
@@ -754,7 +824,7 @@ const SearchResultsPage = () => {
                         Mentoons Books ({filteredResults.mentoonsBooks.length})
                       </h2>
                       <NavLink
-                        to="/product-page?productType=mentoons+books#product"
+                        to="/product?productType=mentoons+books#product"
                         className="text-green-700 hover:                      text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
                       >
                         <span>View all</span>

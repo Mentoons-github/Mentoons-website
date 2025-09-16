@@ -18,7 +18,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/sign-up" ||
     location.pathname === "/sign-in" ||
     location.pathname === "/adda" ||
-    location.pathname === "/chat";
+    location.pathname === "/chat" ||
+    location.pathname === "/puzzle/play" ||
+    location.pathname.startsWith("/employee");
 
   const isChatPage = location.pathname.startsWith("/chat");
 

@@ -315,7 +315,10 @@ const AuthButton = () => {
             initial="idle"
             whileHover="hover"
             whileTap="tap"
-            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
+            className="flex items-center gap-3 px-6 py-3 
+             bg-gradient-to-r from-teal-500 to-blue-600 
+             hover:bg-gradient-to-r hover:from-teal-400 hover:to-blue-500 
+             rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
           >
             <div className="w-8 h-8 bg-white/20 rounded-full flex-shrink-0 flex items-center justify-center">
               <FaUser className="w-4 h-4 text-white" />

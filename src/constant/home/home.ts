@@ -110,6 +110,7 @@ export const PRIME: Membership = {
     //   feature: "Access to groups",
     //   details: "Unlimited",
     // },
+    { feature: "Maximum Connections", details: "50 Connections" },
     { feature: "Access to freebies", details: "Included" },
     {
       feature: "Free complementary call with a psychologist",
@@ -159,6 +160,10 @@ export const PLATINUM: Membership = {
     //   feature: "Access to groups",
     //   details: "Unlimited",
     // },
+    {
+      feature: "Maximum connections",
+      details: "Unlimited",
+    },
     { feature: "Access to freebies", details: "Included" },
     {
       feature: "Free complementary call with a psychologist",

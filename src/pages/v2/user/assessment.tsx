@@ -10,16 +10,18 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { Hiring } from "@/types";
 import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
-import { motion } from "framer-motion";
+import { motion} from "framer-motion";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FAQ from "./faq/faq";
 
 const Assessment = () => {
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
+
   useEffect(() => {
     setHiring(HIRING);
   }, []);
+
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -31,7 +33,6 @@ const Assessment = () => {
     const fetchAssessments = async () => {
       try {
         const token = await getToken();
-        //fetch products
         const assessment = await dispatch(
           fetchProducts({
             type: ProductType.ASSESSMENT,
@@ -62,10 +63,12 @@ const Assessment = () => {
         <div className="w-full lg:w-3/4">
           <AssessmentCards assessmentData={products} isInView={isInView} />
         </div>
+
         <div className="flex flex-col items-center justify-start w-full gap-10 p-3 lg:w-1/4">
           <WeAreHiring hiring={hiring} />
         </div>
       </motion.div>
+
       <FAQ data={FAQ_ASSESSMENT} />
     </>
   );

@@ -1,4 +1,7 @@
 import axiosInstance from "@/api/axios";
+import SubscriptionModalManager, {
+  AccessCheckResponse,
+} from "@/components/protected/subscriptionManager";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
@@ -17,11 +20,11 @@ interface FriendSuggestionsListProps {
   initialHasMore?: boolean;
 }
 
-const FriendSuggestionsList = ({
+const FriendSuggestionsList: React.FC<FriendSuggestionsListProps> = ({
   initialSuggestions = null,
   initialLoading = false,
   initialHasMore = true,
-}: FriendSuggestionsListProps) => {
+}) => {
   const [friendSuggestions, setFriendSuggestions] = useState<
     SuggestionInterface[] | null
   >(initialSuggestions);
@@ -29,9 +32,12 @@ const FriendSuggestionsList = ({
   const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
   const [page, setPage] = useState<number>(1);
   const [connectingIds, setConnectingIds] = useState<string[]>([]);
+  const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
-
   const suggestionsObserver = useRef<IntersectionObserver | null>(null);
   const { getToken } = useAuth();
 
@@ -45,13 +51,9 @@ const FriendSuggestionsList = ({
       const response = await axiosInstance.get(
         `/adda/requestSuggestions?page=${page}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      console.log("data found : ", response);
 
       const { suggestions, hasMore: moreAvailable } = response.data.data;
 
@@ -71,9 +73,8 @@ const FriendSuggestionsList = ({
         }
       }
     } catch (error: unknown) {
-      console.log("error found :", error);
+      console.error("Error fetching friend suggestions:", error);
       if (error instanceof AxiosError) {
-        console.error("Error fetching friend suggestions:", error.response);
         errorToast(error.response?.data.error || "Failed to fetch suggestions");
       } else {
         errorToast("Failed to fetch suggestions");
@@ -105,14 +106,10 @@ const FriendSuggestionsList = ({
       const response = await axiosInstance.post(
         `/adda/request/${suggestionId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data.success === true) {
+      if (response.data.success) {
         setFriendSuggestions((prevSuggestions) =>
           prevSuggestions
             ? prevSuggestions.filter(
@@ -120,7 +117,6 @@ const FriendSuggestionsList = ({
               )
             : null
         );
-
         successToast("Friend request sent successfully");
 
         if (friendSuggestions && friendSuggestions.length <= 3 && hasMore) {
@@ -129,7 +125,21 @@ const FriendSuggestionsList = ({
       }
     } catch (error: unknown) {
       console.error("Error sending friend request:", error);
-      errorToast("Failed to send friend request");
+      if (error instanceof AxiosError) {
+        const accessCheck: AccessCheckResponse = error.response?.data?.error;
+        console.log(error.response?.data);
+        console.log("accessCheck =================>: ", accessCheck);
+        if (accessCheck?.upgradeRequired) {
+          setAccessCheck(accessCheck);
+          setShowModal(true);
+        } else {
+          errorToast(
+            error.response?.data.error || "Failed to send friend request"
+          );
+        }
+      } else {
+        errorToast("Failed to send friend request");
+      }
     } finally {
       setConnectingIds((prev) => prev.filter((id) => id !== suggestionId));
     }
@@ -205,7 +215,16 @@ const FriendSuggestionsList = ({
   );
 
   if (!loading && (!friendSuggestions || friendSuggestions.length === 0)) {
-    return <EmptyStateContent />;
+    return (
+      <>
+        <EmptyStateContent />
+        <SubscriptionModalManager
+          accessCheck={accessCheck}
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+        />
+      </>
+    );
   }
 
   return (
@@ -256,7 +275,6 @@ const FriendSuggestionsList = ({
             ) : (
               <>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   className="w-3 h-3"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -291,6 +309,12 @@ const FriendSuggestionsList = ({
             No more suggestions
           </div>
         )}
+
+      <SubscriptionModalManager
+        accessCheck={accessCheck}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 };

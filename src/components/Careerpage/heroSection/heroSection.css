@@ -1,0 +1,37 @@
+.custom-shape-divider-bottom-1756712573 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+}
+
+.custom-shape-divider-bottom-1756712573 svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 120px;
+}
+
+.custom-shape-divider-bottom-1756712573 .shape-fill {
+  fill: #ffffff;
+}
+
+.custom-shape-divider-bottom-1756712573 {
+  background-image: url("/assets/hiring/hiring-bg.png");
+  background-size: fill;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+}
+
+/* Ensure the parent container hides overflow */
+.relative.h-screen.bg-orange-500 {
+  overflow: hidden;
+}
+
+

@@ -17,6 +17,7 @@ import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 import { FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import DosAndDonts from "../../status/dosAndDonts";
 import "swiper/swiper-bundle.css";
 
 const videos = [
@@ -85,6 +86,7 @@ const UserStatus = () => {
   const [selectedVideo, setSelectedVideo] = useState<(typeof videos)[0] | null>(
     null
   );
+  const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false); // State for guidelines modal
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -249,8 +251,14 @@ const UserStatus = () => {
 
   return (
     <section className="w-full">
-      <div className="flex items-center justify-start gap-4 px-2 py-2 sm:flex-row sm:gap-10 sm:px-4">
+      <div className="flex items-center justify-start gap-4 px-2 sm:flex-row sm:gap-10 sm:px-4">
         <div className="flex flex-col items-center justify-center flex-shrink-0 gap-1">
+          <button
+            onClick={() => setIsGuidelinesOpen(true)}
+            className="text-[#EC9600]"
+          >
+            View Guidelines
+          </button>
           <label
             htmlFor="upload"
             className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-[#FFE5B2] transition-all duration-200"
@@ -405,6 +413,11 @@ const UserStatus = () => {
           onSubmit={handleSubmitStatus}
         />
       )}
+
+      <DosAndDonts
+        isOpen={isGuidelinesOpen}
+        onClose={() => setIsGuidelinesOpen(false)}
+      />
     </section>
   );
 };
