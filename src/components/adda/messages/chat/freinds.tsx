@@ -3,6 +3,7 @@ import useSocket from "@/hooks/adda/useSocket";
 import { fetchAllConversations } from "@/redux/adda/conversationSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { Message } from "@/types";
+import { formatMessageTime } from "@/utils/formateDate";
 import { useAuth } from "@clerk/clerk-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
@@ -372,10 +373,7 @@ const Friends: React.FC<FriendsProps> = () => {
                   {item.type === "conversation" && (
                     <>
                       <span className="text-xs text-gray-400">
-                        {new Date(item.data.updatedAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatMessageTime(item.data.updatedAt)}
 
                       </span>
 

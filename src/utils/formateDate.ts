@@ -44,5 +44,36 @@ export const getDateLabel = (dateString:string) => {
   }
 };
 
+export const formatMessageTime = (timestamp: string) => {
+  const messageDate = new Date(timestamp);
+  const now = new Date();
+
+  const isToday =
+    messageDate.getDate() === now.getDate() &&
+    messageDate.getMonth() === now.getMonth() &&
+    messageDate.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+
+  const isYesterday =
+    messageDate.getDate() === yesterday.getDate() &&
+    messageDate.getMonth() === yesterday.getMonth() &&
+    messageDate.getFullYear() === yesterday.getFullYear();
+
+  if (isToday) {
+    return messageDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  if (isYesterday) {
+    return "Yesterday";
+  }
+
+  return messageDate.toLocaleDateString(); 
+};
+
 
 
