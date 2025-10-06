@@ -2,7 +2,7 @@ import { PHOTO_POST } from "@/constant/constants";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
 import { FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import PostUpload from "../modal/postUpload";
@@ -68,6 +68,8 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
     const [textContent, setTextContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [isTextInputActive, setIsTextInputActive] = useState(false);
+    const [pastedImage, setPastedImage] = useState<File | null>(null);
     const [errorModalProps, setErrorModalProps] = useState<{
       error: string;
       action: "nav" | "retry" | "custom";
@@ -76,6 +78,34 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       onAction?: () => void;
     }>({ error: "", action: "nav" });
     const navigate = useNavigate();
+
+    // Handle clipboard paste event
+    useEffect(() => {
+      const handlePaste = (event: ClipboardEvent) => {
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+          if (item.type.startsWith("image")) {
+            const file = item.getAsFile();
+            if (file) {
+              if (!isSignedIn) {
+                openAuthModal("sign-in");
+                return;
+              }
+              setPastedImage(file);
+              setSelectedPostType("photo");
+              setIsOpen(true);
+              event.preventDefault();
+              break;
+            }
+          }
+        }
+      };
+
+      window.addEventListener("paste", handlePaste);
+      return () => window.removeEventListener("paste", handlePaste);
+    }, [isSignedIn, openAuthModal]);
 
     const handlePost = (type: "photo" | "video" | "event" | "article") => {
       if (!isSignedIn) {
@@ -100,6 +130,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       }
       setIsOpen(false);
       setSelectedPostType(null);
+      setPastedImage(null);
       if (onPostCreated) {
         onPostCreated(newPost);
       }
@@ -107,13 +138,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
     const handleTextSubmit = async () => {
       if (!isSignedIn) {
-        setErrorModalProps({
-          error: "Please sign in to create a post.",
-          action: "nav",
-          link: "/adda/user-profile",
-          actionText: "Go to Profile",
-        });
-        setIsErrorModalOpen(true);
+        openAuthModal("sign-in");
         return;
       }
 
@@ -132,13 +157,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       try {
         const token = await getToken();
         if (!token) {
-          setErrorModalProps({
-            error: "Authentication failed. Please log in again.",
-            action: "nav",
-            link: "/adda/user-profile",
-            actionText: "Go to Profile",
-          });
-          setIsErrorModalOpen(true);
+          openAuthModal("sign-in");
           return;
         }
 
@@ -158,6 +177,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
         if (response.data.success) {
           setTextContent("");
+          setIsTextInputActive(false);
 
           let postData = null;
           if (response.data.data && response.data.data.post) {
@@ -227,7 +247,6 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
         <div className="relative flex flex-col w-full p-5 bg-white border border-orange-200 rounded-2xl shadow-md shadow-orange-100/70">
           {/* Top Section: Avatar + Blog Input */}
           <div className="flex items-start gap-4">
-            {/* User Avatar */}
             <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-200">
               {user?.imageUrl ? (
                 <img
@@ -241,31 +260,47 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
               )}
             </div>
 
-            {/* Blog Input */}
             <div className="flex flex-col w-full gap-3">
-              <textarea
-                rows={5}
-                placeholder="✍️ Share your thoughts or first blog as a parent..."
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-                className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
-              />
-              <div className="flex justify-end">
-                <button
-                  onClick={handleTextSubmit}
-                  disabled={isSubmitting || !textContent.trim()}
-                  className="px-5 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isSubmitting ? "Publishing..." : "Publish"}
-                </button>
-              </div>
+              {isTextInputActive ? (
+                <textarea
+                  rows={5}
+                  placeholder="✍️ Share your thoughts or first blog as a parent..."
+                  value={textContent}
+                  onChange={(e) => setTextContent(e.target.value)}
+                  onBlur={() => {
+                    if (!textContent.trim()) {
+                      setIsTextInputActive(false);
+                    }
+                  }}
+                  autoFocus
+                  className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                />
+              ) : (
+                <input
+                  type="text"
+                  placeholder="✍️ Share your thoughts or first blog as a parent..."
+                  value={textContent}
+                  onChange={(e) => setTextContent(e.target.value)}
+                  onFocus={() => setIsTextInputActive(true)}
+                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                />
+              )}
+              {textContent.trim() && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleTextSubmit}
+                    disabled={isSubmitting}
+                    className="px-5 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    {isSubmitting ? "Publishing..." : "Publish"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Divider */}
           <hr className="w-full my-4 border-t border-orange-100" />
 
-          {/* Post Options */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             {PHOTO_POST.map(({ icon, purpose }, index) => (
               <button
@@ -298,6 +333,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
             onClose={setIsOpen}
             postType={selectedPostType}
             onPostCreated={handlePostComplete}
+            postedImage={pastedImage}
           />
         )}
 

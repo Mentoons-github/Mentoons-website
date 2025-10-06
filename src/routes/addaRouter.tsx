@@ -30,7 +30,6 @@ const AddaRouter = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fallback UI for lazy-loaded components
   const loadingFallback = (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-800">
       <Loader />

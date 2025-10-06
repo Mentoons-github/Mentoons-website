@@ -19,6 +19,7 @@ import EmployeeReducer from "./admin/employee/employeeSlice";
 import friendRequestReducer from "./adda/friendRequest";
 import careerAdminReducer from "./admin/job/jobSlice";
 import sessionCallAdmin from "./admin/sessionCall/sessionCall";
+import groupReducer from "./adda/groupSlice";
 
 export const store = configureStore<{
   comics: ReturnType<typeof comicsReducer>;
@@ -41,6 +42,7 @@ export const store = configureStore<{
   friendRequests: ReturnType<typeof friendRequestReducer>;
   careerAdmin: ReturnType<typeof careerAdminReducer>;
   sessionCallAdmin: ReturnType<typeof sessionCallAdmin>;
+  groups: ReturnType<typeof groupReducer>;
 }>({
   reducer: {
     comics: comicsReducer,
@@ -63,6 +65,7 @@ export const store = configureStore<{
     friendRequests: friendRequestReducer,
     careerAdmin: careerAdminReducer,
     sessionCallAdmin: sessionCallAdmin,
+    groups: groupReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

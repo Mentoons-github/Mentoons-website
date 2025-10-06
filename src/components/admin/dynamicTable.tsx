@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   Eye,
   Edit,
@@ -9,6 +9,22 @@ import {
   Search,
 } from "lucide-react";
 import UserDetailsModal from "./modal/userDetails";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 interface DynamicTableProps<T> {
   data: T[];
@@ -28,7 +44,7 @@ interface DynamicTableProps<T> {
   formatHeader?: (key: string) => string;
   idKey?: keyof T;
   isLoading?: boolean;
-  itemType: "user" | "product" | "enquiry" | "employee" | "job";
+  itemType: "user" | "product" | "enquiry" | "employee" | "job" | "meetups";
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
@@ -58,8 +74,15 @@ const DynamicTable = <T extends Record<string, any>>({
   onSelectAll,
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
   const [isUser, setIsUser] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  useEffect(() => {
+    if (onSearch) {
+      onSearch(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, onSearch]);
 
   const isAllSelected =
     data.length > 0 &&
@@ -110,7 +133,6 @@ const DynamicTable = <T extends Record<string, any>>({
       : stringValue;
   };
 
-  // Default header formatter
   const defaultFormatHeader = (key: string): string => {
     return key
       .replace(/([A-Z])/g, " $1")
@@ -121,7 +143,9 @@ const DynamicTable = <T extends Record<string, any>>({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocalSearchTerm(value);
-    onSearch?.(value);
+    if (itemType !== "user" && handleSearch) {
+      handleSearch(e);
+    }
   };
 
   const handleSort = (field: string) => {
@@ -205,7 +229,7 @@ const DynamicTable = <T extends Record<string, any>>({
             type="text"
             placeholder="Search items..."
             value={localSearchTerm}
-            onChange={itemType === "user" ? handleSearchChange : handleSearch}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -294,15 +318,16 @@ const DynamicTable = <T extends Record<string, any>>({
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      {itemType === "product" && onEdit && (
-                        <button
-                          onClick={() => onEdit(item)}
-                          className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      )}
+                      {(itemType === "product" || itemType === "meetups") &&
+                        onEdit && (
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
                       {itemType !== "user" && onDelete && (
                         <button
                           onClick={() => onDelete(item)}

@@ -35,6 +35,7 @@ const Header = () => {
     products: false,
     services: false,
     subscription: false,
+    workshops: false,
   });
 
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -239,7 +240,12 @@ const Header = () => {
                       label.toLowerCase() as keyof DropDownInterface
                     ] && (
                       <DropDown
-                        labelType={label.toLowerCase() as "products" | "games"}
+                        labelType={
+                          label.toLowerCase() as
+                            | "products"
+                            | "games"
+                            | "workshops"
+                        }
                         items={items}
                       />
                     )}

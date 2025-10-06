@@ -1184,6 +1184,11 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_02",
+    label: "Community",
+    url: "/community",
+  },
+  {
+    id: "NL_03",
     label: "Products",
     // icon: FaShoppingCart,
     url: "/mentoons-store",
@@ -1211,40 +1216,62 @@ export const COMMON_NAV: NavLink[] = [
     ],
   },
   {
-    id: "NL_03",
+    id: "NL_04",
     label: "Comics",
     url: "/mentoons-comics?option=comic",
   },
   {
-    id: "NL_04",
+    id: "NL_05",
     label: "Podcast",
     icon: "mic",
     url: "/mentoons-podcast",
   },
   {
-    id: "NL_05",
+    id: "NL_06",
     label: "Workshops",
     // icon: FaChalkboard,
     url: "/mentoons-workshops",
+    items: [
+      {
+        id: "WK_01",
+        label: "Instant Katha",
+        url: "/workshop",
+      },
+      {
+        id: "WK_02",
+        label: "Hasyaras",
+        url: "/workshop",
+      },
+      {
+        id: "WK_03",
+        label: "KalaKriti",
+        url: "/workshop",
+      },
+      {
+        id: "WK_04",
+        label: "Career Corner",
+        url: "/workshop",
+      },
+    ],
   },
   {
-    id: "NL_06",
+    id: "NL_07",
     label: "Quiz",
     url: "/quiz",
   },
   {
-    id: "NL_07",
+    id: "NL_08",
     label: "Book Sessions",
     url: "/bookings",
   },
   {
-    id: "NL_08",
+    id: "NL_09",
     label: "Join Us",
     icon: "group",
     url: "/hiring",
   },
   {
-    id: "NL_09",
+    id: "NL_10",
     label: "Browse Plans",
     // icon: FaCreditCard,
     url: "/mentoons#subscription",

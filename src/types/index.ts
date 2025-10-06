@@ -27,6 +27,14 @@ import { JobPosting } from "./jobs/jobs";
 import { PostState, EventDetails } from "./adda/posts";
 import { QuizType } from "./assessements/quiz";
 import {
+  PollOption,
+  Group,
+  GroupState,
+  GroupMessage,
+  Poll,
+  ActiveTabType,
+} from "./adda/group";
+import {
   Conversations,
   Friend,
   Message,
@@ -60,9 +68,19 @@ import {
 } from "./adda/userProfile";
 import { OrderData, OrderItem } from "./order";
 import { Cell, Clue } from "./puzzle/crossWord";
+import {
+  WorkshopFormValues,
+  AgeGroupDetails,
+  Benefit,
+  WhyChooseUs,
+  WorkshopCategory,
+} from "./workshop";
+
+import { MeetupFormValues } from "./meetups/meetup";
 
 export type {
   QuizType,
+  MeetupFormValues,
   Color,
   Contests,
   DropDownInterface,
@@ -114,7 +132,18 @@ export type {
   OrderData,
   OrderItem,
   Cell,
-  Clue
+  Clue,
+  WorkshopFormValues,
+  AgeGroupDetails,
+  Benefit,
+  WhyChooseUs,
+  PollOption,
+  Group,
+  GroupState,
+  GroupMessage,
+  Poll,
+  ActiveTabType,
+  WorkshopCategory,
 };
 
 export { MediaType, PostType };

@@ -9,7 +9,7 @@ import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 import WelcomeModal from "@/components/adda/welcome/welcome";
 import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const AddaLayout = () => {
   const { isSignedIn } = useAuth();
@@ -46,13 +46,17 @@ const AddaLayout = () => {
                 <UserStatus />
               </div>
               <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
-                <Link to="/mythos">
+                <a
+                  href="https://mentoonsmythos.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <img
                     src="/assets/adda/sidebar/Introducing poster.png"
                     alt="mentoons-mythos"
                     className="max-w-[134px] lg:max-w-[170px]"
                   />
-                </Link>
+                </a>
               </div>
             </div>
           </div>

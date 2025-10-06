@@ -14,17 +14,18 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
 
-  const isAuthRoute =
+  const hideLayout =
     location.pathname === "/sign-up" ||
     location.pathname === "/sign-in" ||
     location.pathname === "/adda" ||
     location.pathname === "/chat" ||
     location.pathname === "/puzzle/play" ||
-    location.pathname.startsWith("/employee");
+    location.pathname.startsWith("/employee") ||
+    location.pathname === "/add-password";
 
   const isChatPage = location.pathname.startsWith("/chat");
 
-  const showFooter = !isAuthRoute && !isChatPage;
+  const showFooter = !hideLayout && !isChatPage;
 
   return (
     <NotificationProvider>
@@ -32,12 +33,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="absolute top-0 left-0 right-0 z-[99999]">
           <NotificationPopup />
         </div>
-        <PrimaryHeader />
-        <Header />
+
+        {!hideLayout && (
+          <>
+            <PrimaryHeader />
+            <Header />
+          </>
+        )}
+
         <div className="">
           <Outlet />
           {children}
         </div>
+
         {showFooter && <Footer />}
         {showFooter && <ScrollToTopButton />}
       </div>

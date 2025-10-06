@@ -2,11 +2,19 @@ import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { Field, Form, Formik, FormikProps } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Edit, FileText, Image, Video, X } from "lucide-react";
+import {
+  Calendar,
+  Edit,
+  FileText,
+  Image,
+  Loader2,
+  Video,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom"; // Add useNavigate for redirection
+import { useNavigate } from "react-router-dom";
 
 import ArticleForm from "./components/ArticleForm";
 import EventForm from "./components/EventForm";
@@ -22,25 +30,34 @@ const PostUpload = ({
   onClose,
   postType,
   onPostCreated,
+  postedImage,
 }: PostUploadProps) => {
   const formikRef = useRef<FormikProps<FormValues>>(null);
   const [activeTab, setActiveTab] = useState(1);
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [profileError, setProfileError] = useState<{
     message: string;
     missingFields: string[];
-  } | null>(null); 
-  const navigate = useNavigate(); 
+  } | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (postedImage && postType === "photo") {
+      const previewUrl = URL.createObjectURL(postedImage);
+      setMediaPreview([previewUrl]);
+    } else {
+      setMediaPreview([]);
+    }
     setActiveTab(1);
-    setMediaPreview([]);
     setProfileError(null);
-  }, [postType]);
+
+    return () => {
+      mediaPreview.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [postType, postedImage]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,13 +66,26 @@ const PostUpload = ({
         !modalRef.current.contains(event.target as Node) &&
         isOpen
       ) {
+        formikRef.current?.resetForm({ values: getInitialValues(postType) });
+        setMediaPreview((prev) => {
+          prev.forEach((url) => URL.revokeObjectURL(url));
+          return [];
+        });
         onClose(false);
-        formikRef.current?.resetForm();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, postType]);
+
+  const handleClose = () => {
+    formikRef.current?.resetForm({ values: getInitialValues(postType) });
+    setMediaPreview((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return [];
+    });
+    onClose(false);
+  };
 
   const handleTabChange = (tab: number) => {
     setActiveTab(tab);
@@ -113,6 +143,8 @@ const PostUpload = ({
         ...newMedia[index],
         file: file,
         type: fileType,
+        caption: newMedia[index]?.caption || "",
+        url: undefined,
       };
       setFieldValue("media", newMedia);
     }
@@ -123,7 +155,10 @@ const PostUpload = ({
   ) => {
     const values = formikRef.current?.values;
     if (!values) return;
-    const newMedia = [...values.media, { file: null, type: "image" }];
+    const newMedia = [
+      ...values.media,
+      { file: null, type: "image", caption: "", url: undefined },
+    ];
     setFieldValue("media", newMedia);
   };
 
@@ -138,6 +173,9 @@ const PostUpload = ({
     setFieldValue("media", newMedia);
 
     const newPreviews = [...mediaPreview];
+    if (newPreviews[index]) {
+      URL.revokeObjectURL(newPreviews[index]);
+    }
     newPreviews.splice(index, 1);
     setMediaPreview(newPreviews);
   };
@@ -185,14 +223,7 @@ const PostUpload = ({
     console.log("🚨 ARTICLE SUBMISSION FUNCTION TRIGGERED 🚨");
     console.log("Post type:", postType);
 
-    if (isSubmitting) {
-      console.log("Already submitting, skipping duplicate request");
-      return;
-    }
-
     try {
-      setIsSubmitting(true);
-
       const valuesWithUploadedMedia = await uploadAllMedia(values);
 
       toast.info("Processing your post...");
@@ -200,7 +231,6 @@ const PostUpload = ({
       const token = await getToken();
       if (!token) {
         toast.error("Authentication failed. Please log in again.");
-        setIsSubmitting(false);
         return;
       }
 
@@ -311,11 +341,14 @@ const PostUpload = ({
 
       if (response.data.success) {
         toast.success("Post created successfully!");
-        onClose(false);
-        formikRef.current?.resetForm();
-        setMediaPreview([]);
+        formikRef.current?.resetForm({ values: getInitialValues(postType) });
+        setMediaPreview((prev) => {
+          prev.forEach((url) => URL.revokeObjectURL(url));
+          return [];
+        });
         setActiveTab(1);
-        setProfileError(null); // Clear profile error on success
+        setProfileError(null);
+        onClose(false);
 
         if (onPostCreated) {
           console.log("Post creation response data:", response.data);
@@ -369,7 +402,6 @@ const PostUpload = ({
 
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data?.message || error.message;
-        // Check for incomplete profile error
         if (
           error.response.status === 403 &&
           errorMessage === "Complete your profile before posting."
@@ -383,144 +415,35 @@ const PostUpload = ({
               ", "
             )}`
           );
-          return; // Prevent further submission attempts
+          return;
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
 
       toast.error(`Failed to create post: ${errorMessage}`);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const submitArticleDirectly = async () => {
-    try {
-      setIsSubmitting(true);
+    if (!formikRef.current) {
+      toast.error("Form reference not available");
+      return;
+    }
 
-      if (!formikRef.current) {
-        toast.error("Form reference not available");
-        return;
-      }
+    const values = formikRef.current.values;
+    await handleSubmit(values); // Directly call handleSubmit for articles
+  };
 
+  const handleManualSubmit = async () => {
+    console.log("Manual submit triggered");
+    if (formikRef.current) {
+      console.log("Formik instance found, calling handleSubmit");
       const values = formikRef.current.values;
-      const valuesWithUploadedMedia = await uploadAllMedia(values);
-
-      toast.info("Submitting your article...");
-
-      const token = await getToken();
-      if (!token) {
-        toast.error("Authentication failed. Please log in again.");
-        return;
-      }
-
-      const articleData = {
-        title: valuesWithUploadedMedia.title || "",
-        content: valuesWithUploadedMedia.content || "",
-        postType: "article",
-        location: valuesWithUploadedMedia.location || "",
-        tags: valuesWithUploadedMedia.tags || [],
-        visibility: valuesWithUploadedMedia.visibility || "public",
-        article: {
-          body: valuesWithUploadedMedia.articleBody || "",
-          coverImage: valuesWithUploadedMedia.media[0]?.url || "",
-        },
-        media: valuesWithUploadedMedia.media[0]?.url
-          ? [
-              {
-                type: "image",
-                caption: valuesWithUploadedMedia.media[0]?.caption || "",
-                url: valuesWithUploadedMedia.media[0]?.url,
-              },
-            ]
-          : [],
-      };
-
-      const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
-
-      const response = await axios.post(apiUrl, articleData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        toast.success("Article posted successfully!");
-        onClose(false);
-        formikRef.current?.resetForm();
-        setProfileError(null); // Clear profile error on success
-
-        if (onPostCreated) {
-          console.log("Article creation response data:", response.data);
-
-          if (response.data.data && response.data.data.post) {
-            console.log(
-              "Calling onPostCreated with article:",
-              response.data.data.post
-            );
-            onPostCreated(response.data.data.post);
-          } else if (response.data.data) {
-            console.log(
-              "Article not found in data.post, using data directly:",
-              response.data.data
-            );
-            onPostCreated(response.data.data);
-          } else {
-            console.warn(
-              "No valid article data found in response, creating fallback post"
-            );
-            const fallbackPost = {
-              _id: `temp-${Date.now()}`,
-              postType: "article",
-              title: valuesWithUploadedMedia.title || "",
-              content: valuesWithUploadedMedia.content || "",
-              user: {
-                _id: "unknown",
-                name: "User",
-                role: "User",
-                profilePicture: "",
-              },
-              likes: [],
-              comments: [],
-              shares: [],
-              createdAt: new Date().toISOString(),
-              visibility: valuesWithUploadedMedia.visibility || "public",
-              media: articleData.media,
-              article: articleData.article,
-            };
-            console.log("Using fallback article post:", fallbackPost);
-            onPostCreated(fallbackPost);
-          }
-        }
-      } else {
-        throw new Error(`Unexpected response status: ${response.status}`);
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || error.message;
-        if (
-          error.response?.status === 403 &&
-          errorMessage === "Complete your profile before posting."
-        ) {
-          setProfileError({
-            message: errorMessage,
-            missingFields: error.response.data.missingFields || [],
-          });
-          toast.error(
-            `Please complete your profile: ${error.response.data.missingFields.join(
-              ", "
-            )}`
-          );
-          return;
-        }
-        toast.error(`Submission failed: ${errorMessage}`);
-      } else {
-        toast.error("Failed to submit article. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false);
+      await handleSubmit(values); // Directly call handleSubmit
+    } else {
+      console.error("Formik instance not found");
+      toast.error("Error: Form system not initialized");
     }
   };
 
@@ -594,18 +517,6 @@ const PostUpload = ({
     }
   };
 
-  const handleManualSubmit = () => {
-    console.log("Manual submit triggered");
-    if (formikRef.current) {
-      console.log("Formik instance found, submitting form");
-      formikRef.current.submitForm();
-    } else {
-      console.error("Formik instance not found");
-      toast.error("Error: Form system not initialized");
-    }
-  };
-
-  // Handle profile completion redirect
   const handleCompleteProfile = () => {
     navigate("/adda/user-profile");
   };
@@ -629,12 +540,17 @@ const PostUpload = ({
         >
           <Formik
             innerRef={formikRef}
-            initialValues={getInitialValues(postType)}
+            initialValues={getInitialValues(postType, postedImage)}
             validationSchema={getValidationSchema(postType, activeTab)}
             onSubmit={handleSubmit}
             validateOnMount={false}
           >
-            {({ values, isValid, setFieldValue }) => (
+            {({
+              values,
+              isValid,
+              setFieldValue,
+              isSubmitting: formikIsSubmitting,
+            }) => (
               <motion.div
                 ref={modalRef}
                 className="relative flex flex-col w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto my-2 sm:my-4 md:my-6 bg-white shadow-xl dark:bg-gray-800 rounded-xl sm:rounded-2xl overflow-hidden max-h-[95vh] sm:max-h-[90vh]"
@@ -643,7 +559,6 @@ const PostUpload = ({
                 exit={{ scale: 0.9, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
               >
-                {/* Header */}
                 <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-2">
                     {getPostTypeIcon()}
@@ -654,7 +569,7 @@ const PostUpload = ({
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => onClose(false)}
+                    onClick={handleClose}
                     className="p-1 text-gray-600 transition bg-gray-100 rounded-full dark:text-gray-300 hover:text-gray-900 dark:hover:text-white dark:bg-gray-700"
                     aria-label="Close"
                   >
@@ -662,7 +577,6 @@ const PostUpload = ({
                   </motion.button>
                 </div>
 
-                {/* Profile Error Message */}
                 {profileError && (
                   <motion.div
                     className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md mx-4 mt-4"
@@ -685,7 +599,6 @@ const PostUpload = ({
                   </motion.div>
                 )}
 
-                {/* Tab Navigation */}
                 <div className="px-3 sm:px-4 pt-2 sm:pt-3">
                   <TabNavigation
                     postType={postType}
@@ -694,7 +607,6 @@ const PostUpload = ({
                   />
                 </div>
 
-                {/* Form Content */}
                 <Form className="flex flex-col flex-1 min-h-0">
                   <div className="flex-1 px-4 sm:px-5 md:px-6 py-3 sm:py-4 overflow-y-auto">
                     <div className="min-h-[200px] sm:min-h-[250px] md:min-h-[300px]">
@@ -870,7 +782,6 @@ const PostUpload = ({
                     </div>
                   </div>
 
-                  {/* Footer Buttons */}
                   <div className="flex gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
                     {activeTab > 1 && (
                       <motion.button
@@ -879,7 +790,11 @@ const PostUpload = ({
                         whileTap={{ scale: 0.95 }}
                         onClick={handlePrevTab}
                         className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-gray-500 rounded-md dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700"
-                        disabled={profileError !== null} // Disable if profile is incomplete
+                        disabled={
+                          profileError !== null ||
+                          formikIsSubmitting ||
+                          isUploading
+                        }
                       >
                         <motion.div
                           initial={{ x: 0 }}
@@ -909,8 +824,10 @@ const PostUpload = ({
                             className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
                             disabled={
                               !values.media.some((m) => m.file) ||
-                              profileError !== null
-                            } // Disable if no media or profile incomplete
+                              profileError !== null ||
+                              formikIsSubmitting ||
+                              isUploading
+                            }
                           >
                             <span className="hidden sm:inline">
                               Next to Preview
@@ -932,23 +849,47 @@ const PostUpload = ({
                           <motion.button
                             type="button"
                             onClick={handleManualSubmit}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 bg-green-500 rounded-md dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                            whileHover={{
+                              scale:
+                                formikIsSubmitting || isUploading ? 1 : 1.05,
+                            }}
+                            whileTap={{
+                              scale:
+                                formikIsSubmitting || isUploading ? 1 : 0.95,
+                            }}
+                            className={`flex items-center gap-2 px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 rounded-md ${
+                              formikIsSubmitting || isUploading
+                                ? "bg-green-400 dark:bg-green-500 cursor-not-allowed opacity-70"
+                                : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                            }`}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2 }}
                             disabled={
-                              isSubmitting ||
+                              formikIsSubmitting ||
                               isUploading ||
                               profileError !== null
-                            } // Disable if submitting, uploading, or profile incomplete
+                            }
                           >
-                            {isUploading
-                              ? "Uploading..."
-                              : isSubmitting
-                              ? "Submitting..."
-                              : "Submit Post"}
+                            {isUploading ? (
+                              <>
+                                <Loader2
+                                  className="animate-spin mr-2"
+                                  size={16}
+                                />
+                                Uploading...
+                              </>
+                            ) : formikIsSubmitting ? (
+                              <>
+                                <Loader2
+                                  className="animate-spin mr-2"
+                                  size={16}
+                                />
+                                Submitting...
+                              </>
+                            ) : (
+                              "Submit Post"
+                            )}
                           </motion.button>
                         )
                       ) : (
@@ -960,7 +901,11 @@ const PostUpload = ({
                             handleNextTab(isValid, values);
                           }}
                           className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
-                          disabled={profileError !== null} // Disable if profile incomplete
+                          disabled={
+                            profileError !== null ||
+                            formikIsSubmitting ||
+                            isUploading
+                          }
                         >
                           Next
                           <motion.div
@@ -987,21 +932,45 @@ const PostUpload = ({
                               ? submitArticleDirectly
                               : handleManualSubmit
                           }
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 bg-green-500 rounded-md dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                          whileHover={{
+                            scale: formikIsSubmitting || isUploading ? 1 : 1.05,
+                          }}
+                          whileTap={{
+                            scale: formikIsSubmitting || isUploading ? 1 : 0.95,
+                          }}
+                          className={`flex items-center gap-2 px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 rounded-md ${
+                            formikIsSubmitting || isUploading
+                              ? "bg-green-400 dark:bg-green-500 cursor-not-allowed opacity-70"
+                              : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                          }`}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.2 }}
                           disabled={
-                            isSubmitting || isUploading || profileError !== null
-                          } // Disable if submitting, uploading, or profile incomplete
+                            formikIsSubmitting ||
+                            isUploading ||
+                            profileError !== null
+                          }
                         >
-                          {isUploading
-                            ? "Uploading..."
-                            : isSubmitting
-                            ? "Submitting..."
-                            : "Submit Post"}
+                          {isUploading ? (
+                            <>
+                              <Loader2
+                                className="animate-spin mr-2"
+                                size={16}
+                              />
+                              Uploading...
+                            </>
+                          ) : formikIsSubmitting ? (
+                            <>
+                              <Loader2
+                                className="animate-spin mr-2"
+                                size={16}
+                              />
+                              Submitting...
+                            </>
+                          ) : (
+                            "Submit Post"
+                          )}
                         </motion.button>
                       )}
                   </div>

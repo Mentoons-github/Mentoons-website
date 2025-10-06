@@ -50,7 +50,14 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
         title: "Products",
         paths: ["/admin/product-table", "/admin/add-products"],
       },
-      { title: "Workshops", paths: ["/admin/workshop-enquiries"] },
+      {
+        title: "Workshops",
+        paths: [
+          "/admin/workshop-enquiries",
+          "/admin/add-workshop",
+          "/admin/workshops",
+        ],
+      },
       {
         title: "Career Corner",
         paths: [
@@ -73,6 +80,10 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
       {
         title: "Session Call",
         paths: ["/admin/session-enquiry"],
+      },
+      {
+        title: "Meetup",
+        paths: ["/admin/add-meetup", "/admin/meetups"],
       },
     ];
 
@@ -192,7 +203,11 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
         <SidebarSection
           icon={<FaChalkboardTeacher size={collapsed ? 20 : 16} />}
           title="Workshops"
-          items={[{ href: "/admin/workshop-enquiries", label: "Enquiries" }]}
+          items={[
+            { href: "/admin/workshops", label: "Workshops" },
+            { href: "/admin/add-workshop", label: "Add Workshop" },
+            { href: "/admin/workshop-enquiries", label: "Enquiries" },
+          ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Workshops"}
           toggleSection={() => toggleSection("Workshops")}
@@ -237,6 +252,17 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Employees"}
           toggleSection={() => toggleSection("Employees")}
+        />
+        <SidebarSection
+          icon={<FaPhone size={collapsed ? 20 : 16} />}
+          title="Meetup"
+          items={[
+            { href: "/admin/meetups", label: "Meetups" },
+            { href: "/admin/add-meetup", label: "Add Meetup" },
+          ]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Session Call"}
+          toggleSection={() => toggleSection("Session Call")}
         />
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}

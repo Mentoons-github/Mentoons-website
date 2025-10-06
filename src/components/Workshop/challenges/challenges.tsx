@@ -2,7 +2,7 @@ import "./challenges.css";
 
 const WorkShopChallenges = () => {
   return (
-    <div className="relative flex-col items-center justify-center pb-24 bg-primary">
+    <div className="relative flex-col items-center justify-center pb-24 bg-orange-400">
       <div className="custom-shape-divider-top-1756205374">
         <svg
           data-name="Layer 1"
@@ -45,7 +45,7 @@ const WorkShopChallenges = () => {
         />
       </div>
       <div className="w-full">
-        <h2 className="pt-6 pb-12 text-3xl font-semibold text-center md:pb-24 md:text-6xl">
+        <h2 className="pt-6 pb-12 md:pb-24 text-3xl md:text-5xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 text-center">
           Challenges Faced By Kids Today!
         </h2>
 

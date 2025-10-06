@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useClerk, useSignIn } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
+  const { isLoaded, signIn } = useSignIn();
+  const { setActive, client } = useClerk();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [error, setError] = useState<null | string>(null);
@@ -35,26 +40,40 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm() || !isLoaded) return;
 
     setError(null);
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await signIn.create({
+        identifier: formData.email,
+        password: formData.password,
+      });
 
-      // Simulate login success/failure
-      if (
-        formData.email === "admin@example.com" &&
-        formData.password === "password123"
-      ) {
-        alert("Login successful! Redirecting to dashboard...");
+      if (result.status === "complete") {
+        const user = client?.activeSessions[0]?.user;
+
+        if (!user) {
+          setError("Unable to retrieve user information.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const userRole = user.publicMetadata?.role;
+
+        if (userRole === "ADMIN") {
+          await setActive({ session: result.createdSessionId });
+          navigate("/admin/dashboard");
+        } else {
+          setError("Access denied: You do not have admin privileges.");
+        }
       } else {
-        setError("Invalid credentials. Please check your email and password.");
+        setError("Error occurred during authentication.");
       }
-    } catch (err) {
-      setError("An error occurred during login. Please try again.");
+    } catch (err: any) {
+      const error = err?.errors[0]?.message;
+      setError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,7 +83,6 @@ const AdminLogin = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear errors when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
