@@ -8,12 +8,11 @@ import { useState, useEffect, useRef } from "react";
 import Confetti from "react-confetti";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { ProfileUserDetails } from "@/types/adda/userProfile";
-import { ProfilePost } from "@/types/adda/userProfile";
+import { ProfileUserDetails, ProfilePost } from "@/types/adda/userProfile";
 import ProfileTabContent from "@/components/adda/userProfile/profile/tabContent";
-import ErrorModal from "@/components/adda/modal/error";
 import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
 import ProfileCompletionWidget from "@/components/adda/cards/profileCompletion";
+import { useSubmissionModal } from "@/context/adda/commonModalContext";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Posts");
@@ -28,33 +27,7 @@ const Profile = () => {
   const [totalFollowers, setTotalFollowers] = useState<string[]>([]);
   const [totalFollowing, setTotalFollowing] = useState<string[]>([]);
   const [isFetchingUserData, setIsFetchingUserData] = useState(false);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [errorModalProps, setErrorModalProps] = useState<{
-    error: string;
-    action: "nav" | "retry" | "custom";
-    link?: string;
-    actionText?: string;
-    onAction?: () => void;
-  }>({ error: "", action: "nav" });
-  const [userDetails, setUserDetails] = useState<ProfileUserDetails>({
-    _id: "",
-    name: "",
-    email: "",
-    picture: "",
-    phoneNumber: "",
-    location: "",
-    bio: "",
-    education: "",
-    occupation: "",
-    interests: [],
-    coverImage: "",
-    dateOfBirth: "",
-    gender: "",
-    socialLinks: [],
-    joinedDate: "",
-  });
-
+  const { showModal, hideModal } = useSubmissionModal();
   const { getToken } = useAuth();
   const { user } = useUser();
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -142,6 +115,24 @@ const Profile = () => {
     return incompleteFields;
   };
 
+  const [userDetails, setUserDetails] = useState<ProfileUserDetails>({
+    _id: "",
+    name: "",
+    email: "",
+    picture: "",
+    phoneNumber: "",
+    location: "",
+    bio: "",
+    education: "",
+    occupation: "",
+    interests: [],
+    coverImage: "",
+    dateOfBirth: "",
+    gender: "",
+    socialLinks: [],
+    joinedDate: "",
+  });
+
   const profileCompletionPercentage = getProfileCompletion();
   const isProfileComplete = profileCompletionPercentage === 100;
   const incompleteFields = getIncompleteFields();
@@ -150,13 +141,6 @@ const Profile = () => {
     setIsFetchingUserData(true);
     const token = await getToken();
     if (!token) {
-      setErrorModalProps({
-        error: "Authentication required",
-        action: "nav",
-        link: "/adda/user-profile",
-        actionText: "Go to Profile",
-      });
-      setIsErrorModalOpen(true);
       setIsFetchingUserData(false);
       return;
     }
@@ -211,15 +195,16 @@ const Profile = () => {
       );
     } catch (error) {
       console.error("Error fetching user data:", error);
-      setErrorModalProps({
-        error: "Failed to load profile data",
-        action: "retry",
-        actionText: "Try Again",
-        onAction: fetchUserData,
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to load profile data",
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setIsErrorModalOpen(true);
     } finally {
       setIsFetchingUserData(false);
+      setTimeout(hideModal, 2000);
     }
   };
 
@@ -245,7 +230,11 @@ const Profile = () => {
 
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted, constructing profileData...");
+    showModal({
+      isSubmitting: true,
+      currentStep: "saving",
+      message: "Updating profile...",
+    });
 
     const profileData = {
       name: userDetails.name || user?.fullName || "",
@@ -263,18 +252,14 @@ const Profile = () => {
       coverImage: (user?.unsafeMetadata?.coverPhoto as string) || "",
     };
 
-    console.log("Profile data to send:", profileData);
-
     const token = await getToken();
     if (!token) {
-      console.log("No token found, authentication required");
-      setErrorModalProps({
-        error: "Authentication required",
-        action: "nav",
-        link: "/adda/user-profile",
-        actionText: "Go to Profile",
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+        error: "No token found",
       });
-      setIsErrorModalOpen(true);
       return;
     }
 
@@ -285,44 +270,60 @@ const Profile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Backend response:", response.data);
-
       if (response.status === 200) {
         setUserDetails((prev) => ({ ...prev, ...profileData }));
         setShowCompletionForm(false);
         setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 5000);
+        showModal({
+          isSubmitting: false,
+          currentStep: "success",
+          message: "Profile updated successfully!",
+        });
+        setTimeout(() => {
+          setShowConfetti(false);
+          hideModal();
+        }, 2000);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      setErrorModalProps({
-        error: "Failed to update profile",
-        action: "retry",
-        actionText: "Try Again",
-        onAction: () => handleProfileSubmit(e),
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to update profile",
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setIsErrorModalOpen(true);
     }
   };
 
   const handleCoverPhotoChange = async (file: File) => {
-    setIsUploadingPhoto(true);
+    showModal({
+      isSubmitting: true,
+      currentStep: "uploading",
+      message: "Uploading cover photo...",
+    });
+
     const token = await getToken();
     if (!token) {
-      console.log("No token found for cover photo upload");
-      setErrorModalProps({
-        error: "Authentication required",
-        action: "nav",
-        link: "/adda/user-profile",
-        actionText: "Go to Profile",
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+        error: "No token found",
       });
-      setIsErrorModalOpen(true);
-      setIsUploadingPhoto(false);
       return;
     }
 
     try {
-      console.log("Uploading cover photo:", file.name);
+      if (file.size > 5 * 1024 * 1024) {
+        showModal({
+          isSubmitting: false,
+          currentStep: "error",
+          message: "File size should not exceed 5MB",
+        });
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       const uploadResponse = await axios.post(
@@ -337,62 +338,71 @@ const Profile = () => {
       );
 
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
-      console.log("Cover photo upload response:", uploadResponse.data);
       if (!fileUrl) {
-        console.log("Failed to get cover photo URL");
-        setErrorModalProps({
-          error: "Failed to upload cover photo",
-          action: "retry",
-          actionText: "Try Again",
-          onAction: () => handleCoverPhotoChange(file),
+        showModal({
+          isSubmitting: false,
+          currentStep: "error",
+          message: "Failed to upload cover photo",
+          error: "No file URL returned",
         });
-        setIsErrorModalOpen(true);
-        setIsUploadingPhoto(false);
         return;
       }
 
       await user?.update({ unsafeMetadata: { coverPhoto: fileUrl } });
 
-      const profileResponse = await axios.put(
+      await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { coverImage: fileUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Cover photo profile update response:", profileResponse.data);
       setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Cover photo updated successfully!",
+      });
+      setTimeout(hideModal, 2000);
     } catch (error) {
       console.error("Error uploading cover photo:", error);
-      setErrorModalProps({
-        error: "Failed to upload cover photo",
-        action: "retry",
-        actionText: "Try Again",
-        onAction: () => handleCoverPhotoChange(file),
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to upload cover photo",
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setIsErrorModalOpen(true);
-    } finally {
-      setIsUploadingPhoto(false);
     }
   };
 
   const handleProfilePhotoChange = async (file: File) => {
-    setIsUploadingPhoto(true);
+    showModal({
+      isSubmitting: true,
+      currentStep: "uploading",
+      message: "Uploading profile photo...",
+    });
+
     const token = await getToken();
     if (!token) {
-      console.log("No token found for profile photo upload");
-      setErrorModalProps({
-        error: "Authentication required",
-        action: "nav",
-        link: "/adda/user-profile",
-        actionText: "Go to Profile",
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+        error: "No token found",
       });
-      setIsErrorModalOpen(true);
-      setIsUploadingPhoto(false);
       return;
     }
 
     try {
-      console.log("Uploading profile photo:", file.name);
+      if (file.size > 5 * 1024 * 1024) {
+        showModal({
+          isSubmitting: false,
+          currentStep: "error",
+          message: "File size should not exceed 5MB",
+        });
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -410,42 +420,38 @@ const Profile = () => {
       );
 
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
-      console.log("Profile photo upload response:", uploadResponse.data);
       if (!fileUrl) {
-        console.log("Failed to get profile photo URL");
-        setErrorModalProps({
-          error: "Failed to upload profile photo",
-          action: "retry",
-          actionText: "Try Again",
-          onAction: () => handleProfilePhotoChange(file),
+        showModal({
+          isSubmitting: false,
+          currentStep: "error",
+          message: "Failed to upload profile photo",
+          error: "No file URL returned",
         });
-        setIsErrorModalOpen(true);
-        setIsUploadingPhoto(false);
         return;
       }
 
-      const profileResponse = await axios.put(
+      await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { picture: fileUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log(
-        "Profile photo profile update response:",
-        profileResponse.data
-      );
       setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Profile photo updated successfully!",
+      });
+      setTimeout(hideModal, 2000);
     } catch (error) {
       console.error("Error uploading profile photo:", error);
-      setErrorModalProps({
-        error: "Failed to upload profile photo",
-        action: "retry",
-        actionText: "Try Again",
-        onAction: () => handleProfilePhotoChange(file),
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to upload profile photo",
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setIsErrorModalOpen(true);
-    } finally {
-      setIsUploadingPhoto(false);
     }
   };
 
@@ -459,37 +465,45 @@ const Profile = () => {
   };
 
   const updateInterests = async () => {
+    showModal({
+      isSubmitting: true,
+      currentStep: "saving",
+      message: "Updating interests...",
+    });
+
     const token = await getToken();
     if (!token) {
-      console.log("No token found for updating interests");
-      setErrorModalProps({
-        error: "Authentication required",
-        action: "nav",
-        link: "/adda/user-profile",
-        actionText: "Go to Profile",
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+        error: "No token found",
       });
-      setIsErrorModalOpen(true);
       return;
     }
 
     try {
-      console.log("Updating interests:", userDetails.interests);
-      const response = await axios.put(
+      await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { interests: userDetails.interests || [] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Interests update response:", response.data);
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Interests updated successfully!",
+      });
+      setTimeout(hideModal, 2000);
     } catch (error) {
       console.error("Error updating interests:", error);
-      setErrorModalProps({
-        error: "Failed to update interests",
-        action: "retry",
-        actionText: "Try Again",
-        onAction: updateInterests,
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to update interests",
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setIsErrorModalOpen(true);
     }
   };
 
@@ -520,15 +534,6 @@ const Profile = () => {
         onClose={() => setShowProfileModal(false)}
         onCompleteProfile={handleCompleteProfile}
       />
-      <ErrorModal
-        isOpen={isErrorModalOpen}
-        onClose={() => setIsErrorModalOpen(false)}
-        error={errorModalProps.error}
-        action={errorModalProps.action}
-        link={errorModalProps.link}
-        actionText={errorModalProps.actionText}
-        onAction={errorModalProps.onAction}
-      />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
           <div className="relative mb-6 sm:mb-8">
@@ -548,11 +553,7 @@ const Profile = () => {
                 className="absolute bottom-2 right-2 p-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                 onClick={() => coverPhotoInputRef.current?.click()}
               >
-                {isUploadingPhoto ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Camera className="w-5 h-5 text-white" />
-                )}
+                <Camera className="w-5 h-5 text-white" />
               </div>
               <input
                 type="file"
@@ -562,16 +563,6 @@ const Profile = () => {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    if (file.size > 5 * 1024 * 1024) {
-                      setErrorModalProps({
-                        error: "File size should not exceed 5MB",
-                        action: "custom",
-                        actionText: "OK",
-                        onAction: () => {},
-                      });
-                      setIsErrorModalOpen(true);
-                      return;
-                    }
                     handleCoverPhotoChange(file);
                   }
                 }}

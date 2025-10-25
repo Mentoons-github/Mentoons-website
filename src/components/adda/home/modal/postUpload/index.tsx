@@ -220,8 +220,6 @@ const PostUpload = ({
   };
 
   const handleSubmit = async (values: FormValues) => {
-    console.log("🚨 ARTICLE SUBMISSION FUNCTION TRIGGERED 🚨");
-    console.log("Post type:", postType);
 
     try {
       const valuesWithUploadedMedia = await uploadAllMedia(values);
@@ -233,11 +231,6 @@ const PostUpload = ({
         toast.error("Authentication failed. Please log in again.");
         return;
       }
-
-      console.log("=== ARTICLE POST SUBMISSION DEBUG INFO ===");
-      console.log("Form values:", valuesWithUploadedMedia);
-      console.log("Post type:", postType);
-      console.log("Media objects:", valuesWithUploadedMedia.media);
 
       const postData: {
         title: string;
@@ -320,15 +313,7 @@ const PostUpload = ({
           }));
       }
 
-      console.log(
-        "Final post data to be submitted:",
-        JSON.stringify(postData, null, 2)
-      );
-
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
-
-      console.log("Sending request to:", apiUrl);
-      console.log("With authorization token:", token.substring(0, 10) + "...");
 
       const response = await axios.post(apiUrl, postData, {
         headers: {
@@ -336,8 +321,6 @@ const PostUpload = ({
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("Post creation response:", response);
 
       if (response.data.success) {
         toast.success("Post created successfully!");

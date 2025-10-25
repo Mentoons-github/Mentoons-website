@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const { isLoaded, signIn } = useSignIn();
-  const { setActive, client } = useClerk();
+  const { setActive, client, signOut } = useClerk();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -50,30 +50,64 @@ const AdminLogin = () => {
         identifier: formData.email,
         password: formData.password,
       });
+      if (result.status === "complete" && result.createdSessionId) {
+        await setActive({ session: result.createdSessionId });
 
-      if (result.status === "complete") {
-        const user = client?.activeSessions[0]?.user;
+        await new Promise((res) => setTimeout(res, 500));
 
-        if (!user) {
-          setError("Unable to retrieve user information.");
+        const activeUser = client?.activeSessions?.[0]?.user;
+
+        if (!activeUser) {
+          setError("Unable to retrieve user details.");
+          await signOut();
           setIsSubmitting(false);
           return;
         }
 
-        const userRole = user.publicMetadata?.role;
+        const userRole = activeUser.publicMetadata?.role;
 
         if (userRole === "ADMIN") {
-          await setActive({ session: result.createdSessionId });
           navigate("/admin/dashboard");
         } else {
+          await signOut();
           setError("Access denied: You do not have admin privileges.");
         }
       } else {
-        setError("Error occurred during authentication.");
+        setError("Authentication could not be completed. Please try again.");
       }
     } catch (err: any) {
-      const error = err?.errors[0]?.message;
-      setError(error);
+      console.error("Sign-in error:", err);
+
+      const rawMessage = err?.errors?.[0]?.message || err?.message || "";
+
+      let friendlyMessage = "Something went wrong while signing in.";
+
+      if (rawMessage.includes("identifier")) {
+        friendlyMessage =
+          "We couldn’t find an account with that email address.";
+      } else if (rawMessage.includes("password")) {
+        friendlyMessage =
+          "The password you entered is incorrect. Please try again.";
+      } else if (rawMessage.includes("already exists")) {
+        friendlyMessage =
+          "You’re already signed in on another device. Please sign out there before logging in again.";
+      } else if (rawMessage.includes("too many requests")) {
+        friendlyMessage =
+          "Too many login attempts. Please wait a few moments and try again.";
+      } else if (rawMessage.includes("unauthorized")) {
+        friendlyMessage = "You are not authorized to access this page.";
+      } else if (rawMessage.includes("session")) {
+        friendlyMessage =
+          "Your session could not be created. Please refresh and try again.";
+      } else if (rawMessage.includes("network")) {
+        friendlyMessage =
+          "Network issue — please check your internet connection and try again.";
+      } else if (rawMessage.includes("attempts")) {
+        friendlyMessage =
+          "Too many incorrect attempts. Please wait a bit before trying again.";
+      }
+
+      setError(friendlyMessage);
     } finally {
       setIsSubmitting(false);
     }

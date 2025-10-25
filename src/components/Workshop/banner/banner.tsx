@@ -137,10 +137,10 @@ const WorkshopBanner = ({
               const theme = COLOR_THEME[themeIndex];
 
               const subheadingMap: Record<string, string> = {
-                "Instant Katha": "Storytelling",
-                Hasyaras: "Laughter",
-                KalaKriti: "Art",
-                "Career Corner": "Career",
+                "Music Therapy": "KalaKriti",
+                "Art Therapy": "KalaKriti",
+                "Story Telling Therapy": "Instant Katha",
+                "Laughter Therapy": "Instant Katha",
               };
 
               const subheading = subheadingMap[workshop.workshopName] || "";

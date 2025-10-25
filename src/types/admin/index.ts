@@ -33,6 +33,8 @@ import {
   singleJobDataResponse,
 } from "./job";
 
+import { Admin } from "./admin";
+
 import { ISessionCall } from "./sessionCall";
 
 export type {
@@ -62,6 +64,7 @@ export type {
   JobDataResponse,
   singleJobDataResponse,
   ISessionCall,
+  Admin,
 };
 
 export { ProductType };

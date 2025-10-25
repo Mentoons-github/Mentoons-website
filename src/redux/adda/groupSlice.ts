@@ -54,7 +54,18 @@ const groupSlice = createSlice({
     });
     builder.addCase(
       fetchGroupById.fulfilled,
-      (state, action: PayloadAction<Group, string, { arg: string }>) => {
+      (
+        state,
+        action: PayloadAction<
+          Group,
+          string,
+          {
+            arg: { groupId: string; token: string };
+            requestId: string;
+            requestStatus: "fulfilled";
+          }
+        >
+      ) => {
         state.loading = false;
         const groupIndex = state.data.findIndex(
           (g) => g._id === action.payload._id
@@ -164,6 +175,7 @@ const groupSlice = createSlice({
         const groupId = action.meta.arg.groupId;
         const groupIndex = state.data.findIndex((g) => g._id === groupId);
         if (groupIndex !== -1) {
+          state.data[groupIndex].polls = state.data[groupIndex].polls || [];
           state.data[groupIndex].polls.push(action.payload);
         }
       }

@@ -8,6 +8,8 @@ const EmployeeSidebar = () => {
     { name: "YourTeam", icon: "👥" },
     { name: "Salary", icon: "🪙" },
     { name: "Session_Calls", icon: "📞" },
+    { name: "ReferAndEarn", icon: "💰" },
+    { name: "BirthdayTracker", icon: "🎂" },
     // { name: "Incentive", icon: "💳" },
   ];
 

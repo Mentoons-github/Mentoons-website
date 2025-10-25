@@ -22,12 +22,12 @@ const MobileProductList = ({
   handleBuyNow,
   isLoading,
 }: MobileProduct) => (
-  <div className="block md:hidden">
-    <div className="mb-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+  <div className="block md:hidden px-2 sm:px-4">
+    <div className="mb-4 sm:mb-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
         Age {ageCategory}
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-3 sm:space-y-4">
         {products.map((product: ProductBase) => (
           <MobileProductItem
             key={product._id}

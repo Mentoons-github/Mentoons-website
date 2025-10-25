@@ -18,10 +18,26 @@ import {
   TabsAndViewToggleProps,
 } from "./sessionCall";
 
-import { EmployeeInterface } from "./employee";
+import {
+  EmployeeInterface,
+  Department,
+  UserFormData,
+  IAttendance,
+} from "./employee";
+
+import {
+  MonthlyStats,
+  AttendanceRecord,
+  AttendanceStats,
+  TodayAttendanceType,
+} from "./attendance";
+
+import { SalaryData } from "./salary";
 
 export type {
   EmployeeInterface,
+  Department,
+  UserFormData,
   Employee,
   SingleEmployeeDataResponse,
   EmployeeDataResponse,
@@ -36,4 +52,10 @@ export type {
   Stats,
   StatsBarProps,
   TabsAndViewToggleProps,
+  IAttendance,
+  MonthlyStats,
+  AttendanceRecord,
+  AttendanceStats,
+  TodayAttendanceType,
+  SalaryData,
 };

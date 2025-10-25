@@ -118,7 +118,7 @@ export const fetchGroupById = createAsyncThunk<
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("Response data :", response.data);
+    console.log("Response data:", response.data);
     return response.data.data as Group;
   } catch (error: any) {
     return rejectWithValue(

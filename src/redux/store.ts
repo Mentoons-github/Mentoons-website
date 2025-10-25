@@ -15,13 +15,17 @@ import userReducer from "./userSlice";
 import workshopReducer from "./workshopSlice";
 import conversationReducer from "./adda/conversationSlice";
 import adminWorkshopReducer from "./admin/workshop";
-import EmployeeReducer from "./admin/employee/employeeSlice";
+import EmployeeAdminReducer from "./admin/employee/employeeSlice";
 import friendRequestReducer from "./adda/friendRequest";
 import careerAdminReducer from "./admin/job/jobSlice";
 import sessionCallAdmin from "./admin/sessionCall/sessionCall";
 import groupReducer from "./adda/groupSlice";
+import taskReducer from "./admin/task/taskSlice";
+import AdminReducer from "./admin/admin/admin";
+import employeeReducer from "./employee/employee";
 
 export const store = configureStore<{
+  tasks: ReturnType<typeof taskReducer>;
   comics: ReturnType<typeof comicsReducer>;
   user: ReturnType<typeof userReducer>;
   workshop: ReturnType<typeof workshopReducer>;
@@ -38,13 +42,16 @@ export const store = configureStore<{
   notification: ReturnType<typeof notificationReducer>;
   conversation: ReturnType<typeof conversationReducer>;
   adminWorkshop: ReturnType<typeof adminWorkshopReducer>;
-  employee: ReturnType<typeof EmployeeReducer>;
+  employee: ReturnType<typeof EmployeeAdminReducer>;
   friendRequests: ReturnType<typeof friendRequestReducer>;
   careerAdmin: ReturnType<typeof careerAdminReducer>;
   sessionCallAdmin: ReturnType<typeof sessionCallAdmin>;
   groups: ReturnType<typeof groupReducer>;
+  admin: ReturnType<typeof AdminReducer>;
+  employeeData: ReturnType<typeof employeeReducer>;
 }>({
   reducer: {
+    tasks: taskReducer,
     comics: comicsReducer,
     user: userReducer,
     workshop: workshopReducer,
@@ -61,11 +68,13 @@ export const store = configureStore<{
     notification: notificationReducer,
     conversation: conversationReducer,
     adminWorkshop: adminWorkshopReducer,
-    employee: EmployeeReducer,
+    employee: EmployeeAdminReducer,
     friendRequests: friendRequestReducer,
     careerAdmin: careerAdminReducer,
     sessionCallAdmin: sessionCallAdmin,
     groups: groupReducer,
+    admin: AdminReducer,
+    employeeData: employeeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

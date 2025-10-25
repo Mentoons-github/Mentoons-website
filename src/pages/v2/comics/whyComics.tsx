@@ -1,4 +1,3 @@
-import React from "react";
 import { BookOpen, Target, Users, Lightbulb } from "lucide-react";
 
 export default function WhyComics() {

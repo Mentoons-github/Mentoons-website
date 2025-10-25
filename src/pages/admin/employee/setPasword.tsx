@@ -1,22 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle } from "lucide-react";
 
+interface PasswordStrength {
+  strength: number;
+  label: string;
+  color: string;
+}
+
+interface ErrorResponse {
+  message?: string;
+}
+
 const AddPasswordPage = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [hasValidKey, setHasValidKey] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const invitationId = searchParams.get("invitationId");
+  const key = searchParams.get("key");
 
-  const getPasswordStrength = (pass: string) => {
+  useEffect(() => {
+    if (!key) {
+      setMessage(
+        "Invalid or missing invitation link. Please request a new invitation from HR."
+      );
+    } else {
+      setHasValidKey(true);
+    }
+  }, [key]);
+
+  const getPasswordStrength = (pass: string): PasswordStrength => {
     if (pass.length === 0) return { strength: 0, label: "", color: "" };
     if (pass.length < 6)
       return { strength: 25, label: "Weak", color: "bg-red-500" };
@@ -38,11 +60,13 @@ const AddPasswordPage = () => {
 
   const passwordStrength = getPasswordStrength(password);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
 
-    if (!invitationId) {
-      setMessage("Invalid invitation link");
+    if (!key) {
+      setMessage("Invalid invitation link. Please request a new one from HR.");
       return;
     }
 
@@ -62,26 +86,63 @@ const AddPasswordPage = () => {
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/admin/set-password`,
-        { invitationId, password }
+        { key, password }
       );
 
       console.log(data);
 
       setIsSuccess(true);
-      setMessage("Password set successfully! Redirecting to login...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (error: any) {
+      setMessage("Password set successfully! Redirecting to Employee login...");
+      const infoMessage = "Please visit your email to find your employeeId";
+      navigate(`/employee/login?message=${encodeURIComponent(infoMessage)}`);
+    } catch (error) {
       console.error(error);
+      const axiosError = error as AxiosError<ErrorResponse>;
       const errorMessage =
-        error.response?.data?.message ||
+        axiosError.response?.data?.message ||
         "Server error. Please try again later.";
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!hasValidKey) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center">
+                <AlertCircle className="text-white" size={32} />
+              </div>
+            </div>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Invalid Link
+              </h2>
+              <p className="text-gray-600">
+                The invitation link is invalid or missing.
+              </p>
+            </div>
+            <div className="mt-6 p-4 rounded-lg bg-red-50 border border-red-200">
+              <AlertCircle
+                className="text-red-600 mr-3 flex-shrink-0 mt-0.5 inline"
+                size={20}
+              />
+              <p className="text-sm text-red-800 inline">{message}</p>
+            </div>
+            <button
+              onClick={() => navigate("/")}
+              className="w-full mt-6 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:from-gray-700 hover:to-gray-800 transition-all transform hover:scale-[1.02]"
+            >
+              Go Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 py-12">
@@ -121,7 +182,9 @@ const AddPasswordPage = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
                   required
                   className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
@@ -183,7 +246,9 @@ const AddPasswordPage = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Re-enter your password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setConfirmPassword(e.target.value)
+                  }
                   required
                   className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />

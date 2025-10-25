@@ -197,7 +197,14 @@ const ProfileTabContent = ({
                     Date of Birth
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
-                    {userDetails.dateOfBirth}
+                    {new Date(userDetails.dateOfBirth).toLocaleDateString(
+                      "en-En",
+                      {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
                   </p>
                 </div>
               )}

@@ -75,7 +75,7 @@ const DynamicTable = <T extends Record<string, any>>({
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
-  const [isUser, setIsUser] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   useEffect(() => {
@@ -153,14 +153,15 @@ const DynamicTable = <T extends Record<string, any>>({
   };
 
   const handleView = (item: any) => {
-    console.log("clicked view");
-    if (itemType === "user") {
+    console.log("clicked view", item);
+    if (itemType === "user" || itemType === "employee") {
       setSelectedItem(item);
-      setIsUser(true);
+      setIsModalOpen(true);
     } else if (
       itemType === "product" ||
       itemType === "enquiry" ||
-      itemType === "job"
+      itemType === "job" ||
+      itemType === "meetups"
     ) {
       console.log("view setting");
       onView?.(item);
@@ -170,9 +171,9 @@ const DynamicTable = <T extends Record<string, any>>({
   const getSortIcon = (field: string) => {
     if (sortField !== field) return null;
     return sortOrder === "asc" ? (
-      <ChevronUp className="w-4 h-4" />
+      <ChevronUp className="w-4 h-4 text-blue-600" />
     ) : (
-      <ChevronDown className="w-4 h-4" />
+      <ChevronDown className="w-4 h-4 text-blue-600" />
     );
   };
 
@@ -222,22 +223,22 @@ const DynamicTable = <T extends Record<string, any>>({
   return (
     <div className="w-full">
       {/* Header with Search and Add Button */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <div className="relative flex-1 max-w-md w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search items..."
             value={localSearchTerm}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
           />
         </div>
 
         {onAdd && (
           <button
             onClick={onAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ml-4"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
           >
             <Plus className="w-4 h-4" />
             Add Item
@@ -246,12 +247,12 @@ const DynamicTable = <T extends Record<string, any>>({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="overflow-x-auto">
+        <table className="w-full divide-y divide-gray-200 table-auto">
           <thead className="bg-gray-50">
             <tr>
               {itemType === "job" && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <input
                     type="checkbox"
                     checked={isAllSelected}
@@ -262,17 +263,17 @@ const DynamicTable = <T extends Record<string, any>>({
               )}
               {columns.map((column) => (
                 <th
-                  key={column}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort(column)}
+                  key={column}
+                  className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors hidden sm:table-cell"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     {(formatHeader || defaultFormatHeader)(column)}
                     {getSortIcon(column)}
                   </div>
                 </th>
               ))}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -280,10 +281,13 @@ const DynamicTable = <T extends Record<string, any>>({
           <tbody className="bg-white divide-y divide-gray-200">
             {data.map((item, index) => {
               const itemId = String(item[idKey] || index);
+              const hasPendingEditRequest =
+                itemType === "employee" &&
+                item.profileEditRequest?.status === "pending";
               return (
                 <tr key={itemId} className="hover:bg-gray-50 transition-colors">
                   {itemType === "job" && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                       <input
                         type="checkbox"
                         checked={selectedItems.has(itemId)}
@@ -295,10 +299,10 @@ const DynamicTable = <T extends Record<string, any>>({
                   {columns.map((column) => (
                     <td
                       key={column}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                      className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell"
                     >
                       <div
-                        className="max-w-xs truncate"
+                        className="max-w-[150px] sm:max-w-xs truncate"
                         title={String(item[column] || "")}
                       >
                         {(formatCell || defaultFormatCell)(
@@ -309,15 +313,26 @@ const DynamicTable = <T extends Record<string, any>>({
                       </div>
                     </td>
                   ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleView(item)}
-                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                        title="View"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                  <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm text-gray-500 w-[80px] sm:w-[100px]">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => handleView(item)}
+                          className={`p-1 ${
+                            hasPendingEditRequest
+                              ? "text-red-600 hover:text-red-800 hover:bg-red-100"
+                              : "text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                          } rounded transition-colors`}
+                          title="View"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {hasPendingEditRequest && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                              1
+                            </span>
+                          )}
+                        </button>
+                      </div>
                       {(itemType === "product" || itemType === "meetups") &&
                         onEdit && (
                           <button
@@ -350,13 +365,14 @@ const DynamicTable = <T extends Record<string, any>>({
       <div className="mt-4 text-sm text-gray-500">
         Showing {data.length} item{data.length !== 1 ? "s" : ""}
       </div>
-      {isUser && selectedItem && (
+      {isModalOpen && selectedItem && (
         <UserDetailsModal
           onClose={() => {
-            setIsUser(false);
+            setIsModalOpen(false);
             setSelectedItem(null);
           }}
-          user={selectedItem}
+          item={selectedItem}
+          itemType={itemType}
         />
       )}
     </div>

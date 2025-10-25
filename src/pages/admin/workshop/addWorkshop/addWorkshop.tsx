@@ -12,7 +12,7 @@ import {
   WorkshopFormValues,
 } from "@/utils/formik/admin/addWorkshopForm";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { FaTrash, FaCheck, FaSpinner, FaTimes } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
@@ -22,13 +22,7 @@ import { toast } from "sonner";
 import axios, { AxiosError } from "axios";
 import { useSearchParams } from "react-router-dom";
 import { AgeGroupDetails } from "@/types";
-
-interface SubmissionStatus {
-  isSubmitting: boolean;
-  currentStep: "uploading" | "saving" | "success" | "error";
-  message: string;
-  error?: string;
-}
+import { useSubmissionModal } from "@/context/adda/commonModalContext";
 
 const AddWorkshop: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -38,15 +32,12 @@ const AddWorkshop: React.FC = () => {
   const [imageFiles, setImageFiles] = useState<Map<string, File | null>>(
     new Map()
   );
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>({
-    isSubmitting: false,
-    currentStep: "uploading",
-    message: "",
-  });
+  const { showModal, hideModal } = useSubmissionModal();
   const { getToken } = useAuth();
 
   const [formInitialValues, setFormInitialValues] =
     useState<WorkshopFormValues>(initialValues);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchWorkshop = async () => {
@@ -121,7 +112,7 @@ const AddWorkshop: React.FC = () => {
         throw new Error("Authentication token not found");
       }
 
-      setSubmissionStatus({
+      showModal({
         isSubmitting: true,
         currentStep: "uploading",
         message: `Deleting image for ${ageRange}...`,
@@ -149,7 +140,7 @@ const AddWorkshop: React.FC = () => {
         null
       );
 
-      setSubmissionStatus({
+      showModal({
         isSubmitting: false,
         currentStep: "success",
         message: `Image for ${ageRange} deleted successfully!`,
@@ -158,7 +149,7 @@ const AddWorkshop: React.FC = () => {
       toast.success(`Image for ${ageRange} deleted successfully.`);
     } catch (error) {
       console.error("Failed to delete image:", error);
-      setSubmissionStatus({
+      showModal({
         isSubmitting: false,
         currentStep: "error",
         message: `Failed to delete image for ${ageRange}`,
@@ -174,7 +165,8 @@ const AddWorkshop: React.FC = () => {
     { resetForm }: FormikHelpers<WorkshopFormValues>
   ) => {
     try {
-      setSubmissionStatus({
+      setIsSubmitting(true);
+      showModal({
         isSubmitting: true,
         currentStep: "uploading",
         message: "Getting authentication...",
@@ -195,7 +187,7 @@ const AddWorkshop: React.FC = () => {
               let imageUrl = group.image;
 
               if (imageFile) {
-                setSubmissionStatus({
+                showModal({
                   isSubmitting: true,
                   currentStep: "uploading",
                   message: `Uploading image for ${group.ageRange}...`,
@@ -234,7 +226,7 @@ const AddWorkshop: React.FC = () => {
         workshops: updatedWorkshops,
       };
 
-      setSubmissionStatus({
+      showModal({
         isSubmitting: true,
         currentStep: "saving",
         message: workshopId ? "Updating workshop..." : "Creating workshop...",
@@ -264,7 +256,7 @@ const AddWorkshop: React.FC = () => {
         );
       }
 
-      setSubmissionStatus({
+      showModal({
         isSubmitting: false,
         currentStep: "success",
         message: workshopId
@@ -281,15 +273,12 @@ const AddWorkshop: React.FC = () => {
       setTimeout(() => {
         resetForm();
         setImageFiles(new Map());
-        setSubmissionStatus({
-          isSubmitting: false,
-          currentStep: "uploading",
-          message: "",
-        });
+        hideModal();
+        setIsSubmitting(false);
       }, 2000);
     } catch (error: unknown) {
       console.error("Submission failed:", error);
-      setSubmissionStatus({
+      showModal({
         isSubmitting: false,
         currentStep: "error",
         message: workshopId
@@ -305,6 +294,7 @@ const AddWorkshop: React.FC = () => {
           ? "Failed to update workshop. Please try again."
           : "Failed to create workshop. Please try again."
       );
+      setIsSubmitting(false);
     }
   };
 
@@ -358,120 +348,27 @@ const AddWorkshop: React.FC = () => {
     }
   };
 
-  const closeSubmissionModal = () => {
-    setSubmissionStatus({
-      isSubmitting: false,
-      currentStep: "uploading",
-      message: "",
-    });
-  };
-
-  const renderSubmissionModal = () => {
-    if (
-      !submissionStatus.isSubmitting &&
-      submissionStatus.currentStep !== "success" &&
-      submissionStatus.currentStep !== "error"
-    ) {
-      return null;
-    }
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-          {submissionStatus.currentStep === "uploading" && (
-            <>
-              <div className="mb-6">
-                <FaSpinner className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {submissionStatus.message.includes("Deleting")
-                  ? "Deleting Image"
-                  : "Uploading Image"}
-              </h3>
-              <p className="text-gray-600">{submissionStatus.message}</p>
-            </>
-          )}
-
-          {submissionStatus.currentStep === "saving" && (
-            <>
-              <div className="mb-6">
-                <FaSpinner className="w-12 h-12 text-green-500 mx-auto animate-spin" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {workshopId ? "Updating Workshop" : "Creating Workshop"}
-              </h3>
-              <p className="text-gray-600">{submissionStatus.message}</p>
-            </>
-          )}
-
-          {submissionStatus.currentStep === "success" && (
-            <>
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <FaCheck className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold text-green-800 mb-2">
-                Success!
-              </h3>
-              <p className="text-gray-600 mb-6">{submissionStatus.message}</p>
-              <button
-                onClick={closeSubmissionModal}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                Close
-              </button>
-            </>
-          )}
-
-          {submissionStatus.currentStep === "error" && (
-            <>
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                  <FaTimes className="w-8 h-8 text-red-500" />
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold text-red-800 mb-2">Error</h3>
-              <p className="text-gray-600 mb-2">{submissionStatus.message}</p>
-              {submissionStatus.error && (
-                <p className="text-sm text-red-600 mb-6">
-                  {submissionStatus.error}
-                </p>
-              )}
-              <button
-                onClick={closeSubmissionModal}
-                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Close
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-4 md:p-5">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-2 sm:p-4 md:p-6 lg:p-8">
       <div>
-        <div className="mb-8 text-center text-start">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 sm:mb-8 text-center sm:text-left">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             {workshopId ? "Edit" : "Add New"} Workshop Category
           </h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">
-            <h2 className="text-2xl font-semibold text-white">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-white">
               Workshop Category Details
             </h2>
-            <p className="text-green-100 mt-1">
+            <p className="text-green-100 mt-1 text-sm sm:text-base">
               Fill in the information below to {workshopId ? "edit" : "create"}{" "}
               your workshop category
             </p>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             <Formik
               initialValues={formInitialValues}
               validationSchema={validationSchema}
@@ -488,14 +385,13 @@ const AddWorkshop: React.FC = () => {
                 setFieldValue: (field: string, value: any) => void;
                 errors: any;
                 touched: any;
-                isSubmitting: boolean;
               }) => (
-                <Form className="space-y-8">
+                <Form className="space-y-6 sm:space-y-8">
                   {/* Category Name */}
                   <div className="space-y-3">
                     <label
                       htmlFor="categoryName"
-                      className="block text-lg font-semibold text-gray-900"
+                      className="block text-base sm:text-lg font-semibold text-gray-900"
                     >
                       Category Name
                     </label>
@@ -504,8 +400,8 @@ const AddWorkshop: React.FC = () => {
                       name="categoryName"
                       type="text"
                       placeholder="Enter category name"
-                      disabled={submissionStatus.isSubmitting}
-                      className="w-full px-4 py-3 text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isSubmitting}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <ErrorMessage
                       name="categoryName"
@@ -518,7 +414,7 @@ const AddWorkshop: React.FC = () => {
                   <div className="space-y-3">
                     <label
                       htmlFor="subtitle"
-                      className="block text-lg font-semibold text-gray-900"
+                      className="block text-base sm:text-lg font-semibold text-gray-900"
                     >
                       Subtitle
                     </label>
@@ -527,8 +423,8 @@ const AddWorkshop: React.FC = () => {
                       name="subtitle"
                       type="text"
                       placeholder="Enter category subtitle"
-                      disabled={submissionStatus.isSubmitting}
-                      className="w-full px-4 py-3 text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isSubmitting}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <ErrorMessage
                       name="subtitle"
@@ -539,7 +435,7 @@ const AddWorkshop: React.FC = () => {
 
                   {/* Workshops */}
                   <div className="space-y-3">
-                    <label className="block text-lg font-semibold text-gray-900">
+                    <label className="block text-base sm:text-lg font-semibold text-gray-900">
                       Workshops
                     </label>
                     <FieldArray name="workshops">
@@ -557,21 +453,21 @@ const AddWorkshop: React.FC = () => {
                         }) => void;
                         remove: (index: number) => void;
                       }) => (
-                        <div className="space-y-4">
+                        <div className="space-y-4 sm:space-y-6">
                           {values.workshops.map((workshop, workshopIndex) => (
                             <div
                               key={workshopIndex}
-                              className="border p-6 rounded-xl bg-gray-50"
+                              className="border p-4 sm:p-6 rounded-xl bg-gray-50"
                             >
-                              <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-semibold text-gray-900">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-0">
                                   Workshop {workshopIndex + 1}
                                 </h3>
                                 <button
                                   type="button"
                                   onClick={() => remove(workshopIndex)}
-                                  disabled={submissionStatus.isSubmitting}
-                                  className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={isSubmitting}
+                                  className="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <FaTrash className="w-4 h-4" />
                                   Remove Workshop
@@ -579,10 +475,10 @@ const AddWorkshop: React.FC = () => {
                               </div>
 
                               {/* Workshop Name */}
-                              <div className="space-y-3 mb-6">
+                              <div className="space-y-3 mb-4 sm:mb-6">
                                 <label
                                   htmlFor={`workshops[${workshopIndex}].workshopName`}
-                                  className="block text-lg font-semibold text-gray-900"
+                                  className="block text-base sm:text-lg font-semibold text-gray-900"
                                 >
                                   Workshop Name
                                 </label>
@@ -591,8 +487,8 @@ const AddWorkshop: React.FC = () => {
                                   name={`workshops[${workshopIndex}].workshopName`}
                                   type="text"
                                   placeholder="Enter an engaging workshop name"
-                                  disabled={submissionStatus.isSubmitting}
-                                  className="w-full px-4 py-3 text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={isSubmitting}
+                                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                 />
                                 <ErrorMessage
                                   name={`workshops[${workshopIndex}].workshopName`}
@@ -602,8 +498,8 @@ const AddWorkshop: React.FC = () => {
                               </div>
 
                               {/* Why Choose Us */}
-                              <div className="space-y-3 mb-6">
-                                <label className="block text-lg font-semibold text-gray-900">
+                              <div className="space-y-3 mb-4 sm:mb-6">
+                                <label className="block text-base sm:text-lg font-semibold text-gray-900">
                                   Why Choose Us
                                 </label>
                                 <FieldArray
@@ -639,10 +535,8 @@ const AddWorkshop: React.FC = () => {
                                                 placeholder={`Why Choose Us heading ${
                                                   whyIndex + 1
                                                 }`}
-                                                disabled={
-                                                  submissionStatus.isSubmitting
-                                                }
-                                                className="w-full px-4 py-3 text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={isSubmitting}
+                                                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                               />
                                               <ErrorMessage
                                                 name={`workshops[${workshopIndex}].whyChooseUs[${whyIndex}].heading`}
@@ -664,10 +558,8 @@ const AddWorkshop: React.FC = () => {
                                                 placeholder={`Why Choose Us description ${
                                                   whyIndex + 1
                                                 }`}
-                                                disabled={
-                                                  submissionStatus.isSubmitting
-                                                }
-                                                className="w-full px-4 py-3 text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={isSubmitting}
+                                                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                               />
                                               <ErrorMessage
                                                 name={`workshops[${workshopIndex}].whyChooseUs[${whyIndex}].description`}
@@ -678,10 +570,8 @@ const AddWorkshop: React.FC = () => {
                                             <button
                                               type="button"
                                               onClick={() => remove(whyIndex)}
-                                              disabled={
-                                                submissionStatus.isSubmitting
-                                              }
-                                              className="px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed self-start"
+                                              disabled={isSubmitting}
+                                              className="w-full sm:w-auto px-4 py-2 sm:py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                               <FaTrash className="w-4 h-4" />
                                               Remove Why Choose Us
@@ -694,8 +584,8 @@ const AddWorkshop: React.FC = () => {
                                         onClick={() =>
                                           push({ heading: "", description: "" })
                                         }
-                                        disabled={submissionStatus.isSubmitting}
-                                        className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={isSubmitting}
+                                        className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                       >
                                         <PlusIcon className="w-5 h-5" />
                                         Add Why Choose Us
@@ -719,15 +609,15 @@ const AddWorkshop: React.FC = () => {
 
                               {/* Age Groups */}
                               <div className="space-y-3">
-                                <label className="block text-lg font-semibold text-gray-900">
+                                <label className="block text-base sm:text-lg font-semibold text-gray-900">
                                   Target Age Group
                                 </label>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                                   {["6-12", "13-19", "20+"].map((age) => (
                                     <label
                                       key={age}
-                                      className={`flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all duration-200 cursor-pointer bg-gray-50 hover:bg-green-50 group ${
-                                        submissionStatus.isSubmitting
+                                      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all duration-200 cursor-pointer bg-gray-50 hover:bg-green-50 group ${
+                                        isSubmitting
                                           ? "opacity-50 cursor-not-allowed"
                                           : ""
                                       }`}
@@ -780,10 +670,10 @@ const AddWorkshop: React.FC = () => {
                                             });
                                           }
                                         }}
-                                        disabled={submissionStatus.isSubmitting}
-                                        className="w-5 h-5 rounded text-green-600 border-2 border-gray-300 focus:ring-green-500 focus:ring-2"
+                                        disabled={isSubmitting}
+                                        className="w-4 sm:w-5 h-4 sm:h-5 rounded text-green-600 border-2 border-gray-300 focus:ring-green-500 focus:ring-2"
                                       />
-                                      <span className="text-gray-900 font-medium group-hover:text-green-700">
+                                      <span className="text-gray-900 font-medium group-hover:text-green-700 text-sm sm:text-base">
                                         {age} years old
                                       </span>
                                     </label>
@@ -808,9 +698,9 @@ const AddWorkshop: React.FC = () => {
                                 (group, ageGroupIndex) => (
                                   <div
                                     key={ageGroupIndex}
-                                    className="space-y-6 border-t pt-6"
+                                    className="space-y-4 sm:space-y-6 border-t pt-4 sm:pt-6 mt-4 sm:mt-6"
                                   >
-                                    <h3 className="text-xl font-semibold text-gray-900">
+                                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                                       Details for Age Group: {group.ageRange}
                                     </h3>
 
@@ -818,7 +708,7 @@ const AddWorkshop: React.FC = () => {
                                     <div className="space-y-3">
                                       <label
                                         htmlFor={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].serviceOverview`}
-                                        className="block text-lg font-semibold text-gray-900"
+                                        className="block text-base sm:text-lg font-semibold text-gray-900"
                                       >
                                         Service Overview
                                       </label>
@@ -828,8 +718,8 @@ const AddWorkshop: React.FC = () => {
                                         as="textarea"
                                         rows={4}
                                         placeholder={`Service overview for ${group.ageRange}`}
-                                        disabled={submissionStatus.isSubmitting}
-                                        className="w-full px-4 py-3 text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={isSubmitting}
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-gray-50 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                       />
                                       <ErrorMessage
                                         name={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].serviceOverview`}
@@ -840,7 +730,7 @@ const AddWorkshop: React.FC = () => {
 
                                     {/* Benefits */}
                                     <div className="space-y-3">
-                                      <label className="block text-lg font-semibold text-gray-900">
+                                      <label className="block text-base sm:text-lg font-semibold text-gray-900">
                                         Benefits
                                       </label>
                                       <FieldArray
@@ -876,10 +766,8 @@ const AddWorkshop: React.FC = () => {
                                                       placeholder={`Benefit title ${
                                                         benefitIndex + 1
                                                       }`}
-                                                      disabled={
-                                                        submissionStatus.isSubmitting
-                                                      }
-                                                      className="w-full px-4 py-3 text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                      disabled={isSubmitting}
+                                                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     />
                                                     <ErrorMessage
                                                       name={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].benefits[${benefitIndex}].title`}
@@ -901,10 +789,8 @@ const AddWorkshop: React.FC = () => {
                                                       placeholder={`Benefit description ${
                                                         benefitIndex + 1
                                                       }`}
-                                                      disabled={
-                                                        submissionStatus.isSubmitting
-                                                      }
-                                                      className="w-full px-4 py-3 text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                      disabled={isSubmitting}
+                                                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     />
                                                     <ErrorMessage
                                                       name={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].benefits[${benefitIndex}].description`}
@@ -917,10 +803,8 @@ const AddWorkshop: React.FC = () => {
                                                     onClick={() =>
                                                       remove(benefitIndex)
                                                     }
-                                                    disabled={
-                                                      submissionStatus.isSubmitting
-                                                    }
-                                                    className="px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed self-start"
+                                                    disabled={isSubmitting}
+                                                    className="w-full sm:w-auto px-4 py-2 sm:py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                                   >
                                                     <FaTrash className="w-4 h-4" />
                                                     Remove Benefit
@@ -936,10 +820,8 @@ const AddWorkshop: React.FC = () => {
                                                   description: "",
                                                 })
                                               }
-                                              disabled={
-                                                submissionStatus.isSubmitting
-                                              }
-                                              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                              disabled={isSubmitting}
+                                              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                               <PlusIcon className="w-5 h-5" />
                                               Add Benefit for {group.ageRange}
@@ -971,14 +853,14 @@ const AddWorkshop: React.FC = () => {
                                     <div className="space-y-3">
                                       <label
                                         htmlFor={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].image`}
-                                        className="block text-lg font-semibold text-gray-900"
+                                        className="block text-base sm:text-lg font-semibold text-gray-900"
                                       >
                                         Workshop Image for {group.ageRange}
                                       </label>
-                                      <div className="flex flex-col sm:flex-row items-start gap-6">
+                                      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                                         <div
-                                          className={`relative flex items-center justify-center w-full sm:w-48 h-48 border-3 border-dashed border-gray-300 rounded-xl hover:border-green-400 transition-all duration-200 bg-gray-50 hover:bg-green-50 group cursor-pointer ${
-                                            submissionStatus.isSubmitting
+                                          className={`relative flex items-center justify-center w-full sm:w-40 md:w-48 h-40 md:h-48 border-3 border-dashed border-gray-300 rounded-xl hover:border-green-400 transition-all duration-200 bg-gray-50 hover:bg-green-50 group cursor-pointer ${
+                                            isSubmitting
                                               ? "opacity-50 cursor-not-allowed"
                                               : ""
                                           }`}
@@ -988,9 +870,7 @@ const AddWorkshop: React.FC = () => {
                                             name={`workshops[${workshopIndex}].ageGroups[${ageGroupIndex}].image`}
                                             type="file"
                                             accept="image/*"
-                                            disabled={
-                                              submissionStatus.isSubmitting
-                                            }
+                                            disabled={isSubmitting}
                                             onChange={(
                                               event: React.ChangeEvent<HTMLInputElement>
                                             ) =>
@@ -1005,11 +885,11 @@ const AddWorkshop: React.FC = () => {
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                                           />
                                           <div className="text-center">
-                                            <PlusIcon className="w-12 h-12 text-gray-400 group-hover:text-green-500 mx-auto mb-2 transition-colors duration-200" />
-                                            <p className="text-gray-600 font-medium group-hover:text-green-600">
+                                            <PlusIcon className="w-10 sm:w-12 h-10 sm:h-12 text-gray-400 group-hover:text-green-500 mx-auto mb-2 transition-colors duration-200" />
+                                            <p className="text-gray-600 font-medium group-hover:text-green-600 text-sm sm:text-base">
                                               Click to upload image
                                             </p>
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                               PNG, JPG, GIF up to 10MB
                                             </p>
                                           </div>
@@ -1019,7 +899,7 @@ const AddWorkshop: React.FC = () => {
                                             <img
                                               src={group.image}
                                               alt={`Workshop preview for ${group.ageRange}`}
-                                              className="w-full sm:w-48 h-48 object-cover rounded-xl shadow-lg"
+                                              className="w-full sm:w-40 md:w-48 h-40 md:h-48 object-cover rounded-xl shadow-lg"
                                             />
                                             <button
                                               type="button"
@@ -1031,9 +911,7 @@ const AddWorkshop: React.FC = () => {
                                                   group.ageRange
                                                 )
                                               }
-                                              disabled={
-                                                submissionStatus.isSubmitting
-                                              }
+                                              disabled={isSubmitting}
                                               className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-lg opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                               <FaTrash className="w-4 h-4" />
@@ -1062,8 +940,8 @@ const AddWorkshop: React.FC = () => {
                                 ageGroups: [],
                               })
                             }
-                            disabled={submissionStatus.isSubmitting}
-                            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <PlusIcon className="w-5 h-5" />
                             Add Workshop
@@ -1081,15 +959,15 @@ const AddWorkshop: React.FC = () => {
                   </div>
 
                   {/* Submit Button */}
-                  <div className="pt-6">
+                  <div className="pt-4 sm:pt-6">
                     <button
                       type="submit"
-                      disabled={submissionStatus.isSubmitting}
-                      className="w-full py-4 text-xl font-bold text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl transition-all duration-300 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      disabled={isSubmitting}
+                      className="w-full py-3 sm:py-4 text-lg sm:text-xl font-bold text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl transition-all duration-300 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      {submissionStatus.isSubmitting ? (
+                      {isSubmitting ? (
                         <div className="flex items-center justify-center gap-3">
-                          <FaSpinner className="w-5 h-5 animate-spin" />
+                          <FaTrash className="w-5 h-5 animate-spin" />
                           Processing...
                         </div>
                       ) : workshopId ? (
@@ -1105,8 +983,6 @@ const AddWorkshop: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {renderSubmissionModal()}
     </div>
   );
 };

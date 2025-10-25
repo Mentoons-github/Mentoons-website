@@ -794,7 +794,7 @@ export const FOOTER_PAGELINKS = [
       {
         id: "S_5",
         label: "Coloring Books",
-        url: `/product?productType=${ProductType.MENTOONS_BOOKS}#product`,
+        url: `/product?productType=${ProductType.MENTOONS_COLORING_BOOKS}#product`,
       },
     ],
   },
@@ -1182,11 +1182,11 @@ export const COMMON_NAV: NavLink[] = [
     // icon: FaUsers,
     url: "/assessment-page",
   },
-  {
-    id: "NL_02",
-    label: "Community",
-    url: "/community",
-  },
+  // {
+  //   id: "NL_02",
+  //   label: "Community",
+  //   url: "/community",
+  // },
   {
     id: "NL_03",
     label: "Products",
@@ -1297,12 +1297,12 @@ export const ADDA_NAV_LINKS: NavLink[] = [
     icon: FaUsers,
     url: "/assessment-page",
   },
-  {
-    id: "NL_02",
-    label: "Community",
-    icon: FaUsers,
-    url: "/adda/community",
-  },
+  // {
+  //   id: "NL_02",
+  //   label: "Community",
+  //   icon: FaUsers,
+  //   url: "/adda/community",
+  // },
   {
     id: "NL_03",
     label: "Products",

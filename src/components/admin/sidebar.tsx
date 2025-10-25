@@ -73,8 +73,8 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
         paths: [
           "/admin/employee-table",
           "/admin/employee/add",
-          "/admin/task-assign",
           "/admin/task-submissions",
+          "/admin/employee-attendance",
         ],
       },
       {
@@ -85,10 +85,14 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
         title: "Meetup",
         paths: ["/admin/add-meetup", "/admin/meetups"],
       },
+      {
+        title: "Professional Records",
+        paths: ["/admin/psychologists", "/admin/freelancers"],
+      },
     ];
 
     const activeSection = sections.find((section) =>
-      section.paths.some((path) => location.pathname === path)
+      section.paths?.some((path) => location.pathname === path)
     );
 
     if (activeSection && !collapsed) {
@@ -113,7 +117,6 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`bg-white shadow-lg rounded-r-2xl h-screen relative flex flex-col border-r border-gray-200
       ${collapsed ? "w-16" : "w-64"} 
-      [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100
       ${isMobile ? "z-50" : "z-10"}`}
     >
       {/* Logo */}
@@ -137,7 +140,7 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
       </motion.div>
 
       {/* Navigation */}
-      <nav className="flex-grow overflow-y-auto px-2">
+      <nav className="flex-grow overflow-y-auto px-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100">
         {/* Dashboard Single Link */}
         <motion.div
           whileHover={{ backgroundColor: "#f3f4f6" }}
@@ -246,8 +249,11 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           items={[
             { href: "/admin/employee-table", label: "Employees Details" },
             { href: "/admin/employee/add", label: "Add Employees" },
-            { href: "/admin/task-assign", label: "Assign Task" },
             { href: "/admin/task-submissions", label: "Task Submissions" },
+            {
+              href: "/admin/employee-attendance",
+              label: "Employee Attendance",
+            },
           ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Employees"}
@@ -261,8 +267,8 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
             { href: "/admin/add-meetup", label: "Add Meetup" },
           ]}
           isCollapsed={collapsed}
-          isExpanded={expandedSection === "Session Call"}
-          toggleSection={() => toggleSection("Session Call")}
+          isExpanded={expandedSection === "Meetup"}
+          toggleSection={() => toggleSection("Meetup")}
         />
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}
@@ -271,6 +277,17 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Session Call"}
           toggleSection={() => toggleSection("Session Call")}
+        />
+        <SidebarSection
+          icon={<FaBriefcase size={collapsed ? 20 : 16} />}
+          title="Professional Records"
+          items={[
+            { href: "/admin/psychologists", label: "Psychologists" },
+            { href: "/admin/freelancers", label: "Freelancers" },
+          ]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Professional Records"}
+          toggleSection={() => toggleSection("Professional Records")}
         />
       </nav>
 

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { useSelector } from "react-redux";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ComicCard from "./components/comics/HoverCardComic";
 import ScrollToTop from "./components/comics/ScrollToTop";
 import Loader from "./components/common/Loader";
@@ -46,6 +46,7 @@ import CommunityGroups from "./pages/v2/community/groups.tsx";
 import MentoonsServices from "./pages/v2/services/service.tsx";
 import AddPasswordPage from "./pages/admin/employee/setPasword.tsx";
 import WhyComics from "./pages/v2/comics/whyComics.tsx";
+import RootRedirect from "./layout/rootRedirect.tsx";
 const Cart = lazy(() => import("./pages/Cart"));
 
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -63,7 +64,7 @@ const PuzzleContent = lazy(() => import("./pages/v2/puzzle/puzzleContent.tsx"));
 const WordCrossPuzzle = lazy(() => import("./pages/v2/puzzle/wordCross.tsx"));
 
 const routes = [
-  { path: "/", element: <Navigate to="/adda" replace /> },
+  { path: "/", element: <RootRedirect /> },
   { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },

@@ -4,9 +4,10 @@ import AdminProtectedRoute from "@/components/admin/auth/adminRoute";
 import AddProduct from "@/pages/admin/addProduct";
 import AllottedCalls from "@/pages/admin/allottedCalls";
 import DashboardAnalytics from "@/pages/admin/dashboard";
+import AdminAttendanceView from "@/pages/admin/employee/attendance";
 import CreateEmployee from "@/pages/admin/employee/createEmployee";
 import EmployeeTable from "@/pages/admin/employee/employeeTable";
-import TaskAssignmentSystem from "@/pages/admin/employeeTask";
+// import TaskAssignmentSystem from "@/pages/admin/employeeTask";
 import GeneralQueries from "@/pages/admin/generalQueries";
 import CreateJob from "@/pages/admin/jobs/addJob";
 import AllJobs from "@/pages/admin/jobs/all_jobs";
@@ -14,8 +15,12 @@ import ViewApplications from "@/pages/admin/jobs/viewApplication";
 import AdminLoginWrapper from "@/pages/admin/login/adminLoginWrapper";
 import AddMeetup from "@/pages/admin/meetups/addMeetup";
 import Newsletter from "@/pages/admin/newsLetter";
+import AdminNotification from "@/pages/admin/notification";
 import ProductSalesDashboard from "@/pages/admin/productSales";
 import ProductTable from "@/pages/admin/productTable";
+import FreelancersTable from "@/pages/admin/professionalRecords/freelancers";
+import PsychologistsTable from "@/pages/admin/professionalRecords/pychologists";
+import AdminProfile from "@/pages/admin/profile";
 import SessionEnquiries from "@/pages/admin/sessionAllocation/session";
 import AdminTaskDashboard from "@/pages/admin/taskSubmissions";
 import Users from "@/pages/admin/users";
@@ -46,7 +51,7 @@ const AdminRouter = () => {
           <Route path="enquiries/:enquiryId" element={<ViewEnquiry />} />
           <Route path="general-queries" element={<GeneralQueries />} />
           <Route path="newsletter" element={<Newsletter />} />
-          <Route path="task-assign" element={<TaskAssignmentSystem />} />
+          {/* <Route path="task-assign" element={<TaskAssignmentSystem />} /> */}
           <Route path="product-sales" element={<ProductSalesDashboard />} />
           <Route path="employee/add" element={<CreateEmployee />} />
           <Route path="employee-table" element={<EmployeeTable />} />
@@ -60,6 +65,11 @@ const AdminRouter = () => {
           <Route path="add-meetup" element={<AddMeetup />} />
           <Route path="edit-meetup/:id" element={<AddMeetup />} />
           <Route path="meetups" element={<AllMeetups />} />
+          <Route path="psychologists" element={<PsychologistsTable />} />
+          <Route path="freelancers" element={<FreelancersTable />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="notifications" element={<AdminNotification />} />
+          <Route path="employee-attendance" element={<AdminAttendanceView />} />
         </Route>
       </Routes>
     </Suspense>

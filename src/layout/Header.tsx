@@ -106,7 +106,7 @@ const Header = () => {
     try {
       await signOut();
       setShowProfileDropdown(false);
-      navigate("/");
+      navigate("/adda");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -274,7 +274,7 @@ const Header = () => {
       </div>
 
       <div className="absolute flex-shrink-0 transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-        <NavLink to="/">
+        <NavLink to="/adda">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
             alt="mentoons-logo"

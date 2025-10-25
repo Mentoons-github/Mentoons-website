@@ -64,29 +64,29 @@ const JobOpenings = ({
   return (
     <div className="relative">
       <div
-        className={`bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden mt-3 ${
+        className={`bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden mt-2 sm:mt-3 md:mt-4 ${
           isExpanded ? "border-blue-300 shadow-md" : "border-gray-200"
         }`}
       >
         <div
-          className={`flex items-center justify-between p-6 cursor-pointer transition-colors ${
+          className={`flex items-center justify-between p-4 sm:p-5 md:p-6 cursor-pointer transition-colors ${
             isExpanded ? "bg-blue-50" : "hover:bg-gray-50"
           }`}
           onClick={handleToggleExpand}
         >
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1">
             {job.thumbnail && (
               <img
                 src={job.thumbnail}
                 alt={`${job.jobTitle} thumbnail`}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-gray-200 shadow-sm"
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg object-cover border border-gray-200 shadow-sm"
               />
             )}
 
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
                 <h1
-                  className={`text-xl font-semibold transition-colors ${
+                  className={`text-lg sm:text-xl md:text-2xl font-semibold transition-colors ${
                     isExpanded
                       ? "text-blue-700"
                       : "text-gray-900 hover:text-blue-600"
@@ -94,16 +94,18 @@ const JobOpenings = ({
                 >
                   {job.jobTitle}
                 </h1>
-                <span className="text-sm text-gray-500 ml-4">2 days ago</span>
+                <span className="text-xs sm:text-sm text-gray-500 ml-2 sm:ml-4">
+                  2 days ago
+                </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>{job.location}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getJobTypeColor(
                       job.jobType
@@ -113,16 +115,16 @@ const JobOpenings = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>{job.applicationCount} applicants</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="ml-6">
+          <div className="ml-4 sm:ml-6">
             <ChevronDown
-              className={`w-5 h-5 transition-all duration-200 ${
+              className={`w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200 ${
                 isExpanded
                   ? "rotate-180 text-blue-600"
                   : "text-gray-400 hover:text-gray-600"
@@ -133,30 +135,30 @@ const JobOpenings = ({
       </div>
 
       {isExpanded && (
-        <div className="absolute top-full left-0 right-0 z-50 bg-white border border-blue-200 rounded-xl shadow-lg mt-1">
-          <div className="px-6 py-6 bg-blue-50">
-            <div className="max-h-96 overflow-y-auto custom-scrollbar">
-              <div className="space-y-4 pr-2">
+        <div className="absolute top-full left-0 right-0 z-10 bg-white border border-blue-200 rounded-xl shadow-lg mt-1 sm:mt-2">
+          <div className="px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6 bg-blue-50">
+            <div className="max-h-[60vh] sm:max-h-[70vh] md:max-h-96 overflow-y-auto custom-scrollbar">
+              <div className="space-y-4 sm:space-y-5 pr-2">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-semibold text-gray-900 mb-2 text-base sm:text-lg">
                     Job Description
                   </h3>
-                  <p className="text-gray-700 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                     {job.jobDescription}
                   </p>
                 </div>
 
                 {job.skillsRequired.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
+                    <h3 className="font-semibold text-gray-900 mb-2 text-base sm:text-lg flex items-center gap-2">
+                      <Tag className="w-3 h-3 sm:w-4 sm:h-4" />
                       Required Skills
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {job.skillsRequired.map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                          className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                         >
                           {skill}
                         </span>
@@ -167,14 +169,14 @@ const JobOpenings = ({
 
                 {job.responsibilities && job.responsibilities.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
+                    <h3 className="font-semibold text-gray-900 mb-2 text-base sm:text-lg flex items-center gap-2">
+                      <Tag className="w-3 h-3 sm:w-4 sm:h-4" />
                       Responsibilities
                     </h3>
-                    <ul className="text-gray-700 space-y-1">
+                    <ul className="text-gray-700 space-y-1 text-sm sm:text-base">
                       {job.responsibilities.map((responsibility, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></span>
                           <span>{responsibility}</span>
                         </li>
                       ))}
@@ -184,14 +186,14 @@ const JobOpenings = ({
 
                 {job.requirements && job.requirements.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
+                    <h3 className="font-semibold text-gray-900 mb-2 text-base sm:text-lg flex items-center gap-2">
+                      <Tag className="w-3 h-3 sm:w-4 sm:h-4" />
                       Requirements
                     </h3>
-                    <ul className="text-gray-700 space-y-1">
+                    <ul className="text-gray-700 space-y-1 text-sm sm:text-base">
                       {job.requirements.map((requirement, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0"></span>
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></span>
                           <span>{requirement}</span>
                         </li>
                       ))}
@@ -201,14 +203,14 @@ const JobOpenings = ({
 
                 {job.whatWeOffer && job.whatWeOffer.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
+                    <h3 className="font-semibold text-gray-900 mb-2 text-base sm:text-lg flex items-center gap-2">
+                      <Tag className="w-3 h-3 sm:w-4 sm:h-4" />
                       What We Offer
                     </h3>
-                    <ul className="text-gray-700 space-y-1">
+                    <ul className="text-gray-700 space-y-1 text-sm sm:text-base">
                       {job.whatWeOffer.map((offer, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></span>
+                          <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></span>
                           <span>{offer}</span>
                         </li>
                       ))}
@@ -218,9 +220,9 @@ const JobOpenings = ({
               </div>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-gray-200">
+            <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-gray-200">
               <button
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium w-full sm:w-auto"
+                className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium w-full sm:w-auto text-sm sm:text-base"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleJobSelect(job._id);
@@ -235,10 +237,10 @@ const JobOpenings = ({
 
       <style>{`
       .custom-scrollbar {
-        overflow-y: scroll;
+        overflow-y: auto;
       }
       .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
+        width: 6px sm:8px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
         background: #f1f5f9;

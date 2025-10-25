@@ -27,10 +27,8 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
   const [quantity, setQuantity] = useState(cartItem?.quantity);
   const dispatch = useDispatch<AppDispatch>();
   const { getToken, userId } = useAuth();
-  console.log("Cart Item", cartItem);
 
   const handleRemoveItemFromCart = async () => {
-    console.log("Remove Item from Cart", cartItem);
     try {
       const token = await getToken();
       if (!token || !userId) {
@@ -76,8 +74,6 @@ const CartItemCard = ({ cartItem }: { cartItem: CartItem }) => {
             quantity: newQuantity,
           })
         ).unwrap();
-
-        console.log("Update Result", result);
 
         if (result) {
           await dispatch(getCart({ token, userId }));

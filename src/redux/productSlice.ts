@@ -64,8 +64,6 @@ export const fetchProducts = createAsyncThunk<
     const state = thunkAPI.getState().products;
     const { search, sortBy, order, page, limit } = state;
 
-    console.log(search, sortBy, order, page, limit);
-
     try {
       const response = await axios.get<{ data: ProductBase[]; total: number }>(
         `${import.meta.env.VITE_PROD_URL}/products`,
@@ -88,7 +86,6 @@ export const fetchProducts = createAsyncThunk<
           },
         }
       );
-      console.log("Product Response data : ", response.data.data);
       return { items: response.data.data, total: response.data.total };
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

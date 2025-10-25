@@ -49,15 +49,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
                   Access Restricted
                 </h2>
                 <p className="mt-2 text-gray-600">
-                  You have reached your 30-minute limit for today. Please come
-                  back tomorrow!
+                  Your 3 Day trial has been ended. Please purchase plans to
+                  continue
                 </p>
               </div>
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/membership")}
                 className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
               >
-                Return Home
+                Browse Plans
               </button>
             </div>
           </DialogContent>

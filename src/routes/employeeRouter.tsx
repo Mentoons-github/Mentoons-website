@@ -8,18 +8,32 @@ import EmployeeLeaveRequest from "@/pages/employee/leaveRequest/leaveRequest";
 import EmployeeYourTeamPanel from "@/pages/employee/yourTeamPanel/teamPanel";
 import EmployeeSalaryPanel from "@/pages/employee/salary/salary";
 import PsychologistTask from "@/pages/employee/psychologistTask/psychologistTask";
+import EmployeeProtectedRoute from "@/layout/employee/protectedRoute";
+import JobReferralPortal from "@/pages/employee/referAndEarn/referAndEarn";
+import EmployeeProfile from "@/pages/employee/profile";
+import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
 
 const EmployeeRouter = () => {
   return (
     <Suspense fallback={<h1>Loading</h1>}>
       <Routes>
-        <Route path="/" element={<Employeelayout />}>
+        <Route
+          path="/"
+          element={
+            <EmployeeProtectedRoute>
+              <Employeelayout />
+            </EmployeeProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<EmployeeDashboard />} />
           <Route path="tasks" element={<EmployeeTasks />} />
           <Route path="request-leave" element={<EmployeeLeaveRequest />} />
           <Route path="yourteam" element={<EmployeeYourTeamPanel />} />
           <Route path="salary" element={<EmployeeSalaryPanel />} />
           <Route path="session_calls" element={<PsychologistTask />} />
+          <Route path="referandearn" element={<JobReferralPortal />} />
+          <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="birthdaytracker" element={<BirthdayCalendar />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
       </Routes>

@@ -170,12 +170,10 @@ const SearchResultsPage = () => {
 
   const onSendRequest = useCallback(
     async (friendId: string) => {
-      console.log("sending request");
       setIsConnecting(true);
       try {
         const token = await getToken();
         if (!token) {
-          console.log("token found :", token);
           openAuthModal("sign-in");
           return;
         }
@@ -199,7 +197,6 @@ const SearchResultsPage = () => {
           errorToast("Failed to send friend request");
         }
       } catch (error) {
-        console.error("Error sending friend request:", error);
         errorToast("Failed to send friend request");
       } finally {
         setIsConnecting(false);
@@ -232,7 +229,6 @@ const SearchResultsPage = () => {
           errorToast("Failed to cancel friend request");
         }
       } catch (error) {
-        console.error("Error canceling friend request:", error);
         errorToast("Failed to cancel friend request");
       } finally {
         setIsConnecting(false);
@@ -356,8 +352,6 @@ const SearchResultsPage = () => {
         }
       );
 
-      console.log("Raw Backend Response:", response.data);
-
       const transformProduct = (item: any): ProductBase => ({
         ...item,
         ageCategory: mapAgeCategory(item.ageCategory),
@@ -396,12 +390,9 @@ const SearchResultsPage = () => {
         users: response.data.users,
         freeGames,
       };
-
-      console.log("Transformed Results:", transformedResults);
       setActiveFilter("all");
       setSearchResults(transformedResults);
     } catch (err) {
-      console.error("Fetch Error:", err);
       setError("Failed to fetch search results. Please try again.");
     } finally {
       setLoading(false);
@@ -494,7 +485,6 @@ const SearchResultsPage = () => {
         }
         return false;
       } catch (error) {
-        console.error("Error checking access:", error);
         toast.error("Failed to verify access. Please try again.");
         return false;
       }
@@ -506,14 +496,10 @@ const SearchResultsPage = () => {
     setPlaybackTracking((prev: any) => update(prev));
   }, []);
 
-  const onPodcastCompletion = useCallback(
-    (podcastId: string, podcastType: string) => {
-      console.log(`Podcast ${podcastId} (${podcastType}) completed`);
-      setPlayingPodcastId(null);
-      setPlaybackTracking(null);
-    },
-    []
-  );
+  const onPodcastCompletion = useCallback(() => {
+    setPlayingPodcastId(null);
+    setPlaybackTracking(null);
+  }, []);
 
   const filteredResults = useMemo(() => {
     const normalizedQuery = searchQuery.toLowerCase().trim();

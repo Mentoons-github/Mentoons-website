@@ -1,61 +1,96 @@
-import React, { useState } from "react";
+import React from "react";
+import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { Upload, User } from "lucide-react";
 import { EmployeeInterface } from "@/types/employee";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
-import { AppDispatch } from "@/redux/store";
-import { uploadFile } from "@/redux/fileUploadSlice";
-import { useDispatch } from "react-redux";
 
 const validationSchema = Yup.object({
   department: Yup.string().required("Department is required"),
   salary: Yup.number()
+    .typeError("Salary must be a number")
     .positive("Salary must be positive")
     .required("Salary is required"),
   active: Yup.boolean(),
+  jobRole: Yup.string().required("Role is required"),
   user: Yup.object({
     name: Yup.string().required("Name is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     role: Yup.string().required("Role is required"),
-    picture: Yup.string()
-      .url("Invalid URL")
-      .required("Picture URL is required"),
     gender: Yup.string()
       .oneOf(["male", "female", "other"])
       .required("Gender is required"),
+    phoneNumber: Yup.string()
+      .matches(
+        /^\+?[1-9]\d{1,14}$/,
+        "Invalid phone number format (use E.164 format, e.g., +1234567890)"
+      )
+      .required("Phone number is required"),
   }),
 });
 
-const initialValues: EmployeeInterface = {
-  department: "",
-  salary: 0,
+interface FormValues {
+  department: string;
+  salary: string;
+  active: boolean;
+  jobRole: string;
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    gender: string;
+    phoneNumber: string;
+  };
+}
+
+const initialValues: FormValues = {
+  department: "developer",
+  salary: "",
   active: false,
+  jobRole: "",
   user: {
     name: "",
     email: "",
-    role: "",
-    picture: "",
+    role: "EMPLOYEE",
     gender: "male",
+    phoneNumber: "",
   },
 };
 
 const CreateEmployee: React.FC = () => {
   const { getToken } = useAuth();
-  const dispatch = useDispatch<AppDispatch>();
-  const [previewImage, setPreviewImage] = useState<string>("");
+  const { showModal, hideModal } = useSubmissionModal();
 
   const handleSubmit = async (
-    values: EmployeeInterface,
-    { setSubmitting }: FormikHelpers<EmployeeInterface>
+    values: FormValues,
+    { setSubmitting }: FormikHelpers<FormValues>
   ) => {
+    console.log("submitting employee");
+
+    showModal({
+      isSubmitting: true,
+      currentStep: "saving",
+      message: "Creating employee...",
+    });
+
     try {
+      const payload: EmployeeInterface = {
+        department: values.department as any,
+        salary: values.salary ? Number(values.salary) : 0,
+        active: values.active,
+        jobRole: values.jobRole,
+        user: {
+          ...values.user,
+          phoneNumber: values.user.phoneNumber || null,
+        } as EmployeeInterface["user"],
+      };
+
       const token = await getToken();
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/admin/create-employee`,
-        values,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,61 +98,42 @@ const CreateEmployee: React.FC = () => {
         }
       );
 
-      console.log(response);
-      toast.success("Employee created successfully!");
-    } catch (error: any) {
-      console.error("Error creating employee:", error);
-      toast.error(error?.response?.data?.error || "Employee creation failed");
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: response.data.message || "Employee created successfully!",
+      });
+
+      toast.success(response.data.message || "Employee created successfully!");
+
+      setTimeout(() => {
+        hideModal();
+      }, 3000);
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { error?: string; message?: string } };
+      };
+
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: err?.response?.data?.error || "Failed to Create employee",
+        error: err?.response?.data?.message || "An unexpected error occurred",
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (field: string, value: any) => void
-  ) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
-        setPreviewImage(imageUrl);
-      };
-      reader.readAsDataURL(selectedFile);
-
-      try {
-        const resultAction = await dispatch(
-          uploadFile({ file: selectedFile, getToken })
-        );
-
-        if (uploadFile.fulfilled.match(resultAction)) {
-          const uploadedUrl = resultAction.payload.data.fileDetails?.url;
-          if (uploadedUrl) {
-            setFieldValue("user.picture", uploadedUrl);
-            toast.success("Image uploaded successfully!");
-          }
-        } else {
-          toast.error("Failed to upload image");
-          setPreviewImage("");
-        }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        toast.error("Failed to upload image");
-        setPreviewImage("");
-      }
-    }
-  };
-
   const departmentOptions = [
-    { value: "", label: "Select Department" },
-    { value: "developer", label: "Developer" },
-    { value: "illustrator", label: "Illustrator" },
-    { value: "designer", label: "Designer" },
-    { value: "hr", label: "HR" },
-    { value: "marketing", label: "Marketing" },
-    { value: "finance", label: "Finance" },
-    { value: "sales", label: "Sales" },
+    { value: "", label: "Select Your Department" },
+    { value: "developer", label: "Software Development" },
+    { value: "illustrator", label: "Illustration & Art" },
+    { value: "designer", label: "Design & Creativity" },
+    { value: "hr", label: "Human Resources (HR)" },
+    { value: "marketing", label: "Marketing & Branding" },
+    { value: "finance", label: "Finance & Accounts" },
+    { value: "sales", label: "Sales & Business Development" },
   ];
 
   return (
@@ -136,45 +152,12 @@ const CreateEmployee: React.FC = () => {
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
+            validateOnChange={true}
+            validateOnBlur={true}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting, setFieldValue, values, handleSubmit }) => (
-              <div className="space-y-8">
-                {/* Profile Picture Upload */}
-                <div className="flex justify-center">
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="picture-upload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleImageUpload(e, setFieldValue)}
-                    />
-                    <label
-                      htmlFor="picture-upload"
-                      className="cursor-pointer block"
-                    >
-                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg hover:shadow-xl transition-shadow">
-                        {previewImage || values.user.picture ? (
-                          <img
-                            src={previewImage || values.user.picture}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-gray-400">
-                            <User size={40} className="mb-1" />
-                            <Upload size={20} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors">
-                        <Upload size={20} className="text-white" />
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
+            {({ isSubmitting, handleSubmit }) => (
+              <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Personal Information Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
@@ -223,22 +206,25 @@ const CreateEmployee: React.FC = () => {
 
                     <div>
                       <label
-                        htmlFor="user.role"
+                        htmlFor="user.phoneNumber"
                         className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        Job Role *
+                        Phone Number *
                       </label>
                       <Field
-                        name="user.role"
-                        type="text"
+                        name="user.phoneNumber"
+                        type="tel"
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="Senior Developer"
+                        placeholder="+911234567890"
                       />
                       <ErrorMessage
-                        name="user.role"
+                        name="user.phoneNumber"
                         component="div"
                         className="text-red-500 text-sm mt-1"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Include country code (e.g., +91 for India)
+                      </p>
                     </div>
 
                     <div>
@@ -263,6 +249,26 @@ const CreateEmployee: React.FC = () => {
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
+
+                    <div>
+                      <label
+                        htmlFor="jobRole"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Job Role *
+                      </label>
+                      <Field
+                        name="jobRole"
+                        type="text"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Senior Developer"
+                      />
+                      <ErrorMessage
+                        name="jobRole"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -282,7 +288,7 @@ const CreateEmployee: React.FC = () => {
                       <Field
                         as="select"
                         name="department"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-<gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                       >
                         {departmentOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -340,15 +346,14 @@ const CreateEmployee: React.FC = () => {
                 {/* Submit Button */}
                 <div className="pt-6">
                   <button
-                    type="button"
-                    onClick={() => handleSubmit()}
+                    type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]"
                   >
                     {isSubmitting ? "Creating Employee..." : "Create Employee"}
                   </button>
                 </div>
-              </div>
+              </form>
             )}
           </Formik>
         </div>
