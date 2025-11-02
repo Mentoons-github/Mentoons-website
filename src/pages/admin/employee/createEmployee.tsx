@@ -3,12 +3,19 @@ import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { EmployeeInterface } from "@/types/employee";
+import { EmploymentType } from "@/types/employee/employee";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 
 const validationSchema = Yup.object({
   department: Yup.string().required("Department is required"),
+  employmentType: Yup.string()
+    .oneOf(
+      ["full-time", "part-time", "intern", "contract", "freelance"],
+      "Invalid employment type"
+    )
+    .required("Employment type is required"),
   salary: Yup.number()
     .typeError("Salary must be a number")
     .positive("Salary must be positive")
@@ -33,6 +40,7 @@ const validationSchema = Yup.object({
 
 interface FormValues {
   department: string;
+  employmentType: EmploymentType;
   salary: string;
   active: boolean;
   jobRole: string;
@@ -46,7 +54,8 @@ interface FormValues {
 }
 
 const initialValues: FormValues = {
-  department: "developer",
+  department: "",
+  employmentType: "full-time",
   salary: "",
   active: false,
   jobRole: "",
@@ -67,8 +76,6 @@ const CreateEmployee: React.FC = () => {
     values: FormValues,
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
-    console.log("submitting employee");
-
     showModal({
       isSubmitting: true,
       currentStep: "saving",
@@ -78,12 +85,15 @@ const CreateEmployee: React.FC = () => {
     try {
       const payload: EmployeeInterface = {
         department: values.department as any,
+        employmentType: values.employmentType,
         salary: values.salary ? Number(values.salary) : 0,
         active: values.active,
         jobRole: values.jobRole,
         user: {
           ...values.user,
-          phoneNumber: values.user.phoneNumber || null,
+          phoneNumber: values.user.phoneNumber
+            ? Number(values.user.phoneNumber)
+            : null,
         } as EmployeeInterface["user"],
       };
 
@@ -94,6 +104,7 @@ const CreateEmployee: React.FC = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -106,20 +117,25 @@ const CreateEmployee: React.FC = () => {
 
       toast.success(response.data.message || "Employee created successfully!");
 
-      setTimeout(() => {
-        hideModal();
-      }, 3000);
+      setTimeout(() => hideModal(), 3000);
     } catch (error: unknown) {
       const err = error as {
         response?: { data?: { error?: string; message?: string } };
       };
 
+      const errorMessage =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Failed to create employee";
+
       showModal({
         isSubmitting: false,
         currentStep: "error",
-        message: err?.response?.data?.error || "Failed to Create employee",
-        error: err?.response?.data?.message || "An unexpected error occurred",
+        message: errorMessage,
+        error: "An unexpected error occurred",
       });
+
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -134,6 +150,15 @@ const CreateEmployee: React.FC = () => {
     { value: "marketing", label: "Marketing & Branding" },
     { value: "finance", label: "Finance & Accounts" },
     { value: "sales", label: "Sales & Business Development" },
+    { value: "psychologist", label: "Mental Health" },
+  ];
+
+  const employmentTypeOptions = [
+    { value: "full-time", label: "Full-time" },
+    { value: "part-time", label: "Part-time" },
+    { value: "intern", label: "Intern" },
+    { value: "contract", label: "Contract" },
+    { value: "freelance", label: "Freelance" },
   ];
 
   return (
@@ -164,6 +189,7 @@ const CreateEmployee: React.FC = () => {
                     Personal Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* ... existing fields (name, email, phone, gender, jobRole) ... */}
                     <div>
                       <label
                         htmlFor="user.name"
@@ -288,7 +314,7 @@ const CreateEmployee: React.FC = () => {
                       <Field
                         as="select"
                         name="department"
-                        className="w-full px-4 py-3 rounded-lg border border-<gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                       >
                         {departmentOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -298,6 +324,32 @@ const CreateEmployee: React.FC = () => {
                       </Field>
                       <ErrorMessage
                         name="department"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* NEW: Employment Type */}
+                    <div>
+                      <label
+                        htmlFor="employmentType"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Employment Type *
+                      </label>
+                      <Field
+                        as="select"
+                        name="employmentType"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                      >
+                        {employmentTypeOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="employmentType"
                         component="div"
                         className="text-red-500 text-sm mt-1"
                       />
@@ -335,11 +387,6 @@ const CreateEmployee: React.FC = () => {
                         Active Employee
                       </span>
                     </label>
-                    <ErrorMessage
-                      name="active"
-                      component="div"
-                      className="text-red-500 text-sm mt-1"
-                    />
                   </div>
                 </div>
 

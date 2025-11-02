@@ -55,7 +55,7 @@ export const getCart = createAsyncThunk(
   async ({ token, userId }: { token: string; userId: string }) => {
     try {
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/${userId}`,
+        `${import.meta.env.VITE_PROD_URL}/cart/${userId}`,
 
         {
           headers: {
@@ -98,7 +98,7 @@ export const addItemCart = createAsyncThunk(
   }) => {
     try {
       const response = await axios.post(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/add`,
+        `${import.meta.env.VITE_PROD_URL}/cart/add`,
         // "http://localhost:4000/api/v1/cart/add",
 
         {
@@ -139,7 +139,7 @@ export const removeItemFromCart = createAsyncThunk(
   }) => {
     try {
       const response = await axios.delete(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/remove`,
+        `${import.meta.env.VITE_PROD_URL}/cart/remove`,
         {
           headers: {
             "Content-Type": "application/json",

@@ -50,6 +50,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   page = 1,
   limit = 10,
 }) => {
+  console.log("Modal item:", item);
   const dispatch = useDispatch<AppDispatch>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionStatus, setActionStatus] = useState<{
@@ -78,7 +79,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     setActionStatus({ status: null, message: "" });
 
     try {
-
       const resultAction = await dispatch(
         handleProfileEdit({
           token,
@@ -163,6 +163,14 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                     alt={item.name || "Unknown"}
                     className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
                   />
+                ) : itemType === "employee" &&
+                  "profilePicture" in item &&
+                  item.profilePicture ? (
+                  <img
+                    src={item.profilePicture}
+                    alt={item.name || "Unknown"}
+                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                  />
                 ) : (
                   <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
                     {getInitials(item.name || "Unknown")}
@@ -202,15 +210,15 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                         Blocked
                       </span>
                     )}
-                  {itemType === "employee" && "active" in item && (
+                  {itemType === "employee" && "status" in item && (
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        item.active
+                        item.status === "Active"
                           ? "bg-green-100 text-green-800 border-green-200"
                           : "bg-red-100 text-red-800 border-red-200"
                       }`}
                     >
-                      {item.active ? "Active" : "Inactive"}
+                      {item.status as string}
                     </span>
                   )}
                 </div>
@@ -298,21 +306,32 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                       : "Employee Details"}
                   </h3>
 
+                  {/* === ONLY FOR EMPLOYEE === */}
+                  {itemType === "employee" &&
+                    "dateOfBirth" in item &&
+                    item.dateOfBirth && (
+                      <div className="flex items-center gap-3 text-gray-600">
+                        <Calendar className="w-4 h-4" />
+                        <span>Born {formatDate(item.dateOfBirth)}</span>
+                      </div>
+                    )}
+
+                  {itemType === "employee" &&
+                    "joinDate" in item &&
+                    item.joinDate && (
+                      <div className="flex items-center gap-3 text-gray-600">
+                        <FaUser className="w-4 h-4" />
+                        <span>Joined {formatDate(item.joinDate)}</span>
+                      </div>
+                    )}
+
+                  {/* === USER FIELDS (unchanged) === */}
                   {itemType === "user" &&
                     "location" in item &&
                     item.location && (
                       <div className="flex items-center gap-3 text-gray-600">
                         <MapPin className="w-4 h-4" />
                         <span>{item.location}</span>
-                      </div>
-                    )}
-
-                  {itemType === "user" &&
-                    "dateOfBirth" in item &&
-                    item.dateOfBirth && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>Born {formatDate(item.dateOfBirth)}</span>
                       </div>
                     )}
 
@@ -336,6 +355,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                       </div>
                     )}
 
+                  {/* === EMPLOYEE FIELDS (below DOB & Join Date) === */}
                   {itemType === "employee" && "department" in item && (
                     <div className="flex items-center gap-3 text-gray-600">
                       <Briefcase className="w-4 h-4" />

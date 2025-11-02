@@ -32,7 +32,16 @@ import {
   TodayAttendanceType,
 } from "./attendance";
 
-import { SalaryData } from "./salary";
+import {
+  SalaryData,
+  AdminAttendanceRecord,
+  AdminDailySalary,
+  AdminMonthlyStats,
+  AdminSalaryData,
+  AdminStats,
+} from "./salary";
+
+import { LeaveValues, LeaveData, LeaveStatsData, RecentLeave } from "./leave";
 
 export type {
   EmployeeInterface,
@@ -58,4 +67,13 @@ export type {
   AttendanceStats,
   TodayAttendanceType,
   SalaryData,
+  AdminAttendanceRecord,
+  AdminDailySalary,
+  AdminMonthlyStats,
+  AdminSalaryData,
+  AdminStats,
+  LeaveValues,
+  LeaveData,
+  LeaveStatsData,
+  RecentLeave,
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   FaBox,
   FaBriefcase,
@@ -18,31 +18,32 @@ interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
   collapsed: boolean;
   isMobile: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
+const AdminSidebar = ({
+  onToggle,
+  collapsed,
+  isMobile,
+  mobileOpen = false,
+  onMobileClose,
+}: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
+  /* ---------- Auto-collapse on mobile resize ---------- */
   useEffect(() => {
     const handleResize = () => {
-      const shouldCollapse = window.innerWidth <= 768;
-      if (onToggle) {
-        onToggle(shouldCollapse);
-      }
+      if (isMobile && onToggle) onToggle(true);
     };
-
-    if (isMobile !== undefined) {
-      setExpandedSection(null);
-    }
-
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
-  }, [onToggle, isMobile]);
+  }, [isMobile, onToggle]);
 
+  /* ---------- Keep active section expanded (desktop) ---------- */
   useEffect(() => {
     const sections = [
       { title: "Users", paths: ["/admin/users", "/admin/allotted-calls"] },
@@ -53,9 +54,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
       {
         title: "Workshops",
         paths: [
-          "/admin/workshop-enquiries",
-          "/admin/add-workshop",
           "/admin/workshops",
+          "/admin/add-workshop",
+          "/admin/workshop-enquiries",
         ],
       },
       {
@@ -75,51 +76,47 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           "/admin/employee/add",
           "/admin/task-submissions",
           "/admin/employee-attendance",
+          "/admin/leave-management",
         ],
       },
-      {
-        title: "Session Call",
-        paths: ["/admin/session-enquiry"],
-      },
-      {
-        title: "Meetup",
-        paths: ["/admin/add-meetup", "/admin/meetups"],
-      },
+      { title: "Session Call", paths: ["/admin/session-enquiry"] },
+      { title: "Meetup", paths: ["/admin/meetups", "/admin/add-meetup"] },
       {
         title: "Professional Records",
         paths: ["/admin/psychologists", "/admin/freelancers"],
       },
     ];
 
-    const activeSection = sections.find((section) =>
-      section.paths?.some((path) => location.pathname === path)
+    const active = sections.find((s) =>
+      s.paths.some((p) => location.pathname.startsWith(p))
     );
 
-    if (activeSection && !collapsed) {
-      setExpandedSection(activeSection.title);
-    } else if (collapsed) {
-      setExpandedSection(null);
-    }
+    if (!collapsed && active) setExpandedSection(active.title);
+    else if (collapsed) setExpandedSection(null);
   }, [location.pathname, collapsed]);
 
   const toggleSection = (title: string) => {
-    if (title === expandedSection) {
-      setExpandedSection(null);
-    } else {
-      setExpandedSection(title);
-    }
+    setExpandedSection((prev) => (prev === title ? null : title));
+  };
+
+  const handleLinkClick = () => {
+    if (isMobile && onMobileClose) onMobileClose();
   };
 
   return (
     <motion.aside
-      initial={{ width: collapsed ? 64 : 256 }}
-      animate={{ width: collapsed ? 64 : 256 }}
+      initial={false}
+      animate={{
+        width: collapsed ? 64 : 256,
+        x: isMobile && !mobileOpen ? -256 : 0,
+      }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`bg-white shadow-lg rounded-r-2xl h-screen relative flex flex-col border-r border-gray-200
-      ${collapsed ? "w-16" : "w-64"} 
-      ${isMobile ? "z-50" : "z-10"}`}
+      className={`
+        bg-white shadow-lg rounded-r-2xl h-full flex flex-col border-r border-gray-200
+        ${isMobile ? "fixed inset-y-0 left-0 z-50" : "relative"}
+      `}
     >
-      {/* Logo */}
+      {/* ---------- Logo ---------- */}
       <motion.div
         className={`flex justify-center ${collapsed ? "py-3" : "py-4"}`}
         whileHover={{ scale: 1.02 }}
@@ -129,23 +126,26 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           whileTap={{ scale: 0.95 }}
           src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
           alt="Logo"
-          className={`cursor-pointer transition-all duration-300 object-contain ${
+          className={`cursor-pointer object-contain transition-all ${
             collapsed ? "h-10 w-10" : "h-12 w-auto"
           }`}
-          onClick={() => navigate("/admin/dashboard")}
+          onClick={() => {
+            navigate("/admin/dashboard");
+            handleLinkClick();
+          }}
           data-tooltip-id="logo-tooltip"
-          data-tooltip-content="Go to Dashboard"
+          data-tooltip-content="Dashboard"
         />
         <Tooltip id="logo-tooltip" place="right" />
       </motion.div>
 
-      {/* Navigation */}
-      <nav className="flex-grow overflow-y-auto px-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100">
-        {/* Dashboard Single Link */}
+      {/* ---------- Navigation ---------- */}
+      <nav className="flex-1 overflow-y-auto px-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100">
+        {/* Dashboard */}
         <motion.div
           whileHover={{ backgroundColor: "#f3f4f6" }}
           whileTap={{ scale: 0.98 }}
-          className={`py-3 px-2 rounded-lg transition-all duration-200 ${
+          className={`py-3 px-2 rounded-lg ${
             location.pathname === "/admin/dashboard"
               ? "bg-blue-50 text-blue-600"
               : "text-gray-600"
@@ -153,6 +153,7 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
         >
           <NavLink
             to="/admin/dashboard"
+            onClick={handleLinkClick}
             className="flex items-center"
             data-tooltip-id="section-tooltip"
             data-tooltip-content={collapsed ? "Dashboard" : ""}
@@ -180,18 +181,17 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           </NavLink>
         </motion.div>
 
-        {/* Other Sections (Dropdowns) */}
+        {/* ---------- ALL SECTIONS (unchanged) ---------- */}
         <SidebarSection
           icon={<FaUsers size={collapsed ? 20 : 16} />}
           title="Users"
-          items={[
-            { href: "/admin/users", label: "All Users" },
-            { href: "/admin/allotted-calls", label: "Allotted Calls" },
-          ]}
+          items={[{ href: "/admin/users", label: "All Users" }]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Users"}
           toggleSection={() => toggleSection("Users")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaBox size={collapsed ? 20 : 16} />}
           title="Products"
@@ -202,7 +202,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Products"}
           toggleSection={() => toggleSection("Products")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaChalkboardTeacher size={collapsed ? 20 : 16} />}
           title="Workshops"
@@ -214,7 +216,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Workshops"}
           toggleSection={() => toggleSection("Workshops")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaBriefcase size={collapsed ? 20 : 16} />}
           title="Career Corner"
@@ -226,7 +230,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Career Corner"}
           toggleSection={() => toggleSection("Career Corner")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaQuestionCircle size={collapsed ? 20 : 16} />}
           title="General Queries"
@@ -234,7 +240,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "General Queries"}
           toggleSection={() => toggleSection("General Queries")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaNewspaper size={collapsed ? 20 : 16} />}
           title="Newsletter"
@@ -242,7 +250,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Newsletter"}
           toggleSection={() => toggleSection("Newsletter")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaUsers size={collapsed ? 20 : 16} />}
           title="Employees"
@@ -254,11 +264,14 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
               href: "/admin/employee-attendance",
               label: "Employee Attendance",
             },
+            { href: "/admin/leave-management", label: "Leave Management" },
           ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Employees"}
           toggleSection={() => toggleSection("Employees")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}
           title="Meetup"
@@ -269,7 +282,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Meetup"}
           toggleSection={() => toggleSection("Meetup")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}
           title="Session Call"
@@ -277,7 +292,9 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Session Call"}
           toggleSection={() => toggleSection("Session Call")}
+          onItemClick={handleLinkClick}
         />
+
         <SidebarSection
           icon={<FaBriefcase size={collapsed ? 20 : 16} />}
           title="Professional Records"
@@ -288,6 +305,7 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Professional Records"}
           toggleSection={() => toggleSection("Professional Records")}
+          onItemClick={handleLinkClick}
         />
       </nav>
 
@@ -296,6 +314,7 @@ const AdminSidebar = ({ onToggle, collapsed, isMobile }: SidebarProps) => {
   );
 };
 
+/* ---------- SidebarSection (unchanged except onItemClick) ---------- */
 interface SidebarSectionProps {
   icon: React.ReactNode;
   title: string;
@@ -303,6 +322,7 @@ interface SidebarSectionProps {
   isCollapsed: boolean;
   isExpanded: boolean;
   toggleSection: () => void;
+  onItemClick?: () => void;
 }
 
 const SidebarSection = ({
@@ -312,77 +332,71 @@ const SidebarSection = ({
   isCollapsed,
   isExpanded,
   toggleSection,
+  onItemClick,
 }: SidebarSectionProps) => {
-  const menuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-
-  const isActiveSection = items.some((item) => location.pathname === item.href);
-
-  const sectionContent = (
-    <motion.div
-      whileHover={{ backgroundColor: isExpanded ? "" : "#f3f4f6" }}
-      whileTap={{ scale: 0.98 }}
-      className={`
-        py-3 px-2 
-        ${
-          isCollapsed
-            ? "flex justify-center"
-            : "flex items-center justify-between"
-        }
-        ${isExpanded ? "bg-blue-100" : isActiveSection ? "bg-blue-50" : ""}
-        cursor-pointer rounded-lg transition-all duration-200
-      `}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleSection();
-      }}
-      data-tooltip-id="section-tooltip"
-      data-tooltip-content={isCollapsed ? title : ""}
-    >
-      <div className={`flex items-center ${isCollapsed ? "" : "space-x-3"}`}>
-        <motion.span
-          animate={{ rotate: isExpanded ? 5 : 0 }}
-          className={`${isCollapsed ? "" : "mr-2"} ${
-            isExpanded || isActiveSection ? "text-blue-500" : "text-gray-600"
-          }`}
-        >
-          {icon}
-        </motion.span>
-        {!isCollapsed && (
-          <h2
-            className={`text-base font-medium ${
-              isExpanded || isActiveSection ? "text-blue-600" : "text-gray-800"
-            }`}
-          >
-            {title}
-          </h2>
-        )}
-      </div>
-      {!isCollapsed && (
-        <motion.div
-          animate={{
-            rotate: isExpanded ? 90 : 0,
-          }}
-          transition={{ duration: 0.2 }}
-          className={
-            isExpanded || isActiveSection ? "text-blue-500" : "text-gray-500"
-          }
-        >
-          <FaChevronRight />
-        </motion.div>
-      )}
-    </motion.div>
-  );
+  const isActiveSection = items.some((i) => location.pathname === i.href);
 
   return (
     <div
-      ref={menuRef}
       className={`mb-1 overflow-hidden ${
         isCollapsed ? "mx-auto text-center" : ""
       }`}
     >
-      {sectionContent}
+      {/* Header */}
+      <motion.div
+        whileHover={{ backgroundColor: isExpanded ? "" : "#f3f4f6" }}
+        whileTap={{ scale: 0.98 }}
+        className={`
+          py-3 px-2 rounded-lg cursor-pointer
+          ${
+            isCollapsed
+              ? "flex justify-center"
+              : "flex items-center justify-between"
+          }
+          ${isExpanded ? "bg-blue-100" : isActiveSection ? "bg-blue-50" : ""}
+        `}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleSection();
+        }}
+        data-tooltip-id="section-tooltip"
+        data-tooltip-content={isCollapsed ? title : ""}
+      >
+        <div className={`flex items-center ${isCollapsed ? "" : "space-x-3"}`}>
+          <motion.span
+            animate={{ rotate: isExpanded ? 5 : 0 }}
+            className={`${isCollapsed ? "" : "mr-2"} ${
+              isExpanded || isActiveSection ? "text-blue-500" : "text-gray-600"
+            }`}
+          >
+            {icon}
+          </motion.span>
+          {!isCollapsed && (
+            <h2
+              className={`text-base font-medium ${
+                isExpanded || isActiveSection
+                  ? "text-blue-600"
+                  : "text-gray-800"
+              }`}
+            >
+              {title}
+            </h2>
+          )}
+        </div>
+        {!isCollapsed && (
+          <motion.div
+            animate={{ rotate: isExpanded ? 90 : 0 }}
+            className={
+              isExpanded || isActiveSection ? "text-blue-500" : "text-gray-500"
+            }
+          >
+            <FaChevronRight />
+          </motion.div>
+        )}
+      </motion.div>
 
+      {/* Dropdown */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -390,28 +404,25 @@ const SidebarSection = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className={`
-              overflow-hidden
-              ${
-                isCollapsed
-                  ? "absolute left-16 top-auto bg-white shadow-lg rounded-lg p-2 min-w-48 z-50"
-                  : ""
-              }
-            `}
+            className={
+              isCollapsed
+                ? "absolute left-16 bg-white shadow-lg rounded-lg p-2 min-w-48 z-50"
+                : ""
+            }
           >
             <ul className={`space-y-1 ${isCollapsed ? "py-2" : "pl-8 py-2"}`}>
-              {items.map((item, index) => (
+              {items.map((item, idx) => (
                 <motion.li
-                  key={index}
+                  key={idx}
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="py-1"
+                  transition={{ delay: idx * 0.05 }}
                 >
                   <NavLink
                     to={item.href}
+                    onClick={onItemClick}
                     className={({ isActive }) =>
-                      `block px-3 py-2 rounded-md transition-colors duration-200 text-sm ${
+                      `block px-3 py-2 rounded-md text-sm transition-colors ${
                         isActive
                           ? "text-blue-600 font-medium bg-blue-50"
                           : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"

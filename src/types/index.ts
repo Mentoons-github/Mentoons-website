@@ -78,6 +78,12 @@ import {
 
 import { MeetupFormValues } from "./meetups/meetup";
 
+import {
+  Celebration,
+  ApiErrorResponse,
+  UpcomingCelebration,
+} from "./common/celebrations";
+
 export type {
   QuizType,
   MeetupFormValues,
@@ -144,6 +150,9 @@ export type {
   Poll,
   ActiveTabType,
   WorkshopCategory,
+  Celebration,
+  ApiErrorResponse,
+  UpcomingCelebration,
 };
 
 export { MediaType, PostType };

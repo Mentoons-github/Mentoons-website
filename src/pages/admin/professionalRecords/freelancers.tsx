@@ -1,105 +1,108 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import DynamicTable from "@/components/admin/dynamicTable";
-
-interface Freelancer {
-  _id: string;
-  name: string;
-  email: string;
-  department: string;
-  hourlyRate: number;
-  active: boolean;
-  inviteStatus: string;
-}
-
-const sampleData: Freelancer[] = [
-  {
-    _id: "1",
-    name: "Amit Desai",
-    email: "amit.desai@example.com",
-    department: "Freelance",
-    hourlyRate: 1500,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "2",
-    name: "Sonia Gupta",
-    email: "sonia.gupta@example.com",
-    department: "Freelance",
-    hourlyRate: 2000,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "3",
-    name: "Karan Mehta",
-    email: "karan.mehta@example.com",
-    department: "Freelance",
-    hourlyRate: 1200,
-    active: false,
-    inviteStatus: "pending",
-  },
-  {
-    _id: "4",
-    name: "Riya Joshi",
-    email: "riya.joshi@example.com",
-    department: "Freelance",
-    hourlyRate: 1800,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "5",
-    name: "Arjun Reddy",
-    email: "arjun.reddy@example.com",
-    department: "Freelance",
-    hourlyRate: 2200,
-    active: true,
-    inviteStatus: "accepted",
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { getEmployees } from "@/redux/admin/employee/api";
+import { AppDispatch, RootState } from "@/redux/store";
+import { Employee } from "@/types/employee";
+import { useNavigate } from "react-router-dom";
 
 const FreelancersTable: React.FC = () => {
-  const handleEdit = (item: Freelancer): void => {
+  const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  const { employees, loading, error } = useSelector(
+    (state: RootState) => state.employee
+  );
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      const token = await getToken();
+      if (!token) return;
+
+      dispatch(
+        getEmployees({
+          sortOrder: "asc",
+          searchTerm,
+          page: 1,
+          limit: 1000,
+        })
+      );
+    };
+
+    load();
+  }, [dispatch, getToken, searchTerm]);
+
+  const freelancers = employees.filter(
+    (emp) =>
+      emp.department?.toLowerCase() === "freelance" ||
+      emp.department?.toLowerCase() === "freelancer"
+  );
+
+  const handleEdit = (item: Employee) => {
     console.log("Edit freelancer:", item);
-    // Implement edit logic here (e.g., open modal or navigate to edit page)
+    // TODO: navigate to edit page or open modal
   };
 
-  const handleDelete = (item: Freelancer): void => {
+  const handleDelete = (item: Employee) => {
     console.log("Delete freelancer:", item);
-    // Implement delete logic here (e.g., API call to remove)
+    // TODO: dispatch delete action
   };
 
-  const handleView = (item: Freelancer): void => {
-    console.log("View freelancer details:", item);
-    // Implement view logic here (e.g., open details modal)
+  const handleView = (item: Employee) => {
+    navigate(`/employee/${item._id}`);
   };
 
-  const handleAdd = (): void => {
+  const handleAdd = () => {
     console.log("Add new freelancer");
-    // Implement add logic here (e.g., open add form)
+    // TODO: open add freelancer form
   };
 
-  const handleSearch = (term: string): void => {
-    console.log("Search term:", term);
-    // Implement search filtering here if needed
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Freelancers Management</h1>
-      <DynamicTable
-        data={sampleData}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAdd={handleAdd}
-        onView={handleView}
-        onSearch={handleSearch}
-        itemType="employee"
-        excludeColumns={[]}
-        idKey="_id"
-        maxCellLength={30}
-      />
+
+      {freelancers.length === 0 ? (
+        <p className="text-gray-600">No freelancers found.</p>
+      ) : (
+        <DynamicTable
+          data={freelancers}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAdd={handleAdd}
+          onView={handleView}
+          onSearch={handleSearch}
+          itemType="employee"
+          excludeColumns={[]}
+          idKey="_id"
+          maxCellLength={30}
+        />
+      )}
     </div>
   );
 };

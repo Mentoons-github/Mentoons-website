@@ -17,7 +17,6 @@ import { FaClock, FaEye, FaUserMd } from "react-icons/fa";
 import PsychologistDetails, {
   Psychologist,
 } from "@/components/admin/modal/psychologistDetails";
-
 interface Call {
   _id: string;
   name: string;
@@ -26,9 +25,8 @@ interface Call {
   time: string;
   date: string;
   status: keyof typeof statusConfig;
-  psychologist: Psychologist;
+  psychologist?: Psychologist;
 }
-
 type StatusConfigType = {
   [key: string]: {
     bg: string;
@@ -38,7 +36,6 @@ type StatusConfigType = {
     icon?: string;
   };
 };
-
 const statusConfig: StatusConfigType = {
   "reached out": {
     bg: "bg-blue-100",
@@ -67,7 +64,6 @@ const statusConfig: StatusConfigType = {
     icon: "❌",
   },
 };
-
 const AllottedCalls = () => {
   const { getToken } = useAuth();
   const [showDetailModal, setDetailModal] = useState(false);
@@ -82,12 +78,10 @@ const AllottedCalls = () => {
   const [expandedCards, setExpandedCards] = useState<{
     [key: string]: boolean;
   }>({});
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-
   const fetchAllottedCalls = async () => {
     try {
       const response = await axios.get(
@@ -100,15 +94,11 @@ const AllottedCalls = () => {
           },
         }
       );
-
       console.log(response);
-
       const fetchedCalls = response.data.data.allocatedCalls;
-
       if (fetchedCalls && fetchedCalls.length > 0) {
         setAllottedCalls(fetchedCalls);
         setShowingSampleData(false);
-
         setTotalItems(response.data.data.totalItems || fetchedCalls.length);
         setTotalPages(
           response.data.data.totalPages ||
@@ -122,29 +112,23 @@ const AllottedCalls = () => {
       setIsLoading(false);
     }
   };
-
   const handlePsychologistClick = async (psychologist: Psychologist) => {
     setSelectedPsychologist(psychologist);
     setDetailModal(true);
   };
-
   useEffect(() => {
     fetchAllottedCalls();
   }, [currentPage, limit, sortField, sortDirection]);
-
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
   const handleLimitChange = (newLimit: number) => {
     setLimit(newLimit);
     setCurrentPage(1);
   };
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-
   const handleSort = (field: keyof Call) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -154,14 +138,12 @@ const AllottedCalls = () => {
     }
     setCurrentPage(1);
   };
-
   const toggleExpandCard = (id: string) => {
     setExpandedCards((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
   };
-
   const filteredCalls = allottedCalls.filter((call) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -173,19 +155,19 @@ const AllottedCalls = () => {
       )
     );
   });
-
   const sortedCalls = [...filteredCalls].sort((a, b) => {
-    let valA = a[sortField];
-    let valB = b[sortField];
-
+    let valA: any = a[sortField];
+    let valB: any = b[sortField];
+    if (sortField === "psychologist") {
+      valA = a.psychologist?.name || "";
+      valB = b.psychologist?.name || "";
+    }
     if (typeof valA === "string") valA = valA.toLowerCase();
     if (typeof valB === "string") valB = valB.toLowerCase();
-
     if (valA < valB) return sortDirection === "asc" ? -1 : 1;
     if (valA > valB) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -195,7 +177,6 @@ const AllottedCalls = () => {
       },
     },
   };
-
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -207,15 +188,12 @@ const AllottedCalls = () => {
       },
     },
   };
-
   const refreshData = () => {
     fetchAllottedCalls();
   };
-
   const handleSearch = () => {
     fetchAllottedCalls();
   };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -229,7 +207,6 @@ const AllottedCalls = () => {
       </div>
     );
   }
-
   if (allottedCalls.length === 0) {
     return (
       <motion.div
@@ -251,7 +228,6 @@ const AllottedCalls = () => {
       </motion.div>
     );
   }
-
   const renderMobileCards = () => {
     return (
       <motion.div
@@ -307,7 +283,6 @@ const AllottedCalls = () => {
                 />
               </div>
             </div>
-
             {expandedCards[call._id] && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -340,16 +315,18 @@ const AllottedCalls = () => {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-gray-900 break-all flex items-center gap-3">
-                      {call.psychologist.name}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePsychologistClick(call.psychologist);
-                        }}
-                        className="text-blue-500 hover:text-blue-700 transition-colors"
-                      >
-                        <FaEye />
-                      </button>
+                      {call.psychologist?.name || "Unassigned"}
+                      {call.psychologist && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePsychologistClick(call.psychologist!);
+                          }}
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                        >
+                          <FaEye />
+                        </button>
+                      )}
                     </p>
                   </div>
                   <div>
@@ -372,7 +349,6 @@ const AllottedCalls = () => {
       </motion.div>
     );
   };
-
   const renderDesktopTable = () => {
     return (
       <div className="hidden lg:block overflow-hidden">
@@ -506,17 +482,19 @@ const AllottedCalls = () => {
                   <td className="px-3 sm:px-1 xl:px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2 sm:gap-5 text-xs lg:text-[13px] xl:text-sm text-gray-900">
                       <span className="truncate max-w-[100px] xl:max-w-none">
-                        {call.psychologist.name}
+                        {call.psychologist?.name || "Unassigned"}
                       </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePsychologistClick(call.psychologist);
-                        }}
-                        className="text-blue-500 hover:text-blue-700 transition-colors"
-                      >
-                        <FaEye />
-                      </button>
+                      {call.psychologist && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePsychologistClick(call.psychologist!);
+                          }}
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                        >
+                          <FaEye />
+                        </button>
+                      )}
                     </div>
                   </td>
                   <td className="px-3 sm:px-1 xl:px-6 py-4 whitespace-nowrap">
@@ -530,7 +508,6 @@ const AllottedCalls = () => {
                       </div>
                     </div>
                   </td>
-
                   <td className="px-3 sm:px-1 xl:px-6 py-4 whitespace-nowrap">
                     <motion.span
                       whileHover={{ scale: 1.05 }}
@@ -554,7 +531,6 @@ const AllottedCalls = () => {
       </div>
     );
   };
-
   return (
     <div className="px-2 sm:px-6 py-4 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
@@ -606,12 +582,10 @@ const AllottedCalls = () => {
           </div>
         </div>
       </div>
-
       <div className="bg-transparent rounded-lg">
         {renderMobileCards()}
         {renderDesktopTable()}
       </div>
-
       <div className="mt-4 overflow-x-auto">
         <Pagination
           currentPage={currentPage}
@@ -622,7 +596,6 @@ const AllottedCalls = () => {
           onPageChange={handlePageChange}
         />
       </div>
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

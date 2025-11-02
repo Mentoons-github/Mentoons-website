@@ -20,6 +20,8 @@ const MemePage = lazy(() => import("@/pages/v2/adda/MemePage"));
 const MemeDetails = lazy(() => import("@/pages/v2/adda/memeDetails"));
 
 const AddaRouter = () => {
+ 
+
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -66,8 +68,8 @@ const AddaRouter = () => {
             path="meme"
             element={
               <SubscriptionGuard>
-                <MemePage /> 
-              </SubscriptionGuard> 
+                <MemePage />
+              </SubscriptionGuard>
             }
           />
           <Route path="meme/:memeId" element={<MemeDetails />} />

@@ -166,7 +166,7 @@ const AddEditEmployeePage: React.FC = () => {
     try {
       setCurrentState(1);
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {

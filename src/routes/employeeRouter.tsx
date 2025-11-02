@@ -5,11 +5,11 @@ import Employeelayout from "@/layout/employee/employee";
 import EmployeeDashboard from "@/pages/employee/dashboard/dashboard";
 import EmployeeTasks from "@/pages/employee/tasks/tasks";
 import EmployeeLeaveRequest from "@/pages/employee/leaveRequest/leaveRequest";
-import EmployeeYourTeamPanel from "@/pages/employee/yourTeamPanel/teamPanel";
+// import EmployeeYourTeamPanel from "@/pages/employee/yourTeamPanel/teamPanel";
 import EmployeeSalaryPanel from "@/pages/employee/salary/salary";
 import PsychologistTask from "@/pages/employee/psychologistTask/psychologistTask";
 import EmployeeProtectedRoute from "@/layout/employee/protectedRoute";
-import JobReferralPortal from "@/pages/employee/referAndEarn/referAndEarn";
+// import JobReferralPortal from "@/pages/employee/referAndEarn/referAndEarn";
 import EmployeeProfile from "@/pages/employee/profile";
 import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
 
@@ -28,12 +28,12 @@ const EmployeeRouter = () => {
           <Route path="dashboard" element={<EmployeeDashboard />} />
           <Route path="tasks" element={<EmployeeTasks />} />
           <Route path="request-leave" element={<EmployeeLeaveRequest />} />
-          <Route path="yourteam" element={<EmployeeYourTeamPanel />} />
+          {/* <Route path="your-team" element={<EmployeeYourTeamPanel />} /> */}
           <Route path="salary" element={<EmployeeSalaryPanel />} />
-          <Route path="session_calls" element={<PsychologistTask />} />
-          <Route path="referandearn" element={<JobReferralPortal />} />
+          <Route path="session-calls" element={<PsychologistTask />} />
+          {/* <Route path="refer-and-earn" element={<JobReferralPortal />} /> */}
           <Route path="profile" element={<EmployeeProfile />} />
-          <Route path="birthdaytracker" element={<BirthdayCalendar />} />
+          <Route path="celebrations" element={<BirthdayCalendar />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
       </Routes>

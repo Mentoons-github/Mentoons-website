@@ -13,19 +13,18 @@ const SuccessDisplay: React.FC<SuccessDisplayProps> = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-in fade-in zoom-in duration-300">
-        {/* Close button */}
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 z-[1000]">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-in fade-in zoom-in duration-300">
+        {/* Close Button - Always visible if onClose exists */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-50 bg-white rounded-full p-1 shadow-md"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         )}
 
-        {/* Content */}
         <div className="p-8 text-center">
           <div className="relative mb-6">
             <div className="absolute inset-0 bg-green-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
@@ -43,7 +42,6 @@ const SuccessDisplay: React.FC<SuccessDisplayProps> = ({
             <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
           )}
 
-          {/* Decorative dots */}
           <div className="flex justify-center space-x-1">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <div

@@ -71,6 +71,7 @@ const TaskAssignmentSystem: React.FC = () => {
 
   const { showStatus } = useStatusModal();
 
+  // === Data Fetching ===
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,7 +88,7 @@ const TaskAssignmentSystem: React.FC = () => {
             limit: 100,
           })
         );
-        await dispatch(fetchTasks({token}));
+        await dispatch(fetchTasks({ token }));
       } catch (err) {
         console.error("Failed to fetch data:", err);
         showStatus("error", "Failed to fetch data. Please try again.");
@@ -95,10 +96,7 @@ const TaskAssignmentSystem: React.FC = () => {
     };
     fetchData();
 
-    const interval = setInterval(() => {
-      fetchData();
-    }, 30000);
-
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [dispatch, getToken]);
 
@@ -116,16 +114,17 @@ const TaskAssignmentSystem: React.FC = () => {
     }
   }, [error, dispatch, showStatus]);
 
+  // === Helper Functions ===
   const getAvatar = (role?: string): string => {
     switch (role?.toLowerCase()) {
       case "developer":
-        return "💻";
+        return "Developer";
       case "illustrator":
-        return "🎨";
+        return "Illustrator";
       case "designer":
-        return "🖌️";
+        return "Designer";
       default:
-        return "👤";
+        return "User";
     }
   };
 
@@ -136,148 +135,25 @@ const TaskAssignmentSystem: React.FC = () => {
     ? employees.filter((emp) => emp.department === selectedDepartment)
     : employees;
 
-  const handleCreateTask = async () => {
-    if (newTask.title && newTask.assignedTo && newTask.deadline) {
-      try {
-        const token = await getToken();
-        if (!token) {
-          showStatus("error", "Authentication error. Please log in again.");
-          return;
-        }
-        await dispatch(assignTask({ taskData: newTask, token })).unwrap();
-        await dispatch(fetchTasks({token}));
-        setNewTask({
-          title: "",
-          description: "",
-          assignedTo: "",
-          deadline: "",
-          priority: "medium",
-        });
-        setSelectedDepartment("");
-        setShowSuccessModal(true);
-      } catch (err) {
-        console.error("Failed to create task:", err);
-        showStatus("error", "Failed to create task. Please try again.");
-      }
-    } else {
-      showStatus("error", "Please fill in all required fields.");
+  const isImage = (name: string): boolean => {
+    const ext = name.split(".").pop()?.toLowerCase();
+    return ["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || "");
+  };
+
+  const getAttachmentIcon = (name: string, isLink: boolean = false) => {
+    if (isLink) return <LinkIcon className="w-5 h-5 text-blue-500" />;
+
+    const ext = name.split(".").pop()?.toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || "")) {
+      return <Image className="w-5 h-5 text-gray-500" />;
     }
-  };
-
-  const handleExtendTask = async (taskId: string, newDeadline: string) => {
-    try {
-      const token = await getToken();
-      if (!token) {
-        throw new Error("Authentication error. Please log in again.");
-      }
-      console.log(
-        `Sending PATCH request to /task-assignments/${taskId}/extend`,
-        {
-          id: taskId,
-          newDeadLine: newDeadline,
-          token,
-        }
-      );
-      await dispatch(
-        extendTask({ id: taskId, token, newDeadLine: newDeadline })
-      ).unwrap();
-      await dispatch(fetchTasks({token}));
-      setExtendStatusMessage(`Task deadline extended successfully!`);
-      setExtendStatusSuccess(true);
-      setShowExtendStatusModal(true);
-      setExtendTaskId(null);
-      setNewDeadline("");
-    } catch (err: any) {
-      console.error("Extend task error:", err);
-      const message =
-        err.response?.status === 401
-          ? "Unauthorized: Please log in as an admin"
-          : err.response?.status === 403
-          ? "Forbidden: Admin access required"
-          : typeof err === "string"
-          ? err
-          : "Failed to extend task deadline";
-      setExtendStatusMessage(message);
-      setExtendStatusSuccess(false);
-      setShowExtendStatusModal(true);
-      setExtendTaskId(null);
-      setNewDeadline("");
+    if (["mp4", "avi", "mov", "wmv"].includes(ext || "")) {
+      return <Video className="w-5 h-5 text-gray-500" />;
     }
-  };
-
-  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const dept = e.target.value;
-    setSelectedDepartment(dept);
-    setNewTask((prev) => ({ ...prev, assignedTo: "" }));
-  };
-
-  const handleDeleteTask = (taskId: number) => {
-    setTaskToDelete(taskId);
-    setShowDeleteConfirmModal(true);
-  };
-
-  const confirmDeleteTask = async () => {
-    if (taskToDelete !== null) {
-      try {
-        const token = await getToken();
-        if (!token) {
-          showStatus("error", "Authentication error. Please log in again.");
-          return;
-        }
-        await dispatch(deleteTask({ taskId: taskToDelete, token })).unwrap();
-        await dispatch(fetchTasks({token}));
-        setShowDeleteConfirmModal(false);
-        setShowDeleteSuccessModal(true);
-        setTaskToDelete(null);
-      } catch (err) {
-        console.error("Failed to delete task:", err);
-        setShowDeleteConfirmModal(false);
-        setTaskToDelete(null);
-        showStatus("error", "Failed to delete task. Please try again.");
-      }
+    if (["pdf", "doc", "docx", "txt"].includes(ext || "")) {
+      return <FileText className="w-5 h-5 text-gray-500" />;
     }
-  };
-
-  const handleUpdateTaskStatus = async (
-    taskId: number,
-    status: Task["status"]
-  ) => {
-    try {
-      const token = await getToken();
-      if (!token) {
-        showStatus("error", "Authentication error. Please log in again.");
-        return;
-      }
-      await dispatch(updateTaskStatus({ id: taskId, status, token })).unwrap();
-      await dispatch(fetchTasks({token}));
-    } catch (err) {
-      console.error("Failed to update task status:", err);
-      showStatus("error", "Failed to update task status. Please try again.");
-    }
-  };
-
-  const handleRemoveImage = async (taskId: number, imageId: number) => {
-    try {
-      const token = await getToken();
-      if (!token) {
-        showStatus("error", "Authentication error. Please log in again.");
-        return;
-      }
-      await dispatch(removeImage({ taskId, imageId, token })).unwrap();
-      await dispatch(fetchTasks({token}));
-    } catch (err) {
-      console.error("Failed to remove image:", err);
-      showStatus("error", "Failed to remove image. Please try again.");
-    }
-  };
-
-  const handleDownloadImage = (imageUrl: string, imageName: string) => {
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = imageName || "image";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    return <FileText className="w-5 h-5 text-gray-500" />;
   };
 
   const getPriorityColor = (priority: string) => {
@@ -308,35 +184,137 @@ const TaskAssignmentSystem: React.FC = () => {
 
   const isOverdue = (deadline: string) => {
     const deadlineDate = new Date(deadline);
-    return (
-      deadlineDate instanceof Date &&
-      !isNaN(deadlineDate.getTime()) &&
-      deadlineDate < new Date()
-    );
+    return deadlineDate < new Date() && !isNaN(deadlineDate.getTime());
   };
 
-  const getAttachmentIcon = (url: string, name: string) => {
-    if (url.startsWith("http")) {
-      return <LinkIcon className="w-5 h-5 text-blue-500" />;
-    }
-    const ext = name.split(".").pop()?.toLowerCase();
-    if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || "")) {
-      return <Image className="w-5 h-5 text-gray-500" />;
-    }
-    if (["mp4", "avi", "mov", "wmv"].includes(ext || "")) {
-      return <Video className="w-5 h-5 text-gray-500" />;
-    }
-    if (["pdf", "doc", "docx", "txt"].includes(ext || "")) {
-      return <FileText className="w-5 h-5 text-gray-500" />;
-    }
-    return <FileText className="w-5 h-5 text-gray-500" />;
+  const handleDownloadImage = (imageUrl: string, imageName: string) => {
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.download = imageName || "image";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const isImage = (name: string) => {
-    const ext = name.split(".").pop()?.toLowerCase();
-    return ["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || "");
+  // === Task Actions ===
+  const handleCreateTask = async () => {
+    if (newTask.title && newTask.assignedTo && newTask.deadline) {
+      try {
+        const token = await getToken();
+        if (!token) {
+          showStatus("error", "Authentication error. Please log in again.");
+          return;
+        }
+        await dispatch(assignTask({ taskData: newTask, token })).unwrap();
+        await dispatch(fetchTasks({ token }));
+        setNewTask({
+          title: "",
+          description: "",
+          assignedTo: "",
+          deadline: "",
+          priority: "medium",
+        });
+        setSelectedDepartment("");
+        setShowSuccessModal(true);
+      } catch (err) {
+        showStatus("error", "Failed to create task. Please try again.");
+      }
+    } else {
+      showStatus("error", "Please fill in all required fields.");
+    }
   };
 
+  const handleExtendTask = async (taskId: string, newDeadline: string) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication error.");
+      await dispatch(
+        extendTask({ id: taskId, token, newDeadLine: newDeadline })
+      ).unwrap();
+      await dispatch(fetchTasks({ token }));
+      setExtendStatusMessage("Task deadline extended successfully!");
+      setExtendStatusSuccess(true);
+      setShowExtendStatusModal(true);
+    } catch (err: any) {
+      const message =
+        err.response?.status === 401
+          ? "Unauthorized: Please log in as an admin"
+          : err.response?.status === 403
+          ? "Forbidden: Admin access required"
+          : "Failed to extend task deadline";
+      setExtendStatusMessage(message);
+      setExtendStatusSuccess(false);
+      setShowExtendStatusModal(true);
+    } finally {
+      setExtendTaskId(null);
+      setNewDeadline("");
+    }
+  };
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const dept = e.target.value;
+    setSelectedDepartment(dept);
+    setNewTask((prev) => ({ ...prev, assignedTo: "" }));
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    setTaskToDelete(taskId);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (taskToDelete !== null) {
+      try {
+        const token = await getToken();
+        if (!token) {
+          showStatus("error", "Authentication error.");
+          return;
+        }
+        await dispatch(deleteTask({ taskId: taskToDelete, token })).unwrap();
+        await dispatch(fetchTasks({ token }));
+        setShowDeleteConfirmModal(false);
+        setShowDeleteSuccessModal(true);
+        setTaskToDelete(null);
+      } catch (err) {
+        showStatus("error", "Failed to delete task.");
+        setShowDeleteConfirmModal(false);
+        setTaskToDelete(null);
+      }
+    }
+  };
+
+  const handleUpdateTaskStatus = async (
+    taskId: number,
+    status: Task["status"]
+  ) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        showStatus("error", "Authentication error.");
+        return;
+      }
+      await dispatch(updateTaskStatus({ id: taskId, status, token })).unwrap();
+      await dispatch(fetchTasks({ token }));
+    } catch (err) {
+      showStatus("error", "Failed to update task status.");
+    }
+  };
+
+  const handleRemoveImage = async (taskId: number, imageId: number) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        showStatus("error", "Authentication error.");
+        return;
+      }
+      await dispatch(removeImage({ taskId, imageId, token })).unwrap();
+      await dispatch(fetchTasks({ token }));
+    } catch (err) {
+      showStatus("error", "Failed to remove image.");
+    }
+  };
+
+  // === Loading State ===
   if (loading && tasks.length === 0 && employees.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-yellow-50 to-amber-100">
@@ -348,9 +326,11 @@ const TaskAssignmentSystem: React.FC = () => {
     );
   }
 
+  // === Main Render ===
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-yellow-50 to-amber-100 p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full mb-4 shadow-lg">
             <Plus className="w-8 h-8 text-white" />
@@ -360,6 +340,7 @@ const TaskAssignmentSystem: React.FC = () => {
           </h1>
         </div>
 
+        {/* Error Alert */}
         {error && error !== "Request failed with status code 500" && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl max-w-2xl mx-auto">
             <div className="flex items-center">
@@ -387,6 +368,7 @@ const TaskAssignmentSystem: React.FC = () => {
           </div>
         )}
 
+        {/* Modals */}
         {showSuccessModal && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -512,6 +494,7 @@ const TaskAssignmentSystem: React.FC = () => {
           </div>
         )}
 
+        {/* Main Grid */}
         <div
           className={`grid gap-8 ${
             tasks.length === 0
@@ -519,6 +502,7 @@ const TaskAssignmentSystem: React.FC = () => {
               : "grid-cols-1 lg:grid-cols-3"
           }`}
         >
+          {/* Task Creation Form */}
           <div className={tasks.length === 0 ? "" : "lg:col-span-1"}>
             <div
               className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 overflow-hidden ${
@@ -527,8 +511,7 @@ const TaskAssignmentSystem: React.FC = () => {
             >
               <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white">
                 <h2 className="text-2xl font-bold flex items-center gap-3">
-                  <Plus className="w-6 h-6" />
-                  Create New Task
+                  <Plus className="w-6 h-6" /> Create New Task
                 </h2>
               </div>
 
@@ -686,6 +669,7 @@ const TaskAssignmentSystem: React.FC = () => {
             </div>
           </div>
 
+          {/* Task List */}
           {tasks.length > 0 && (
             <div className="lg:col-span-2">
               <div className="space-y-6">
@@ -704,15 +688,9 @@ const TaskAssignmentSystem: React.FC = () => {
                       );
                       const overdue = isOverdue(task.deadline);
                       const isCompleted = task.status === "completed";
-
                       const images = Array.isArray(task.attachments)
                         ? task.attachments
                         : [];
-
-                      if (task.id === undefined) {
-                        console.warn("Task with undefined id:", task);
-                        return null;
-                      }
 
                       return (
                         <div
@@ -720,7 +698,6 @@ const TaskAssignmentSystem: React.FC = () => {
                           className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-gray-300 overflow-hidden hover:shadow-xl transition-all"
                         >
                           <div className="h-2 bg-gradient-to-r from-orange-400 to-amber-600" />
-
                           <div className="p-6">
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex-1">
@@ -851,7 +828,6 @@ const TaskAssignmentSystem: React.FC = () => {
                                   </button>
                                 </div>
                               </div>
-                              <h1>{task.submissionFailureReason}</h1>
 
                               <div className="flex items-center gap-2">
                                 <button
@@ -867,8 +843,8 @@ const TaskAssignmentSystem: React.FC = () => {
                             {images.length > 0 && (
                               <div className="border-t border-gray-200 pt-4">
                                 <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                  <Eye className="w-4 h-4" />
-                                  Submitted Attachments ({images.length})
+                                  <Eye className="w-4 h-4" /> Submitted
+                                  Attachments ({images.length})
                                 </h5>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                   {images.map((attachment) => (
@@ -876,10 +852,7 @@ const TaskAssignmentSystem: React.FC = () => {
                                       key={attachment.id}
                                       className="relative group"
                                     >
-                                      {isImage(
-                                        attachment.url,
-                                        attachment.name
-                                      ) ? (
+                                      {isImage(attachment.name) ? (
                                         <div className="relative">
                                           <img
                                             src={attachment.url}
@@ -891,10 +864,9 @@ const TaskAssignmentSystem: React.FC = () => {
                                               );
                                             }}
                                             className="w-full h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-orange-500 transition-all z-10"
-                                            style={{ pointerEvents: "auto" }}
                                             onError={() =>
                                               console.error(
-                                                "Thumbnail failed to load:",
+                                                "Thumbnail failed:",
                                                 attachment.url
                                               )
                                             }
@@ -922,21 +894,23 @@ const TaskAssignmentSystem: React.FC = () => {
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="flex flex-col items-center p-3 bg-gray-100 rounded-lg border-2 border-gray-200 hover:border-orange-500 transition-all relative"
+                                          onClick={(e) => e.stopPropagation()}
                                         >
                                           {getAttachmentIcon(
-                                            attachment.url,
-                                            attachment.name
+                                            attachment.name,
+                                            attachment.url.startsWith("http")
                                           )}
                                           <span className="text-xs text-gray-600 mt-2 truncate w-full text-center">
                                             {attachment.name}
                                           </span>
                                           <button
-                                            onClick={() =>
+                                            onClick={(e) => {
+                                              e.preventDefault();
                                               handleRemoveImage(
                                                 task.id,
                                                 attachment.id
-                                              )
-                                            }
+                                              );
+                                            }}
                                             className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                                           >
                                             ×
@@ -957,6 +931,7 @@ const TaskAssignmentSystem: React.FC = () => {
             </div>
           )}
 
+          {/* Image Preview Modal */}
           {selectedImage && (
             <div
               className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
@@ -974,21 +949,20 @@ const TaskAssignmentSystem: React.FC = () => {
                   alt={selectedImageName || "Preview"}
                   className="max-w-full max-h-[80vh] object-contain rounded-lg"
                   onError={() => {
-                    console.error("Full image failed to load:", selectedImage);
                     setSelectedImage(null);
                     setSelectedImageName(null);
                   }}
                 />
                 <div className="absolute top-4 right-4 flex gap-2">
                   <button
-                    onClick={() => {
+                    onClick={() =>
                       handleDownloadImage(
                         selectedImage,
                         selectedImageName || "image"
-                      );
-                    }}
+                      )
+                    }
                     className="bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 transition-all"
-                    title="Download Image"
+                    title="Download"
                   >
                     <Download className="w-5 h-5" />
                   </button>

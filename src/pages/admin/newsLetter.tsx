@@ -50,7 +50,7 @@ const Newsletter = () => {
       // Replace with your actual API endpoint
       const response = await axios.get(
         // `http://localhost:4000/api/v1/email/newsletter-subscribers`,
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/email/newsletter-subscribers`,
+        `${import.meta.env.VITE_PROD_URL}/email/newsletter-subscribers`,
         {
           params: {
             page: currentPage,

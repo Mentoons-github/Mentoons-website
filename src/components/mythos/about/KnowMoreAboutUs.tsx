@@ -31,7 +31,7 @@ const KnowMoreAboutUs = () => {
       setIsLoading(true);
       console.log(formData);
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/mythosComment",
+        `${import.meta.env.VITE_PROD_URL}/mythosComment`,
         formData
       );
       if (response.status === 200) {

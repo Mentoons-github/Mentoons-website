@@ -69,7 +69,7 @@ const ViewProduct: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${productId}`
+          `${import.meta.env.VITE_PROD_URL}/products/${productId}`
         );
         if (!response.data) {
           throw new Error("Failed to fetch product");

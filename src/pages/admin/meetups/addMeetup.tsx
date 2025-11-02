@@ -2,6 +2,7 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import {
   MeetupInitialValues,
   MeetupValidationSchema,
+  MeetupFormValues,
 } from "@/utils/formik/admin/addMeetup";
 import axios from "axios";
 import { ChangeEvent, useState, useEffect } from "react";
@@ -9,7 +10,6 @@ import { useDispatch } from "react-redux";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
-import { MeetupFormValues } from "@/types";
 import { useParams, useNavigate } from "react-router-dom";
 
 const AddMeetup = () => {
@@ -24,70 +24,65 @@ const AddMeetup = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
+  // Fetch data for edit mode
   useEffect(() => {
     const fetchMeetupData = async () => {
-      if (id) {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_PROD_URL}/meetup/${id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${await getToken()}`,
-              },
-            }
-          );
-          const meetupData = response.data.data;
-          const dateTime = meetupData.dateTime
-            ? new Date(meetupData.dateTime)
-            : null;
-          const updatedInitialValues: MeetupFormValues = {
-            title: meetupData.title || "",
-            date: dateTime ? dateTime.toISOString().split("T")[0] : "",
-            time: dateTime
-              ? `${dateTime
-                  .getUTCHours()
-                  .toString()
-                  .padStart(2, "0")}:${dateTime
-                  .getUTCMinutes()
-                  .toString()
-                  .padStart(2, "0")}`
-              : "",
-            duration: meetupData.duration || "1 hour",
-            maxCapacity: meetupData.maxCapacity || 0,
-            isOnline: meetupData.isOnline || false,
-            platform: meetupData.platform || "",
-            meetingLink: meetupData.meetingLink || "",
-            place: meetupData.place || "",
-            description: meetupData.description || "",
-            detailedDescription: meetupData.detailedDescription || "",
-            speakerName: meetupData.speakerName || "",
-            speakerImage: meetupData.speakerImage,
-            speakerImageUrl: meetupData.speakerImage || "",
-            topics: meetupData.topics?.join(", ") || "",
-            tags: meetupData.tags?.join(", ") || "",
-          };
-          setInitialValues(updatedInitialValues);
-          if (meetupData.speakerImage) {
-            console.log("Setting image preview to:", meetupData.speakerImage);
-            setImagePreview(meetupData.speakerImage);
-          } else {
-            setImagePreview(null);
+      if (!id) return;
+
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}/meetup/${id}`,
+          {
+            headers: { Authorization: `Bearer ${await getToken()}` },
           }
-        } catch (error: any) {
-          console.error("Error fetching meetup data:", error);
-          setModalOpen(true);
-          setModalMessage(
-            error.response?.data?.message ||
-              "Failed to load meetup data. Please try again."
-          );
-          setIsError(true);
+        );
+
+        const meetupData = response.data.data;
+        const dateTime = meetupData.dateTime
+          ? new Date(meetupData.dateTime)
+          : null;
+
+        const updatedInitialValues: MeetupFormValues = {
+          title: meetupData.title || "",
+          date: dateTime ? dateTime.toISOString().split("T")[0] : "",
+          time: dateTime
+            ? `${dateTime.getUTCHours().toString().padStart(2, "0")}:${dateTime
+                .getUTCMinutes()
+                .toString()
+                .padStart(2, "0")}`
+            : "",
+          duration: meetupData.duration || "1 hour",
+          maxCapacity: meetupData.maxCapacity || 0,
+          isOnline: meetupData.isOnline || false,
+          platform: meetupData.platform || "",
+          meetingLink: meetupData.meetingLink || "",
+          place: meetupData.place || "",
+          description: meetupData.description || "",
+          detailedDescription: meetupData.detailedDescription || "",
+          speakerName: meetupData.speakerName || "",
+          speakerImage: null,
+          speakerImageUrl: meetupData.speakerImage || "",
+          topics: meetupData.topics?.join(", ") || "",
+          tags: meetupData.tags?.join(", ") || "",
+        };
+
+        setInitialValues(updatedInitialValues);
+        if (meetupData.speakerImage) {
+          setImagePreview(meetupData.speakerImage);
         }
+      } catch (error: any) {
+        setModalOpen(true);
+        setModalMessage(
+          error.response?.data?.message || "Failed to load meetup data."
+        );
+        setIsError(true);
       }
     };
 
     fetchMeetupData();
   }, [id, getToken]);
 
+  // Handle image upload
   const handleImageChange = (
     event: ChangeEvent<HTMLInputElement>,
     setFieldValue: (field: string, value: any) => void
@@ -98,7 +93,6 @@ const AddMeetup = () => {
       setFieldValue("speakerImageUrl", null);
       const reader = new FileReader();
       reader.onloadend = () => {
-        console.log("New image selected for preview:", file.name);
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
@@ -109,47 +103,41 @@ const AddMeetup = () => {
     }
   };
 
+  // Remove image
   const removeImage = async (
     setFieldValue: (field: string, value: any) => void,
     values: MeetupFormValues
   ) => {
     setModalOpen(true);
-    setModalMessage("Processing image removal...");
+    setModalMessage("Removing image...");
     setIsError(false);
 
     try {
-      console.log(values.speakerImage, initialValues.speakerImageUrl);
-      if (!values.speakerImage && id && initialValues.speakerImage) {
-        console.log("Calling DELETE API for meetup image:", id);
-        const response = await axios.delete(
+      if (!values.speakerImage && id && initialValues.speakerImageUrl) {
+        await axios.delete(
           `${import.meta.env.VITE_PROD_URL}/meetup/${id}/image`,
           {
-            headers: {
-              Authorization: `Bearer ${await getToken()}`,
-            },
+            headers: { Authorization: `Bearer ${await getToken()}` },
           }
         );
-        console.log("Delete image response:", response.data);
-        setModalMessage(response.data.message || "Image deleted successfully!");
+        setModalMessage("Image deleted successfully!");
       } else {
-        setModalMessage("Image removed from input!");
+        setModalMessage("Image removed from input.");
       }
+
       setFieldValue("speakerImage", null);
       setFieldValue("speakerImageUrl", null);
       setImagePreview(null);
-      setTimeout(() => {
-        setModalOpen(false);
-      }, 1500);
+      setTimeout(() => setModalOpen(false), 1500);
     } catch (error: any) {
-      console.error("Error deleting image:", error);
       setModalMessage(
-        error.response?.data?.message ||
-          "Failed to delete image. Please try again."
+        error.response?.data?.message || "Failed to delete image."
       );
       setIsError(true);
     }
   };
 
+  // Submit handler
   const handleSubmit = async (
     values: MeetupFormValues,
     { setSubmitting, resetForm }: FormikHelpers<MeetupFormValues>
@@ -159,30 +147,36 @@ const AddMeetup = () => {
     setIsError(false);
 
     try {
-      let updatedValues: MeetupFormValues = { ...values };
+      const updatedValues: any = { ...values };
 
+      // Convert comma-separated strings to arrays
+      const parseList = (str: string) =>
+        str
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
+
+      updatedValues.topics = parseList(values.topics);
+      updatedValues.tags = parseList(values.tags);
+
+      // Upload image if new
       if (values.speakerImage instanceof File) {
-        setModalMessage("Uploading speaker image...");
-        console.log(values.speakerImage);
+        setModalMessage("Uploading image...");
         const resultAction = await dispatch(
           uploadFile({ file: values.speakerImage, getToken })
         );
 
         if (uploadFile.fulfilled.match(resultAction)) {
           const uploadedUrl = resultAction.payload.data.fileDetails?.url;
-          if (!uploadedUrl) {
-            throw new Error("Failed to get uploaded image URL");
-          }
-          updatedValues = {
-            ...values,
-            speakerImage: null,
-            speakerImageUrl: uploadedUrl,
-          };
+          if (!uploadedUrl) throw new Error("Image upload failed");
+          updatedValues.speakerImageUrl = uploadedUrl;
+          updatedValues.speakerImage = null;
         } else {
           throw new Error("Image upload failed");
         }
       }
 
+      // Combine date + time
       const dateTime =
         values.date && values.time
           ? new Date(`${values.date}T${values.time}:00.000Z`).toISOString()
@@ -193,9 +187,14 @@ const AddMeetup = () => {
         dateTime,
         date: undefined,
         time: undefined,
+        // Ensure platform/meetingLink are undefined if offline
+        ...(values.isOnline
+          ? {}
+          : { platform: undefined, meetingLink: undefined }),
       };
 
-      setModalMessage(id ? "Updating meetup..." : "Submitting meetup...");
+      setModalMessage(id ? "Updating meetup..." : "Creating meetup...");
+
       const url = id
         ? `${import.meta.env.VITE_PROD_URL}/meetup/edit/${id}`
         : `${import.meta.env.VITE_PROD_URL}/meetup/add`;
@@ -211,14 +210,10 @@ const AddMeetup = () => {
         },
       });
 
-      console.log(
-        id ? "Meetup updated successfully:" : "Meetup created successfully:",
-        response.data
-      );
       setModalMessage(
-        response.data.message ||
-          (id ? "Meetup updated successfully!" : "Meetup created successfully!")
+        response.data.message || (id ? "Meetup updated!" : "Meetup created!")
       );
+
       setTimeout(() => {
         setModalOpen(false);
         if (!id) {
@@ -229,12 +224,10 @@ const AddMeetup = () => {
         }
       }, 1500);
     } catch (error: any) {
-      console.error("Error processing meetup:", error);
+      console.error("Submit error:", error);
       setModalMessage(
         error.response?.data?.message ||
-          (id
-            ? "Failed to update meetup. Please try again."
-            : "Failed to create meetup. Please try again.")
+          (id ? "Failed to update meetup." : "Failed to create meetup.")
       );
       setIsError(true);
     } finally {
@@ -247,14 +240,18 @@ const AddMeetup = () => {
       <h1 className="mb-6 text-2xl font-bold text-gray-800">
         {id ? "Edit" : "Add"} Meetup
       </h1>
+
       <Formik
         initialValues={initialValues}
         validationSchema={MeetupValidationSchema}
         onSubmit={handleSubmit}
         enableReinitialize
+        validateOnChange={true}
+        validateOnBlur={true}
       >
         {({ isSubmitting, values, setFieldValue }) => (
           <Form className="space-y-6">
+            {/* Title, Date, Time */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -263,7 +260,7 @@ const AddMeetup = () => {
                 <Field
                   type="text"
                   name="title"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                   placeholder="e.g., Child Creativity & Fun Learning"
                 />
                 <ErrorMessage
@@ -279,7 +276,7 @@ const AddMeetup = () => {
                 <Field
                   type="date"
                   name="date"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
                 <ErrorMessage
                   name="date"
@@ -294,7 +291,7 @@ const AddMeetup = () => {
                 <Field
                   type="time"
                   name="time"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
                 <ErrorMessage
                   name="time"
@@ -303,6 +300,8 @@ const AddMeetup = () => {
                 />
               </div>
             </div>
+
+            {/* Duration, Capacity, Online/Offline */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -311,7 +310,7 @@ const AddMeetup = () => {
                 <Field
                   as="select"
                   name="duration"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 >
                   <option value="1/2 hour">1/2 hour</option>
                   <option value="1 hour">1 hour</option>
@@ -333,7 +332,7 @@ const AddMeetup = () => {
                 <Field
                   type="number"
                   name="maxCapacity"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
                 <ErrorMessage
                   name="maxCapacity"
@@ -348,23 +347,24 @@ const AddMeetup = () => {
                 <Field
                   as="select"
                   name="isOnline"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                    setFieldValue("isOnline", e.target.value === "true");
-                    setFieldValue("meetingLink", "");
+                    const isOnline = e.target.value === "true";
+                    setFieldValue("isOnline", isOnline);
+                    if (!isOnline) {
+                      setFieldValue("platform", undefined);
+                      setFieldValue("meetingLink", undefined);
+                    }
                     setFieldValue("place", "");
                   }}
                 >
                   <option value="true">Online</option>
                   <option value="false">Offline</option>
                 </Field>
-                <ErrorMessage
-                  name="isOnline"
-                  component="p"
-                  className="mt-1 text-sm text-red-500"
-                />
               </div>
             </div>
+
+            {/* Platform / Meeting Link / Place */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {values.isOnline ? (
                 <>
@@ -375,7 +375,7 @@ const AddMeetup = () => {
                     <Field
                       as="select"
                       name="platform"
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                       onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                         setFieldValue("platform", e.target.value);
                         setFieldValue("meetingLink", "");
@@ -400,8 +400,8 @@ const AddMeetup = () => {
                     <Field
                       type="url"
                       name="meetingLink"
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={`e.g., https://${
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                      placeholder={`https://${
                         values.platform === "Google Meet"
                           ? "meet.google.com"
                           : values.platform === "Zoom"
@@ -411,7 +411,7 @@ const AddMeetup = () => {
                           : values.platform === "Cisco Webex"
                           ? "webex.com"
                           : "discord.gg"
-                      }/abc-123`}
+                      }/...`}
                     />
                     <ErrorMessage
                       name="meetingLink"
@@ -429,7 +429,7 @@ const AddMeetup = () => {
                   <Field
                     type="text"
                     name="place"
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                     placeholder="e.g., Community Center, Mumbai"
                   />
                   <ErrorMessage
@@ -440,6 +440,8 @@ const AddMeetup = () => {
                 </div>
               )}
             </div>
+
+            {/* Descriptions */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Description
@@ -447,8 +449,7 @@ const AddMeetup = () => {
               <Field
                 as="textarea"
                 name="description"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Engage children in creative problem-solving activities"
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               />
               <ErrorMessage
                 name="description"
@@ -463,8 +464,7 @@ const AddMeetup = () => {
               <Field
                 as="textarea"
                 name="detailedDescription"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Online interactive session..."
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               />
               <ErrorMessage
                 name="detailedDescription"
@@ -472,6 +472,8 @@ const AddMeetup = () => {
                 className="mt-1 text-sm text-red-500"
               />
             </div>
+
+            {/* Speaker */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -480,8 +482,7 @@ const AddMeetup = () => {
                 <Field
                   type="text"
                   name="speakerName"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Ms. Priya Sharma"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
                 <ErrorMessage
                   name="speakerName"
@@ -498,19 +499,16 @@ const AddMeetup = () => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleImageChange(e, setFieldValue)}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     PNG, JPG, GIF up to 5MB
                   </p>
                 </div>
-                <ErrorMessage
-                  name="speakerImage"
-                  component="p"
-                  className="mt-1 text-sm text-red-500"
-                />
               </div>
             </div>
+
+            {/* Image Preview */}
             {imagePreview && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -519,15 +517,9 @@ const AddMeetup = () => {
                 <div className="relative inline-block">
                   <img
                     src={imagePreview}
-                    alt="Speaker preview"
-                    className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                    onError={() => {
-                      console.error(
-                        "Failed to load image preview:",
-                        imagePreview
-                      );
-                      setImagePreview(null);
-                    }}
+                    alt="Speaker"
+                    className="w-32 h-32 object-cover rounded-lg border"
+                    onError={() => setImagePreview(null)}
                   />
                   <button
                     type="button"
@@ -539,6 +531,8 @@ const AddMeetup = () => {
                 </div>
               </div>
             )}
+
+            {/* Topics & Tags */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -547,8 +541,8 @@ const AddMeetup = () => {
                 <Field
                   type="text"
                   name="topics"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Creative Thinking, Problem Solving"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  placeholder="e.g., Art, Music, Creativity"
                 />
                 <ErrorMessage
                   name="topics"
@@ -563,8 +557,8 @@ const AddMeetup = () => {
                 <Field
                   type="text"
                   name="tags"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Parenting, Child Learning"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  placeholder="e.g., Kids, Parenting, Learning"
                 />
                 <ErrorMessage
                   name="tags"
@@ -573,6 +567,8 @@ const AddMeetup = () => {
                 />
               </div>
             </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -582,11 +578,13 @@ const AddMeetup = () => {
                 ? "Submitting..."
                 : id
                 ? "Update Meetup"
-                : "Submit Meetup"}
+                : "Create Meetup"}
             </button>
           </Form>
         )}
       </Formik>
+
+      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
@@ -599,8 +597,8 @@ const AddMeetup = () => {
             </p>
             {isError && (
               <button
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full"
                 onClick={() => setModalOpen(false)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full"
               >
                 Close
               </button>

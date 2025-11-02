@@ -1,8 +1,8 @@
 export interface MeetupFormValues {
   _id?: string;
   title: string;
-  date: string;
-  time: string;
+  date?: string;
+  time?: string;
   duration: string;
   maxCapacity: number;
   platform: string;
@@ -17,4 +17,8 @@ export interface MeetupFormValues {
   tags: string;
   isOnline: boolean;
   venue?: string;
+  dateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  __v: string;
 }

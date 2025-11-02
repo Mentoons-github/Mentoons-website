@@ -66,6 +66,9 @@ export const editEmployee = createAsyncThunk<
         email: currentEmployee.user.email,
         role: currentEmployee.user.role,
         phoneNumber: currentEmployee.user.phoneNumber,
+        dob: currentEmployee.user.dob
+          ? currentEmployee.user.dob
+          : updatedData.user?.dob || null,
       },
     };
 

@@ -43,7 +43,7 @@ const GeneralQueries = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/query"
+          `${import.meta.env.VITE_PROD_URL}/query`
         );
         console.log(response.data);
         setQueries(response.data.data);
@@ -76,7 +76,7 @@ const GeneralQueries = () => {
 
     try {
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/email/sendQueryResponseEmail",
+        `${import.meta.env.VITE_PROD_URL}/email/sendQueryResponseEmail`,
         {
           id: selectedQuery._id,
           name: selectedQuery.name,

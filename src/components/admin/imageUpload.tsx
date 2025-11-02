@@ -76,7 +76,7 @@ const ImageUpload = ({
         formData.append("file", file);
 
         const response = await axios.post<UploadResponse>(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+          `${import.meta.env.VITE_PROD_URL}/upload/file`,
           formData,
           {
             headers: {
@@ -121,7 +121,9 @@ const ImageUpload = ({
       try {
         const token = await getToken();
         const response = await axios.delete(
-          `https://mentoons-backend-zlx3.onrender.com/api/v1/products/image/${imageToRemove._id}`,
+          `${import.meta.env.VITE_PROD_URL}/products/image/${
+            imageToRemove._id
+          }`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

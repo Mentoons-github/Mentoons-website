@@ -39,7 +39,7 @@ const ProductTable = () => {
     if (productToDelete) {
       try {
         const response = await axios.delete(
-          `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${productToDelete._id}`
+          `${import.meta.env.VITE_PROD_URL}/products/${productToDelete._id}`
         );
         if (response.status === 200) {
           setProducts((prevProducts) =>

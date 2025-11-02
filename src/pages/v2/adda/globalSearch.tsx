@@ -241,7 +241,7 @@ const SearchResultsPage = () => {
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${userId}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

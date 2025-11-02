@@ -13,6 +13,7 @@ import { EXCLUDE_USER_ITEMS } from "@/constant/admin";
 const Users = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
+
   const [users, setUsers] = useState<User[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -36,44 +37,75 @@ const Users = () => {
   };
 
   const confirmDelete = async () => {
-    if (userToDelete) {
-      try {
-        const token = await getToken();
-        await axios.delete(
-          `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${userToDelete.clerkId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setUsers((prevUsers) =>
-          prevUsers.filter((user) => user._id !== userToDelete._id)
-        );
-        toast.success("User deleted successfully");
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        toast.error("Failed to delete user");
-      }
+    if (!userToDelete) return;
+    try {
+      const token = await getToken();
+      await axios.delete(
+        `${import.meta.env.VITE_PROD_URL}/user/user/${userToDelete.clerkId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setUsers((prev) => prev.filter((u) => u._id !== userToDelete._id));
+      toast.success("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
     }
-    setIsDeleteModalOpen(false);
-    setUserToDelete(null);
   };
 
   const addUser = () => {
     navigate("/admin/user/create");
   };
 
+  const toggleBlockUser = async (user: User) => {
+    try {
+      const token = await getToken();
+      const newBlocked = !user.isBlocked;
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === user._id ? { ...u, isBlocked: newBlocked } : u
+        )
+      );
+
+      await axios.patch(
+        `${import.meta.env.VITE_PROD_URL}/user/block/${user.clerkId}`,
+        { isBlocked: newBlocked },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(
+        newBlocked ? "User blocked successfully" : "User unblocked successfully"
+      );
+    } catch (error) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === user._id ? { ...u, isBlocked: !user.isBlocked } : u
+        )
+      );
+      console.error("Error toggling block status:", error);
+      toast.error("Failed to change block status");
+    }
+  };
+
   const handleSort = (field: string) => {
     setSortField(field);
-    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
   const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      setDebouncedSearchTerm(value);
-    }, 500),
+    debounce((value: string) => setDebouncedSearchTerm(value), 500),
     []
   );
 
@@ -82,10 +114,7 @@ const Users = () => {
     debouncedSearch(term);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
+  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
   const handleLimitChange = (newLimit: number) => {
     setLimit(newLimit);
     setCurrentPage(1);
@@ -109,25 +138,19 @@ const Users = () => {
     }
 
     if (key === "isOnline") {
-      return value ? "🟢 Online" : "🔴 Offline";
+      return value ? "Online" : "Offline";
     }
 
     if (Array.isArray(value)) {
       return value.length > 0 ? `${value.length} items` : "None";
     }
 
-    if (typeof value === "object") {
-      return "Object";
-    }
+    if (typeof value === "object") return "Object";
 
-    if (typeof value === "boolean") {
-      return value ? "Yes" : "No";
-    }
+    if (typeof value === "boolean") return value ? "Yes" : "No";
 
-    const stringValue = String(value);
-    return stringValue.length > 50
-      ? `${stringValue.substring(0, 50)}...`
-      : stringValue;
+    const s = String(value);
+    return s.length > 50 ? `${s.substring(0, 50)}...` : s;
   };
 
   useEffect(() => {
@@ -135,8 +158,10 @@ const Users = () => {
       setIsLoading(true);
       try {
         const token = await getToken();
-        const response = await axios.get(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/user/all-users",
+        console.log("fetching User")
+        console.log(import.meta.env.VITE_PROD_URL)
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}/user/all-users`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params: {
@@ -147,17 +172,13 @@ const Users = () => {
             },
           }
         );
-        console.log("API Response:", response.data);
+        console.log(data)
 
-        if (response.data.success && Array.isArray(response.data.data.users)) {
-          setUsers(response.data.data.users);
-          setTotalPages(response.data.data.totalPages || 1);
-          setTotalUsers(response.data.data.totalCount || 0);
+        if (data.success && Array.isArray(data.data.users)) {
+          setUsers(data.data.users);
+          setTotalPages(data.data.totalPages || 1);
+          setTotalUsers(data.data.totalCount || 0);
         } else {
-          console.error(
-            "Fetched data is not in the expected format:",
-            response.data
-          );
           setUsers([]);
         }
       } catch (error) {
@@ -182,6 +203,7 @@ const Users = () => {
         data={users}
         onEdit={editUser}
         onDelete={removeUser}
+        onBlock={toggleBlockUser}
         onAdd={addUser}
         searchTerm={searchTerm}
         onSearch={handleSearch}

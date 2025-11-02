@@ -5,7 +5,8 @@ export type Department =
   | "hr"
   | "marketing"
   | "finance"
-  | "sales";
+  | "sales"
+  | "psychologist";
 
 export interface UserFormData {
   name: string;
@@ -14,6 +15,7 @@ export interface UserFormData {
   picture?: string;
   gender: "male" | "female" | "other";
   phoneNumber: number | null;
+  dob: string | null;
 }
 
 export interface EmployeeInterface {
@@ -22,6 +24,7 @@ export interface EmployeeInterface {
   active: boolean;
   user: UserFormData;
   jobRole: string;
+  dob?: string | null;
   profileEditRequest?: {
     status: "pending" | "approved" | "rejected";
     requestedAt?: string;
@@ -46,4 +49,37 @@ export interface IAttendance {
   editedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export type EmploymentType =
+  | "full-time"
+  | "part-time"
+  | "intern"
+  | "contract"
+  | "freelance";
+
+export interface UserFormData {
+  name: string;
+  email: string;
+  role: string;
+  picture?: string;
+  gender: "male" | "female" | "other";
+  phoneNumber: number | null;
+  dob: string | null;
+}
+
+export interface EmployeeInterface {
+  department: Department | null;
+  employmentType: EmploymentType; 
+  salary: number;
+  active: boolean;
+  user: UserFormData;
+  jobRole: string;
+  dob?: string | null;
+  profileEditRequest?: {
+    status: "pending" | "approved" | "rejected";
+    requestedAt?: string;
+    approvedAt?: string;
+    adminId?: string;
+  };
 }

@@ -1,105 +1,105 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import DynamicTable from "@/components/admin/dynamicTable";
-
-interface Psychologist {
-  _id: string;
-  name: string;
-  email: string;
-  department: string;
-  salary: number;
-  active: boolean;
-  inviteStatus: string;
-}
-
-const sampleData: Psychologist[] = [
-  {
-    _id: "1",
-    name: "Priya Sharma",
-    email: "priya.sharma@example.com",
-    department: "Psychology",
-    salary: 75000,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "2",
-    name: "Raj Kumar",
-    email: "raj.kumar@example.com",
-    department: "Psychology",
-    salary: 85000,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "3",
-    name: "Aisha Khan",
-    email: "aisha.khan@example.com",
-    department: "Psychology",
-    salary: 65000,
-    active: false,
-    inviteStatus: "pending",
-  },
-  {
-    _id: "4",
-    name: "Vikram Singh",
-    email: "vikram.singh@example.com",
-    department: "Psychology",
-    salary: 90000,
-    active: true,
-    inviteStatus: "accepted",
-  },
-  {
-    _id: "5",
-    name: "Neha Patel",
-    email: "neha.patel@example.com",
-    department: "Psychology",
-    salary: 55000,
-    active: true,
-    inviteStatus: "accepted",
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { getEmployees } from "@/redux/admin/employee/api";
+import { AppDispatch, RootState } from "@/redux/store";
+import { Employee } from "@/types/employee";
+import { useNavigate } from "react-router-dom";
 
 const PsychologistsTable: React.FC = () => {
-  const handleEdit = (item: Psychologist): void => {
+  const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  const { employees, loading, error } = useSelector(
+    (state: RootState) => state.employee
+  );
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      const token = await getToken();
+      if (!token) return;
+
+      dispatch(
+        getEmployees({
+          sortOrder: "asc",
+          searchTerm,
+          page: 1,
+          limit: 1000,
+        })
+      );
+    };
+
+    load();
+  }, [dispatch, getToken, searchTerm]);
+
+  const psychologists = employees.filter(
+    (emp) =>
+      emp.department?.toLowerCase() === "psychology" ||
+      emp.department?.toLowerCase() === "psychologist"
+  );
+
+  const handleEdit = (item: Employee) => {
     console.log("Edit psychologist:", item);
-    // Implement edit logic here (e.g., open modal or navigate to edit page)
   };
 
-  const handleDelete = (item: Psychologist): void => {
+  const handleDelete = (item: Employee) => {
     console.log("Delete psychologist:", item);
-    // Implement delete logic here (e.g., API call to remove)
   };
 
-  const handleView = (item: Psychologist): void => {
-    console.log("View psychologist details:", item);
-    // Implement view logic here (e.g., open details modal)
+  const handleView = (item: Employee) => {
+    navigate(`/employee/${item._id}`);
   };
 
-  const handleAdd = (): void => {
+  const handleAdd = () => {
     console.log("Add new psychologist");
-    // Implement add logic here (e.g., open add form)
   };
 
-  const handleSearch = (term: string): void => {
-    console.log("Search term:", term);
-    // Implement search filtering here if needed
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Psychologists Management</h1>
-      <DynamicTable
-        data={sampleData}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAdd={handleAdd}
-        onView={handleView}
-        onSearch={handleSearch}
-        itemType="employee"
-        excludeColumns={[]}
-        idKey="_id"
-        maxCellLength={30}
-      />
+
+      {psychologists.length === 0 ? (
+        <p className="text-gray-600">No psychologists found.</p>
+      ) : (
+        <DynamicTable
+          data={psychologists}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAdd={handleAdd}
+          onView={handleView}
+          onSearch={handleSearch}
+          itemType="employee"
+          excludeColumns={[]}
+          idKey="_id"
+          maxCellLength={30}
+        />
+      )}
     </div>
   );
 };

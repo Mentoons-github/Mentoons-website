@@ -25,9 +25,13 @@ export const fetchMeetups = async (
   }
 };
 
-export const meetupDelete = async (id: string) => {
+export const meetupDelete = async (token: string, id: string) => {
   try {
-    const response = await axios.delete(`${BASE_URL}/meetup/${id}`);
+    const response = await axios.delete(`${BASE_URL}/meetup/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (response.status === 200) {
       return {
         success: true,

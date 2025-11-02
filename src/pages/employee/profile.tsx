@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Phone,
   Key,
+  Calendar,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -46,7 +47,7 @@ export default function EmployeeProfile() {
     role: "",
     gender: "other",
     phoneNumber: null,
-    picture: undefined,
+    dob: null, // Added DOB
   };
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function EmployeeProfile() {
           ...defaultUserData,
           name: employee.employee.user.name,
           picture: employee.employee.user.picture,
+          dob: employee.employee.user.dob, // Initialize DOB
         },
       });
     }
@@ -174,11 +176,28 @@ export default function EmployeeProfile() {
         return;
       }
 
+      // Validate DOB if provided
+      if (editForm.user?.dob && !employee?.employee?.user.dob) {
+        const dobDate = new Date(editForm.user.dob);
+        const today = new Date();
+        if (isNaN(dobDate.getTime()) || dobDate > today) {
+          showModal({
+            currentStep: "error",
+            isSubmitting: true,
+            message: "Validation Error",
+            error: "Please provide a valid Date of Birth",
+          });
+          alert("Please provide a valid Date of Birth");
+          return;
+        }
+      }
+
       const updatedForm: Partial<EmployeeInterface> = {
         user: {
           ...editForm.user!,
           name: editForm.user!.name,
           picture: pictureUrl,
+          dob: editForm.user!.dob,
         },
       };
 
@@ -233,6 +252,7 @@ export default function EmployeeProfile() {
         ...defaultUserData,
         name: employee?.employee?.user.name || defaultUserData.name,
         picture: employee?.employee?.user.picture || defaultUserData.picture,
+        dob: employee?.employee?.user.dob || defaultUserData.dob, // Reset DOB
       },
     });
     setSelectedFile(null);
@@ -254,7 +274,7 @@ export default function EmployeeProfile() {
         ...prev,
         user: {
           ...prev.user,
-          [userField]: value,
+          [userField]: userField === "dob" ? value : value, // Handle DOB as string
         } as UserFormData,
       }));
     }
@@ -341,6 +361,29 @@ export default function EmployeeProfile() {
           </div>
           <div>
             <label className="text-sm font-semibold text-gray-600 block mb-1">
+              Date of Birth
+            </label>
+            <input
+              type="date"
+              name="user.dob"
+              value={editForm.user?.dob || ""}
+              onChange={handleInputChange}
+              disabled={!!employee?.employee?.user.dob}
+              className={`w-full p-2 border border-gray-300 rounded-lg focus:outline-none ${
+                employee?.employee?.user.dob
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "focus:border-blue-500"
+              }`}
+              placeholder="Select date of birth"
+            />
+            {employee?.employee?.user.dob && (
+              <p className="text-sm text-gray-500 mt-1">
+                Date of Birth cannot be edited once set.
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-gray-600 block mb-1">
               Profile Picture
             </label>
             <div className="flex items-center gap-4">
@@ -402,7 +445,7 @@ export default function EmployeeProfile() {
     </div>
   );
 
-  // Profile Picture Modal (Updated with Null Check)
+  // Profile Picture Modal
   const ProfilePictureModal = () => {
     if (!employee?.employee?.user) {
       console.error("Employee data is missing in ProfilePictureModal");
@@ -699,6 +742,22 @@ export default function EmployeeProfile() {
                           </label>
                           <p className="text-gray-900 font-medium">
                             {employee.employee.user.phoneNumber || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                        <Calendar className="text-blue-600 mt-1" size={22} />
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold text-gray-600 block mb-1">
+                            Date of Birth
+                          </label>
+                          <p className="text-gray-900 font-medium">
+                            {employee.employee.user.dob
+                              ? new Date(
+                                  employee.employee.user.dob
+                                ).toLocaleDateString()
+                              : "Please update your Date of Birth"}
                           </p>
                         </div>
                       </div>

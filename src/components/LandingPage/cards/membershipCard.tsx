@@ -100,7 +100,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
 
       try {
         const response = await axios.post(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate?type=subscription",
+          `${import.meta.env.VITE_PROD_URL}/payment/initiate?type=subscription`,
           subscriptionData,
           {
             headers: {

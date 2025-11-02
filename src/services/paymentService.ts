@@ -68,7 +68,7 @@ export const handlePayment = async (
       console.log("Order Data:", orderData);
 
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+        `${import.meta.env.VITE_PROD_URL}/payment/initiate`,
         orderData,
         {
           headers: {
