@@ -175,83 +175,87 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
 
   return (
     <div
-      className="relative w-full max-w-6xl mx-auto"
+      className="relative w-full max-w-[100vw] mx-auto px-2 sm:px-4"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10">
+      <div className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10">
         <button
           onClick={scrollLeft}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
+          className="bg-white p-1 sm:p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
           aria-label="Previous product"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={20} className="w-5 sm:w-6 h-5 sm:h-6" />
         </button>
       </div>
 
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+      <div className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10">
         <button
           onClick={scrollRight}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
+          className="bg-white p-1 sm:p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
           aria-label="Next product"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={20} className="w-5 sm:w-6 h-5 sm:h-6" />
         </button>
       </div>
 
-      <div className="absolute right-4 bottom-4 z-10">
+      <div className="absolute right-1 sm:right-4 bottom-4 z-10">
         <button
           onClick={togglePlayPause}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
+          className="bg-white p-1 sm:p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none"
           aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
         >
-          {isPaused ? <Play size={20} /> : <Pause size={20} />}
+          {isPaused ? (
+            <Play size={16} className="w-4 sm:w-5 h-4 sm:h-5" />
+          ) : (
+            <Pause size={16} className="w-4 sm:w-5 h-4 sm:h-5" />
+          )}
         </button>
       </div>
 
       <div
         ref={sliderRef}
-        className="overflow-x-auto scroll-smooth snap-x snap-mandatory px-3 py-4 flex gap-4 hide-scrollbar"
+        className="overflow-x-auto scroll-smooth snap-x snap-mandatory px-2 sm:px-3 py-3 sm:py-4 flex gap-3 sm:gap-4 hide-scrollbar"
       >
         {products.map((product) => (
           <div
             key={product.id}
-            className={`min-w-[100%] sm:min-w-[80%] md:min-w-[75%] lg:min-w-[70%] border shadow-lg flex flex-col md:flex-row justify-between items-center p-4 sm:p-6 ${product.color} rounded-2xl snap-start transition-transform hover:scale-[0.98] cursor-pointer`}
+            className={`min-w-[90vw] sm:min-w-[80vw] md:min-w-[75vw] lg:min-w-[70vw] border shadow-lg flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4 ${product.color} rounded-xl sm:rounded-2xl snap-start transition-transform hover:scale-[0.98] cursor-pointer`}
             data-index={product.id - 1}
           >
-            <div className="flex-1 text-start mb-6 md:mb-0 md:ml-6 lg:ml-10">
-              <h2 className="font-akshar font-semibold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#040404] leading-tight">
+            <div className="flex-1 text-start mb-4 sm:mb-0 sm:ml-4 md:ml-6">
+              <h2 className="font-akshar font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#040404] leading-tight">
                 {product.title}
               </h2>
-              <p className="font-inter text-base sm:text-lg md:text-xl mt-3 max-w-md">
+              <p className="font-inter text-sm sm:text-base md:text-lg mt-2 sm:mt-3 max-w-[90%] sm:max-w-md">
                 {product.description}
               </p>
               <button
-                className="mt-5 bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-opacity-80 transition-colors"
+                className="mt-3 sm:mt-4 bg-black text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-full font-medium hover:bg-opacity-80 transition-colors"
                 onClick={() => handleShopNow(product.title)}
               >
                 Shop Now
               </button>
             </div>
 
-            <div className="flex justify-center md:justify-end flex-shrink-0">
+            <div className="flex justify-center sm:justify-end flex-shrink-0 w-full sm:w-auto">
               <img
                 src={product.image}
                 alt={product.alt}
-                className="w-[200px] sm:w-[250px] md:w-[300px] lg:w-[340px] xl:w-[400px] object-contain transform transition-transform hover:rotate-2"
+                className="w-[150px] sm:w-[200px] md:w-[250px] lg:w-[300px] object-contain transform transition-transform hover:rotate-2"
               />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
         {products.map((product, index) => (
           <div
             key={`dot-${product.id}`}
-            className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${
+            className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full cursor-pointer transition-all duration-300 ${
               currentIndex === index
-                ? "w-6 bg-black"
+                ? "w-4 sm:w-6 bg-black"
                 : "bg-gray-300 hover:bg-gray-500"
             }`}
             onClick={() => jumpToSlide(index)}

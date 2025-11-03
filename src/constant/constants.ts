@@ -24,8 +24,12 @@ import { INDIAN_STATES } from "./bookings/states";
 import { QUIZ_ITEMS, QUIZ_DATA, ICON_SETS } from "./assessments/quiz";
 import { GRID, CLUES } from "./puzzle/crossWord";
 import { GRID_SOCIAL_EASY, CLUES_SOCIAL_EASY } from "./puzzle/difficulty/easy";
-import { GRID_SOCIAL_MEDIUM, CLUES_SOCIAL_MEDIUM } from "./puzzle/difficulty/medium";
+import {
+  GRID_SOCIAL_MEDIUM,
+  CLUES_SOCIAL_MEDIUM,
+} from "./puzzle/difficulty/medium";
 import { GRID_SOCIAL_HARD, CLUES_SOCIAL_HARD } from "./puzzle/difficulty/hard";
+import { COLOR_THEME } from "./workshops/colorTheme";
 
 export {
   ADDA_NAV_LINKS,
@@ -69,4 +73,5 @@ export {
   GRID_SOCIAL_EASY,
   GRID_SOCIAL_HARD,
   GRID_SOCIAL_MEDIUM,
+  COLOR_THEME,
 };

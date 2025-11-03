@@ -19,10 +19,6 @@ const ProductCard = ({ productDetails }: { productDetails: ProductBase }) => {
   const { getToken, userId } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  console.log(
-    "id contain : ",
-    `product-${productDetails.title.replace(/\s*\(\d+-\d+\)\s*years/, "")}`
-  );
 
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>

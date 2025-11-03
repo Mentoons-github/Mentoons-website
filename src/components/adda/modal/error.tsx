@@ -2,16 +2,18 @@ import { NavLink } from "react-router-dom";
 import { useEffect, useRef } from "react";
 
 interface ErrorModalInterface {
+  heading?: string;
   isOpen: boolean;
   onClose: () => void;
   error: string;
-  action: "nav" | "retry" | "custom";
+  action?: "nav" | "retry" | "custom";
   link?: string;
   actionText?: string;
   onAction?: () => void;
 }
 
 const ErrorModal = ({
+  heading,
   isOpen,
   onClose,
   error,
@@ -60,7 +62,7 @@ const ErrorModal = ({
           id="error-modal-title"
           className="text-lg font-semibold text-red-600 mb-4"
         >
-          Please fill your details
+          {heading ? heading : "Please fill your details"}
         </h1>
         <p className="text-sm text-gray-700 mb-6">{error}</p>
         <div className="flex justify-end gap-4">

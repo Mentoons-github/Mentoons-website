@@ -32,7 +32,7 @@ export const fetchFriendRequest = createAsyncThunk<
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(res.data.data.request,'its status of friend request')
+      console.log(res.data.data.request, "its status of friend request");
       return res.data.data.request;
     } catch (error) {
       return rejectWithValue("Failed to fetch friend request details");
@@ -48,6 +48,7 @@ export const fetchNotifications = createAsyncThunk<
   "notifications/fetch",
   async ({ token, page, limit = 10 }, { rejectWithValue }) => {
     try {
+      console.log("cvalling fetching");
       const res = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/adda/userNotifications`,
         {
@@ -61,6 +62,7 @@ export const fetchNotifications = createAsyncThunk<
       const notifications = Array.isArray(res.data.data)
         ? res.data.data
         : res.data.notifications || [];
+
       return {
         notifications,
         hasMore: notifications.length === limit,
@@ -185,7 +187,7 @@ const notificationSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchFriendRequest.fulfilled, (state,action) => {
+      .addCase(fetchFriendRequest.fulfilled, (state, action) => {
         state.status = action.payload.status;
         state.isLoading = false;
       })

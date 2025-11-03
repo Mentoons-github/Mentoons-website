@@ -99,7 +99,7 @@ const Podcastv2 = () => {
     e.preventDefault();
     try {
       const queryResponse = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/query",
+        `${import.meta.env.VITE_PROD_URL}/query`,
         {
           message,
           name: enquiryName,
@@ -119,7 +119,7 @@ const Podcastv2 = () => {
     try {
       const token = await getToken();
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {

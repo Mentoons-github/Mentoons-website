@@ -59,7 +59,7 @@ WorkshopFeatureCard2Props) => {
 
   const handleSubmit = async (
     values: REQUEST_CALL_DATA,
-    { setSubmitting }: FormikHelpers<REQUEST_CALL_DATA>,
+    { setSubmitting }: FormikHelpers<REQUEST_CALL_DATA>
   ) => {
     try {
       const WorkshopFeatureCardFormData = {
@@ -68,13 +68,13 @@ WorkshopFeatureCard2Props) => {
       };
 
       const response = await axiosInstance.post<ApiResponse>(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/call-requests",
+        `${import.meta.env.VITE_PROD_URL}/call-requests`,
         JSON.stringify(WorkshopFeatureCardFormData),
         {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
       const res: ApiResponse = response.data;
 

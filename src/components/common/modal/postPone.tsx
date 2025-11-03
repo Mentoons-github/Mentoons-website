@@ -37,7 +37,11 @@ const PostPone = ({
 
     try {
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${values.time}&date=${values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=update`,
+        `${import.meta.env.VITE_PROD_URL}/sessionbookings/postpone?time=${
+          values.time
+        }&date=${values.date}&state=${postponeBooking?.state}&sessionID=${
+          postponeBooking?._id
+        }&type=update`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -106,7 +110,11 @@ const PostPone = ({
     console.log("postponed booking :", postponeBooking);
     try {
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/postpone?time=${formik.values.time}&date=${formik.values.date}&state=${postponeBooking?.state}&sessionID=${postponeBooking?._id}&type=check`,
+        `${import.meta.env.VITE_PROD_URL}/sessionbookings/postpone?time=${
+          formik.values.time
+        }&date=${formik.values.date}&state=${
+          postponeBooking?.state
+        }&sessionID=${postponeBooking?._id}&type=check`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

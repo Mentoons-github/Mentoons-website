@@ -16,7 +16,6 @@ const Cart: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const { getToken, userId } = useAuth();
-  console.log("User ID", userId);
 
   const [recommendationsFilter, setRecommendationFilter] = useState(
     ProductType.MENTOONS_CARDS
@@ -27,12 +26,8 @@ const Cart: React.FC = () => {
     (state: RootState) => state.cart
   );
 
-  console.log("Cart", cart);
-
   // Get products from the productSlice
   const { items: products } = useSelector((state: RootState) => state.products);
-
-  console.log("Product", products);
 
   const handleScroll = (direction: "left" | "right") => {
     const container = scrollContainerRef.current;

@@ -203,7 +203,7 @@ const Chat: React.FC<ChatProps> = ({
         dispatch(
           incrementUnreadCount({
             conversationId: data.conversationId,
-            userId: mongoUserId, // 👈 Use your own userId
+            userId: mongoUserId,
           })
         );
       }

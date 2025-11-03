@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { X, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AddToCartModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
   productName,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +49,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
 
   const handleViewCart = () => {
     onClose();
-    // navigate("/cart"); // Uncomment when using with React Router
+    navigate("/cart"); // Uncomment when using with React Router
   };
 
   return (

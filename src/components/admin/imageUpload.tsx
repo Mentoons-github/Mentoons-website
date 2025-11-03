@@ -1,5 +1,6 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { errorToast, successToast } from "../../utils/toastResposnse";
 
@@ -21,26 +22,43 @@ interface UploadResponse {
 
 interface ImageData {
   imageUrl: string;
+  _id?: string;
+}
+
+interface BackendImageData {
+  imageUrl: {
+    imageUrl: string;
+    _id: string;
+  };
 }
 
 const ImageUpload = ({
   onImageUpload,
   multiple = false,
   initialImages = [],
+  productId,
 }: {
   onImageUpload: (images: ImageData[]) => void;
   multiple?: boolean;
-  initialImages?: ImageData[];
+  initialImages?: (ImageData | BackendImageData)[];
+  productId?: string;
 }) => {
   const [uploading, setUploading] = useState(false);
-  const [productImages, setProductImages] =
-    useState<ImageData[]>(initialImages);
+  const [productImages, setProductImages] = useState<ImageData[]>([]);
   const { getToken } = useAuth();
 
-  // Initialize with initial images if provided
   useEffect(() => {
     if (initialImages && initialImages.length > 0) {
-      setProductImages(initialImages);
+      const formattedImages = initialImages.map((img) =>
+        "imageUrl" in img &&
+        typeof img.imageUrl === "object" &&
+        img.imageUrl.imageUrl
+          ? { imageUrl: img.imageUrl.imageUrl, _id: img.imageUrl._id }
+          : img
+      ) as ImageData[];
+      setProductImages(formattedImages);
+    } else {
+      setProductImages([]);
     }
   }, [initialImages]);
 
@@ -53,44 +71,34 @@ const ImageUpload = ({
     try {
       const token = await getToken();
 
-      // Upload all files concurrently
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        const response = await axios.post<UploadResponse>(
+          `${import.meta.env.VITE_PROD_URL}/upload/file`,
+          formData,
           {
-            method: "POST",
-            body: formData,
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
             },
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
-        }
-
-        const data = (await response.json()) as UploadResponse;
-
-        if (data.success && data.data.fileDetails) {
-          return { imageUrl: data.data.fileDetails.url };
-        } else {
+        if (!response.data.success || !response.data.data.fileDetails) {
           throw new Error(`Failed to process ${file.name}`);
         }
+
+        return { imageUrl: response.data.data.fileDetails.url };
       });
 
-      // Wait for all uploads to complete
       const uploadedImages = await Promise.all(uploadPromises);
 
-      // Add new images to the existing ones (if multiple is true)
       const newProductImages = multiple
         ? [...productImages, ...uploadedImages]
         : uploadedImages;
 
-      // Update state and call onImageUpload
       setProductImages(newProductImages);
       onImageUpload(newProductImages);
 
@@ -100,7 +108,6 @@ const ImageUpload = ({
       errorToast("Failed to upload one or more images");
     } finally {
       setUploading(false);
-      // Clear the input value to allow uploading the same file again
       const fileInput = document.getElementById(
         "image-upload"
       ) as HTMLInputElement;
@@ -108,7 +115,37 @@ const ImageUpload = ({
     }
   };
 
-  const removeImage = (indexToRemove: number) => {
+  const removeImage = async (indexToRemove: number) => {
+    const imageToRemove = productImages[indexToRemove];
+    if (imageToRemove._id && productId) {
+      try {
+        const token = await getToken();
+        const response = await axios.delete(
+          `${import.meta.env.VITE_PROD_URL}/products/image/${
+            imageToRemove._id
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            data: {
+              productId,
+            },
+          }
+        );
+
+        if (response.status !== 200) {
+          throw new Error("Failed to delete image from backend");
+        }
+
+        successToast("Image deleted successfully");
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        errorToast("Failed to delete image");
+        return;
+      }
+    }
+
     const updatedImages = productImages.filter(
       (_, index) => index !== indexToRemove
     );

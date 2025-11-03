@@ -20,6 +20,7 @@ const Sidebar = ({
     games: boolean;
     products: boolean;
     services: boolean;
+    workshops: boolean;
   };
   handleHover: (key: string) => void;
   handleMouseLeave: (key: string) => void;
@@ -67,22 +68,41 @@ const Sidebar = ({
       <div className="flex flex-col items-center gap-8">
         {COMMON_NAV.map(({ id, label, url, items }) =>
           items ? (
-            <NavButton
-              key={id ? id : label}
-              className="text-white text-2xl sm:text-3xl md:text-4xl"
-              label={label}
-              icon={false}
-              onMouseEnter={() => handleHover(label.toLowerCase())}
-              onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
-            >
-              {label === "Products" && dropdown.products && (
-                <DropDown
-                  isOpen={setIsOpen}
-                  items={items}
-                  labelType="products"
-                />
-              )}
-            </NavButton>
+            label === "Products" ? (
+              <NavButton
+                key={id ? id : label}
+                className="text-white text-2xl sm:text-3xl md:text-4xl"
+                label={label}
+                icon={false}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+              >
+                {label === "Products" && dropdown.products && (
+                  <DropDown
+                    isOpen={setIsOpen}
+                    items={items}
+                    labelType="products"
+                  />
+                )}
+              </NavButton>
+            ) : (
+              <NavButton
+                key={id ? id : label}
+                className="text-white text-2xl sm:text-3xl md:text-4xl"
+                label={label}
+                icon={false}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+              >
+                {label === "Workshops" && dropdown.workshops && (
+                  <DropDown
+                    isOpen={setIsOpen}
+                    items={items}
+                    labelType="workshops"
+                  />
+                )}
+              </NavButton>
+            )
           ) : (
             <Link
               key={id}

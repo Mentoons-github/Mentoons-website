@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ProductNavProps {
-  debouncedSearch: (
-    value: string,
-    category: string | undefined,
-    productType: string | undefined,
-    cardType: string | undefined
-  ) => void;
   searchTerm: string;
   productType: string | undefined;
   cardType: string | undefined;
@@ -14,13 +9,13 @@ interface ProductNavProps {
 }
 
 const ProductNav = ({
-  debouncedSearch,
   searchTerm,
   productType,
   cardType,
   selectedCategory = "all",
 }: ProductNavProps) => {
   const [activeCategory, setActiveCategory] = useState(selectedCategory);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setActiveCategory(selectedCategory);
@@ -67,12 +62,23 @@ const ProductNav = ({
   const handleCategoryClick = (category: string) => {
     console.log("Category clicked:", category);
     setActiveCategory(category);
-    debouncedSearch(
-      searchTerm,
-      category === "all" ? undefined : category,
-      productType,
-      cardType
-    );
+
+    const searchParams = new URLSearchParams();
+
+    if (searchTerm) {
+      searchParams.set("search", searchTerm);
+    } else if (category !== "all") {
+      searchParams.set("category", category);
+    }
+
+    if (productType) {
+      searchParams.set("productType", productType);
+    }
+    if (cardType) {
+      searchParams.set("cardType", cardType);
+    }
+
+    navigate({ search: searchParams.toString() });
   };
 
   return (

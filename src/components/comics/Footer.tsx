@@ -29,6 +29,13 @@ interface ApiResponse {
 interface FormValues {
   email: string;
 }
+
+interface LinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
 const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email address")
@@ -40,6 +47,7 @@ const Footer = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const [showNewletterModal, setShowNewsletterModal] = useState(false);
+
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, resetForm }: FormikHelpers<FormValues>
@@ -66,54 +74,37 @@ const Footer = () => {
     }
   };
 
-  interface LinkItem {
-    id: string;
-    label: string;
-    url: string;
-  }
-
   const handleLinkClick = (linkItem: LinkItem) => {
     const { label, url } = linkItem;
 
+    // Handle email links
     if (label.includes("@")) {
       window.open(`mailto:${label}`, "_blank");
       return;
     }
 
+    // Handle phone links
     if (/^[\d\s+()-]+$/.test(label)) {
       window.location.href = `tel:${label}`;
       return;
     }
 
-    sessionStorage.setItem("scrollToLabel", label);
-    window.location.href = url;
-    return;
-
+    // Handle navigation with hash fragments
     if (url.includes("#")) {
       const hashIndex = url.indexOf("#");
       const path = url.substring(0, hashIndex);
       const section = url.substring(hashIndex + 1);
 
-      console.log("Path with query params:", path);
-      console.log("Section:", section);
+      console.log("Navigating to path:", path);
+      console.log("Scrolling to section:", section);
 
-      if (location.pathname !== path.split("?")[0]) {
-        navigate(path);
-        setTimeout(() => {
-          const element = document.getElementById(section);
-          if (element) {
-            const yOffset = -80;
-            const y =
-              element.getBoundingClientRect().top +
-              window.pageYOffset +
-              yOffset;
-            window.scrollTo({
-              top: y,
-              behavior: "smooth",
-            });
-          }
-        }, 100);
+      // Check if we're on a different path
+      const currentPath = location.pathname + location.search;
+      if (currentPath !== path) {
+        // Navigate to the new path with hash
+        navigate(path + "#" + section);
       } else {
+        // Same path, just scroll to the section
         setTimeout(() => {
           const element = document.getElementById(section);
           if (element) {
@@ -126,17 +117,13 @@ const Footer = () => {
               top: offsetPosition,
               behavior: "smooth",
             });
-          } else {
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
           }
         }, 100);
       }
       return;
     }
 
+    // Handle regular navigation
     if (location.pathname !== url) {
       navigate(url);
     }

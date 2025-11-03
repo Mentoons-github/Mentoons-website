@@ -16,6 +16,7 @@ if (!PUBLISHABLE_KEY) {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ClerkProvider
     publishableKey={PUBLISHABLE_KEY}
+    afterSignOutUrl={null}
     appearance={{
       layout: {
         unsafe_disableDevelopmentModeWarnings: true,

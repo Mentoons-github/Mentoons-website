@@ -40,6 +40,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
+          className="w-full h-[60px] sm:h-[80px] md:h-[100px] lg:h-[120px]"
         >
           <path
             d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
@@ -47,35 +48,35 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
           ></path>
         </svg>
       </div>
-      <div className="relative z-10 flex flex-col items-center justify-start h-full text-white text-center px-4">
-        <h1 className="text-6xl font-extrabold tracking-wider drop-shadow-lg mt-44">
+      <div className="relative z-10 flex flex-col items-center justify-start h-full text-white text-center px-4 sm:px-6 md:px-8">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wider drop-shadow-lg mt-20 sm:mt-28 md:mt-36 lg:mt-44">
           MENTOONS IS HIRING
         </h1>
-        <p className="mt-4 text-lg opacity-90">
+        <p className="mt-4 text-base sm:text-lg md:text-xl opacity-90 max-w-lg sm:max-w-xl md:max-w-2xl">
           Find your dream job with us — start your search below
         </p>
 
-        <div className="mt-10 w-full max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-8 py-5 backdrop-blur-lg shadow-xl hover:shadow-2xl transition-all">
+        <div className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl hover:shadow-2xl transition-all">
           <input
             type="text"
             placeholder="Search job here..."
-            className="flex-1 bg-transparent text-white placeholder-white focus:outline-none text-2xl"
+            className="flex-1 bg-transparent text-white placeholder-white focus:outline-none text-lg sm:text-xl md:text-2xl"
             value={inputValue}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
           />
           <button
-            className="ml-4 p-3 rounded-full bg-white/30 hover:bg-white/40 transition-colors"
+            className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/40 transition-colors"
             onClick={handleSearchClick}
           >
-            <Search className="w-6 h-6 text-white" />
+            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </button>
           {inputValue && (
             <button
-              className="ml-2 p-3 rounded-full bg-white/30 hover:bg-white/40 transition-colors"
+              className="ml-1 sm:ml-2 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/40 transition-colors"
               onClick={handleClearClick}
             >
-              <X className="w-6 h-6 text-white" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
           )}
         </div>

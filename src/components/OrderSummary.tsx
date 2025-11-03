@@ -259,7 +259,7 @@ const OrderSummary: React.FC = () => {
       console.log("Sending order data:", orderData);
       console.log("UserObjectClerk", user);
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate?type=downloads",
+        `${import.meta.env.VITE_PROD_URL}/payment/initiate?type=downloads`,
         orderData,
         {
           headers: {

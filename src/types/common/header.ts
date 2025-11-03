@@ -4,4 +4,5 @@ export interface DropDownInterface {
   products: boolean;
   services: boolean;
   subscription: boolean;
+  workshops: boolean;
 }

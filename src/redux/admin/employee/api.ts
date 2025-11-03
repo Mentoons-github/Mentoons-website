@@ -16,7 +16,6 @@ export const getEmployees = createAsyncThunk<
     params: { sortOrder, search: searchTerm, page, limit },
     headers: { Accept: "application/json" },
   });
-  console.log(data);
   return data;
 });
 
@@ -85,3 +84,4 @@ export const updateEmployee = createAsyncThunk<
   );
   return data;
 });
+

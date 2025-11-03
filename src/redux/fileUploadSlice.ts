@@ -30,7 +30,7 @@ export const uploadFile = createAsyncThunk(
         throw new Error("No authentication token available");
       }
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {

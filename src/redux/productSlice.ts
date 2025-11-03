@@ -64,8 +64,6 @@ export const fetchProducts = createAsyncThunk<
     const state = thunkAPI.getState().products;
     const { search, sortBy, order, page, limit } = state;
 
-    console.log(search, sortBy, order, page, limit);
-
     try {
       const response = await axios.get<{ data: ProductBase[]; total: number }>(
         `${import.meta.env.VITE_PROD_URL}/products`,
@@ -88,7 +86,6 @@ export const fetchProducts = createAsyncThunk<
           },
         }
       );
-      console.log("Product Response data : ", response.data.data);
       return { items: response.data.data, total: response.data.total };
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -108,7 +105,7 @@ export const fetchAllProducts = createAsyncThunk<
 >("products/fetchAllProducts", async (_, thunkAPI) => {
   try {
     const response = await axios.get(
-      "https://mentoons-backend-zlx3.onrender.com/api/v1/products/all"
+      `${import.meta.env.VITE_PROD_URL}/products/all`
     );
     return response.data;
   } catch (error: unknown) {
@@ -129,7 +126,7 @@ export const fetchProductById = createAsyncThunk<
 >("products/fetchProductById", async (id, thunkAPI) => {
   try {
     const response = await axios.get(
-      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
+      `${import.meta.env.VITE_PROD_URL}/products/${id}`
       // `http://localhost:4000/api/v1/products/${id}`
     );
     return response.data;
@@ -192,7 +189,7 @@ export const createProduct = createAsyncThunk<
     }
 
     const response = await axios.post(
-      "https://mentoons-backend-zlx3.onrender.com/api/v1/products",
+      `${import.meta.env.VITE_PROD_URL}/products`,
       formData,
       {
         headers: {
@@ -250,7 +247,7 @@ export const updateProduct = createAsyncThunk<
     }
 
     const response = await axios.put(
-      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`,
+      `${import.meta.env.VITE_PROD_URL}/products/${id}`,
       formData,
       {
         headers: {
@@ -276,9 +273,7 @@ export const deleteProduct = createAsyncThunk<
   { rejectValue: string }
 >("products/deleteProduct", async (id, thunkAPI) => {
   try {
-    await axios.delete(
-      `https://mentoons-backend-zlx3.onrender.com/api/v1/products/${id}`
-    );
+    await axios.delete(`${import.meta.env.VITE_PROD_URL}/products/${id}`);
     return id;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

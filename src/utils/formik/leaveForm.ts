@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 
 const getLeaveFormConfig = () => {
-  const initialVlues = {
+  const initialValues = {
     leaveType: "",
     startDate: "",
     endDate: "",
@@ -17,16 +17,14 @@ const getLeaveFormConfig = () => {
     endDate: Yup.date()
       .required("End date is required")
       .typeError("End date must be a valid date")
-      .min(Yup.ref("startDate"), "End date can't be lesser than start date"),
+      .min(Yup.ref("startDate"), "End date can't be before start date"),
     reason: Yup.string()
-      .min(5, "5 character atleast required")
-      .required("Reason for leave is required"),
+      .min(5, "At least 5 characters required")
+      .required("Reason is required"),
+    document: Yup.string().optional(),
   });
 
-  return {
-    initialVlues,
-    validationSchema,
-  };
+  return { initialValues, validationSchema };
 };
 
 export default getLeaveFormConfig;

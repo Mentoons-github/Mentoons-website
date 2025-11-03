@@ -24,8 +24,9 @@ export const getValidationSchema = (
         eventEndDate: Yup.date(),
         venue: Yup.string().required("Venue is required"),
         location: Yup.string(),
-        description: Yup.string(),
+        description: Yup.string(), // optional
       });
+
     case "article":
       return Yup.object({
         ...baseSchema,
@@ -40,6 +41,7 @@ export const getValidationSchema = (
           })
         ),
       });
+
     case "photo":
     case "video":
       return Yup.object({
@@ -57,7 +59,7 @@ export const getValidationSchema = (
             `At least one ${postType} file is required`,
             function (value) {
               if (
-                activeTab === 3 &&
+                activeTab === 2 &&
                 (!value ||
                   value.length === 0 ||
                   !value.some((item) => item.file))
@@ -68,6 +70,7 @@ export const getValidationSchema = (
             }
           ),
       });
+
     case "mixed":
       return Yup.object({
         ...baseSchema,
@@ -79,6 +82,7 @@ export const getValidationSchema = (
           })
         ),
       });
+
     default:
       return Yup.object({
         ...baseSchema,
@@ -87,7 +91,8 @@ export const getValidationSchema = (
 };
 
 export const getInitialValues = (
-  postType: PostUploadProps["postType"]
+  postType: PostUploadProps["postType"],
+  postedImage?: File | null
 ): FormValues => {
   return {
     title: "",
@@ -102,7 +107,14 @@ export const getInitialValues = (
     visibility: "public",
     media:
       postType === "photo" || postType === "video" || postType === "article"
-        ? [{ file: null, type: postType === "video" ? "video" : "image" }]
+        ? [
+            {
+              file: postType === "photo" && postedImage ? postedImage : null,
+              type: postType === "video" ? "video" : "image",
+              caption: "",
+              url: undefined,
+            },
+          ]
         : [],
   };
 };

@@ -1,9 +1,8 @@
 import { Field } from "formik";
 import { motion } from "framer-motion";
 import { Image, Upload, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UploadContentProps } from "../types";
-import PhotoVideoForm from "./PhotoVideoForm";
 
 const UploadContent = ({
   postType,
@@ -17,22 +16,137 @@ const UploadContent = ({
   const [localMediaPreview, setLocalMediaPreview] =
     useState<string[]>(mediaPreview);
 
+  useEffect(() => {
+    setLocalMediaPreview(mediaPreview);
+  }, [mediaPreview]);
+
   if (postType === "photo" || postType === "video") {
     return (
-      <PhotoVideoForm
-        postType={postType as "photo" | "video"}
-        mediaPreview={localMediaPreview}
-        handleMediaUpload={(e, setFieldValue) => {
-          if (e.target.files && e.target.files.length > 0) {
-            handleMediaUpload(e, setFieldValue);
-            const file = e.target.files[0];
-            const url = URL.createObjectURL(file);
-            setLocalMediaPreview([url]);
-          }
-        }}
-        setFieldValue={setFieldValue}
-        setMediaPreview={setLocalMediaPreview}
-      />
+      <div className="flex flex-col w-full gap-4 sm:gap-6">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          Upload {postType === "photo" ? "Photo" : "Video"}
+        </h3>
+
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+          <div className="mb-3 text-center">
+            <h4 className="mb-2 font-medium text-gray-700 dark:text-gray-300">
+              {postType === "photo" ? "Photo" : "Video"} Upload
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {postType === "photo"
+                ? "Upload an image to share"
+                : "Upload a video to share"}
+            </p>
+          </div>
+
+          <input
+            type="file"
+            accept={postType === "photo" ? "image/*" : "video/*"}
+            id="mediaUpload"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleMediaUpload(e, setFieldValue, 0);
+                const file = e.target.files[0];
+                const url = URL.createObjectURL(file);
+                setLocalMediaPreview([url]);
+              }
+            }}
+          />
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="mb-3"
+          >
+            <label
+              htmlFor="mediaUpload"
+              className="flex flex-col items-center justify-center w-full h-48 px-4 py-2 text-gray-600 transition duration-200 border-2 border-gray-400 border-dashed rounded-lg cursor-pointer dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              {localMediaPreview[0] ? (
+                postType === "photo" ? (
+                  <motion.img
+                    src={localMediaPreview[0]}
+                    alt="Preview"
+                    className="object-contain max-w-full rounded-md max-h-40"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                  />
+                ) : (
+                  <motion.video
+                    src={localMediaPreview[0]}
+                    controls
+                    className="object-contain max-w-full rounded-md max-h-40"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                  />
+                )
+              ) : (
+                <motion.div
+                  className="flex flex-col items-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Upload size={40} className="mb-2 text-blue-500" />
+                  <p className="font-medium text-center">
+                    Click to upload {postType}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {postType === "photo"
+                      ? "JPG, PNG, GIF up to 10MB"
+                      : "MP4, MOV up to 50MB"}
+                  </p>
+                </motion.div>
+              )}
+            </label>
+          </motion.div>
+
+          {localMediaPreview[0] && (
+            <div className="flex items-center justify-center mt-2">
+              <motion.button
+                type="button"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-1 px-3 py-1 text-xs text-red-500 border border-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                onClick={() => {
+                  const newMedia = [...values.media];
+                  if (newMedia[0].url) {
+                    URL.revokeObjectURL(newMedia[0].url);
+                  }
+                  newMedia[0] = { ...newMedia[0], file: null, url: undefined };
+                  setFieldValue("media", newMedia);
+                  setLocalMediaPreview([]);
+                }}
+              >
+                <X size={14} /> Remove {postType}
+              </motion.button>
+            </div>
+          )}
+
+          <div className="mb-2">
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Caption (optional)
+            </label>
+            <Field
+              type="text"
+              name="media[0].caption"
+              className="w-full p-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              placeholder="Add a caption"
+            />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -109,7 +223,7 @@ const UploadContent = ({
             </label>
           </motion.div>
 
-          {localMediaPreview && localMediaPreview.length > 0 && (
+          {localMediaPreview[0] && (
             <div className="flex items-center justify-center mt-2">
               <motion.button
                 type="button"
@@ -340,7 +454,7 @@ const UploadContent = ({
           onClick={() => addMediaField(setFieldValue)}
           className="flex items-center justify-center gap-2 p-2 mt-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-700"
         >
-          sexes+ Add Another Media
+          <span>+ Add Another Media</span>
         </motion.button>
       )}
     </div>
