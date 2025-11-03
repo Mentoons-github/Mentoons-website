@@ -7,9 +7,7 @@ import {
   Menu,
   User,
   LogOut,
-  Settings,
   ChevronDown,
-  MessageSquare,
   Check,
   Trash2,
   Loader2,
@@ -382,28 +380,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                   >
                     <User className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
                     View Profile
-                  </button>
-
-                  <button
-                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 group"
-                    onClick={() => {
-                      navigate("/admin/settings");
-                      setUserMenuOpen(false);
-                    }}
-                  >
-                    <Settings className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
-                    Settings
-                  </button>
-
-                  <button
-                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 group"
-                    onClick={() => {
-                      navigate("/admin/messages");
-                      setUserMenuOpen(false);
-                    }}
-                  >
-                    <MessageSquare className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
-                    Messages
                   </button>
                 </div>
 
