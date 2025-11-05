@@ -100,12 +100,17 @@ export const fetchProducts = createAsyncThunk<
 
 export const fetchAllProducts = createAsyncThunk<
   ProductBase[],
-  void,
+  string,
   { rejectValue: string }
->("products/fetchAllProducts", async (_, thunkAPI) => {
+>("products/fetchAllProducts", async (token, thunkAPI) => {
   try {
     const response = await axios.get(
-      `${import.meta.env.VITE_PROD_URL}/products/all`
+      `${import.meta.env.VITE_PROD_URL}/products/all`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     return response.data;
   } catch (error: unknown) {
@@ -211,9 +216,9 @@ export const createProduct = createAsyncThunk<
 // Update the updateProduct thunk similarly
 export const updateProduct = createAsyncThunk<
   Product,
-  { id: string; updatedData: Partial<Product> },
+  { id: string; updatedData: Partial<Product>; token: string },
   { rejectValue: string }
->("products/updateProduct", async ({ id, updatedData }, thunkAPI) => {
+>("products/updateProduct", async ({ id, updatedData, token }, thunkAPI) => {
   try {
     const formData = new FormData();
 
@@ -252,6 +257,7 @@ export const updateProduct = createAsyncThunk<
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -291,7 +297,7 @@ const productSlice = createSlice({
   reducers: {
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload;
-      state.page = 1; // Reset to first page when search changes
+      state.page = 1;
     },
     setSort(
       state,

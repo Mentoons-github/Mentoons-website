@@ -33,7 +33,14 @@ import { useAuth } from "@clerk/clerk-react";
 
 interface DetailsModalProps {
   item: User | Employee | null;
-  itemType: "user" | "product" | "enquiry" | "employee" | "job" | "meetups";
+  itemType:
+    | "user"
+    | "product"
+    | "enquiry"
+    | "employee"
+    | "job"
+    | "meetups"
+    | "workshop";
   onClose: () => void;
   sortOrder?: string;
   searchTerm?: string;

@@ -12,6 +12,7 @@ export const EXCLUDE_USER_ITEMS = [
   "bio",
   "dateOfBirth",
   "lastActive",
+  "isBlocked",
 ];
 
 export const EXCLUDE_PRODUCT_ITEMS = [

@@ -85,18 +85,23 @@ const TaskAssignModal: React.FC<TaskAssignModalProps> = ({
         setSubmitting(false);
         return;
       }
+
       await dispatch(assignTask({ taskData: values, token })).unwrap();
       await dispatch(fetchTasks({ token }));
 
       setShowSuccessModal(true);
+
       resetForm();
       setSelectedDepartment("");
       setSubmitting(false);
 
       setTimeout(() => {
         setShowSuccessModal(false);
-        onClose();
-      }, 2000);
+    
+        setTimeout(() => {
+          onClose();
+        }, 300);
+      }, 3000); 
     } catch (err) {
       console.error("Failed to create task:", err);
       showStatus("error", "Failed to create task. Please try again.");

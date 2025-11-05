@@ -9,15 +9,18 @@ import {
   Task,
   extendTask,
 } from "./taskApi";
+import { PaginationMeta } from "@/pages/employee/tasks/tasks";
 
 interface TaskState {
   tasks: Task[];
+  pagination: PaginationMeta | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: TaskState = {
   tasks: [],
+  pagination: null,
   loading: false,
   error: null,
 };
@@ -37,9 +40,10 @@ const taskSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
+      .addCase(fetchTasks.fulfilled, (state, action) => {
         state.loading = false;
-        state.tasks = action.payload || [];
+        state.tasks = action.payload.data || [];
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false;

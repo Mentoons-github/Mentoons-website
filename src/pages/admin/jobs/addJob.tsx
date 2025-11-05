@@ -210,7 +210,7 @@ const CreateJob: React.FC = () => {
       setCurrentLoadingStep(3);
 
       setTimeout(() => {
-        navigate("/all-jobs");
+        navigate("/admin/all-jobs");
       }, 2000);
     } catch (error: unknown) {
       const apiError = error as ApiError;

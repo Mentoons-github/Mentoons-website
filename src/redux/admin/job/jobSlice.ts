@@ -90,7 +90,7 @@ export const createJob = createAsyncThunk(
           },
         }
       );
-      return response.data as JobDataResponse;
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(
         axios.isAxiosError(error) ? error.message : "Failed to create job"
@@ -113,7 +113,7 @@ export const updateJob = createAsyncThunk(
           },
         }
       );
-      return response.data as JobDataResponse;
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(
         axios.isAxiosError(error) ? error.message : "Failed to update job"
@@ -132,7 +132,7 @@ export const deleteJob = createAsyncThunk(
           Accept: "application/json",
         },
       });
-      return { id } as { id: string };
+      return { id };
     } catch (error: any) {
       return rejectWithValue(
         axios.isAxiosError(error) ? error.message : "Failed to delete job"
@@ -170,8 +170,6 @@ export const getAppliedJobs = createAsyncThunk(
           },
         }
       );
-
-      console.log(response.data);
       return response.data as JobApplicationResponse;
     } catch (error: any) {
       return rejectWithValue(
@@ -224,13 +222,13 @@ const careerSlice = createSlice({
     });
     builder.addCase(createJob.fulfilled, (state, action) => {
       state.loading = false;
-      if (state.jobs && state.jobs.data.jobs) {
-        state.jobs.data.jobs = [
-          ...state.jobs.data.jobs,
-          ...action.payload.data.jobs,
-        ];
+      const newJob = action.payload.data;
+      if (state.jobs?.data?.jobs) {
+        state.jobs.data.jobs = [newJob, ...state.jobs.data.jobs];
+      } else if (state.jobs) {
+        state.jobs.data = { jobs: [newJob] };
       } else {
-        state.jobs = action.payload;
+        state.jobs = { data: { jobs: [newJob] }, success: true, message: "" };
       }
     });
     builder.addCase(createJob.rejected, (state, action) => {
@@ -244,12 +242,14 @@ const careerSlice = createSlice({
     });
     builder.addCase(updateJob.fulfilled, (state, action) => {
       state.loading = false;
-      if (state.jobs && state.jobs.data.jobs) {
-        state.jobs.data.jobs = state.jobs.data.jobs.map((job: JobData) =>
-          job._id === action.payload.data.jobs[0]._id
-            ? action.payload.data.jobs[0]
-            : job
+      const updatedJob = action.payload.data;
+      if (state.jobs?.data?.jobs) {
+        state.jobs.data.jobs = state.jobs.data.jobs.map((job) =>
+          job._id === updatedJob._id ? updatedJob : job
         );
+      }
+      if (state.job?.data?._id === updatedJob._id) {
+        state.job.data = updatedJob;
       }
     });
     builder.addCase(updateJob.rejected, (state, action) => {
@@ -263,9 +263,10 @@ const careerSlice = createSlice({
     });
     builder.addCase(deleteJob.fulfilled, (state, action) => {
       state.loading = false;
-      if (state.jobs && state.jobs.data.jobs) {
+      const id = action.payload.id;
+      if (state.jobs?.data?.jobs) {
         state.jobs.data.jobs = state.jobs.data.jobs.filter(
-          (job: JobData) => job._id !== action.payload.id
+          (job) => job._id !== id
         );
       }
     });

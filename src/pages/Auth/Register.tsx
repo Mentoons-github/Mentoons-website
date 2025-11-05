@@ -39,7 +39,11 @@ const Register = () => {
   return (
     <div className="h-screen flex  bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
       <div className="hidden flex-1 lg:block">
-        <img src="/assets/home/team007.png" alt="" className="object-cover" />
+        <img
+          src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/1234/team+Illustration+3.png"
+          alt=""
+          className="object-cover"
+        />
       </div>
       <div className="flex flex-1 justify-center items-center">
         <SignUp

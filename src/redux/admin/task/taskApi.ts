@@ -1,3 +1,4 @@
+import { PaginationMeta } from "@/pages/employee/tasks/tasks";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 
@@ -47,7 +48,7 @@ export interface NewTask {
 // Fetch Tasks
 
 export const fetchTasks = createAsyncThunk<
-  Task[],
+  { data: Task[]; pagination: PaginationMeta },
   {
     token: string;
     employeeId?: string;
@@ -56,12 +57,24 @@ export const fetchTasks = createAsyncThunk<
     sortOrder?: string;
     status?: string;
     searchTerm?: string;
+    page?: number;
+    limit?: number;
   },
   { rejectValue: string }
 >(
   "tasks/fetchTasks",
   async (
-    { token, employeeId, date, sortBy, sortOrder, status, searchTerm },
+    {
+      token,
+      employeeId,
+      date,
+      sortBy,
+      sortOrder,
+      status,
+      searchTerm,
+      page,
+      limit,
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -72,21 +85,25 @@ export const fetchTasks = createAsyncThunk<
       if (sortOrder) params.append("sortOrder", sortOrder);
       if (status) params.append("status", status);
       if (searchTerm) params.append("searchTerm", searchTerm);
+      if (page !== undefined) params.append("page", page.toString());
+      if (limit !== undefined) params.append("limit", limit.toString());
 
-      const response = await axios.get<any>(
-        `${API_BASE_URL}?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get<{
+        data: Task[];
+        pagination?: PaginationMeta;
+      }>(`${API_BASE_URL}?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const data = Array.isArray(response.data)
-        ? response.data
-        : Array.isArray(response.data?.data)
-        ? response.data.data
-        : [];
-
-      return data as Task[];
+      return {
+        data: response.data.data || [],
+        pagination: response.data.pagination || {
+          page: 1,
+          limit: limit || 10,
+          total: response.data.data?.length || 0,
+          totalPages: 1,
+        },
+      };
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       return rejectWithValue(
@@ -113,6 +130,7 @@ export const assignTask = createAsyncThunk<
     console.log(response.data);
     return response.data;
   } catch (error) {
+    console.log(error);
     const err = error as AxiosError<{ message?: string }>;
     return rejectWithValue(
       err.response?.data?.message || err.message || "Failed to assign task"
