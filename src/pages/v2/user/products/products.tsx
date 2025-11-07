@@ -115,6 +115,7 @@ const ProductsPage = () => {
         scrollToSection();
         setHasInitialLoad(true);
       } catch (error: unknown) {
+        console.log(error);
         console.error("Error fetching products:", error);
         setHasInitialLoad(true);
       } finally {

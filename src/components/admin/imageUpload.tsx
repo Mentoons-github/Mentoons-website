@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
+import { useDispatch } from "react-redux";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { errorToast, successToast } from "../../utils/toastResposnse";
-
-interface UploadResponse {
-  success: boolean;
-  message: string;
-  data: {
-    fileDetails: {
-      url: string;
-      key: string;
-      originalName: string;
-      mimetype: string;
-      uploadedAt: string;
-      userId: string;
-      fileSize: number;
-    };
-  };
-}
+import { uploadFile } from "@/redux/fileUploadSlice";
+import axios from "axios";
+import { AppDispatch } from "@/redux/store";
 
 interface ImageData {
   imageUrl: string;
@@ -46,6 +33,7 @@ const ImageUpload = ({
   const [uploading, setUploading] = useState(false);
   const [productImages, setProductImages] = useState<ImageData[]>([]);
   const { getToken } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (initialImages && initialImages.length > 0) {
@@ -69,28 +57,19 @@ const ImageUpload = ({
     setUploading(true);
 
     try {
-      const token = await getToken();
 
       const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
+        const resultAction = await dispatch(uploadFile({ file, getToken }));
 
-        const response = await axios.post<UploadResponse>(
-          `${import.meta.env.VITE_PROD_URL}/upload/file`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
+        if (uploadFile.fulfilled.match(resultAction)) {
+          const uploadedUrl = resultAction.payload.data.fileDetails?.url;
+          if (!uploadedUrl) {
+            throw new Error(`Failed to process ${file.name}`);
           }
-        );
-
-        if (!response.data.success || !response.data.data.fileDetails) {
+          return { imageUrl: uploadedUrl };
+        } else {
           throw new Error(`Failed to process ${file.name}`);
         }
-
-        return { imageUrl: response.data.data.fileDetails.url };
       });
 
       const uploadedImages = await Promise.all(uploadPromises);
@@ -179,7 +158,6 @@ const ImageUpload = ({
         )}
       </div>
 
-      {/* Image Preview Section */}
       {productImages.length > 0 && (
         <div className="mt-4">
           <h4 className="mb-2 text-sm font-medium text-gray-700">

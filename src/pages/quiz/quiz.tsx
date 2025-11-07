@@ -36,12 +36,14 @@ export interface QuizData {
   resultCategories: string[];
 }
 
+const STORAGE_KEY = (qt: string, df: string) => `quiz_${qt}_${df}_state`;
+
 const QuizPage: React.FC = () => {
   const { quizType, difficulty } = useParams<{
     quizType: string;
     difficulty: "easy" | "medium" | "hard" | undefined;
   }>();
-  
+
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
   const { user } = useUser();
@@ -91,7 +93,27 @@ const QuizPage: React.FC = () => {
     }
   }, []);
 
-  // Update progress
+  useEffect(() => {
+    if (!quizType || !difficulty) return;
+    const key = STORAGE_KEY(quizType, difficulty);
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const { answers: a, currentQuestion: q, hasPaid: p } = JSON.parse(raw);
+      setAnswers(a ?? {});
+      setCurrentQuestion(q ?? 0);
+      setHasPaid(p ?? false);
+    }
+  }, [quizType, difficulty]);
+
+  useEffect(() => {
+    if (!quizType || !difficulty) return;
+    const key = STORAGE_KEY(quizType, difficulty);
+    localStorage.setItem(
+      key,
+      JSON.stringify({ answers, currentQuestion, hasPaid })
+    );
+  }, [answers, currentQuestion, hasPaid, quizType, difficulty]);
+
   useEffect(() => {
     if (quizStarted && currentQuiz && questions.length > 0) {
       setProgress(
@@ -102,14 +124,12 @@ const QuizPage: React.FC = () => {
     }
   }, [currentQuestion, quizStarted, currentQuiz, difficulty, hasPaid]);
 
-  // Reset payment modal on unmount
   useEffect(() => {
     return () => {
       setShowPaymentModal(false);
     };
   }, []);
 
-  // Validate quizType and difficulty
   if (!quizType || !currentQuiz || !isValidDifficulty) {
     console.error(`Invalid quizType: ${quizType} or difficulty: ${difficulty}`);
     return (
@@ -184,6 +204,9 @@ const QuizPage: React.FC = () => {
     setIsAnswerSubmitted(false);
     setIsCorrect(null);
     setShowPaymentModal(false);
+    if (quizType && difficulty) {
+      localStorage.removeItem(STORAGE_KEY(quizType, difficulty));
+    }
   };
 
   const handleStart = () => {
@@ -241,7 +264,7 @@ const QuizPage: React.FC = () => {
     } catch (error) {
       console.error("Payment error:", error);
       toast.error("Failed to process payment. Please try again.");
-      setIsPaying(false); // Reset paying state on error
+      setIsPaying(false);
     }
   };
 
@@ -291,6 +314,8 @@ const QuizPage: React.FC = () => {
           onNext={handleNext}
           onPaymentPrompt={handleMockPayment}
           hasPaid={hasPaid}
+          showPaymentModal={showPaymentModal}
+          onClosePaymentModal={handleCancelPayment}
         />
       )}
 

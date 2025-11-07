@@ -91,6 +91,8 @@ export const handlePayment = async (
 
       rewardPurchaseProduct(quizId);
 
+      console.log("response data :", response.data);
+
       if (response.data && typeof response.data === "string") {
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = response.data;

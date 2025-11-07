@@ -41,6 +41,7 @@ export const uploadFile = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      console.log("error found :", error);
       return rejectWithValue("Failed to upload file");
     }
   }

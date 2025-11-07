@@ -9,15 +9,24 @@ import {
 } from "@/animation/assessmentsAndQuiz/quiz";
 import { QuizType } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { useAuthModal } from "@/context/adda/authModalContext";
+import { useAuth } from "@clerk/clerk-react";
 
 const QuizCardGrid = () => {
   const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
-  const handleQuizStart = (
+  const handleQuizStart = async (
     quizValue: QuizType,
     difficulty: "easy" | "medium" | "hard"
   ) => {
+    const token = await getToken();
+    if (!token) {
+      openAuthModal("sign-in");
+      return;
+    }
     if (!quizValue) {
       console.error("Invalid quizValue:", quizValue);
       alert("Error: Invalid quiz value. Please try another quiz.");

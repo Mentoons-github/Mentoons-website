@@ -223,12 +223,22 @@ const careerSlice = createSlice({
     builder.addCase(createJob.fulfilled, (state, action) => {
       state.loading = false;
       const newJob = action.payload.data;
-      if (state.jobs?.data?.jobs) {
-        state.jobs.data.jobs = [newJob, ...state.jobs.data.jobs];
-      } else if (state.jobs) {
-        state.jobs.data = { jobs: [newJob] };
+      if (state.jobs?.data) {
+        state.jobs.data.jobs = [newJob, ...(state.jobs.data.jobs || [])];
+        state.jobs.data.currentPage = state.jobs.data.currentPage || 1;
+        state.jobs.data.totalPages = state.jobs.data.totalPages || 1;
+        state.jobs.data.totalJobs = (state.jobs.data.totalJobs || 0) + 1;
       } else {
-        state.jobs = { data: { jobs: [newJob] }, success: true, message: "" };
+        state.jobs = {
+          success: true,
+          message: "",
+          data: {
+            jobs: [newJob],
+            currentPage: 1,
+            totalPages: 1,
+            totalJobs: 1,
+          },
+        };
       }
     });
     builder.addCase(createJob.rejected, (state, action) => {
@@ -248,7 +258,7 @@ const careerSlice = createSlice({
           job._id === updatedJob._id ? updatedJob : job
         );
       }
-      if (state.job?.data?._id === updatedJob._id) {
+      if (state.job?.data && state.job.data._id === updatedJob._id) {
         state.job.data = updatedJob;
       }
     });
@@ -267,6 +277,10 @@ const careerSlice = createSlice({
       if (state.jobs?.data?.jobs) {
         state.jobs.data.jobs = state.jobs.data.jobs.filter(
           (job) => job._id !== id
+        );
+        state.jobs.data.totalJobs = Math.max(
+          (state.jobs.data.totalJobs || 0) - 1,
+          0
         );
       }
     });

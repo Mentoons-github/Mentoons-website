@@ -61,6 +61,7 @@ export const fetchProducts = createAsyncThunk<
 >(
   "products/fetchProducts",
   async ({ type, cardType, ageCategory, token }, thunkAPI) => {
+    
     const state = thunkAPI.getState().products;
     const { search, sortBy, order, page, limit } = state;
 
@@ -86,8 +87,10 @@ export const fetchProducts = createAsyncThunk<
           },
         }
       );
+      console.log(response);
       return { items: response.data.data, total: response.data.total };
     } catch (error: unknown) {
+      console.log("error found while fetching : ", error);
       if (axios.isAxiosError(error)) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message || error.message
