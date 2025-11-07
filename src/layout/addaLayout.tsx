@@ -16,7 +16,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import ProductScrollNav from "@/components/Home/productScrollNav";
 
 const AddaLayout = () => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +28,7 @@ const AddaLayout = () => {
         return { id: product._id, title: product.title };
       })
     : [];
-    console.log(productsData)
+  console.log(productsData);
 
   const isHomeRoute =
     location.pathname === "/adda/" ||
@@ -38,7 +38,11 @@ const AddaLayout = () => {
     location.pathname === "/adda/user-profile";
 
   useEffect(() => {
-    void dispatch(fetchAllProducts());
+    const fetchProducts = async () => {
+      const token = await getToken();
+      void dispatch(fetchAllProducts(token!));
+    };
+    fetchProducts();
   }, [dispatch]);
 
   const handleGoBack = useCallback(() => {
@@ -59,7 +63,7 @@ const AddaLayout = () => {
         <div className="relative flex flex-col w-full">
           <div className="flex flex-col w-full bg-white">
             <div className="flex w-full overflow-x-auto gap-5">
-                <ProductScrollNav productsData={productsData} />
+              <ProductScrollNav productsData={productsData} />
             </div>
             {/* UserStatus */}
             <div className="w-full py-2">

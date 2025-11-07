@@ -11,6 +11,7 @@ import { getEnquiries } from "@/redux/admin/workshop";
 import { WorkshopEnquiry } from "@/types/admin";
 import { useDispatch, useSelector } from "react-redux";
 import { EXCLUDE_ENQUIRY_ITEMS } from "@/constant/admin";
+import { useAuth } from "@clerk/clerk-react";
 
 const GetWorkshopEnquiries = () => {
   const navigate = useNavigate();
@@ -29,9 +30,21 @@ const GetWorkshopEnquiries = () => {
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalEnquiries, setTotalEnquiries] = useState<number>(0);
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    dispatch(getEnquiries({ sort: sortOrder, page: currentPage, limit }));
+    const fetchEnquiries = async () => {
+      const token = await getToken();
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+      dispatch(
+        getEnquiries({ sort: sortOrder, page: currentPage, limit, token })
+      );
+    };
+
+    fetchEnquiries();
   }, [dispatch, sortOrder, currentPage, limit, debouncedSearchTerm]);
 
   useEffect(() => {

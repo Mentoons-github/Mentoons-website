@@ -91,6 +91,8 @@ export const handlePayment = async (
 
       rewardPurchaseProduct(quizId);
 
+      console.log("response data :", response.data);
+
       if (response.data && typeof response.data === "string") {
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = response.data;
@@ -111,7 +113,7 @@ export const handlePayment = async (
       toast.error(
         error.message || "Failed to process payment. Please try again later."
       );
-      throw error; // Re-throw to allow caller to handle
+      throw error;
     }
   };
 

@@ -52,9 +52,15 @@ const Workshopv2 = () => {
 
   const fetchWorkshops = useCallback(async () => {
     try {
+      const token = await getToken();
       setLoading(true);
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/workshop/all`
+        `${import.meta.env.VITE_PROD_URL}/workshop/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const fetchedCategories = response.data.data as WorkshopCategory[];
       setCategories(fetchedCategories);
@@ -244,6 +250,7 @@ const Workshopv2 = () => {
 
   const handleRegisterationForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = getToken();
     if (formData.message.length < 50) {
       toast.error("Message must be at least 50 characters long");
       return;
@@ -251,7 +258,12 @@ const Workshopv2 = () => {
     try {
       const workshopRegistrationResponse = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/workshop/submit-form`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (workshopRegistrationResponse.status === 200) {
         setShowRegistrationModal(true);

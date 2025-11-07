@@ -80,7 +80,7 @@ const QuizStarting: React.FC<QuizStartingProps> = ({
           </motion.div>
           <motion.div variants={itemVariants} className="flex gap-4">
             <button
-              onClick={() => navigate("/assessment-page")}
+              onClick={() => navigate("/quiz")}
               className="flex-1 py-4 px-6 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
               Back to Quiz Selection

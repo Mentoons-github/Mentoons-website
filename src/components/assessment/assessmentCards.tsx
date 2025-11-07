@@ -19,7 +19,7 @@ const AssessmentCards = ({
     >
       {assessmentData.map((data, index) => (
         <motion.div
-          className="h-[600px] w-full max-w-[400px] p-5 shadow-xl rounded-xl space-y-3 bg-white flex flex-col justify-between"
+          className="min-h-[600px] w-full max-w-[400px] p-5 shadow-xl rounded-xl space-y-3 bg-white flex flex-col justify-between"
           key={data._id}
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -53,7 +53,7 @@ const AssessmentCards = ({
           <motion.h1 className="font-semibold text-lg sm:text-xl lg:text-2xl tracking-[0.5px]">
             {data.title}
           </motion.h1>
-          <motion.p className="text-sm sm:text-base lg:text-lg tracking-[0.35px] line-clamp-3">
+          <motion.p className="text-sm sm:text-base lg:text-lg tracking-[0.35px] flex-grow">
             {data.description}
           </motion.p>
           <div className="flex flex-col items-start gap-3 sm:gap-4">

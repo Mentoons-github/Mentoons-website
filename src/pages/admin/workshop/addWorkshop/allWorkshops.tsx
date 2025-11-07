@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import DynamicTable from "@/components/admin/dynamicTable";
+import { useAuth } from "@clerk/clerk-react";
+import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
 
-// Define TypeScript interfaces based on the Mongoose schema
 interface WhyChooseUs {
   heading: string;
   description: string;
@@ -46,6 +47,7 @@ interface ApiResponse {
     pagination: Pagination;
   };
 }
+
 const AllWorkshops: React.FC = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,17 +56,26 @@ const AllWorkshops: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
+  const { getToken } = useAuth();
   const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [workshopToDelete, setWorkshopToDelete] = useState<Workshop | null>(
+    null
+  );
   const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_PROD_URL;
 
   useEffect(() => {
     const fetchWorkshops = async () => {
       try {
+        const token = await getToken();
         setLoading(true);
         const response = await axios.get<ApiResponse>(
           `${API_BASE_URL}/workshop/all`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             params: {
               page,
               limit,
@@ -105,63 +116,56 @@ const AllWorkshops: React.FC = () => {
     setPage(1);
   };
 
-  // Handle view action
-  const handleView = (item: Workshop) => {
-    navigate(`/workshops/${item._id}`);
-  };
-
-  // Handle edit action
   const handleEdit = (item: Workshop) => {
     navigate(`/admin/add-workshop?workshopId=${item._id}`);
   };
 
-  // Handle delete action
-  const handleDelete = async (item: Workshop) => {
-    if (
-      window.confirm(`Are you sure you want to delete ${item.workshopName}?`)
-    ) {
+  const handleDelete = (item: Workshop) => {
+    setWorkshopToDelete(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (workshopToDelete) {
       try {
+        const token = await getToken();
         const response = await axios.delete(
-          `${API_BASE_URL}/workshops/${item._id}`
+          `${API_BASE_URL}/workshop/${workshopToDelete._id}`,{
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         );
 
         if (response.status !== 200) {
           throw new Error("Failed to delete workshop");
         }
 
-        // Refetch data after delete to update pagination
-        // Or remove from state if on current page
         setWorkshops((prev) =>
-          prev.filter((workshop) => workshop._id !== item._id)
+          prev.filter((workshop) => workshop._id !== workshopToDelete._id)
         );
         if (workshops.length === 1 && page > 1) {
           setPage((prev) => prev - 1);
         }
       } catch (error) {
         console.error("Error deleting workshop:", error);
-        // Optionally refetch on error
       }
     }
+    setIsDeleteModalOpen(false);
+    setWorkshopToDelete(null);
   };
 
-  // Handle add action
   const handleAdd = () => {
-    navigate("/workshops/add");
+    navigate("/admin/add-workshop");
   };
 
-  // Handle page change
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && pagination && newPage <= pagination.totalPages) {
       setPage(newPage);
     }
   };
 
-  // Custom cell formatting
-  const formatCell = (
-    value: any,
-    key: string,
-    // item: Workshop
-  ): React.ReactNode => {
+  const formatCell = (value: any, key: string): React.ReactNode => {
     if (key === "whyChooseUs") {
       return (
         value.map((item: WhyChooseUs) => item.heading).join(", ") || "None"
@@ -178,7 +182,6 @@ const AllWorkshops: React.FC = () => {
     return String(value);
   };
 
-  // Custom header formatting
   const formatHeader = (key: string): string => {
     const headers: Record<string, string> = {
       workshopName: "Workshop Name",
@@ -200,19 +203,18 @@ const AllWorkshops: React.FC = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onAdd={handleAdd}
-        onView={handleView}
         searchTerm={searchTerm}
         onSearch={handleSearchChange}
         sortField={String(sortField)}
         sortOrder={sortOrder}
         onSort={handleSort}
-        excludeColumns={["_id", "__v"]}
+        excludeColumns={["_id", "__v", "updatedAt", "workshops"]}
         maxCellLength={50}
         formatCell={formatCell}
         formatHeader={formatHeader}
         idKey="_id"
         isLoading={loading}
-        itemType="product"
+        itemType="workshop"
       />
       {pagination && (
         <div className="mt-4 flex justify-between items-center">
@@ -241,6 +243,12 @@ const AllWorkshops: React.FC = () => {
           </div>
         </div>
       )}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={workshopToDelete ? workshopToDelete.workshopName : ""}
+      />
     </div>
   );
 };

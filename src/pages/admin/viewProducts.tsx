@@ -28,6 +28,8 @@ import {
   WorkshopProduct,
 } from "@/types/admin";
 import { errorToast } from "../../utils/toastResposnse";
+import { useAuth } from "@clerk/clerk-react";
+import { toast } from "sonner";
 
 // Animation variants
 const fadeIn = {
@@ -63,13 +65,21 @@ const ViewProduct: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"details" | "media" | "pricing">(
     "details"
   );
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        const token = await getToken();
+        if (!token) toast.error("Please loginto continue");
         setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/products/${productId}`
+          `${import.meta.env.VITE_PROD_URL}/products/${productId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!response.data) {
           throw new Error("Failed to fetch product");

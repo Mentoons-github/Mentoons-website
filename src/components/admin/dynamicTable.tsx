@@ -10,20 +10,18 @@ import {
   CheckCircle,
   Edit,
 } from "lucide-react";
+import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedValue(value), delay);
     return () => clearTimeout(handler);
   }, [value, delay]);
-
   return debouncedValue;
 }
 
-/* -------------------------- Props Interface -------------------------- */
 interface DynamicTableProps<T> {
   data: T[];
   onEdit?: (item: T) => void;
@@ -43,13 +41,19 @@ interface DynamicTableProps<T> {
   formatHeader?: (key: string) => string;
   idKey?: keyof T;
   isLoading?: boolean;
-  itemType: "user" | "product" | "enquiry" | "employee" | "job" | "meetups";
+  itemType:
+    | "user"
+    | "product"
+    | "enquiry"
+    | "employee"
+    | "job"
+    | "workshop"
+    | "meetups";
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
 }
 
-/* -------------------------- Main Component -------------------------- */
 const DynamicTable = <T extends Record<string, any>>({
   data,
   onEdit,
@@ -78,16 +82,15 @@ const DynamicTable = <T extends Record<string, any>>({
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [commonModalOpen, setCommonModalOpen] = useState(false);
+  const [commonModalData, setCommonModalData] = useState<any>(null);
 
-  /* Sync external search term */
   useEffect(() => setLocalSearchTerm(searchTerm), [searchTerm]);
 
-  /* Fire external search */
   useEffect(() => {
     if (onSearch) onSearch(debouncedSearchTerm);
   }, [debouncedSearchTerm, onSearch]);
 
-  /* Get columns */
   const getTableColumns = () => {
     if (!data.length) return [];
     const set = new Set<string>();
@@ -98,7 +101,6 @@ const DynamicTable = <T extends Record<string, any>>({
   };
   const columns = getTableColumns();
 
-  /* Client-side filtering */
   const filteredData = useMemo(() => {
     if (onSearch || !debouncedSearchTerm) return data;
     const term = debouncedSearchTerm.toLowerCase();
@@ -115,7 +117,6 @@ const DynamicTable = <T extends Record<string, any>>({
     displayData.length > 0 &&
     displayData.every((i) => selectedItems.has(String(i[idKey])));
 
-  /* Format helpers */
   const defaultFormatCell = (value: any): React.ReactNode => {
     if (value == null) return "-";
     if (value instanceof Date || !isNaN(Date.parse(String(value))))
@@ -135,14 +136,12 @@ const DynamicTable = <T extends Record<string, any>>({
       .replace(/^./, (c) => c.toUpperCase())
       .trim();
 
-  /* Search handler */
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setLocalSearchTerm(v);
     if (itemType !== "user" && handleSearch) handleSearch(e);
   };
 
-  /* Sort */
   const handleSort = (field: string) => onSort?.(field);
   const getSortIcon = (field: string) =>
     sortField !== field ? null : sortOrder === "asc" ? (
@@ -151,15 +150,18 @@ const DynamicTable = <T extends Record<string, any>>({
       <ChevronDown className="w-4 h-4 text-blue-600" />
     );
 
-  /* View */
   const handleView = (item: any) => {
-    if (["user", "employee"].includes(itemType)) {
+    if (["workshop", "job"].includes(itemType)) {
+      setCommonModalData(item);
+      setCommonModalOpen(true);
+    } else if (["user", "employee"].includes(itemType)) {
       setSelectedItem(item);
       setIsModalOpen(true);
-    } else if (onView) onView(item);
+    } else if (onView) {
+      onView(item);
+    }
   };
 
-  /* Selection */
   const handleSelectAllChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     onSelectAll?.(e.target.checked);
   const handleSelectChange = (
@@ -167,15 +169,15 @@ const DynamicTable = <T extends Record<string, any>>({
     e: React.ChangeEvent<HTMLInputElement>
   ) => onSelectItem?.(id, e.target.checked);
 
-  /* Block/Unblock Button */
   const BlockButton = ({ item }: { item: T }) => {
     if (itemType !== "user" || !onBlock) return null;
-    const isBlocked = !!item.isBlocked;
+
+    const isBlocked = !!(item.isBlocked ?? false);
 
     return (
       <button
         onClick={() => onBlock(item)}
-        className={`p-1 rounded transition-colors ${
+        className={`group relative p-1 rounded transition-colors ${
           isBlocked
             ? "text-green-600 hover:text-green-800 hover:bg-green-100"
             : "text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -187,11 +189,17 @@ const DynamicTable = <T extends Record<string, any>>({
         ) : (
           <Ban className="w-4 h-4" />
         )}
+        <span
+          className="absolute left-1/2 -translate-x-3/4 bottom-full mb-1 
+          opacity-0 group-hover:opacity-100 transition-opacity 
+          bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-md whitespace-nowrap"
+        >
+          {isBlocked ? "Unblock user" : "Block user"}
+        </span>
       </button>
     );
   };
 
-  /* ---------- Render Actions – USER ONLY (View + Block) ---------- */
   const renderDesktopActions = (item: T) => {
     if (itemType === "user") {
       return (
@@ -207,7 +215,10 @@ const DynamicTable = <T extends Record<string, any>>({
 
     return (
       <div className="flex items-center gap-2">
-        <ViewButton pendingEdit={pendingEdit} onClick={() => handleView(item)} />
+        <ViewButton
+          pendingEdit={pendingEdit}
+          onClick={() => handleView(item)}
+        />
         {onEdit && (
           <button
             onClick={() => onEdit(item)}
@@ -246,7 +257,10 @@ const DynamicTable = <T extends Record<string, any>>({
 
     return (
       <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
-        <ViewButton pendingEdit={pendingEdit} onClick={() => handleView(item)} />
+        <ViewButton
+          pendingEdit={pendingEdit}
+          onClick={() => handleView(item)}
+        />
         {onEdit && (
           <button
             onClick={() => onEdit(item)}
@@ -270,7 +284,6 @@ const DynamicTable = <T extends Record<string, any>>({
     );
   };
 
-  /* Loading State */
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -282,7 +295,6 @@ const DynamicTable = <T extends Record<string, any>>({
     );
   }
 
-  /* Empty State */
   if (!data.length) {
     return (
       <div className="w-full">
@@ -290,7 +302,7 @@ const DynamicTable = <T extends Record<string, any>>({
           onAdd={onAdd}
           localSearchTerm={localSearchTerm}
           onSearch={handleSearchChange}
-          itemType={itemType} 
+          itemType={itemType}
         />
         <EmptyState onAdd={onAdd} />
       </div>
@@ -304,7 +316,7 @@ const DynamicTable = <T extends Record<string, any>>({
           onAdd={onAdd}
           localSearchTerm={localSearchTerm}
           onSearch={handleSearchChange}
-          itemType={itemType} 
+          itemType={itemType}
         />
         <NoResults />
       </div>
@@ -317,10 +329,9 @@ const DynamicTable = <T extends Record<string, any>>({
         onAdd={onAdd}
         localSearchTerm={localSearchTerm}
         onSearch={handleSearchChange}
-        itemType={itemType} 
+        itemType={itemType}
       />
 
-      {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full divide-y divide-gray-200 table-auto">
           <thead className="bg-gray-50">
@@ -395,7 +406,6 @@ const DynamicTable = <T extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Mobile Cards */}
       <div className="block sm:hidden space-y-4">
         {displayData.map((item, idx) => {
           const itemId = String(item[idKey] ?? idx);
@@ -435,12 +445,10 @@ const DynamicTable = <T extends Record<string, any>>({
         })}
       </div>
 
-      {/* Footer */}
       <div className="mt-4 text-sm text-gray-500">
         Showing {displayData.length} item{displayData.length !== 1 ? "s" : ""}
       </div>
 
-      {/* Modal */}
       {isModalOpen && selectedItem && (
         <UserDetailsModal
           onClose={() => {
@@ -451,16 +459,21 @@ const DynamicTable = <T extends Record<string, any>>({
           itemType={itemType}
         />
       )}
+
+      <CommonModal
+        values={commonModalData}
+        isOpen={commonModalOpen}
+        onClose={setCommonModalOpen}
+      />
     </div>
   );
 };
 
-/* -------------------------- Subcomponents -------------------------- */
 interface HeaderProps {
   onAdd?: () => void;
   localSearchTerm: string;
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  itemType: DynamicTableProps<any>["itemType"];   // <-- receive it
+  itemType: DynamicTableProps<any>["itemType"];
 }
 
 const Header = ({
@@ -481,7 +494,6 @@ const Header = ({
       />
     </div>
 
-    {/* Hide "Add" button for users */}
     {onAdd && itemType !== "user" && (
       <button
         onClick={onAdd}

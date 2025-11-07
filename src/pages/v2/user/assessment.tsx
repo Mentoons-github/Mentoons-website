@@ -30,19 +30,14 @@ const Assessment = () => {
     const fetchAssessments = async () => {
       try {
         setIsLoading(true);
-        const token = await getToken();
-        if (!token) {
-          throw new Error("Authentication token not found");
-        }
-        const result = await dispatch(
+        const token = (await getToken()) || "";
+        await dispatch(
           fetchProducts({
             type: ProductType.ASSESSMENT,
             token,
           })
         ).unwrap();
-        console.log("Fetched Assessments:", result);
       } catch (error: unknown) {
-        console.error("Error fetching assessments:", error);
         setError(
           error instanceof Error ? error.message : "Failed to load assessments"
         );
@@ -59,7 +54,7 @@ const Assessment = () => {
       <DiscoverYourself />
       <SampleReport />
 
-      <div className="flex flex-col items-start justify-between gap-6 sm:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 mt-12 sm:mt-16 md:mt-20">
+      <div className="flex flex-col lg:flex-row items-start justify-between gap-6 sm:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 mt-12 sm:mt-16 md:mt-20">
         {isLoading ? (
           <div className="w-full text-center py-8">
             <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-500 mx-auto"></div>
@@ -80,14 +75,16 @@ const Assessment = () => {
             <p className="text-gray-600 text-lg">No assessments available</p>
           </div>
         ) : (
-          <div className="w-full lg:w-3/4">
-            <AssessmentCards assessmentData={products} />
-          </div>
-        )}
+          <>
+            <div className="w-full lg:w-3/4">
+              <AssessmentCards assessmentData={products} />
+            </div>
 
-        <div className="flex flex-col items-center justify-start w-full gap-6 sm:gap-8 p-3 lg:w-1/4">
-          <WeAreHiring hiring={hiring} />
-        </div>
+            <div className="flex flex-col items-center justify-start w-full lg:w-1/4 gap-6 sm:gap-8 lg:sticky lg:top-24">
+              <WeAreHiring hiring={hiring} />
+            </div>
+          </>
+        )}
       </div>
 
       <FAQ data={FAQ_ASSESSMENT} />

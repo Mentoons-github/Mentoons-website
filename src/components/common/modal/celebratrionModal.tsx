@@ -1,4 +1,4 @@
-import { Cake, Mail, Calendar } from "lucide-react";
+import { Cake, Calendar } from "lucide-react";
 import { Celebration } from "@/types";
 
 interface CelebrationModalProps {
@@ -66,10 +66,10 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                   </p>
                 </div>
               </div>
-              <button className="w-full px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base">
+              {/* <button className="w-full px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                 Send Message
-              </button>
+              </button> */}
             </div>
           ))}
         </div>

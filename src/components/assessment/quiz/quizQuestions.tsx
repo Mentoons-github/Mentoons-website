@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
 import {
   BackgroundIcons,
   containerVariants,
@@ -26,6 +25,8 @@ interface QuizQuestionProps {
   onNext: () => void;
   onPaymentPrompt: () => void;
   hasPaid: boolean;
+  showPaymentModal?: boolean;
+  onClosePaymentModal?: () => void;
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
@@ -41,34 +42,12 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   onNext,
   onPaymentPrompt,
   hasPaid,
+  showPaymentModal,
+  onClosePaymentModal,
 }) => {
-  const FREE_QUESTION_LIMIT = 5;
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-
   const questions = quiz.questionsByDifficulty[quizType];
   const question = questions[currentQuestion];
 
-  useEffect(() => {
-    if (
-      currentQuestion >= FREE_QUESTION_LIMIT &&
-      !hasPaid &&
-      isAnswerSubmitted
-    ) {
-      console.log("limit reached");
-      setShowPaymentModal(true);
-      onPaymentPrompt();
-    } else {
-      setShowPaymentModal(false);
-    }
-  }, [currentQuestion, hasPaid, isAnswerSubmitted, onPaymentPrompt]);
-
-  // Handle payment (mock for now)
-  const handlePayment = () => {
-    setShowPaymentModal(false);
-    onPaymentPrompt(); 
-  };
-
-  // Return null if no question is available
   if (!question || currentQuestion >= questions.length) {
     return null;
   }
@@ -84,6 +63,8 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       },
     },
   };
+
+  const isFreeLimitReached = currentQuestion === 4 && !hasPaid;
 
   return (
     <motion.div
@@ -133,7 +114,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 {question.question}
               </h2>
 
-              {/* Feedback Message */}
               {isAnswerSubmitted && (
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
@@ -154,7 +134,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 </motion.div>
               )}
 
-              {/* 2x2 Grid Layout for Options */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {question.options.slice(0, 4).map((option, index) => (
                   <motion.button
@@ -189,7 +168,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                           } flex items-center justify-center shadow-lg`}
                         >
                           <span className="text-white text-sm font-bold">
-                            {isCorrect ? "✓" : "✗"}
+                            {isCorrect ? "Checkmark" : "Cross"}
                           </span>
                         </motion.div>
                       )}
@@ -203,7 +182,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           <div className="flex justify-end mt-8">
             <button
               onClick={onNext}
-              disabled={!isAnswerSubmitted}
+              disabled={!isAnswerSubmitted || isFreeLimitReached}
               className={`py-3 px-8 bg-gradient-to-r ${quiz.gradientFrom} ${quiz.gradientTo} text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
             >
               {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
@@ -212,7 +191,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         </div>
       </motion.div>
 
-      {/* Payment Modal */}
       {showPaymentModal && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -234,13 +212,13 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               {questions.length} questions and continue the quiz!
             </p>
             <button
-              onClick={handlePayment}
+              onClick={onPaymentPrompt}
               className="py-3 px-8 bg-green-500 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all"
             >
               Pay ₹9 to Continue
             </button>
             <button
-              onClick={() => setShowPaymentModal(false)}
+              onClick={onClosePaymentModal}
               className="mt-4 ml-4 py-2 px-4 bg-gray-200 rounded-xl"
             >
               Cancel

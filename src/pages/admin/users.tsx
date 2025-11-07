@@ -31,6 +31,41 @@ const Users = () => {
     navigate(`/admin/user/edit/${row._id}`);
   };
 
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    try {
+      const token = await getToken();
+      console.log("fetching User");
+      console.log(import.meta.env.VITE_PROD_URL);
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_PROD_URL}/user/all-users`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            limit,
+            page: currentPage,
+            sort: `${sortField}:${sortOrder}`,
+            search: debouncedSearchTerm,
+          },
+        }
+      );
+      console.log(data);
+
+      if (data.success && Array.isArray(data.data.users)) {
+        setUsers(data.data.users);
+        setTotalPages(data.data.totalPages || 1);
+        setTotalUsers(data.data.totalCount || 0);
+      } else {
+        setUsers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const removeUser = (row: User) => {
     setUserToDelete(row);
     setIsDeleteModalOpen(true);
@@ -65,37 +100,37 @@ const Users = () => {
   };
 
   const toggleBlockUser = async (user: User) => {
+    const originalUsers = [...users];
+
+    const willBeBlocked = !(user.isBlocked ?? false);
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u._id === user._id ? { ...u, isBlocked: willBeBlocked } : u
+      )
+    );
+
     try {
       const token = await getToken();
-      const newBlocked = !user.isBlocked;
-      setUsers((prev) =>
-        prev.map((u) =>
-          u._id === user._id ? { ...u, isBlocked: newBlocked } : u
-        )
-      );
 
       await axios.patch(
-        `${import.meta.env.VITE_PROD_URL}/user/block/${user.clerkId}`,
-        { isBlocked: newBlocked },
+        `${import.meta.env.VITE_PROD_URL}/user/block-unblock/${user._id}`,
+        {},
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      toast.success(
-        newBlocked ? "User blocked successfully" : "User unblocked successfully"
+      await fetchUsers();
+
+      toast.success(willBeBlocked ? "User blocked" : "User unblocked");
+    } catch (error: any) {
+      setUsers(originalUsers);
+      toast.error(
+        error.response?.data?.message || "Failed to update block status"
       );
-    } catch (error) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u._id === user._id ? { ...u, isBlocked: !user.isBlocked } : u
-        )
-      );
-      console.error("Error toggling block status:", error);
-      toast.error("Failed to change block status");
     }
   };
 
@@ -154,40 +189,6 @@ const Users = () => {
   };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      try {
-        const token = await getToken();
-        console.log("fetching User")
-        console.log(import.meta.env.VITE_PROD_URL)
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/user/all-users`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              limit,
-              page: currentPage,
-              sort: `${sortField}:${sortOrder}`,
-              search: debouncedSearchTerm,
-            },
-          }
-        );
-        console.log(data)
-
-        if (data.success && Array.isArray(data.data.users)) {
-          setUsers(data.data.users);
-          setTotalPages(data.data.totalPages || 1);
-          setTotalUsers(data.data.totalCount || 0);
-        } else {
-          setUsers([]);
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        setUsers([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchUsers();
   }, [getToken, limit, currentPage, sortField, sortOrder, debouncedSearchTerm]);
 
