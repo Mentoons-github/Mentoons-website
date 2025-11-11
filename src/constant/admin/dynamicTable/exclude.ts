@@ -30,7 +30,14 @@ export const EXCLUDE_PRODUCT_ITEMS = [
 
 export const EXCLUDE_ENQUIRY_ITEMS = ["lastName", "email", "_id"];
 
-export const EXCLUDE_EMPLOYEE_DATA = ["profileEditRequest"];
+export const EXCLUDE_EMPLOYEE_DATA = [
+  "profileEditRequest",
+  "role",
+  "salary",
+  "status",
+  "joinDate",
+  "dateOfBirth",
+];
 
 export const EXCLUDE_JOBS = [
   "createdAt",

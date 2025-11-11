@@ -1,6 +1,6 @@
 import { reactionEventEmitter } from "@/utils/reactionEvents";
 import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
+import { api } from "@/api/axiosInstance/axiosInstance";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { FaHeart } from "react-icons/fa";
@@ -139,17 +139,11 @@ const ReactionsDisplay = ({
       if (!isSignedIn) return;
 
       try {
-        const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
         }/reactions/check-reaction?type=${type}&id=${id}`;
 
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await axios.get(endpoint, { headers });
+        const response = await api.get(endpoint);
 
         if (response.data.reactionCounts) {
           setReactionCounts(response.data.reactionCounts);
@@ -185,17 +179,11 @@ const ReactionsDisplay = ({
 
       setIsLoadingReactions(true);
       try {
-        const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
         }/reactions/get-reactions?type=${type}&id=${id}`;
 
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await axios.get(endpoint, { headers });
+        const response = await api.get(endpoint);
 
         if (response.status === 200) {
           setReactionsList(response.data.reactions || []);

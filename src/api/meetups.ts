@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "./axiosInstance/axiosInstance";
 
 const BASE_URL = import.meta.env.VITE_PROD_URL;
 
@@ -11,7 +11,7 @@ export const fetchMeetups = async (
   search: string = ""
 ): Promise<ApiResponse> => {
   try {
-    const response = await axios.get(`${BASE_URL}/meetup?search=${search}`);
+    const response = await api.get(`${BASE_URL}/meetup?search=${search}`);
     return {
       success: true,
       data: response.data.data,
@@ -25,13 +25,9 @@ export const fetchMeetups = async (
   }
 };
 
-export const meetupDelete = async (token: string, id: string) => {
+export const meetupDelete = async (id: string) => {
   try {
-    const response = await axios.delete(`${BASE_URL}/meetup/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.delete(`${BASE_URL}/meetup/${id}`);
     if (response.status === 200) {
       return {
         success: true,

@@ -29,6 +29,8 @@ const EmployeeTable = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(
     null
   );
+
+  console.log("Employees Data:", employees);
   useEffect(() => {
     dispatch(
       getEmployees({

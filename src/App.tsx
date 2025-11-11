@@ -20,15 +20,20 @@ import {
 import useSocket from "./hooks/adda/useSocket";
 import { Message } from "./types";
 import { SubmissionModalProvider } from "./context/adda/commonModalContext";
+import attachAuthInterceptor from "./api/axiosInstance/axiosInstance";
 
 const AppContent = () => {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, signOut } = useAuth();
   const { isSignedIn } = useUser();
   const dispatch = useDispatch<AppDispatch>();
   const { socket, mongoUserId } = useSocket();
   const currentOpenConversationId = useSelector(
     (state: RootState) => state.conversation.conversationId
   );
+
+  useEffect(() => {
+    attachAuthInterceptor(getToken, signOut);
+  }, [getToken, signOut]);
 
   useEffect(() => {
     if (isSignedIn) {

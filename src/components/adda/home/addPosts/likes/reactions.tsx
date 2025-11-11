@@ -1,6 +1,6 @@
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import axios from "axios";
+import { api } from "@/api/axiosInstance/axiosInstance";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { RewardEventType } from "@/types/rewards";
@@ -189,7 +189,6 @@ const Reactions = ({
     });
 
     try {
-      const token = await getToken();
       let endpoint;
 
       if (isTogglingOff) {
@@ -198,17 +197,12 @@ const Reactions = ({
         endpoint = `${import.meta.env.VITE_PROD_URL}/reactions/add-reaction`;
       }
 
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
       // Add reactionType to the payload
-      const response = await axios.post(
-        endpoint,
-        { type, id, reactionType: newReaction },
-        { headers }
-      );
+      const response = await api.post(endpoint, {
+        type,
+        id,
+        reactionType: newReaction,
+      });
 
       // Update with server response if available
       if (response.data.reactionCounts) {
@@ -260,17 +254,11 @@ const Reactions = ({
       if (!isSignedIn) return;
 
       try {
-        const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
         }/reactions/check-reaction?type=${type}&id=${id}`;
 
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await axios.get(endpoint, { headers });
+        const response = await api.get(endpoint);
 
         // Handle new response format if available
         if (response.data.userReaction) {
@@ -338,17 +326,11 @@ const Reactions = ({
 
       setIsLoadingReactions(true);
       try {
-        const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
         }/reactions/get-reactions?type=${type}&id=${id}`;
 
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await axios.get(endpoint, { headers });
+        const response = await api.get(endpoint);
 
         if (response.status === 200) {
           setReactionsList(response.data.reactions);

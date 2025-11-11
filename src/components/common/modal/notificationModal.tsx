@@ -209,11 +209,11 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
   };
 
   const handleFriendRequestAction = async (
-    notificationId: string,
     referenceId: string | undefined,
     action: "accept" | "decline"
   ) => {
-    console.log(notificationId);
+    console.log()
+
     if (!referenceId) return;
     const token = await getToken();
     if (!token) return;
@@ -425,7 +425,6 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleFriendRequestAction(
-                                          notification._id,
                                           notification.referenceId,
                                           "accept"
                                         );
@@ -438,7 +437,6 @@ const NotificationModal = ({ getToken }: NotificationProps) => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleFriendRequestAction(
-                                          notification._id,
                                           notification.referenceId,
                                           "decline"
                                         );

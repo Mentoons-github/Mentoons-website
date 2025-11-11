@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
+import { AxiosError } from "axios";
 
 interface PDFUploadProps {
   onPdfUpload: (pdf: { pdfUrl: string } | null) => void;
@@ -15,93 +16,50 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
   initialPdf,
   onRemoveBackendFile,
 }) => {
-  console.log("🔄 PDFUpload component render START");
-
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(initialPdf?.pdfUrl || "");
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isRecentlyUploaded, setIsRecentlyUploaded] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
-
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log("🔍 Props check => initialPdf:", initialPdf);
-  console.log(
-    "📌 Current state => previewUrl:",
-    previewUrl,
-    "isRecentlyUploaded:",
-    isRecentlyUploaded
-  );
-
   useEffect(() => {
-    console.log(
-      "🔥 useEffect triggered - initialPdf changed OR previewUrl changed"
-    );
-    console.log("   👉 initialPdf?.pdfUrl:", initialPdf?.pdfUrl);
-    console.log("   👉 current previewUrl:", previewUrl);
-
-    const newPdfUrl = initialPdf?.pdfUrl || "";
-    if (previewUrl !== newPdfUrl) {
-      console.log("   ✅ previewUrl is different -> updating state");
-      setPreviewUrl(newPdfUrl);
+    const newUrl = initialPdf?.pdfUrl || "";
+    if (previewUrl !== newUrl) {
+      setPreviewUrl(newUrl);
       setIsRecentlyUploaded(false);
-      if (!newPdfUrl) {
-        setUploadedFileName("");
-      }
-    } else {
-      console.log("   ⏭ previewUrl matches newPdfUrl -> skipping update");
+      if (!newUrl) setUploadedFileName("");
     }
-  }, [initialPdf, previewUrl]);
+  }, [initialPdf?.pdfUrl]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("📂 handleFileChange triggered");
-
     const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith("application/pdf")) {
-      console.warn("⚠ Invalid file selected");
+    if (!file || !file.type.includes("pdf")) {
       alert("Please select a valid PDF file.");
       return;
     }
 
-    console.log("⬆️ Starting upload for:", file.name);
     setUploading(true);
     setUploadedFileName(file.name);
 
     try {
       const result = await dispatch(uploadFile({ file, getToken })).unwrap();
-      console.log("✅ Full upload result:", result);
+      const pdfUrl = result?.data?.fileDetails?.url;
 
-      const pdfUrl =
-        result?.data?.fileDetails?.url ||
-        result?.data?.url ||
-        result?.fileDetails?.url ||
-        result?.url ||
-        result?.data?.fileUrl;
+      if (!pdfUrl) throw new Error("Upload failed: No URL returned");
 
-      console.log("📎 Extracted pdfUrl:", pdfUrl);
-
-      if (!pdfUrl) {
-        console.error("❌ No PDF URL returned from upload. Result:", result);
-        throw new Error("No PDF URL returned from upload. Check API response.");
-      }
-
-      console.log("🎯 Setting previewUrl state:", pdfUrl);
       setPreviewUrl(pdfUrl);
       setIsRecentlyUploaded(true);
       onPdfUpload({ pdfUrl });
-
-      console.log(
-        "✅ Upload complete: previewUrl updated, isRecentlyUploaded=true"
-      );
     } catch (error) {
-      console.error("❌ Upload failed:", error);
-      alert(
-        `Failed to upload PDF: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      console.error("Upload failed:", error);
+      const message =
+        error instanceof AxiosError
+          ? error.response?.data?.message || error.message
+          : "Upload failed";
+      alert(`Failed to upload PDF: ${message}`);
       onPdfUpload(null);
       setUploadedFileName("");
     } finally {
@@ -110,49 +68,32 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
   };
 
   const handleRemove = async () => {
-    console.log("🗑 handleRemove triggered");
     setRemoving(true);
-
     try {
       if (!isRecentlyUploaded && previewUrl && onRemoveBackendFile) {
-        console.log("   🔗 Removing file from backend...");
         await onRemoveBackendFile();
       }
-
-      console.log("   🧹 Resetting states for removed file");
       setPreviewUrl("");
       setIsRecentlyUploaded(false);
       setUploadedFileName("");
       onPdfUpload(null);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
-      console.error("❌ Failed to remove file:", error);
-      alert("Failed to remove PDF from server.");
+      console.error("Failed to remove PDF:", error);
+      alert("Failed to remove PDF.");
     } finally {
       setRemoving(false);
     }
   };
 
-  const showRemoveButton = previewUrl && !uploading;
-
-  console.log("🧮 Computed showRemoveButton:", showRemoveButton);
-
-  // Get display name for the file
+  const showRemoveButton = !!previewUrl && !uploading;
   const getDisplayName = () => {
-    if (uploadedFileName && isRecentlyUploaded) {
-      return uploadedFileName;
-    }
+    if (uploadedFileName && isRecentlyUploaded) return uploadedFileName;
     return previewUrl.split("/").pop()?.replace(/%20/g, " ") || "document.pdf";
   };
 
-  console.log("🔄 PDFUpload component render END");
-
   return (
     <div className="space-y-4">
-      {/* Upload Input */}
       <div className="relative">
         <input
           ref={fileInputRef}
@@ -174,21 +115,17 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
         )}
       </div>
 
-      {/* Debug Info (Remove in production) */}
       {process.env.NODE_ENV === "development" && (
         <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
           <div>Preview URL: {previewUrl || "None"}</div>
           <div>Recently Uploaded: {isRecentlyUploaded ? "Yes" : "No"}</div>
-          <div>Show Remove Button: {showRemoveButton ? "Yes" : "No"}</div>
-          <div>Uploaded File Name: {uploadedFileName || "None"}</div>
+          <div>Show Remove: {showRemoveButton ? "Yes" : "No"}</div>
         </div>
       )}
 
-      {/* Compact PDF Preview Card */}
       {previewUrl && (
         <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm max-w-xs">
           <div className="flex items-center space-x-2">
-            {/* PDF Icon */}
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-red-50 rounded flex items-center justify-center">
                 <svg
@@ -204,8 +141,6 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
                 </svg>
               </div>
             </div>
-
-            {/* File Info */}
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-medium text-gray-900 truncate">
                 {getDisplayName()}
@@ -216,14 +151,12 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
                 </p>
               )}
             </div>
-
-            {/* Action Buttons */}
             <div className="flex items-center space-x-1">
               <a
                 href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                 title="View PDF"
               >
                 <svg
@@ -246,13 +179,12 @@ const PDFUpload: React.FC<PDFUploadProps> = ({
                   />
                 </svg>
               </a>
-
               {showRemoveButton && (
                 <button
                   type="button"
                   onClick={handleRemove}
                   disabled={removing}
-                  className="inline-flex items-center p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
                   title={removing ? "Removing..." : "Remove PDF"}
                 >
                   {removing ? (

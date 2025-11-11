@@ -65,6 +65,10 @@ const Podcastv2 = () => {
   const [playbackTracking, setPlaybackTracking] =
     useState<PlaybackTrackingState | null>(null);
   const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
+  const [hasPlayedNewRelease, setHasPlayedNewRelease] = useState(() => {
+    return sessionStorage.getItem("newReleaseAutoPlayed") === "true";
+  });
+
   const { isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
@@ -312,6 +316,13 @@ const Podcastv2 = () => {
       return () => carousel.removeEventListener("scroll", handleScroll);
     }
   }, []);
+
+  useEffect(() => {
+    if (playingPodcastId === "new-release" && !hasPlayedNewRelease) {
+      setHasPlayedNewRelease(true);
+      sessionStorage.setItem("newReleaseAutoPlayed", "true");
+    }
+  }, [playingPodcastId, hasPlayedNewRelease]);
 
   return (
     <>
@@ -818,8 +829,9 @@ const Podcastv2 = () => {
                             .details as PodcastProduct["details"]
                         )?.sampleUrl || "#"
                       }
-                      autoPlay
+                      autoPlay={!hasPlayedNewRelease}
                       onPlay={async (e) => {
+                        setHasPlayedNewRelease(true);
                         const hasAccess = await checkAccessAndControlPlayback(
                           filteredPodcast[0],
                           e.currentTarget

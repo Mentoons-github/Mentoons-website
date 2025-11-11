@@ -132,7 +132,7 @@ const DropDown = ({
               if (data.label === "Instant Katha") sideLine = "Storytelling";
               else if (data.label === "Hasyaras") sideLine = "Laughter";
               else if (data.label === "KalaKriti") sideLine = "Art";
-              else if (data.label === "Career Corner") sideLine = "Career";
+              else if (data.label === "Music Therapy") sideLine = "Music";
             }
 
             return (
