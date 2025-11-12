@@ -11,6 +11,9 @@ import JobApplicationModal from "@/components/admin/modal/jobApplication";
 import { AppDispatch, RootState } from "../../../redux/store";
 import * as XLSX from "xlsx";
 import { motion, AnimatePresence } from "framer-motion";
+import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
+import { errorToast, successToast } from "@/utils/toastResposnse";
+import axios from "axios";
 
 const ViewApplications = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,6 +33,9 @@ const ViewApplications = () => {
   const [selectedApplication, setSelectedApplication] =
     useState<JobApplication | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [applicationToDelete, setApplicationToDelete] =
+    useState<JobApplication | null>(null);
   const [selectedApplications, setSelectedApplications] = useState<Set<string>>(
     new Set()
   );
@@ -107,16 +113,16 @@ const ViewApplications = () => {
       const worksheet = XLSX.utils.json_to_sheet(exportData);
 
       worksheet["!cols"] = [
-        { wch: 20 }, // Name
-        { wch: 30 }, // Email
-        { wch: 25 }, // Job
-        { wch: 15 }, // Phone
-        { wch: 40 }, // Portfolio Link
-        { wch: 10 }, // Gender
-        { wch: 50 }, // Cover Note
-        { wch: 40 }, // Resume Link
-        { wch: 40 }, // Cover Letter Link
-        { wch: 20 }, // Applied At
+        { wch: 20 },
+        { wch: 30 },
+        { wch: 25 },
+        { wch: 15 },
+        { wch: 40 },
+        { wch: 10 },
+        { wch: 50 },
+        { wch: 40 },
+        { wch: 40 },
+        { wch: 20 },
       ];
 
       const workbook = XLSX.utils.book_new();
@@ -181,12 +187,9 @@ const ViewApplications = () => {
     XLSX.writeFile(workbook, `Selected_Job_Applications_${timestamp}.xlsx`);
   };
 
-  const handleEdit = (application: JobApplication) => {
-    console.log("Edit application:", application);
-  };
-
   const handleDelete = (application: JobApplication) => {
-    console.log("Delete application:", application);
+    setApplicationToDelete(application);
+    setIsDeleteModalOpen(true);
   };
 
   const handleView = (application: JobApplication) => {
@@ -221,7 +224,9 @@ const ViewApplications = () => {
 
     const displayField =
       sortOptions[sortField as keyof typeof sortOptions] || sortField;
-    return `Sort by ${displayField} ${sortOrder === 1 ? "↑" : "↓"}`;
+    return `Sort by ${displayField} ${
+      sortOrder === 1 ? "Ascending" : "Descending"
+    }`;
   };
 
   const debouncedSearch = useCallback(
@@ -268,11 +273,53 @@ const ViewApplications = () => {
     setSelectedApplications(newSelected);
   };
 
+  const confirmDelete = async () => {
+    if (applicationToDelete) {
+      try {
+        const token = await getToken();
+        if (!token) {
+          errorToast("Authentication token not found.");
+          return;
+        }
+        console.log("Deleting application with ID:", applicationToDelete._id);
+
+        await axios.delete(
+          `${import.meta.env.VITE_PROD_URL}/career/applied/${
+            applicationToDelete._id
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        successToast("Job application deleted successfully");
+        dispatch(
+          getAppliedJobs({
+            sortOrder,
+            sortField,
+            searchTerm: debouncedSearchTerm,
+            page: currentPage,
+            limit,
+          })
+        );
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to delete job application";
+        errorToast(errorMessage);
+      } finally {
+        setIsDeleteModalOpen(false);
+        setApplicationToDelete(null);
+      }
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -302,12 +349,12 @@ const ViewApplications = () => {
   const { totalPages, totalJobs } = data.data;
 
   const sortOptions = [
-    { field: "createdAt", label: "Date Applied", icon: "📅" },
-    { field: "name", label: "Applicant Name", icon: "👤" },
-    { field: "email", label: "Email", icon: "📧" },
-    { field: "jobTitle", label: "Job Title", icon: "💼" },
-    { field: "phone", label: "Phone", icon: "📞" },
-    { field: "gender", label: "Gender", icon: "⚧️" },
+    { field: "createdAt", label: "Date Applied", icon: "Calendar" },
+    { field: "name", label: "Applicant Name", icon: "User" },
+    { field: "email", label: "Email", icon: "Mail" },
+    { field: "jobTitle", label: "Job Title", icon: "Briefcase" },
+    { field: "phone", label: "Phone", icon: "Phone" },
+    { field: "gender", label: "Gender", icon: "Users" },
   ];
 
   return (
@@ -315,7 +362,6 @@ const ViewApplications = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">View All Job Applications</h1>
         <div className="flex gap-2">
-          {/* Sort Dropdown Button */}
           <div className="sort-dropdown-container relative">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -356,7 +402,6 @@ const ViewApplications = () => {
               </svg>
             </motion.button>
 
-            {/* Sort Dropdown Menu */}
             <AnimatePresence>
               {isSortDropdownOpen && (
                 <motion.div
@@ -389,7 +434,9 @@ const ViewApplications = () => {
                                 : "text-red-600"
                             }`}
                           >
-                            {sortOrder === 1 ? "↑ Ascending" : "↓ Descending"}
+                            {sortOrder === 1
+                              ? "Ascending Ascending"
+                              : "Descending Descending"}
                           </span>
                         )}
                       </motion.button>
@@ -460,10 +507,15 @@ const ViewApplications = () => {
 
       <div className="overflow-hidden">
         <DynamicTable
-          excludeColumns={["_id", "portfolioLink", "coverNote", "resume"]}
+          excludeColumns={[
+            "_id",
+            "portfolioLink",
+            "coverNote",
+            "resume",
+            "gender",
+          ]}
           data={data.data.jobs}
           sortField={sortField}
-          onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
           onSort={handleSort}
@@ -492,6 +544,17 @@ const ViewApplications = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         application={selectedApplication}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={
+          applicationToDelete
+            ? applicationToDelete.name || "this application"
+            : ""
+        }
       />
     </div>
   );

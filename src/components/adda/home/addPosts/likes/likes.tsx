@@ -1,6 +1,6 @@
 import { useAuthModal } from "@/context/adda/authModalContext";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import axios from "axios";
+import { useUser } from "@clerk/clerk-react";
+import { api } from "@/api/axiosInstance/axiosInstance";
 import { motion } from "framer-motion";
 
 import { RewardEventType } from "@/types/rewards";
@@ -23,8 +23,6 @@ const Likes = ({
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [likeCounter, setLikeCounter] = useState(likeCount || 0);
 
-  const { getToken } = useAuth();
-
   const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
@@ -37,17 +35,11 @@ const Likes = ({
     setLikeCounter((prev) => Math.max(0, newLikedState ? prev + 1 : prev - 1));
 
     try {
-      const token = await getToken();
       const endpoint = newLikedState
         ? `${import.meta.env.VITE_PROD_URL}/likes/add-like`
         : `${import.meta.env.VITE_PROD_URL}/likes/remove-like`;
 
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
-      const response = await axios.post(endpoint, { type, id }, { headers });
+      const response = await api.post(endpoint, { type, id });
 
       // Update with server response
       if (response.data.likeCount !== undefined) {
@@ -77,17 +69,10 @@ const Likes = ({
   useEffect(() => {
     const checkLike = async () => {
       try {
-        const token = await getToken();
         const endpoint = `${
           import.meta.env.VITE_PROD_URL
         }/likes/check-like?type=${type}&id=${id}`;
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-        const response = await axios.get(endpoint, {
-          headers,
-        });
+        const response = await api.get(endpoint);
         setIsLiked(response.data.liked);
         if (response.data.likeCount !== undefined) {
           setLikeCounter(response.data.likeCount);
@@ -98,7 +83,7 @@ const Likes = ({
     };
 
     checkLike();
-  }, [type, id, getToken]);
+  }, [type, id]);
 
   return (
     <div className="flex items-center justify-center gap-3">

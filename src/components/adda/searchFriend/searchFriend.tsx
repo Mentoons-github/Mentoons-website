@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import SubscriptionModalManager, {
   AccessCheckResponse,
 } from "@/components/protected/subscriptionManager";
+import { UserInfo } from "@/types";
 
 export interface Friend {
   _id: string;
@@ -106,7 +107,7 @@ const FriendSearch = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const { pendingReceived } = response.data.data;
-      const transformedRequests = pendingReceived.map((data: any) => ({
+      const transformedRequests = (pendingReceived || []).map((data: any) => ({
         requestId: data._id,
         senderDetails: {
           _id: data.senderId._id,
@@ -188,12 +189,14 @@ const FriendSearch = () => {
 
       if (totalCount > 0) {
         setHasFriends(true);
-        const mappedFriends: Friend[] = friends.map((friend: any) => ({
-          _id: friend._id,
-          name: friend.name,
-          picture: friend.picture,
-          status: "friends",
-        }));
+        const mappedFriends: Friend[] = (friends || [])
+          .map((friend: UserInfo) => ({
+            _id: friend._id || "",
+            name: friend.name || "Unknown",
+            picture: friend.picture || "/default-avatar.png",
+            status: "friends" as const,
+          }))
+          .filter((f: UserInfo): f is Friend => !!f._id);
         setSuggestionHasMore(suggestionPage < totalPages);
         setSuggestions((prev) =>
           suggestionPage === 1 ? mappedFriends : [...prev, ...mappedFriends]
@@ -202,7 +205,6 @@ const FriendSearch = () => {
           setSuggestionPage((prev) => prev + 1);
         }
       } else {
-        // No friends, fetch suggestions
         setHasFriends(false);
         const suggestionsResponse = await axiosInstance.get(
           `/adda/requestSuggestions?page=${suggestionPage}&limit=10`,
@@ -210,14 +212,14 @@ const FriendSearch = () => {
         );
 
         const { suggestions, hasMore } = suggestionsResponse.data.data;
-        const mappedSuggestions: Friend[] = suggestions.map(
-          (suggestion: any) => ({
-            _id: suggestion._id,
-            name: suggestion.name,
-            picture: suggestion.picture,
-            status: "connect",
-          })
-        );
+        const mappedSuggestions: Friend[] = (suggestions || [])
+          .map((suggestion: UserInfo) => ({
+            _id: suggestion._id || "",
+            name: suggestion.name || "Unknown",
+            picture: suggestion.picture || "/default-avatar.png",
+            status: "connect" as const,
+          }))
+          .filter((f: UserInfo): f is Friend => !!f._id);
         setSuggestionHasMore(hasMore);
         setSuggestions((prev) =>
           suggestionPage === 1
@@ -250,8 +252,17 @@ const FriendSearch = () => {
         )}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      const suggestions = (response.data.data.suggestions || [])
+        .map((item: Friend) => ({
+          _id: item._id || "",
+          name: item.name || "Unknown",
+          picture: item.picture || "/default-avatar.png",
+          status: item.status || "connect",
+          requestId: item.requestId,
+        }))
+        .filter((f: Friend): f is Friend => !!f._id);
       return {
-        suggestions: response.data.data.suggestions || [],
+        suggestions,
         hasMore: response.data.data.hasMore || false,
       };
     } catch (error) {
@@ -272,29 +283,26 @@ const FriendSearch = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.data.success === true) {
+          const newRequestId = response.data.data.requestId;
           if (isSearchMode) {
             setSearchResults((prev) =>
-              prev.map((s) =>
-                s._id === friendId
-                  ? {
-                      ...s,
-                      status: "pendingSent",
-                      requestId: response.data.data.requestId,
-                    }
-                  : s
-              )
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s._id === friendId
+                    ? { ...s, status: "pendingSent", requestId: newRequestId }
+                    : s
+                )
             );
           } else {
             setSuggestions((prev) =>
-              prev.map((s) =>
-                s._id === friendId
-                  ? {
-                      ...s,
-                      status: "pendingSent",
-                      requestId: response.data.data.requestId,
-                    }
-                  : s
-              )
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s._id === friendId
+                    ? { ...s, status: "pendingSent", requestId: newRequestId }
+                    : s
+                )
             );
           }
           successToast("Friend request sent successfully");
@@ -313,7 +321,6 @@ const FriendSearch = () => {
         errorToast("Failed to send friend request");
         if (error instanceof AxiosError) {
           const accessCheck: AccessCheckResponse = error.response?.data?.error;
-          console.log("accessCheck =================>: ", accessCheck);
           if (accessCheck?.upgradeRequired) {
             setAccessCheck(accessCheck);
             setShowModal(true);
@@ -330,8 +337,6 @@ const FriendSearch = () => {
       }
     },
     [
-      suggestions,
-      searchResults,
       isSearchMode,
       hasFriends,
       suggestionHasMore,
@@ -352,23 +357,27 @@ const FriendSearch = () => {
         if (response.data.success === true) {
           if (isSearchMode) {
             setSearchResults((prev) =>
-              prev.map((s) =>
-                s.requestId === requestId
-                  ? { ...s, status: "connect", requestId: undefined }
-                  : s
-              )
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s.requestId === requestId
+                    ? { ...s, status: "connect", requestId: undefined }
+                    : s
+                )
             );
           } else {
             setSuggestions((prev) =>
-              prev.map((s) =>
-                s.requestId === requestId
-                  ? {
-                      ...s,
-                      status: hasFriends ? "friends" : "connect",
-                      requestId: undefined,
-                    }
-                  : s
-              )
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s.requestId === requestId
+                    ? {
+                        ...s,
+                        status: hasFriends ? "friends" : "connect",
+                        requestId: undefined,
+                      }
+                    : s
+                )
             );
           }
           successToast("Friend request cancelled successfully");
@@ -471,7 +480,6 @@ const FriendSearch = () => {
           setRequests((prev) =>
             prev.filter((request) => request.requestId !== requestId)
           );
-          // Refresh friends list after accepting a request
           setSuggestionPage(1);
           setSuggestions([]);
           fetchFriendsOrSuggestions();
@@ -481,17 +489,14 @@ const FriendSearch = () => {
       console.error("Error accepting friend request:", error);
       if (error instanceof AxiosError) {
         const accessCheck: AccessCheckResponse = error.response?.data?.error;
-        console.log("accessCheck =================>: ", accessCheck);
         if (accessCheck?.upgradeRequired) {
           setAccessCheck(accessCheck);
           setShowModal(true);
         } else {
-          errorToast(
-            error.response?.data.error || "Failed to send friend request"
-          );
+          errorToast(error.response?.data.error || "Failed to accept request");
         }
       } else {
-        errorToast("Failed to send friend request");
+        errorToast("Failed to accept request");
       }
       setRequests((prev) =>
         prev.map((request) =>
@@ -966,16 +971,18 @@ const FriendSearch = () => {
                 animate="visible"
                 className="grid grid-cols-3 gap-3"
               >
-                {searchResults.map((friend, index) => (
-                  <FriendCard
-                    key={friend._id}
-                    index={index}
-                    friend={friend}
-                    onSendRequest={handleSendRequest}
-                    onCancelRequest={handleCancelRequest}
-                    isConnecting={connectingIds.includes(friend._id)}
-                  />
-                ))}
+                {searchResults
+                  .filter((f): f is Friend => !!f && !!f._id)
+                  .map((friend, index) => (
+                    <FriendCard
+                      key={`${friend._id}-${index}`}
+                      index={index}
+                      friend={friend}
+                      onSendRequest={handleSendRequest}
+                      onCancelRequest={handleCancelRequest}
+                      isConnecting={connectingIds.includes(friend._id)}
+                    />
+                  ))}
                 {searchHasMore && (
                   <div ref={loadMoreRef} className="col-span-3 h-4" />
                 )}
@@ -1053,16 +1060,18 @@ const FriendSearch = () => {
                 animate="visible"
                 className="grid grid-cols-3 gap-3"
               >
-                {suggestions.map((friend, index) => (
-                  <FriendCard
-                    key={friend._id}
-                    index={index}
-                    friend={friend}
-                    onSendRequest={handleSendRequest}
-                    onCancelRequest={handleCancelRequest}
-                    isConnecting={connectingIds.includes(friend._id)}
-                  />
-                ))}
+                {suggestions
+                  .filter((f): f is Friend => !!f && !!f._id)
+                  .map((friend, index) => (
+                    <FriendCard
+                      key={`${friend._id}-${index}`}
+                      index={index}
+                      friend={friend}
+                      onSendRequest={handleSendRequest}
+                      onCancelRequest={handleCancelRequest}
+                      isConnecting={connectingIds.includes(friend._id)}
+                    />
+                  ))}
                 {suggestionHasMore && (
                   <div ref={loadMoreRef} className="col-span-3 h-4" />
                 )}

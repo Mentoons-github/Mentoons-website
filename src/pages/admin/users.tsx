@@ -35,8 +35,6 @@ const Users = () => {
     setIsLoading(true);
     try {
       const token = await getToken();
-      console.log("fetching User");
-      console.log(import.meta.env.VITE_PROD_URL);
       const { data } = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/user/all-users`,
         {

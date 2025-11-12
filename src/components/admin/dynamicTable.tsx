@@ -6,9 +6,9 @@ import {
   ChevronUp,
   ChevronDown,
   Search,
-  Ban,
-  CheckCircle,
   Edit,
+  UserX,
+  UserCheck,
 } from "lucide-react";
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
@@ -177,24 +177,44 @@ const DynamicTable = <T extends Record<string, any>>({
     return (
       <button
         onClick={() => onBlock(item)}
-        className={`group relative p-1 rounded transition-colors ${
-          isBlocked
-            ? "text-green-600 hover:text-green-800 hover:bg-green-100"
-            : "text-red-600 hover:text-red-800 hover:bg-red-100"
-        }`}
-        title={isBlocked ? "Unblock user" : "Block user"}
+        className={`
+          group relative inline-flex items-center gap-1.5 px-3 py-1.5 
+          rounded-md font-medium text-xs transition-all duration-200
+          ${
+            isBlocked
+              ? "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 hover:border-green-300"
+              : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 hover:border-red-300"
+          }
+        `}
+        title={
+          isBlocked ? "Click to unblock this user" : "Click to block this user"
+        }
       >
         {isBlocked ? (
-          <CheckCircle className="w-4 h-4" />
+          <>
+            <UserCheck className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Unblock</span>
+          </>
         ) : (
-          <Ban className="w-4 h-4" />
+          <>
+            <UserX className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Block</span>
+          </>
         )}
+
+        {/* Enhanced Tooltip */}
         <span
-          className="absolute left-1/2 -translate-x-3/4 bottom-full mb-1 
-          opacity-0 group-hover:opacity-100 transition-opacity 
-          bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-md whitespace-nowrap"
+          className="
+            absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
+            opacity-0 group-hover:opacity-100 transition-opacity 
+            bg-gray-900 text-white text-xs px-3 py-1.5 rounded-md shadow-lg 
+            whitespace-nowrap pointer-events-none z-10
+            after:content-[''] after:absolute after:top-full after:left-1/2 
+            after:-translate-x-1/2 after:border-4 after:border-transparent 
+            after:border-t-gray-900
+          "
         >
-          {isBlocked ? "Unblock user" : "Block user"}
+          {isBlocked ? "Restore user access" : "Restrict user access"}
         </span>
       </button>
     );

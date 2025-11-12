@@ -38,7 +38,7 @@ const AllJobs = () => {
   }, [dispatch, sortOrder, debouncedSearchTerm, currentPage, limit]);
 
   const handleEdit = (job: JobData) => {
-    navigate("/hiring-form", { state: { id: job._id } });
+    navigate("/admin/hiring-form", { state: { id: job._id } });
   };
 
   const handleDelete = (job: JobData) => {
@@ -104,7 +104,7 @@ const AllJobs = () => {
         />
       );
     }
-   
+
     if (value === null || value === undefined) return "-";
     if (
       value instanceof Date ||

@@ -1249,7 +1249,7 @@ export const COMMON_NAV: NavLink[] = [
       },
       {
         id: "WK_04",
-        label: "Career Corner",
+        label: "Music Therapy",
         url: "/workshop",
       },
     ],

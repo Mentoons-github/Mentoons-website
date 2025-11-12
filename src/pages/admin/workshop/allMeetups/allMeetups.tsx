@@ -136,7 +136,7 @@ const AllMeetups = () => {
     }
 
     try {
-      const result = await meetupDelete(token, meetupToDelete._id);
+      const result = await meetupDelete(meetupToDelete._id);
       if (!result?.success) {
         throw new Error((result?.data as string) || "Failed to delete meetup");
       }
