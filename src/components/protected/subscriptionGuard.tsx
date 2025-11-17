@@ -23,8 +23,6 @@ const SubscriptionGuard = ({ children }: { children: React.ReactNode }) => {
           }
         );
 
-        console.log(res);
-
         const userData = res.data;
         const isFree = userData.subscription?.plan === "free";
         const trialEnd = new Date(

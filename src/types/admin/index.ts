@@ -25,7 +25,17 @@ import {
   WorkshopEnquiriesListResponse,
 } from "./workshop";
 
-import { JobData, JobApplication } from "./job";
+import {
+  JobData,
+  JobApplication,
+  JobApplicationResponse,
+  JobDataResponse,
+  singleJobDataResponse,
+} from "./job";
+
+import { Admin } from "./admin";
+
+import { ISessionCall } from "./sessionCall";
 
 export type {
   Products,
@@ -50,6 +60,11 @@ export type {
   WorkshopEnquiriesListResponse,
   JobApplication,
   JobData,
+  JobApplicationResponse,
+  JobDataResponse,
+  singleJobDataResponse,
+  ISessionCall,
+  Admin,
 };
 
 export { ProductType };

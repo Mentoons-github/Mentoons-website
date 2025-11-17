@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { ProductBase } from "@/types/admin";
-
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
-
 import { useForm } from "react-hook-form";
-
 import { useLocation } from "react-router-dom";
 import { errorToast, successToast } from "../../utils/toastResposnse";
 import ImageUpload from "@/components/admin/imageUpload";
 import ProductTypeFields from "@/components/admin/productTypeFields";
 import VideoUpload from "@/components/admin/videoUpload";
+import PDFUpload from "@/components/admin/product/pdfUpload";
 
 const AddProduct = () => {
   const [products, setProducts] = useState<ProductBase[]>([]);
@@ -20,13 +18,10 @@ const AddProduct = () => {
   const [isEditing, setIsEditing] = useState(false);
   const location = useLocation();
   const { state } = location;
-
   const { register, handleSubmit, reset, setValue, watch } = useForm();
   const productType = watch("type");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const { getToken } = useAuth();
 
   useEffect(() => {
@@ -37,54 +32,72 @@ const AddProduct = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/products`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setProducts(response.data);
-        // setTotal(response.data.length);
+
+        const data = response.data;
+        let productList: ProductBase[] = [];
+
+        if (Array.isArray(data)) {
+          productList = data;
+        } else if (data?.products && Array.isArray(data.products)) {
+          productList = data.products;
+        } else if (data?.data && Array.isArray(data.data)) {
+          productList = data.data;
+        }
+
+        setProducts(productList);
       } catch (error) {
         console.error("Error fetching products:", error);
+        errorToast("Failed to load products");
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchProducts();
   }, [getToken]);
 
+  useEffect(() => {
+    if (state?.product) {
+      setSelectedProduct(state.product);
+      setIsEditing(true);
+      reset(state.product);
+    }
+  }, [state, reset]);
+
   const onSubmit = async (data: Record<string, any>) => {
-    console.log("data uploading: ", data);
     try {
+      setLoading(true);
+      const token = await getToken();
+
       if (isEditing && selectedProduct) {
-        //update the product
-        setLoading(true);
         const response = await axios.put(
-          `${import.meta.env.VITE_PROD_URL}/products/${selectedProduct?._id}`,
-          data
+          `${import.meta.env.VITE_PROD_URL}/products/${selectedProduct._id}`,
+          data,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        //show toast
-        if (response.status === 200) {
+        if (response.status === 200)
           successToast("Product updated successfully");
-        }
       } else {
-        //create the product
         const response = await axios.post(
           `${import.meta.env.VITE_PROD_URL}/products`,
-          data
+          data,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        //show toast
-        if (response.status === 201) {
+        if (response.status === 201)
           successToast("Product created successfully");
-        }
       }
+
       reset();
       setIsEditing(false);
       setSelectedProduct(null);
     } catch (error) {
-      console.error("Error:", error);
-      setError("An error occurred while saving the product.");
+      console.error("Error saving product:", error);
       errorToast("An error occurred while saving the product.");
+      setError("An error occurred while saving the product.");
     } finally {
       setLoading(false);
     }
@@ -97,28 +110,15 @@ const AddProduct = () => {
     reset(product);
   };
 
-  useEffect(() => {
-    if (state?.product) {
-      setSelectedProduct(state.product);
-      setIsEditing(true);
-      reset(state.product);
-    }
-  }, [state, reset]);
-
   const handleDelete = async (id: string) => {
     if (!id) return;
     try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_PROD_URL}/products/${id}`
-      );
-
-      console.log("Product deleted successfully");
-      if (response.status === 200) {
-        successToast("Product deleted successfully");
-      }
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product._id !== id)
-      );
+      const token = await getToken();
+      await axios.delete(`${import.meta.env.VITE_PROD_URL}/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      successToast("Product deleted successfully");
+      setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (error) {
       console.error("Error deleting product:", error);
       errorToast("Error deleting product");
@@ -127,11 +127,8 @@ const AddProduct = () => {
 
   const handleImageUpload = (images: { imageUrl: string }[]) => {
     if (images.length) {
-      const currentImages = watch("productImages") || [];
-      setValue("productImages", [
-        ...currentImages,
-        ...images.map((img) => img.imageUrl),
-      ]);
+      const current = watch("productImages") || [];
+      setValue("productImages", [...current, ...images.map((i) => i.imageUrl)]);
     }
   };
 
@@ -139,10 +136,54 @@ const AddProduct = () => {
     if (videos.length) {
       setValue(
         "productVideos",
-        videos.map((vid) => vid.videoUrl)
+        videos.map((v) => v.videoUrl)
       );
     }
   };
+
+  const handlePdfUpload = (pdf: { pdfUrl: string } | null) => {
+    const newUrl = pdf?.pdfUrl || "";
+    if (newUrl !== watch("orignalProductSrc")) {
+      setValue("orignalProductSrc", newUrl);
+    }
+  };
+
+  const handleRemoveBackendFile = async () => {
+    try {
+      const token = await getToken();
+      await axios.delete(
+        `${import.meta.env.VITE_PROD_URL}/products/remove-file/`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { productId: selectedProduct?._id },
+        }
+      );
+      setValue("orignalProductSrc", "");
+      successToast("PDF removed successfully");
+    } catch (error) {
+      console.error("Error deleting PDF:", error);
+      errorToast("Failed to delete PDF from server");
+      throw error;
+    }
+  };
+
+  const currentPdfUrl = watch("orignalProductSrc");
+  const initialPdf = useMemo(() => {
+    const url =
+      currentPdfUrl || (isEditing && selectedProduct?.orignalProductSrc);
+    return url ? { pdfUrl: url } : null;
+  }, [currentPdfUrl, isEditing, selectedProduct?.orignalProductSrc]);
+
+  const watchedImages = watch("productImages") || [];
+  const initialImages = useMemo(() => {
+    return watchedImages.map((url: string) => ({ imageUrl: url }));
+  }, [watchedImages]);
+
+  const watchedVideos = watch("productVideos") || [];
+  const initialVideos = useMemo(() => {
+    return watchedVideos.map((url: string) => ({ videoUrl: url }));
+  }, [watchedVideos]);
+
   return (
     <div className="container p-4 mx-auto">
       <h1 className="mb-4 text-2xl font-bold">Product Management</h1>
@@ -152,9 +193,7 @@ const AddProduct = () => {
         </div>
       )}
 
-      {/* Product Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="mb-8 space-y-4">
-        {/* Basic Fields */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block mb-1">Title</label>
@@ -163,7 +202,6 @@ const AddProduct = () => {
               className="w-full p-2 border rounded"
             />
           </div>
-
           <div>
             <label className="block mb-1">Price</label>
             <input
@@ -175,12 +213,14 @@ const AddProduct = () => {
             />
           </div>
 
-          <div>
-            <label className="block mb-1">Original Product Source</label>
-            <input
-              {...register("orignalProductSrc")}
-              className="w-full p-2 border rounded"
-              placeholder="Enter source URL"
+          <div className="col-span-2">
+            <label className="block mb-1">Original Product Source (PDF)</label>
+            <PDFUpload
+              onPdfUpload={handlePdfUpload}
+              initialPdf={initialPdf}
+              onRemoveBackendFile={
+                isEditing ? handleRemoveBackendFile : undefined
+              }
             />
           </div>
 
@@ -263,7 +303,7 @@ const AddProduct = () => {
                     ? value
                         .split(",")
                         .map((tag: string) => tag.trim())
-                        .filter((tag: string) => tag !== "")
+                        .filter(Boolean)
                     : [],
               })}
               className="w-full p-2 border rounded"
@@ -272,23 +312,19 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* Image Upload */}
         <ImageUpload
           onImageUpload={handleImageUpload}
           multiple
-          initialImages={watch("productImages")?.map((url: string) => ({
-            imageUrl: url,
-          }))}
+          initialImages={initialImages}
+          productId={isEditing ? selectedProduct?._id : undefined}
         />
+
         <VideoUpload
           onVideoUpload={handleVideoUpload}
           multiple
-          initialVideos={watch("productVideos")?.map((url: string) => ({
-            videoUrl: url,
-          }))}
+          initialVideos={initialVideos}
         />
 
-        {/* Dynamic Fields based on Product Type */}
         <ProductTypeFields type={productType} register={register} />
 
         <button
@@ -300,43 +336,56 @@ const AddProduct = () => {
         </button>
       </form>
 
-      {/* Products List */}
       {loading ? (
         <div className="text-center">Loading...</div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {products.length > 0 &&
-              products.map((product) => (
-                <div key={product._id} className="p-4 border rounded">
-                  <h2 className="text-xl font-bold">
-                    {product.title ?? "Untitled Product"}
-                  </h2>
-                  <p className="text-gray-600">
-                    {product.description ?? "No description available."}
-                  </p>
-                  <p className="mt-2 text-lg font-bold">
-                    ₹
-                    {product.price >= 0 ? product.price : "Price not available"}
-                  </p>
-                  <div className="mt-4 space-x-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600"
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.isArray(products) && products.length > 0 ? (
+            products.map((product) => (
+              <div key={product._id} className="p-4 border rounded">
+                <h2 className="text-xl font-bold">
+                  {product.title ?? "Untitled"}
+                </h2>
+                <p className="text-gray-600">
+                  {product.description ?? "No description."}
+                </p>
+                <p className="mt-2 text-lg font-bold">
+                  ₹{product.price ?? "N/A"}
+                </p>
+                {product.orignalProductSrc && (
+                  <p className="mt-2 text-sm">
+                    <a
+                      href={product.orignalProductSrc}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product?._id)}
-                      className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                      PDF Available
+                    </a>
+                  </p>
+                )}
+                <div className="mt-4 space-x-2">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product._id)}
+                    className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
                 </div>
-              ))}
-          </div>
-        </>
+              </div>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-500">
+              No products found.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

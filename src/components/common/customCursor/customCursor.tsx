@@ -1,16 +1,39 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const CustomCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const location = useLocation();
 
   useEffect(() => {
-    const updateCursorPosition = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+    let x = 0;
+    let y = 0;
+    const speed = 0.2;
+
+    const update = (e: MouseEvent) => {
+      const targetX = e.clientX;
+      const targetY = e.clientY;
+
+      const animate = () => {
+        x += (targetX - x) * speed;
+        y += (targetY - y) * speed;
+        setPosition({ x, y });
+        requestAnimationFrame(animate);
+      };
+
+      animate();
     };
 
-    window.addEventListener("mousemove", updateCursorPosition);
-    return () => window.removeEventListener("mousemove", updateCursorPosition);
+    window.addEventListener("mousemove", update);
+    return () => window.removeEventListener("mousemove", update);
   }, []);
+
+  if (
+    location.pathname.includes("/employee") ||
+    location.pathname.includes("/admin")
+  ) {
+    return null;
+  }
 
   return (
     <div

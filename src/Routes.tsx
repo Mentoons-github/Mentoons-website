@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { useSelector } from "react-redux";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ComicCard from "./components/comics/HoverCardComic";
 import ScrollToTop from "./components/comics/ScrollToTop";
 import Loader from "./components/common/Loader";
@@ -34,19 +34,25 @@ import ProductsPage from "./pages/v2/user/products/products.tsx";
 import AdvancedBookingSystem from "./pages/v2/user/sessionBooking/sessionBooking.tsx";
 import { RootState } from "./redux/store";
 import AddaRouter from "./routes/addaRouter.tsx";
-import MythosRouter from "./routes/mythosRouter.tsx";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import SubscriptionGuard from "./components/protected/subscriptionGuard.tsx";
 import QuizPage from "./pages/quiz/quiz.tsx";
 import EmployeeRouter from "./routes/employeeRouter.tsx";
 import AdminRouter from "./routes/adminRouter.tsx";
 import Profile from "./pages/v2/profile.tsx";
-const Cart = lazy(() => import("./pages/Cart"));
+import CommunityPage from "./pages/v2/community/community.tsx";
+import CommunityGroups from "./pages/v2/community/groups.tsx";
+import MentoonsServices from "./pages/v2/services/service.tsx";
+import AddPasswordPage from "./pages/admin/employee/setPasword.tsx";
+import WhyComics from "./pages/v2/comics/whyComics.tsx";
+import RootRedirect from "./layout/rootRedirect.tsx";
+import BlockedGuard from "./components/adda/auth/blockedGuard.tsx";
+import BlockedPage from "./components/adda/auth/blockedPage.tsx";
 
+const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
-
 const FreeDownload = lazy(() => import("./pages/v2/user/freeDownloads.tsx"));
 const FAQ = lazy(() => import("./components/common/FAQ"));
 const Plans = lazy(() => import("./components/common/Plans"));
@@ -58,19 +64,13 @@ const PuzzleContent = lazy(() => import("./pages/v2/puzzle/puzzleContent.tsx"));
 const WordCrossPuzzle = lazy(() => import("./pages/v2/puzzle/wordCross.tsx"));
 
 const routes = [
-  { path: "/", element: <Navigate to="/adda" replace /> },
+  { path: "/", element: <RootRedirect /> },
   { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },
-  {
-    path: "/mentoons-works",
-    element: <HowMentoonsWork />,
-  },
-  {
-    path: "/product",
-    element: <ProductsPage />,
-  },
+  { path: "/mentoons-works", element: <HowMentoonsWork /> },
+  { path: "/product", element: <ProductsPage /> },
   {
     path: "/cart",
     element: (
@@ -103,7 +103,6 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
-  // { path: "/membership", element: <Membership /> },
   { path: "/hiring", element: <CareerPage /> },
   {
     path: "/assessment-page",
@@ -116,10 +115,8 @@ const routes = [
   { path: "/assessment-questions", element: <AssessmentQuestions /> },
   { path: "/order-summary", element: <OrderSummary /> },
   { path: "/payment-status", element: <PaymentStatusPage /> },
-  { path: "*", element: <NotFound /> },
   { path: "/adda/*", element: <AddaRouter /> },
   { path: "/bookings", element: <AdvancedBookingSystem /> },
-  { path: "/mythos/*", element: <MythosRouter /> },
   { path: "/search", element: <SearchResultsPage /> },
   { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
@@ -132,14 +129,17 @@ const routes = [
   { path: "/wordCross/:difficulty/:puzzleType", element: <WordCrossPuzzle /> },
   { path: "/employee/*", element: <EmployeeRouter /> },
   { path: "/admin/*", element: <AdminRouter /> },
+  { path: "/community", element: <CommunityPage /> },
+  { path: "/community/group/:id", element: <CommunityGroups /> },
+  { path: "/services", element: <MentoonsServices /> },
   { path: "/prof", element: <Profile /> },
+  { path: "/add-password", element: <AddPasswordPage /> },
+  { path: "/why-comics", element: <WhyComics /> },
 ];
 
 const Router = () => {
-  //get the openModal from urlsearch
   const urlSearchParams = new URLSearchParams(window.location.search);
   const openModal = urlSearchParams.get("openModal");
-  // Check if user is newly registered
   const isNewUser =
     openModal === "true" || localStorage.getItem("Signed up") === "true";
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
@@ -149,6 +149,7 @@ const Router = () => {
   );
 
   const handlePopup = (value: boolean) => {
+    localStorage.removeItem("Signed up");
     localStorage.removeItem("isNewUser");
     setShowPopup(value);
   };
@@ -158,25 +159,36 @@ const Router = () => {
       <ScrollToTop />
       <Suspense fallback={<Loader />}>
         <Routes>
-          {routes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              element={
-                route.path.startsWith("/employee") ||
-                route.path.startsWith("/admin") ? (
-                  route.element
-                ) : (
-                  <MainLayout>{route.element}</MainLayout>
-                )
-              }
-            />
-          ))}
+          <Route path="/blocked" element={<BlockedPage />} />
+
+          <Route
+            path="/*"
+            element={
+              <BlockedGuard>
+                <Routes>
+                  {routes.map((route, index) => (
+                    <Route
+                      key={index}
+                      path={route.path}
+                      element={
+                        route.path.startsWith("/employee") ||
+                        route.path.startsWith("/admin") ? (
+                          route.element
+                        ) : (
+                          <MainLayout>{route.element}</MainLayout>
+                        )
+                      }
+                    />
+                  ))}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BlockedGuard>
+            }
+          />
         </Routes>
       </Suspense>
 
       {hoverComicCard !== null && <ComicCard item={hoverComicCard} />}
-      {/* <ProgressScroller /> */}
       {showPopup && (
         <Popup
           item={{

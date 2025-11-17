@@ -20,10 +20,7 @@ const ProfileCompletionTooltip = ({
 }: ProfileCompletionTooltipProps) => {
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-40"
-        onClick={handleCloseTooltip}
-      />
+      <div className="fixed inset-0 z-40" onClick={handleCloseTooltip} />
       <div
         className={`
           relative mr-4 bg-white rounded-xl shadow-2xl border border-gray-200 max-w-sm z-50

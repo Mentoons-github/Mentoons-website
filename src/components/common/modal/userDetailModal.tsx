@@ -68,7 +68,7 @@ const FriendModal: React.FC<FriendModalProps> = ({
       initial="hidden"
       onClick={() => handleClick(friend._id)}
       animate={isVisible ? "visible" : "hidden"}
-      className="absolute top-0 left-full ml-3 z-20 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden w-64"
+      className="absolute top-0 left-full ml-3 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden w-64"
     >
       <div className="relative bg-gradient-to-br from-orange-400 via-pink-400 to-purple-500 p-4 pb-10">
         <div className="absolute inset-0 bg-black/10"></div>

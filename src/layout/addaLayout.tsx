@@ -7,15 +7,27 @@ import UserStatus from "@/components/adda/home/userStatus/userStatus";
 import WhatWeOffer from "@/components/adda/home/whatweExplore/weOffer";
 import ViewAllFriends from "@/components/adda/searchFriend/requestButton";
 import WelcomeModal from "@/components/adda/welcome/welcome";
+import { fetchProducts } from "@/redux/productSlice";
+import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
-import { useCallback, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import ProductScrollNav from "@/components/Home/productScrollNav";
 
 const AddaLayout = () => {
-  const { isSignedIn } = useAuth();
-  const [showWelcome, setShowWelcome] = useState(false);
+  const { isSignedIn, getToken } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { items, loading, page } = useSelector(
+    (state: RootState) => state.products
+  );
+
+  const productsData = Array.isArray(items)
+    ? items.map(product => ({ id: product._id, title: product.title }))
+    : [];
 
   const isHomeRoute =
     location.pathname === "/adda/" ||
@@ -23,6 +35,25 @@ const AddaLayout = () => {
     location.pathname === "/adda/meme" ||
     location.pathname === "/adda/notifications" ||
     location.pathname === "/adda/user-profile";
+
+  useEffect(() => {
+    const loadInitial = async () => {
+      const token = await getToken();
+      if (token) {
+        await dispatch(
+          fetchProducts({
+            token,
+            type: undefined,
+            cardType: undefined,
+            ageCategory: undefined,
+            page: 1,
+            append: false,
+          })
+        );
+      }
+    };
+    loadInitial();
+  }, [dispatch, getToken]);
 
   const handleGoBack = useCallback(() => {
     navigate(-1);
@@ -36,24 +67,22 @@ const AddaLayout = () => {
     setShowWelcome(true);
   }, []);
 
+  const [showWelcome, setShowWelcome] = useState(false);
+
   return (
     <>
       <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
         <div className="relative flex flex-col w-full">
-          <div className="left-0 flex items-center w-full bg-white">
-            <div className="flex items-center w-full bg-white">
-              <div className="flex-grow w-full min-w-0 py-2">
-                <UserStatus />
-              </div>
-              <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
-                <Link to="/mythos">
-                  <img
-                    src="/assets/adda/sidebar/Introducing poster.png"
-                    alt="mentoons-mythos"
-                    className="max-w-[134px] lg:max-w-[170px]"
-                  />
-                </Link>
-              </div>
+          <div className="flex flex-col w-full bg-white">
+            <div className="flex w-full overflow-x-auto gap-5">
+              <ProductScrollNav
+                productsData={productsData}
+                loading={loading}
+                currentPage={page}
+              />
+            </div>
+            <div className="w-full py-2">
+              <UserStatus />
             </div>
           </div>
 
@@ -97,9 +126,7 @@ const AddaLayout = () => {
                   <div className="p-3 mb-4 bg-white border border-orange-200 rounded-lg sm:p-4">
                     <FriendRequest />
                     <div className="pt-3 mt-4 border-t border-orange-100">
-                      <ViewAllFriends
-                        onNavigate={navigateToFriendRequestsPage}
-                      />
+                      <ViewAllFriends onNavigate={navigateToFriendRequestsPage} />
                     </div>
                   </div>
                 )}
@@ -109,6 +136,16 @@ const AddaLayout = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
+            <a href="https://mentoonsmythos.com" target="_blank" rel="noopener noreferrer">
+              <img
+                src="/assets/adda/sidebar/Introducing poster.png"
+                alt="mentoons-mythos"
+                className="max-w-[134px] lg:max-w-[170px]"
+              />
+            </a>
           </div>
         </div>
       </div>

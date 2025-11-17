@@ -30,11 +30,18 @@ export interface Employee {
     country: string;
   };
   profilePicture: string;
+  profileEditRequest?: {
+    status: "pending" | "approved" | "rejected";
+    requestedAt?: string;
+    approvedAt?: string;
+    adminId?: string;
+  };
 }
 
 export interface SingleEmployeeDataResponse {
   success: boolean;
   data: Employee;
+  message?: string;
 }
 
 interface AddressFormData {

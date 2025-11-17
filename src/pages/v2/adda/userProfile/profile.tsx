@@ -413,7 +413,7 @@ const Profile = () => {
       const formData = new FormData();
       formData.append("file", file);
       const uploadResponse = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {
@@ -462,7 +462,7 @@ const Profile = () => {
       await user?.setProfileImage({ file });
 
       const uploadResponse = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {

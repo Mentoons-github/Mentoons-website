@@ -1,194 +1,246 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { WorkshopCategory } from "@/types";
+import { COLOR_THEME } from "@/constant/constants";
+import CarouselHeader from "./carousal/header";
+import NavigationArrows from "./carousal/navigationArrow";
+import WorkshopCard from "./carousal/card";
+import OverviewSection from "./carousal/overViewSection";
+import AgeGroupSection from "./carousal/ageGroup";
+import WhyChooseSection from "./carousal/whyChooseUs";
 
-const WorkshopInfoCarousel = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+interface WorkshopInfoCarouselProps {
+  categories: WorkshopCategory[];
+  currentCategoryIndex?: number;
+  currentWorkshopIndex?: number;
+  setCurrentCategoryIndex?: (index: number) => void;
+  setCurrentWorkshopIndex?: (index: number) => void;
+  direction?: number;
+  setDirection?: (direction: number) => void;
+}
 
-  const workshops = [
-    {
-      title: "Workshops Held For Ages 6-12",
-      age: "6-12",
-      focus: "Reducing screen dependency, encouraging creativity and empathy",
-      activities: [
-        "Story-based lessons",
-        "Digital-free play challenges",
-        "Painting & role-playing to understand emotions",
-      ],
-      image: "/assets/workshopv2/buddycamp/buddy-camp-logo.png",
-      color: "#EC9600",
-      bgGradient: "from-orange-100 to-yellow-50",
+const WorkshopInfoCarousel = ({
+  categories,
+  currentCategoryIndex: externalCurrentCategoryIndex,
+  currentWorkshopIndex: externalCurrentWorkshopIndex,
+  setCurrentCategoryIndex: externalSetCurrentCategoryIndex,
+  setCurrentWorkshopIndex: externalSetCurrentWorkshopIndex,
+  direction: externalDirection,
+  setDirection: externalSetDirection,
+}: WorkshopInfoCarouselProps) => {
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(
+    externalCurrentCategoryIndex || 0
+  );
+  const [currentWorkshopIndex, setCurrentWorkshopIndex] = useState(
+    externalCurrentWorkshopIndex || 0
+  );
+  const [currentAgeGroup, setCurrentAgeGroup] = useState(0);
+  const [activeSection, setActiveSection] = useState<
+    "overview" | "ageGroups" | "whyChoose" | "services"
+  >("overview");
+  const [direction, setDirection] = useState(externalDirection || 0);
+
+  useEffect(() => {
+    if (
+      externalCurrentCategoryIndex !== undefined &&
+      externalCurrentCategoryIndex !== currentCategoryIndex
+    ) {
+      setCurrentCategoryIndex(externalCurrentCategoryIndex);
+      if (
+        externalSetDirection &&
+        externalCurrentCategoryIndex !== currentCategoryIndex
+      ) {
+        const newDir =
+          externalCurrentCategoryIndex > currentCategoryIndex ? 1 : -1;
+        setDirection(newDir);
+        externalSetDirection(newDir);
+      }
+    }
+  }, [
+    externalCurrentCategoryIndex,
+    externalSetDirection,
+    currentCategoryIndex,
+  ]);
+
+  useEffect(() => {
+    if (
+      externalCurrentWorkshopIndex !== undefined &&
+      externalCurrentWorkshopIndex !== currentWorkshopIndex
+    ) {
+      setCurrentWorkshopIndex(externalCurrentWorkshopIndex);
+      if (
+        externalSetDirection &&
+        externalCurrentWorkshopIndex !== currentWorkshopIndex
+      ) {
+        const newDir =
+          externalCurrentWorkshopIndex > currentWorkshopIndex ? 1 : -1;
+        setDirection(newDir);
+        externalSetDirection(newDir);
+      }
+    }
+  }, [
+    externalCurrentWorkshopIndex,
+    externalSetDirection,
+    currentWorkshopIndex,
+  ]);
+
+  useEffect(() => {
+    setCurrentAgeGroup(0);
+    setActiveSection("overview");
+  }, [currentCategoryIndex, currentWorkshopIndex]);
+
+  const currentCategory = categories[currentCategoryIndex];
+  const currentWorkshop = currentCategory?.workshops[currentWorkshopIndex];
+  const currentTheme = COLOR_THEME[currentCategoryIndex % COLOR_THEME.length];
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0,
+      scale: 0.8,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+      scale: 1,
     },
-    {
-      title: "Workshops Held For Ages 13-19",
-      age: "13-19",
-      focus: "Breaking free from gaming & social media cycles",
-      activities: [
-        "Guided journaling",
-        "Social detox challenges",
-        "Peer-led discussion circles",
-      ],
-      image: "/assets/workshopv2/teencamp/teen-camp-logo.png",
-      color: "#007AFF",
-      bgGradient: "from-blue-100 to-sky-50",
-    },
-    {
-      title: "Workshops Held For Ages 20+",
-      age: "20+",
-      focus:
-        "Managing content overload, improving attention & emotional clarity",
-      activities: [
-        "Digital self-assessment",
-        "Dopamine detox exercises",
-        "Habit loop rewiring",
-      ],
-      image: "/assets/workshopv2/careercorner/career-corner-logo.png",
-      color: "#DC2626",
-      bgGradient: "from-red-100 to-rose-50",
-    },
-  ];
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0,
+      scale: 0.8,
+    }),
+  };
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    if (
+      currentWorkshopIndex === currentCategory.workshops.length - 1 &&
+      newDirection === 1
+    ) {
+      const newCategoryIndex =
+        currentCategoryIndex === categories.length - 1
+          ? 0
+          : currentCategoryIndex + 1;
+      setCurrentCategoryIndex(newCategoryIndex);
+      setCurrentWorkshopIndex(0);
+      if (externalSetCurrentCategoryIndex)
+        externalSetCurrentCategoryIndex(newCategoryIndex);
+      if (externalSetCurrentWorkshopIndex) externalSetCurrentWorkshopIndex(0);
+    } else if (currentWorkshopIndex === 0 && newDirection === -1) {
+      const newCategoryIndex =
+        currentCategoryIndex === 0
+          ? categories.length - 1
+          : currentCategoryIndex - 1;
+      setCurrentCategoryIndex(newCategoryIndex);
+      setCurrentWorkshopIndex(
+        categories[newCategoryIndex].workshops.length - 1
+      );
+      if (externalSetCurrentCategoryIndex)
+        externalSetCurrentCategoryIndex(newCategoryIndex);
+      if (externalSetCurrentWorkshopIndex)
+        externalSetCurrentWorkshopIndex(
+          categories[newCategoryIndex].workshops.length - 1
+        );
+    } else {
+      const newWorkshopIndex =
+        newDirection === 1
+          ? currentWorkshopIndex + 1
+          : currentWorkshopIndex - 1;
+      setCurrentWorkshopIndex(newWorkshopIndex);
+      if (externalSetCurrentWorkshopIndex)
+        externalSetCurrentWorkshopIndex(newWorkshopIndex);
+    }
+    if (externalSetDirection) externalSetDirection(newDirection);
+  };
+
+  if (!categories.length || !currentCategory?.workshops.length) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-start">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mb-4"
+          />
+          <h2 className="text-2xl font-bold text-gray-800">
+            No Workshops Available
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Please check back later for new workshops
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative mt-10">
-      <div className="relative overflow-hidden">
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {workshops.map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-col md:flex-row items-center md:items-start justify-center gap-4 min-w-full min-h-[500px] px-4 py-8 md:py-0"
-            >
-              <div className="flex flex-col flex-1 order-2 max-w-2xl gap-4 md:order-1">
-                <h3 className="pb-4 text-3xl font-semibold text-center md:pb-8 md:text-5xl md:text-left">
-                  Workshops Held for{" "}
-                  <span
-                    key={`age-${index}`}
-                    style={{ color: item.color }}
-                    className="inline-block font-bold text-8xl mt-2"
-                  >
-                    {`Age ${item.age}`.split("").map((char, charIndex) => (
-                      <motion.span
-                        key={`${index}-${charIndex}`}
-                        initial={{ scale: 1 }}
-                        animate={{
-                          scale: [1, 1.3, 1],
-                        }}
-                        transition={{
-                          duration: 0.6,
-                          delay: charIndex * 0.1,
-                          repeat: Infinity,
-                          repeatDelay: 2,
-                          ease: "easeInOut",
-                        }}
-                        className="inline-block"
-                        style={{
-                          transformOrigin: "center bottom",
-                        }}
-                      >
-                        {char === " " ? "\u00A0" : char}
-                      </motion.span>
-                    ))}
-                  </span>
-                </h3>
-                <motion.p
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="pb-4 text-lg font-medium text-center md:text-xl md:text-left"
-                >
-                  <span className="font-semibold">Focus:</span> {item.focus}
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.6 }}
-                  className="space-y-2 font-semibold"
-                >
-                  <h4 className="pb-4 text-xl font-semibold text-center md:text-left">
-                    Activities:
-                  </h4>
-                  {item.activities.map((activity, actIndex) => (
-                    <motion.li
-                      key={actIndex}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: 0.8 + actIndex * 0.1,
-                        duration: 0.4,
-                      }}
-                      className="pl-4 text-base text-center list-disc list-inside md:text-lg md:text-left"
-                    >
-                      {activity}
-                    </motion.li>
-                  ))}
-                </motion.div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
+        <CarouselHeader
+          categories={categories}
+          currentCategoryIndex={currentCategoryIndex}
+          currentWorkshopIndex={currentWorkshopIndex}
+          currentTheme={currentTheme}
+          setCurrentCategoryIndex={setCurrentCategoryIndex}
+          setCurrentWorkshopIndex={setCurrentWorkshopIndex}
+          setDirection={setDirection}
+          externalSetCurrentCategoryIndex={externalSetCurrentCategoryIndex}
+          externalSetCurrentWorkshopIndex={externalSetCurrentWorkshopIndex}
+          externalSetDirection={externalSetDirection}
+        />
+        <div className="relative">
+          {categories.length > 1 && <NavigationArrows paginate={paginate} />}
+          <div className="px-4">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.7 }}
-                className="flex justify-center flex-1 order-1 w-full max-w-2xl md:justify-end md:order-2 md:w-auto"
+                key={`${currentCategoryIndex}-${currentWorkshopIndex}`}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.5 },
+                  scale: { duration: 0.5 },
+                }}
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="object-contain w-full md:w-auto shadow-lg h-[300px] md:h-[400px] rounded-lg hover:scale-105 transition-transform duration-300"
+                <WorkshopCard
+                  category={currentCategory}
+                  workshop={currentWorkshop}
+                  currentTheme={currentTheme}
+                  activeSection={activeSection}
+                  setActiveSection={setActiveSection}
                 />
+                <AnimatePresence mode="wait">
+                  {activeSection === "overview" && (
+                    <OverviewSection
+                      workshop={currentWorkshop}
+                      currentTheme={currentTheme}
+                      setActiveSection={setActiveSection}
+                      setCurrentAgeGroup={setCurrentAgeGroup}
+                    />
+                  )}
+                  {activeSection === "ageGroups" && (
+                    <AgeGroupSection
+                      workshop={currentWorkshop}
+                      currentTheme={currentTheme}
+                      currentAgeGroup={currentAgeGroup}
+                      setCurrentAgeGroup={setCurrentAgeGroup}
+                    />
+                  )}
+                  {activeSection === "whyChoose" && (
+                    <WhyChooseSection
+                      workshop={currentWorkshop}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                </AnimatePresence>
               </motion.div>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev > 0 ? prev - 1 : 2))}
-          className="absolute z-10 p-2 -translate-y-1/2 rounded-full shadow-lg left-2 md:left-4 top-1/2 bg-white/80 hover:bg-white transition-all duration-200 hover:scale-110"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5 md:w-6 md:h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev < 2 ? prev + 1 : 0))}
-          className="absolute z-10 p-2 -translate-y-1/2 rounded-full shadow-lg right-2 md:right-4 top-1/2 bg-white/80 hover:bg-white transition-all duration-200 hover:scale-110"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5 md:w-6 md:h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
-        </button>
-        <div className="absolute flex gap-2 -translate-x-1/2 bottom-4 left-1/2">
-          {[0, 1, 2].map((index) => (
-            <motion.button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
-                currentSlide === index ? "bg-blue-600 shadow-lg" : "bg-gray-300"
-              }`}
-            />
-          ))}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

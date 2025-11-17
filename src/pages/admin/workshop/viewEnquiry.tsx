@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Loader from "@/components/common/admin/loader";
 import { getEnquiryById } from "@/redux/admin/workshop";
 import { SingleWorkshopEnquiryResponse } from "@/types/admin";
+import { useAuth } from "@clerk/clerk-react";
 import { toast } from "react-toastify";
 import {
   User,
@@ -26,15 +27,26 @@ const ViewEnquiry = () => {
   const { enquiry, loading, error, success } = useSelector(
     (state: RootState) => state.adminWorkshop
   );
+
+  const { getToken } = useAuth();
   const enquiryData: SingleWorkshopEnquiryResponse["data"] | undefined =
     enquiry?.data;
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
-    if (enquiryId) {
-      dispatch(getEnquiryById({ enquiryId }));
-    }
+    const fetchEnquiryById = async () => {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Please login to continue");
+        return;
+      }
+      if (enquiryId) {
+        dispatch(getEnquiryById({ enquiryId, token }));
+      }
+    };
+
+    fetchEnquiryById();
   }, [dispatch, enquiryId]);
 
   useEffect(() => {

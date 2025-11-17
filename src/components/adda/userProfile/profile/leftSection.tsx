@@ -13,7 +13,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import ProfileFormModal from "@/pages/v2/adda/userProfile/profieForm";
-import { toast } from "sonner";
+import { useSubmissionModal } from "@/context/adda/commonModalContext";
 
 interface LeftSectionProps {
   userDetails: ProfileUserDetails;
@@ -46,18 +46,23 @@ const LeftSection = ({
 }: LeftSectionProps) => {
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const { showModal } = useSubmissionModal();
 
-  const handleFileChange = (
+  const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     handler: (file: File) => Promise<void>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size should not exceed 5MB");
+        showModal({
+          isSubmitting: false,
+          currentStep: "error",
+          message: "File size should not exceed 5MB",
+        });
         return;
       }
-      handler(file);
+      await handler(file);
     }
   };
 

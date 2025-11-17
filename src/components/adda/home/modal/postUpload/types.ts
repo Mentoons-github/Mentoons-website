@@ -3,6 +3,7 @@ export interface PostUploadProps {
   onClose: (val: boolean) => void;
   postType: "photo" | "video" | "event" | "article" | "text" | "mixed";
   onPostCreated?: (post: any) => void;
+  postedImage?: File | null;
 }
 
 export interface FormValues {
@@ -36,6 +37,7 @@ export interface MediaUploadProps {
 
 export interface UploadContentProps extends MediaUploadProps {
   postType: PostUploadProps["postType"];
+  isPastedImage?: boolean;
   values: FormValues;
   addMediaField: (
     setFieldValue: (field: string, value: unknown) => void

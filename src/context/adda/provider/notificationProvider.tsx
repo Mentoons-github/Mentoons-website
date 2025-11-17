@@ -46,7 +46,7 @@ export const NotificationProvider = ({
 
       setNotifications(formattedNotifications);
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      console.error("Failed fetch notification");
     } finally {
       setIsLoading(false);
     }

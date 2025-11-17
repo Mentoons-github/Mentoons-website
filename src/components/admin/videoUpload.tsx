@@ -59,7 +59,7 @@ const VideoUpload = ({
         formData.append("file", file);
 
         const response = await fetch(
-          "https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file",
+          `${import.meta.env.VITE_PROD_URL}/upload/file`,
           {
             method: "POST",
             headers: {

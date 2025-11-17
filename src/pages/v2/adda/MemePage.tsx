@@ -231,7 +231,7 @@ const MemePage = () => {
     }
 
     if (!isSignedIn) {
-        openAuthModal("sign-in");
+      openAuthModal("sign-in");
       return;
     }
 
@@ -247,7 +247,7 @@ const MemePage = () => {
       formData.append("file", selectedImage);
 
       const uploadResponse = await axios.post(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/upload/file`,
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
         {
           headers: {
@@ -311,8 +311,6 @@ const MemePage = () => {
 
     fetchMemesFeeds();
   }, []);
-
- 
 
   if (loading) {
     return (

@@ -86,6 +86,7 @@ export interface User {
   email: string;
   phoneNumber: string;
   picture: string;
+  joinDate?: string;
 }
 
 export interface SingleWorkshopEnquiryResponse {

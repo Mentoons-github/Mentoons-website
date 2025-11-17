@@ -136,7 +136,7 @@ const SessionBooking: React.FC = () => {
       };
 
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/payment/initiate",
+        `${import.meta.env.VITE_PROD_URL}/payment/initiate`,
         paymentData,
         {
           headers: {

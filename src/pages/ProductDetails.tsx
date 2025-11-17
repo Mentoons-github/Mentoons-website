@@ -211,7 +211,7 @@ const ProductDetails = () => {
     e.preventDefault();
     try {
       const queryResponse = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/query", // Fixed the endpoint URL
+        `${import.meta.env.VITE_PROD_URL}/query`, // Fixed the endpoint URL
         {
           message: message,
         }

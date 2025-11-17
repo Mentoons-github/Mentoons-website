@@ -6,19 +6,22 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { MdMessage } from "react-icons/md";
-import { toast } from "sonner";
+
+import ErrorModal from "@/components/adda/modal/error";
 
 const FAQ = ({ data }: { data: object }) => {
   const { isInView, ref } = useInView(0.3, false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState("");
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const queryType = "general"; // Removed unused state setter
+  const queryType = "general";
   const [userDetails, setUserDetails] = useState<any>(null);
   const { user } = useUser();
   const { getToken } = useAuth();
@@ -26,7 +29,6 @@ const FAQ = ({ data }: { data: object }) => {
   const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Determine the queryType based on the current URL
       const currentUrl = window.location.pathname;
       let dynamicQueryType = "general";
 
@@ -40,12 +42,11 @@ const FAQ = ({ data }: { data: object }) => {
         dynamicQueryType = "product";
       }
 
-      // Use the determined queryType or the state value if it was manually set
       const finalQueryType =
         queryType !== "general" ? queryType : dynamicQueryType;
       const queryResponse = await axios.post(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/query`, // Fixed the endpoint URL
-        // "http://localhost:4000/api/v1/query", // Fixed the endpoint URL
+        `${import.meta.env.VITE_PROD_URL}/query`,
+        // "http://localhost:4000/api/v1/query",
         {
           message: message,
           name: name,
@@ -57,8 +58,11 @@ const FAQ = ({ data }: { data: object }) => {
       if (queryResponse.status === 201) {
         setShowEnquiryModal(true);
       }
-    } catch (error) {
-      toast.error("Failed to submit message");
+    } catch (error: any) {
+      setShowErrorModal(true);
+      setShowErrorMessage(
+        error?.response?.data?.message || "Failed to submit message"
+      );
     }
   };
 
@@ -217,6 +221,14 @@ const FAQ = ({ data }: { data: object }) => {
           isOpen={showEnquiryModal}
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
+        />
+      )}
+      {showErrorModal && (
+        <ErrorModal
+          heading="Already Added Query"
+          error={showErrorMessage}
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
         />
       )}
     </motion.section>

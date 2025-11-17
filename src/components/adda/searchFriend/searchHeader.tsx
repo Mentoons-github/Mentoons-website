@@ -7,7 +7,7 @@ interface SearchHeaderProps {
 
 const SearchHeader = ({ searchQuery, totalResults }: SearchHeaderProps) => {
   return (
-    <div className="bg-blue-600 shadow-xl border-b-4 border-orange-500 sticky top-0 z-50">
+    <div className="bg-blue-600 shadow-xl border-b-4 border-orange-500 sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between">
           <div>

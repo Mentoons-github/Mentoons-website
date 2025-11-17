@@ -19,12 +19,13 @@ import {
 } from "./redux/adda/conversationSlice";
 import useSocket from "./hooks/adda/useSocket";
 import { Message } from "./types";
+import { SubmissionModalProvider } from "./context/adda/commonModalContext";
 
 const AppContent = () => {
   const { getToken, userId } = useAuth();
   const { isSignedIn } = useUser();
   const dispatch = useDispatch<AppDispatch>();
-  const { socket, mongoUserId } = useSocket(); // 👈 your custom hook
+  const { socket, mongoUserId } = useSocket();
   const currentOpenConversationId = useSelector(
     (state: RootState) => state.conversation.conversationId
   );
@@ -49,7 +50,7 @@ const AppContent = () => {
   // 🔌 GLOBAL SOCKET MESSAGE LISTENER
   useEffect(() => {
     if (!socket) return;
-    socket.on("receive_message", (data:Message) => {
+    socket.on("receive_message", (data: Message) => {
       console.log(" Global receive_message:", data);
       dispatch(addNewMessage(data));
       dispatch(
@@ -100,7 +101,9 @@ const App = () => {
     <Provider store={store}>
       <SocketProvider>
         <RewardsProvider>
-          <AppContent />
+          <SubmissionModalProvider>
+            <AppContent />
+          </SubmissionModalProvider>
         </RewardsProvider>
       </SocketProvider>
     </Provider>

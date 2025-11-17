@@ -65,6 +65,10 @@ const Podcastv2 = () => {
   const [playbackTracking, setPlaybackTracking] =
     useState<PlaybackTrackingState | null>(null);
   const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
+  const [hasPlayedNewRelease, setHasPlayedNewRelease] = useState(() => {
+    return sessionStorage.getItem("newReleaseAutoPlayed") === "true";
+  });
+
   const { isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
@@ -99,7 +103,7 @@ const Podcastv2 = () => {
     e.preventDefault();
     try {
       const queryResponse = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/query",
+        `${import.meta.env.VITE_PROD_URL}/query`,
         {
           message,
           name: enquiryName,
@@ -119,7 +123,7 @@ const Podcastv2 = () => {
     try {
       const token = await getToken();
       const response = await axios.get(
-        `https://mentoons-backend-zlx3.onrender.com/api/v1/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {
@@ -312,6 +316,13 @@ const Podcastv2 = () => {
       return () => carousel.removeEventListener("scroll", handleScroll);
     }
   }, []);
+
+  useEffect(() => {
+    if (playingPodcastId === "new-release" && !hasPlayedNewRelease) {
+      setHasPlayedNewRelease(true);
+      sessionStorage.setItem("newReleaseAutoPlayed", "true");
+    }
+  }, [playingPodcastId, hasPlayedNewRelease]);
 
   return (
     <>
@@ -818,8 +829,9 @@ const Podcastv2 = () => {
                             .details as PodcastProduct["details"]
                         )?.sampleUrl || "#"
                       }
-                      autoPlay
+                      autoPlay={!hasPlayedNewRelease}
                       onPlay={async (e) => {
+                        setHasPlayedNewRelease(true);
                         const hasAccess = await checkAccessAndControlPlayback(
                           filteredPodcast[0],
                           e.currentTarget

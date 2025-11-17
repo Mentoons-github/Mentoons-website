@@ -1,7 +1,7 @@
 const WorkshopActivities = () => {
   return (
     <div className="bg-gradient-to-b from-white to-[#FFDA9A] w-full pb-10">
-      <h2 className="pt-6 pb-12 text-3xl font-semibold text-center md:pb-24 md:text-4xl">
+      <h2 className="pt-6 pb-12 md:pb-24 text-3xl md:text-5xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 text-center">
         What We Do In Our Workshops
       </h2>
       <div className="flex flex-wrap justify-around gap-4 pb-10">

@@ -59,7 +59,7 @@ export const fetchSessions = createAsyncThunk(
   async (token: string, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        "https://mentoons-backend-zlx3.onrender.com/api/v1/sessionbookings/getbookings",
+        `${import.meta.env.VITE_PROD_URL}/sessionbookings/getbookings`,
         {
           headers: {
             "Content-Type": "application/json",

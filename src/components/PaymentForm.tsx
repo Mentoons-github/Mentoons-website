@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const PaymentForm = () => { 
+const PaymentForm = () => {
   const [formData, setFormData] = useState({
     merchant_id: "3545043",
     order_id: `#ORD-${Date.now()}`,
@@ -43,13 +43,13 @@ const PaymentForm = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://mentoons-backend-zlx3.onrender.com/ccavRequestHandler",
+        `${import.meta.env.VITE_DEV_URL}/ccavRequestHandler`,
         formData,
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-        },
+        }
       );
 
       // Assuming the response contains the HTML string for the form

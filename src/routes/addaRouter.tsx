@@ -11,7 +11,6 @@ import { Route, Routes } from "react-router-dom";
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
-// const UserProfile = lazy(() => import("@/pages/v2/adda/userProfile/profile"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
 const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
 const Notification = lazy(
@@ -21,6 +20,8 @@ const MemePage = lazy(() => import("@/pages/v2/adda/MemePage"));
 const MemeDetails = lazy(() => import("@/pages/v2/adda/memeDetails"));
 
 const AddaRouter = () => {
+ 
+
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,7 +31,6 @@ const AddaRouter = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fallback UI for lazy-loaded components
   const loadingFallback = (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-800">
       <Loader />

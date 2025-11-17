@@ -1,4 +1,4 @@
-import { format, isToday, isYesterday, isThisYear } from 'date-fns';
+import { format, isToday, isYesterday, isThisYear } from "date-fns";
 
 interface DateFormatOptions extends Intl.DateTimeFormatOptions {
   year?: "numeric" | "2-digit";
@@ -29,8 +29,7 @@ export function formatDateString(
   return date.toLocaleString(undefined, { ...defaultOptions, ...options });
 }
 
-
-export const getDateLabel = (dateString:string) => {
+export const getDateLabel = (dateString: string) => {
   const date = new Date(dateString);
 
   if (isToday(date)) {
@@ -40,7 +39,7 @@ export const getDateLabel = (dateString:string) => {
   } else if (isThisYear(date)) {
     return format(date, "EEEE"); // Monday, Tuesday etc
   } else {
-    return format(date, "dd/MM/yyyy");  // For previous years
+    return format(date, "dd/MM/yyyy"); // For previous years
   }
 };
 
@@ -76,4 +75,15 @@ export const formatMessageTime = (timestamp: string) => {
 };
 
 
-
+export const formatDate = (date: Date | string | undefined) => {
+  if (!date) return "N/A";
+  try {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "N/A";
+  }
+};

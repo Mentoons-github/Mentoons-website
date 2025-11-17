@@ -256,10 +256,10 @@ const MobileProductItem = ({
 
   return (
     <div
-      className="flex p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      className="flex p-3 sm:p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow w-full"
       onClick={handleCardClick}
     >
-      <div className="flex-shrink-0 w-32 h-28 mr-4">
+      <div className="flex-shrink-0 w-24 sm:w-28 h-24 sm:h-28 mr-3 sm:mr-4">
         <div className="relative w-full h-full">
           <div
             ref={scrollContainerRef}
@@ -294,7 +294,7 @@ const MobileProductItem = ({
                   key={`${image.imageUrl}-${index}`}
                   src={image.imageUrl}
                   alt={`${product.title} - Image ${index + 1}`}
-                  className="flex-shrink-0 object-cover w-full h-full rounded-md snap-start pointer-events-none select-none"
+                  className="flex-shrink-0 object-contain w-full h-full rounded-md snap-start pointer-events-none select-none"
                   draggable={false}
                   style={{ userSelect: "none" }}
                 />
@@ -303,7 +303,7 @@ const MobileProductItem = ({
               <img
                 src="/placeholder-image.jpg"
                 alt={product.title}
-                className="flex-shrink-0 object-cover w-full h-full rounded-md pointer-events-none select-none"
+                className="flex-shrink-0 object-contain w-full h-full rounded-md pointer-events-none select-none"
                 draggable={false}
                 style={{ userSelect: "none" }}
               />
@@ -311,11 +311,11 @@ const MobileProductItem = ({
           </div>
 
           {totalImages > 1 && (
-            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-1 bg-black/50 px-2 py-1 rounded-full">
+            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-1 bg-black/50 px-1.5 py-0.5 rounded-full">
               {images.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-200 ${
                     index === currentImageIndex
                       ? "bg-white scale-125"
                       : "bg-white/60 scale-100 hover:bg-white/80"
@@ -334,50 +334,50 @@ const MobileProductItem = ({
 
       <div className="flex-1 min-w-0">
         <div className="mb-2">
-          <span className="inline-block px-2 py-1 mb-2 text-xs text-white bg-red-500 rounded-full">
+          <span className="inline-block px-2 py-0.5 sm:py-1 mb-1 sm:mb-2 text-xs sm:text-sm text-white bg-red-500 rounded-full">
             {product.ageCategory}
           </span>
-          <h3 className="text-sm font-semibold text-gray-900 leading-tight mb-1">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-tight mb-1">
             {product.title}
           </h3>
-          <div className="flex my-1 text-yellow-400">
+          <div className="flex my-1 sm:my-2 text-yellow-400">
             {[...Array(4)].map((_, i) => (
-              <FaStar key={i} className="w-3 h-3" />
+              <FaStar key={i} className="w-3 sm:w-4 h-3 sm:h-4" />
             ))}
-            <FaStar className="w-3 h-3 text-gray-400" />
+            <FaStar className="w-3 sm:w-4 h-3 sm:h-4 text-gray-400" />
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
+        <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mb-2 sm:mb-3 leading-relaxed">
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-orange-500">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <span className="text-base sm:text-lg font-bold text-orange-500">
             ₹{product.price}
           </span>
 
-          <div className="flex gap-2 ml-2">
+          <div className="flex gap-2">
             <button
-              className="flex items-center justify-center gap-1 bg-white border border-orange-500 text-orange-500 text-xs px-3 py-1.5 rounded hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px]"
+              className="flex items-center justify-center gap-1 bg-white border border-orange-500 text-orange-500 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[50px] sm:min-w-[60px]"
               onClick={(e) => {
                 e.stopPropagation();
                 handleBuyNow(e, product);
               }}
               disabled={isLoading}
             >
-              <FaBolt className="w-3 h-3" />
+              <FaBolt className="w-3 sm:w-4 h-3 sm:h-4" />
               <span className="hidden xs:inline">Buy</span>
             </button>
             <button
-              className="flex items-center justify-center gap-1 bg-orange-500 text-white text-xs px-3 py-1.5 rounded hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px]"
+              className="flex items-center justify-center gap-1 bg-orange-500 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[50px] sm:min-w-[60px]"
               onClick={(e) => {
                 e.stopPropagation();
                 handleAddToCart(e, product);
               }}
               disabled={isLoading}
             >
-              <FaShoppingCart className="w-3 h-3" />
+              <FaShoppingCart className="w-3 sm:w-4 h-3 sm:h-4" />
               <span className="hidden xs:inline">Cart</span>
             </button>
           </div>
@@ -388,22 +388,25 @@ const MobileProductItem = ({
 };
 
 export const MobileProductSkeleton = () => (
-  <div className="flex p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm animate-pulse">
-    <div className="flex-shrink-0 w-24 h-24 mr-4 bg-gray-200 rounded-md"></div>
-    <div className="flex-1">
-      <div className="w-12 h-4 mb-2 bg-gray-200 rounded"></div>
-      <div className="w-32 h-4 mb-2 bg-gray-200 rounded"></div>
-      <div className="flex gap-1 mb-2">
+  <div className="flex p-3 sm:p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm animate-pulse w-full">
+    <div className="flex-shrink-0 w-24 sm:w-28 h-24 sm:h-28 mr-3 sm:mr-4 bg-gray-200 rounded-md"></div>
+    <div className="flex-1 min-w-0">
+      <div className="w-12 sm:w-16 h-3 sm:h-4 mb-2 bg-gray-200 rounded"></div>
+      <div className="w-3/4 sm:w-32 h-4 sm:h-5 mb-2 bg-gray-200 rounded"></div>
+      <div className="flex gap-1 mb-2 sm:mb-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="w-3 h-3 bg-gray-200 rounded-full"></div>
+          <div
+            key={i}
+            className="w-3 sm:w-4 h-3 sm:h-4 bg-gray-200 rounded-full"
+          ></div>
         ))}
       </div>
-      <div className="w-full h-8 mb-3 bg-gray-200 rounded"></div>
-      <div className="flex items-center justify-between">
-        <div className="w-16 h-5 bg-gray-200 rounded"></div>
+      <div className="w-full h-6 sm:h-8 mb-2 sm:mb-3 bg-gray-200 rounded"></div>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="w-12 sm:w-16 h-4 sm:h-5 bg-gray-200 rounded"></div>
         <div className="flex gap-2">
-          <div className="w-12 h-6 bg-gray-200 rounded"></div>
-          <div className="w-12 h-6 bg-gray-200 rounded"></div>
+          <div className="w-10 sm:w-12 h-6 sm:h-7 bg-gray-200 rounded"></div>
+          <div className="w-10 sm:w-12 h-6 sm:h-7 bg-gray-200 rounded"></div>
         </div>
       </div>
     </div>

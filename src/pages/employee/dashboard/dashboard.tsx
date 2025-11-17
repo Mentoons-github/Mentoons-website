@@ -1,278 +1,314 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import TodayAttendance from "@/components/employee/dashboard/attendance";
+import CalendarView from "@/components/employee/dashboard/calenderView";
+import ChartView from "@/components/employee/dashboard/chartsection";
+import StatsCards from "@/components/employee/dashboard/stats";
+import { Calendar } from "lucide-react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from "recharts";
+  AttendanceRecord,
+  AttendanceStats,
+  MonthlyStats,
+  TodayAttendanceType,
+} from "@/types/employee";
+
+const BASE_URL = `${import.meta.env.VITE_PROD_URL}/attendance`;
 
 const EmployeeDashboard = () => {
-  const [selectedYear, setSelectedYear] = useState("2024");
-  const [viewMode, setViewMode] = useState("bar");
-  const [screenSize, setScreenSize] = useState(window.innerWidth);
+  const { getToken } = useAuth();
+  const { showStatus } = useStatusModal();
+  const [selectedYear, setSelectedYear] = useState<string>(
+    new Date().getFullYear().toString()
+  );
+  const [selectedMonth, setSelectedMonth] = useState<string>(
+    (new Date().getMonth() + 1).toString().padStart(2, "0")
+  );
+  const [viewMode, setViewMode] = useState<"bar" | "pie" | "line">("bar");
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [todayAttendance, setTodayAttendance] =
+    useState<TodayAttendanceType | null>(null);
+  const [allAttendance, setAllAttendance] = useState<AttendanceRecord[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
+  const [yearlyStats, setYearlyStats] = useState<AttendanceStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [calendarView, setCalendarView] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [sectionLoading, setSectionLoading] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setScreenSize(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    fetchInitialData();
   }, []);
 
-  const attendanceData = [
-    { month: "Jan", present: 21, absent: 2, late: 1 },
-    { month: "Feb", present: 19, absent: 1, late: 2 },
-    { month: "Mar", present: 22, absent: 0, late: 0 },
-    { month: "Apr", present: 20, absent: 2, late: 1 },
-    { month: "May", present: 21, absent: 1, late: 2 },
-    { month: "Jun", present: 18, absent: 3, late: 1 },
-    { month: "Jul", present: 20, absent: 2, late: 1 },
-    { month: "Aug", present: 22, absent: 0, late: 0 },
-    { month: "Sep", present: 19, absent: 1, late: 2 },
-    { month: "Oct", present: 21, absent: 2, late: 1 },
-    { month: "Nov", present: 20, absent: 1, late: 1 },
-    { month: "Dec", present: 18, absent: 3, late: 2 },
-  ];
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const pieData = [
-    { name: "Present", value: 221, color: "#4ADE80" },
-    { name: "Absent", value: 18, color: "#F87171" },
-    { name: "Late", value: 14, color: "#FBBF24" },
-  ];
+  useEffect(() => {
+    if (!calendarView && !loading) {
+      fetchChartData();
+    }
+  }, [selectedYear]);
 
-  const stats = {
-    totalDays: 242,
-    presentDays: 221,
-    absentDays: 18,
-    lateDays: 14,
-    presentPercentage: Math.round((221 / 242) * 100),
-  };
+  useEffect(() => {
+    if (calendarView && !loading) {
+      const newMonth = (currentMonth.getMonth() + 1)
+        .toString()
+        .padStart(2, "0");
+      const newYear = currentMonth.getFullYear().toString();
+      setSelectedMonth(newMonth);
+      setSelectedYear(newYear);
+      fetchCalendarData(newYear, newMonth);
+    }
+  }, [currentMonth]);
 
-  const renderChart = () => {
-    if (viewMode === "bar") {
-      return (
-        <BarChart
-          data={attendanceData}
-          margin={{
-            top: 20,
-            right: 30,
-            left: screenSize < 768 ? 0 : 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="present" name="Present" fill="#4ADE80" />
-          <Bar dataKey="absent" name="Absent" fill="#F87171" />
-          <Bar dataKey="late" name="Late" fill="#FBBF24" />
-        </BarChart>
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      if (!token) {
+        showStatus("error", "Authentication error. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(
+        `${BASE_URL}/my-attendance?year=${selectedYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-    } else if (viewMode === "pie") {
-      return (
-        <PieChart>
-          <Pie
-            data={pieData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={screenSize < 768 ? 80 : 100}
-            paddingAngle={5}
-            dataKey="value"
-            label={({ name, percent }) =>
-              `${name}: ${(percent! * 100).toFixed(0)}%`
-            }
-          >
-            {pieData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value) => value} />
-          <Legend />
-        </PieChart>
+
+      setTodayAttendance(response.data.todayAttendance || null);
+      setYearlyStats(response.data.yearlyStats || null);
+      setMonthlyStats(response.data.monthlyStats || []);
+    } catch (error: any) {
+      console.error("Error fetching attendance:", error);
+      showStatus(
+        "error",
+        error.response?.data?.error || "Failed to fetch attendance data"
       );
-    } else {
-      return (
-        <LineChart
-          data={attendanceData}
-          margin={{
-            top: 20,
-            right: 30,
-            left: screenSize < 768 ? 0 : 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="present"
-            name="Present"
-            stroke="#4ADE80"
-            strokeWidth={2}
-          />
-          <Line
-            type="monotone"
-            dataKey="absent"
-            name="Absent"
-            stroke="#F87171"
-            strokeWidth={2}
-          />
-          <Line
-            type="monotone"
-            dataKey="late"
-            name="Late"
-            stroke="#FBBF24"
-            strokeWidth={2}
-          />
-        </LineChart>
-      );
+    } finally {
+      setLoading(false);
     }
   };
 
+  const fetchChartData = async () => {
+    try {
+      setSectionLoading(true);
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await axios.get(
+        `${BASE_URL}/my-attendance?year=${selectedYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setYearlyStats(response.data.yearlyStats || null);
+      setMonthlyStats(response.data.monthlyStats || []);
+    } catch (error: any) {
+      console.error("Error fetching chart data:", error);
+      showStatus("error", "Failed to fetch chart data");
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  const fetchCalendarData = async (year: string, month: string) => {
+    try {
+      setSectionLoading(true);
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await axios.get(
+        `${BASE_URL}/my-attendance?year=${year}&month=${month}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const attendanceData = (response.data.monthlyDetails || []).filter(
+        (att: AttendanceRecord) => att && att.date
+      );
+      setAllAttendance(attendanceData);
+    } catch (error: any) {
+      console.error("Error fetching calendar data:", error);
+      showStatus("error", "Failed to fetch calendar data");
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  const fetchAttendanceData = async () => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const yearResponse = await axios.get(
+        `${BASE_URL}/my-attendance?year=${selectedYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setTodayAttendance(yearResponse.data.todayAttendance || null);
+      setYearlyStats(yearResponse.data.yearlyStats || null);
+      setMonthlyStats(yearResponse.data.monthlyStats || []);
+
+      if (calendarView) {
+        const monthResponse = await axios.get(
+          `${BASE_URL}/my-attendance?year=${selectedYear}&month=${selectedMonth}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const attendanceData = (monthResponse.data.monthlyDetails || []).filter(
+          (att: AttendanceRecord) => att && att.date
+        );
+        setAllAttendance(attendanceData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching attendance:", error);
+    }
+  };
+
+  const handleToggleView = () => {
+    const newCalendarView = !calendarView;
+    setCalendarView(newCalendarView);
+
+    if (newCalendarView) {
+      fetchCalendarData(selectedYear, selectedMonth);
+    }
+  };
+
+  const getMonthlyStats = (): MonthlyStats[] => {
+    if (calendarView) return [];
+    return monthlyStats;
+  };
+
+  const getOverallStats = (): AttendanceStats => {
+    return (
+      yearlyStats || {
+        totalDays: 0,
+        presentDays: 0,
+        absentDays: 0,
+        lateDays: 0,
+        onLeaveDays: 0,
+        halfDays: 0,
+        presentPercentage: 0,
+        averageWorkHours: 0,
+      }
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-6 bg-gray-100 ">
+    <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
+      <style>
+        {`
+          @keyframes chartGrow {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+          }
+        `}
+      </style>
       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 md:p-6 text-white shadow-lg mb-6">
-        <h1 className="text-xl md:text-2xl font-bold">Welcome Devan P. S</h1>
+        <h1 className="text-xl md:text-2xl font-bold">Welcome Back!</h1>
         <p className="mt-1 opacity-90">
           Here's your attendance dashboard for {selectedYear}
         </p>
       </div>
 
-      <div className="mt-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-            Employee Attendance
-          </h2>
+      <TodayAttendance
+        todayAttendance={todayAttendance}
+        currentTime={currentTime}
+        fetchAttendanceData={fetchAttendanceData}
+      />
 
-          <div className="flex flex-col md:flex-row gap-3 mt-3 md:mt-0">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode("bar")}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  viewMode === "bar"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Bar
-              </button>
-              <button
-                onClick={() => setViewMode("pie")}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  viewMode === "pie"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Pie
-              </button>
-              <button
-                onClick={() => setViewMode("line")}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  viewMode === "line"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Line
-              </button>
-            </div>
-
-            <select
-              className="border outline-none focus:ring-2 focus:ring-blue-400 px-3 py-1 rounded-md text-sm bg-white"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-            >
-              <option>Select a Year</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
-          <div className="h-64 md:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              {renderChart()}
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
-          <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h3 className="text-sm md:text-lg font-medium text-gray-500">
-              Total Working Days
-            </h3>
-            <div className="flex justify-between items-end mt-2">
-              <p className="text-xl md:text-2xl font-bold text-gray-800">
-                {stats.totalDays}
-              </p>
-              <span className="text-xs md:text-sm text-blue-500 font-medium">
-                100%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border-l-4 border-green-500 hover:shadow-lg transition-shadow">
-            <h3 className="text-sm md:text-lg font-medium text-gray-500">
-              Present Days
-            </h3>
-            <div className="flex justify-between items-end mt-2">
-              <p className="text-xl md:text-2xl font-bold text-green-600">
-                {stats.presentDays}
-              </p>
-              <span className="text-xs md:text-sm text-green-500 font-medium">
-                {stats.presentPercentage}%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border-l-4 border-red-500 hover:shadow-lg transition-shadow">
-            <h3 className="text-sm md:text-lg font-medium text-gray-500">
-              Absent Days
-            </h3>
-            <div className="flex justify-between items-end mt-2">
-              <p className="text-xl md:text-2xl font-bold text-red-600">
-                {stats.absentDays}
-              </p>
-              <span className="text-xs md:text-sm text-red-500 font-medium">
-                {Math.round((stats.absentDays / stats.totalDays) * 100)}%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition-shadow">
-            <h3 className="text-sm md:text-lg font-medium text-gray-500">
-              Late Days
-            </h3>
-            <div className="flex justify-between items-end mt-2">
-              <p className="text-xl md:text-2xl font-bold text-yellow-600">
-                {stats.lateDays}
-              </p>
-              <span className="text-xs md:text-sm text-yellow-500 font-medium">
-                {Math.round((stats.lateDays / stats.totalDays) * 100)}%
-              </span>
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleToggleView}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          <Calendar className="w-4 h-4" />
+          {calendarView ? "Show Charts" : "Show Calendar"}
+        </button>
       </div>
+
+      {sectionLoading ? (
+        <div className="flex items-center justify-center py-20">
+          {calendarView ? (
+            <div className="flex flex-col items-center gap-4">
+              <div className="grid grid-cols-7 gap-2">
+                {[...Array(28)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-10 h-10 bg-gray-200 rounded animate-pulse"
+                    style={{ animationDelay: `${i * 0.02}s` }}
+                  ></div>
+                ))}
+              </div>
+              <p className="text-gray-600 text-sm">Loading calendar...</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative w-64 h-40">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute bottom-0 bg-blue-500 rounded-t"
+                    style={{
+                      left: `${i * 20}%`,
+                      width: "15%",
+                      height: `${20 + Math.random() * 60}%`,
+                      animation: `chartGrow 1s ease-out ${i * 0.1}s infinite`,
+                    }}
+                  ></div>
+                ))}
+              </div>
+              <p className="text-gray-600 text-sm">Loading chart...</p>
+            </div>
+          )}
+        </div>
+      ) : calendarView ? (
+        <CalendarView
+          currentMonth={currentMonth}
+          setCurrentMonth={setCurrentMonth}
+          allAttendance={allAttendance}
+        />
+      ) : (
+        <ChartView
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          monthlyStats={getMonthlyStats()}
+          overallStats={getOverallStats()}
+        />
+      )}
+
+      <StatsCards overallStats={getOverallStats()} />
     </div>
   );
 };

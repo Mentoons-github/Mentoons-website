@@ -34,10 +34,12 @@ export const getEnquiries = createAsyncThunk(
     sort,
     page,
     limit,
+    token,
   }: {
     sort: string;
     page: number;
     limit: number;
+    token: string;
   }) => {
     try {
       const response = await axiosInstance.get(
@@ -46,6 +48,7 @@ export const getEnquiries = createAsyncThunk(
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -58,10 +61,20 @@ export const getEnquiries = createAsyncThunk(
 
 export const getEnquiryById = createAsyncThunk(
   "workshop/getEnquiryById",
-  async ({ enquiryId }: { enquiryId: string | undefined }) => {
+  async ({
+    enquiryId,
+    token,
+  }: {
+    enquiryId: string | undefined;
+    token: string;
+  }) => {
     try {
       if (!enquiryId) throw new Error("Enquiry ID is required");
-      const response = await axiosInstance.get(`/workshop/${enquiryId}`);
+      const response = await axiosInstance.get(`/workshop/${enquiryId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch enquiry by ID");
