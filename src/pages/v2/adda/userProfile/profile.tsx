@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import { FaBookmark, FaUsers } from "react-icons/fa";
 import { FiAward, FiEdit2, FiHome, FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { toast } from "sonner";
 import PhotosCard from "./cards/photosCard";
 import ProfileForm from "./profieForm";
@@ -270,11 +270,7 @@ const Profile = () => {
         setIsLoading(false);
         return;
       }
-      console.log(token, "-----------------------------");
-      console.log(
-        user?.id,
-        "user.==========================================================="
-      );
+
       try {
         const [userResponse, postsResponse, savedPostsResponse] =
           await Promise.all([
@@ -906,12 +902,12 @@ const Profile = () => {
                   <p className="text-xs text-gray-500 sm:text-sm">
                     Start saving posts to see them here.
                   </p>
-                  <Button
-                    asChild
+                  <NavLink
+                    to={"/adda"}
                     className="mt-4 text-xs text-white bg-orange-500 hover:bg-orange-600 sm:text-sm"
                   >
-                    <Link to="/adda">Explore Posts</Link>
-                  </Button>
+                    Explore Posts
+                  </NavLink>
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import CelebrationHeader from "@/components/common/celebration/header";
 import CelebrationSearchBar from "@/components/common/celebration/searchBar";
 import TodayCelebrations from "@/components/common/celebration/todayCelebration";
@@ -42,7 +42,7 @@ const Celebrations = () => {
     }
   }, [searchQuery, celebrations]);
 
-  const getUpcoming = (): UpcomingCelebration[] => {
+  const upcomingAll = useMemo((): UpcomingCelebration[] => {
     const today = new Date();
     return celebrations
       .map((c) => {
@@ -55,9 +55,8 @@ const Celebrations = () => {
         return { ...c, daysUntil };
       })
       .filter((c): c is UpcomingCelebration => c !== null)
-      .sort((a, b) => a.daysUntil - b.daysUntil)
-      .slice(0, 5);
-  };
+      .sort((a, b) => a.daysUntil - b.daysUntil);
+  }, [celebrations]);
 
   const currentMonthCelebs = celebrations.filter(
     (c) => new Date(c.date).getMonth() === currentDate.getMonth()
@@ -171,7 +170,7 @@ const Celebrations = () => {
               celebrations={currentMonthCelebs}
               onDateClick={setSelectedDate}
             />
-            <ComingSoonPanel celebrations={getUpcoming()} />
+            <ComingSoonPanel celebrations={upcomingAll} />
             <TeamStatsPanel
               total={celebrations.length}
               thisMonth={currentMonthCelebs.length}
@@ -179,7 +178,7 @@ const Celebrations = () => {
           </div>
         </div>
 
-        {selectedDate && (
+        {selectedDate !== null && (
           <CelebrationModal
             date={selectedDate}
             month={currentDate.getMonth()}

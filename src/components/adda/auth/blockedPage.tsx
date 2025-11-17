@@ -1,21 +1,15 @@
-// components/adda/auth/BlockedPage.tsx
 import { AlertTriangle, Mail, ShieldAlert } from "lucide-react";
 import { useEffect } from "react";
-import { useClerk } from "@clerk/clerk-react";
 
 const BlockedPage = () => {
-  const { signOut } = useClerk();
-
   useEffect(() => {
-    signOut();
-    // Keep history clean forever
     window.history.pushState(null, "", "/blocked");
     const handlePopState = () => {
       window.history.pushState(null, "", "/blocked");
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [signOut]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center px-6">
@@ -42,7 +36,7 @@ const BlockedPage = () => {
         </div>
 
         <a
-          href="mailto:support@mentoons.com"
+          href="mailto:info@mentoons.com"
           className="mt-8 inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white font-medium px-8 py-4 rounded-lg transition"
         >
           <Mail className="w-5 h-5" />

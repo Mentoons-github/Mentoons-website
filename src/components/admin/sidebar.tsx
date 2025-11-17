@@ -85,6 +85,10 @@ const AdminSidebar = ({
         title: "Professional Records",
         paths: ["/admin/psychologists", "/admin/freelancers"],
       },
+      {
+        title: "Quiz",
+        paths: ["/admin/add-quiz", "/admin/quiz"],
+      },
     ];
 
     const active = sections.find((s) =>
@@ -305,6 +309,18 @@ const AdminSidebar = ({
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Professional Records"}
           toggleSection={() => toggleSection("Professional Records")}
+          onItemClick={handleLinkClick}
+        />
+        <SidebarSection
+          icon={<FaBriefcase size={collapsed ? 20 : 16} />}
+          title="Quiz"
+          items={[
+            { href: "/admin/quiz", label: "Quiz" },
+            { href: "/admin/add-quiz", label: "Add Quiz" },
+          ]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Quiz"}
+          toggleSection={() => toggleSection("Quiz")}
           onItemClick={handleLinkClick}
         />
       </nav>
