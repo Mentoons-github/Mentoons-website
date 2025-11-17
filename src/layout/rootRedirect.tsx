@@ -1,32 +1,42 @@
-import Loader from "@/components/common/admin/loader";
 import { useUser } from "@clerk/clerk-react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import Loader from "@/components/common/admin/loader";
 
-const RootRedirect = () => {
-  const { user, isLoaded } = useUser();
-  const navigate = useNavigate();
+const RootRouteWrapper = () => {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      return;
+    }
 
-    const role = user?.publicMetadata?.role;
-    console.log(role);
+    if (!isSignedIn || !user) {
+      setRedirectPath("/adda");
+      return;
+    }
+
+    const role = user.publicMetadata?.role as string | undefined;
 
     if (role === "EMPLOYEE") {
-      navigate("/employee/dashboard", { replace: true });
+      setRedirectPath("/employee/dashboard");
     } else if (role === "ADMIN") {
-      navigate("/admin/dashboard", { replace: true });
+      setRedirectPath("/admin/dashboard");
     } else {
-      navigate("/adda", { replace: true });
+      setRedirectPath("/adda");
     }
-  }, [isLoaded, user, navigate]);
+  }, [isLoaded, isSignedIn, user]);
 
-  if (!isLoaded) {
-    return <Loader />;
+  if (!isLoaded || redirectPath === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    );
   }
 
-  return null;
+  return <Navigate to={redirectPath} replace />;
 };
 
-export default RootRedirect;
+export default RootRouteWrapper;

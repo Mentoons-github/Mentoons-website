@@ -3,26 +3,35 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const BlockedGuard = ({ children }: { children: React.ReactNode }) => {
+interface BlockedGuardProps {
+  children: React.ReactNode;
+}
+
+const BlockedGuard = ({ children }: BlockedGuardProps) => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !isSignedIn) return;
 
-    if (!isSignedIn) return;
-
-    const isBlocked = user?.publicMetadata?.blocked === true;
+    const isBlocked = user?.publicMetadata?.blocked;
     const role = user?.publicMetadata?.role as string;
 
-    if (role === "ADMIN" || role === "EMPLOYEE" || !isBlocked) return;
+    if (isBlocked) {
+      signOut({ redirectUrl: `/blocked` });
+      return;
+    }
 
-    signOut({ redirectUrl: `/blocked` });
+    if (role === "ADMIN" && !location.pathname.startsWith("/admin")) {
+      navigate("/admin", { replace: true });
+      return;
+    }
 
-    if (location.pathname !== "/blocked") {
-      navigate("/blocked", { replace: true });
+    if (role === "EMPLOYEE" && !location.pathname.startsWith("/employee")) {
+      navigate("/employee", { replace: true });
+      return;
     }
   }, [isLoaded, isSignedIn, user, signOut, navigate, location]);
 
@@ -30,14 +39,9 @@ const BlockedGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (!isSignedIn) return <>{children}</>;
 
-  const isBlocked = user?.publicMetadata?.blocked === true;
-  const role = user?.publicMetadata?.role as string;
+  if (user?.publicMetadata?.blocked) return null;
 
-  if (role === "ADMIN" || role === "EMPLOYEE" || !isBlocked) {
-    return <>{children}</>;
-  }
-
-  return null; // blocked user → never render anything
+  return <>{children}</>;
 };
 
 export default BlockedGuard;

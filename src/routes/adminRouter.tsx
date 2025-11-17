@@ -23,6 +23,8 @@ import ProductTable from "@/pages/admin/productTable";
 import FreelancersTable from "@/pages/admin/professionalRecords/freelancers";
 import PsychologistsTable from "@/pages/admin/professionalRecords/pychologists";
 import AdminProfile from "@/pages/admin/profile";
+import AddQuiz from "@/pages/admin/quiz/addQuiz";
+import QuizTable from "@/pages/admin/quiz/quiz";
 // import SessionEnquiries from "@/pages/admin/sessionAllocation/session";
 import AdminTaskDashboard from "@/pages/admin/taskSubmissions";
 import Users from "@/pages/admin/users";
@@ -45,34 +47,50 @@ const AdminRouter = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardAnalytics />} />
           <Route path="users" element={<Users />} />
+
+          {/*Products*/}
           {/* <Route path="allotted-calls" element={<AllottedCalls />} /> */}
           <Route path="product-table" element={<ProductTable />} />
           <Route path="products/:productId" element={<ViewProduct />} />
           <Route path="add-products" element={<AddProduct />} />
+
+          {/*Enquiry */}
           <Route path="workshop-enquiries" element={<GetWorkshopEnquiries />} />
           <Route path="enquiries/:enquiryId" element={<ViewEnquiry />} />
           <Route path="general-queries" element={<GeneralQueries />} />
+          <Route path="session-enquiry" element={<AllottedCalls />} />
           <Route path="newsletter" element={<Newsletter />} />
           {/* <Route path="task-assign" element={<TaskAssignmentSystem />} /> */}
           <Route path="product-sales" element={<ProductSalesDashboard />} />
+
+          {/*Employee */}
           <Route path="employee/add" element={<CreateEmployee />} />
           <Route path="employee-table" element={<EmployeeTable />} />
           <Route path="task-submissions" element={<AdminTaskDashboard />} />
+
+          {/*Job */}
           <Route path="all-jobs" element={<AllJobs />} />
           <Route path="hiring-form" element={<CreateJob />} />
           <Route path="view-applications" element={<ViewApplications />} />
-          <Route path="session-enquiry" element={<AllottedCalls />} />
+
+          {/*Workshop */}
           <Route path="add-workshop" element={<AddWorkshop />} />
           <Route path="workshops" element={<AllWorkshops />} />
+
+          {/*Meetup */}
           <Route path="add-meetup" element={<AddMeetup />} />
           <Route path="edit-meetup/:id" element={<AddMeetup />} />
           <Route path="meetups" element={<AllMeetups />} />
           <Route path="psychologists" element={<PsychologistsTable />} />
           <Route path="freelancers" element={<FreelancersTable />} />
+
+          
           <Route path="profile" element={<AdminProfile />} />
           <Route path="notifications" element={<AdminNotification />} />
           <Route path="leave-management" element={<AdminLeaveManagement />} />
           <Route path="employee-attendance" element={<AdminAttendanceView />} />
+          <Route path="add-quiz" element={<AddQuiz />} />
+          <Route path="quiz" element={<QuizTable />} />
         </Route>
       </Routes>
     </Suspense>

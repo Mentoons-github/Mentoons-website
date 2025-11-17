@@ -1,18 +1,21 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_PROD_URL,
 });
 
 const attachAuthInterceptor = (
   getToken: () => Promise<string | null>,
   signOut: () => Promise<void>
 ) => {
-  api.interceptors.request.clear();
-  api.interceptors.response.clear();
-
   api.interceptors.request.use(async (config) => {
-    const token = await getToken();
+    let token = await getToken();
+
+    if (!token) {
+      token = await new Promise((resolve) =>
+        setTimeout(async () => resolve(await getToken()), 200)
+      );
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

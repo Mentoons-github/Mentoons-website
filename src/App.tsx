@@ -20,9 +20,10 @@ import {
 import useSocket from "./hooks/adda/useSocket";
 import { Message } from "./types";
 import { SubmissionModalProvider } from "./context/adda/commonModalContext";
+import attachAuthInterceptor from "./api/axiosInstance/axiosInstance";
 
 const AppContent = () => {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, signOut, isLoaded } = useAuth();
   const { isSignedIn } = useUser();
   const dispatch = useDispatch<AppDispatch>();
   const { socket, mongoUserId } = useSocket();
@@ -35,6 +36,12 @@ const AppContent = () => {
       dispatch(userLoggedIn());
     }
   }, [isSignedIn, dispatch]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      attachAuthInterceptor(getToken, signOut);
+    }
+  }, [isLoaded]);
 
   useEffect(() => {
     const fetchCart = async () => {

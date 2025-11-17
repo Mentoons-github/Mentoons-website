@@ -3,6 +3,7 @@ import { ProfilePost } from "@/types/adda/userProfile";
 import RewardsSection from "@/components/adda/userProfile/rewardsSection";
 import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
 import { ProfileUserDetails } from "@/types/adda/userProfile";
+import { NavLink } from "react-router-dom";
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -74,9 +75,12 @@ const ProfileTabContent = ({
               <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6">
                 Save interesting content to view it here later!
               </p>
-              <button className="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-sm sm:text-base">
+              <NavLink
+                to={"/adda"}
+                className="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-sm sm:text-base"
+              >
                 Explore Content
-              </button>
+              </NavLink>
             </div>
           ) : (
             userSavedPosts.map((post) => (

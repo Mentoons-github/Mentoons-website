@@ -1,4 +1,3 @@
-import { FaPlayCircle } from "react-icons/fa";
 import QuizCardGrid from "./quizCardGrid";
 
 const QuizBanner = () => {
@@ -37,10 +36,6 @@ const QuizBanner = () => {
               Test your knowledge, sharpen your logic, and enjoy hours of
               engaging quizzes designed for all ages.
             </p>
-            <button className="flex items-center gap-3 px-6 py-3 rounded-xl bg-green-400 hover:bg-green-500 transition-colors duration-300 text-white text-lg md:text-xl font-semibold shadow-lg">
-              <FaPlayCircle size={24} />
-              Start Playing Now
-            </button>
           </div>
         </div>
       </div>

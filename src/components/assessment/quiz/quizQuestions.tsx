@@ -3,11 +3,27 @@ import {
   BackgroundIcons,
   containerVariants,
 } from "@/utils/assessment/quizAndAssessment";
-import { QuizData } from "@/pages/quiz/quiz";
+import { CircleHelp } from "lucide-react";
+
+interface Option {
+  text: string;
+  score: number;
+}
+
+interface Question {
+  _id: string;
+  question: string;
+  options: Option[];
+}
+
+interface QuizData {
+  _id: string;
+  category: string;
+  questions: Question[];
+}
 
 interface QuizQuestionProps {
   quiz: QuizData;
-  quizType: "easy" | "medium" | "hard";
   backgroundIcons: Array<{
     id: number;
     x: number;
@@ -17,11 +33,9 @@ interface QuizQuestionProps {
     delay: number;
   }>;
   currentQuestion: number;
-  answers: Record<number, string>;
-  isAnswerSubmitted: boolean;
-  isCorrect: boolean | null;
+  answers: Record<number, number>;
   progress: number;
-  onAnswerSelect: (answer: string) => void;
+  onAnswerSelect: (score: number) => void;
   onNext: () => void;
   onPaymentPrompt: () => void;
   hasPaid: boolean;
@@ -31,12 +45,9 @@ interface QuizQuestionProps {
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
   quiz,
-  quizType,
   backgroundIcons,
   currentQuestion,
   answers,
-  isAnswerSubmitted,
-  isCorrect,
   progress,
   onAnswerSelect,
   onNext,
@@ -45,26 +56,16 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   showPaymentModal,
   onClosePaymentModal,
 }) => {
-  const questions = quiz.questionsByDifficulty[quizType];
-  const question = questions[currentQuestion];
-
-  if (!question || currentQuestion >= questions.length) {
-    return null;
-  }
+  const question = quiz.questions[currentQuestion];
+  if (!question) return null;
 
   const progressVariants = {
     hidden: { width: 0 },
     visible: {
       width: `${progress}%`,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
+      transition: { type: "spring", stiffness: 100, damping: 15 },
     },
   };
-
-  const isFreeLimitReached = currentQuestion === 4 && !hasPaid;
 
   return (
     <motion.div
@@ -72,7 +73,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       animate={{ opacity: 1 }}
       className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative"
     >
-      <BackgroundIcons quizType={quizType} backgroundIcons={backgroundIcons} />
+      <BackgroundIcons quizType={quiz._id} backgroundIcons={backgroundIcons} />
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -84,19 +85,20 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
             variants={progressVariants}
             initial="hidden"
             animate="visible"
-            custom={progress}
-            className={`h-full bg-gradient-to-r ${quiz.gradientFrom} ${quiz.gradientTo}`}
+            className="h-full bg-blue-600"
           />
         </div>
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{quiz.icon}</span>
-              <span className="font-semibold text-gray-800">{quiz.title}</span>
+              <CircleHelp className="w-8 h-8 text-blue-600" />
+              <span className="font-semibold text-gray-800">
+                {quiz.category}
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
-                {currentQuestion + 1} of {questions.length}
+                {currentQuestion + 1} of {hasPaid ? quiz.questions.length : 5}
               </span>
             </div>
           </div>
@@ -114,64 +116,37 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 {question.question}
               </h2>
 
-              {isAnswerSubmitted && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`text-center mb-6 p-4 rounded-xl ${
-                    isCorrect
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {isCorrect ? (
-                    <span>Correct! Well done!</span>
-                  ) : (
-                    <span>
-                      Incorrect. The correct answer is: {question.correctAnswer}
-                    </span>
-                  )}
-                </motion.div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                {question.options.slice(0, 4).map((option, index) => (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                {question.options.map((option, index) => (
                   <motion.button
                     key={index}
-                    onClick={() => onAnswerSelect(option)}
-                    disabled={isAnswerSubmitted}
-                    className={`p-6 text-center rounded-xl border-2 transition-all min-h-[120px] flex items-center justify-center ${
-                      answers[currentQuestion] === option
-                        ? isAnswerSubmitted && isCorrect
-                          ? "border-green-500 bg-green-50 shadow-lg"
-                          : isAnswerSubmitted && !isCorrect
-                          ? "border-red-500 bg-red-50 shadow-lg"
-                          : "border-blue-500 bg-blue-50 shadow-lg"
+                    onClick={() => onAnswerSelect(option.score)}
+                    disabled={answers[currentQuestion] !== undefined}
+                    className={`p-6 text-left rounded-xl border-2 transition-all min-h-[80px] flex items-center ${
+                      answers[currentQuestion] === option.score
+                        ? "border-blue-500 bg-blue-50 shadow-lg"
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
-                    } ${isAnswerSubmitted ? "cursor-not-allowed" : ""}`}
-                    whileHover={isAnswerSubmitted ? {} : { scale: 1.02 }}
-                    whileTap={isAnswerSubmitted ? {} : { scale: 0.98 }}
+                    } ${
+                      answers[currentQuestion] !== undefined
+                        ? "cursor-not-allowed"
+                        : ""
+                    }`}
+                    whileHover={
+                      answers[currentQuestion] !== undefined
+                        ? {}
+                        : { scale: 1.02 }
+                    }
+                    whileTap={
+                      answers[currentQuestion] !== undefined
+                        ? {}
+                        : { scale: 0.98 }
+                    }
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <div className="relative w-full">
-                      <div className="font-medium text-gray-800 leading-relaxed">
-                        {option}
-                      </div>
-                      {answers[currentQuestion] === option && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${
-                            isCorrect ? "bg-green-500" : "bg-red-500"
-                          } flex items-center justify-center shadow-lg`}
-                        >
-                          <span className="text-white text-sm font-bold">
-                            {isCorrect ? "Checkmark" : "Cross"}
-                          </span>
-                        </motion.div>
-                      )}
+                    <div className="font-medium text-gray-800">
+                      {option.text}
                     </div>
                   </motion.button>
                 ))}
@@ -182,10 +157,12 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           <div className="flex justify-end mt-8">
             <button
               onClick={onNext}
-              disabled={!isAnswerSubmitted || isFreeLimitReached}
-              className={`py-3 px-8 bg-gradient-to-r ${quiz.gradientFrom} ${quiz.gradientTo} text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+              disabled={answers[currentQuestion] === undefined}
+              className="py-3 px-8 bg-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
+              {currentQuestion === (hasPaid ? quiz.questions.length - 1 : 5) - 1
+                ? "Finish"
+                : "Next"}
             </button>
           </div>
         </div>
@@ -208,8 +185,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               Free Limit Reached
             </h2>
             <p className="text-gray-700 mb-6">
-              You've answered the 5 free questions. Pay ₹9 to unlock all{" "}
-              {questions.length} questions and continue the quiz!
+              Pay ₹9 to unlock all {quiz.questions.length} questions!
             </p>
             <button
               onClick={onPaymentPrompt}

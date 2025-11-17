@@ -1,4 +1,4 @@
-import { QuizData } from "@/pages/quiz/quiz";
+// import { QuizData } from "@/pages/quiz/quiz";
 
 export const QUIZ_ITEMS = [
   {
@@ -84,7 +84,7 @@ export const QUIZ_ITEMS = [
   },
 ];
 
-export const QUIZ_DATA: Record<string, QuizData> = {
+export const QUIZ_DATA = {
   games: {
     id: "games",
     title: "Gaming Knowledge Quiz",
