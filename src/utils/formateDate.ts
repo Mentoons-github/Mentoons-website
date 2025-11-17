@@ -74,6 +74,21 @@ export const formatMessageTime = (timestamp: string) => {
   return messageDate.toLocaleDateString(); 
 };
 
+export const formatDateTime = (date: Date | string | undefined) => {
+  if (!date) return "N/A";
+  try {
+    return new Date(date).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "N/A";
+  }
+};
+
 
 export const formatDate = (date: Date | string | undefined) => {
   if (!date) return "N/A";
