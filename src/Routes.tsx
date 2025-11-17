@@ -123,7 +123,7 @@ const routes = [
   { path: "/chat", element: <ChatPage /> },
   { path: "/chat/:selectedUser", element: <ChatPage /> },
   { path: "/quiz", element: <QuizHome /> },
-  { path: "/quiz/:quizType/:difficulty", element: <QuizPage /> },
+  { path: "/quiz/category/:categoryId", element: <QuizPage /> },
   { path: "/puzzle", element: <Puzzle /> },
   { path: "/puzzle/play", element: <PuzzleContent /> },
   { path: "/wordCross/:difficulty/:puzzleType", element: <WordCrossPuzzle /> },

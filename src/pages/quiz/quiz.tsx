@@ -1,81 +1,58 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { QUIZ_DATA } from "@/constant/constants";
 import { generateIconPositions } from "@/utils/assessment/quizAndAssessment";
 import QuizResult from "@/components/assessment/quiz/quisResult";
-import QuizStarting from "@/components/assessment/quiz/starting";
 import QuizQuestion from "@/components/assessment/quiz/quizQuestions";
 import { handlePayment } from "@/services/paymentService";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import axios from "axios";
+import { QuizData } from "@/types/adda/quiz";
 
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  type: "multiple" | "scale" | "boolean";
-  category?: string;
-  correctAnswer: string;
-}
-
-export interface QuizData {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  icon: string;
-  bgColor: string;
-  accentColor: string;
-  gradientFrom: string;
-  gradientTo: string;
-  questionsByDifficulty: {
-    easy: QuizQuestion[];
-    medium: QuizQuestion[];
-    hard: QuizQuestion[];
-  };
-  resultCategories: string[];
-}
-
-const STORAGE_KEY = (qt: string, df: string) => `quiz_${qt}_${df}_state`;
+const STORAGE_KEY = (id: string) => `quiz_${id}_state`;
 
 const QuizPage: React.FC = () => {
-  const { quizType, difficulty } = useParams<{
-    quizType: string;
-    difficulty: "easy" | "medium" | "hard" | undefined;
-  }>();
-
+  const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
   const { user } = useUser();
+  const [quiz, setQuiz] = useState<QuizData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
-  const [quizStarted, setQuizStarted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [backgroundIcons] = useState(() => generateIconPositions(15));
-  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [hasPaid, setHasPaid] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
 
-  const currentQuiz: QuizData | undefined =
-    QUIZ_DATA[quizType as keyof typeof QUIZ_DATA];
-  const validDifficulties = ["easy", "medium", "hard"] as const;
-  const isValidDifficulty =
-    difficulty && validDifficulties.includes(difficulty);
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      if (!categoryId) return;
+      try {
+        const token = await getToken();
+        const response = await axios.get(
+          `${import.meta.env.VITE_PROD_URL}/quiz/${categoryId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setQuiz(response.data.data);
+        setHasPaid(false);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Failed to load quiz");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [categoryId, getToken]);
 
-  const questions = useMemo(() => {
-    return isValidDifficulty
-      ? currentQuiz?.questionsByDifficulty[difficulty].slice(
-          0,
-          hasPaid ? 25 : 5
-        )
-      : [];
-  }, [currentQuiz, difficulty, isValidDifficulty, hasPaid]);
-
+  const TOTAL_QUESTIONS = quiz?.questions.length || 0;
   const FREE_QUESTION_LIMIT = 5;
-  const TOTAL_QUESTIONS = 25;
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -94,8 +71,8 @@ const QuizPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!quizType || !difficulty) return;
-    const key = STORAGE_KEY(quizType, difficulty);
+    if (!categoryId || !quiz) return;
+    const key = STORAGE_KEY(categoryId);
     const raw = localStorage.getItem(key);
     if (raw) {
       const { answers: a, currentQuestion: q, hasPaid: p } = JSON.parse(raw);
@@ -103,42 +80,40 @@ const QuizPage: React.FC = () => {
       setCurrentQuestion(q ?? 0);
       setHasPaid(p ?? false);
     }
-  }, [quizType, difficulty]);
+  }, [categoryId, quiz]);
 
   useEffect(() => {
-    if (!quizType || !difficulty) return;
-    const key = STORAGE_KEY(quizType, difficulty);
+    if (!categoryId || !quiz) return;
+    const key = STORAGE_KEY(categoryId);
     localStorage.setItem(
       key,
       JSON.stringify({ answers, currentQuestion, hasPaid })
     );
-  }, [answers, currentQuestion, hasPaid, quizType, difficulty]);
+  }, [answers, currentQuestion, hasPaid, categoryId]);
 
   useEffect(() => {
-    if (quizStarted && currentQuiz && questions.length > 0) {
+    if (quiz && quiz.questions.length > 0) {
       setProgress(
         ((currentQuestion + 1) /
           (hasPaid ? TOTAL_QUESTIONS : FREE_QUESTION_LIMIT)) *
           100
       );
     }
-  }, [currentQuestion, quizStarted, currentQuiz, difficulty, hasPaid]);
+  }, [currentQuestion, quiz, hasPaid, TOTAL_QUESTIONS]);
 
-  useEffect(() => {
-    return () => {
-      setShowPaymentModal(false);
-    };
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
 
-  if (!quizType || !currentQuiz || !isValidDifficulty) {
-    console.error(`Invalid quizType: ${quizType} or difficulty: ${difficulty}`);
+  if (!quiz || !categoryId) {
     return (
       <div className="text-center p-8">
         <h2 className="text-2xl font-bold text-red-600">Error</h2>
-        <p>
-          Invalid quiz type or difficulty. Please go back and select a valid
-          quiz.
-        </p>
+        <p>Quiz not found. Please go back and select a valid quiz.</p>
         <button
           onClick={() => navigate("/quiz")}
           className="mt-4 py-2 px-4 bg-gray-200 rounded-xl"
@@ -149,73 +124,59 @@ const QuizPage: React.FC = () => {
     );
   }
 
-  const handleAnswerSelect = (answer: string) => {
-    if (!isAnswerSubmitted || showPaymentModal) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentQuestion]: answer,
-      }));
-      setIsCorrect(answer === questions[currentQuestion].correctAnswer);
-      setIsAnswerSubmitted(true);
+  const handleAnswerSelect = (score: number) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion]: score,
+    }));
 
-      if (currentQuestion === FREE_QUESTION_LIMIT - 1 && !hasPaid) {
-        setShowPaymentModal(true);
-      }
+    if (currentQuestion === FREE_QUESTION_LIMIT - 1 && !hasPaid) {
+      setShowPaymentModal(true);
     }
   };
 
   const handleNext = () => {
-    if (!isAnswerSubmitted || showPaymentModal) return;
+    const isLastFreeQuestion = currentQuestion === FREE_QUESTION_LIMIT - 1;
+    const isLastQuestionOverall = currentQuestion === quiz.questions.length - 1;
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
-      setIsAnswerSubmitted(false);
-      setIsCorrect(null);
-    } else {
+    if (isLastFreeQuestion && !hasPaid) {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    if (isLastQuestionOverall && hasPaid) {
       setShowResults(true);
+      return;
+    }
+
+    if (currentQuestion < quiz.questions.length - 1) {
+      setCurrentQuestion((prev) => prev + 1);
     }
   };
 
-  const getResult = () => {
-    const correctCount = Object.entries(answers).reduce(
-      (acc, [index, answer]) => {
-        return (
-          acc + (answer === questions[parseInt(index)].correctAnswer ? 1 : 0)
-        );
-      },
+  const calculateResult = () => {
+    const totalScore = Object.values(answers).reduce(
+      (sum, score) => sum + score,
       0
     );
-
-    const totalQuestions = hasPaid ? TOTAL_QUESTIONS : FREE_QUESTION_LIMIT;
-    const percentage = (correctCount / totalQuestions) * 100;
-
-    if (percentage < 25) return currentQuiz.resultCategories[0];
-    if (percentage < 50) return currentQuiz.resultCategories[1];
-    if (percentage < 75) return currentQuiz.resultCategories[2];
-    return currentQuiz.resultCategories[3];
+    const result = quiz.results.find(
+      (r) => totalScore >= r.minScore && totalScore <= r.maxScore
+    );
+    return result?.message || "No result found";
   };
 
   const handleRetake = () => {
     setShowResults(false);
-    setQuizStarted(false);
     setCurrentQuestion(0);
     setAnswers({});
     setProgress(0);
-    setIsAnswerSubmitted(false);
-    setIsCorrect(null);
+    setHasPaid(false);
     setShowPaymentModal(false);
-    if (quizType && difficulty) {
-      localStorage.removeItem(STORAGE_KEY(quizType, difficulty));
-    }
-  };
-
-  const handleStart = () => {
-    setQuizStarted(true);
+    localStorage.removeItem(STORAGE_KEY(categoryId));
   };
 
   const handleMockPayment = async () => {
     setIsPaying(true);
-
     const billing_name =
       user?.firstName && user?.lastName
         ? `${user.firstName} ${user.lastName}`
@@ -225,7 +186,6 @@ const QuizPage: React.FC = () => {
       : "0123456789";
     const billing_email =
       user?.emailAddresses?.[0]?.emailAddress || "john@example.com";
-    const quizId = currentQuiz?.id || "quiz123";
     const formData = {
       billing_name,
       billing_email,
@@ -243,19 +203,18 @@ const QuizPage: React.FC = () => {
 
     try {
       const token = await getToken();
-
       const proceedToPay = await handlePayment(
         userId || "anonymous",
         { firstName: user?.firstName || "", lastName: user?.lastName || "" },
-        quizId,
+        quiz._id,
         token!,
         formData,
         redeemPoints,
         appliedDiscount,
         handleRedeemPoints,
         rewardPurchaseProduct,
-        currentQuiz,
-        difficulty || "easy",
+        { questionsByDifficulty: { dynamic: quiz.questions } },
+        "dynamic",
         orderType
       );
       await proceedToPay({
@@ -273,51 +232,33 @@ const QuizPage: React.FC = () => {
     navigate("/quiz");
   };
 
+  if (showResults) {
+    return (
+      <QuizResult
+        quiz={quiz}
+        answers={answers}
+        result={calculateResult()}
+        backgroundIcons={backgroundIcons}
+        onRetake={handleRetake}
+      />
+    );
+  }
+
   return (
     <div className="relative">
-      {!quizStarted ? (
-        <QuizStarting
-          quiz={currentQuiz}
-          quizType={quizType}
-          backgroundIcons={backgroundIcons}
-          onStart={handleStart}
-        />
-      ) : showResults ? (
-        <QuizResult
-          quiz={currentQuiz}
-          quizType={difficulty as "easy" | "medium" | "hard"}
-          answers={answers}
-          result={getResult()}
-          correctCount={Object.entries(answers).reduce(
-            (acc, [index, answer]) => {
-              return (
-                acc +
-                (answer === questions[parseInt(index)].correctAnswer ? 1 : 0)
-              );
-            },
-            0
-          )}
-          backgroundIcons={backgroundIcons}
-          onRetake={handleRetake}
-        />
-      ) : (
-        <QuizQuestion
-          quiz={currentQuiz}
-          quizType={difficulty}
-          backgroundIcons={backgroundIcons}
-          currentQuestion={currentQuestion}
-          answers={answers}
-          isAnswerSubmitted={isAnswerSubmitted}
-          isCorrect={isCorrect}
-          progress={progress}
-          onAnswerSelect={handleAnswerSelect}
-          onNext={handleNext}
-          onPaymentPrompt={handleMockPayment}
-          hasPaid={hasPaid}
-          showPaymentModal={showPaymentModal}
-          onClosePaymentModal={handleCancelPayment}
-        />
-      )}
+      <QuizQuestion
+        quiz={quiz}
+        backgroundIcons={backgroundIcons}
+        currentQuestion={currentQuestion}
+        answers={answers}
+        progress={progress}
+        onAnswerSelect={handleAnswerSelect}
+        onNext={handleNext}
+        onPaymentPrompt={handleMockPayment}
+        hasPaid={hasPaid}
+        showPaymentModal={showPaymentModal}
+        onClosePaymentModal={handleCancelPayment}
+      />
 
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -353,10 +294,7 @@ const QuizPage: React.FC = () => {
               <>
                 <p className="text-gray-600 mb-6">
                   You've answered {FREE_QUESTION_LIMIT} free questions. Pay ₹9
-                  to unlock all{" "}
-                  {currentQuiz.questionsByDifficulty[difficulty].length}{" "}
-                  questions and continue from question {FREE_QUESTION_LIMIT + 1}
-                  !
+                  to unlock all {quiz.questions.length} questions and continue!
                 </p>
                 <div className="flex justify-center gap-4">
                   <button
