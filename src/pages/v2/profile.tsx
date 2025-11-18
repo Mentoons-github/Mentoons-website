@@ -150,9 +150,14 @@ const Profile = () => {
           axios.get(`${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          axios.get(
+            `${import.meta.env.VITE_PROD_URL}/posts/user/${
+              user?.id
+            }?currentUser=${user?.id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
           axios.get(`${import.meta.env.VITE_PROD_URL}/feeds/saved`, {
             headers: { Authorization: `Bearer ${token}` },
           }),

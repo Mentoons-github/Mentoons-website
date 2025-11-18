@@ -220,7 +220,6 @@ const PostUpload = ({
   };
 
   const handleSubmit = async (values: FormValues) => {
-
     try {
       const valuesWithUploadedMedia = await uploadAllMedia(values);
 
@@ -303,7 +302,6 @@ const PostUpload = ({
             url: m.url || "",
           }));
       } else {
-        console.log("media =====> ", valuesWithUploadedMedia.media);
         postData.media = valuesWithUploadedMedia.media
           .filter((m) => m.file && m.url)
           .map((m) => ({
@@ -651,9 +649,6 @@ const PostUpload = ({
                                     className="w-full p-3 text-sm sm:text-base text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                   >
                                     <option value="public">Public</option>
-                                    <option value="friends">
-                                      Friends Only
-                                    </option>
                                     <option value="private">Private</option>
                                   </Field>
                                 </motion.div>
