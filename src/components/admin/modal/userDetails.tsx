@@ -26,7 +26,14 @@ import axios from "axios";
 
 interface DetailsModalProps {
   item: any;
-  itemType: "employee" | "user";
+  itemType:
+    | "user"
+    | "product"
+    | "enquiry"
+    | "employee"
+    | "job"
+    | "workshop"
+    | "meetups";
   onClose: () => void;
   sortOrder?: string;
   searchTerm?: string;
@@ -72,7 +79,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
 
   if (!item) return null;
   const data = itemType === "employee" ? employee || item : item;
-  console.log(data)
+  console.log(data);
 
   const handleProfileEditRequest = async (action: "approve" | "reject") => {
     const token = await getToken();
