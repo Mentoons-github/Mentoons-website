@@ -34,7 +34,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         >
           About
         </button>
-        <button
+        {/* <button
           onClick={() => setActiveTab("friends")}
           className={`px-1 py-4 text-sm font-medium ${
             activeTab === "friends"
@@ -43,7 +43,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           }`}
         >
           Friends
-        </button>
+        </button> */}
         <button
           onClick={() => setActiveTab("rewards")}
           className={`px-1 py-4 text-sm font-medium flex items-center ${

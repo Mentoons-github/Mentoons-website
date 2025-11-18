@@ -17,6 +17,7 @@ import { WorkshopCategory } from "@/types";
 import { ModalMessage } from "@/utils/enum";
 import { useSearchParams } from "react-router-dom";
 import AboutWorkshop from "@/components/Workshop/about";
+import ErrorModal from "@/components/adda/modal/error";
 
 const Workshopv2 = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -38,6 +39,8 @@ const Workshopv2 = () => {
   const [searchParams] = useSearchParams();
   const workshopName = searchParams.get("category");
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -49,6 +52,11 @@ const Workshopv2 = () => {
     ageCategory: "",
     doubt: "",
   });
+
+  useEffect(() => {
+    setEnquiryEmail(user?.email || "");
+    setEnquiryName(user?.name || "");
+  }, [user]);
 
   const fetchWorkshops = useCallback(async () => {
     try {
@@ -250,7 +258,7 @@ const Workshopv2 = () => {
 
   const handleRegisterationForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = getToken();
+    const token = await getToken();
     if (formData.message.length < 50) {
       toast.error("Message must be at least 50 characters long");
       return;
@@ -271,9 +279,9 @@ const Workshopv2 = () => {
           firstname: user?.name?.split(" ")[0] || "",
           lastname: user?.name?.split(" ")[1] || "",
           email: user?.email || "",
-          phone: user?.phoneNumber || "",
+          phone: user?.phoneNumber || 0,
           message: "",
-          workshop: categories[0]?.workshops[0]?.workshopName || "",
+          workshop: categories[0]?.workshops[0]?.workshopName || "", 
           ageCategory:
             categories[0]?.workshops[0]?.ageGroups[0]?.ageRange || "",
           doubt: "",
@@ -289,6 +297,13 @@ const Workshopv2 = () => {
 
   const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (enquiryMessage.trim().length < 50) {
+      setShowErrorModal(true);
+      setShowErrorMessage("Message must be at least 50 characters long.");
+      return;
+    }
+
     try {
       const queryResponse = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/query`,
@@ -300,10 +315,15 @@ const Workshopv2 = () => {
         }
       );
       if (queryResponse.status === 201) {
+        setEnquiryMessage("");
         setShowEnquiryModal(true);
       }
-    } catch (error) {
-      toast.error("Failed to submit message");
+    } catch (error: any) {
+      setEnquiryMessage("")
+      setShowErrorModal(true);
+      setShowErrorMessage(
+        error?.response?.data?.message || "Failed to submit message"
+      );
     }
   };
 
@@ -741,6 +761,7 @@ const Workshopv2 = () => {
                       />
                     </div>
                     <textarea
+                      required
                       name="doubt"
                       id="doubt"
                       value={enquiryMessage}
@@ -768,6 +789,10 @@ const Workshopv2 = () => {
             </motion.div>
           </motion.div>
         </motion.div>
+
+        {/* <div className="w-full">
+          <FAQ data={WORKSHOP_FAQ} />
+        </div> */}
       </div>
       {showRegistrationModal && (
         <RegirstrationModal
@@ -782,6 +807,15 @@ const Workshopv2 = () => {
           isOpen={showEnquiryModal}
           onClose={() => setShowEnquiryModal(false)}
           message={ModalMessage.ENQUIRY_MESSAGE}
+        />
+      )}
+
+      {showErrorModal && (
+        <ErrorModal
+          heading="Faild to submit query"
+          error={showErrorMessage}
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
         />
       )}
     </div>

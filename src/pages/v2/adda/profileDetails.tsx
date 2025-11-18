@@ -39,7 +39,6 @@ const ProfileDetails = () => {
       return;
     }
 
-    console.log("reached");
 
     const fetchUserData = async () => {
       try {
@@ -53,7 +52,7 @@ const ProfileDetails = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        console.log(response.data.data,'jjjjjjjjjjjjjjjjjjjjjjj')
         console.log(response.data.data.isFriend);
         setUser(response.data.data.user);
         setFollowers(response.data.data.user.followers);
