@@ -8,7 +8,6 @@ import Pagination from "@/components/admin/pagination";
 import DynamicTable from "@/components/admin/dynamicTable";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getEmployees, deleteEmployee } from "@/redux/admin/employee/api";
-import { JobData } from "@/types/admin";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { Employee } from "@/types/employee";
 import { EXCLUDE_EMPLOYEE_DATA } from "@/constant/admin";
@@ -42,9 +41,10 @@ const EmployeeTable = () => {
     );
   }, [dispatch, sortOrder, debouncedSearchTerm, currentPage, limit]);
 
-  const handleEdit = (job: JobData) => {
-    navigate(`/employee/edit/${job._id}`);
-  };
+  // const handleEdit = (job: JobData) => {
+  //   console.log("edit employee working");
+  //   navigate(`/employee/edit/${job._id}`);
+  // };
 
   const handleDelete = (employee: Employee) => {
     setEmployeeToDelete(employee);
@@ -114,11 +114,11 @@ const EmployeeTable = () => {
       </div>
     );
 
-  const updatedEmployees = employees.map((employee: Employee) => {
+  const updatedEmployees = employees.map((employee) => {
     const { place, profilePicture, ...rest } = employee;
     console.log(place, profilePicture);
     return rest;
-  });
+  }) as Employee[];
 
   return (
     <div className="h-full p-4">
@@ -128,7 +128,9 @@ const EmployeeTable = () => {
         excludeColumns={EXCLUDE_EMPLOYEE_DATA}
         data={updatedEmployees}
         sortField="createdAt"
-        onEdit={() => handleEdit}
+        onEdit={(employee: Employee) => {
+          navigate(`/admin/employee/edit/${employee._id}`);
+        }}
         onDelete={() => handleDelete}
         onView={handleView}
         onSort={handleSort}

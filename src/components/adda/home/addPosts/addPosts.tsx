@@ -39,7 +39,7 @@ interface PostData {
   comments: string[];
   shares: string[];
   createdAt: string | Date;
-  visibility: "public" | "friends" | "private";
+  visibility: "public" | "private";
   tags?: string[];
   location?: string;
 }

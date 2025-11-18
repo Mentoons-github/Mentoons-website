@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -7,14 +7,14 @@ import { EmploymentType } from "@/types/employee/employee";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import { useParams, useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const validationSchema = Yup.object({
   department: Yup.string().required("Department is required"),
   employmentType: Yup.string()
-    .oneOf(
-      ["full-time", "part-time", "intern", "contract", "freelance"],
-      "Invalid employment type"
-    )
+    .oneOf(["full-time", "part-time", "intern", "contract", "freelance"])
     .required("Employment type is required"),
   salary: Yup.number()
     .typeError("Salary must be a number")
@@ -25,16 +25,15 @@ const validationSchema = Yup.object({
   user: Yup.object({
     name: Yup.string().required("Name is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
-    role: Yup.string().required("Role is required"),
     gender: Yup.string()
       .oneOf(["male", "female", "other"])
       .required("Gender is required"),
     phoneNumber: Yup.string()
-      .matches(
-        /^\+?[1-9]\d{1,14}$/,
-        "Invalid phone number format (use E.164 format, e.g., +1234567890)"
-      )
-      .required("Phone number is required"),
+      .required("Phone number is required")
+      .test("is-valid-phone", "Invalid phone number", (value) => {
+        if (!value) return false;
+        return /^\+?[1-9]\d{1,14}$/.test(value);
+      }),
   }),
 });
 
@@ -53,24 +52,66 @@ interface FormValues {
   };
 }
 
-const initialValues: FormValues = {
-  department: "",
-  employmentType: "full-time",
-  salary: "",
-  active: false,
-  jobRole: "",
-  user: {
-    name: "",
-    email: "",
-    role: "EMPLOYEE",
-    gender: "male",
-    phoneNumber: "",
-  },
-};
-
 const CreateEmployee: React.FC = () => {
   const { getToken } = useAuth();
   const { showModal, hideModal } = useSubmissionModal();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = !!id;
+
+  const [initialValues, setInitialValues] = useState<FormValues>({
+    department: "",
+    employmentType: "full-time",
+    salary: "",
+    active: true,
+    jobRole: "",
+    user: {
+      name: "",
+      email: "",
+      role: "EMPLOYEE",
+      gender: "male",
+      phoneNumber: "",
+    },
+  });
+
+  useEffect(() => {
+    if (isEdit) {
+      const fetchEmployee = async () => {
+        try {
+          const token = await getToken();
+          const response = await axios.get(
+            `${import.meta.env.VITE_PROD_URL}/employee/${id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          const emp = response.data.data.fullDetails;
+
+          setInitialValues({
+            department: emp.department || "",
+            employmentType: emp.employmentType || "full-time",
+            salary: emp.salary?.toString() || "",
+            active: emp.active ?? true,
+            jobRole: emp.jobRole || "",
+            user: {
+              name: emp.user?.name || emp.name || "",
+              email: emp.user?.email || emp.email || "",
+              role: "EMPLOYEE",
+              gender: emp.user?.gender || "male",
+              phoneNumber: emp.user?.phoneNumber
+                ? `+${emp.user.phoneNumber}`
+                : "",
+            },
+          });
+        } catch (err) {
+          toast.error("Failed to load employee data");
+          navigate("/admin/employee-table");
+        }
+      };
+      fetchEmployee();
+    }
+  }, [id, isEdit, getToken, navigate]);
 
   const handleSubmit = async (
     values: FormValues,
@@ -79,60 +120,71 @@ const CreateEmployee: React.FC = () => {
     showModal({
       isSubmitting: true,
       currentStep: "saving",
-      message: "Creating employee...",
+      message: isEdit ? "Updating employee..." : "Creating employee...",
     });
 
     try {
-      const payload: EmployeeInterface = {
-        department: values.department as any,
+      const token = await getToken();
+
+      const payload: Partial<EmployeeInterface> = {
+        department: values.department as EmployeeInterface["department"],
         employmentType: values.employmentType,
-        salary: values.salary ? Number(values.salary) : 0,
+        salary: Number(values.salary),
         active: values.active,
         jobRole: values.jobRole,
         user: {
-          ...values.user,
+          name: values.user.name,
+          email: values.user.email,
+          role: "EMPLOYEE" as const,
+          gender: values.user.gender as "male" | "female" | "other",
           phoneNumber: values.user.phoneNumber
-            ? Number(values.user.phoneNumber)
+            ? Number(values.user.phoneNumber.replace(/\D/g, "")) || null
             : null,
-        } as EmployeeInterface["user"],
+          dob: null,
+        },
       };
 
-      const token = await getToken();
-      const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/admin/create-employee`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const url = isEdit
+        ? `${import.meta.env.VITE_PROD_URL}/admin/update-employee/${id}`
+        : `${import.meta.env.VITE_PROD_URL}/admin/create-employee`;
+
+      const method = isEdit ? axios.put : axios.post;
+
+      const response = await method(url, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       showModal({
         isSubmitting: false,
         currentStep: "success",
-        message: response.data.message || "Employee created successfully!",
+        message:
+          response.data.message ||
+          (isEdit ? "Employee updated!" : "Employee created!"),
       });
 
-      toast.success(response.data.message || "Employee created successfully!");
+      toast.success(
+        response.data.message ||
+          (isEdit ? "Employee updated!" : "Employee created!")
+      );
 
-      setTimeout(() => hideModal(), 3000);
-    } catch (error: unknown) {
-      const err = error as {
-        response?: { data?: { error?: string; message?: string } };
-      };
-
+      setTimeout(() => {
+        hideModal();
+        if (isEdit) navigate("/admin/employee-table");
+      }, 2000);
+    } catch (error: any) {
+      console.log(error);
       const errorMessage =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Failed to create employee";
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        (isEdit ? "Failed to update employee" : "Failed to create employee");
 
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: errorMessage,
-        error: "An unexpected error occurred",
       });
 
       toast.error(errorMessage);
@@ -167,29 +219,28 @@ const CreateEmployee: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              Create Employee
+              {isEdit ? "Edit Employee" : "Create Employee"}
             </h2>
             <p className="text-gray-500 mt-2">
-              Fill in the employee details below
+              {isEdit
+                ? "Update employee details"
+                : "Fill in the employee details below"}
             </p>
           </div>
 
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            validateOnChange={true}
-            validateOnBlur={true}
+            enableReinitialize
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting, handleSubmit }) => (
+            {({ isSubmitting, handleSubmit, setFieldValue, values }) => (
               <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Personal Information Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                     Personal Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* ... existing fields (name, email, phone, gender, jobRole) ... */}
                     <div>
                       <label
                         htmlFor="user.name"
@@ -231,17 +282,19 @@ const CreateEmployee: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="user.phoneNumber"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Phone Number *
                       </label>
-                      <Field
-                        name="user.phoneNumber"
-                        type="tel"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="+911234567890"
+                      <PhoneInput
+                        international
+                        countryCallingCodeEditable={false}
+                        defaultCountry="IN"
+                        placeholder="Enter phone number"
+                        value={values.user.phoneNumber}
+                        onChange={(value) =>
+                          setFieldValue("user.phoneNumber", value || "")
+                        }
+                        className="phone-input"
                       />
                       <ErrorMessage
                         name="user.phoneNumber"
@@ -249,7 +302,7 @@ const CreateEmployee: React.FC = () => {
                         className="text-red-500 text-sm mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Include country code (e.g., +91 for India)
+                        Select country code and enter number
                       </p>
                     </div>
 
@@ -298,7 +351,6 @@ const CreateEmployee: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Employment Details Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                     Employment Details
@@ -316,9 +368,9 @@ const CreateEmployee: React.FC = () => {
                         name="department"
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                       >
-                        {departmentOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
+                        {departmentOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
                           </option>
                         ))}
                       </Field>
@@ -329,7 +381,6 @@ const CreateEmployee: React.FC = () => {
                       />
                     </div>
 
-                    {/* NEW: Employment Type */}
                     <div>
                       <label
                         htmlFor="employmentType"
@@ -390,14 +441,19 @@ const CreateEmployee: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Submit Button */}
                 <div className="pt-6">
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]"
                   >
-                    {isSubmitting ? "Creating Employee..." : "Create Employee"}
+                    {isSubmitting
+                      ? isEdit
+                        ? "Updating Employee..."
+                        : "Creating Employee..."
+                      : isEdit
+                      ? "Update Employee"
+                      : "Create Employee"}
                   </button>
                 </div>
               </form>
@@ -405,6 +461,25 @@ const CreateEmployee: React.FC = () => {
           </Formik>
         </div>
       </div>
+
+      <style>{`
+        .phone-input .PhoneInputInput {
+          height: 48px;
+          padding: 12px 14px;
+          border-radius: 8px;
+          border: 1px solid #d1d5db;
+          font-size: 16px;
+          background: white;
+        }
+        .phone-input .PhoneInputInput:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .phone-input .PhoneInputCountry {
+          margin-right: 8px;
+        }
+      `}</style>
     </div>
   );
 };

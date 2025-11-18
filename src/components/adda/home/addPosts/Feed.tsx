@@ -61,7 +61,6 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
             pageNum === 1 ? newPosts : [...prev, ...newPosts]
           );
 
-          // Call onFetchComplete after successful fetch for page 1
           if (pageNum === 1 && onFetchComplete) {
             onFetchComplete();
           }
