@@ -49,7 +49,7 @@ const QuizPage: React.FC = () => {
       }
     };
     fetchQuiz();
-  }, [categoryId, getToken]);
+  }, []);
 
   const TOTAL_QUESTIONS = quiz?.questions.length || 0;
   const FREE_QUESTION_LIMIT = 5;
