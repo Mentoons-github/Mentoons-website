@@ -118,7 +118,7 @@ const LeftSection = ({
                 {userDetails.name || "User Name"}
               </h1>
               <p className="text-gray-600 mt-1 text-xs sm:text-sm">
-                {userDetails.occupation || "Not provided"}
+                {userDetails.occupation || ""}
               </p>
               <div className="flex items-center justify-center gap-2 mt-2 text-gray-500">
                 <Mail className="w-3 h-3 sm:w-4 sm:h-4" />

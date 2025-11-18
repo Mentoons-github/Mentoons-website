@@ -1,9 +1,10 @@
 import { format } from "date-fns";
 import { ProfilePost } from "@/types/adda/userProfile";
 import RewardsSection from "@/components/adda/userProfile/rewardsSection";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import { PostData } from "@/components/adda/home/addPosts/PostCard";
 import { ProfileUserDetails } from "@/types/adda/userProfile";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import ProfilePostCard from "../../home/addPosts/ProfilePostCard";
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -22,6 +23,8 @@ const ProfileTabContent = ({
   setUserPosts,
   setShowCompletionForm,
 }: ProfileTabContentProps) => {
+  const navigate = useNavigate();
+
   switch (activeTab) {
     case "Posts":
       return (
@@ -42,9 +45,9 @@ const ProfileTabContent = ({
               </button> */}
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+            <div className="grid grid-cols-3 gap-3 space-y-3 sm:space-y-4 lg:space-y-6">
               {userPosts.map((post) => (
-                <PostCard
+                <ProfilePostCard
                   setUserPosts={setUserPosts}
                   isUser={true}
                   key={post._id}
@@ -98,7 +101,10 @@ const ProfileTabContent = ({
                   <span className="text-xs text-gray-500">
                     Saved {format(new Date(post.createdAt), "MMMM d, yyyy")}
                   </span>
-                  <button className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium">
+                  <button
+                    className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium"
+                    onClick={() => navigate(`/adda/post/${post._id}`)}
+                  >
                     View →
                   </button>
                 </div>

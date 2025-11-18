@@ -512,6 +512,7 @@ const Profile = () => {
     setShowCompletionForm(true);
   };
 
+
   if (isFetchingUserData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -687,9 +688,9 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <div className="mt-4 sm:mt-6 lg:mt-8">
+          {/* <div className="mt-4 sm:mt-6 lg:mt-8">
             <PhotosCard userPosts={userPosts} />
-          </div>
+          </div> */}
         </div>
       </div>
       {modalType && (
