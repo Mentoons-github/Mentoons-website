@@ -65,6 +65,7 @@ const AdminRouter = () => {
 
           {/*Employee */}
           <Route path="employee/add" element={<CreateEmployee />} />
+          <Route path="employee/edit/:id" element={<CreateEmployee />} />
           <Route path="employee-table" element={<EmployeeTable />} />
           <Route path="task-submissions" element={<AdminTaskDashboard />} />
 
@@ -84,7 +85,6 @@ const AdminRouter = () => {
           <Route path="psychologists" element={<PsychologistsTable />} />
           <Route path="freelancers" element={<FreelancersTable />} />
 
-          
           <Route path="profile" element={<AdminProfile />} />
           <Route path="notifications" element={<AdminNotification />} />
           <Route path="leave-management" element={<AdminLeaveManagement />} />

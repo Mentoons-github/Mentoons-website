@@ -1,46 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   X,
-  MapPin,
   Calendar,
-  Users,
-  UserCheck,
-  Globe,
-  Clock,
-  Crown,
-  AlertTriangle,
-  Mail,
-  FileText,
   Briefcase,
+  Mail,
   CheckCircle,
   XCircle,
+  Phone,
+  IndianRupee,
+  UserCheck,
+  MapPin,
+  Shield,
+  Clock,
+  Crown,
+  Users,
 } from "lucide-react";
-import { User } from "@/types";
-import { FaRupeeSign, FaUser } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { getEmployees } from "@/redux/admin/employee/api";
 import { handleProfileEdit } from "@/redux/admin/admin/adminApi";
 import { errorToast, successToast } from "@/utils/toastResposnse";
-import { Employee } from "@/types/employee";
-import { formatDateTime, formatDate } from "@/utils/formateDate";
-import {
-  getRoleColor,
-  getSocialColor,
-  getSubscriptionStatusColor,
-} from "@/utils/task/admin/taskUtils";
+import { formatDate } from "@/utils/formateDate";
 import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 
 interface DetailsModalProps {
-  item: User | Employee | null;
-  itemType:
-    | "user"
-    | "product"
-    | "enquiry"
-    | "employee"
-    | "job"
-    | "meetups"
-    | "workshop";
+  item: any;
+  itemType: "employee" | "user";
   onClose: () => void;
   sortOrder?: string;
   searchTerm?: string;
@@ -57,7 +43,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   page = 1,
   limit = 10,
 }) => {
-  console.log("Modal item:", item);
   const dispatch = useDispatch<AppDispatch>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionStatus, setActionStatus] = useState<{
@@ -65,453 +50,474 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     message: string;
   }>({ status: null, message: "" });
   const { getToken } = useAuth();
+  const [employee, setEmployee] = useState<any>(null);
+
+  useEffect(() => {
+    if (itemType === "employee" && item?._id) {
+      const fetchEmployee = async () => {
+        try {
+          const token = await getToken();
+          const res = await axios.get(
+            `${import.meta.env.VITE_PROD_URL}/employee/${item._id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setEmployee(res.data.data.fullDetails || res.data.data);
+        } catch (err) {
+          setEmployee(item);
+        }
+      };
+      fetchEmployee();
+    }
+  }, [item, itemType, getToken]);
 
   if (!item) return null;
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const data = itemType === "employee" ? employee || item : item;
+  console.log(data)
 
   const handleProfileEditRequest = async (action: "approve" | "reject") => {
     const token = await getToken();
-    if (!token) return;
-    if (itemType !== "employee" || !("profileEditRequest" in item)) return;
+    if (!token || !data._id) return;
 
     setIsProcessing(true);
     setActionStatus({ status: null, message: "" });
 
     try {
-      const resultAction = await dispatch(
+      const result = await dispatch(
         handleProfileEdit({
           token,
           action: action === "approve" ? "approved" : "rejected",
-          employeeId: item._id ?? "",
+          employeeId: data._id,
         })
       );
 
-      if (handleProfileEdit.fulfilled.match(resultAction)) {
-        const successMessage =
+      if (handleProfileEdit.fulfilled.match(result)) {
+        successToast(
           action === "approve"
-            ? "Profile edit request approved successfully"
-            : "Profile edit request rejected successfully";
-
-        successToast(successMessage);
-        setActionStatus({ status: "success", message: successMessage });
-
-        await dispatch(getEmployees({ sortOrder, searchTerm, page, limit }));
-
-        setTimeout(() => onClose(), 1500);
+            ? "Profile edit approved"
+            : "Profile edit rejected"
+        );
+        setActionStatus({
+          status: "success",
+          message: action === "approve" ? "Approved" : "Rejected",
+        });
+        dispatch(getEmployees({ sortOrder, searchTerm, page, limit }));
+        setTimeout(onClose, 1500);
       } else {
-        const errorMessage =
-          resultAction.payload ||
-          "Failed to process profile edit request. Please try again.";
-        errorToast(errorMessage);
-        setActionStatus({ status: "error", message: errorMessage });
+        const msg = result.payload || "Action failed";
+        errorToast(msg);
+        setActionStatus({ status: "error", message: msg });
       }
-    } catch (error) {
-      console.error("Error handling profile edit request:", error);
-      errorToast("An unexpected error occurred");
-      setActionStatus({
-        status: "error",
-        message: "An unexpected error occurred",
-      });
+    } catch {
+      errorToast("Something went wrong");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={onClose}
-        />
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
 
-        {/* Modal */}
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-          {/* Cover Image */}
-          <div className="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600">
-            {itemType === "user" && "coverImage" in item && item.coverImage ? (
+  const isEmployee = itemType === "employee";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 h-40 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all z-10"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+        </div>
+
+        <div className="px-6 pb-6">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-20 mb-6">
+            {data.picture ? (
               <img
-                src={item.coverImage}
-                alt="Cover"
-                className="w-full h-full object-cover"
+                src={data.picture}
+                alt={data.name}
+                className="w-36 h-36 rounded-full object-cover shadow-2xl border-8 border-white ring-4 ring-blue-100 relative z-10"
               />
             ) : (
-              <img
-                src="https://placehold.co/1200x192"
-                alt="No cover image"
-                className="w-full h-full object-cover opacity-50"
-              />
-            )}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Profile Section */}
-          <div className="relative px-6 pb-6">
-            {/* Profile Picture */}
-            <div className="flex items-start justify-between -mt-16 mb-6">
-              <div className="relative">
-                {itemType === "user" && "picture" in item && item.picture ? (
-                  <img
-                    src={item.picture}
-                    alt={item.name || "Unknown"}
-                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                  />
-                ) : itemType === "employee" &&
-                  "profilePicture" in item &&
-                  item.profilePicture ? (
-                  <img
-                    src={item.profilePicture}
-                    alt={item.name || "Unknown"}
-                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
-                    {getInitials(item.name || "Unknown")}
-                  </div>
-                )}
-                {itemType === "user" &&
-                  "isBlocked" in item &&
-                  item.isBlocked && (
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                      <AlertTriangle className="w-4 h-4 text-white" />
-                    </div>
-                  )}
+              <div className="w-36 h-36 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-5xl font-bold shadow-2xl border-8 border-white ring-4 ring-blue-100 relative z-10">
+                {getInitials(data.user?.name || data.name || "NA")}
               </div>
-            </div>
-
-            {/* Item Info */}
-            <div className="space-y-6">
-              {/* Basic Info */}
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    {item.name || "Unknown"}
-                  </h1>
-                  {itemType === "user" && "role" in item && (
+            )}
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                {data.user?.name || data.name}
+              </h1>
+              {isEmployee && data.jobRole && (
+                <p className="text-lg text-gray-600 mb-2">{data.jobRole}</p>
+              )}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                {isEmployee ? (
+                  <>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleColor(
-                        item.role!
-                      )}`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                        data.active
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : "bg-red-100 text-red-800 border border-red-200"
+                      }`}
                     >
-                      {item.role}
+                      {data.active ? "Active" : "Inactive"}
                     </span>
-                  )}
-                  {itemType === "user" &&
-                    "isBlocked" in item &&
-                    item.isBlocked && (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold border border-blue-200 shadow-sm">
+                      {data.employmentType}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold border border-blue-200 shadow-sm">
+                      {data.role}
+                    </span>
+                    {data.subscription?.plan && (
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border shadow-sm ${
+                          data.subscription.plan === "free"
+                            ? "bg-gray-100 text-gray-800 border-gray-200"
+                            : "bg-purple-100 text-purple-800 border-purple-200"
+                        }`}
+                      >
+                        <Crown className="w-3 h-3 inline mr-1" />
+                        {data.subscription.plan.toUpperCase()}
+                      </span>
+                    )}
+                    {data.isBlocked && (
+                      <span className="px-3 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold border border-red-200">
                         Blocked
                       </span>
                     )}
-                  {itemType === "employee" && "status" in item && (
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        item.status === "Active"
-                          ? "bg-green-100 text-green-800 border-green-200"
-                          : "bg-red-100 text-red-800 border-red-200"
-                      }`}
-                    >
-                      {item.status as string}
-                    </span>
-                  )}
-                </div>
-                <p className="text-gray-600 flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  {item.email || "N/A"}
-                </p>
-              </div>
-
-              {/* Profile Edit Request */}
-              {itemType === "employee" &&
-                "profileEditRequest" in item &&
-                item.profileEditRequest?.status === "pending" && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h3 className="text-sm font-semibold text-yellow-700 uppercase tracking-wide mb-2">
-                      Pending Profile Edit Request
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      A profile edit request is pending for this employee,
-                      submitted on{" "}
-                      {formatDate(item.profileEditRequest.requestedAt)}. Review
-                      and take action.
-                    </p>
-                    {actionStatus.status && (
-                      <p
-                        className={`text-sm mb-4 ${
-                          actionStatus.status === "success"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {actionStatus.message}
-                      </p>
-                    )}
-                    <div className="flex gap-4">
-                      <button
-                        onClick={() => handleProfileEditRequest("approve")}
-                        disabled={
-                          isProcessing || actionStatus.status === "success"
-                        }
-                        className={`flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${
-                          isProcessing || actionStatus.status === "success"
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleProfileEditRequest("reject")}
-                        disabled={
-                          isProcessing || actionStatus.status === "success"
-                        }
-                        className={`flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ${
-                          isProcessing || actionStatus.status === "success"
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                      >
-                        <XCircle className="w-4 h-4" />
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+                  </>
                 )}
+              </div>
+            </div>
+          </div>
 
-              {/* Bio for User */}
-              {itemType === "user" && "bio" in item && item.bio && (
+          {isEmployee && data.profileEditRequest?.status === "pending" && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4 mb-6 shadow-md">
+              <div className="flex items-start gap-3 mb-3">
+                <Clock className="w-5 h-5 text-amber-600 mt-1" />
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                    About
+                  <h3 className="font-bold text-amber-900 mb-1">
+                    Pending Profile Edit Request
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">{item.bio}</p>
+                  <p className="text-sm text-gray-700">
+                    Requested on:{" "}
+                    {formatDate(data.profileEditRequest.requestedAt)}
+                  </p>
+                </div>
+              </div>
+              {actionStatus.status && (
+                <div
+                  className={`mb-3 p-2 rounded-lg text-sm ${
+                    actionStatus.status === "success"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  <p className="font-medium">{actionStatus.message}</p>
                 </div>
               )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleProfileEditRequest("approve")}
+                  disabled={isProcessing || actionStatus.status === "success"}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-md hover:shadow-lg"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Approve
+                </button>
+                <button
+                  onClick={() => handleProfileEditRequest("reject")}
+                  disabled={isProcessing || actionStatus.status === "success"}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-md hover:shadow-lg"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Reject
+                </button>
+              </div>
+            </div>
+          )}
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal/Employee Details */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                    {itemType === "user"
-                      ? "Personal Details"
-                      : "Employee Details"}
-                  </h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                {isEmployee ? "Employee Information" : "User Information"}
+              </h3>
 
-                  {/* === ONLY FOR EMPLOYEE === */}
-                  {itemType === "employee" &&
-                    "dateOfBirth" in item &&
-                    item.dateOfBirth && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>Born {formatDate(item.dateOfBirth)}</span>
-                      </div>
-                    )}
-
-                  {itemType === "employee" &&
-                    "joinDate" in item &&
-                    item.joinDate && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <FaUser className="w-4 h-4" />
-                        <span>Joined {formatDate(item.joinDate)}</span>
-                      </div>
-                    )}
-
-                  {/* === USER FIELDS (unchanged) === */}
-                  {itemType === "user" &&
-                    "location" in item &&
-                    item.location && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <MapPin className="w-4 h-4" />
-                        <span>{item.location}</span>
-                      </div>
-                    )}
-
-                  {itemType === "user" &&
-                    "joinedDate" in item &&
-                    item.joinedDate && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <FaUser className="w-4 h-4" />
-                        <span>Joined {formatDate(item.joinedDate)}</span>
-                      </div>
-                    )}
-
-                  {itemType === "user" &&
-                    "lastActive" in item &&
-                    item.lastActive && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Clock className="w-4 h-4" />
-                        <span>
-                          Last active {formatDateTime(item.lastActive)}
-                        </span>
-                      </div>
-                    )}
-
-                  {/* === EMPLOYEE FIELDS (below DOB & Join Date) === */}
-                  {itemType === "employee" && "department" in item && (
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Briefcase className="w-4 h-4" />
-                      <span>Department: {item.department}</span>
-                    </div>
-                  )}
-
-                  {itemType === "employee" && "jobRole" in item && (
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Briefcase className="w-4 h-4" />
-                      <span>Job Role: {item.jobRole as string}</span>
-                    </div>
-                  )}
-
-                  {itemType === "employee" && "salary" in item && (
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <FaRupeeSign className="w-4 h-4" />
-                      <span>Salary: ₹{item.salary.toLocaleString()}</span>
-                    </div>
-                  )}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                  <div className="p-2 bg-blue-600 rounded-lg">
+                    <Mail className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-500 font-medium">Email</p>
+                    <p className="text-sm text-gray-800 font-medium truncate">
+                      {data.email}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Stats for User */}
-                {itemType === "user" &&
-                  "posts" in item &&
-                  "followers" in item &&
-                  "following" in item && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Statistics
-                      </h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center p-3 bg-blue-50 rounded-lg">
-                          <div className="flex items-center justify-center mb-1">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div className="text-xl font-bold text-blue-600">
-                            {item.posts?.length || 0}
-                          </div>
-                          <div className="text-xs text-blue-600">Posts</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded-lg">
-                          <div className="flex items-center justify-center mb-1">
-                            <Users className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div className="text-xl font-bold text-green-600">
-                            {item.followers?.length || 0}
-                          </div>
-                          <div className="text-xs text-green-600">
-                            Followers
-                          </div>
-                        </div>
-                        <div className="text-center p-3 bg-purple-50 rounded-lg">
-                          <div className="flex items-center justify-center mb-1">
-                            <UserCheck className="w-4 h-4 text-purple-600" />
-                          </div>
-                          <div className="text-xl font-bold text-purple-600">
-                            {item.following?.length || 0}
-                          </div>
-                          <div className="text-xs text-purple-600">
-                            Following
-                          </div>
-                        </div>
-                      </div>
+                {(data.phoneNumber || data.user?.phoneNumber) && (
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <div className="p-2 bg-blue-600 rounded-lg">
+                      <Phone className="w-4 h-4 text-white" />
                     </div>
-                  )}
-              </div>
-
-              {/* Social Links for User */}
-              {itemType === "user" &&
-                "socialLinks" in item &&
-                item.socialLinks &&
-                Object.keys(item.socialLinks).length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                      Social Links
-                    </h3>
-                    <div className="flex flex-wrap gap-3">
-                      {Object.entries(item.socialLinks).map(
-                        ([platform, url]) =>
-                          url && (
-                            <a
-                              key={platform}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${getSocialColor(
-                                platform
-                              )}`}
-                            >
-                              {platform === "facebook" && (
-                                <Globe className="w-4 h-4" />
-                              )}
-                              {platform === "twitter" && (
-                                <X className="w-4 h-4" />
-                              )}
-                              {platform === "instagram" && (
-                                <Globe className="w-4 h-4" />
-                              )}
-                              {platform === "linkedin" && (
-                                <Globe className="w-4 h-4" />
-                              )}
-                              {platform === "website" && (
-                                <Globe className="w-4 h-4" />
-                              )}
-                              <span className="text-sm capitalize">
-                                {platform}
-                              </span>
-                            </a>
-                          )
-                      )}
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Phone</p>
+                      <p className="text-sm text-gray-800 font-medium">
+                        +91 {data.phoneNumber || data.user?.phoneNumber}
+                      </p>
                     </div>
                   </div>
                 )}
 
-              {/* Subscription Details for User */}
-              {itemType === "user" &&
-                "subscription" in item &&
-                item.subscription && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                      Subscription
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Crown className="w-4 h-4" />
-                        <span>Plan: {item.subscription.plan}</span>
+                {isEmployee ? (
+                  <>
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Briefcase className="w-4 h-4 text-white" />
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${getSubscriptionStatusColor(
-                            item.subscription.status
-                          )}`}
-                        >
-                          Status: {item.subscription.status}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">
+                          Department
+                        </p>
+                        <p className="text-sm text-gray-800 font-medium">
+                          {data.department}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <UserCheck className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">
+                          Job Role
+                        </p>
+                        <p className="text-sm text-gray-800 font-medium">
+                          {data.jobRole}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <IndianRupee className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">
+                          Salary
+                        </p>
+                        <p className="text-sm text-gray-800 font-medium">
+                          ₹{Number(data.salary).toLocaleString("en-IN")}/month
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Calendar className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">
+                          Join Date
+                        </p>
+                        <p className="text-sm text-gray-800 font-medium">
+                          {formatDate(data.joinDate)}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {data.location && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <MapPin className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            Location
+                          </p>
+                          <p className="text-sm text-gray-800 font-medium">
+                            {data.location}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {data.joinedDate && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <Calendar className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            Joined Date
+                          </p>
+                          <p className="text-sm text-gray-800 font-medium">
+                            {formatDate(data.joinedDate)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {data.dateOfBirth && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <Calendar className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            Date of Birth
+                          </p>
+                          <p className="text-sm text-gray-800 font-medium">
+                            {formatDate(data.dateOfBirth)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-blue-600" />
+                {isEmployee ? "Status Overview" : "Account Details"}
+              </h3>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 space-y-3 border border-blue-200 shadow-sm">
+                {isEmployee ? (
+                  <>
+                    <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                      <span className="text-sm text-gray-600 font-medium">
+                        Invite Status
+                      </span>
+                      <span className="text-xs font-semibold text-green-700 px-2 py-1 bg-green-100 rounded-full">
+                        {data.inviteStatus}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                      <span className="text-sm text-gray-600 font-medium">
+                        Account Status
+                      </span>
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          data.active
+                            ? "text-green-700 bg-green-100"
+                            : "text-red-700 bg-red-100"
+                        }`}
+                      >
+                        {data.active ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    {data.profileEditRequest && (
+                      <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                        <span className="text-sm text-gray-600 font-medium">
+                          Edit Request
+                        </span>
+                        <span className="text-xs font-semibold text-amber-700 px-2 py-1 bg-amber-100 rounded-full capitalize">
+                          {data.profileEditRequest.status}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          Started: {formatDate(item.subscription.startDate)}
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {data.subscription && (
+                      <>
+                        <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Subscription
+                          </span>
+                          <span className="text-xs font-semibold text-purple-700 px-2 py-1 bg-purple-100 rounded-full capitalize">
+                            {data.subscription.plan}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Status
+                          </span>
+                          <span
+                            className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
+                              data.subscription.status === "active"
+                                ? "text-green-700 bg-green-100"
+                                : "text-gray-700 bg-gray-100"
+                            }`}
+                          >
+                            {data.subscription.status}
+                          </span>
+                        </div>
+                        {data.subscription.validUntil && (
+                          <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                            <span className="text-sm text-gray-600 font-medium">
+                              Valid Until
+                            </span>
+                            <span className="text-xs font-semibold text-gray-700">
+                              {formatDate(data.subscription.validUntil)}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {data.lastActive && (
+                      <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+                        <span className="text-sm text-gray-600 font-medium">
+                          Last Active
+                        </span>
+                        <span className="text-xs font-semibold text-gray-700">
+                          {formatDate(data.lastActive)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          Valid Until:{" "}
-                          {formatDate(item.subscription.validUntil)}
-                        </span>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {!isEmployee &&
+                (data.followers?.length > 0 ||
+                  data.following?.length > 0 ||
+                  data.friends?.length > 0) && (
+                  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                    <h4 className="font-bold text-gray-800 mb-3 text-sm flex items-center gap-2">
+                      <Users className="w-4 h-4 text-blue-600" />
+                      Social Stats
+                    </h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xl font-bold text-blue-600">
+                          {data.followers?.length || 0}
+                        </p>
+                        <p className="text-xs text-gray-600">Followers</p>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xl font-bold text-blue-600">
+                          {data.following?.length || 0}
+                        </p>
+                        <p className="text-xs text-gray-600">Following</p>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xl font-bold text-blue-600">
+                          {data.friends?.length || 0}
+                        </p>
+                        <p className="text-xs text-gray-600">Friends</p>
                       </div>
                     </div>
                   </div>
