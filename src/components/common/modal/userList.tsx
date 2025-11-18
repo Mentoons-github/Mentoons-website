@@ -39,7 +39,6 @@ const UserListModal: React.FC<UserListModalProps> = ({
           { userIds },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("followers or following === >", response.data.data);
         const fetchedUsers = response.data.data.map((user: any) => ({
           _id: user._id,
           name: user.name,

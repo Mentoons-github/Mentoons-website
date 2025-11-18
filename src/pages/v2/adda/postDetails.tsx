@@ -7,7 +7,7 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { BiArrowBack, BiComment, BiLock } from "react-icons/bi";
+import {  BiComment, BiLock } from "react-icons/bi";
 import {
   FaBookmark,
   FaMapMarkerAlt,
@@ -149,7 +149,7 @@ const PostDetailsPage = () => {
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Check for redirect from authentication
   useEffect(() => {
@@ -384,13 +384,13 @@ const PostDetailsPage = () => {
         <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
           {/* User information */}
           <div className="flex items-start gap-4 mb-4">
-            <button
+            {/* <button
               onClick={() => navigate("/adda")}
               className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
             >
               <BiArrowBack className="w-5 h-5" />
-            </button>
-            <div className="overflow-hidden rounded-full w-14 h-14">
+            </button> */}
+            <div className="overflow-hidden rounded-full w-14 h-14 ml-5">
               <img
                 src={post.user.picture}
                 alt={`${post.user.name}'s profile`}

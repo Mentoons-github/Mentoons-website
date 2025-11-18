@@ -117,7 +117,7 @@ export const HIRING: Hiring[] = [
     bg: "#EC9600",
   },
   {
-    _id: "6808d7fb9488a1497d6e535d",
+    _id: "68b6a61e8e80f30190a5f568",
     job: "Psychologists",
     description:
       "Are you a passionate Psychologist ready to guide others toward self-discovery? We’re looking for talented professionals to be a part of Mentoons Mythos!",

@@ -28,6 +28,13 @@ const FAQ = ({ data }: { data: object }) => {
 
   const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (message.trim().length < 50) {
+      setShowErrorModal(true);
+      setShowErrorMessage("Message must be at least 50 characters long.");
+      return;
+    }
+
     try {
       const currentUrl = window.location.pathname;
       let dynamicQueryType = "general";
@@ -54,11 +61,12 @@ const FAQ = ({ data }: { data: object }) => {
           queryType: finalQueryType,
         }
       );
-      console.log(queryResponse);
       if (queryResponse.status === 201) {
+        setMessage("");
         setShowEnquiryModal(true);
       }
     } catch (error: any) {
+      setMessage("");
       setShowErrorModal(true);
       setShowErrorMessage(
         error?.response?.data?.message || "Failed to submit message"
@@ -88,6 +96,13 @@ const FAQ = ({ data }: { data: object }) => {
     };
     fetchUserDetails();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (userDetails) {
+      setName(userDetails.name || "");
+      setEmail(userDetails.email || "");
+    }
+  }, [userDetails]);
 
   return (
     <motion.section
@@ -179,7 +194,7 @@ const FAQ = ({ data }: { data: object }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.55 }}
                 type="text"
-                value={userDetails?.name || name}
+                value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
                 placeholder="Your Name"
@@ -189,13 +204,14 @@ const FAQ = ({ data }: { data: object }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 type="email"
-                value={userDetails?.email || email}
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 transition border border-black outline-none sm:p-4 rounded-3xl focus:ring-2 focus:ring-blue-400"
                 placeholder="Your Email"
               />
             </motion.div>
             <motion.textarea
+              required
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
@@ -225,7 +241,7 @@ const FAQ = ({ data }: { data: object }) => {
       )}
       {showErrorModal && (
         <ErrorModal
-          heading="Already Added Query"
+          heading="Faild to submit query"
           error={showErrorMessage}
           isOpen={showErrorModal}
           onClose={() => setShowErrorModal(false)}

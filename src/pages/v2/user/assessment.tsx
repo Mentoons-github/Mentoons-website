@@ -123,7 +123,7 @@ const Assessment = () => {
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-6 sm:mb-8 lg:mb-10">
                   Available Assessments
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3  gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8">
                   {products.map((product, index) => (
                     <div
                       key={product._id || index}
