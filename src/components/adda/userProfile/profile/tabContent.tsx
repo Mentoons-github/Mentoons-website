@@ -1,9 +1,10 @@
 import { format } from "date-fns";
 import { ProfilePost } from "@/types/adda/userProfile";
 import RewardsSection from "@/components/adda/userProfile/rewardsSection";
-import PostCard, { PostData } from "@/components/adda/home/addPosts/PostCard";
+import { PostData } from "@/components/adda/home/addPosts/PostCard";
 import { ProfileUserDetails } from "@/types/adda/userProfile";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import ProfilePostCard from "../../home/addPosts/ProfilePostCard";
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -22,10 +23,12 @@ const ProfileTabContent = ({
   setUserPosts,
   setShowCompletionForm,
 }: ProfileTabContentProps) => {
+  const navigate = useNavigate();
+
   switch (activeTab) {
     case "Posts":
       return (
-        <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
+        <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8 overflow-y-auto ">
           {userPosts.length === 0 ? (
             <div className="text-center py-10 sm:py-12 lg:py-16">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -42,9 +45,9 @@ const ProfileTabContent = ({
               </button> */}
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto ">
               {userPosts.map((post) => (
-                <PostCard
+                <ProfilePostCard
                   setUserPosts={setUserPosts}
                   isUser={true}
                   key={post._id}
@@ -98,7 +101,10 @@ const ProfileTabContent = ({
                   <span className="text-xs text-gray-500">
                     Saved {format(new Date(post.createdAt), "MMMM d, yyyy")}
                   </span>
-                  <button className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium">
+                  <button
+                    className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium"
+                    onClick={() => navigate(`/adda/post/${post._id}`)}
+                  >
                     View →
                   </button>
                 </div>

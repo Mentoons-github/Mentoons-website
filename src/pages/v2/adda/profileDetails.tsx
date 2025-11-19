@@ -3,7 +3,7 @@ import AboutSection from "@/components/adda/userProfile/aboutSection";
 import FriendsSection from "@/components/adda/userProfile/freindSections";
 import ErrorDisplay from "@/components/adda/userProfile/loader/errorDisplay";
 import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
-import PostsList from "@/components/adda/userProfile/postList";
+// import PostsList from "@/components/adda/userProfile/postList";
 import ProfileHeader from "@/components/adda/userProfile/profilesHeader";
 import ProfileTabs from "@/components/adda/userProfile/profileTabs";
 import { TabType, User, UserSummary } from "@/types";
@@ -11,6 +11,8 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Post, PostType } from "./userProfile";
+import ProfilePostCard from "@/components/adda/home/addPosts/ProfilePostCard";
+import { PostData } from "@/components/adda/home/addPosts/PostCard";
 
 const ProfileDetails = () => {
   const { userId } = useParams();
@@ -39,7 +41,6 @@ const ProfileDetails = () => {
       return;
     }
 
-
     const fetchUserData = async () => {
       try {
         const token = await getToken();
@@ -52,7 +53,6 @@ const ProfileDetails = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data.data,'jjjjjjjjjjjjjjjjjjjjjjj')
         console.log(response.data.data.isFriend);
         setUser(response.data.data.user);
         setFollowers(response.data.data.user.followers);
@@ -82,7 +82,6 @@ const ProfileDetails = () => {
           },
         });
 
-        console.log(response.data.data);
         setFriends(response.data.data);
         setIsLoading(false);
       } catch (err) {
@@ -107,7 +106,6 @@ const ProfileDetails = () => {
           },
         });
 
-        console.log(response.data.data);
 
         const formattedPosts = response.data.data.map(
           (post: Partial<Post>) => ({
@@ -161,7 +159,19 @@ const ProfileDetails = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "posts":
-        return <PostsList posts={userPosts} user={user} />;
+        return (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto ">
+            {userPosts.map((post) => (
+              <ProfilePostCard
+                setUserPosts={setUserPosts}
+                isUser={true}
+                key={post._id}
+                post={post as unknown as PostData}
+              />
+            ))}
+          </div>
+        );
+      // <PostsList posts={userPosts} user={user} />;
 
       case "about":
         return <AboutSection user={user} />;
