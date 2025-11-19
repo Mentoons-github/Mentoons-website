@@ -2,7 +2,6 @@ import LeftSection from "@/components/adda/userProfile/profile/leftSection";
 import ProfileFormModal from "./adda/userProfile/profieForm";
 import CompleteProfileModal from "@/components/adda/userProfile/CompleteProfileModal";
 import UserListModal from "@/components/common/modal/userList";
-import PhotosCard from "./adda/userProfile/cards/photosCard";
 import { Camera } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Confetti from "react-confetti";
