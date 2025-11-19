@@ -28,7 +28,7 @@ const ProfileTabContent = ({
   switch (activeTab) {
     case "Posts":
       return (
-        <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
+        <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8 overflow-y-auto ">
           {userPosts.length === 0 ? (
             <div className="text-center py-10 sm:py-12 lg:py-16">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -45,7 +45,7 @@ const ProfileTabContent = ({
               </button> */}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3 space-y-3 sm:space-y-4 lg:space-y-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto ">
               {userPosts.map((post) => (
                 <ProfilePostCard
                   setUserPosts={setUserPosts}

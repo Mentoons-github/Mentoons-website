@@ -147,7 +147,7 @@ const Profile = () => {
     try {
       const [userResponse, postsResponse, savedPostsResponse] =
         await Promise.all([
-          axios.get(`${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`, {
+          axios.get(`${import.meta.env.VITE_PROD_URL}/user/user`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           axios.get(
@@ -614,7 +614,7 @@ const Profile = () => {
                 setModalType={setModalType}
               />
             </div>
-            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden ">
               <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                 <div className="flex flex-wrap gap-2 sm:gap-3 bg-white rounded-xl p-1 w-fit shadow-sm">
                   {["Posts", "Rewards", "Saved", "Details"].map((tab) => (
@@ -643,7 +643,7 @@ const Profile = () => {
                   ))}
                 </div>
               </div>
-              <div className="p-4 sm:p-6 lg:p-8">
+              <div className="p-4 sm:p-6 lg:p-8 h-screen overflow-y-auto hide-scrollbar">
                 {activeTab === "Posts" && (
                   <div className="mb-4 sm:mb-6">
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-900">

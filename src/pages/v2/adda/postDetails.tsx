@@ -1,13 +1,17 @@
+import axiosInstance from "@/api/axios";
 import Reactions from "@/components/adda/home/addPosts/likes/reactions";
 import ReactionsDisplay from "@/components/adda/home/addPosts/likes/ReactionsDisplay";
 import Share from "@/components/adda/home/addPosts/share/share";
+import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
+import { useStatusModal } from "@/context/adda/statusModalContext";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import {  BiComment, BiLock } from "react-icons/bi";
+import { useEffect, useRef, useState } from "react";
+import { BiComment, BiLock } from "react-icons/bi";
+import { BsThreeDots } from "react-icons/bs";
 import {
   FaBookmark,
   FaMapMarkerAlt,
@@ -15,6 +19,8 @@ import {
   FaUserPlus,
 } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
+import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -146,10 +152,44 @@ const PostDetailsPage = () => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"report" | "block">("report");
+  const [isUserBlocked, setIsUserBlocked] = useState(false);
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const location = useLocation();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { showStatus } = useStatusModal();
+
+  console.log(user?.id, "hhh");
+  console.log(post?.user._id, "jjjjjjjjjjjjj");
+
+  const fetchUser = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const res = await axiosInstance.get("user/user", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserId(res.data.data._id);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      setError(err instanceof Error ? err.message : "Failed to load user data");
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   // Check for redirect from authentication
   useEffect(() => {
@@ -284,6 +324,41 @@ const PostDetailsPage = () => {
     }
   };
 
+  const handleDeletePost = async () => {
+    try {
+      const token = await getToken();
+      const response = await axios.delete(
+        `${import.meta.env.VITE_PROD_URL}/posts/${post?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success === true) {
+        // setUserPosts?.((prev) =>
+        //   prev.filter((userPost) => userPost._id !== post._id)
+        // );
+        navigate(-1)
+        showStatus("success", "Post deleted successfully.");
+        // if (onDelete) {
+        //   onDelete(post._id);
+        // }
+      } else {
+        showStatus("error", "Failed to delete post.");
+      }
+    } catch (error: any) {
+      console.error("Error deleting post:", error);
+      showStatus(
+        "error",
+        error?.response?.data?.message || "Something went wrong."
+      );
+    } finally {
+      setShowDropdown(false);
+    }
+  };
+
   const handleSavePost = async () => {
     // If not signed in, show auth modal
     if (!isSignedIn) {
@@ -320,6 +395,56 @@ const PostDetailsPage = () => {
     } catch (err) {
       console.error("Error toggling save status:", err);
     }
+  };
+
+  const handleReportAbuse = () => {
+    if (!isSignedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+    console.log("Opening Report Abuse modal");
+    setModalType("report");
+    setIsModalOpen(true);
+    setShowDropdown(false);
+  };
+
+  const handleUnblockUser = async () => {
+    if (!isSignedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/users/unblock`,
+        {
+          userId: post?.user._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setIsUserBlocked(false);
+      toast.success("User unblocked successfully.");
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      toast.error("Failed to unblock user. Please try again.");
+    } finally {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleBlockUser = () => {
+    if (!isSignedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+    console.log("Opening Block User modal");
+    setModalType("block");
+    setIsModalOpen(true);
+    setShowDropdown(false);
   };
 
   const handleReactionUpdate = (counts: Record<string, number>) => {
@@ -363,6 +488,20 @@ const PostDetailsPage = () => {
     );
   }
 
+  const isUser = userId == post?.user._id;
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!isSignedIn) {
+      setShowAuthModal(true);
+      return;
+    } else if (isUser) {
+      navigate("/adda/user-profile");
+    } else {
+      navigate(`/adda/user/${post.user._id}`);
+    }
+  };
+
   const displayedComments = showAllComments
     ? post.comments
     : post.comments.slice(0, 3);
@@ -383,32 +522,96 @@ const PostDetailsPage = () => {
         {/* Post details */}
         <div className="p-5 bg-white border border-orange-200 rounded-lg shadow-sm">
           {/* User information */}
-          <div className="flex items-start gap-4 mb-4">
-            {/* <button
-              onClick={() => navigate("/adda")}
-              className="p-2 text-orange-600 transition-colors bg-orange-100 rounded-full hover:bg-orange-200"
+          <div className="flex justify-between">
+            <div
+              className="flex items-start gap-4 mb-4 cursor-pointer"
+              onClick={(e) => handleClick(e)}
             >
-              <BiArrowBack className="w-5 h-5" />
-            </button> */}
-            <div className="overflow-hidden rounded-full w-14 h-14 ml-5">
-              <img
-                src={post.user.picture}
-                alt={`${post.user.name}'s profile`}
-                className="object-cover w-full h-full rounded-full"
-              />
-            </div>
-            <div className="flex flex-col">
-              <h3 className="text-xl font-bold">{post.user.name}</h3>
-              <p className="text-sm text-gray-600">{post.user.role}</p>
-              <div className="flex items-center text-sm text-gray-500">
-                <span>{formatDate(post.createdAt)}</span>
-                {post.location && (
-                  <span className="flex items-center ml-2">
-                    <FaMapMarkerAlt className="mr-1 text-red-400" />
-                    {post.location}
-                  </span>
-                )}
+              <div className="overflow-hidden rounded-full w-14 h-14 ml-5">
+                <img
+                  src={post.user.picture}
+                  alt={`${post.user.name}'s profile`}
+                  className="object-cover w-full h-full rounded-full"
+                />
               </div>
+              <div className="flex flex-col">
+                <h3 className="text-xl font-bold">{post.user.name}</h3>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span>{formatDate(post.createdAt)}</span>
+                  {post.location && (
+                    <span className="flex items-center ml-2">
+                      <FaMapMarkerAlt className="mr-1 text-red-400" />
+                      {post.location}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative" ref={dropdownRef}>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 text-gray-500 transition-colors rounded-full hover:bg-orange-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log(
+                    "Toggling dropdown, current state:",
+                    showDropdown
+                  );
+                  setShowDropdown((prev) => !prev);
+                }}
+              >
+                <BsThreeDots className="w-5 h-5" />
+              </motion.button>
+
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
+                >
+                  {isUser ? (
+                    <button
+                      className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                      onClick={handleDeletePost}
+                    >
+                      <RiDeleteBin6Line className="w-5 h-5 mr-2" />
+                      Delete Post
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="flex items-center w-full px-4 py-3 text-left text-orange-600 transition-colors hover:bg-gray-50"
+                        onClick={handleReportAbuse}
+                      >
+                        <MdReport className="w-5 h-5 mr-2" />
+                        Report Abuse
+                      </button>
+                      <button
+                        className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                        onClick={
+                          isUserBlocked ? handleUnblockUser : handleBlockUser
+                        }
+                      >
+                        {isUserBlocked ? (
+                          <>
+                            <MdPersonAdd className="w-5 h-5 mr-2" />
+                            Unblock User
+                          </>
+                        ) : (
+                          <>
+                            <MdBlock className="w-5 h-5 mr-2" />
+                            Block User
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
+                </motion.div>
+              )}
             </div>
           </div>
 
@@ -667,6 +870,14 @@ const PostDetailsPage = () => {
           </div>
         </div>
       </div>
+      <ReportAbuseModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        modalType={modalType}
+        userId={post.user._id}
+        contentId={post._id}
+        reportType="post"
+      />
     </>
   );
 };
