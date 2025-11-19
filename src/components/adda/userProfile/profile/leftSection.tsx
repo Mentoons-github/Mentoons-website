@@ -21,15 +21,14 @@ interface LeftSectionProps {
   handleProfileSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   removeInterest: (index: number) => void;
   updateInterests: () => Promise<void>;
-  coverPhotoInputRef: React.RefObject<HTMLInputElement>;
   profilePhotoInputRef: React.RefObject<HTMLInputElement>;
-  handleCoverPhotoChange: (file: File) => Promise<void>;
   handleProfilePhotoChange: (file: File) => Promise<void>;
   totalFollowers: string[];
   totalFollowing: string[];
   setModalType: React.Dispatch<
     React.SetStateAction<"followers" | "following" | null>
   >;
+  onProfilePhotoSelect?: (file: File) => void;
 }
 
 const LeftSection = ({
@@ -43,26 +42,31 @@ const LeftSection = ({
   totalFollowers,
   totalFollowing,
   setModalType,
+  onProfilePhotoSelect,
 }: LeftSectionProps) => {
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { showModal } = useSubmissionModal();
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    handler: (file: File) => Promise<void>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        showModal({
-          isSubmitting: false,
-          currentStep: "error",
-          message: "File size should not exceed 5MB",
-        });
-        return;
-      }
-      await handler(file);
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "File size should not exceed 5MB",
+      });
+      return;
+    }
+
+    if (onProfilePhotoSelect) {
+      onProfilePhotoSelect(file);
+    } else {
+      await handleProfilePhotoChange(file);
     }
   };
 
@@ -104,7 +108,7 @@ const LeftSection = ({
                 ref={profilePhotoInputRef}
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => handleFileChange(e, handleProfilePhotoChange)}
+                onChange={handleFileChange}
               />
               <div
                 className="absolute bottom-0 right-0 p-1 sm:p-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
@@ -113,6 +117,7 @@ const LeftSection = ({
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-white group-hover:rotate-90 transition-transform duration-300" />
               </div>
             </div>
+
             <div className="text-center mt-3 sm:mt-4">
               <h1 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">
                 {userDetails.name || "User Name"}
@@ -127,6 +132,7 @@ const LeftSection = ({
                 </span>
               </div>
             </div>
+
             <div className="flex items-center gap-4 sm:gap-6 mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-50 rounded-xl w-full justify-center">
               <button
                 className="flex flex-col items-center text-center group cursor-pointer"
@@ -153,6 +159,7 @@ const LeftSection = ({
               </button>
             </div>
           </div>
+
           <div className="mt-4 sm:mt-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h2 className="font-bold text-base sm:text-lg text-gray-900">
@@ -163,6 +170,7 @@ const LeftSection = ({
                 onClick={() => setIsEditing(true)}
               />
             </div>
+
             <div className="grid sm:grid-cols-2 sm:gap-4 space-y-3 sm:space-y-0">
               <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="p-1 sm:p-2 bg-orange-100 rounded-lg">
@@ -175,6 +183,7 @@ const LeftSection = ({
                   <p className="text-xs text-gray-500">Current Location</p>
                 </div>
               </div>
+
               <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="p-1 sm:p-2 bg-blue-100 rounded-lg">
                   <CalendarRange className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
@@ -188,6 +197,7 @@ const LeftSection = ({
                   <p className="text-xs text-gray-500">Member Since</p>
                 </div>
               </div>
+
               <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="p-1 sm:p-2 bg-green-100 rounded-lg">
                   <Hourglass className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -204,6 +214,7 @@ const LeftSection = ({
                   <p className="text-xs text-gray-500">Date of Birth</p>
                 </div>
               </div>
+
               <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="p-1 sm:p-2 bg-green-100 rounded-lg">
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -216,6 +227,7 @@ const LeftSection = ({
                 </div>
               </div>
             </div>
+
             <div className="space-y-3 mt-4 sm:mt-6">
               <button
                 className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white rounded-xl h-10 sm:h-12 font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 text-xs sm:text-sm"

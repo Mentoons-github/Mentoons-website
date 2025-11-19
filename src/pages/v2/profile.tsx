@@ -12,6 +12,9 @@ import ProfileTabContent from "@/components/adda/userProfile/profile/tabContent"
 import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
 import ProfileCompletionWidget from "@/components/adda/cards/profileCompletion";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
+import Croppr from "croppr";
+import "croppr/dist/croppr.css";
+import PhotosCard from "./adda/userProfile/cards/photosCard";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Posts");
@@ -31,6 +34,16 @@ const Profile = () => {
   const { user } = useUser();
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
+  const coverImgRef = useRef<HTMLImageElement>(null);
+  const profileImgRef = useRef<HTMLImageElement>(null);
+  const coverCropInstance = useRef<any>(null);
+  const profileCropInstance = useRef<any>(null);
+  const [showCoverCropper, setShowCoverCropper] = useState(false);
+  const [showProfileCropper, setShowProfileCropper] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [coverImageLoaded, setCoverImageLoaded] = useState(false);
+  const [profileImageLoaded, setProfileImageLoaded] = useState(false);
 
   const profileFields = [
     { field: "name", label: "Name", required: true },
@@ -46,73 +59,6 @@ const Profile = () => {
     { field: "gender", label: "Gender" },
     { field: "socialLinks", label: "Social Links" },
   ];
-
-  const getProfileCompletion = () => {
-    let completedFields = 0;
-    if (!userDetails) return 0;
-
-    profileFields.forEach((field) => {
-      const value = userDetails[field.field as keyof ProfileUserDetails];
-      if (field.field === "interests") {
-        if ((value as string[])?.length >= (field.minLength || 1)) {
-          completedFields++;
-        }
-      } else if (field.field === "socialLinks") {
-        if ((value as Array<{ label: string; url: string }>)?.length >= 1) {
-          completedFields++;
-        }
-      } else if (field.field === "bio") {
-        if ((value as string)?.length >= (field.minLength || 1)) {
-          completedFields++;
-        }
-      } else if (field.field === "picture") {
-        if (value || user?.imageUrl) {
-          completedFields++;
-        }
-      } else if (value && String(value).trim() !== "") {
-        completedFields++;
-      }
-    });
-
-    return Math.round((completedFields / profileFields.length) * 100);
-  };
-
-  const getIncompleteFields = () => {
-    const incompleteFields: string[] = [];
-    if (!userDetails) return profileFields.map((field) => field.label);
-
-    profileFields.forEach((field) => {
-      if (field.required) return;
-      const value = userDetails[field.field as keyof ProfileUserDetails];
-      if (field.field === "interests") {
-        if (
-          !(value as string[])?.length ||
-          (value as string[])?.length < (field.minLength || 1)
-        ) {
-          incompleteFields.push(field.label);
-        }
-      } else if (field.field === "socialLinks") {
-        if (!(value as Array<{ label: string; url: string }>)?.length) {
-          incompleteFields.push(field.label);
-        }
-      } else if (field.field === "bio") {
-        if (
-          !(value as string) ||
-          (value as string).length < (field.minLength || 1)
-        ) {
-          incompleteFields.push(field.label);
-        }
-      } else if (field.field === "picture") {
-        if (!value && !user?.imageUrl) {
-          incompleteFields.push(field.label);
-        }
-      } else if (!value || String(value).trim() === "") {
-        incompleteFields.push(field.label);
-      }
-    });
-
-    return incompleteFields;
-  };
 
   const [userDetails, setUserDetails] = useState<ProfileUserDetails>({
     _id: "",
@@ -132,6 +78,56 @@ const Profile = () => {
     joinedDate: "",
   });
 
+  const getProfileCompletion = () => {
+    let completedFields = 0;
+    if (!userDetails) return 0;
+    profileFields.forEach((field) => {
+      const value = userDetails[field.field as keyof ProfileUserDetails];
+      if (field.field === "interests") {
+        if ((value as string[])?.length >= (field.minLength || 1))
+          completedFields++;
+      } else if (field.field === "socialLinks") {
+        if ((value as Array<{ label: string; url: string }>)?.length >= 1)
+          completedFields++;
+      } else if (field.field === "bio") {
+        if ((value as string)?.length >= (field.minLength || 1))
+          completedFields++;
+      } else if (field.field === "picture") {
+        if (value || user?.imageUrl) completedFields++;
+      } else if (value && String(value).trim() !== "") completedFields++;
+    });
+    return Math.round((completedFields / profileFields.length) * 100);
+  };
+
+  const getIncompleteFields = () => {
+    const incompleteFields: string[] = [];
+    if (!userDetails) return profileFields.map((f) => f.label);
+    profileFields.forEach((field) => {
+      if (field.required) return;
+      const value = userDetails[field.field as keyof ProfileUserDetails];
+      if (field.field === "interests") {
+        if (
+          !(value as string[])?.length ||
+          (value as string[])?.length < (field.minLength || 1)
+        )
+          incompleteFields.push(field.label);
+      } else if (field.field === "socialLinks") {
+        if (!(value as Array<{ label: string; url: string }>)?.length)
+          incompleteFields.push(field.label);
+      } else if (field.field === "bio") {
+        if (
+          !(value as string) ||
+          (value as string).length < (field.minLength || 1)
+        )
+          incompleteFields.push(field.label);
+      } else if (field.field === "picture") {
+        if (!value && !user?.imageUrl) incompleteFields.push(field.label);
+      } else if (!value || String(value).trim() === "")
+        incompleteFields.push(field.label);
+    });
+    return incompleteFields;
+  };
+
   const profileCompletionPercentage = getProfileCompletion();
   const isProfileComplete = profileCompletionPercentage === 100;
   const incompleteFields = getIncompleteFields();
@@ -139,10 +135,7 @@ const Profile = () => {
   const fetchUserData = async () => {
     setIsFetchingUserData(true);
     const token = await getToken();
-    if (!token) {
-      setIsFetchingUserData(false);
-      return;
-    }
+    if (!token) return setIsFetchingUserData(false);
     try {
       const [userResponse, postsResponse, savedPostsResponse] =
         await Promise.all([
@@ -153,19 +146,15 @@ const Profile = () => {
             `${import.meta.env.VITE_PROD_URL}/posts/user/${
               user?.id
             }?currentUser=${user?.id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(`${import.meta.env.VITE_PROD_URL}/feeds/saved`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-
       setUserDetails(userResponse.data.data);
       setTotalFollowers(userResponse.data.data.followers || []);
       setTotalFollowing(userResponse.data.data.following || []);
-
       setUserPosts(
         postsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
@@ -181,7 +170,6 @@ const Profile = () => {
           visibility: post.visibility || "public",
         }))
       );
-
       setUserSavedPosts(
         savedPostsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
@@ -203,8 +191,6 @@ const Profile = () => {
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to load profile data",
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
       });
     } finally {
       setIsFetchingUserData(false);
@@ -213,24 +199,303 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (user?.id) {
-      fetchUserData();
-    }
-  }, [
-    user?.id,
-    getToken,
-    userDetails.name,
-    userDetails.picture,
-    userDetails.email,
-  ]);
+    if (user?.id) fetchUserData();
+  }, [user?.id, getToken]);
 
   useEffect(() => {
-    if (!isProfileComplete) {
-      setShowProfileModal(true);
-    } else {
-      localStorage.setItem("profileModalShown", "true");
-    }
+    if (!isProfileComplete) setShowProfileModal(true);
   }, [isProfileComplete]);
+
+  useEffect(() => {
+    if (
+      !showCoverCropper ||
+      !coverImgRef.current ||
+      !coverImageUrl ||
+      !coverImageLoaded
+    )
+      return;
+
+    const timer = setTimeout(() => {
+      if (
+        coverImgRef.current &&
+        coverImgRef.current.offsetWidth > 0 &&
+        coverImgRef.current.offsetHeight > 0
+      ) {
+        if (coverCropInstance.current) {
+          try {
+            coverCropInstance.current.destroy();
+          } catch {}
+          coverCropInstance.current = null;
+        }
+        coverCropInstance.current = new Croppr(coverImgRef.current, {
+          aspectRatio: 3 / 1,
+          startSize: [90, 50, "%"],
+        });
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      if (coverCropInstance.current) {
+        try {
+          coverCropInstance.current.destroy();
+        } catch {}
+        coverCropInstance.current = null;
+      }
+    };
+  }, [showCoverCropper, coverImageUrl, coverImageLoaded]);
+
+  useEffect(() => {
+    if (
+      !showProfileCropper ||
+      !profileImgRef.current ||
+      !profileImageUrl ||
+      !profileImageLoaded
+    )
+      return;
+
+    const timer = setTimeout(() => {
+      if (
+        profileImgRef.current &&
+        profileImgRef.current.offsetWidth > 0 &&
+        profileImgRef.current.offsetHeight > 0
+      ) {
+        if (profileCropInstance.current) {
+          try {
+            profileCropInstance.current.destroy();
+          } catch {}
+          profileCropInstance.current = null;
+        }
+        profileCropInstance.current = new Croppr(profileImgRef.current, {
+          aspectRatio: 1,
+          startSize: [70, 70, "%"],
+        });
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      if (profileCropInstance.current) {
+        try {
+          profileCropInstance.current.destroy();
+        } catch {}
+        profileCropInstance.current = null;
+      }
+    };
+  }, [showProfileCropper, profileImageUrl, profileImageLoaded]);
+
+  useEffect(() => {
+    return () => {
+      if (coverImageUrl) URL.revokeObjectURL(coverImageUrl);
+      if (profileImageUrl) URL.revokeObjectURL(profileImageUrl);
+    };
+  }, []);
+
+  const applyCrop = async (type: "cover" | "profile") => {
+    const instance =
+      type === "cover"
+        ? coverCropInstance.current
+        : profileCropInstance.current;
+    const imgUrl = type === "cover" ? coverImageUrl : profileImageUrl;
+    const setShow =
+      type === "cover" ? setShowCoverCropper : setShowProfileCropper;
+    const setUrl = type === "cover" ? setCoverImageUrl : setProfileImageUrl;
+    const setLoaded =
+      type === "cover" ? setCoverImageLoaded : setProfileImageLoaded;
+
+    if (!instance || !imgUrl) return;
+
+    const { x, y, width, height } = instance.getValue();
+    const img = new Image();
+    img.src = imgUrl;
+    await img.decode();
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const croppedFile = new File(
+          [blob],
+          type === "cover" ? "cover.jpg" : "profile.jpg",
+          {
+            type: "image/jpeg",
+          }
+        );
+        if (type === "cover") await handleCoverPhotoChange(croppedFile);
+        else await handleProfilePhotoChange(croppedFile);
+
+        setShow(false);
+        setLoaded(false);
+        setTimeout(() => {
+          setUrl(null);
+          if (imgUrl) URL.revokeObjectURL(imgUrl);
+        }, 300);
+
+        try {
+          instance.destroy();
+        } catch {}
+        if (type === "cover") coverCropInstance.current = null;
+        else profileCropInstance.current = null;
+      }
+    }, "image/jpeg");
+  };
+
+  const closeCropper = (type: "cover" | "profile") => {
+    const instance =
+      type === "cover"
+        ? coverCropInstance.current
+        : profileCropInstance.current;
+    const url = type === "cover" ? coverImageUrl : profileImageUrl;
+    const setShow =
+      type === "cover" ? setShowCoverCropper : setShowProfileCropper;
+    const setUrl = type === "cover" ? setCoverImageUrl : setProfileImageUrl;
+    const setLoaded =
+      type === "cover" ? setCoverImageLoaded : setProfileImageLoaded;
+
+    if (instance) {
+      try {
+        instance.destroy();
+      } catch {}
+    }
+    if (type === "cover") coverCropInstance.current = null;
+    else profileCropInstance.current = null;
+
+    setShow(false);
+    setLoaded(false);
+    setUrl(null);
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 300);
+  };
+
+  const handleFileSelect = (file: File, type: "cover" | "profile") => {
+    if (file.size > 5 * 1024 * 1024) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "File size should not exceed 5MB",
+      });
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    if (type === "cover") {
+      setCoverImageUrl(url);
+      setCoverImageLoaded(false);
+      setShowCoverCropper(true);
+    } else {
+      setProfileImageUrl(url);
+      setProfileImageLoaded(false);
+      setShowProfileCropper(true);
+    }
+  };
+
+  const handleCoverPhotoChange = async (file: File) => {
+    showModal({
+      isSubmitting: true,
+      currentStep: "uploading",
+      message: "Uploading cover photo...",
+    });
+    const token = await getToken();
+    if (!token) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+      });
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadResponse = await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
+      if (!fileUrl) throw new Error("Upload failed");
+
+      await user?.update({ unsafeMetadata: { coverPhoto: fileUrl } });
+      await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { coverImage: fileUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Cover photo updated!",
+      });
+      setTimeout(hideModal, 2000);
+    } catch (error) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to upload cover photo",
+      });
+    }
+  };
+
+  const handleProfilePhotoChange = async (file: File) => {
+    showModal({
+      isSubmitting: true,
+      currentStep: "uploading",
+      message: "Uploading profile photo...",
+    });
+    const token = await getToken();
+    if (!token) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Authentication required",
+      });
+      return;
+    }
+    try {
+      await user?.setProfileImage({ file });
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadResponse = await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/upload/file`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
+      if (!fileUrl) throw new Error("Upload failed");
+
+      await axios.put(
+        `${import.meta.env.VITE_PROD_URL}/user/profile`,
+        { picture: fileUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Profile photo updated!",
+      });
+      setTimeout(hideModal, 2000);
+    } catch (error) {
+      showModal({
+        isSubmitting: false,
+        currentStep: "error",
+        message: "Failed to upload profile photo",
+      });
+    }
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -239,7 +504,6 @@ const Profile = () => {
       currentStep: "saving",
       message: "Updating profile...",
     });
-
     const profileData = {
       name: userDetails.name || user?.fullName || "",
       email: userDetails.email || user?.primaryEmailAddress?.emailAddress || "",
@@ -253,208 +517,39 @@ const Profile = () => {
       interests: userDetails.interests || [],
       socialLinks: userDetails.socialLinks || [],
       picture: userDetails.picture || user?.imageUrl || "",
-      coverImage: (user?.unsafeMetadata?.coverPhoto as string) || "",
+      coverImage: userDetails.coverImage || "",
     };
-
     const token = await getToken();
-    if (!token) {
-      showModal({
+    if (!token)
+      return showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Authentication required",
-        error: "No token found",
       });
-      return;
-    }
 
     try {
-      const response = await axios.put(
+      await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (response.status === 200) {
-        setUserDetails((prev) => ({ ...prev, ...profileData }));
-        setShowCompletionForm(false);
-        setShowConfetti(true);
-        showModal({
-          isSubmitting: false,
-          currentStep: "success",
-          message: "Profile updated successfully!",
-        });
-        setTimeout(() => {
-          setShowConfetti(false);
-          hideModal();
-        }, 2000);
-      }
+      setUserDetails((prev) => ({ ...prev, ...profileData }));
+      setShowCompletionForm(false);
+      setShowConfetti(true);
+      showModal({
+        isSubmitting: false,
+        currentStep: "success",
+        message: "Profile updated!",
+      });
+      setTimeout(() => {
+        setShowConfetti(false);
+        hideModal();
+      }, 2000);
     } catch (error) {
-      console.error("Error updating profile:", error);
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to update profile",
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      });
-    }
-  };
-
-  const handleCoverPhotoChange = async (file: File) => {
-    showModal({
-      isSubmitting: true,
-      currentStep: "uploading",
-      message: "Uploading cover photo...",
-    });
-
-    const token = await getToken();
-    if (!token) {
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Authentication required",
-        error: "No token found",
-      });
-      return;
-    }
-
-    try {
-      if (file.size > 5 * 1024 * 1024) {
-        showModal({
-          isSubmitting: false,
-          currentStep: "error",
-          message: "File size should not exceed 5MB",
-        });
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadResponse = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/upload/file`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
-      if (!fileUrl) {
-        showModal({
-          isSubmitting: false,
-          currentStep: "error",
-          message: "Failed to upload cover photo",
-          error: "No file URL returned",
-        });
-        return;
-      }
-
-      await user?.update({ unsafeMetadata: { coverPhoto: fileUrl } });
-
-      await axios.put(
-        `${import.meta.env.VITE_PROD_URL}/user/profile`,
-        { coverImage: fileUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
-      showModal({
-        isSubmitting: false,
-        currentStep: "success",
-        message: "Cover photo updated successfully!",
-      });
-      setTimeout(hideModal, 2000);
-    } catch (error) {
-      console.error("Error uploading cover photo:", error);
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Failed to upload cover photo",
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      });
-    }
-  };
-
-  const handleProfilePhotoChange = async (file: File) => {
-    showModal({
-      isSubmitting: true,
-      currentStep: "uploading",
-      message: "Uploading profile photo...",
-    });
-
-    const token = await getToken();
-    if (!token) {
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Authentication required",
-        error: "No token found",
-      });
-      return;
-    }
-
-    try {
-      if (file.size > 5 * 1024 * 1024) {
-        showModal({
-          isSubmitting: false,
-          currentStep: "error",
-          message: "File size should not exceed 5MB",
-        });
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      await user?.setProfileImage({ file });
-
-      const uploadResponse = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/upload/file`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
-      if (!fileUrl) {
-        showModal({
-          isSubmitting: false,
-          currentStep: "error",
-          message: "Failed to upload profile photo",
-          error: "No file URL returned",
-        });
-        return;
-      }
-
-      await axios.put(
-        `${import.meta.env.VITE_PROD_URL}/user/profile`,
-        { picture: fileUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
-      showModal({
-        isSubmitting: false,
-        currentStep: "success",
-        message: "Profile photo updated successfully!",
-      });
-      setTimeout(hideModal, 2000);
-    } catch (error) {
-      console.error("Error uploading profile photo:", error);
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Failed to upload profile photo",
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
@@ -462,9 +557,7 @@ const Profile = () => {
   const removeInterest = (indexToRemove: number) => {
     setUserDetails((prev) => ({
       ...prev,
-      interests: (prev.interests || []).filter(
-        (_, index) => index !== indexToRemove
-      ),
+      interests: (prev.interests || []).filter((_, i) => i !== indexToRemove),
     }));
   };
 
@@ -474,17 +567,13 @@ const Profile = () => {
       currentStep: "saving",
       message: "Updating interests...",
     });
-
     const token = await getToken();
-    if (!token) {
-      showModal({
+    if (!token)
+      return showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Authentication required",
-        error: "No token found",
       });
-      return;
-    }
 
     try {
       await axios.put(
@@ -492,21 +581,17 @@ const Profile = () => {
         { interests: userDetails.interests || [] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       showModal({
         isSubmitting: false,
         currentStep: "success",
-        message: "Interests updated successfully!",
+        message: "Interests updated!",
       });
       setTimeout(hideModal, 2000);
     } catch (error) {
-      console.error("Error updating interests:", error);
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to update interests",
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
@@ -515,7 +600,6 @@ const Profile = () => {
     setShowProfileModal(false);
     setShowCompletionForm(true);
   };
-
 
   if (isFetchingUserData) {
     return (
@@ -565,12 +649,10 @@ const Profile = () => {
                 ref={coverPhotoInputRef}
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleCoverPhotoChange(file);
-                  }
-                }}
+                onChange={(e) =>
+                  e.target.files?.[0] &&
+                  handleFileSelect(e.target.files[0], "cover")
+                }
               />
             </div>
           </div>
@@ -583,6 +665,7 @@ const Profile = () => {
               isProfileComplete={isProfileComplete}
             />
           )}
+
           {showCompletionForm && (
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 mb-6 sm:mb-8">
               <ProfileFormModal
@@ -596,6 +679,7 @@ const Profile = () => {
               />
             </div>
           )}
+
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
             <div className="w-full lg:w-1/3">
               <LeftSection
@@ -604,16 +688,18 @@ const Profile = () => {
                 handleProfileSubmit={handleProfileSubmit}
                 removeInterest={removeInterest}
                 updateInterests={updateInterests}
-                coverPhotoInputRef={coverPhotoInputRef}
                 profilePhotoInputRef={profilePhotoInputRef}
-                handleCoverPhotoChange={handleCoverPhotoChange}
                 handleProfilePhotoChange={handleProfilePhotoChange}
                 totalFollowers={totalFollowers}
                 totalFollowing={totalFollowing}
                 setModalType={setModalType}
+                onProfilePhotoSelect={(file) =>
+                  handleFileSelect(file, "profile")
+                }
               />
             </div>
-            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden ">
+
+            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                 <div className="flex flex-wrap gap-2 sm:gap-3 bg-white rounded-xl p-1 w-fit shadow-sm">
                   {["Posts", "Rewards", "Saved", "Details"].map((tab) => (
@@ -642,45 +728,8 @@ const Profile = () => {
                   ))}
                 </div>
               </div>
-              <div className="p-4 sm:p-6 lg:p-8 h-screen overflow-y-auto hide-scrollbar">
-                {activeTab === "Posts" && (
-                  <div className="mb-4 sm:mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      My Posts
-                    </h2>
-                  </div>
-                )}
-                {activeTab === "Rewards" && (
-                  <div className="mb-4 sm:mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      My Rewards
-                    </h2>
-                    <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                      Achievements and recognition earned through community
-                      participation
-                    </p>
-                  </div>
-                )}
-                {activeTab === "Saved" && (
-                  <div className="mb-4 sm:mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      Saved Items
-                    </h2>
-                    <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                      Content you've bookmarked for later reference
-                    </p>
-                  </div>
-                )}
-                {activeTab === "Details" && (
-                  <div className="mb-4 sm:mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      Profile Details
-                    </h2>
-                    <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                      Your personal information and preferences
-                    </p>
-                  </div>
-                )}
+
+              <div className="p-4 sm:p-6 lg:p-8">
                 <ProfileTabContent
                   activeTab={activeTab}
                   userPosts={userPosts}
@@ -692,17 +741,109 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          {/* <div className="mt-4 sm:mt-6 lg:mt-8">
+
+          <div className="mt-4 sm:mt-6 lg:mt-8">
             <PhotosCard userPosts={userPosts} />
-          </div> */}
+          </div>
         </div>
       </div>
+
       {modalType && (
         <UserListModal
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
           title={modalType === "followers" ? "Followers" : "Following"}
           setShowModal={() => setModalType(null)}
         />
+      )}
+
+      {showCoverCropper && coverImageUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => closeCropper("cover")}
+        >
+          <div
+            className="bg-white p-6 rounded-2xl shadow-xl max-w-4xl w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold mb-4">Crop Cover Photo</h3>
+            <div className="max-h-96 overflow-hidden bg-gray-50 rounded-lg relative">
+              {!coverImageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                  Loading image...
+                </div>
+              )}
+              <img
+                ref={coverImgRef}
+                src={coverImageUrl}
+                alt="Crop cover"
+                onLoad={() => setCoverImageLoaded(true)}
+                className={`w-full transition-opacity duration-200 ${
+                  !coverImageLoaded ? "opacity-0" : "opacity-100"
+                }`}
+              />
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => closeCropper("cover")}
+                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => applyCrop("cover")}
+                disabled={!coverImageLoaded}
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+              >
+                Apply Crop
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showProfileCropper && profileImageUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => closeCropper("profile")}
+        >
+          <div
+            className="bg-white p-6 rounded-2xl shadow-xl max-w-lg w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold mb-4">Crop Profile Photo</h3>
+            <div className="max-h-96 overflow-hidden bg-gray-50 rounded-lg relative">
+              {!profileImageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                  Loading image...
+                </div>
+              )}
+              <img
+                ref={profileImgRef}
+                src={profileImageUrl}
+                alt="Crop profile"
+                onLoad={() => setProfileImageLoaded(true)}
+                className={`w-full transition-opacity duration-200 ${
+                  !profileImageLoaded ? "opacity-0" : "opacity-100"
+                }`}
+              />
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => closeCropper("profile")}
+                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => applyCrop("profile")}
+                disabled={!profileImageLoaded}
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+              >
+                Apply Crop
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
