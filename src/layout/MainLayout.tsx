@@ -6,6 +6,7 @@ import Header from "./Header";
 import PrimaryHeader from "./primaryHeader";
 import ScrollToTopButton from "@/components/common/topUpArrow/upArrow";
 import NotificationPopup from "@/components/modals/notification";
+import GlobalProgressBar from "@/components/common/globalProgressBar";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -23,28 +24,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/add-password";
 
   const isChatPage = location.pathname.startsWith("/chat");
-
   const showFooter = !hideLayout && !isChatPage;
 
   return (
     <NotificationProvider>
-      <div className="relative w-full h-full">
+      <div className="relative min-h-screen">
+        <GlobalProgressBar />
         <div className="absolute top-0 left-0 right-0 z-[99999]">
           <NotificationPopup />
         </div>
-
         {!hideLayout && (
           <>
             <PrimaryHeader />
             <Header />
           </>
         )}
-
-        <div className="">
+        <div className="pt-[20px] md:pt-[30px]">
+          {" "}
           <Outlet />
           {children}
         </div>
-
         {showFooter && <Footer />}
         {showFooter && <ScrollToTopButton />}
       </div>

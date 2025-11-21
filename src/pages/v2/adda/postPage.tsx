@@ -6,6 +6,8 @@ import axiosInstance from "@/api/axios";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import PostCard from "@/components/adda/home/addPosts/PostCard";
 import { PostData } from "@/components/adda/home/addPosts/PostCard";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
 interface User {
   id: string;
@@ -15,6 +17,7 @@ interface User {
 
 const PostPage = () => {
   const { postId } = useParams<{ postId: string }>();
+  const { getToken } = useAuth();
   const { state } = useLocation();
   const navigate = useNavigate();
   const { showStatus } = useStatusModal();
@@ -24,13 +27,23 @@ const PostPage = () => {
 
   const fetchPostOrMeme = async (id: string, type: "post" | "meme") => {
     try {
+      const token = await getToken();
+      if (!token) {
+        console.warn("Clerk token missing!");
+        return showStatus("error", "You must login again.");
+      }
       const endpoint = type === "meme" ? `/memes/${id}` : `/posts/${id}`;
-      const response = await axiosInstance.get(endpoint);
+      const response = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.data.success) {
         throw new Error(response.data.message || `Failed to fetch ${type}`);
       }
       return response.data.data;
     } catch (err: any) {
+      console.log(err);
       throw new Error(err.response?.data?.message || `Error fetching ${type}`);
     }
   };
@@ -101,7 +114,7 @@ const PostPage = () => {
               _id: postData.user._id,
               name: postData.user.name,
               email: postData.user.email || "",
-              picture: postData.user.picture || "/default-avatar.png",
+              picture: postData.user.picture || "",
             },
             content: postData.content,
             title: postData.title,
@@ -131,7 +144,7 @@ const PostPage = () => {
     };
 
     loadData();
-  }, [postId, navigate, showStatus]); // Removed `state` from dependencies
+  }, [postId, navigate, showStatus]);
 
   if (loading) {
     return (
@@ -145,7 +158,7 @@ const PostPage = () => {
   }
 
   if (!post) {
-    return null; // StatusModal handles error display
+    return null;
   }
 
   return (
