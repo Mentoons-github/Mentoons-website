@@ -20,13 +20,14 @@ const AddaLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const { items, loading, page } = useSelector(
     (state: RootState) => state.products
   );
 
   const productsData = Array.isArray(items)
-    ? items.map(product => ({ id: product._id, title: product.title }))
+    ? items.map((product) => ({ id: product._id, title: product.title }))
     : [];
 
   const isHomeRoute =
@@ -55,50 +56,44 @@ const AddaLayout = () => {
     loadInitial();
   }, [dispatch, getToken]);
 
-  const handleGoBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
-  const navigateToFriendRequestsPage = useCallback(() => {
-    navigate("/adda/search-friend");
-  }, [navigate]);
-
-  const handleActionButtonClick = useCallback(() => {
-    setShowWelcome(true);
-  }, []);
-
-  const [showWelcome, setShowWelcome] = useState(false);
+  const handleGoBack = useCallback(() => navigate(-1), [navigate]);
+  const navigateToFriendRequestsPage = useCallback(
+    () => navigate("/adda/search-friend"),
+    [navigate]
+  );
+  const handleActionButtonClick = useCallback(() => setShowWelcome(true), []);
 
   return (
     <>
-      <div className="flex items-start justify-center w-full p-2 bg-white max-w-8xl sm:p-3 md:p-4">
-        <div className="relative flex flex-col w-full">
-          <div className="flex flex-col w-full bg-white">
-            <div className="flex w-full overflow-x-auto gap-5">
+      <div className="flex justify-center w-full min-h-screen">
+        <div className="w-full max-w-8xl">
+          <div className="border-b border-gray-200 bg-white">
+            <div className="overflow-x-auto">
               <ProductScrollNav
                 productsData={productsData}
                 loading={loading}
                 currentPage={page}
               />
             </div>
-            <div className="w-full py-2">
-              <UserStatus />
-            </div>
           </div>
 
-          <div className="flex flex-col w-full md:flex-row md:gap-4 lg:gap-6">
-            <div className="flex-shrink-0 hidden lg:block lg:w-1/4">
-              <div className="sticky top-[104px] w-full z-4 max-h-[calc(100vh-104px)] overflow-y-auto">
+          <div className="py-3 px-2 bg-white border-b border-gray-100">
+            <UserStatus />
+          </div>
+
+          <div className="flex flex-col md:flex-row md:gap-6 lg:gap-8 px-2 md:px-4 lg:px-0">
+            <div className="hidden lg:block lg:w-1/4">
+              <div className="sticky top-20 space-y-6">
                 <WhatWeOffer onActionButtonClick={handleActionButtonClick} />
                 <AboutMentoons />
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 sm:gap-6 w-full md:flex-1 lg:max-w-[50%] relative">
+            <div className="flex-1 lg:max-w-[50%] min-w-0 relative">
               {!isHomeRoute && (
                 <button
                   onClick={handleGoBack}
-                  className="absolute z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md top-2 left-2 hover:bg-gray-100"
+                  className="absolute z-10 top-4 left-4 flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-lg hover:bg-gray-50 transition"
                   aria-label="Go back"
                 >
                   <svg
@@ -108,7 +103,7 @@ const AddaLayout = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -117,33 +112,39 @@ const AddaLayout = () => {
                   </svg>
                 </button>
               )}
-              <Outlet />
+              <div className="pt-2">
+                <Outlet />
+              </div>
             </div>
 
-            <div className="flex-shrink-0 hidden w-1/3 md:block lg:w-1/4">
-              <div className="sticky top-[104px] flex flex-col gap-4 sm:gap-6 md:rounded-lg md:pt-0 w-full z-4 max-h-[calc(100vh-204px)] overflow-y-auto">
+            <div className="hidden md:block lg:w-1/4">
+              <div className="sticky top-20 space-y-6">
                 {isSignedIn && (
-                  <div className="p-3 mb-4 bg-white border border-orange-200 rounded-lg sm:p-4">
+                  <div className="bg-white rounded-xl border border-orange-200 p-4 shadow-sm">
                     <FriendRequest />
-                    <div className="pt-3 mt-4 border-t border-orange-100">
-                      <ViewAllFriends onNavigate={navigateToFriendRequestsPage} />
+                    <div className="pt-4 mt-4 border-t border-orange-100">
+                      <ViewAllFriends
+                        onNavigate={navigateToFriendRequestsPage}
+                      />
                     </div>
                   </div>
                 )}
-                <div className="md:flex md:flex-col md:gap-4 lg:gap-6">
-                  <Influencer />
-                  <Meme />
-                </div>
+                <Influencer />
+                <Meme />
               </div>
             </div>
           </div>
 
-          <div className="flex-shrink-0 hidden px-4 pt-2 md:block">
-            <a href="https://mentoonsmythos.com" target="_blank" rel="noopener noreferrer">
+          <div className="hidden md:block px-6 py-8">
+            <a
+              href="https://mentoonsmythos.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
                 src="/assets/adda/sidebar/Introducing poster.png"
                 alt="mentoons-mythos"
-                className="max-w-[134px] lg:max-w-[170px]"
+                className="max-w-[170px]"
               />
             </a>
           </div>
@@ -151,10 +152,11 @@ const AddaLayout = () => {
       </div>
 
       {isSignedIn && (
-        <div className="fixed bottom-0 left-0 right-0 z-[9] bg-white border-t border-gray-200 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
           <BottomNav />
         </div>
       )}
+
       {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
     </>
   );

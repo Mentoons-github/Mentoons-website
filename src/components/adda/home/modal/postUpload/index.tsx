@@ -15,6 +15,15 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import {
+  startUpload,
+  updateProgress,
+  completeUpload,
+  failUpload,
+  resetUpload,
+} from "@/redux/fileUploadSlice";
 
 import ArticleForm from "./components/ArticleForm";
 import EventForm from "./components/EventForm";
@@ -37,12 +46,15 @@ const PostUpload = ({
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const [profileError, setProfileError] = useState<{
     message: string;
     missingFields: string[];
   } | null>(null);
   const navigate = useNavigate();
+  const isUploading = useSelector(
+    (state: RootState) => state.fileUpload.loading
+  );
 
   useEffect(() => {
     if (postedImage && postType === "photo") {
@@ -61,6 +73,8 @@ const PostUpload = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (isUploading) return;
+
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node) &&
@@ -71,19 +85,26 @@ const PostUpload = ({
           prev.forEach((url) => URL.revokeObjectURL(url));
           return [];
         });
+        dispatch(resetUpload());
         onClose(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose, postType]);
+  }, [isOpen, onClose, postType, dispatch, isUploading]);
 
   const handleClose = () => {
+    if (isUploading) {
+      toast.warning("Please wait while your post is being uploaded");
+      return;
+    }
+
     formikRef.current?.resetForm({ values: getInitialValues(postType) });
     setMediaPreview((prev) => {
       prev.forEach((url) => URL.revokeObjectURL(url));
       return [];
     });
+    dispatch(resetUpload());
     onClose(false);
   };
 
@@ -91,7 +112,11 @@ const PostUpload = ({
     setActiveTab(tab);
   };
 
-  const uploadMediaFile = async (file: File) => {
+  const uploadMediaFile = async (
+    file: File,
+    index: number,
+    totalFiles: number
+  ) => {
     try {
       const token = await getToken();
       const formData = new FormData();
@@ -104,6 +129,19 @@ const PostUpload = ({
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
+          },
+          onUploadProgress: (progressEvent) => {
+            const total = progressEvent.total ?? 1;
+            const loaded = progressEvent.loaded ?? 0;
+
+            const fileProgress = (loaded / total) * 100;
+            const baseProgress = (index / totalFiles) * 70;
+            const currentFileProgress = (fileProgress / totalFiles) * 0.7;
+            const totalProgress = Math.round(
+              baseProgress + currentFileProgress
+            );
+
+            dispatch(updateProgress(totalProgress));
           },
         }
       );
@@ -122,12 +160,9 @@ const PostUpload = ({
     index: number = 0
   ) => {
     const file = e.target.files?.[0];
-    console.log("File being uploaded:", file);
 
     if (file) {
-      console.log("File found");
       const values = formikRef.current?.values;
-      console.log("Current form values:", values);
       if (!values) return;
 
       const newPreviews = [...mediaPreview];
@@ -136,7 +171,6 @@ const PostUpload = ({
 
       const isImage = file.type.startsWith("image/");
       const fileType = isImage ? "image" : "video";
-      console.log(`Detected file type: ${fileType} for file: ${file.name}`);
 
       const newMedia = [...values.media];
       newMedia[index] = {
@@ -185,8 +219,10 @@ const PostUpload = ({
       return values;
     }
 
-    setIsUploading(true);
-    toast.info("Uploading media files...");
+    const mediaToUpload = values.media.filter((m) => m.file && !m.url);
+    if (mediaToUpload.length === 0) {
+      return values;
+    }
 
     try {
       const updatedValues = { ...values };
@@ -194,7 +230,11 @@ const PostUpload = ({
 
       const uploadPromises = updatedMedia.map(async (media, index) => {
         if (media.file && !media.url) {
-          const url = await uploadMediaFile(media.file);
+          const url = await uploadMediaFile(
+            media.file,
+            index,
+            mediaToUpload.length
+          );
           if (url) {
             updatedMedia[index] = {
               ...media,
@@ -214,19 +254,20 @@ const PostUpload = ({
       console.error("Failed to upload media files:", error);
       toast.error("Error uploading media files");
       throw error;
-    } finally {
-      setIsUploading(false);
     }
   };
 
   const handleSubmit = async (values: FormValues) => {
     try {
+      dispatch(startUpload({ file: values.media[0]?.file }));
+
       const valuesWithUploadedMedia = await uploadAllMedia(values);
 
-      toast.info("Processing your post...");
+      dispatch(updateProgress(75));
 
       const token = await getToken();
       if (!token) {
+        dispatch(failUpload("Authentication failed"));
         toast.error("Authentication failed. Please log in again.");
         return;
       }
@@ -263,7 +304,6 @@ const PostUpload = ({
       };
 
       if (postType === "article") {
-        console.log("Processing ARTICLE post type");
         postData.article = {
           body: valuesWithUploadedMedia.articleBody || "",
           coverImage: valuesWithUploadedMedia.media[0]?.url || "",
@@ -311,6 +351,8 @@ const PostUpload = ({
           }));
       }
 
+      dispatch(updateProgress(85));
+
       const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
 
       const response = await axios.post(apiUrl, postData, {
@@ -321,7 +363,10 @@ const PostUpload = ({
       });
 
       if (response.data.success) {
+        dispatch(completeUpload());
+
         toast.success("Post created successfully!");
+
         formikRef.current?.resetForm({ values: getInitialValues(postType) });
         setMediaPreview((prev) => {
           prev.forEach((url) => URL.revokeObjectURL(url));
@@ -331,50 +376,41 @@ const PostUpload = ({
         setProfileError(null);
         onClose(false);
 
-        if (onPostCreated) {
-          console.log("Post creation response data:", response.data);
+        setTimeout(() => {
+          dispatch(resetUpload());
 
-          if (response.data.data && response.data.data.post) {
-            console.log(
-              "Calling onPostCreated with post:",
-              response.data.data.post
-            );
-            onPostCreated(response.data.data.post);
-          } else if (response.data.data) {
-            console.log(
-              "Post not found in data.post, using data directly:",
-              response.data.data
-            );
-            onPostCreated(response.data.data);
-          } else {
-            console.warn(
-              "No valid post data found in response, creating fallback post"
-            );
-            const fallbackPost = {
-              _id: `temp-${Date.now()}`,
-              postType: postType,
-              title: valuesWithUploadedMedia.title || "",
-              content: valuesWithUploadedMedia.content || "",
-              user: {
-                _id: "unknown",
-                name: "User",
-                role: "User",
-                profilePicture: "",
-              },
-              likes: [],
-              comments: [],
-              shares: [],
-              createdAt: new Date().toISOString(),
-              visibility: valuesWithUploadedMedia.visibility || "public",
-              media: postData.media,
-              article: postType === "article" ? postData.article : undefined,
-              event: postType === "event" ? postData.event : undefined,
-            };
-            console.log("Using fallback post:", fallbackPost);
-            onPostCreated(fallbackPost);
+          if (onPostCreated) {
+            if (response.data.data && response.data.data.post) {
+              onPostCreated(response.data.data.post);
+            } else if (response.data.data) {
+              onPostCreated(response.data.data);
+            } else {
+              const fallbackPost = {
+                _id: `temp-${Date.now()}`,
+                postType: postType,
+                title: valuesWithUploadedMedia.title || "",
+                content: valuesWithUploadedMedia.content || "",
+                user: {
+                  _id: "unknown",
+                  name: "User",
+                  role: "User",
+                  profilePicture: "",
+                },
+                likes: [],
+                comments: [],
+                shares: [],
+                createdAt: new Date().toISOString(),
+                visibility: valuesWithUploadedMedia.visibility || "public",
+                media: postData.media,
+                article: postType === "article" ? postData.article : undefined,
+                event: postType === "event" ? postData.event : undefined,
+              };
+              onPostCreated(fallbackPost);
+            }
           }
-        }
+        }, 1500);
       } else {
+        dispatch(failUpload(response.data.message));
         toast.error("Failed to create post: " + response.data.message);
       }
     } catch (error) {
@@ -391,6 +427,7 @@ const PostUpload = ({
             message: errorMessage,
             missingFields: error.response.data.missingFields || [],
           });
+          dispatch(failUpload(errorMessage));
           toast.error(
             `Please complete your profile: ${error.response.data.missingFields.join(
               ", "
@@ -402,6 +439,7 @@ const PostUpload = ({
         errorMessage = error.message;
       }
 
+      dispatch(failUpload(errorMessage));
       toast.error(`Failed to create post: ${errorMessage}`);
     }
   };
@@ -413,15 +451,13 @@ const PostUpload = ({
     }
 
     const values = formikRef.current.values;
-    await handleSubmit(values); // Directly call handleSubmit for articles
+    await handleSubmit(values);
   };
 
   const handleManualSubmit = async () => {
-    console.log("Manual submit triggered");
     if (formikRef.current) {
-      console.log("Formik instance found, calling handleSubmit");
       const values = formikRef.current.values;
-      await handleSubmit(values); // Directly call handleSubmit
+      await handleSubmit(values);
     } else {
       console.error("Formik instance not found");
       toast.error("Error: Form system not initialized");
@@ -429,8 +465,6 @@ const PostUpload = ({
   };
 
   const handleNextTab = (isValid: boolean, values: FormValues) => {
-    console.log("Next button clicked", { isValid, activeTab, postType });
-
     if (postType === "article") {
       if (activeTab === 1 && (!values.title || !values.articleBody)) {
         toast.error("Please fill in the article title and body");
@@ -501,6 +535,10 @@ const PostUpload = ({
   const handleCompleteProfile = () => {
     navigate("/adda/user-profile");
   };
+
+  if (isUploading) {
+    return null;
+  }
 
   return createPortal(
     <AnimatePresence>
@@ -760,197 +798,137 @@ const PostUpload = ({
                     </div>
                   </div>
 
-                  <div className="flex gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
-                    {activeTab > 1 && (
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handlePrevTab}
-                        className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-gray-500 rounded-md dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700"
-                        disabled={
-                          profileError !== null ||
-                          formikIsSubmitting ||
-                          isUploading
-                        }
-                      >
-                        <motion.div
-                          initial={{ x: 0 }}
-                          animate={{ x: [-5, 0] }}
-                          transition={{
-                            repeat: Infinity,
-                            repeatType: "reverse",
-                            duration: 0.6,
-                          }}
-                        >
-                          ←
-                        </motion.div>
-                        Previous
-                      </motion.button>
-                    )}
-
-                    {activeTab < 3 &&
-                      (postType === "photo" || postType === "video" ? (
-                        activeTab === 1 ? (
-                          <motion.button
-                            type="button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              handleNextTab(isValid, values);
-                            }}
-                            className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
-                            disabled={
-                              !values.media.some((m) => m.file) ||
-                              profileError !== null ||
-                              formikIsSubmitting ||
-                              isUploading
-                            }
-                          >
-                            <span className="hidden sm:inline">
-                              Next to Preview
-                            </span>
-                            <span className="sm:hidden">Next</span>
-                            <motion.div
-                              initial={{ x: 0 }}
-                              animate={{ x: [0, 5] }}
-                              transition={{
-                                repeat: Infinity,
-                                repeatType: "reverse",
-                                duration: 0.6,
-                              }}
-                            >
-                              →
-                            </motion.div>
-                          </motion.button>
-                        ) : (
-                          <motion.button
-                            type="button"
-                            onClick={handleManualSubmit}
-                            whileHover={{
-                              scale:
-                                formikIsSubmitting || isUploading ? 1 : 1.05,
-                            }}
-                            whileTap={{
-                              scale:
-                                formikIsSubmitting || isUploading ? 1 : 0.95,
-                            }}
-                            className={`flex items-center gap-2 px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 rounded-md ${
-                              formikIsSubmitting || isUploading
-                                ? "bg-green-400 dark:bg-green-500 cursor-not-allowed opacity-70"
-                                : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
-                            }`}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            disabled={
-                              formikIsSubmitting ||
-                              isUploading ||
-                              profileError !== null
-                            }
-                          >
-                            {isUploading ? (
-                              <>
-                                <Loader2
-                                  className="animate-spin mr-2"
-                                  size={16}
-                                />
-                                Uploading...
-                              </>
-                            ) : formikIsSubmitting ? (
-                              <>
-                                <Loader2
-                                  className="animate-spin mr-2"
-                                  size={16}
-                                />
-                                Submitting...
-                              </>
-                            ) : (
-                              "Submit Post"
-                            )}
-                          </motion.button>
-                        )
-                      ) : (
+                  <div className="flex justify-between gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
+                    {activeTab > 1 &&
+                      !(postType === "photo" || postType === "video") && (
                         <motion.button
                           type="button"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            handleNextTab(isValid, values);
-                          }}
-                          className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-orange-500 rounded-md dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700"
-                          disabled={
-                            profileError !== null ||
-                            formikIsSubmitting ||
-                            isUploading
-                          }
+                          onClick={handlePrevTab}
+                          className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-gray-500 rounded-md dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700"
+                          disabled={profileError !== null || formikIsSubmitting}
                         >
-                          Next
                           <motion.div
                             initial={{ x: 0 }}
-                            animate={{ x: [0, 5] }}
+                            animate={{ x: [-5, 0] }}
                             transition={{
                               repeat: Infinity,
                               repeatType: "reverse",
                               duration: 0.6,
                             }}
                           >
-                            →
+                            ← Previous
                           </motion.div>
                         </motion.button>
-                      ))}
+                      )}
 
-                    {activeTab === 3 &&
-                      postType !== "photo" &&
-                      postType !== "video" && (
+                    {activeTab === 2 &&
+                      (postType === "photo" || postType === "video") && (
                         <motion.button
                           type="button"
-                          onClick={
-                            postType === "article"
-                              ? submitArticleDirectly
-                              : handleManualSubmit
-                          }
-                          whileHover={{
-                            scale: formikIsSubmitting || isUploading ? 1 : 1.05,
-                          }}
-                          whileTap={{
-                            scale: formikIsSubmitting || isUploading ? 1 : 0.95,
-                          }}
-                          className={`flex items-center gap-2 px-4 sm:px-6 py-2 text-sm sm:text-base text-white transition duration-200 rounded-md ${
-                            formikIsSubmitting || isUploading
-                              ? "bg-green-400 dark:bg-green-500 cursor-not-allowed opacity-70"
-                              : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
-                          }`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          disabled={
-                            formikIsSubmitting ||
-                            isUploading ||
-                            profileError !== null
-                          }
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handlePrevTab}
+                          className="flex items-center gap-2 px-4 sm:px-5 py-2 text-sm sm:text-base text-white transition duration-200 bg-gray-500 rounded-md dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700"
+                          disabled={profileError !== null || formikIsSubmitting}
                         >
-                          {isUploading ? (
-                            <>
-                              <Loader2
-                                className="animate-spin mr-2"
-                                size={16}
-                              />
-                              Uploading...
-                            </>
-                          ) : formikIsSubmitting ? (
-                            <>
-                              <Loader2
-                                className="animate-spin mr-2"
-                                size={16}
-                              />
-                              Submitting...
-                            </>
-                          ) : (
-                            "Submit Post"
-                          )}
+                          <motion.div
+                            initial={{ x: 0 }}
+                            animate={{ x: [-5, 0] }}
+                            transition={{
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                              duration: 0.6,
+                            }}
+                          >
+                            ← Previous
+                          </motion.div>
                         </motion.button>
                       )}
+
+                    {activeTab <
+                      (postType === "photo" || postType === "video"
+                        ? 2
+                        : 3) && (
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleNextTab(isValid, values)}
+                        className={`flex items-center gap-2 px-6 py-2.5 text-white bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          (postType === "photo" || postType === "video") &&
+                          activeTab === 1
+                            ? "ml-auto"
+                            : ""
+                        }`}
+                        disabled={
+                          profileError !== null ||
+                          formikIsSubmitting ||
+                          (postType === "photo" || postType === "video"
+                            ? activeTab === 1 &&
+                              !values.media.some((m) => m.file)
+                            : false)
+                        }
+                      >
+                        {postType === "photo" || postType === "video"
+                          ? "Next → Preview"
+                          : "Next"}
+                        <motion.div
+                          animate={{ x: [0, 4, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.5 }}
+                        >
+                          →
+                        </motion.div>
+                      </motion.button>
+                    )}
+
+                    {activeTab ===
+                      (postType === "photo" || postType === "video"
+                        ? 2
+                        : 3) && (
+                      <motion.button
+                        type="button"
+                        onClick={
+                          postType === "article"
+                            ? submitArticleDirectly
+                            : handleManualSubmit
+                        }
+                        disabled={profileError !== null || formikIsSubmitting}
+                        className={`
+        ml-auto flex items-center gap-3 px-8 py-3 text-white font-medium rounded-lg shadow-lg
+        ${
+          formikIsSubmitting
+            ? "bg-green-400 dark:bg-green-600 cursor-not-allowed"
+            : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+        }
+        transition-all duration-300
+      `}
+                        whileHover={{
+                          scale: formikIsSubmitting ? 1 : 1.05,
+                        }}
+                        whileTap={{
+                          scale: formikIsSubmitting ? 1 : 0.95,
+                        }}
+                      >
+                        {formikIsSubmitting ? (
+                          <>
+                            <Loader2 className="animate-spin" size={20} />
+                            Creating Post...
+                          </>
+                        ) : (
+                          <>
+                            <span>Post Now</span>
+                            <motion.span
+                              animate={{ x: [0, 5, 0] }}
+                              transition={{ repeat: Infinity, duration: 1.2 }}
+                            >
+                              →
+                            </motion.span>
+                          </>
+                        )}
+                      </motion.button>
+                    )}
                   </div>
                 </Form>
               </motion.div>
