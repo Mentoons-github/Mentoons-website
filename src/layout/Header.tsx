@@ -36,6 +36,7 @@ const Header = () => {
     services: false,
     subscription: false,
     workshops: false,
+    joinus: false,
   });
 
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -245,6 +246,7 @@ const Header = () => {
                             | "products"
                             | "games"
                             | "workshops"
+                            | "joinus"
                         }
                         items={items}
                       />
@@ -338,7 +340,7 @@ const Header = () => {
           title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
         } items-center gap-4 xl:gap-8 justify-end`}
       >
-        {filteredNav.slice(5).map(({ id, label, url, icon: Icon }) =>
+        {filteredNav.slice(5).map(({ id, label, url, icon: Icon, items }) =>
           label === "Browse Plans" ? (
             <a
               key={id}
@@ -423,6 +425,18 @@ const Header = () => {
                   )}
                 </AnimatePresence>
               </div>
+            </div>
+          ) : label === "Join Us" && items && items.length ? (
+            <div key={id} className="relative flex-shrink-0">
+              <NavButton
+                label={label}
+                onMouseEnter={() => handleHover("joinus")}
+                onMouseLeave={() => handleMouseLeave("joinus")}
+              >
+                {dropdown.joinus && (
+                  <DropDown labelType="joinus" items={items} />
+                )}
+              </NavButton>
             </div>
           ) : (
             <NavLink

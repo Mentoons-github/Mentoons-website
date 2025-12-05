@@ -203,21 +203,18 @@ const PostDetailsPage = () => {
     const fetchPostDetails = async () => {
       setLoading(true);
       try {
-        // Check if user is signed in
         if (!isSignedIn) {
           setShowAuthModal(true);
           setLoading(false);
           return;
         }
 
-        // Check for token without assignment
         if (!(await getToken())) {
           setShowAuthModal(true);
           setLoading(false);
           return;
         }
 
-        // Use token directly in the request
         const response = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/posts/${postId}`,
           {
@@ -337,14 +334,8 @@ const PostDetailsPage = () => {
       );
 
       if (response.data.success === true) {
-        // setUserPosts?.((prev) =>
-        //   prev.filter((userPost) => userPost._id !== post._id)
-        // );
-        navigate(-1)
+        navigate(-1);
         showStatus("success", "Post deleted successfully.");
-        // if (onDelete) {
-        //   onDelete(post._id);
-        // }
       } else {
         showStatus("error", "Failed to delete post.");
       }

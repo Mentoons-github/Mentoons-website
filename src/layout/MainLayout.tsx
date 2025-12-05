@@ -21,7 +21,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/chat" ||
     location.pathname === "/puzzle/play" ||
     location.pathname.startsWith("/employee") ||
-    location.pathname === "/add-password";
+    location.pathname === "/add-password" ||
+    (location.pathname !== "/adda/game-lobby" &&
+      location.pathname.startsWith("/adda/game-lobby"));
+
+  const isAddaGamePage = location.pathname === "/adda";
 
   const isChatPage = location.pathname.startsWith("/chat");
   const showFooter = !hideLayout && !isChatPage;
@@ -39,8 +43,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Header />
           </>
         )}
-        <div className="pt-[20px] md:pt-[30px]">
-          {" "}
+        <div className={!isAddaGamePage ? "" : "pt-[20px] md:pt-[30px]"}>
           <Outlet />
           {children}
         </div>

@@ -1,6 +1,5 @@
 import WelcomeModal from "@/components/adda/welcome/welcome";
 import { useAuth } from "@clerk/clerk-react";
-
 import PostsContainer from "@/components/adda/home/addPosts/index";
 import { useEffect, useState } from "react";
 
@@ -9,12 +8,17 @@ const AddaHome = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const alreadyShown = sessionStorage.getItem("welcomeModalShown");
+    if (isSignedIn) return;
 
-    if (!isSignedIn && !alreadyShown) {
+    const alreadyShown = sessionStorage.getItem("welcomeModalShown");
+    if (alreadyShown) return;
+
+    const timer = setTimeout(() => {
       setShowModal(true);
       sessionStorage.setItem("welcomeModalShown", "true");
-    }
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, [isSignedIn]);
 
   return (

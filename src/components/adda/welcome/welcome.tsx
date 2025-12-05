@@ -166,6 +166,7 @@ const WelcomeModal = ({ onClose }: WelcomeModalProps) => {
               </li>
             ))}
           </ul>
+
           <SignedOut>
             <div className="flex flex-col justify-center items-center mt-6 gap-4">
               <NavLink
