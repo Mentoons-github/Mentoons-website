@@ -5,6 +5,7 @@ export interface ContestUpload {
   mobile: number | null;
   age: number;
   fileUrl: string[];
+  category: string;
 }
 
 export const uploadInitialValues: ContestUpload = {
@@ -12,7 +13,17 @@ export const uploadInitialValues: ContestUpload = {
   mobile: null,
   age: 18,
   fileUrl: [],
+  category: "",
 };
+
+const categories = [
+  "social media logos",
+  "accessories",
+  "daily stationary items",
+  "gadgets",
+  "musicians",
+  "animated movie characters",
+] as const;
 
 export const validationSchema = yup.object({
   name: yup.string().required("Please enter your name").trim(),
@@ -25,4 +36,8 @@ export const validationSchema = yup.object({
     .array()
     .of(yup.string())
     .min(1, "Please upload at least one image"),
+  category: yup
+    .string()
+    .required("Please select a category")
+    .oneOf(categories, "Invalid category selected"),
 });

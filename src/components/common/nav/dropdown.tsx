@@ -16,7 +16,7 @@ const DropDown = ({
   items: NavLinkWithDescription[];
   alignLeft?: boolean;
   isOpen?: (val: boolean) => void;
-  labelType?: "products" | "games" | "workshops";
+  labelType?: "products" | "games" | "workshops" | "joinus";
 }) => {
   const navigate = useNavigate();
 
@@ -28,8 +28,15 @@ const DropDown = ({
       basePath = "/product";
     } else if (labelType === "workshops") {
       basePath = "/mentoons-workshops";
+    } else if (labelType === "joinus") {
+      basePath = "/join-us";
     } else {
       basePath = "/mentoons-games";
+    }
+
+    if (labelType === "joinus") {
+      navigate(`${basePath}/${category.toLowerCase()}`);
+      return;
     }
 
     navigate(`${basePath}?category=${encodeURIComponent(category)}`);

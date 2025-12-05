@@ -12,6 +12,8 @@ import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { compressedImageFile } from "@/services/imageCommpresser";
+import ProgressModal from "@/components/common/modal/progressModal";
 
 const ImageUploadFormSubmit = () => {
   const { showStatus } = useStatusModal();
@@ -19,12 +21,36 @@ const ImageUploadFormSubmit = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
+  const Category = [
+    "social media logos",
+    "accessories",
+    "daily stationary items",
+    "gadgets",
+    "musicians",
+    "animated movie characters",
+  ];
+
+  const [progressModal, setProgressModal] = useState({
+    isOpen: false,
+    type: "compress" as "compress" | "upload" | "submit" | "progress",
+    message: "",
+    progress: { current: 0, total: 0 },
+  });
+
   const passKey = searchParams.get("PASS_KEY");
   const QR_PASSKEY = import.meta.env.VITE_QR_PASSKEY;
+
+  const closeProgressModal = () => {
+    setProgressModal({
+      isOpen: false,
+      type: "compress",
+      message: "",
+      progress: { current: 0, total: 0 },
+    });
+  };
 
   useEffect(() => {
     if (passKey !== QR_PASSKEY) {
@@ -36,23 +62,21 @@ const ImageUploadFormSubmit = () => {
       });
       navigate("/adda");
     }
-  }, []);
+  }, [passKey, QR_PASSKEY, showModal, navigate]);
 
   const uploadImages = async (files: File[]): Promise<string[]> => {
-    const urls: string[] = [];
-
-    for (const f of files) {
-      const res = await dispatch(uploadFile({ file: f, contestUpload: true }));
-      if (uploadFile.fulfilled.match(res)) {
-        const url = res.payload.data.fileDetails?.url;
-        if (url) urls.push(url);
-      }
-    }
-
-    return urls;
+    const uploadFiles = files.map((file) =>
+      dispatch(uploadFile({ file, contestUpload: true }))
+    );
+    const results = await Promise.all(uploadFiles);
+    const urls = results
+      .filter((res) => uploadFile.fulfilled.match(res))
+      .map((res) => res.payload.data.fileDetails?.url)
+      .filter(Boolean);
+    return urls as string[];
   };
 
-  const handleFileSelection = (
+  const handleFileSelection = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setFieldValue: (field: string, value: any) => void
   ) => {
@@ -61,11 +85,30 @@ const ImageUploadFormSubmit = () => {
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
 
     const files = Array.from(e.target.files);
-    setSelectedFiles(files);
 
-    const urls = files.map((file) => URL.createObjectURL(file));
+    setProgressModal({
+      isOpen: true,
+      type: "progress",
+      message: "Compressing your images for optimal upload...",
+      progress: { current: 0, total: files.length },
+    });
+
+    const compressedFiles: File[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const compressed = await compressedImageFile(files[i]);
+      compressedFiles.push(compressed);
+      setProgressModal((prev) => ({
+        ...prev,
+        progress: { current: i + 1, total: files.length },
+      }));
+    }
+
+    closeProgressModal();
+
+    setSelectedFiles(compressedFiles);
+    const urls = compressedFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls(urls);
-
     setFieldValue("fileUrl", urls);
   };
 
@@ -73,36 +116,36 @@ const ImageUploadFormSubmit = () => {
     values: ContestUpload,
     actions: FormikHelpers<ContestUpload>
   ) => {
-    console.log("submitting");
     try {
       if (!selectedFiles.length) {
         showStatus("error", "Please select at least one image");
         return;
       }
 
-      showModal({
-        currentStep: "uploading",
-        isSubmitting: true,
-        message: "Uploading your pictures, please wait...",
+      setProgressModal({
+        isOpen: true,
+        type: "upload",
+        message: "Uploading your pictures to the server...",
+        progress: { current: 0, total: 0 },
       });
 
       const uploadedUrls = await uploadImages(selectedFiles);
 
-      showModal({
-        currentStep: "uploading",
-        isSubmitting: true,
-        message: "Submitting your form, please wait...",
+      setProgressModal({
+        isOpen: true,
+        type: "submit",
+        message: "Finalizing your submission...",
+        progress: { current: 0, total: 0 },
       });
 
-      const payload = {
-        ...values,
-        fileUrl: uploadedUrls,
-      };
-
+      const payload = { ...values, fileUrl: uploadedUrls };
       await axios.post(
         `${import.meta.env.VITE_PROD_URL}/contest/submit`,
         payload
       );
+      closeProgressModal();
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       showModal({
         currentStep: "success",
@@ -115,8 +158,13 @@ const ImageUploadFormSubmit = () => {
       setSelectedFiles([]);
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
       setPreviewUrls([]);
+
+      setTimeout(() => {
+        navigate("/adda");
+      }, 2000);
     } catch (err) {
       console.log(err);
+      closeProgressModal();
       showStatus("error", "Submission failed");
     }
   };
@@ -132,115 +180,143 @@ const ImageUploadFormSubmit = () => {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-md h-full flex flex-col py-6">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-200 flex flex-col max-h-full">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-center flex-shrink-0">
-            <h1 className="text-3xl font-bold text-white tracking-wide drop-shadow-lg">
+    <>
+      <ProgressModal
+        isOpen={progressModal.isOpen}
+        type={progressModal.type}
+        message={progressModal.message}
+        progress={progressModal.progress}
+      />
+
+      <div className="h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl h-full flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-200">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-center flex-shrink-0">
+            <h1 className="text-4xl font-bold text-white tracking-tight">
               Image Submission
             </h1>
-            <p className="text-blue-50 mt-1 text-sm">
+            <p className="text-blue-100 mt-2 text-lg font-medium">
               Share your amazing pictures with us
             </p>
           </div>
 
-          <div className="p-6 overflow-y-auto flex-1">
+          <div className="flex-1 overflow-y-auto px-8 pt-6 pb-12">
             <Formik
               initialValues={uploadInitialValues}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
               {({ setFieldValue }) => (
-                <Form className="flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <span className="text-blue-600">Name</span>
+                <Form className="space-y-8">
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-700 mb-2">
+                      Full Name
                     </label>
                     <Field
                       name="name"
-                      className="border-2 border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 px-4 py-3 rounded-xl w-full transition-all duration-200 outline-none"
                       placeholder="Enter your name"
+                      className="w-full px-5 py-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     />
                     <ErrorMessage
                       name="name"
                       component="div"
-                      className="text-red-500 text-sm mt-1 font-medium"
+                      className="text-red-500 text-sm mt-2"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <span className="text-blue-600">Age</span>
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-700 mb-2">
+                      Age
                     </label>
                     <Field
                       name="age"
-                      className="border-2 border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 px-4 py-3 rounded-xl w-full transition-all duration-200 outline-none"
+                      type="number"
                       placeholder="Enter your age"
+                      className="w-full px-5 py-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     />
                     <ErrorMessage
                       name="age"
                       component="div"
-                      className="text-red-500 text-sm mt-1 font-medium"
+                      className="text-red-500 text-sm mt-2"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <span className="text-blue-600">Mobile</span>
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-700 mb-2">
+                      Mobile Number
                     </label>
                     <Field
                       name="mobile"
-                      className="border-2 border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 px-4 py-3 rounded-xl w-full transition-all duration-200 outline-none"
+                      type="tel"
                       placeholder="Enter your mobile number"
+                      className="w-full px-5 py-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     />
                     <ErrorMessage
                       name="mobile"
                       component="div"
-                      className="text-red-500 text-sm mt-1 font-medium"
+                      className="text-red-500 text-sm mt-2"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <span className="text-blue-600">Upload Images</span>
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-700 mb-2">
+                      Category <span className="text-red-500">*</span>
                     </label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        value=""
-                        onChange={(e) => handleFileSelection(e, setFieldValue)}
-                        className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer file:transition-all file:duration-200 cursor-pointer border-2 border-dashed border-blue-300 rounded-xl p-4 bg-blue-50 hover:bg-blue-100 transition-all duration-200"
-                      />
-                    </div>
+                    <Field
+                      as="select"
+                      name="category"
+                      className="w-full px-5 py-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    >
+                      <option value="">Select a category</option>
+                      {Category.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="category"
+                      component="div"
+                      className="text-red-500 text-sm mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-700 mb-2">
+                      Upload Images
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleFileSelection(e, setFieldValue)}
+                      className="block w-full text-sm text-gray-600 file:mr-4 file:py-4 file:px-8 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer border-4 border-dashed border-blue-300 rounded-3xl bg-blue-50 p-12 hover:border-blue-500 transition-all"
+                    />
                     {selectedFiles.length > 0 && (
-                      <p className="text-sm text-green-600 font-medium mt-2">
-                        ✓ {selectedFiles.length} file(s) selected
+                      <p className="mt-4 text-green-600 font-bold text-center">
+                        ✓ {selectedFiles.length} image
+                        {selectedFiles.length > 1 ? "s" : ""} selected
                       </p>
                     )}
-                    <ErrorMessage
-                      name="fileUrl"
-                      component="div"
-                      className="text-red-500 text-sm mt-1 font-medium"
-                    />
                   </div>
 
                   {previewUrls.length > 0 && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">
+                    <div>
+                      <h3 className="text-xl font-bold text-blue-700 mb-6 text-center">
                         Preview
-                      </label>
-                      <div className="grid grid-cols-2 gap-3">
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                         {previewUrls.map((url, index) => (
-                          <div key={index} className="relative group">
+                          <div
+                            key={index}
+                            className="relative group overflow-hidden rounded-2xl shadow-lg"
+                          >
                             <img
                               src={url}
                               alt={`Preview ${index + 1}`}
-                              className="w-full h-32 object-cover rounded-lg border-2 border-blue-200 shadow-sm"
+                              className="w-full h-48 object-cover"
                             />
-                            <div className="absolute inset-0 bg-blue-600 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
-                              <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100 bg-blue-600 px-2 py-1 rounded">
+                            <div className="absolute inset-0 bg-blue-600 bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                              <span className="text-white font-bold text-lg opacity-0 group-hover:opacity-100">
                                 Image {index + 1}
                               </span>
                             </div>
@@ -252,7 +328,7 @@ const ImageUploadFormSubmit = () => {
 
                   <button
                     type="submit"
-                    className="mt-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg"
+                    className="w-full mt-12 py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-xl rounded-full shadow-xl hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300"
                   >
                     Submit Entry
                   </button>
@@ -262,7 +338,7 @@ const ImageUploadFormSubmit = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
