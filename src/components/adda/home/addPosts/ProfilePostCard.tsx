@@ -261,7 +261,7 @@ const ProfilePostCard = ({ post }: PostCardProps) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-start w-full gap-5 p-2 border border-orange-200 rounded-xl min-h-fit">
+      <div >
         <div className="flex items-center justify-between w-full">
           {/* <PostContent post={post} /> */}
           {renderPostContent()}

@@ -51,12 +51,27 @@ const PreviewContent = ({
             </div>
           </div>
 
-          <div className="flex items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
-            <span className="px-2 py-1 mr-2 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
-              {values.visibility || "Public"}
-            </span>
-            <span>Ready to publish</span>
-            <span className="ml-auto text-xs text-blue-500">Step 3 of 3</span>
+          <div className="space-y-2 mt-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center ">
+              <span className="px-2 py-1 mr-2 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
+                {values.visibility || "Public"}
+              </span>
+
+              <span>Ready to publish</span>
+
+              <span className="ml-auto text-xs text-blue-500">Step 3 of 3</span>
+            </div>
+            <div>
+              {values?.tags &&
+                values?.tags?.split(",")?.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-1 mr-2 text-xs text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-200"
+                  >
+                    #{tag.trim()}
+                  </span>
+                ))}
+            </div>
           </div>
         </div>
       </motion.div>

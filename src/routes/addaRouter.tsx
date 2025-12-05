@@ -2,6 +2,10 @@ import FriendSearch from "@/components/adda/searchFriend/searchFriend";
 import Loader from "@/components/common/Loader";
 import SubscriptionGuard from "@/components/protected/subscriptionGuard";
 import AddaLayout from "@/layout/addaLayout";
+import ColorTubeGame from "@/pages/v2/adda/games/colorTubes";
+import Instruments from "@/pages/v2/adda/games/Instruments";
+import Inventors from "@/pages/v2/adda/games/Inventors";
+import OddOneOut from "@/pages/v2/adda/games/OddOneOut";
 import PostPage from "@/pages/v2/adda/postPage";
 import Profile from "@/pages/v2/profile";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -20,8 +24,6 @@ const MemePage = lazy(() => import("@/pages/v2/adda/MemePage"));
 const MemeDetails = lazy(() => import("@/pages/v2/adda/memeDetails"));
 
 const AddaRouter = () => {
- 
-
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -78,6 +80,11 @@ const AddaRouter = () => {
           <Route path="posts/:postId" element={<PostPage />} />
         </Route>
         <Route path="user-profile" element={<Profile />} />
+        <Route path="game" element={<></>} />
+        <Route path="game/inventors" element={<Inventors />} />
+        <Route path="game/instruments" element={<Instruments />} />
+        <Route path="game/color-tube" element={<ColorTubeGame />} />
+        <Route path="game/odd-one-out" element={<OddOneOut />} />
       </Routes>
     </Suspense>
   );

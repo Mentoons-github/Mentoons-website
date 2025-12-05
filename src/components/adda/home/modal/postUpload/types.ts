@@ -15,7 +15,7 @@ export interface FormValues {
   location?: string;
   description?: string;
   articleBody?: string;
-  tags?: string[];
+  tags?: string;
   visibility?: "public" | "friends" | "private";
   media: {
     file: File | null;

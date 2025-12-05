@@ -20,7 +20,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/chat" ||
     location.pathname === "/puzzle/play" ||
     location.pathname.startsWith("/employee") ||
-    location.pathname === "/add-password";
+    location.pathname === "/add-password" ||
+    location.pathname.startsWith("/adda/game")
+
+    console.log(hideLayout)
 
   const isChatPage = location.pathname.startsWith("/chat");
 

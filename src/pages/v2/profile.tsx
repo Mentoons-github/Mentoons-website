@@ -139,6 +139,7 @@ const Profile = () => {
   const fetchUserData = async () => {
     setIsFetchingUserData(true);
     const token = await getToken();
+    console.log(token,'tokennnnnn')
     if (!token) {
       setIsFetchingUserData(false);
       return;
