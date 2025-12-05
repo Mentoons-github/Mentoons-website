@@ -19,7 +19,6 @@ const Header = () => {
   const navigate = useNavigate();
   const { userId, signOut, getToken } = useAuth();
 
-  const title = location.pathname.startsWith("/adda") ? "adda" : "home";
   const [isScrolled, setIsScrolled] = useState(false);
   const [sidebarOpen, setSideBarOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -46,10 +45,9 @@ const Header = () => {
     (item) => item.label !== "Profile" || userId
   );
   const navLeft = filteredNav.slice(0, 5);
+  const navRight = filteredNav.slice(5);
 
-  const handleBrowsePlansClick = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
+  const handleBrowsePlansClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     navigate("/membership");
   };
@@ -57,9 +55,7 @@ const Header = () => {
   const handleSearchToggle = () => {
     setShowSearch(!showSearch);
     if (!showSearch) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
+      setTimeout(() => searchInputRef.current?.focus(), 100);
     } else {
       setSearchQuery("");
     }
@@ -71,46 +67,19 @@ const Header = () => {
   ) => {
     e.preventDefault();
     const query = suggestion || searchQuery.trim();
-    const encoded = encodeURIComponent(query);
-    if (!encoded) return;
-
-    const currentParams = new URLSearchParams(location.search);
-    const currentQ = currentParams.get("q");
-
-    if (currentQ === encoded) {
-      navigate(`/search?q=${encoded}`, { replace: true });
-      navigate(0);
-    } else {
-      navigate(`/search?q=${encoded}`);
-    }
-
+    if (!query) return;
+    navigate(`/search?q=${encodeURIComponent(query)}`);
     setShowSearch(false);
     setSearchQuery("");
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
-      setShowSearch(false);
-      setSearchQuery("");
-    }
-  };
-
-  const handleProfileHover = () => {
-    setShowProfileDropdown(true);
-  };
-
-  const handleProfileContainerLeave = () => {
-    setShowProfileDropdown(false);
-  };
+  const handleProfileHover = () => setShowProfileDropdown(true);
+  const handleProfileLeave = () => setShowProfileDropdown(false);
 
   const handleLogout = async () => {
-    try {
-      await signOut();
-      setShowProfileDropdown(false);
-      navigate("/adda");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    setShowProfileDropdown(false);
+    await signOut();
+    navigate("/adda");
   };
 
   const handleProfileNavigation = () => {
@@ -118,323 +87,233 @@ const Header = () => {
     navigate("/adda/user-profile");
   };
 
+  // Fixed: Proper async handling of getToken()
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const fetchCartData = async () => {
+      if (!userId) return;
+      try {
+        const token = await getToken();
+        if (token) {
+          dispatch(getCart({ token, userId }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch cart:", error);
+      }
+    };
+
+    fetchCartData();
+  }, [userId, getToken, dispatch]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target as Node)
+        !profileDropdownRef.current.contains(e.target as Node)
       ) {
         setShowProfileDropdown(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      const token = await getToken();
-      if (token && userId) {
-        await dispatch(getCart({ token, userId }));
-      }
-    };
-
-    fetchCart();
-  }, [dispatch, getToken, userId]);
-
-  const handleHover = (menu: string) => {
+  const handleHover = (menu: string) =>
     setDropDown((prev) => ({ ...prev, [menu]: true }));
-  };
-
-  const handleMouseLeave = (menu: string) => {
+  const handleMouseLeave = (menu: string) =>
     setDropDown((prev) => ({ ...prev, [menu]: false }));
-  };
 
-  if (location.pathname.startsWith("/employee")) {
-    return null;
-  }
-
-  const dropdownVariants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: { duration: 0.2 },
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: { duration: 0.15 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    }),
-  };
+  if (location.pathname.startsWith("/employee")) return null;
 
   return (
     <header
-      id="header"
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-      } flex justify-between items-center bg-primary max-w-screen-full h-16 px-2 sm:px-4 md:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
+      } flex justify-between items-center bg-primary h-16 px-4 sm:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
     >
-      <div className="flex items-center justify-start pl-0 lg:w-1/3 lg:pl-4 xl:pl-6">
-        <nav
-          className={`w-auto flex-shrink-0 ${
-            title === "adda"
-              ? "hidden lg:flex gap-4 xl:gap-8"
-              : "hidden lg:flex gap-4 xl:gap-8"
-          } justify-start items-center`}
-        >
-          {navLeft.map(({ icon: Icon, id, label, url, items }) =>
+      {/* Left Nav */}
+      <div className="flex items-center lg:w-1/3">
+        <nav className="hidden lg:flex gap-6 xl:gap-8">
+          {navLeft.map(({ id, label, url, icon: Icon, items }) =>
             label === "Browse Plans" ? (
               <a
                 key={id}
                 href={url}
                 onClick={handleBrowsePlansClick}
-                className="group relative bg-transparent outline-none cursor-pointer text-center text-[12px] sm:text-sm md:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out"
+                className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
               >
                 {Icon && typeof Icon === "function" && (
-                  <Icon className="sm:text-sm md:text-lg" />
+                  <Icon className="w-5 h-5" />
                 )}
                 {label}
-                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
+                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </a>
-            ) : (
-              <div key={id} className="relative flex-shrink-0">
-                {items && items.length ? (
-                  <NavButton
-                    label={label}
-                    onMouseEnter={() => handleHover(label.toLowerCase())}
-                    onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
-                  >
-                    {dropdown[
-                      label.toLowerCase() as keyof DropDownInterface
-                    ] && (
-                      <DropDown
-                        labelType={
-                          label.toLowerCase() as
-                            | "products"
-                            | "games"
-                            | "workshops"
-                            | "joinus"
-                        }
-                        items={items}
-                      />
-                    )}
-                  </NavButton>
-                ) : (
-                  <NavLink
-                    to={url}
-                    className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap"
-                  >
-                    {Icon && typeof Icon === "function" && (
-                      <Icon className="flex-shrink-0 text-xs md:text-sm" />
-                    )}
-                    {label}
-                    {label === "Mythos" && (
-                      <span className="absolute -top-1/2 -left-1/2 -translate-x-1/4 bg-red-500 rounded-full px-1 py-0.5 text-[8px] md:text-[10px] leading-none text-white whitespace-nowrap">
-                        Introducing
-                      </span>
-                    )}
-                    <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
-                  </NavLink>
-                )}
+            ) : items?.length ? (
+              <div key={id} className="relative">
+                <NavButton
+                  label={label}
+                  onMouseEnter={() => handleHover(label.toLowerCase())}
+                  onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                >
+                  {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
+                    <DropDown
+                      labelType={label.toLowerCase() as any}
+                      items={items}
+                    />
+                  )}
+                </NavButton>
               </div>
+            ) : (
+              <NavLink
+                key={id}
+                to={url}
+                className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+              >
+                {Icon && typeof Icon === "function" && (
+                  <Icon className="w-5 h-5" />
+                )}
+                {label}
+                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
+              </NavLink>
             )
           )}
         </nav>
       </div>
 
-      <div className="absolute flex-shrink-0 transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+      {/* Logo */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <NavLink to="/adda">
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
-            alt="mentoons-logo"
-            className="w-[100px] sm:w-[120px] md:w-[130px] lg:w-[150px]"
+            alt="Logo"
+            className="w-28 sm:w-32 lg:w-40"
           />
         </NavLink>
       </div>
 
-      <div className="flex items-center justify-end gap-3 pr-0 lg:w-1/3 lg:pr-4 xl:pr-6">
-        <motion.div
-          className="relative flex-shrink-0 cursor-pointer"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
+      {/* Mobile Right Icons */}
+      <div className="flex items-center gap-4 lg:hidden">
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <div
             onClick={handleSearchToggle}
-            className="p-2 transition-colors rounded-full hover:bg-white/10"
+            className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
           >
-            <Search className="w-5 h-5 text-white sm:w-6 sm:h-6" />
+            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
         </motion.div>
 
         <SignedIn>
-          <div className="relative flex flex-shrink-0 cursor-pointer lg:hidden">
-            <NavLink to="/cart">
-              <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
-              {(cart?.totalItemCount ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                  {cart.totalItemCount}
-                </span>
-              )}
-            </NavLink>
-          </div>
+          <NavLink to="/cart" className="relative">
+            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            {(cart?.totalItemCount ?? 0) > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                {cart.totalItemCount}
+              </span>
+            )}
+          </NavLink>
         </SignedIn>
 
         <motion.div
-          className={`${
-            title === "adda" ? "lg:hidden flex" : "lg:hidden flex"
-          } cursor-pointer z-50 flex-shrink-0 ml-2`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ rotate: 90, scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300 }}
           onClick={() => setSideBarOpen(!sidebarOpen)}
         >
           {sidebarOpen ? (
-            <FaTimes
-              size={24}
-              className="text-white transition-colors hover:text-gray-300"
-            />
+            <FaTimes size={24} className="text-white" />
           ) : (
-            <FaBars
-              size={24}
-              className="text-white transition-colors hover:text-gray-300"
-            />
+            <FaBars size={24} className="text-white" />
           )}
         </motion.div>
       </div>
 
-      <nav
-        className={`${
-          title === "adda" ? "hidden lg:flex" : "hidden lg:flex"
-        } items-center gap-4 xl:gap-8 justify-end`}
-      >
-        {filteredNav.slice(5).map(({ id, label, url, icon: Icon, items }) =>
-          label === "Browse Plans" ? (
+      {/* Desktop Right Nav + Cart at the END */}
+      <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+        {navRight.map(({ id, label, url, icon: Icon, items }) => {
+          if ((label === "Games" || label === "My Library") && !userId)
+            return null;
+
+          return label === "Browse Plans" ? (
             <a
               key={id}
               href={url}
               onClick={handleBrowsePlansClick}
-              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative text-white flex items-center gap-2 text-base font-semibold"
             >
               {Icon && typeof Icon === "function" && (
-                <Icon className="flex-shrink-0 text-xs md:text-sm" />
+                <Icon className="w-5 h-5" />
               )}
               {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
             </a>
           ) : label === "Share" ? (
             <div
               key={id}
               onClick={() => setShowShareModal(true)}
-              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative text-white flex items-center gap-2 text-base font-semibold cursor-pointer"
             >
               {Icon && typeof Icon === "function" && (
-                <Icon className="flex-shrink-0 text-xs md:text-sm" />
+                <Icon className="w-5 h-5" />
               )}
               {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
-              {showShareModal && (
-                <ShareModal
-                  onClose={() => setShowShareModal(false)}
-                  isOpen={showShareModal}
-                  link={window.location.href}
-                />
-              )}
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
             </div>
           ) : label === "Profile" ? (
-            <div key={id} className="relative flex-shrink-0">
+            <div key={id} className="relative" ref={profileDropdownRef}>
               <div
-                ref={profileDropdownRef}
                 onMouseEnter={handleProfileHover}
-                onMouseLeave={handleProfileContainerLeave}
-                className="relative"
+                onMouseLeave={handleProfileLeave}
               >
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="relative flex items-center text-center transition-all duration-300 ease-in-out bg-transparent outline-none cursor-pointer group"
+                  whileHover={{ scale: 1.1 }}
+                  className="cursor-pointer"
                 >
-                  <FaUserCircle className="w-5 h-5 text-white rounded-full sm:w-6 sm:h-6" />
-                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
+                  <FaUserCircle className="w-7 h-7 text-white" />
                 </motion.div>
 
                 <AnimatePresence>
                   {showProfileDropdown && (
                     <motion.div
-                      variants={dropdownVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[10001]"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl py-2 z-[10001] border"
                     >
-                      <motion.div
-                        custom={0}
-                        variants={itemVariants}
-                        initial="hidden"
-                        animate="visible"
+                      <div
                         onClick={handleProfileNavigation}
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 transition-colors cursor-pointer hover:bg-gray-50"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 cursor-pointer"
                       >
                         <User className="w-4 h-4" />
-                        <span className="text-sm font-medium">Profile</span>
-                      </motion.div>
-
-                      <motion.div
-                        custom={1}
-                        variants={itemVariants}
-                        initial="hidden"
-                        animate="visible"
+                        <span>Profile</span>
+                      </div>
+                      <div
                         onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-2 text-red-600 transition-colors cursor-pointer hover:bg-red-50"
+                        className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
-                        <span className="text-sm font-medium">Logout</span>
-                      </motion.div>
+                        <span>Logout</span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             </div>
-          ) : label === "Join Us" && items && items.length ? (
-            <div key={id} className="relative flex-shrink-0">
+          ) : items?.length ? (
+            <div key={id} className="relative">
               <NavButton
                 label={label}
-                onMouseEnter={() => handleHover("joinus")}
-                onMouseLeave={() => handleMouseLeave("joinus")}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
               >
-                {dropdown.joinus && (
-                  <DropDown labelType="joinus" items={items} />
+                {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
+                  <DropDown
+                    labelType={label.toLowerCase() as any}
+                    items={items}
+                  />
                 )}
               </NavButton>
             </div>
@@ -442,110 +321,69 @@ const Header = () => {
             <NavLink
               key={id}
               to={url}
-              className="group relative bg-transparent outline-none cursor-pointer text-center text-[11px] sm:text-xs md:text-sm lg:text-base font-semibold text-white flex items-center gap-1 transition-all duration-300 ease-in-out whitespace-nowrap flex-shrink-0"
+              className="group relative text-white flex items-center gap-2 text-base font-semibold"
             >
               {Icon && typeof Icon === "function" && (
-                <Icon className="flex-shrink-0 text-xs md:text-sm" />
+                <Icon className="w-5 h-5" />
               )}
               {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all duration-300 ease-in-out group-hover:w-full" />
+              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
             </NavLink>
-          )
-        )}
+          );
+        })}
+
+        {/* CART AT THE VERY END */}
         <SignedIn>
-          <div className="relative flex-shrink-0 cursor-pointer">
-            <NavLink to="/cart">
-              <ShoppingCart className="w-5 h-5 text-white sm:w-6 sm:h-6" />
-              {(cart?.totalItemCount ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                  {cart.totalItemCount}
-                </span>
-              )}
-            </NavLink>
-          </div>
+          <NavLink to="/cart" className="relative ml-6">
+            <ShoppingCart className="w-7 h-7 text-white" />
+            {(cart?.totalItemCount ?? 0) > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {cart.totalItemCount}
+              </span>
+            )}
+          </NavLink>
         </SignedIn>
       </nav>
 
+      {/* Search Modal & Sidebar & Share Modal */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[10000] flex items-start justify-center pt-20"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-24"
             onClick={handleSearchToggle}
           >
             <motion.div
-              initial={{ y: -50, opacity: 0, scale: 0.9 }}
+              initial={{ y: -50, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -50, opacity: 0, scale: 0.9 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              exit={{ y: -50, opacity: 0 }}
               className="w-full max-w-2xl mx-4"
               onClick={(e) => e.stopPropagation()}
             >
               <form
                 onSubmit={handleSearchSubmit}
-                className="relative overflow-hidden bg-white shadow-2xl rounded-2xl"
+                className="bg-white rounded-2xl shadow-2xl overflow-hidden"
               >
                 <div className="flex items-center">
-                  <div className="py-4 pl-6 pr-3">
-                    <Search className="w-6 h-6 text-gray-400" />
-                  </div>
+                  <Search className="w-6 h-6 text-gray-400 ml-6" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    placeholder="Search for games, comics, podcasts..."
-                    className="flex-1 py-4 pr-4 text-lg text-gray-900 placeholder-gray-500 bg-transparent border-none outline-none"
+                    placeholder="Search games, comics, podcasts..."
+                    className="flex-1 py-5 px-4 text-lg outline-none"
                   />
-                  <motion.button
+                  <button
                     type="button"
                     onClick={handleSearchToggle}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-3 mr-3 transition-colors rounded-full hover:bg-gray-100"
+                    className="p-3 mr-4 hover:bg-gray-100 rounded-full"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
-                  </motion.button>
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
                 </div>
-
-                {searchQuery && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-4 border-t border-gray-200"
-                  >
-                    <p className="mb-2 text-sm text-gray-500">
-                      Press Enter to search
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Games", "Comics", "Books", "Cards"].map(
-                        (suggestion) => (
-                          <motion.button
-                            key={suggestion}
-                            type="button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setSearchQuery(suggestion);
-                              handleSearchSubmit(
-                                new Event("submit") as any,
-                                suggestion
-                              );
-                            }}
-                            className="px-3 py-1 text-sm text-gray-700 transition-colors bg-gray-100 rounded-full hover:bg-primary hover:text-white"
-                          >
-                            {suggestion}
-                          </motion.button>
-                        )
-                      )}
-                    </div>
-                  </motion.div>
-                )}
               </form>
             </motion.div>
           </motion.div>
@@ -561,6 +399,14 @@ const Header = () => {
         setIsOpen={setSideBarOpen}
         handlePlans={handleBrowsePlansClick}
       />
+
+      {showShareModal && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          link={window.location.href}
+        />
+      )}
     </header>
   );
 };
