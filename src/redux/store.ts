@@ -23,6 +23,7 @@ import groupReducer from "./adda/groupSlice";
 import taskReducer from "./admin/task/taskSlice";
 import AdminReducer from "./admin/admin/admin";
 import employeeReducer from "./employee/employee";
+import postReducer from "./adda/postSlice";
 
 export const store = configureStore<{
   tasks: ReturnType<typeof taskReducer>;
@@ -49,6 +50,7 @@ export const store = configureStore<{
   groups: ReturnType<typeof groupReducer>;
   admin: ReturnType<typeof AdminReducer>;
   employeeData: ReturnType<typeof employeeReducer>;
+  posts: ReturnType<typeof postReducer>;
 }>({
   reducer: {
     tasks: taskReducer,
@@ -75,6 +77,7 @@ export const store = configureStore<{
     groups: groupReducer,
     admin: AdminReducer,
     employeeData: employeeReducer,
+    posts: postReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -2,6 +2,10 @@ import FriendSearch from "@/components/adda/searchFriend/searchFriend";
 import Loader from "@/components/common/Loader";
 import SubscriptionGuard from "@/components/protected/subscriptionGuard";
 import AddaLayout from "@/layout/addaLayout";
+import ColorTubeGame from "@/pages/v2/adda/games/colorTubes";
+import Instruments from "@/pages/v2/adda/games/Instruments";
+import Inventors from "@/pages/v2/adda/games/Inventors";
+import OddOneOut from "@/pages/v2/adda/games/OddOneOut";
 import Cartoonmoji from "@/pages/v2/adda/games/cartoonmoji";
 import Dice from "@/pages/v2/adda/games/dice";
 import BrainStack from "@/pages/v2/adda/games/brainStack";
@@ -85,6 +89,11 @@ const AddaRouter = () => {
         </Route>
         <Route path="game-lobby" element={<GameLobby />} />
         <Route path="user-profile" element={<Profile />} />
+        <Route path="game" element={<></>} />
+        <Route path="game-lobby/inventors" element={<Inventors />} />
+        <Route path="game-lobby/instruments" element={<Instruments />} />
+        <Route path="game-lobby/color-tube" element={<ColorTubeGame />} />
+        <Route path="game-lobby/odd-one-out" element={<OddOneOut />} />
         <Route path="show-case" element={<ContestVotingPage />} />
         <Route path="game-lobby/dice" element={<Dice />} />
         <Route path="game-lobby/cartoonmoji" element={<Cartoonmoji />} />

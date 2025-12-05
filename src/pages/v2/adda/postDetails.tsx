@@ -3,12 +3,15 @@ import Reactions from "@/components/adda/home/addPosts/likes/reactions";
 import ReactionsDisplay from "@/components/adda/home/addPosts/likes/ReactionsDisplay";
 import Share from "@/components/adda/home/addPosts/share/share";
 import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
+import PostEditModal from "@/components/modals/PostEditModal";
 import { useStatusModal } from "@/context/adda/statusModalContext";
+import { Comment, PostDetails } from "@/types/adda/posts";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { Edit } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BiComment, BiLock } from "react-icons/bi";
 import { BsThreeDots } from "react-icons/bs";
@@ -25,54 +28,6 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 // Types
-interface Comment {
-  _id: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    picture: string;
-  };
-  content: string;
-  createdAt: string;
-}
-
-interface PostDetails {
-  _id: string;
-  user: {
-    _id: string;
-    name: string;
-    role: string;
-    picture: string;
-    bio?: string;
-  };
-  content?: string;
-  title?: string;
-  postType: "text" | "photo" | "video" | "article" | "event" | "mixed";
-  media?: Array<{
-    url: string;
-    type: "image" | "video";
-    caption?: string;
-  }>;
-  article?: {
-    body: string;
-    coverImage?: string;
-  };
-  event?: {
-    startDate: string | Date;
-    endDate?: string | Date;
-    venue: string;
-    description: string;
-    coverImage?: string;
-  };
-  likes: string[];
-  comments: Comment[];
-  shares: string[];
-  createdAt: string | Date;
-  visibility: "public" | "friends" | "private";
-  tags?: string[];
-  location?: string;
-}
 
 // Authentication Modal Component
 const AuthModal = ({ onClose }: { onClose: () => void }) => {
@@ -157,6 +112,7 @@ const PostDetailsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"report" | "block">("report");
   const [isUserBlocked, setIsUserBlocked] = useState(false);
+  const [editModal, setEditModal] = useState(false);
   const { user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const location = useLocation();
@@ -166,7 +122,6 @@ const PostDetailsPage = () => {
   const { showStatus } = useStatusModal();
 
   console.log(user?.id, "hhh");
-  console.log(post?.user._id, "jjjjjjjjjjjjj");
 
   const fetchUser = async () => {
     try {
@@ -350,6 +305,11 @@ const PostDetailsPage = () => {
     }
   };
 
+  const handleEditPost = () => {
+    setEditModal(true);
+    setShowDropdown(false);
+  };
+
   const handleSavePost = async () => {
     // If not signed in, show auth modal
     if (!isSignedIn) {
@@ -480,6 +440,7 @@ const PostDetailsPage = () => {
   }
 
   const isUser = userId == post?.user._id;
+  console.log(post,'postttttttt')
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -565,13 +526,22 @@ const PostDetailsPage = () => {
                   className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
                 >
                   {isUser ? (
-                    <button
-                      className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
-                      onClick={handleDeletePost}
-                    >
-                      <RiDeleteBin6Line className="w-5 h-5 mr-2" />
-                      Delete Post
-                    </button>
+                    <>
+                      <button
+                        className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                        onClick={handleDeletePost}
+                      >
+                        <RiDeleteBin6Line className="w-5 h-5 mr-2" />
+                        Delete Post
+                      </button>
+                      <button
+                        className="flex items-center w-full px-4 py-3 text-left text-blue-600 transition-colors hover:bg-gray-50"
+                        onClick={handleEditPost}
+                      >
+                        <Edit className="w-5 h-5 mr-2" />
+                        Edit Post
+                      </button>
+                    </>
                   ) : (
                     <>
                       <button
@@ -683,7 +653,7 @@ const PostDetailsPage = () => {
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4 mt-2">
               {post.tags.map((tag, index) => (
                 <span
                   key={index}
@@ -869,6 +839,13 @@ const PostDetailsPage = () => {
         contentId={post._id}
         reportType="post"
       />
+      {editModal && (
+        <PostEditModal
+          post={post}
+          onClose={() => setEditModal(false)}
+          setPost = {setPost}
+        />
+      )}
     </>
   );
 };

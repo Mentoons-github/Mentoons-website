@@ -47,6 +47,23 @@ const ArticleForm = () => {
       </motion.div>
 
       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="w-full"
+      >
+        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Tags (seperate by coma)
+        </label>
+        <Field
+          type="text"
+          name="tags"
+          className="w-full p-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+          placeholder="tag1, tag2, tag3"
+        />
+      </motion.div>
+
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.45 }}
