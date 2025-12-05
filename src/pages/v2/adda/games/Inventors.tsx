@@ -14,6 +14,8 @@ import { BsExclamation } from "react-icons/bs";
 import InventorInstructionModal from "@/components/adda/games/Inventors&Invention.tsx/modal/InventorInstructionModal";
 import InventorsReviewCard from "@/components/adda/games/Inventors&Invention.tsx/InventorsReviewCard";
 import InventorsStartScreen from "@/components/adda/games/Inventors&Invention.tsx/InventorsStartScreen";
+import postScore from "@/api/game/postScore";
+import { useAuth } from "@clerk/clerk-react";
 
 const COLORS = {
   CARD_BG: "bg-[#ab6c3c] backdrop-blur-sm",
@@ -71,6 +73,12 @@ const Inventors: React.FC = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [reviewCards, setReviewCards] = useState<ReviewCard[]>([]);
   const [lastBatchScore, setLastBatchScore] = useState(0);
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [completeSend, setCompleteSend] = useState(false);
+
+  const { getToken } = useAuth();
+
+  const gameId = `inventors_${difficulty}`;
 
   const navigate = useNavigate();
 
@@ -98,6 +106,7 @@ const Inventors: React.FC = () => {
   };
 
   const startGame = (level: Difficulty) => {
+    setDifficulty(level);
     const data = [...INVENTORS_BY_DIFFICULTY[level]].sort(
       () => Math.random() - 0.5
     );
@@ -127,8 +136,7 @@ const Inventors: React.FC = () => {
     }
   }, [gameState, batchIndex, allSlides, batchSize]);
 
-
-  const onBatchComplete = (batchScore: number, cards: ReviewCard[]) => {
+  const onBatchComplete = async (batchScore: number, cards: ReviewCard[]) => {
     setLastBatchScore(batchScore);
     setReviewCards(cards);
     setGameState("review");
@@ -224,6 +232,8 @@ const Inventors: React.FC = () => {
     return () => clearInterval(timer);
   }, [gameState]);
 
+  console.log(score);
+
   useEffect(() => {
     if (gameState !== "memorize" && gameState !== "match") return;
     if (timeLeft > 5 || timeLeft === 0) return;
@@ -248,6 +258,85 @@ const Inventors: React.FC = () => {
     return <InventorsStartScreen onStart={() => setGameState("difficulty")} />;
   }
 
+  const sendResult = async () => {
+    setCompleteSend(true);
+    try {
+      postScore({
+        body: { gameId, difficulty: difficulty as string, score },
+        token: (await getToken()) || "",
+      });
+    } catch (error) {
+      console.log(error as string);
+    }
+  };
+
+  if (gameState === "final") {
+    if (!completeSend) {
+      sendResult();
+    }
+    return (
+      <div className="relative min-h-screen flex items-center justify-center md:p-4 bg-[url('/assets/games/dice/dice-bg.png')]">
+        <div
+          className={`bg-[#fceec7] backdrop-blur-md rounded-lg p-1 md:p-2 lg:p-4 border border-white/20`}
+        >
+          <div className="text-center text-white py-6">
+            <h1 className="text-4xl font-extrabold mb-3 text-yellow-400 animate-bounce">
+              🎉 Game Completed! 🎉
+            </h1>
+
+            <p className="text-lg text-green-600 mb-4">
+              Great job! Here is your final score:
+            </p>
+
+            {/* ✅ SCORE BOARD */}
+            <div
+              className="mx-auto w-full max-w-sm bg-gradient-to-br from-purple-600 to-blue-700 
+                    rounded-2xl p-6 shadow-2xl border border-white/30"
+            >
+              <p className="text-xl font-semibold mb-2">⭐ Your Score ⭐</p>
+
+              <div className="text-5xl font-extrabold text-green-300 mb-2">
+                {score}
+                <span className="text-2xl text-white">
+                  {" "}
+                  / {maxRounds * batchSize}
+                </span>
+              </div>
+
+              <p className="text-sm text-teal-100">
+                You matched {score} correct answers!
+              </p>
+
+              {/* 🎯 PERFORMANCE MESSAGE */}
+              <div className="mt-4 text-lg font-bold">
+                {score === maxRounds * batchSize && "🏆 Perfect Champion!"}
+                {score > (maxRounds * batchSize) / 2 &&
+                  score < maxRounds * batchSize &&
+                  "🌟 Superb Job!"}
+                {score <= (maxRounds * batchSize) / 2 && "💪 Keep Practicing!"}
+              </div>
+            </div>
+
+            {/* 🔁 PLAY AGAIN BUTTON */}
+            <button
+              className="mt-6 bg-gradient-to-r from-teal-500 to-green-500 
+                 hover:from-teal-400 hover:to-green-400 
+                 px-8 py-3 rounded-full font-bold text-lg 
+                 shadow-xl transition-all transform hover:scale-105"
+              onClick={() => {
+                setGameState("difficulty");
+                setScore(0);
+                setRound(1);
+              }}
+            >
+              🔁 Play Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen flex items-center justify-center md:p-4 bg-[url('/assets/games/dice/dice-bg.png')]">
       <audio
@@ -267,11 +356,7 @@ const Inventors: React.FC = () => {
     ${
       COLORS.CARD_BG
     } rounded-xl shadow-2xl pt-2 p-1 md:p-6 w-full border border-white/20
-    ${
-      gameState === "difficulty" || gameState === "final"
-        ? "max-w-2xl"
-        : "max-w-6xl"
-    }
+    ${gameState === "difficulty" ? "max-w-2xl" : "max-w-6xl"}
         ${gameState === "countdown" && "hidden"}
   `}
       >
@@ -432,63 +517,6 @@ const Inventors: React.FC = () => {
               autoSubmit={autoSubmit}
               resetAutoSubmit={() => setAutoSubmit(false)}
             />
-          )}
-
-          {gameState === "final" && (
-            <div className="text-center text-white py-6">
-              <h1 className="text-4xl font-extrabold mb-3 text-yellow-400 animate-bounce">
-                🎉 Game Completed! 🎉
-              </h1>
-
-              <p className="text-lg text-green-600 mb-4">
-                Great job! Here is your final score:
-              </p>
-
-              {/* ✅ SCORE BOARD */}
-              <div
-                className="mx-auto w-full max-w-sm bg-gradient-to-br from-purple-600 to-blue-700 
-                    rounded-2xl p-6 shadow-2xl border border-white/30"
-              >
-                <p className="text-xl font-semibold mb-2">⭐ Your Score ⭐</p>
-
-                <div className="text-5xl font-extrabold text-green-300 mb-2">
-                  {score}
-                  <span className="text-2xl text-white">
-                    {" "}
-                    / {maxRounds * batchSize}
-                  </span>
-                </div>
-
-                <p className="text-sm text-teal-100">
-                  You matched {score} correct answers!
-                </p>
-
-                {/* 🎯 PERFORMANCE MESSAGE */}
-                <div className="mt-4 text-lg font-bold">
-                  {score === maxRounds * batchSize && "🏆 Perfect Champion!"}
-                  {score > (maxRounds * batchSize) / 2 &&
-                    score < maxRounds * batchSize &&
-                    "🌟 Superb Job!"}
-                  {score <= (maxRounds * batchSize) / 2 &&
-                    "💪 Keep Practicing!"}
-                </div>
-              </div>
-
-              {/* 🔁 PLAY AGAIN BUTTON */}
-              <button
-                className="mt-6 bg-gradient-to-r from-teal-500 to-green-500 
-                 hover:from-teal-400 hover:to-green-400 
-                 px-8 py-3 rounded-full font-bold text-lg 
-                 shadow-xl transition-all transform hover:scale-105"
-                onClick={() => {
-                  setGameState("difficulty");
-                  setScore(0);
-                  setRound(1);
-                }}
-              >
-                🔁 Play Again
-              </button>
-            </div>
           )}
 
           {gameState === "review" && (

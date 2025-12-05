@@ -4,7 +4,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getEmployees } from "@/redux/admin/employee/api";
-import { User } from "lucide-react";
+import { User, Clock } from "lucide-react";
 import { Employee } from "@/types/employee";
 import {
   AdminMonthlyStats,
@@ -51,8 +51,6 @@ const AdminAttendanceView: React.FC = () => {
   const [salaryData, setSalaryData] = useState<AdminSalaryData | null>(null);
   const [sectionLoading, setSectionLoading] = useState(false);
   const [employeeInfo, setEmployeeInfo] = useState<Employee | null>(null);
-
-  // Add separate loading states for better control
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [salaryLoading, setSalaryLoading] = useState(false);
 
@@ -60,7 +58,6 @@ const AdminAttendanceView: React.FC = () => {
     fetchEmployees();
   }, [currentPage]);
 
-  // Update employeeInfo whenever selectedEmployee or employees changes
   useEffect(() => {
     if (selectedEmployee && employees.length > 0) {
       const employee = employees.find((emp) => emp._id === selectedEmployee);
@@ -105,12 +102,10 @@ const AdminAttendanceView: React.FC = () => {
 
   useEffect(() => {
     if (selectedEmployee) {
-
       setTodayAttendance(null);
       setYearlyStats(null);
       setMonthlyStats([]);
       setSalaryData(null);
-
       fetchAttendanceData();
       fetchSalaryData();
     }
@@ -132,7 +127,6 @@ const AdminAttendanceView: React.FC = () => {
     try {
       const token = await getToken();
       if (!token) return;
-
       await dispatch(
         getEmployees({
           sortOrder: "asc",
@@ -154,16 +148,9 @@ const AdminAttendanceView: React.FC = () => {
       if (!token || !selectedEmployee) return;
 
       const response = await axios.get(`${BASE_URL}/attendance/my-attendance`, {
-        params: {
-          year: selectedYear,
-          userId: selectedEmployee,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        params: { year: selectedYear, userId: selectedEmployee },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("Attendance Response:", response.data);
 
       setTodayAttendance(response.data.todayAttendance || null);
       setYearlyStats(response.data.yearlyStats || null);
@@ -172,9 +159,7 @@ const AdminAttendanceView: React.FC = () => {
       console.error("Error fetching attendance:", error);
     } finally {
       setAttendanceLoading(false);
-      if (!salaryLoading) {
-        setSectionLoading(false);
-      }
+      if (!salaryLoading) setSectionLoading(false);
     }
   };
 
@@ -187,23 +172,16 @@ const AdminAttendanceView: React.FC = () => {
 
       const response = await axios.get(
         `${BASE_URL}/employee/salary?employeeId=${selectedEmployee}&year=${selectedYear}&month=${selectedMonth}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Salary Response:", response.data);
       setSalaryData(response.data);
     } catch (error) {
       console.error("Error fetching salary data:", error);
       setSalaryData(null);
     } finally {
       setSalaryLoading(false);
-      if (!attendanceLoading) {
-        setSectionLoading(false);
-      }
+      if (!attendanceLoading) setSectionLoading(false);
     }
   };
 
@@ -214,14 +192,8 @@ const AdminAttendanceView: React.FC = () => {
       if (!token || !selectedEmployee) return;
 
       const response = await axios.get(`${BASE_URL}/attendance/my-attendance`, {
-        params: {
-          year,
-          month,
-          userId: selectedEmployee,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        params: { year, month, userId: selectedEmployee },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const attendanceData = (response.data.monthlyDetails || []).filter(
@@ -259,21 +231,13 @@ const AdminAttendanceView: React.FC = () => {
   };
 
   const getMonthlySalaryStats = () => {
-    if (!salaryData) {
-      console.log("No salary data available");
-      return null;
-    }
-
-    console.log("Full salary data:", salaryData);
-    console.log("Monthly stats:", monthlyStats);
-    console.log("Selected year/month:", selectedYear, selectedMonth);
+    if (!salaryData) return null;
 
     if (
       salaryData.dailySalaries &&
       Array.isArray(salaryData.dailySalaries) &&
       salaryData.dailySalaries.length > 0
     ) {
-      console.log("Using dailySalaries path");
       const selectedMonthSalaries = salaryData.dailySalaries.filter((daily) => {
         const date = new Date(daily.date);
         return (
@@ -282,10 +246,7 @@ const AdminAttendanceView: React.FC = () => {
         );
       });
 
-      console.log("Filtered salaries for month:", selectedMonthSalaries);
-
       if (selectedMonthSalaries.length === 0) {
-        console.log("No salaries for selected month, showing basic info");
         return {
           employeeName: salaryData.employeeName,
           monthlySalary: salaryData.monthlySalary,
@@ -303,37 +264,21 @@ const AdminAttendanceView: React.FC = () => {
             ?.cumulativeSalary || 0,
       };
     } else {
-      console.log("Using salaries array path");
-      const selectedMonthStats =
-        monthlyStats && Array.isArray(monthlyStats)
-          ? monthlyStats.find(
-              (stat) =>
-                stat && stat.month === `${selectedYear}-${selectedMonth}`
-            )
-          : null;
+      const selectedMonthStats = monthlyStats.find(
+        (stat) => stat?.month === `${selectedYear}-${selectedMonth}`
+      );
 
-      console.log("Found monthly stats:", selectedMonthStats);
-
-      const salaryRecord =
-        salaryData.salaries && Array.isArray(salaryData.salaries)
-          ? salaryData.salaries.find((salary: SalaryData) => {
-              if (!salary || !salary.periodStart) return false;
-              const periodStart = new Date(salary.periodStart);
-              return (
-                periodStart.getFullYear().toString() === selectedYear &&
-                (periodStart.getMonth() + 1).toString().padStart(2, "0") ===
-                  selectedMonth
-              );
-            })
-          : null;
-
-      console.log("Found salary record:", salaryRecord);
+      const salaryRecord = salaryData.salaries?.find((salary: SalaryData) => {
+        if (!salary?.periodStart) return false;
+        const periodStart = new Date(salary.periodStart);
+        return (
+          periodStart.getFullYear().toString() === selectedYear &&
+          (periodStart.getMonth() + 1).toString().padStart(2, "0") ===
+            selectedMonth
+        );
+      });
 
       if (!selectedMonthStats && !salaryRecord) {
-        console.log(
-          "No monthly stats or salary record found, showing basic info"
-        );
-        // Still show basic salary info
         return {
           monthlySalary: salaryData.monthlySalary,
           annualSalary: salaryData.annualSalary,
@@ -363,7 +308,7 @@ const AdminAttendanceView: React.FC = () => {
     ) {
       return salaryData.dailySalaries
         .filter((daily) => {
-          if (!daily || !daily.date) return false;
+          if (!daily?.date) return false;
           const date = new Date(daily.date);
           return (
             date.getFullYear().toString() === selectedYear &&
@@ -377,7 +322,7 @@ const AdminAttendanceView: React.FC = () => {
     } else if (salaryData.salaries && Array.isArray(salaryData.salaries)) {
       return salaryData.salaries
         .filter((salary: SalaryData) => {
-          if (!salary || !salary.periodStart) return false;
+          if (!salary?.periodStart) return false;
           const periodStart = new Date(salary.periodStart);
           return periodStart.getFullYear().toString() === selectedYear;
         })
@@ -430,7 +375,6 @@ const AdminAttendanceView: React.FC = () => {
   const monthlySalaryStats = getMonthlySalaryStats();
   const salaryChartData = getSalaryChartData();
 
-
   return (
     <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
       <style>
@@ -464,8 +408,33 @@ const AdminAttendanceView: React.FC = () => {
             </div>
           </div>
         </div>
-      ) : (
+      ) : todayAttendance ? (
         <TodayAttendance todayAttendance={todayAttendance} />
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-50 mb-4">
+              <Clock className="w-10 h-10 text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              Not Checked In Yet
+            </h3>
+            <p className="text-gray-600 max-w-sm mx-auto">
+              <span className="font-medium">
+                {employeeInfo?.name || "Employee"}
+              </span>{" "}
+              has not checked in for today.
+            </p>
+            <p className="text-sm text-gray-400 mt-3">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
       )}
 
       {salaryLoading ? (

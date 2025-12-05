@@ -48,6 +48,8 @@ import WhyComics from "./pages/v2/comics/whyComics.tsx";
 import RootRedirect from "./layout/rootRedirect.tsx";
 import BlockedGuard from "./components/adda/auth/blockedGuard.tsx";
 import BlockedPage from "./components/adda/auth/blockedPage.tsx";
+import ImageUploadFormSubmit from "./pages/v2/adda/ImageUploadFormSubmit.tsx";
+import Explore from "./pages/v2/chnages.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -103,7 +105,8 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
-  { path: "/hiring", element: <CareerPage /> },
+  { path: "/join-us/careers", element: <CareerPage /> },
+  { path: "/join-us/explore", element: <Explore /> },
   {
     path: "/assessment-page",
     element: (
@@ -135,6 +138,7 @@ const routes = [
   { path: "/prof", element: <Profile /> },
   { path: "/add-password", element: <AddPasswordPage /> },
   { path: "/why-comics", element: <WhyComics /> },
+  { path: "/form-submit", element: <ImageUploadFormSubmit /> },
 ];
 
 const Router = () => {
@@ -172,7 +176,8 @@ const Router = () => {
                       path={route.path}
                       element={
                         route.path.startsWith("/employee") ||
-                        route.path.startsWith("/admin") ? (
+                        route.path.startsWith("/admin") ||
+                        route.path.startsWith("/form-submit") ? (
                           route.element
                         ) : (
                           <MainLayout>{route.element}</MainLayout>

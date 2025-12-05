@@ -1256,8 +1256,8 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_07",
-    label: "Quiz",
-    url: "/quiz",
+    label: "Games",
+    url: "/adda/game-lobby",
   },
   {
     id: "NL_08",
@@ -1269,6 +1269,18 @@ export const COMMON_NAV: NavLink[] = [
     label: "Join Us",
     icon: "group",
     url: "/hiring",
+    items: [
+      {
+        id: "JS_01",
+        label: "Careers",
+        url: "/join-us/hiring",
+      },
+      {
+        id: "JS_02",
+        label: "Explore",
+        url: "/join-us/explore",
+      },
+    ],
   },
   {
     id: "NL_10",

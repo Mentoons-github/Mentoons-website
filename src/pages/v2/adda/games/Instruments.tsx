@@ -1,4 +1,5 @@
 // Instruments.tsx
+import postScore from "@/api/game/postScore";
 import InstrumentQuestions from "@/components/adda/games/IdentifyInstruments/InstrumentQuestions";
 import InstrumentsDifficulty from "@/components/adda/games/IdentifyInstruments/InstrumentsDifficulty";
 import InstrumentsFinished from "@/components/adda/games/IdentifyInstruments/InstrumentsFinished";
@@ -7,6 +8,7 @@ import {
   INSTRUMENT_BY_DIFFICULTY,
   InstrumentTypes,
 } from "@/constant/games/instrumentQuestions";
+import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useRef, useState } from "react";
 
 const Instruments = () => {
@@ -23,10 +25,15 @@ const Instruments = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [completeSend, setCompleteSend] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = questions[currentIndex];
+
+  const { getToken } = useAuth();
+
+  const gameId = `instruments${difficulty}`;
 
   // Load and auto-play audio when question changes
   useEffect(() => {
@@ -147,6 +154,31 @@ const Instruments = () => {
     setSubmitted(false);
   };
 
+  const sendResult = async () => {
+    setCompleteSend(true);
+    try {
+      postScore({
+        body: { gameId, difficulty: difficulty as string, score },
+        token: (await getToken()) || "",
+      });
+    } catch (error) {
+      console.log(error as string);
+    }
+  };
+
+  if (finished) {
+    if (!completeSend) {
+      sendResult();
+    }
+    return (
+      <InstrumentsFinished
+        questions={questions}
+        resetGame={resetGame}
+        score={score}
+      />
+    );
+  }
+
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center p-2 md:p-4"
@@ -173,14 +205,6 @@ const Instruments = () => {
           handleSelect={handleSelect}
           handleSubmit={handleSubmit}
           resetGame={resetGame}
-        />
-      )}
-
-      {finished && (
-        <InstrumentsFinished
-          questions={questions}
-          resetGame={resetGame}
-          score={score}
         />
       )}
     </div>

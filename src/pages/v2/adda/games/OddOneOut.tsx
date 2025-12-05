@@ -1,11 +1,13 @@
 "use client";
 
+import postScore from "@/api/game/postScore";
 import OddOneOutDifficulty from "@/components/adda/games/OddOneOut/OddOneOutDifficulty";
 import OddOneOutFinalScore from "@/components/adda/games/OddOneOut/OddOneOutFinalScor";
 import OddOneOutPuzzle from "@/components/adda/games/OddOneOut/OddOneOutPuzzle";
 import OddOneOutStartScreen from "@/components/adda/games/OddOneOut/OddOneOutStarterScreen";
 import { IMAGE_SETS } from "@/constant/games/OddOneOutImages";
 import { useCountdown } from "@/hooks/adda/OneOddOutTimet";
+import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -52,6 +54,7 @@ const OddOneOut = () => {
   const [shuffledImages, setShuffledImages] = useState<ImagePair[]>([]);
   const [totalRounds, setTotalRounds] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [completeSend, setCompleteSend] = useState(false);
 
   const grid = level ? LEVEL_CONFIG[level].grid : 0;
   const time = level ? LEVEL_CONFIG[level].time : 0;
@@ -60,6 +63,10 @@ const OddOneOut = () => {
   const currentSet = shuffledImages[round];
 
   const timer = useCountdown(time, handleTimeOver, round);
+
+  const { getToken } = useAuth();
+
+  const gameId = `odd_one_out${level}`;
 
   function handleTimeOver() {
     setResultType("timeover");
@@ -125,10 +132,25 @@ const OddOneOut = () => {
     setRound(0);
     setScore(0);
     setGameOver(false);
-    setLevel(null)
+    setLevel(null);
+  };
+
+  const sendResult = async () => {
+    setCompleteSend(true);
+    try {
+      postScore({
+        body: { gameId, difficulty: level as string, score },
+        token: (await getToken()) || "",
+      });
+    } catch (error) {
+      console.log(error as string);
+    }
   };
 
   if (gameOver && level) {
+    if (!completeSend) {
+      sendResult();
+    }
     return (
       <OddOneOutFinalScore
         score={score}

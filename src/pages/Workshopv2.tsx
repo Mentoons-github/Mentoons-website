@@ -70,6 +70,8 @@ const Workshopv2 = () => {
           },
         }
       );
+
+      console.log(response.data.data);
       const fetchedCategories = response.data.data as WorkshopCategory[];
       setCategories(fetchedCategories);
 
@@ -281,7 +283,7 @@ const Workshopv2 = () => {
           email: user?.email || "",
           phone: user?.phoneNumber || 0,
           message: "",
-          workshop: categories[0]?.workshops[0]?.workshopName || "", 
+          workshop: categories[0]?.workshops[0]?.workshopName || "",
           ageCategory:
             categories[0]?.workshops[0]?.ageGroups[0]?.ageRange || "",
           doubt: "",
@@ -319,7 +321,7 @@ const Workshopv2 = () => {
         setShowEnquiryModal(true);
       }
     } catch (error: any) {
-      setEnquiryMessage("")
+      setEnquiryMessage("");
       setShowErrorModal(true);
       setShowErrorMessage(
         error?.response?.data?.message || "Failed to submit message"

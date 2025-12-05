@@ -1,7 +1,9 @@
+import postScore from "@/api/game/postScore";
 import ColorTubeDifficulty from "@/components/adda/games/ColorTube/ColorTubeDifficulty";
 import ColorTubeFinalScore from "@/components/adda/games/ColorTube/ColorTubeFinalScore";
 import ColorTubePuzzles from "@/components/adda/games/ColorTube/ColorTubePuzzles";
 import ColorTubeStartScreen from "@/components/adda/games/ColorTube/ColorTubeStarterScreen";
+import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 
 export type Level = "easy" | "medium" | "hard";
@@ -61,8 +63,13 @@ const ColorTubeGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [showFinalScore, setShowFinalScore] = useState(false);
+  const [completeSend, setCompleteSend] = useState(false);
 
   const totalScore = difficulty ? 10 * DIFFICULTY_CONFIG[difficulty].points : 0;
+
+  const { getToken } = useAuth();
+
+  const gameId = `colorTube${difficulty}`;
 
   // ✅ LOAD LEVEL
   useEffect(() => {
@@ -150,7 +157,7 @@ const ColorTubeGame = () => {
   };
 
   const resetGame = () => {
-    console.log("first");
+    setCompleteSend(false);
     setStarted(true);
     setDifficulty(null);
     setLevel(1);
@@ -158,8 +165,23 @@ const ColorTubeGame = () => {
     setShowFinalScore(false);
   };
 
+  const sendResult = async () => {
+    setCompleteSend(true);
+    try {
+      postScore({
+        body: { gameId, difficulty: difficulty as string, score },
+        token: (await getToken()) || "",
+      });
+    } catch (error) {
+      console.log(error as string);
+    }
+  };
+
   // ✅ FINAL SCORE SCREEN
   if (showFinalScore) {
+    if (!completeSend) {
+      sendResult();
+    }
     return (
       <ColorTubeFinalScore
         restart={resetGame}
@@ -170,7 +192,7 @@ const ColorTubeGame = () => {
   }
 
   return (
-    <div className="min-h-screen" >
+    <div className="min-h-screen">
       {!started && <ColorTubeStartScreen onStart={() => setStarted(true)} />}
 
       {started && !difficulty && (

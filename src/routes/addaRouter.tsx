@@ -6,12 +6,20 @@ import ColorTubeGame from "@/pages/v2/adda/games/colorTubes";
 import Instruments from "@/pages/v2/adda/games/Instruments";
 import Inventors from "@/pages/v2/adda/games/Inventors";
 import OddOneOut from "@/pages/v2/adda/games/OddOneOut";
+import Cartoonmoji from "@/pages/v2/adda/games/cartoonmoji";
+import Dice from "@/pages/v2/adda/games/dice";
+import BrainStack from "@/pages/v2/adda/games/brainStack";
+import GameLobby from "@/pages/v2/adda/games/game";
+import GridFlash from "@/pages/v2/adda/games/gridFlash";
 import PostPage from "@/pages/v2/adda/postPage";
+import ContestVotingPage from "@/pages/v2/adda/showCase";
 import Profile from "@/pages/v2/profile";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
+import FlipAndMatch from "@/pages/v2/adda/games/flipAndMatch";
+import StickMaster from "@/pages/v2/adda/games/stickMaster";
+import LeaderBoard from "@/pages/v2/adda/games/leaderBoard";
 
-// Lazy-loaded components
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
@@ -79,12 +87,21 @@ const AddaRouter = () => {
           <Route path="search-friend" element={<FriendSearch />} />
           <Route path="posts/:postId" element={<PostPage />} />
         </Route>
+        <Route path="game-lobby" element={<GameLobby />} />
         <Route path="user-profile" element={<Profile />} />
         <Route path="game" element={<></>} />
-        <Route path="game/inventors" element={<Inventors />} />
-        <Route path="game/instruments" element={<Instruments />} />
-        <Route path="game/color-tube" element={<ColorTubeGame />} />
-        <Route path="game/odd-one-out" element={<OddOneOut />} />
+        <Route path="game-lobby/inventors" element={<Inventors />} />
+        <Route path="game-lobby/instruments" element={<Instruments />} />
+        <Route path="game-lobby/color-tube" element={<ColorTubeGame />} />
+        <Route path="game-lobby/odd-one-out" element={<OddOneOut />} />
+        <Route path="show-case" element={<ContestVotingPage />} />
+        <Route path="game-lobby/dice" element={<Dice />} />
+        <Route path="game-lobby/cartoonmoji" element={<Cartoonmoji />} />
+        <Route path="game-lobby/grid-flash" element={<GridFlash />} />
+        <Route path="game-lobby/mind-stack" element={<BrainStack />} />
+        <Route path="game-lobby/flip-and-match" element={<FlipAndMatch />} />
+        <Route path="game-lobby/stick-master" element={<StickMaster />} />
+        <Route path="leaderboard" element={<LeaderBoard />} />
       </Routes>
     </Suspense>
   );

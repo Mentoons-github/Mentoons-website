@@ -5,4 +5,5 @@ export interface DropDownInterface {
   services: boolean;
   subscription: boolean;
   workshops: boolean;
+  joinus: boolean;
 }
