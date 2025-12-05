@@ -1,11 +1,11 @@
 import axiosInstance from "@/api/axios";
 import { PostState } from "@/types";
-import { EditPostTypes } from "@/types/adda/posts";
+import { EditPostTypes, PostDetails } from "@/types/adda/posts";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
 interface PostsState {
-  post: PostState | null;
+  post: PostDetails | null;
   posts: PostState[];
   error: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -116,7 +116,7 @@ export const deletePost = createAsyncThunk<
 });
 
 export const updatePostThunk = createAsyncThunk<
-  PostState,
+  PostDetails,
   { postId: string; data: EditPostTypes; token: string },
   { rejectValue: string }
 >("posts/updatePost", async ({ postId, data, token }, { rejectWithValue }) => {
