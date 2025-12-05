@@ -310,10 +310,7 @@ const Header = () => {
                 onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
               >
                 {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
-                  <DropDown
-                    labelType={label.toLowerCase() as any}
-                    items={items}
-                  />
+                  <DropDown labelType={"joinus"} items={items} />
                 )}
               </NavButton>
             </div>

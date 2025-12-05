@@ -33,6 +33,7 @@ interface DiceBoxProps {
 
 const DiceBox: React.FC<DiceBoxProps> = ({ value, revealed = true }) => {
   const pip = "w-2 h-2 bg-white rounded-full shadow-sm";
+  const smallPip = "w-1.5 h-1.5 sm:w-2 sm:h-2";
 
   const patterns: Record<number, (string | null)[][]> = {
     1: [
@@ -69,12 +70,12 @@ const DiceBox: React.FC<DiceBoxProps> = ({ value, revealed = true }) => {
 
   return (
     <div
-      className={`${COLORS.DICE_BOX_GRADIENT} rounded-xl shadow-lg p-4 w-14 h-14 sm:w-20 sm:h-20 transition-transform duration-200`}
+      className={`${COLORS.DICE_BOX_GRADIENT} rounded-lg sm:rounded-xl shadow-lg p-3 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 transition-transform duration-200`}
     >
-      <div className="grid grid-cols-3 gap-0.5 sm:gap-1.5 h-full">
+      <div className="grid grid-cols-3 gap-0.5 sm:gap-1 h-full">
         {patterns[value].flat().map((dot, i) => (
           <div key={i} className="flex items-center justify-center">
-            {revealed && dot && <div className={dot} />}
+            {revealed && dot && <div className={`${dot} ${smallPip}`} />}
           </div>
         ))}
       </div>
@@ -115,7 +116,7 @@ const Dice: React.FC = () => {
   const navigate = useNavigate();
   const gameId = `dice_${difficulty}`;
 
-  const maxRounds = 2;
+  const maxRounds = 10;
 
   const difficultySettings = {
     easy: {
@@ -210,12 +211,12 @@ const Dice: React.FC = () => {
 
   const nextRound = async () => {
     const lastResult = gameHistory[gameHistory.length - 1];
-    const bonusThisRound = lastResult?.isPerfect ? 10 : 0;
-    const finalScore = score + bonusThisRound;
+    const currentRoundScore = lastResult?.isPerfect
+      ? 10
+      : lastResult?.correctCount || 0;
 
-    if (bonusThisRound > 0) {
-      setScore(finalScore);
-    }
+    const newTotalScore = score + currentRoundScore;
+    setScore(newTotalScore);
 
     if (round < maxRounds) {
       setRound((prev) => prev + 1);
@@ -226,40 +227,42 @@ const Dice: React.FC = () => {
       try {
         const token = await getToken();
         if (token)
-          await postScore({ body: { score, gameId, difficulty }, token });
+          await postScore({
+            body: { score: newTotalScore, gameId, difficulty },
+            token,
+          });
       } catch (error: unknown) {
         showStatus("error", error as string);
       }
     }
   };
 
-  const currentRoundCorrectCount = diceValues.reduce(
-    (count, value, index) => count + (userGuesses[index] === value ? 1 : 0),
-    0
-  );
-
-  const currentRoundIsPerfect = currentRoundCorrectCount === diceCount;
+  const currentRoundResult = gameHistory[gameHistory.length - 1] || {};
+  const currentRoundCorrectCount = currentRoundResult.correctCount || 0;
+  const currentRoundIsPerfect = currentRoundResult.isPerfect || false;
+  const currentDiceValues = currentRoundResult.diceValues || diceValues;
+  const currentUserGuesses = currentRoundResult.userGuesses || userGuesses;
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 bg-[url('/assets/games/dice/dice-bg.png')]">
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[url('/assets/games/dice/dice-bg.png')] bg-cover bg-center">
       <button
         onClick={() => navigate("/adda/game-lobby")}
-        className="absolute left-6 top-6 w-10 h-10 rounded-full flex items-center justify-center bg-white/30 backdrop-blur-sm shadow-md"
+        className="absolute left-4 top-4 sm:left-6 sm:top-6 w-10 h-10 rounded-full flex items-center justify-center bg-white/30 backdrop-blur-sm shadow-md z-10"
       >
-        <FaChevronLeft className="text-white text-2xl" />
+        <FaChevronLeft className="text-white text-xl sm:text-2xl" />
       </button>
 
       <div
-        className={`${COLORS.CARD_BG} rounded-xl shadow-2xl p-6 max-w-2xl w-full border border-white/20`}
+        className={`${COLORS.CARD_BG} rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 max-w-lg md:max-w-2xl w-full border border-white/20`}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Trophy className={COLORS.ACCENT_ICON} size={28} />
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
                 Dice Memory Game
               </h1>
-              <p className={COLORS.SECONDARY_TEXT}>
+              <p className={COLORS.SECONDARY_TEXT + " text-sm sm:text-base"}>
                 Score: {score} | Round:{" "}
                 {round <= maxRounds ? `${round}/${maxRounds}` : "Complete!"}
               </p>
@@ -277,16 +280,18 @@ const Dice: React.FC = () => {
         <div className="bg-white/10 rounded-lg p-4 border border-white/20">
           {gameState === "difficulty" && (
             <div className="text-center py-4">
-              <h2 className="text-xl font-bold text-white mb-3">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">
                 Choose Your Challenge
               </h2>
-              <p className={COLORS.SECONDARY_TEXT + " mb-5"}>
+              <p
+                className={COLORS.SECONDARY_TEXT + " mb-5 text-sm sm:text-base"}
+              >
                 Select a difficulty level to begin
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   onClick={() => selectDifficulty("easy")}
-                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.EASY_GRADIENT} hover:opacity-90 rounded-lg p-4 transition-all transform hover:scale-[1.02] shadow-lg`}
+                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.EASY_GRADIENT} hover:opacity-90 rounded-lg p-4 sm:p-6 transition-all transform hover:scale-[1.02] shadow-lg`}
                 >
                   <div className="text-4xl mb-2">🙂</div>
                   <h3 className="text-lg font-bold text-white">Easy</h3>
@@ -297,7 +302,7 @@ const Dice: React.FC = () => {
                 </button>
                 <button
                   onClick={() => selectDifficulty("medium")}
-                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.MEDIUM_GRADIENT} hover:opacity-90 rounded-lg p-4 transition-all transform hover:scale-[1.02] shadow-lg`}
+                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.MEDIUM_GRADIENT} hover:opacity-90 rounded-lg p-4 sm:p-6 transition-all transform hover:scale-[1.02] shadow-lg`}
                 >
                   <div className="text-4xl mb-2">🧐</div>
                   <h3 className="text-lg font-bold text-white">Medium</h3>
@@ -308,7 +313,7 @@ const Dice: React.FC = () => {
                 </button>
                 <button
                   onClick={() => selectDifficulty("hard")}
-                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.HARD_GRADIENT} hover:opacity-90 rounded-lg p-4 transition-all transform hover:scale-[1.02] shadow-lg`}
+                  className={`group relative overflow-hidden bg-gradient-to-br ${COLORS.HARD_GRADIENT} hover:opacity-90 rounded-lg p-4 sm:p-6 transition-all transform hover:scale-[1.02] shadow-lg`}
                 >
                   <div className="text-4xl mb-2">🚀</div>
                   <h3 className="text-lg font-bold text-white">Hard</h3>
@@ -326,20 +331,26 @@ const Dice: React.FC = () => {
               <div className="text-5xl mb-3">
                 {difficultySettings[difficulty].icon}
               </div>
-              <h2 className="text-xl font-semibold text-white mb-2">
+              <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2">
                 Ready to Play Round {round}?
               </h2>
-              <p className={COLORS.SECONDARY_TEXT + " mb-1"}>
+              <p
+                className={COLORS.SECONDARY_TEXT + " mb-1 text-sm sm:text-base"}
+              >
                 Difficulty:{" "}
                 <span className="font-bold capitalize">{difficulty}</span>
               </p>
-              <p className={COLORS.SECONDARY_TEXT + " mb-3"}>
+              <p
+                className={COLORS.SECONDARY_TEXT + " mb-3 text-sm sm:text-base"}
+              >
                 Recommended Age:{" "}
                 <span className="font-bold">
                   {difficultySettings[difficulty].ageCategory}
                 </span>
               </p>
-              <p className={COLORS.SECONDARY_TEXT + " mb-4"}>
+              <p
+                className={COLORS.SECONDARY_TEXT + " mb-4 text-sm sm:text-base"}
+              >
                 Memorize {diceCount} dice values in 10 seconds.
               </p>
               <button
@@ -360,10 +371,15 @@ const Dice: React.FC = () => {
                 </span>
                 <Eye className="text-teal-300" size={20} />
               </div>
-              <p className={COLORS.SECONDARY_TEXT + " text-center mb-4"}>
+              <p
+                className={
+                  COLORS.SECONDARY_TEXT +
+                  " text-center mb-4 text-sm sm:text-base"
+                }
+              >
                 Memorize these dice!
               </p>
-              <div className="flex flex-wrap justify-center gap-3">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                 {diceValues.map((value, i) => (
                   <DiceBox key={i} value={value} revealed={true} />
                 ))}
@@ -375,34 +391,44 @@ const Dice: React.FC = () => {
             <div>
               <div className="flex items-center justify-center gap-3 mb-4">
                 <EyeOff className={COLORS.ACCENT_ICON} size={20} />
-                <span className="text-lg font-semibold text-white">
+                <span className="text-lg font-semibold text-white text-center">
                   Click the dice in the correct order!
                 </span>
               </div>
 
               <div className="mb-6">
-                <p className={COLORS.SECONDARY_TEXT + " text-center mb-2"}>
+                <p
+                  className={
+                    COLORS.SECONDARY_TEXT +
+                    " text-center mb-2 text-sm sm:text-base"
+                  }
+                >
                   Your guesses ({userGuesses.length}/{diceCount}):
                 </p>
-                <div className="flex flex-wrap justify-center gap-3 min-h-[90px]">
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3 min-h-[60px] sm:min-h-[90px]">
                   {userGuesses.map((value, i) => (
                     <DiceBox key={i} value={value} revealed={true} />
                   ))}
                   {[...Array(diceCount - userGuesses.length)].map((_, i) => (
                     <div
                       key={`empty-${i}`}
-                      className="w-14 h-14 sm:w-20 sm:h-20 bg-white/10 rounded-xl border-2 border-dashed border-white/30"
+                      className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white/10 rounded-lg sm:rounded-xl border-2 border-dashed border-white/30"
                     />
                   ))}
                 </div>
               </div>
 
-              <div className="border-t border-white/20 pt-6 mt-6">
-                <p className={COLORS.SECONDARY_TEXT + " text-center mb-4"}>
+              <div className="border-t border-white/20 pt-4 mt-4 sm:pt-6 sm:mt-6">
+                <p
+                  className={
+                    COLORS.SECONDARY_TEXT +
+                    " text-center mb-4 text-sm sm:text-base"
+                  }
+                >
                   Choose the next die:
                 </p>
 
-                <div className="grid grid-cols-6 gap-3 max-w-lg mx-auto mb-6">
+                <div className="grid grid-cols-6 gap-2 sm:gap-3 max-w-lg mx-auto mb-6">
                   {[1, 2, 3, 4, 5, 6].map((value) => (
                     <button
                       key={value}
@@ -420,14 +446,14 @@ const Dice: React.FC = () => {
                 <button
                   onClick={() => setUserGuesses((prev) => prev.slice(0, -1))}
                   disabled={userGuesses.length === 0}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
                 >
                   Undo
                 </button>
                 <button
                   onClick={submitGuesses}
                   disabled={userGuesses.length !== diceCount}
-                  className={`px-6 py-2 bg-gradient-to-r ${COLORS.SUBMIT_GRADIENT} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all shadow-md`}
+                  className={`px-6 py-2 bg-gradient-to-r ${COLORS.SUBMIT_GRADIENT} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all shadow-md text-sm sm:text-base`}
                 >
                   Submit Round {round}
                 </button>
@@ -457,10 +483,14 @@ const Dice: React.FC = () => {
                 ) : (
                   <>
                     <div className="text-5xl mb-3">😬</div>
-                    <h2 className="text-2xl font-bold text-orange-400 mb-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-orange-400 mb-2">
                       Round {round} Close Call!
                     </h2>
-                    <p className={COLORS.SECONDARY_TEXT}>
+                    <p
+                      className={
+                        COLORS.SECONDARY_TEXT + " text-sm sm:text-base"
+                      }
+                    >
                       You got{" "}
                       <span className="text-3xl font-semibold">
                         {currentRoundCorrectCount}
@@ -490,7 +520,7 @@ const Dice: React.FC = () => {
 
               <button
                 onClick={() => setShowReport(!showReport)}
-                className="w-full py-2 mb-4 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-colors"
+                className="w-full py-2 mb-4 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
               >
                 {showReport ? "Hide Comparison" : "View Comparison"}
                 {showReport ? (
@@ -509,13 +539,13 @@ const Dice: React.FC = () => {
                   >
                     Round {round} Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-green-300 mb-2 font-medium text-sm">
                         ✓ Correct Sequence:
                       </p>
                       <div className="flex flex-wrap justify-center gap-2 bg-green-500/20 rounded-lg p-2 border border-green-500/30">
-                        {diceValues.map((value, i) => (
+                        {currentDiceValues.map((value, i) => (
                           <DiceBox key={i} value={value} revealed={true} />
                         ))}
                       </div>
@@ -525,17 +555,19 @@ const Dice: React.FC = () => {
                         Your Answer:
                       </p>
                       <div className="flex flex-wrap justify-center gap-2 bg-blue-500/20 rounded-lg p-2 border border-blue-500/30">
-                        {userGuesses.map((value, i) => (
+                        {currentUserGuesses.map((value, i) => (
                           <div key={i} className="relative">
                             <DiceBox value={value} revealed={true} />
                             <div
                               className={`absolute -top-1.5 -right-1.5 rounded-full w-5 h-5 flex items-center justify-center text-white font-bold text-xs shadow-md ${
-                                userGuesses[i] === diceValues[i]
+                                currentUserGuesses[i] === currentDiceValues[i]
                                   ? "bg-green-500"
                                   : "bg-red-500"
                               }`}
                             >
-                              {userGuesses[i] === diceValues[i] ? "✓" : "✗"}
+                              {currentUserGuesses[i] === currentDiceValues[i]
+                                ? "✓"
+                                : "✗"}
                             </div>
                           </div>
                         ))}
@@ -547,7 +579,7 @@ const Dice: React.FC = () => {
               <div className="flex justify-center">
                 <button
                   onClick={nextRound}
-                  className={`px-6 py-2 bg-gradient-to-r ${difficultySettings[difficulty].color} hover:opacity-90 text-white font-semibold rounded-lg transition-all shadow-md`}
+                  className={`px-6 py-2 bg-gradient-to-r ${difficultySettings[difficulty].color} hover:opacity-90 text-white font-semibold rounded-lg transition-all shadow-md text-sm sm:text-base`}
                 >
                   {round < maxRounds
                     ? `Proceed to Round ${round + 1} →`
@@ -565,7 +597,7 @@ const Dice: React.FC = () => {
               </h2>
               <p className={COLORS.SECONDARY_TEXT + " text-xl mb-4"}>
                 Final Score: <span className="text-4xl font-bold">{score}</span>{" "}
-                / 100
+                / {maxRounds * 10}
               </p>
 
               <p className="text-lg text-white mb-6">
@@ -580,11 +612,11 @@ const Dice: React.FC = () => {
 
               <button
                 onClick={() => setShowReport(!showReport)}
-                className="w-full py-3 mb-4 flex items-center justify-center gap-2 backdrop-blur-md text-white font-bold text-lg rounded-lg transition-colors shadow-lg"
+                className="w-full py-3 mb-4 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-lg transition-colors shadow-lg"
               >
                 {showReport
                   ? "Hide Full Game Report"
-                  : "View Full Game Report (Rounds 1-10)"}
+                  : `View Full Game Report (Rounds 1-${maxRounds})`}
                 {showReport ? (
                   <ChevronUp size={24} />
                 ) : (
