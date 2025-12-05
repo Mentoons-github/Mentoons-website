@@ -2,7 +2,13 @@ import { PHOTO_POST } from "@/constant/constants";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import PostUpload from "../modal/postUpload";
@@ -66,10 +72,12 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       "photo" | "video" | "event" | "article" | null
     >(null);
     const [textContent, setTextContent] = useState("");
+    const [tags, setTags] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
     const [isTextInputActive, setIsTextInputActive] = useState(false);
     const [pastedImage, setPastedImage] = useState<File | null>(null);
+    const textInputRef = useRef<HTMLDivElement | null>(null);
     const [errorModalProps, setErrorModalProps] = useState<{
       error: string;
       action: "nav" | "retry" | "custom";
@@ -165,6 +173,11 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
           content: textContent,
           postType: "text",
           visibility: "public",
+          tags:
+            tags
+              ?.split(",")
+              ?.map((t) => t.trim())
+              ?.filter((t) => t.length > 0) || [],
         };
 
         const apiUrl = `${import.meta.env.VITE_PROD_URL}/posts`;
@@ -242,6 +255,27 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       }
     };
 
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          textInputRef.current &&
+          !textInputRef.current.contains(event.target as Node)
+        ) {
+          if (!isSubmitting) {
+            setIsTextInputActive(false);
+          }
+        }
+      };
+
+      if (isTextInputActive) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [isTextInputActive, isSubmitting]);
+
     return (
       <>
         <div className="relative flex flex-col w-full p-5 bg-white border border-orange-200 rounded-2xl shadow-md shadow-orange-100/70">
@@ -260,21 +294,31 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
               )}
             </div>
 
-            <div className="flex flex-col w-full gap-3">
+            <div ref={textInputRef} className="flex flex-col w-full gap-3">
               {isTextInputActive ? (
-                <textarea
-                  rows={5}
-                  placeholder="✍️ Share your thoughts or first blog as a parent..."
-                  value={textContent}
-                  onChange={(e) => setTextContent(e.target.value)}
-                  onBlur={() => {
-                    if (!textContent.trim()) {
-                      setIsTextInputActive(false);
-                    }
-                  }}
-                  autoFocus
-                  className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
-                />
+                <div>
+                  <textarea
+                    rows={5}
+                    placeholder="✍️ Share your thoughts or first blog as a parent..."
+                    value={textContent}
+                    onChange={(e) => setTextContent(e.target.value)}
+                    autoFocus
+                    className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                  />
+                  <div className="w-full">
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Tags (seperate by coma)
+                    </label>
+                    <input
+                      type="text"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                      name="tags"
+                      className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                      placeholder="tag1, tag2, tag3"
+                    />
+                  </div>
+                </div>
               ) : (
                 <input
                   type="text"

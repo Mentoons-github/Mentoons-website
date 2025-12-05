@@ -299,7 +299,11 @@ const PostUpload = ({
         content: valuesWithUploadedMedia.content || "",
         postType: postType,
         location: valuesWithUploadedMedia.location || "",
-        tags: valuesWithUploadedMedia.tags || [],
+        tags:
+          valuesWithUploadedMedia?.tags
+            ?.split(",")
+            ?.map((t) => t.trim())
+            ?.filter((t) => t.length > 0) || [],
         visibility: valuesWithUploadedMedia.visibility || "public",
       };
 
@@ -673,6 +677,23 @@ const PostUpload = ({
                                 </motion.div>
 
                                 <motion.div
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.3 }}
+                                  className="w-full"
+                                >
+                                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Tags (seperate by coma)
+                                  </label>
+                                  <Field
+                                    type="text"
+                                    name="tags"
+                                    className="w-full p-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    placeholder="tag1, tag2, tag3"
+                                  />
+                                </motion.div>
+
+                                <motion.div
                                   initial={{ y: 20, opacity: 0 }}
                                   animate={{ y: 0, opacity: 1 }}
                                   transition={{ delay: 0.45 }}
@@ -748,13 +769,28 @@ const PostUpload = ({
                                   )}
 
                                   <div className="flex items-center justify-between mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center">
-                                      <span className="px-2 py-1 mr-2 text-xs text-orange-800 bg-orange-100 rounded dark:bg-orange-900 dark:text-orange-200">
-                                        {postType}
-                                      </span>
-                                      <span className="px-2 py-1 mr-2 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
-                                        {values.visibility || "Public"}
-                                      </span>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center">
+                                        <span className="px-2 py-1 mr-2 text-xs text-orange-800 bg-orange-100 rounded dark:bg-orange-900 dark:text-orange-200">
+                                          {postType}
+                                        </span>
+                                        <span className="px-2 py-1 mr-2 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
+                                          {values.visibility || "Public"}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        {values?.tags &&
+                                          values?.tags
+                                            ?.split(",")
+                                            ?.map((tag, i) => (
+                                              <span
+                                                key={i}
+                                                className="px-2 py-1 mr-2 text-xs text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-200"
+                                              >
+                                                #{tag.trim()}
+                                              </span>
+                                            ))}
+                                      </div>
                                     </div>
                                     <span className="text-xs sm:text-sm">
                                       Ready to post

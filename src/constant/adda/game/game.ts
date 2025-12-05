@@ -36,6 +36,26 @@ export const GAMES = [
     thumbnail: "/assets/adda/gameLobby/image.jpg",
     link: `${base_url}/quiz`,
   },
+  {
+    title: "Color Tube",
+    thumbnail: "/assets/adda/ColorTube/startBg2.jpg",
+    link: `${base_url}/game-lobby/color-tube`,
+  },
+  {
+    title: "Odd One Out",
+    thumbnail: "/assets/adda/FindOddOne/image.png",
+    link: `${base_url}/game-lobby/odd-one-out`,
+  },
+  {
+    title: "Sound & Strings",
+    thumbnail: "/assets/adda/instruments/bg1.jpg",
+    link: `${base_url}/game-lobby/instruments`,
+  },
+  {
+    title: "Mind of Inventions",
+    thumbnail: "/assets/adda/invetors/image.png",
+    link: `${base_url}/game-lobby/inventors`,
+  },
 ];
 
 export const getPodiumColor = (position: number) => {

@@ -24,7 +24,7 @@ export const getValidationSchema = (
         eventEndDate: Yup.date(),
         venue: Yup.string().required("Venue is required"),
         location: Yup.string(),
-        description: Yup.string(), // optional
+        description: Yup.string(), 
       });
 
     case "article":
@@ -103,7 +103,7 @@ export const getInitialValues = (
     location: "",
     description: "",
     articleBody: "",
-    tags: [],
+    tags: "",
     visibility: "public",
     media:
       postType === "photo" || postType === "video" || postType === "article"

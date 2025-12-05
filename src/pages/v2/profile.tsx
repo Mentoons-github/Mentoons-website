@@ -135,7 +135,11 @@ const Profile = () => {
   const fetchUserData = async () => {
     setIsFetchingUserData(true);
     const token = await getToken();
-    if (!token) return setIsFetchingUserData(false);
+    console.log(token,'tokennnnnn')
+    if (!token) {
+      setIsFetchingUserData(false);
+      return;
+    }
     try {
       const [userResponse, postsResponse, savedPostsResponse] =
         await Promise.all([
