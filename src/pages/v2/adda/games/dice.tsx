@@ -226,13 +226,11 @@ const Dice: React.FC = () => {
 
       try {
         const token = await getToken();
-        if (token) {
-          const success = newTotalScore === maxRounds * 10;
+        if (token)
           await postScore({
-            body: { score: newTotalScore, gameId, difficulty, success },
+            body: { score: newTotalScore, gameId, difficulty },
             token,
           });
-        }
       } catch (error: unknown) {
         showStatus("error", error as string);
       }
