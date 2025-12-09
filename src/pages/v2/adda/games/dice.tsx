@@ -226,11 +226,19 @@ const Dice: React.FC = () => {
 
       try {
         const token = await getToken();
-        if (token)
+        if (token) {
+          const isGamePerfect = gameHistory.every((r) => r.isPerfect);
+
           await postScore({
-            body: { score: newTotalScore, gameId, difficulty },
+            body: {
+              score: newTotalScore,
+              gameId,
+              difficulty,
+              success: isGamePerfect,
+            },
             token,
           });
+        }
       } catch (error: unknown) {
         showStatus("error", error as string);
       }

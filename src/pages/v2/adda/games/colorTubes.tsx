@@ -3,6 +3,7 @@ import ColorTubeDifficulty from "@/components/adda/games/ColorTube/ColorTubeDiff
 import ColorTubeFinalScore from "@/components/adda/games/ColorTube/ColorTubeFinalScore";
 import ColorTubePuzzles from "@/components/adda/games/ColorTube/ColorTubePuzzles";
 import ColorTubeStartScreen from "@/components/adda/games/ColorTube/ColorTubeStarterScreen";
+import RewardPointsModal from "@/components/modals/candyCoin";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 
@@ -35,7 +36,6 @@ const DIFFICULTY_CONFIG: Record<
   },
 };
 
-// ✅ RANDOM LEVEL GENERATOR
 const generateLevel = (difficulty: Level): Color[][] => {
   const { colors, tubes } = DIFFICULTY_CONFIG[difficulty];
   const pool: Color[] = colors.flatMap((c) => Array(TUBE_CAPACITY).fill(c));
@@ -64,6 +64,8 @@ const ColorTubeGame = () => {
   const [score, setScore] = useState(0);
   const [showFinalScore, setShowFinalScore] = useState(false);
   const [completeSend, setCompleteSend] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [showRewardModal, setShowRewardModal] = useState(false);
 
   const totalScore = difficulty ? 10 * DIFFICULTY_CONFIG[difficulty].points : 0;
 
@@ -71,7 +73,6 @@ const ColorTubeGame = () => {
 
   const gameId = `colorTube${difficulty}`;
 
-  // ✅ LOAD LEVEL
   useEffect(() => {
     if (!difficulty) return;
 
@@ -128,7 +129,6 @@ const ColorTubeGame = () => {
     setSelectedTube(null);
   };
 
-  // ✅ MOVE LIMIT → NEXT LEVEL WITH 0 POINTS
   useEffect(() => {
     if (!difficulty) return;
 
@@ -138,7 +138,6 @@ const ColorTubeGame = () => {
     }
   }, [moves]);
 
-  // ✅ WIN → NEXT LEVEL WITH POINTS
   useEffect(() => {
     const isWin = tubes.every(
       (tube) =>
@@ -165,13 +164,27 @@ const ColorTubeGame = () => {
     setShowFinalScore(false);
   };
 
+  const handleCloseRewardModal = () => {
+    setShowRewardModal(false);
+    setRewardPoints(null);
+  };
+
   const sendResult = async () => {
     setCompleteSend(true);
+
+    if (!difficulty) return;
     try {
-      postScore({
-        body: { gameId, difficulty: difficulty as string, score },
+      const maxScore = 10 * DIFFICULTY_CONFIG[difficulty].points;
+      const success = score === maxScore;
+      const response = await postScore({
+        body: { gameId, difficulty: difficulty as string, score, success },
         token: (await getToken()) || "",
       });
+
+      if (response?.rewardPoints) {
+        setRewardPoints(response.rewardPoints);
+        setShowRewardModal(true);
+      }
     } catch (error) {
       console.log(error as string);
     }
@@ -213,6 +226,13 @@ const ColorTubeGame = () => {
           TUBE_CAPACITY={TUBE_CAPACITY}
           onNextLevel={goToNextLevel} // ✅
           onReset={resetGame}
+        />
+      )}
+
+      {showRewardModal && rewardPoints !== null && (
+        <RewardPointsModal
+          rewardPoints={rewardPoints}
+          onClose={handleCloseRewardModal}
         />
       )}
     </div>

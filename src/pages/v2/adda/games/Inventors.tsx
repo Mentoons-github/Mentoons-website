@@ -261,8 +261,10 @@ const Inventors: React.FC = () => {
   const sendResult = async () => {
     setCompleteSend(true);
     try {
+      const maxScore = maxRounds * batchSize;
+      const success = score === maxScore;
       postScore({
-        body: { gameId, difficulty: difficulty as string, score },
+        body: { gameId, difficulty: difficulty as string, score, success },
         token: (await getToken()) || "",
       });
     } catch (error) {

@@ -10,6 +10,7 @@ import { CurrentState } from "@/types/adda/game";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useAuth } from "@clerk/clerk-react";
 import postScore from "@/api/game/postScore";
+import RewardPointsModal from "@/components/modals/candyCoin";
 
 const BrainStack = () => {
   const { showStatus } = useStatusModal();
@@ -17,20 +18,39 @@ const BrainStack = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [finalScore, setFinalScore] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [showRewardModal, setShowRewardModal] = useState(false);
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const gameId = `brainstack_${difficulty}`;
+
+  const currentItems = gameData[difficulty].items;
+  const currentRounds = gameData[difficulty].rounds;
 
   const handleGameComplete = async (score: number) => {
     setFinalScore(score);
     setCurrentState("result");
     try {
       const token = await getToken();
-      if (token)
-        await postScore({ body: { score, gameId, difficulty }, token });
+      if (token) {
+        const success = score === currentRounds.length * 10;
+        const response = await postScore({
+          body: { score, gameId, difficulty, success },
+          token,
+        });
+        if (response?.rewardPoints) {
+          setRewardPoints(response.rewardPoints);
+          setShowRewardModal(true);
+        }
+      }
     } catch (error: unknown) {
       showStatus("error", error as string);
     }
+  };
+
+  const handleCloseRewardModal = () => {
+    setShowRewardModal(false);
+    setRewardPoints(null);
   };
 
   const handlePlayAgain = () => {
@@ -47,9 +67,6 @@ const BrainStack = () => {
   const goToLobby = () => {
     setCurrentState("lobby");
   };
-
-  const currentItems = gameData[difficulty].items;
-  const currentRounds = gameData[difficulty].rounds;
 
   return (
     <>
@@ -86,6 +103,13 @@ const BrainStack = () => {
         <GameDifficultyModal
           isClose={() => setIsModalOpen(false)}
           setDifficulty={startGame}
+        />
+      )}
+
+      {showRewardModal && rewardPoints !== null && (
+        <RewardPointsModal
+          rewardPoints={rewardPoints}
+          onClose={handleCloseRewardModal}
         />
       )}
     </>

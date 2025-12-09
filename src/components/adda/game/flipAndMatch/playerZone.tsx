@@ -18,7 +18,7 @@ const FlipAndMatchPlayerZone = ({
   onGameComplete,
 }: {
   difficulty: Difficulty;
-  onGameComplete: (score: number) => void;
+  onGameComplete: (score: number, success: boolean) => void;
 }) => {
   const [gameCards, setGameCards] = useState<CardItem[]>([]);
   const [flippedCards, setFlippedCards] = useState<CardItem[]>([]);
@@ -29,6 +29,7 @@ const FlipAndMatchPlayerZone = ({
   const [moves, setMoves] = useState(0);
   const [gameTimer, setGameTimer] = useState(GAME_DURATION[difficulty]);
   const [score, setScore] = useState(0);
+  const MAX_SCORE = (gameCards.length / 2) * 10;
 
   useEffect(() => {
     const createdCards = createCardsForLevel(difficulty);
@@ -94,7 +95,8 @@ const FlipAndMatchPlayerZone = ({
 
   useEffect(() => {
     if (gameCards.length > 0 && gameCards.every((card) => card.isMatched)) {
-      onGameComplete(score);
+      const success = score === MAX_SCORE;
+      onGameComplete(score, success);
     }
   }, [gameCards, onGameComplete, score]);
 
@@ -145,7 +147,8 @@ const FlipAndMatchPlayerZone = ({
   );
 
   const handleGameEndContinue = () => {
-    onGameComplete(score);
+    const success = score === MAX_SCORE;
+    onGameComplete(score, success);
   };
 
   const getGridClasses = () => {
