@@ -38,22 +38,22 @@ export const GAMES = [
   },
   {
     title: "Color Tube",
-    thumbnail: "/assets/adda/ColorTube/startBg2.jpg",
+    thumbnail: "/assets/games/ColorTube/startBg2.jpg",
     link: `${base_url}/game-lobby/color-tube`,
   },
   {
     title: "Odd One Out",
-    thumbnail: "/assets/adda/FindOddOne/image.png",
+    thumbnail: "/assets/games/FindOddOne/image.png",
     link: `${base_url}/game-lobby/odd-one-out`,
   },
   {
     title: "Sound & Strings",
-    thumbnail: "/assets/adda/instruments/bg1.jpg",
+    thumbnail: "/assets/games/instruments/bg1.jpg",
     link: `${base_url}/game-lobby/instruments`,
   },
   {
     title: "Mind of Inventions",
-    thumbnail: "/assets/adda/invetors/image.png",
+    thumbnail: "/assets/games/inventors/image.png",
     link: `${base_url}/game-lobby/inventors`,
   },
 ];
