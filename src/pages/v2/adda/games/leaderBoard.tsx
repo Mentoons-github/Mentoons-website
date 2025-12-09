@@ -17,15 +17,16 @@ import {
   getRankBadgeColor,
 } from "@/constant/adda/game/game";
 
-interface LeaderboardEntry {
+export interface LeaderboardEntry {
   rank: number;
   playerId: string;
+  playerClerkId: string;
   userName: string;
   totalScore: number;
   profileImage: string | null;
 }
 
-interface ApiResponse {
+export interface ApiResponseLeaderBoard {
   success: boolean;
   count: number;
   data: LeaderboardEntry[];
@@ -54,7 +55,7 @@ const LeaderBoard = () => {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<ApiResponse>(
+      const response = await axios.get<ApiResponseLeaderBoard>(
         `${import.meta.env.VITE_PROD_URL}/game/leaderboard`
       );
 

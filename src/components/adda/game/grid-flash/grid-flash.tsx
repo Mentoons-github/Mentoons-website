@@ -108,8 +108,13 @@ const GridFlashPlay = ({
     } else {
       try {
         const token = await getToken();
-        if (token)
-          await postScore({ body: { score, gameId, difficulty }, token });
+        if (token) {
+          const success = score === totalRounds * 10;
+          await postScore({
+            body: { score, gameId, difficulty, success },
+            token,
+          });
+        }
       } catch (error: unknown) {
         showStatus("error", error as string);
       }

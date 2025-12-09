@@ -20,13 +20,16 @@ const FlipAndMatch = () => {
   const { showStatus } = useStatusModal();
   const gameId = `flipAndMatch_${difficulty}`;
 
-  const handleGameComplete = async (score: number) => {
+  const handleGameComplete = async (score: number, success: boolean) => {
     setFinalScore(score);
     setCurrentState("result");
     try {
       const token = await getToken();
       if (token)
-        await postScore({ body: { score, gameId, difficulty }, token });
+        await postScore({
+          body: { score, gameId, difficulty, success },
+          token,
+        });
     } catch (error: unknown) {
       showStatus("error", error as string);
     }

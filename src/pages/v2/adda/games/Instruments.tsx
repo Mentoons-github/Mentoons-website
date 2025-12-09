@@ -1,4 +1,3 @@
-// Instruments.tsx
 import postScore from "@/api/game/postScore";
 import InstrumentQuestions from "@/components/adda/games/IdentifyInstruments/InstrumentQuestions";
 import InstrumentsDifficulty from "@/components/adda/games/IdentifyInstruments/InstrumentsDifficulty";
@@ -157,8 +156,9 @@ const Instruments = () => {
   const sendResult = async () => {
     setCompleteSend(true);
     try {
+      const success = score === questions.length;
       postScore({
-        body: { gameId, difficulty: difficulty as string, score },
+        body: { gameId, difficulty: difficulty as string, score, success },
         token: (await getToken()) || "",
       });
     } catch (error) {

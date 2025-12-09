@@ -9,6 +9,7 @@ import { CurrentState, Difficulty, Questions } from "@/types/adda/game";
 import { useAuth } from "@clerk/clerk-react";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import postScore from "@/api/game/postScore";
+import RewardPointsModal from "@/components/modals/candyCoin";
 
 const Cartoonmoji = () => {
   const [currentState, setCurrentState] = useState<CurrentState>("lobby");
@@ -16,6 +17,9 @@ const Cartoonmoji = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Questions[]>([]);
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [showRewardModal, setShowRewardModal] = useState(false);
+
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const { showStatus } = useStatusModal();
@@ -30,12 +34,26 @@ const Cartoonmoji = () => {
   const handleGameOver = async () => {
     try {
       const token = await getToken();
-      if (token)
-        await postScore({ body: { score, gameId, difficulty }, token });
+      if (token) {
+        const success = score === CARTOONMOJI_QUESTIONS[difficulty].length * 10;
+        const response = await postScore({
+          body: { score, gameId, difficulty, success },
+          token,
+        });
+        if (response?.rewardPoints) {
+          setRewardPoints(response.rewardPoints);
+          setShowRewardModal(true);
+        }
+      }
     } catch (error: unknown) {
       showStatus("error", error as string);
     }
     setCurrentState("lobby");
+  };
+
+  const handleCloseRewardModal = () => {
+    setShowRewardModal(false);
+    setRewardPoints(null);
   };
 
   return (
@@ -73,6 +91,13 @@ const Cartoonmoji = () => {
             setIsModalOpen(false);
             setCurrentState("play");
           }}
+        />
+      )}
+
+      {showRewardModal && rewardPoints !== null && (
+        <RewardPointsModal
+          rewardPoints={rewardPoints}
+          onClose={handleCloseRewardModal}
         />
       )}
     </>

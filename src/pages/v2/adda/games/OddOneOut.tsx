@@ -1,5 +1,3 @@
-"use client";
-
 import postScore from "@/api/game/postScore";
 import OddOneOutDifficulty from "@/components/adda/games/OddOneOut/OddOneOutDifficulty";
 import OddOneOutFinalScore from "@/components/adda/games/OddOneOut/OddOneOutFinalScor";
@@ -88,7 +86,7 @@ const OddOneOut = () => {
     setScore(0);
     setGameOver(false);
 
-    setGameStarted(true); // ✅ start the game only after images are ready
+    setGameStarted(true);
   }, [level]);
 
   useEffect(() => {
@@ -138,8 +136,9 @@ const OddOneOut = () => {
   const sendResult = async () => {
     setCompleteSend(true);
     try {
+      const success = score === TOTAL_ROUNDS;
       postScore({
-        body: { gameId, difficulty: level as string, score },
+        body: { gameId, difficulty: level as string, score, success },
         token: (await getToken()) || "",
       });
     } catch (error) {

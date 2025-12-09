@@ -1,72 +1,125 @@
-import { GAMES } from "@/constant/adda/game/game";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useUser, useAuth } from "@clerk/clerk-react";
+import GameLobbyHeader from "./header";
+import ScoringDashboard from "./scoring";
+import GameItems from "./gameItems";
+import { fetchCandyCoin } from "@/api/game/mentoonsCoin";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { CandyCoins } from "@/types/adda/game/candyCoins";
 
-const Games = () => {
+export interface LeaderboardEntry {
+  rank: number;
+  playerId: string;
+  playerClerkId: string;
+  userName: string;
+  totalScore: number;
+  profileImage: string | null;
+}
+
+interface ApiResponseLeaderBoard {
+  success: boolean;
+  count: number;
+  data: LeaderboardEntry[];
+}
+
+const GameLobby = () => {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<LeaderboardEntry | null>(null);
+  const [coins, setCoins] = useState<CandyCoins | null>(null);
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const { showStatus } = useStatusModal();
+
+  useEffect(() => {
+    fetchLeaderboard();
+    fetchUserCandyCoins();
+  }, []);
+
+  const fetchLeaderboard = async () => {
+    try {
+      const response = await axios.get<ApiResponseLeaderBoard>(
+        `${import.meta.env.VITE_PROD_URL}/game/leaderboard`
+      );
+      const data = response.data;
+
+      if (data.success) {
+        setLeaderboard(data.data);
+        const userId = user?.id;
+        if (userId) {
+          const foundUser = data.data.find(
+            (entry) => entry.playerClerkId === userId
+          );
+          setCurrentUser(foundUser || null);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserCandyCoins = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetchCandyCoin(token!);
+      console.log("response data :", response);
+      setCoins(response.candyCoins);
+    } catch (error) {
+      showStatus(
+        "error",
+        (error as string) ||
+          "Error takin coins, Please try again after sometimes"
+      );
+    }
+  };
+
+  const handleLeaderboardClick = () => {
+    window.location.href = "/adda/leaderboard";
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="relative overflow-hidden pt-16 pb-8">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-        </div>
+    <div className="relative min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 lg:top-10 lg:right-10">
+        <div className="relative">
+          {/* Glowing backdrop effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 rounded-full blur-md opacity-75 animate-pulse"></div>
 
-        <div className="relative z-10 text-center px-8">
-          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent animate-gradient">
-            Game Collection
-          </h1>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
-            Sharpen your mind, boost creativity, and enhance your logical and
-            numerical skills as you embark on thrilling adventures.
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
-            <div className="h-1 w-1 bg-cyan-500 rounded-full"></div>
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+          {/* Main container with gradient border */}
+          <div className="relative bg-gradient-to-br from-orange-500 via-amber-400 to-orange-600 rounded-full p-[2px] sm:p-[3px] shadow-2xl">
+            <div className="flex items-center justify-center rounded-full h-14 w-36 sm:h-16 sm:w-40 md:h-20 md:w-48 lg:h-24 lg:w-56 bg-gradient-to-br from-slate-900 to-slate-800 shadow-inner">
+              <div className="flex items-center justify-between w-full px-2 relative">
+                {/* Coin image - much larger and positioned on the left, overlapping the edge */}
+                <div className="absolute -left-6 sm:-left-7 md:-left-9 lg:-left-11 top-1/2 -translate-y-1/2">
+                  <img
+                    src="/assets/games/coins/candyCoin.png"
+                    alt="Coin"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] relative z-10"
+                  />
+                </div>
+
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-amber-300 font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ml-auto pr-3">
+                  {coins?.currentCoins ?? 0}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 place-items-center gap-5 p-8">
-        {GAMES.map((game, index) => (
-          <div
-            key={index}
-            className="group relative rounded-xl border-2 border-gray-700 w-full h-64 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 hover:border-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-          >
-            <div className="absolute left-4 top-8 bottom-8 w-1 bg-gradient-to-b from-transparent via-white to-transparent opacity-60 blur-sm z-10"></div>
-            <div className="absolute left-4 top-8 bottom-8 w-0.5 bg-gradient-to-b from-transparent via-white to-transparent z-10"></div>
-
-            <div className="relative w-full h-full">
-              {game.thumbnail ? (
-                <img
-                  src={game.thumbnail}
-                  alt={game.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500 text-4xl font-bold">
-                  {game.title}
-                </div>
-              )}
-
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-lg text-center">
-                  {game.title}
-                </h3>
-              </div>
-
-              <a
-                href={game.link}
-                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 backdrop-blur-sm z-20"
-              >
-                <span className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xl rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all">
-                  Play
-                </span>
-              </a>
-            </div>
-          </div>
-        ))}
+      <GameLobbyHeader />
+      <div className="px-8 pb-8">
+        <ScoringDashboard
+          handleLeaderboardClick={handleLeaderboardClick}
+          currentUser={currentUser}
+          leaderboard={leaderboard}
+          loading={loading}
+        />
+        <GameItems />
       </div>
     </div>
   );
 };
 
-export default Games;
+export default GameLobby;

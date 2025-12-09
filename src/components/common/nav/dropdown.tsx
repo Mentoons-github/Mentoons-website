@@ -18,6 +18,7 @@ const DropDown = ({
   isOpen?: (val: boolean) => void;
   labelType?: "products" | "games" | "workshops" | "joinus";
 }) => {
+  console.log("labelType : ", labelType);
   const navigate = useNavigate();
 
   const handleClick = (category: string) => {
