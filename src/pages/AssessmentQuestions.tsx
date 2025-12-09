@@ -199,8 +199,6 @@ const AssessmentQuestions: React.FC = () => {
           },
         }
       );
-      console.log("response", response);
-      console.log("response.data", response.data);
 
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = response.data;

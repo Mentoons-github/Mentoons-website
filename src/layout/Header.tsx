@@ -67,10 +67,28 @@ const Header = () => {
   ) => {
     e.preventDefault();
     const query = suggestion || searchQuery.trim();
-    if (!query) return;
-    navigate(`/search?q=${encodeURIComponent(query)}`);
+    const encoded = encodeURIComponent(query);
+    if (!encoded) return;
+
+    const currentParams = new URLSearchParams(location.search);
+    const currentQ = currentParams.get("q");
+
+    if (currentQ === encoded && location.pathname === "/search") {
+      navigate(`/search?q=${encoded}`, { replace: true });
+      navigate(0);
+    } else {
+      navigate(`/search?q=${encoded}`);
+    }
+
     setShowSearch(false);
     setSearchQuery("");
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setShowSearch(false);
+      setSearchQuery("");
+    }
   };
 
   const handleProfileHover = () => setShowProfileDropdown(true);
@@ -78,8 +96,12 @@ const Header = () => {
 
   const handleLogout = async () => {
     setShowProfileDropdown(false);
-    await signOut();
-    navigate("/adda");
+    try {
+      await signOut();
+      navigate("/adda");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const handleProfileNavigation = () => {
@@ -87,7 +109,6 @@ const Header = () => {
     navigate("/adda/user-profile");
   };
 
-  // Fixed: Proper async handling of getToken()
   useEffect(() => {
     const fetchCartData = async () => {
       if (!userId) return;
@@ -130,13 +151,32 @@ const Header = () => {
 
   if (location.pathname.startsWith("/employee")) return null;
 
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.2, ease: "easeOut" },
+    },
+    exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: { delay: i * 0.05, duration: 0.2, ease: "easeOut" },
+    }),
+  };
+
   return (
     <header
       className={`${
         isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
       } flex justify-between items-center bg-primary h-16 px-4 sm:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
     >
-      {/* Left Nav */}
       <div className="flex items-center lg:w-1/3">
         <nav className="hidden lg:flex gap-6 xl:gap-8">
           {navLeft.map(({ id, label, url, icon: Icon, items }) =>
@@ -185,7 +225,6 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Logo */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <NavLink to="/adda">
           <img
@@ -196,7 +235,6 @@ const Header = () => {
         </NavLink>
       </div>
 
-      {/* Mobile Right Icons */}
       <div className="flex items-center gap-4 lg:hidden">
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <div
@@ -231,8 +269,16 @@ const Header = () => {
         </motion.div>
       </div>
 
-      {/* Desktop Right Nav + Cart at the END */}
       <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <div
+            onClick={handleSearchToggle}
+            className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
+          >
+            <Search className="w-6 h-6 text-white" />
+          </div>
+        </motion.div>
+
         {navRight.map(({ id, label, url, icon: Icon, items }) => {
           if ((label === "Games" || label === "My Library") && !userId)
             return null;
@@ -278,25 +324,30 @@ const Header = () => {
                 <AnimatePresence>
                   {showProfileDropdown && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
                       className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl py-2 z-[10001] border"
                     >
-                      <div
+                      <motion.div
+                        custom={0}
+                        variants={itemVariants}
                         onClick={handleProfileNavigation}
                         className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 cursor-pointer"
                       >
                         <User className="w-4 h-4" />
                         <span>Profile</span>
-                      </div>
-                      <div
+                      </motion.div>
+                      <motion.div
+                        custom={1}
+                        variants={itemVariants}
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -329,7 +380,6 @@ const Header = () => {
           );
         })}
 
-        {/* CART AT THE VERY END */}
         <SignedIn>
           <NavLink to="/cart" className="relative ml-6">
             <ShoppingCart className="w-7 h-7 text-white" />
@@ -342,20 +392,20 @@ const Header = () => {
         </SignedIn>
       </nav>
 
-      {/* Search Modal & Sidebar & Share Modal */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-24"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[10000] flex items-start justify-center pt-20"
             onClick={handleSearchToggle}
           >
             <motion.div
-              initial={{ y: -50, opacity: 0, scale: 0.95 }}
+              initial={{ y: -50, opacity: 0, scale: 0.9 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -50, opacity: 0 }}
+              exit={{ y: -50, opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="w-full max-w-2xl mx-4"
               onClick={(e) => e.stopPropagation()}
             >
@@ -364,23 +414,54 @@ const Header = () => {
                 className="bg-white rounded-2xl shadow-2xl overflow-hidden"
               >
                 <div className="flex items-center">
-                  <Search className="w-6 h-6 text-gray-400 ml-6" />
+                  <div className="py-4 pl-6 pr-3">
+                    <Search className="w-6 h-6 text-gray-400" />
+                  </div>
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search games, comics, podcasts..."
-                    className="flex-1 py-5 px-4 text-lg outline-none"
+                    onKeyDown={handleSearchKeyDown}
+                    placeholder="Search for games, comics, podcasts..."
+                    className="flex-1 py-4 text-lg outline-none"
                   />
-                  <button
+                  <motion.button
                     type="button"
                     onClick={handleSearchToggle}
-                    className="p-3 mr-4 hover:bg-gray-100 rounded-full"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="p-3 mr-3 hover:bg-gray-100 rounded-full"
                   >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
+                    <X className="w-5 h-5 text-gray-400" />
+                  </motion.button>
                 </div>
+
+                {searchQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="p-4 border-t"
+                  >
+                    <p className="text-sm text-gray-500 mb-2">
+                      Press Enter to search
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {["Games", "Comics", "Books", "Cards"].map((s) => (
+                        <motion.button
+                          key={s}
+                          type="button"
+                          onClick={() =>
+                            handleSearchSubmit(new Event("submit") as any, s)
+                          }
+                          className="px-3 py-1 text-sm bg-gray-100 rounded-full hover:bg-primary hover:text-white"
+                        >
+                          {s}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </form>
             </motion.div>
           </motion.div>

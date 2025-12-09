@@ -1,60 +1,60 @@
-const base_url = `${import.meta.env.VITE_STATIC_URL}adda`;
+const base_url = import.meta.env.VITE_STATIC_URL;
 
 export const GAMES = [
   {
     title: "Dice",
     thumbnail: "/assets/adda/gameLobby/dice.jpg",
-    link: `${base_url}/game-lobby/dice`,
+    link: `${base_url}adda/game-lobby/dice`,
   },
   {
     title: "cartoonmoji",
     thumbnail: "/assets/adda/gameLobby/cartoonmoji.png",
-    link: `${base_url}/game-lobby/cartoonmoji`,
+    link: `${base_url}adda/game-lobby/cartoonmoji`,
   },
   {
     title: "Grid Flash",
     thumbnail: "/assets/adda/gameLobby/gridFlash.png",
-    link: `${base_url}/game-lobby/grid-flash`,
+    link: `${base_url}adda/game-lobby/grid-flash`,
   },
   {
     title: "Mind Stack",
     thumbnail: "/assets/adda/gameLobby/mindStack.png",
-    link: `${base_url}/game-lobby/mind-stack`,
+    link: `${base_url}adda/game-lobby/mind-stack`,
   },
   {
     title: "Flip And Match",
     thumbnail: "/assets/adda/gameLobby/flipAndMatch.png",
-    link: `${base_url}/game-lobby/flip-and-match`,
+    link: `${base_url}adda/game-lobby/flip-and-match`,
   },
   {
     title: "Stick Master",
     thumbnail: "/assets/adda/gameLobby/stickMaster.png",
-    link: `${base_url}/game-lobby/stick-master`,
+    link: `${base_url}adda/game-lobby/stick-master`,
   },
   {
     title: "Quiz",
     thumbnail: "/assets/adda/gameLobby/image.jpg",
-    link: `${base_url}/quiz`,
+    link: `${base_url}quiz`,
   },
   {
     title: "Color Tube",
-    thumbnail: "/assets/adda/ColorTube/startBg2.jpg",
-    link: `${base_url}/game-lobby/color-tube`,
+    thumbnail: "/assets/games/ColorTube/startBg2.jpg",
+    link: `${base_url}adda/game-lobby/color-tube`,
   },
   {
     title: "Odd One Out",
-    thumbnail: "/assets/adda/FindOddOne/image.png",
-    link: `${base_url}/game-lobby/odd-one-out`,
+    thumbnail: "/assets/games/FindOddOne/image.png",
+    link: `${base_url}adda/game-lobby/odd-one-out`,
   },
   {
     title: "Sound & Strings",
-    thumbnail: "/assets/adda/instruments/bg1.jpg",
-    link: `${base_url}/game-lobby/instruments`,
+    thumbnail: "/assets/games/instruments/bg1.jpg",
+    link: `${base_url}adda/game-lobby/instruments`,
   },
   {
     title: "Mind of Inventions",
-    thumbnail: "/assets/adda/invetors/image.png",
-    link: `${base_url}/game-lobby/inventors`,
+    thumbnail: "/assets/games/inventors/image.png",
+    link: `${base_url}adda/game-lobby/inventors`,
   },
 ];
 

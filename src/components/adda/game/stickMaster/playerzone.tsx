@@ -13,6 +13,7 @@ interface Props {
   onGameComplete: (score: number, totalRounds: number) => void;
   score: number;
   setScore: React.Dispatch<React.SetStateAction<number>>;
+  setAllCorrect: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const computeEquation = (puz: PuzzleElement[]) => {
@@ -89,6 +90,7 @@ const StickMasterPlayzone: React.FC<Props> = ({
   onGameComplete,
   score,
   setScore,
+  setAllCorrect,
 }) => {
   const puzzles = PUZZLE_DATA.filter((p) => p.difficulty === difficulty);
 
@@ -239,6 +241,7 @@ const StickMasterPlayzone: React.FC<Props> = ({
             setTimeout(() => loadPuzzle(idx + 1), 1500);
           }
         } else {
+          setAllCorrect(false);
           setMsg(`Not quite right → ${finalEq}`);
           setTimeout(() => loadPuzzle(idx + 1), 2000);
         }
