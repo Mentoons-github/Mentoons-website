@@ -26,7 +26,7 @@ const DropDown = ({
 
     let basePath = "";
     if (labelType === "products") {
-      basePath = "/product";
+      basePath = "/products";
     } else if (labelType === "workshops") {
       basePath = "/mentoons-workshops";
     } else if (labelType === "joinus") {

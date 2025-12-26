@@ -19,6 +19,10 @@ import { Route, Routes } from "react-router-dom";
 import FlipAndMatch from "@/pages/v2/adda/games/flipAndMatch";
 import StickMaster from "@/pages/v2/adda/games/stickMaster";
 import LeaderBoard from "@/pages/v2/adda/games/leaderBoard";
+import ColorClash from "@/pages/v2/adda/games/colorClash";
+import SpeedAdd from "@/pages/v2/adda/games/mindMath";
+import WordBuilder from "@/pages/v2/adda/games/wordBuilder";
+import SortMyDeck from "@/pages/v2/adda/games/sortMyDeck";
 
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
@@ -101,6 +105,10 @@ const AddaRouter = () => {
         <Route path="game-lobby/mind-stack" element={<BrainStack />} />
         <Route path="game-lobby/flip-and-match" element={<FlipAndMatch />} />
         <Route path="game-lobby/stick-master" element={<StickMaster />} />
+        <Route path="game-lobby/color-clash" element={<ColorClash />} />
+        <Route path="game-lobby/mind-math" element={<SpeedAdd />} />
+        <Route path="game-lobby/word-builder" element={<WordBuilder />} />
+        <Route path="game-lobby/sort-my-deck" element={<SortMyDeck />} />
         <Route path="leaderboard" element={<LeaderBoard />} />
       </Routes>
     </Suspense>

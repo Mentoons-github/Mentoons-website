@@ -315,7 +315,7 @@ const ComicViewer: React.FC<ComicViewerProps> = ({
               {userPlan === "platinum" ? "Purchase Now" : "Subscribe Now"}
             </button>
             <button
-              onClick={() => navigate("/product")}
+              onClick={() => navigate("/products")}
               className="px-10 py-4 ml-4 text-xl font-semibold text-white transition-all duration-300 rounded-full bg-primary hover:bg-primary/90 hover:scale-105 hover:shadow-lg"
             >
               Explore Mentoons Store

@@ -1,5 +1,7 @@
 const base_url = import.meta.env.VITE_STATIC_URL;
 
+console;
+
 export const GAMES = [
   {
     title: "Dice",
@@ -31,11 +33,11 @@ export const GAMES = [
     thumbnail: "/assets/adda/gameLobby/stickMaster.png",
     link: `${base_url}adda/game-lobby/stick-master`,
   },
-  {
-    title: "Quiz",
-    thumbnail: "/assets/adda/gameLobby/image.jpg",
-    link: `${base_url}quiz`,
-  },
+  // {
+  //   title: "Quiz",
+  //   thumbnail: "/assets/adda/gameLobby/image.jpg",
+  //   link: `${base_url}quiz`,
+  // },
   {
     title: "Color Tube",
     thumbnail: "/assets/games/ColorTube/startBg2.jpg",
@@ -55,6 +57,26 @@ export const GAMES = [
     title: "Mind of Inventions",
     thumbnail: "/assets/games/inventors/image.png",
     link: `${base_url}adda/game-lobby/inventors`,
+  },
+  {
+    title: "Color Clash",
+    thumbnail: "/assets/games/colorClash/thumbnail.png",
+    link: `${base_url}adda/game-lobby/color-clash`,
+  },
+  {
+    title: "Mind Math",
+    thumbnail: "/assets/games/mindMath/bg.jpg",
+    link: `${base_url}adda/game-lobby/mind-math`,
+  },
+  {
+    title: "Word Builder",
+    thumbnail: "/assets/games/wordBuilder/thumbnail.png",
+    link: `${base_url}adda/game-lobby/word-builder`,
+  },
+  {
+    title: "Sort My Deck",
+    thumbnail: "/assets/games/sortMyDeck/thumbnail.png",
+    link: `${base_url}adda/game-lobby/sort-my-deck`,
   },
 ];
 

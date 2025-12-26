@@ -1,293 +1,170 @@
-import { useRef, useState } from "react";
-import { QUIZ_ITEMS } from "@/constant/constants";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { Category } from "@/pages/quiz/quizHome";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const QuizTimelineSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+// Category descriptions and color themes
+const categoryData: Record<
+  string,
+  { description: string; gradient: string; accent: string; icon: string }
+> = {
+  "Mobile addiction": {
+    description:
+      "Learn how excessive smartphone use develops, its psychological effects, and how it influences attention, sleep, and daily behavior.",
+    gradient: "from-blue-600 via-blue-500 to-cyan-400",
+    accent: "bg-blue-500",
+    icon: "📱",
+  },
+  "Gaming addiction": {
+    description:
+      "Explore the science behind gaming addiction, common warning signs, and how prolonged gaming can impact mental health and lifestyle.",
+    gradient: "from-orange-600 via-orange-500 to-yellow-400",
+    accent: "bg-orange-500",
+    icon: "🎮",
+  },
+  "Gambling addiction": {
+    description:
+      "Understand how gambling addiction forms, the role of risk and reward in the brain, and its social and financial consequences.",
+    gradient: "from-red-600 via-orange-500 to-yellow-400",
+    accent: "bg-red-500",
+    icon: "🎲",
+  },
+  "Performance addiction": {
+    description:
+      "Discover how the constant drive for success and perfection can become addictive, affecting mental health, motivation, and balance.",
+    gradient: "from-green-600 via-emerald-500 to-teal-400",
+    accent: "bg-green-500",
+    icon: "🏆",
+  },
+  "Entertainment addiction": {
+    description:
+      "Learn about excessive consumption of entertainment media, why it becomes habit-forming, and its effects on productivity and focus.",
+    gradient: "from-yellow-600 via-yellow-500 to-amber-300",
+    accent: "bg-yellow-500",
+    icon: "🎬",
+  },
+};
 
-  // Scroll tracking with useScroll (moved before early return)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  // Transform scroll progress for smoother and more visible animations
-  const arrowY = useTransform(scrollYProgress, [0, 1], [0, 600]);
-
-  // Fallback UI if QUIZ_ITEMS is empty
-  if (!QUIZ_ITEMS || QUIZ_ITEMS.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-xl text-gray-600">Loading quizzes...</p>
-      </div>
-    );
-  }
+const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
+  const [selectedCategory, setSelectedCategory] = useState(0);
+  const currentCategory = categories[selectedCategory]?.category || "";
+  const currentData = categoryData[currentCategory] || {
+    description: "Explore this category to learn more about your habits.",
+    gradient: "from-gray-600 via-gray-500 to-gray-400",
+    accent: "bg-gray-500",
+    icon: "📋",
+  };
 
   return (
-    <div className="relative w-full py-20 bg-gradient-to-b from-slate-50 via-white to-slate-50 overflow-hidden">
-      {/* Animated Background with Floating Shapes */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute opacity-10"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100],
-              rotate: [0, 360],
-              scale: [1, 1.5, 1],
-            }}
-            transition={{
-              duration: 20 + Math.random() * 20,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-          >
-            <div
-              className={`w-16 h-16 bg-gradient-to-r ${
-                i % 3 === 0
-                  ? "from-blue-400 to-purple-600"
-                  : i % 3 === 1
-                  ? "from-pink-400 to-red-600"
-                  : "from-green-400 to-teal-600"
-              } ${i % 2 === 0 ? "rounded-full" : "rounded-lg rotate-45"}`}
-            />
-          </motion.div>
-        ))}
-
-        {/* Floating Icons */}
-        {["🌟", "✨", "💫", "🎯", "🔥", "⚡", "🌈", "🎪", "🎭", "🎨"].map(
-          (icon, i) => (
-            <motion.div
-              key={`icon-${i}`}
-              className="absolute text-3xl opacity-20"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -60, 0],
-                x: [0, Math.random() * 50 - 25, 0],
-                rotate: [0, 30, -30, 0],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 12 + Math.random() * 15,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              {icon}
-            </motion.div>
-          )
-        )}
-      </div>
-
-      {/* Header Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="text-center mb-20"
-      >
+    <div className="flex items-center justify-center p-8 md:p-20 min-h-screen">
+      <div className="w-full max-w-7xl">
+        {/* Main Display Card */}
         <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="inline-block mb-4"
+          key={selectedCategory}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className={`relative w-full h-[500px] rounded-3xl bg-gradient-to-br ${currentData.gradient} shadow-2xl overflow-hidden`}
         >
-          <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-semibold rounded-full shadow-lg">
-            <span className="mr-2">🎯</span>
-            Quiz Collection
-          </span>
-        </motion.div>
-        <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent mb-6">
-          Test Your Knowledge
-        </h2>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Explore our diverse set of interactive quizzes, crafted to challenge
-          your knowledge and spark curiosity across various domains. From
-          beginner to expert, there's something for everyone!
-        </p>
-      </motion.div>
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-      {/* Timeline Container */}
-      <div ref={containerRef} className="relative max-w-7xl mx-auto px-4">
-        {/* Enhanced Timeline Line */}
-        <div
-          className="absolute left-1/2 transform -translate-x-1/2 w-3 bg-gradient-to-b from-blue-400 via-purple-500 to-pink-500 rounded-full opacity-30"
-          style={{ height: "100%", minHeight: "1200px" }}
-        />
-
-        {/* Animated Timeline Indicator (Arrow) */}
-        <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 z-30 w-14 h-14 bg-white rounded-full shadow-xl border-4 border-blue-500 flex items-center justify-center cursor-pointer"
-          style={{ y: arrowY, top: "5%" }}
-          whileHover={{
-            scale: 1.2,
-            borderColor: "rgba(236, 72, 153, 1)",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
-            boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)",
-          }}
-          animate={{
-            boxShadow: [
-              "0 0 20px rgba(59, 130, 246, 0.3)",
-              "0 0 40px rgba(59, 130, 246, 0.6)",
-              "0 0 20px rgba(59, 130, 246, 0.3)",
-            ],
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="text-blue-600 text-3xl font-bold"
-          >
-            ↓
-          </motion.div>
+          {/* Content */}
+          <div className="relative h-full flex flex-col items-center justify-center p-12 text-white">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedCategory}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="text-center space-y-6"
+              >
+                <div className="text-8xl mb-4 drop-shadow-2xl">
+                  {currentData.icon}
+                </div>
+                <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight drop-shadow-2xl">
+                  {currentCategory}
+                </h1>
+                <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 max-w-3xl mx-auto">
+                  <p className="text-xl md:text-2xl font-medium leading-relaxed text-white drop-shadow-lg px-4">
+                    {currentData.description}
+                  </p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </motion.div>
 
-        {/* Quiz Cards */}
-        <div className="space-y-32 pt-16">
-          {QUIZ_ITEMS.map((item, index) => {
-            const isLeft = index % 2 === 0;
-            const isHovered = hoveredIndex === index;
+        {/* Category Selection Pills */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 px-4">
+          {categories.map((category, index) => {
+            const data =
+              categoryData[category.category] ||
+              categoryData["Mobile addiction"];
+            const isSelected = selectedCategory === index;
 
             return (
               <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: isLeft ? -100 : 100, y: 50 }}
-                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                key={category._id}
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.8,
-                  delay: 0.2,
+                  delay: index * 0.1,
                   type: "spring",
-                  stiffness: 100,
+                  stiffness: 200,
                 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className={`relative flex ${
-                  isLeft ? "justify-start" : "justify-end"
-                } items-center`}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCategory(index)}
+                className={`
+                  relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300
+                  ${
+                    isSelected
+                      ? `${data.accent} text-white shadow-2xl scale-105`
+                      : "bg-white text-gray-800 shadow-lg hover:shadow-xl"
+                  }
+                `}
               >
-                {/* Timeline Node */}
-                <motion.div
-                  className="absolute left-1/2 transform -translate-x-1/2 z-20"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full border-4 border-white shadow-lg ${
-                      isHovered ? "bg-purple-500 scale-125" : "bg-blue-500"
-                    } transition-all duration-300`}
+                <div className="relative z-10 px-6 py-4 flex flex-col items-center justify-center text-center min-w-[160px] min-h-[100px]">
+                  <div className="text-3xl mb-2">{data.icon}</div>
+                  <span className="font-semibold text-sm leading-tight">
+                    {category.category}
+                  </span>
+                </div>
+
+                {/* Selection Indicator */}
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeCategory"
+                    className="absolute inset-0 bg-white/20 backdrop-blur-sm"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
-                </motion.div>
-
-                {/* Connection Line */}
-                <motion.div
-                  className={`absolute top-6 w-20 h-1 bg-gradient-to-r ${
-                    isLeft
-                      ? "from-blue-400 to-transparent right-1/2 mr-4"
-                      : "from-transparent to-blue-400 left-1/2 ml-4"
-                  }`}
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  transition={{ delay: 0.7, duration: 0.5 }}
-                />
-
-                {/* Card */}
-                <motion.div
-                  className={`relative w-full max-w-md ${
-                    isLeft ? "mr-10" : "ml-10"
-                  }`}
-                  whileHover={{ scale: 1.05, y: -10 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div
-                    className={`relative rounded-2xl overflow-hidden ${item.bgColor} shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer`}
-                    style={{
-                      boxShadow: isHovered
-                        ? `0 20px 40px ${item.shadowColor}, 0 0 60px ${item.glowColor}`
-                        : `0 10px 30px ${item.shadowColor}`,
-                    }}
-                  >
-                    {/* Card Header */}
-                    <div className="relative h-60 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/60" />
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                        animate={isHovered ? { x: [-100, 400] } : {}}
-                        transition={{ duration: 0.6 }}
-                      />
-
-                      {/* Category Badge */}
-                      <div className="absolute top-4 left-4 z-10">
-                        <span className="inline-flex items-center px-3 py-1 text-sm font-bold bg-white/95 backdrop-blur-sm rounded-full text-gray-800 shadow-lg">
-                          {item.category}
-                        </span>
-                      </div>
-
-                      {/* Icon */}
-                      <motion.div
-                        className="absolute bottom-4 right-4 text-7xl"
-                        animate={
-                          isHovered
-                            ? {
-                                scale: [1, 1.2, 1],
-                                rotate: [0, 10, -10, 0],
-                              }
-                            : {}
-                        }
-                        transition={{ duration: 0.5 }}
-                      >
-                        {item.icon}
-                      </motion.div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="p-6">
-                      <h3 className="text-2xl font-bold text-white mb-3">
-                        {item.label}
-                      </h3>
-                      <p className="text-white/90 text-sm leading-relaxed mb-4">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
+                )}
               </motion.div>
             );
           })}
         </div>
-      </div>
 
-      {/* Enhanced CTA Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        viewport={{ once: true }}
-        className="text-center mt-32"
-      >
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-            Ready to Challenge Yourself?
-          </h3>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            Join thousands of learners who have tested their skills with our
-            interactive quizzes. Start exploring now or dive into detailed
-            statistics to track your progress!
-          </p>
+        {/* Progress Indicator */}
+        <div className="mt-8 flex items-center justify-center gap-2">
+          {categories.map((_, index) => (
+            <motion.div
+              key={index}
+              onClick={() => setSelectedCategory(index)}
+              className={`h-2 rounded-full cursor-pointer transition-all duration-300 ${
+                selectedCategory === index
+                  ? `${
+                      categoryData[categories[index].category]?.accent ||
+                      "bg-gray-500"
+                    } w-12`
+                  : "bg-gray-300 w-2"
+              }`}
+              whileHover={{ scale: 1.2 }}
+            />
+          ))}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

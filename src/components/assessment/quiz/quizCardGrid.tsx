@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth } from "@clerk/clerk-react";
 import { useStatusModal } from "@/context/adda/statusModalContext";
-import axios from "axios";
 import {
   Dice6,
   Smartphone,
@@ -13,11 +12,7 @@ import {
   Tv,
   HelpCircle,
 } from "lucide-react";
-
-interface Category {
-  _id: string;
-  category: string;
-}
+import { Category } from "@/pages/quiz/quizHome";
 
 const fadeContainer = {
   hidden: { opacity: 0 },
@@ -75,40 +70,16 @@ const colorSchemes = [
   },
 ];
 
-const QuizCardGrid = () => {
+interface QuizCardGrid {
+  categories: Category[];
+}
+
+const QuizCardGrid = ({ categories }: QuizCardGrid) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { showStatus } = useStatusModal();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const token = await getToken();
-        const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/quiz/categories`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setCategories(response.data.categories || []);
-      } catch (error: any) {
-        showStatus(
-          "error",
-          error.response?.data?.message || "Failed to load categories"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, [getToken, showStatus]);
 
   const handleCategoryClick = async (categoryId: string) => {
     const token = await getToken();
@@ -133,21 +104,6 @@ const QuizCardGrid = () => {
     if (name.includes("entertainment")) return <Tv className="w-16 h-16" />;
     return <HelpCircle className="w-16 h-16" />;
   };
-
-  if (loading) {
-    return (
-      <div className="relative w-full px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="h-64 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   if (categories.length === 0) {
     return (
