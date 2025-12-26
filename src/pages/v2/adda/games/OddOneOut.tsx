@@ -1,12 +1,17 @@
 import postScore from "@/api/game/postScore";
+import HowToPlay from "@/components/adda/game/howToPlay/howToPlay";
 import OddOneOutDifficulty from "@/components/adda/games/OddOneOut/OddOneOutDifficulty";
 import OddOneOutFinalScore from "@/components/adda/games/OddOneOut/OddOneOutFinalScor";
 import OddOneOutPuzzle from "@/components/adda/games/OddOneOut/OddOneOutPuzzle";
 import OddOneOutStartScreen from "@/components/adda/games/OddOneOut/OddOneOutStarterScreen";
+import { GAME_INSTRUCTIONS } from "@/constant/adda/game/instructions";
 import { IMAGE_SETS } from "@/constant/games/OddOneOutImages";
 import { useCountdown } from "@/hooks/adda/OneOddOutTimet";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
+import { BiBulb } from "react-icons/bi";
+import { FaChevronLeft } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -48,12 +53,12 @@ const OddOneOut = () => {
   const [resultType, setResultType] = useState<
     "correct" | "wrong" | "timeover" | null
   >(null);
-
+  const [isInstructionOpen, setInstructionOpen] = useState(false);
   const [shuffledImages, setShuffledImages] = useState<ImagePair[]>([]);
   const [totalRounds, setTotalRounds] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [completeSend, setCompleteSend] = useState(false);
-
+  const navigate = useNavigate();
   const grid = level ? LEVEL_CONFIG[level].grid : 0;
   const time = level ? LEVEL_CONFIG[level].time : 0;
 
@@ -65,6 +70,12 @@ const OddOneOut = () => {
   const { getToken } = useAuth();
 
   const gameId = `odd_one_out${level}`;
+
+  const gameInstructions = GAME_INSTRUCTIONS.find(
+    (inst) =>
+      inst.game.toLowerCase().replace(/_/g, "").replace(/\s+/g, "") ===
+      "oddoneout"
+  );
 
   function handleTimeOver() {
     setResultType("timeover");
@@ -162,6 +173,28 @@ const OddOneOut = () => {
 
   return (
     <div className="min-h-screen">
+      <HowToPlay
+        instructions={gameInstructions?.steps || []}
+        isModalOpen={isInstructionOpen}
+        setClose={() => setInstructionOpen(false)}
+      />
+      <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 z-50 flex items-center justify-between gap-2">
+        <button
+          onClick={() => navigate("/adda/game-lobby")}
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-sm shadow-md hover:bg-black/40 transition-all flex-shrink-0"
+        >
+          <FaChevronLeft className="text-white text-xl sm:text-2xl" />
+        </button>
+
+        <button
+          onClick={() => setInstructionOpen(true)}
+          className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-md text-white font-bold py-2 px-3 sm:py-2.5 sm:px-4 md:px-6 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-lg cursor-pointer hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border border-blue-400/30 hover:from-blue-400 hover:via-blue-500 hover:to-blue-600 flex-shrink-0"
+        >
+          <span className="hidden xs:inline sm:inline">How To Play</span>
+          <span className="inline xs:hidden sm:hidden">Help</span>
+          <BiBulb className="text-base sm:text-xl animate-pulse" />
+        </button>
+      </div>
       {!started && <OddOneOutStartScreen onStart={() => setStarted(true)} />}
 
       {started && !level && <OddOneOutDifficulty setDifficulty={setLevel} />}

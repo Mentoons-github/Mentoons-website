@@ -1,6 +1,11 @@
+import { Category } from "@/pages/quiz/quizHome";
 import QuizCardGrid from "./quizCardGrid";
 
-const QuizBanner = () => {
+interface QuizBanner {
+  categories: Category[];
+}
+
+const QuizBanner = ({ categories }: QuizBanner) => {
   return (
     <div className="relative">
       <div
@@ -43,7 +48,7 @@ const QuizBanner = () => {
         className="relative -mt-32 md:-mt-48 z-20"
         style={{ marginTop: "-7rem" }}
       >
-        <QuizCardGrid />
+        <QuizCardGrid categories={categories} />
       </div>
     </div>
   );
