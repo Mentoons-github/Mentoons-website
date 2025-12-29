@@ -769,32 +769,32 @@ export const FOOTER_PAGELINKS = [
   {
     id: "FP_2",
     title: "Mentoons Products",
-    url: "/product",
+    url: "/products",
     items: [
       {
         id: "S_1",
         label: "Conversation Starter Cards",
-        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
+        url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
       },
       {
         id: "S_2",
         label: "Story Re-Teller Cards",
-        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
+        url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
       },
       {
         id: "S_3",
         label: "Silent Stories",
-        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
+        url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
       },
       {
         id: "S_4",
         label: "Conversataion Story Card",
-        url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
+        url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
       {
         id: "S_5",
         label: "Coloring Books",
-        url: `/product?productType=${ProductType.MENTOONS_COLORING_BOOKS}#product`,
+        url: `/products?productType=${ProductType.MENTOONS_COLORING_BOOKS}#product`,
       },
     ],
   },
@@ -811,7 +811,7 @@ export const FOOTER_PAGELINKS = [
       },
       {
         id: "AB_2",
-        label: "+919036033300",
+        label: "+917892858593",
         url: "#",
       },
     ],
@@ -1261,8 +1261,8 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_08",
-    label: "Book Sessions",
-    url: "/bookings",
+    label: "Quiz",
+    url: "/quiz",
   },
   {
     id: "NL_09",
@@ -1284,6 +1284,12 @@ export const COMMON_NAV: NavLink[] = [
   },
   {
     id: "NL_10",
+    label: "Book Sessions",
+    url: "/bookings",
+  },
+
+  {
+    id: "NL_11",
     label: "Browse Plans",
     // icon: FaCreditCard,
     url: "/mentoons#subscription",

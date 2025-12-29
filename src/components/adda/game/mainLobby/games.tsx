@@ -68,6 +68,7 @@ const GameLobby = () => {
       console.log("response data :", response);
       setCoins(response.candyCoins);
     } catch (error) {
+      console.log(error);
       showStatus(
         "error",
         (error as string) ||
@@ -84,14 +85,10 @@ const GameLobby = () => {
     <div className="relative min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 lg:top-10 lg:right-10">
         <div className="relative">
-          {/* Glowing backdrop effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 rounded-full blur-md opacity-75 animate-pulse"></div>
-
-          {/* Main container with gradient border */}
           <div className="relative bg-gradient-to-br from-orange-500 via-amber-400 to-orange-600 rounded-full p-[2px] sm:p-[3px] shadow-2xl">
             <div className="flex items-center justify-center rounded-full h-14 w-36 sm:h-16 sm:w-40 md:h-20 md:w-48 lg:h-24 lg:w-56 bg-gradient-to-br from-slate-900 to-slate-800 shadow-inner">
               <div className="flex items-center justify-between w-full px-2 relative">
-                {/* Coin image - much larger and positioned on the left, overlapping the edge */}
                 <div className="absolute -left-6 sm:-left-7 md:-left-9 lg:-left-11 top-1/2 -translate-y-1/2">
                   <img
                     src="/assets/games/coins/candyCoin.png"

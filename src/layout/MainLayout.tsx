@@ -7,6 +7,7 @@ import PrimaryHeader from "./primaryHeader";
 import ScrollToTopButton from "@/components/common/topUpArrow/upArrow";
 import NotificationPopup from "@/components/modals/notification";
 import GlobalProgressBar from "@/components/common/globalProgressBar";
+import WhatsappGroup from "@/components/adda/whatsapp/whatsappGroup";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -48,7 +49,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {children}
         </div>
         {showFooter && <Footer />}
-        {showFooter && <ScrollToTopButton />}
+        <div className="fixed bottom-20 right-8 flex flex-col items-center justify-center gap-4">
+          <WhatsappGroup />
+          {showFooter && <ScrollToTopButton />}
+        </div>
       </div>
     </NotificationProvider>
   );

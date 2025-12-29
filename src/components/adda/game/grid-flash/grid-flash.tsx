@@ -36,7 +36,7 @@ const GridFlashPlay = ({
 }) => {
   const config = gridConfigs[difficulty];
   const totalCells = config.cols * config.rows;
-  const totalRounds = 2;
+  const totalRounds = 10;
 
   const [phase, setPhase] = useState<GamePhase>("memorize");
   const [round, setRound] = useState(1);

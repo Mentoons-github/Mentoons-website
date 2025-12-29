@@ -72,7 +72,7 @@ const routes = [
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },
   { path: "/mentoons-works", element: <HowMentoonsWork /> },
-  { path: "/product", element: <ProductsPage /> },
+  { path: "/products", element: <ProductsPage /> },
   {
     path: "/cart",
     element: (

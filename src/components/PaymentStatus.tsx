@@ -185,7 +185,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = () => {
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <motion.div variants={itemVariants} className="flex-1">
-          <Link to="/product" className="block">
+          <Link to="/products" className="block">
             <motion.button
               className="w-full px-5 py-4 text-lg font-medium text-white bg-black rounded-lg shadow-lg"
               whileHover={{ scale: 1.03 }}

@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   Star,
   Trophy,
-  Medal,
   ChevronRight,
   Gamepad2,
   Crown,
@@ -118,16 +117,31 @@ const LeaderBoard = () => {
   const getMedalIcon = (position: number) => {
     if (position === 1)
       return (
-        <Trophy className="text-yellow-400 w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(252,211,77,0.8)]" />
+        <img
+          src="/assets/games/positions/1st price.png"
+          alt="Gold Medal"
+          className="w-8 h-14 md:w-10 md:h-16 drop-shadow-[0_0_10px_rgba(252,211,77,0.8)]"
+        />
       );
+
     if (position === 2)
       return (
-        <Medal className="text-gray-300 w-9 h-9 md:w-11 md:h-11 drop-shadow-[0_0_8px_rgba(209,213,219,0.7)]" />
+        <img
+          src="/assets/games/positions/2nd price.png"
+          alt="Silver Medal"
+          className="w-7 h-12 md:w-9 md:h-14 drop-shadow-[0_0_8px_rgba(209,213,219,0.7)]"
+        />
       );
+
     if (position === 3)
       return (
-        <Medal className="text-yellow-600 w-8 h-8 md:w-10 md:h-10 drop-shadow-[0_0_8px_rgba(202,138,4,0.7)]" />
+        <img
+          src="/assets/games/positions/3rd price.png"
+          alt="Bronze Medal"
+          className="w-6 h-10 md:w-8 md:h-12 drop-shadow-[0_0_8px_rgba(202,138,4,0.7)]"
+        />
       );
+
     return null;
   };
 

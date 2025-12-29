@@ -7,17 +7,17 @@ const ProductDisplay = () => {
     {
       name: "Conversation Starter Cards",
       imageUrl: "/assets/mythos/about/mythos-conversation-starter-cards.png",
-      url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
+      url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STARTER_CARDS}#product`,
     },
     {
       name: "Story Re-teller Cards",
       imageUrl: "/assets/mythos/about/mythos-story-reteller-cards.png",
-      url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
+      url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.STORY_RE_TELLER_CARD}#product`,
     },
     {
       name: "Silent Stories",
       imageUrl: "/assets/mythos/about/mythos-silent-stories.png",
-      url: `/product?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
+      url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.SILENT_STORIES}#product`,
     },
   ];
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const ProductDisplay = () => {
           viewport={{ once: true }}
           whileHover={{ scale: 1.05 }}
           onClick={() => {
-            navigate("/product");
+            navigate("/products");
           }}
         >
           <span className="p-1 bg-black rounded-full">
