@@ -469,3 +469,19 @@ body {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* Hide everything with .no-print when printing */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  /* Optional: remove background for better black/white print */
+  body * {
+    background: none !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+}
+
+

@@ -12,7 +12,10 @@ import {
   Briefcase,
   Tv,
   HelpCircle,
+  Music,
 } from "lucide-react";
+import { QUIZES } from "@/constant/Quizes/quizeDatas";
+import { QuizSetTypes } from "@/types/adda/quiz";
 
 interface Category {
   _id: string;
@@ -83,6 +86,7 @@ const QuizCardGrid = () => {
   const { getToken } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { showStatus } = useStatusModal();
+  const [activeQuiz, setActiveQuiz] = useState<QuizSetTypes | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -120,6 +124,11 @@ const QuizCardGrid = () => {
       showStatus("error", "Invalid category. Please try another quiz.");
       return;
     }
+    const staticQuiz = QUIZES.find((q) => q._id === categoryId);
+    if (staticQuiz?.type?.length) {
+      setActiveQuiz(staticQuiz);
+      return;
+    }
     navigate(`/quiz/category/${categoryId}`);
   };
 
@@ -131,6 +140,7 @@ const QuizCardGrid = () => {
     if (name.includes("performance"))
       return <Briefcase className="w-16 h-16" />;
     if (name.includes("entertainment")) return <Tv className="w-16 h-16" />;
+    if (name.includes("music")) return <Music className="w-16 h-16" />;
     return <HelpCircle className="w-16 h-16" />;
   };
 
@@ -169,7 +179,7 @@ const QuizCardGrid = () => {
         variants={fadeContainer}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
-        {categories.map((category, index) => {
+        {[...categories, ...QUIZES].map((category, index) => {
           const colorScheme = colorSchemes[index % colorSchemes.length];
 
           return (
@@ -275,6 +285,47 @@ const QuizCardGrid = () => {
           );
         })}
       </motion.div>
+      {activeQuiz && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setActiveQuiz(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Select Music Quiz Type
+            </h2>
+
+            <div className="space-y-3">
+              {activeQuiz.type?.map((type) => (
+                <button
+                  key={type._id}
+                  onClick={() => navigate(`/quiz/category/${type._id}`)}
+                  className="w-full py-3 px-4 rounded-xl border text-left hover:bg-gray-100 transition"
+                >
+                  🎵 {type.artists}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setActiveQuiz(null)}
+              className="mt-6 w-full py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };

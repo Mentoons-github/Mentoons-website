@@ -1,5 +1,5 @@
 import StickMasterLobby from "@/components/adda/game/stickMaster/lobby";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CurrentState, Difficulty } from "@/types/adda/game";
 import GameDifficultyModal from "@/components/adda/game/difficultyModal";
 import StickMasterPlayzone from "@/components/adda/game/stickMaster/playerzone";
@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import postScore from "@/api/game/postScore";
 import { useAuth } from "@clerk/clerk-react";
 import { useStatusModal } from "@/context/adda/statusModalContext";
+import { fetchCandyCoin } from "@/api/game/mentoonsCoin";
+import { CandyCoins } from "@/types/adda/game/candyCoins";
 
 interface GameResult {
   score: number;
@@ -26,6 +28,7 @@ const StickMaster = () => {
   const [allCorrect, setAllCorrect] = useState(true);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showRewardModal, setShowRewardModal] = useState(false);
+  const [coins, setCoins] = useState<CandyCoins | null>(null);
 
   const navigate = useNavigate();
   const { getToken } = useAuth();
@@ -37,6 +40,25 @@ const StickMaster = () => {
     setDifficulty(selectedDifficulty);
     setCurrentState("play");
     setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    fetchUserCandyCoins();
+  }, []);
+
+  const fetchUserCandyCoins = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetchCandyCoin(token!);
+      console.log("response data :", response);
+      setCoins(response.candyCoins);
+    } catch (error) {
+      showStatus(
+        "error",
+        (error as string) ||
+          "Error takin coins, Please try again after sometimes"
+      );
+    }
   };
 
   const handleGameComplete = async (score: number, roundsPlayed: number) => {
@@ -102,6 +124,7 @@ const StickMaster = () => {
           score={score}
           setScore={setScore}
           setAllCorrect={setAllCorrect}
+          coins={coins}
         />
       )}
 

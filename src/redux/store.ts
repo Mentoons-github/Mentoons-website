@@ -24,6 +24,7 @@ import taskReducer from "./admin/task/taskSlice";
 import AdminReducer from "./admin/admin/admin";
 import employeeReducer from "./employee/employee";
 import postReducer from "./adda/postSlice";
+import dataCaptureReducer from "./employee/dataCaptureRedux/dataCaptureSlice";
 
 export const store = configureStore<{
   tasks: ReturnType<typeof taskReducer>;
@@ -51,6 +52,7 @@ export const store = configureStore<{
   admin: ReturnType<typeof AdminReducer>;
   employeeData: ReturnType<typeof employeeReducer>;
   posts: ReturnType<typeof postReducer>;
+  data_capture: ReturnType<typeof dataCaptureReducer>;
 }>({
   reducer: {
     tasks: taskReducer,
@@ -78,6 +80,7 @@ export const store = configureStore<{
     admin: AdminReducer,
     employeeData: employeeReducer,
     posts: postReducer,
+    data_capture: dataCaptureReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

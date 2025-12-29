@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  ClipboardList,
 } from "lucide-react";
 
 interface NavItem {
@@ -49,6 +50,11 @@ const navItems: NavItem[] = [
     name: "Celebrations",
     icon: <Cake className="w-5 h-5" />,
     path: "/employee/celebrations",
+  },
+  {
+    name: "Data Capture",
+    icon: <ClipboardList className="w-5 h-5" />,
+    path: "/employee/data_capture",
   },
 ];
 

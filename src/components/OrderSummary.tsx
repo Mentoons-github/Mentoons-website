@@ -13,6 +13,9 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { fetchCandyCoin, spendCandyCoin } from "@/api/game/mentoonsCoin";
+import { CandyCoins } from "@/types/adda/game/candyCoins";
+import { useStatusModal } from "@/context/adda/statusModalContext";
 // import { useNavigate } from "react-router-dom";
 
 // Define maximum discount limits per product type
@@ -25,6 +28,9 @@ const MAX_DISCOUNT_LIMITS = {
   [ProductType.ASSESSMENT]: 3, // 3 rupees max discount
   DEFAULT: 4, // Default max discount
 };
+
+const MAX_CANDY_DISCOUNT_RUPEE = 5;
+const CANDY_TO_RUPEE_RATIO = 0.75 / 1000; // ₹ per candy coin
 
 // Conversion rate: how many points = 1 rupee
 const POINTS_TO_RUPEE_RATIO = 10;
@@ -42,8 +48,74 @@ const OrderSummary: React.FC = () => {
   const { totalPoints } = useRewards();
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [coins, setCoins] = useState<CandyCoins | null>(null);
   const { redeemPoints: handleRedeemPoints, rewardPurchaseProduct } =
     useRewardActions();
+
+  const { showStatus } = useStatusModal();
+
+  const [redeemCandyCoins, setRedeemCandyCoins] = useState(0);
+  const [appliedCandyDiscount, setAppliedCandyDiscount] = useState(0);
+
+  const maxRedeemableCandyCoins = coins
+    ? Math.min(
+        coins.currentCoins,
+        MAX_CANDY_DISCOUNT_RUPEE / CANDY_TO_RUPEE_RATIO
+      )
+    : 0;
+
+  const calculateDiscountFromCandy = (coinAmount: number) => {
+    const discount = coinAmount * CANDY_TO_RUPEE_RATIO;
+    return Math.min(discount, MAX_CANDY_DISCOUNT_RUPEE);
+  };
+
+  const handleApplyCandyCoins = () => {
+    if (redeemCandyCoins <= 0) {
+      toast.error("Enter valid candy coins");
+      return;
+    }
+
+    if (!coins || redeemCandyCoins > coins.currentCoins) {
+      toast.error("Not enough Candy Coins");
+      return;
+    }
+
+    if (redeemCandyCoins > maxRedeemableCandyCoins) {
+      toast.error(
+        `You can redeem only up to ${Math.floor(maxRedeemableCandyCoins)} coins`
+      );
+      return;
+    }
+
+    const discount = calculateDiscountFromCandy(redeemCandyCoins);
+    setAppliedCandyDiscount(discount);
+    toast.success(`₹${discount.toFixed(2)} Candy Coin discount applied`);
+  };
+
+  const handleRemoveCandyDiscount = () => {
+    setRedeemCandyCoins(0);
+    setAppliedCandyDiscount(0);
+    toast.success("Candy Coin discount removed");
+  };
+
+  useEffect(() => {
+    fetchUserCandyCoins();
+  }, []);
+
+  const fetchUserCandyCoins = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetchCandyCoin(token!);
+      console.log("response data :", response);
+      setCoins(response.candyCoins);
+    } catch (error) {
+      showStatus(
+        "error",
+        (error as string) ||
+          "Error takin coins, Please try again after sometimes"
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -195,7 +267,8 @@ const OrderSummary: React.FC = () => {
     const originalTotal = productDetail
       ? productDetail.price
       : cart.totalPrice || 0;
-    return Math.max(0, originalTotal - appliedDiscount);
+
+    return Math.max(0, originalTotal - appliedDiscount - appliedCandyDiscount);
   };
 
   const handleProceedToPay = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -279,6 +352,24 @@ const OrderSummary: React.FC = () => {
           toast.success(`${redeemPoints} points redeemed successfully!`);
         } catch (error) {
           console.error("Error deducting reward points:", error);
+        }
+      }
+
+      if (redeemCandyCoins > 0) {
+        try {
+          if (!token) {
+            return;
+          }
+          await spendCandyCoin(
+            token,
+            redeemCandyCoins,
+            `Redeem coin for buy porduct : ${productId}`
+          );
+
+          toast.success(`${redeemCandyCoins} Candy Coins redeemed!`);
+        } catch (error) {
+          console.error("Candy coin deduction failed:", error);
+          toast.error("Candy coin update failed");
         }
       }
 
@@ -467,6 +558,61 @@ const OrderSummary: React.FC = () => {
           </div>
         </motion.div>
 
+        <motion.div className="p-6 mb-8 bg-white rounded-lg shadow-md">
+          <h2 className="mb-4 text-2xl font-semibold text-black">
+            Redeem Candy Coins
+          </h2>
+
+          <p className="mb-2 text-gray-600">
+            Available Candy Coins:{" "}
+            <span className="font-semibold">{coins?.currentCoins || 0}</span>
+          </p>
+
+          <p className="mb-4 text-sm text-gray-500">
+            Max Discount: ₹5 • 1000 Coins = ₹0.75
+          </p>
+
+          <div className="flex items-center gap-2 mb-4">
+            <input
+              type="number"
+              min="0"
+              max={Math.floor(maxRedeemableCandyCoins)}
+              value={redeemCandyCoins}
+              onChange={(e) =>
+                setRedeemCandyCoins(
+                  Math.min(+e.target.value || 0, maxRedeemableCandyCoins)
+                )
+              }
+              disabled={appliedCandyDiscount > 0}
+              className="w-full px-4 py-2 border rounded-lg"
+              placeholder="Enter candy coins"
+            />
+
+            {appliedCandyDiscount === 0 ? (
+              <button
+                onClick={handleApplyCandyCoins}
+                className="px-4 py-2 text-white rounded-lg bg-primary"
+              >
+                Apply
+              </button>
+            ) : (
+              <button
+                onClick={handleRemoveCandyDiscount}
+                className="px-4 py-2 text-white bg-red-500 rounded-lg"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          {appliedCandyDiscount > 0 && (
+            <div className="p-3 text-green-700 bg-green-100 rounded-md">
+              ₹{appliedCandyDiscount.toFixed(2)} discount using{" "}
+              {redeemCandyCoins} coins
+            </div>
+          )}
+        </motion.div>
+
         <motion.div
           className="p-6 mb-8 bg-white rounded-lg shadow-md"
           variants={itemVariants}
@@ -487,6 +633,13 @@ const OrderSummary: React.FC = () => {
                 <span>-₹ {appliedDiscount.toFixed(2)}</span>
               </div>
             )}
+            {appliedCandyDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Candy Coin Discount:</span>
+                <span>-₹ {appliedCandyDiscount.toFixed(2)}</span>
+              </div>
+            )}
+
             <div className="flex justify-between pt-2 mt-2 text-xl font-bold border-t border-gray-200">
               <span>Total:</span>
               <span>₹ {calculateFinalAmount().toFixed(2)}</span>
