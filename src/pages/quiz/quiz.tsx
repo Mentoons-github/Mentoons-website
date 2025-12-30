@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { generateIconPositions } from "@/utils/assessment/quizAndAssessment";
 import QuizResult from "@/components/assessment/quiz/quisResult";
 import QuizQuestion from "@/components/assessment/quiz/quizQuestions";
@@ -8,16 +8,21 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { QuizData } from "@/types/adda/quiz";
+import QuizSeconds from "@/components/adda/quiz/quizSeconds";
 
 const STORAGE_KEY = (id: string) => `quiz_${id}_state`;
 
 const QuizPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const [searchParams] = useSearchParams();
+  const hasQuizParam = searchParams.has("quiz");
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
   const { user } = useUser();
+  console.log(hasQuizParam);
+
   const [quiz, setQuiz] = useState<QuizData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasQuizParam);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
@@ -28,16 +33,20 @@ const QuizPage: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false);
 
   useEffect(() => {
+    if (hasQuizParam) {
+      setLoading(false);
+      return;
+    }
+
+    if (!categoryId) return;
+
     const fetchQuiz = async () => {
-      if (!categoryId) return;
       try {
         const token = await getToken();
         const response = await axios.get(
           `${import.meta.env.VITE_PROD_URL}/quiz/${categoryId}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         setQuiz(response.data.data);
@@ -48,30 +57,12 @@ const QuizPage: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchQuiz();
-  }, []);
-
-  const TOTAL_QUESTIONS = quiz?.questions.length || 0;
-  const FREE_QUESTION_LIMIT = 5;
+  }, [categoryId, hasQuizParam, getToken]);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get("status");
-    const message = urlParams.get("message");
-    if (status && message) {
-      toast[status.toLowerCase() === "success" ? "success" : "error"](message);
-      if (status.toLowerCase() === "success") {
-        setHasPaid(true);
-        setShowPaymentModal(false);
-      } else {
-        setShowPaymentModal(true);
-        setIsPaying(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!categoryId || !quiz) return;
+    if (hasQuizParam || !categoryId || !quiz) return;
     const key = STORAGE_KEY(categoryId);
     const raw = localStorage.getItem(key);
     if (raw) {
@@ -80,26 +71,27 @@ const QuizPage: React.FC = () => {
       setCurrentQuestion(q ?? 0);
       setHasPaid(p ?? false);
     }
-  }, [categoryId, quiz]);
+  }, [categoryId, quiz, hasQuizParam]);
 
   useEffect(() => {
-    if (!categoryId || !quiz) return;
+    if (hasQuizParam || !categoryId || !quiz) return;
     const key = STORAGE_KEY(categoryId);
     localStorage.setItem(
       key,
       JSON.stringify({ answers, currentQuestion, hasPaid })
     );
-  }, [answers, currentQuestion, hasPaid, categoryId]);
+  }, [answers, currentQuestion, hasPaid, categoryId, hasQuizParam]);
 
   useEffect(() => {
-    if (quiz && quiz.questions.length > 0) {
-      setProgress(
-        ((currentQuestion + 1) /
-          (hasPaid ? TOTAL_QUESTIONS : FREE_QUESTION_LIMIT)) *
-          100
-      );
-    }
-  }, [currentQuestion, quiz, hasPaid, TOTAL_QUESTIONS]);
+    if (!quiz || hasQuizParam) return;
+    const TOTAL_QUESTIONS = quiz.questions.length;
+    const FREE_QUESTION_LIMIT = 5;
+    setProgress(
+      ((currentQuestion + 1) /
+        (hasPaid ? TOTAL_QUESTIONS : FREE_QUESTION_LIMIT)) *
+        100
+    );
+  }, [currentQuestion, quiz, hasPaid, hasQuizParam]);
 
   if (loading) {
     return (
@@ -107,6 +99,10 @@ const QuizPage: React.FC = () => {
         <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
       </div>
     );
+  }
+
+  if (hasQuizParam) {
+    return <QuizSeconds />;
   }
 
   if (!quiz || !categoryId) {
@@ -124,6 +120,9 @@ const QuizPage: React.FC = () => {
     );
   }
 
+  const TOTAL_QUESTIONS = quiz.questions.length;
+  const FREE_QUESTION_LIMIT = 5;
+
   const handleAnswerSelect = (score: number) => {
     setAnswers((prev) => ({
       ...prev,
@@ -137,7 +136,7 @@ const QuizPage: React.FC = () => {
 
   const handleNext = () => {
     const isLastFreeQuestion = currentQuestion === FREE_QUESTION_LIMIT - 1;
-    const isLastQuestionOverall = currentQuestion === quiz.questions.length - 1;
+    const isLastQuestionOverall = currentQuestion === TOTAL_QUESTIONS - 1;
 
     if (isLastFreeQuestion && !hasPaid) {
       setShowPaymentModal(true);
@@ -149,7 +148,7 @@ const QuizPage: React.FC = () => {
       return;
     }
 
-    if (currentQuestion < quiz.questions.length - 1) {
+    if (currentQuestion < TOTAL_QUESTIONS - 1) {
       setCurrentQuestion((prev) => prev + 1);
     }
   };

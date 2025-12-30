@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 export interface Category {
   _id: string;
   category: string;
+  subCategory?: string[];
 }
 
 const QuizHome = () => {

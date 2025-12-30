@@ -2,7 +2,6 @@ import { Category } from "@/pages/quiz/quizHome";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Category descriptions and color themes
 const categoryData: Record<
   string,
   { description: string; gradient: string; accent: string; icon: string }
