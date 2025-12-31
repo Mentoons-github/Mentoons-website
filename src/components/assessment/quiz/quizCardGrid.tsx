@@ -13,9 +13,12 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
+  Music,
+  Trophy,
 } from "lucide-react";
 import { Category } from "@/pages/quiz/quizHome";
 import { QUIZ_DATA_GAME } from "@/constant/adda/game/quiz";
+import { COLOR_SCHEME } from "@/constant/adda/quiz";
 
 const fadeContainer = {
   hidden: { opacity: 0 },
@@ -33,39 +36,6 @@ const fadeItem = {
     transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
-
-const colorSchemes = [
-  {
-    bgGradient: "from-purple-600 via-purple-500 to-pink-500",
-    shadow: "rgba(168,85,247,0.4)",
-    glow: "rgba(168,85,247,0.3)",
-  },
-  {
-    bgGradient: "from-blue-600 via-blue-500 to-cyan-500",
-    shadow: "rgba(59,130,246,0.4)",
-    glow: "rgba(59,130,246,0.3)",
-  },
-  {
-    bgGradient: "from-emerald-600 via-emerald-500 to-teal-500",
-    shadow: "rgba(16,185,129,0.4)",
-    glow: "rgba(16,185,129,0.3)",
-  },
-  {
-    bgGradient: "from-orange-600 via-orange-500 to-amber-500",
-    shadow: "rgba(249,115,22,0.4)",
-    glow: "rgba(249,115,22,0.3)",
-  },
-  {
-    bgGradient: "from-rose-600 via-rose-500 to-pink-500",
-    shadow: "rgba(244,63,94,0.4)",
-    glow: "rgba(244,63,94,0.3)",
-  },
-  {
-    bgGradient: "from-indigo-600 via-indigo-500 to-purple-500",
-    shadow: "rgba(99,102,241,0.4)",
-    glow: "rgba(99,102,241,0.3)",
-  },
-];
 
 interface QuizCardGridProps {
   categories: Category[];
@@ -86,6 +56,7 @@ const QuizCardGrid = ({ categories }: QuizCardGridProps) => {
 
   const getCategoryIcon = (categoryName: string) => {
     const name = categoryName.toLowerCase();
+    console.log(name);
     if (name.includes("logo") || name.includes("guess"))
       return <Dice6 className="w-16 h-16" />;
     if (name.includes("social") || name.includes("mobile"))
@@ -95,6 +66,9 @@ const QuizCardGrid = ({ categories }: QuizCardGridProps) => {
     if (name.includes("tech") || name.includes("software"))
       return <Briefcase className="w-16 h-16" />;
     if (name.includes("entertainment")) return <Tv className="w-16 h-16" />;
+    if (name.includes("music")) return <Music className="w-16 h-16" />;
+    if (name.includes("gambling")) return <Dice6 className="w-16 h-16" />;
+    if (name.includes("performance")) return <Trophy className="w-16 h-16" />;
     return <HelpCircle className="w-16 h-16" />;
   };
 
@@ -187,7 +161,7 @@ const QuizCardGrid = ({ categories }: QuizCardGridProps) => {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
         {allCategories.map((category, index) => {
-          const scheme = colorSchemes[index % colorSchemes.length];
+          const scheme = COLOR_SCHEME[index % COLOR_SCHEME.length];
           const isFrontendCategory = frontendId.includes(category._id);
           const isExpanded = expandedIndex === index;
           const hasSubcategories =

@@ -4,6 +4,7 @@ import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { QUIZ_DATA_GAME } from "@/constant/adda/game/quiz";
 
 export interface Category {
   _id: string;
@@ -29,7 +30,12 @@ const QuizHome = () => {
             },
           }
         );
-        setCategories(response.data.categories || []);
+
+        const frontendCategories = QUIZ_DATA_GAME.map((cat) => ({
+          category: cat.title,
+          _id: cat._id,
+        }));
+        setCategories([...response.data.categories, ...frontendCategories]);
       } catch (error: any) {
         showStatus(
           "error",
