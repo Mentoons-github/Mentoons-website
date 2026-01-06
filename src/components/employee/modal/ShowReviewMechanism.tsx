@@ -23,6 +23,7 @@ import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import PrintableReview from "../dataCaptureComponents/ReviewMechanism/ShowReviewMechanism/PrintableReview";
 import axios from "axios";
+import { BsThreeDots } from "react-icons/bs";
 
 const ShowReviewMechanism = ({
   onClose,
@@ -32,6 +33,7 @@ const ShowReviewMechanism = ({
   singleData: Details;
 }) => {
   const [isEdit, setIsEdit] = useState(false);
+  const [clickMore, setClickMore] = useState(false);
   const { getToken } = useAuth();
   const dispatch = useAppDispatch();
   const { message, error, success } = useAppSelector(
@@ -95,7 +97,7 @@ const ShowReviewMechanism = ({
   return (
     <div
       onClick={() => onClose()}
-      className="fixed inset-0 bg-black/70 flex justify-center backdrop:blur-md items-center p-4 z-50 transition-opacity duration-300"
+      className="fixed inset-0 bg-black/70 flex justify-center backdrop:blur-md items-center p-4 md:p-4 z-50 transition-opacity duration-300"
     >
       <style>
         {`
@@ -158,27 +160,59 @@ const ShowReviewMechanism = ({
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white h-[650px] rounded-lg relative shadow-xl w-full max-w-3xl transform transition-all duration-300 ease-in-out overflow-auto"
+        className={`bg-white h-[650px] rounded-lg relative shadow-xl w-full max-w-3xl transform transition-all duration-300 ease-in-out overflow-auto ${
+          clickMore && "overflow-y-hidden"
+        }`}
       >
         <div className=" absolute top-3 right-3 flex justify-end mb-2 z-50">
           <button className="text-sm text-gray-500" onClick={() => onClose()}>
             <X className="text-orange-500 hover:text-orange-300" />
           </button>
         </div>
+
+        {clickMore && (
+          <div
+            onClick={() => setClickMore(false)}
+            className="absolute inset-0 z-40 bg-black/50 "
+          />
+        )}
+
         {!isEdit && (
-          <div className="mt-5 flex justify-end gap-3 p-5">
-            <button
-              className="py-2 px-3 bg-orange-500 rounded-md"
-              onClick={() => setIsEdit(true)}
-            >
-              Edit
-            </button>
-            <button
-              className="py-2 px-3 bg-orange-500 rounded-md"
-              onClick={handlePrint}
-            >
-              Print Details
-            </button>
+          <div className="p-4 flex justify-end gap-2 mr-10 no-print relative">
+            <BsThreeDots
+              size={20}
+              onClick={() => setClickMore(true)}
+              className="text-gray-400 hover:text-orange-500"
+            />
+
+            {clickMore && (
+              <div className="absolute top-5 flex flex-col gap-3 bg-gray-700 text-white z-50 rounded-md px-4 pb-4 pt-10 w-56">
+                <button
+                  onClick={() => setClickMore(false)}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-orange-500"
+                >
+                  <X />
+                </button>
+                <button
+                  onClick={() => {
+                    handlePrint();
+                    setClickMore(false);
+                  }}
+                  className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
+                >
+                  Print Details
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEdit(true);
+                    setClickMore(false);
+                  }}
+                  className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
           </div>
         )}
         {isEdit ? (
@@ -254,7 +288,7 @@ const ShowReviewMechanism = ({
             }}
           >
             {({ setFieldValue }) => (
-              <Form className="space-y-6 p-4">
+              <Form className="space-y-6  md:p-4">
                 <ReviewMechanismSecond singleData={singleData} />
                 <ReviewMechanismThird />
                 <ReviewMechanismFourth

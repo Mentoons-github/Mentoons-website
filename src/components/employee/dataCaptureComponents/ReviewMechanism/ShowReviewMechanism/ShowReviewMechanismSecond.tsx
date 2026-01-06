@@ -28,53 +28,49 @@ const ShowReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
   }
 
   return (
-    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:!p-0 border print:!border-0">
-      <div className="w-[210mm]  bg-white px-[15mm] py-[10mm] shadow-lg print:shadow-none">
+    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:p-0">
+      {/* PAGE */}
+      <div
+        className="
+          w-full max-w-[1100px]
+          print:w-[210mm]
+          bg-white
+          px-4 sm:px-6 lg:px-10 print:px-[15mm]
+          py-6 sm:py-8 print:py-[10mm]
+          shadow-lg print:shadow-none
+        "
+      >
         {/* HEADER */}
-        <div className="border-b-2 border-gray-700 pb-6 space-y-3 text-[16px]">
-          <p className="font-semibold flex gap-2">
-            CHILD NAME:
-            <span className="w-[60mm] border-b border-dashed border-gray-700 font-normal">
-              {review.childName}
-            </span>
-          </p>
-
-          <p className="font-semibold flex gap-2">
-            AGE:
-            <span className="w-[20mm] border-b border-dashed border-gray-700 font-normal">
-              {review.age}
-            </span>
-          </p>
-
-          <p className="font-semibold flex gap-2">
-            DATE:
-            <span className="w-[30mm] border-b border-dashed border-gray-700 font-normal">
-              {review.date}
-            </span>
-          </p>
-
-          <p className="font-semibold flex gap-2">
-            REVIEWER / THERAPIST:
-            <span className="w-[60mm] border-b border-dashed border-gray-700 font-normal">
-              {review.psychologist}
-            </span>
-          </p>
-
-          <p className="font-semibold flex gap-2">
-            STEP(S) TAKEN:
-            <span className="w-[60mm] border-b border-dashed border-gray-700 font-normal">
-              {review.stepsTaken}
-            </span>
-          </p>
+        <div className="border-b-2 border-gray-700 pb-6 space-y-3 text-sm sm:text-base print:text-[16px]">
+          {[
+            ["CHILD NAME", review.childName, "60mm"],
+            ["AGE", review.age, "20mm"],
+            ["DATE", review.date, "30mm"],
+            ["REVIEWER / THERAPIST", review.psychologist, "60mm"],
+            ["STEP(S) TAKEN", review.stepsTaken, "60mm"],
+          ].map(([label, value, width]) => (
+            <p key={label} className="font-semibold flex flex-wrap gap-2">
+              {label}:
+              <span
+                className={`
+                  border-b border-dashed border-gray-700 font-normal
+                  min-w-[150px]
+                  print:w-[${width}]
+                `}
+              >
+                {value}
+              </span>
+            </p>
+          ))}
         </div>
 
         {/* PROGRESS EFFECTIVENESS */}
-        <div className="mt-7 border-b-2 border-gray-700 pb-12">
-          <h2 className="font-semibold text-xl">
+        <div className="mt-8 border-b-2 border-gray-700 pb-10">
+          <h2 className="font-semibold text-lg sm:text-xl">
             1. PROGRESS EFFECTIVENESS RATING
           </h2>
 
-          <div className="space-y-4 mt-4 ml-5">
+          <div className="space-y-4 mt-4 ml-2 sm:ml-5">
             {[
               "ACTION TAKEN IS WORKING WELL",
               "ACTION TAKEN IS WORKING 50/50 (PARTIAL EFFECTIVENESS)",
@@ -86,7 +82,9 @@ const ShowReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
                 ) : (
                   <FaRegSquare className="text-gray-500" size={18} />
                 )}
-                <span className="text-lg font-semibold">{label}</span>
+                <span className="font-semibold text-sm sm:text-base">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -94,55 +92,60 @@ const ShowReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
 
         {/* OBSERVABLE PROGRESS */}
         <div className="mt-10">
-          <h2 className="font-semibold text-xl">
+          <h2 className="font-semibold text-lg sm:text-xl">
             2. OBSERVABLE PROGRESS INDICATORS
           </h2>
 
-          <table className="w-full border-collapse border-2 border-gray-700 text-base mt-8">
-            <thead>
-              <tr>
-                <th className="border-2 border-gray-700 p-3 text-left">
-                  Area Observed
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  Positive Change
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  No Change
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  Negative Change
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {areas.map(({ label, key }) => (
-                <tr key={key}>
-                  <td className="border-2 border-gray-700 p-4">{label}</td>
-
-                  {["Positive Change", "No Change", "Negative Change"].map(
-                    (val) => (
-                      <td
-                        key={val}
-                        className="border-2 border-gray-700 p-4 text-center"
-                      >
-                        {review.observableProgressIndicators?.[key] === val ? (
-                          <FaRegSquareCheck className="text-orange-600 mx-auto" />
-                        ) : (
-                          <FaRegSquare className="mx-auto text-gray-500" />
-                        )}
-                      </td>
-                    )
-                  )}
+          {/* TABLE WRAPPER (mobile scroll) */}
+          <div className="overflow-x-auto mt-6">
+            <table className="min-w-[650px] w-full border-collapse border-2 border-gray-700 text-sm sm:text-base">
+              <thead>
+                <tr>
+                  <th className="border-2 border-gray-700 p-3 text-left">
+                    Area Observed
+                  </th>
+                  <th className="border-2 border-gray-700 p-3 text-center">
+                    Positive Change
+                  </th>
+                  <th className="border-2 border-gray-700 p-3 text-center">
+                    No Change
+                  </th>
+                  <th className="border-2 border-gray-700 p-3 text-center">
+                    Negative Change
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {areas.map(({ label, key }) => (
+                  <tr key={key}>
+                    <td className="border-2 border-gray-700 p-3">
+                      {label}
+                    </td>
+
+                    {["Positive Change", "No Change", "Negative Change"].map(
+                      (val) => (
+                        <td
+                          key={val}
+                          className="border-2 border-gray-700 p-3 text-center"
+                        >
+                          {review.observableProgressIndicators?.[key] === val ? (
+                            <FaRegSquareCheck className="text-orange-600 mx-auto" />
+                          ) : (
+                            <FaRegSquare className="text-gray-500 mx-auto" />
+                          )}
+                        </td>
+                      )
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* NOTES */}
-          <div className="mt-10 gap-2 flex">
-            <p className="font-semibold mb-2">NOTES:</p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <p className="font-semibold whitespace-nowrap">NOTES:</p>
             <div className="border w-full p-3 rounded-md min-h-[100px]">
               {review.observableProgressIndicators?.notes}
             </div>

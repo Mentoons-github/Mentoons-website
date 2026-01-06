@@ -40,12 +40,12 @@ const ChatPage = () => {
   const lastMessage = conversationMessages[conversationMessages.length - 1];
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden p-2 sm:p-4 md:p-6">
+    <div className="flex h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden ">
       {/* Friends list: Full width on mobile when no user is selected */}
       <div
         className={`${
           selectedUser ? "hidden" : "block"
-        } md:block w-full md:w-80 xl:w-96 h-full md:border-r md:border-gray-200/50 md:bg-white/80 md:backdrop-blur-lg`}
+        } lg:block w-full lg:w-80 xl:w-96 h-full lg:border-r lg:border-gray-200/50 lg:bg-white/80 lg:backdrop-blur-lg`}
       >
         <Friends lastMessage={lastMessage} />
       </div>
@@ -54,22 +54,11 @@ const ChatPage = () => {
       <div
         className={`${
           selectedUser ? "block" : "hidden"
-        } md:block w-full md:flex-1 h-full md:bg-white/80 md:backdrop-blur-lg md:border-l md:border-white/20`}
+        } lg:block w-full lg:flex-1 h-full lg:bg-white/80 lg:backdrop-blur-lg lg:border-l md:border-white/20`}
       >
         {selectedUser ? (
           <div className="flex flex-col h-full">
-            <div className="md:hidden flex items-center p-3 sm:p-4 border-b border-gray-200">
-              <button
-                onClick={() => navigate("/chat")}
-                className="p-2 text-gray-600 hover:text-indigo-500 transition-colors"
-                aria-label="Back to friends list"
-              >
-                <FaArrowLeft size={18} />
-              </button>
-              <h2 className="ml-2 text-base sm:text-lg font-semibold text-gray-800">
-                Chat
-              </h2>
-            </div>
+            
             <Chat
               selectedUser={selectedUser}
               conversationMessages={conversationMessages}

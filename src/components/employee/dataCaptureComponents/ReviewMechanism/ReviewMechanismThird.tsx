@@ -26,7 +26,7 @@ const SquareCheckbox = ({
         ) : (
           <FaRegSquare className="text-gray-700" size={18} />
         )}
-        <span className="text-lg font-semibold">{label}</span>
+        <span className=" md:text-lg font-semibold">{label}</span>
       </div>
 
       {/* Inline input */}
@@ -58,21 +58,21 @@ const ReviewMechanismThird = () => {
 
   return (
     <div className="flex justify-center bg-gray-100 print:bg-white p-2 border">
-      <div className="w-[210mm] min-h-[297mm] bg-white px-[15mm] py-[10mm] shadow-lg print:shadow-none">
+      <div className="w-full max-w-[210mm] min-h-[297mm] bg-white px-4 md:px-[15mm] py-[10mm] shadow-lg print:shadow-none">
         {/* SECTION A */}
         <div className="border-b-2 border-gray-700 pb-8">
-          <h2 className="font-semibold text-xl mb-2">
+          <h2 className="font-semibold text-lg md:text-xl mb-2">
             3. REASONS WHY THE INTERVENTION IS / IS NOT WORKING
           </h2>
 
-          <p className="text-lg ml-5 mb-">
+          <p className=" md:text-lg ml-2 md:ml-5 mb-">
             A. FACTORS RELATED TO MENTORS / INTERVENTION PROVIDER
           </p>
-          <p className="text-base ml-5 mb-5 flex gap-2">
+          <p className="text-sm ml-2 md:ml-5 mb-5 flex gap-2">
             (<Check /> Tick all that apply and add remarks)
           </p>
 
-          <div className="space-y-4 ml-5">
+          <div className="space-y-4 ml-2 md:ml-5">
             {[
               "INTERVENTION NOT DELIVERED CONSISTENTLY",
               "METHOD NOT AGE-APPROPRIATE",
@@ -136,7 +136,7 @@ const ReviewMechanismThird = () => {
               </p>
             )}
 
-          <div className="mt-6 flex gap-2 ml-5">
+          <div className="mt-6 md:flex gap-2 ml-2 md:ml-5">
             <label className="font-semibold text-base">REMARKS:</label>
             <textarea
               rows={3}
@@ -174,12 +174,12 @@ const ReviewMechanismThird = () => {
 
         {/* SECTION B */}
         <div className="mt-4">
-          <p className="text-lg ml-5 mb-">B. FACTORS RELATED TO THE CHILD</p>
-          <p className="text-base ml-5 mb-5 flex gap-2">
+          <p className="text-lg ml-2 md:ml-5 mb-">B. FACTORS RELATED TO THE CHILD</p>
+          <p className="text-base ml-2 md:ml-5 mb-5 flex gap-2">
             (<Check /> Tick all that apply and add remarks)
           </p>
 
-          <div className="space-y-4 ml-5">
+          <div className="space-y-4 ml-2 md:ml-5">
             {[
               "LOW MOTIVATION OR RESISTANCE",
               "INCONSISTENT PARTICIPATION",
@@ -235,7 +235,7 @@ const ReviewMechanismThird = () => {
               </p>
             )}
 
-          <div className="mt-6 flex gap-2 ml-5">
+          <div className="mt-6 md:flex gap-2 ml-2 md:ml-5">
             <label className="font-semibold text-base">REMARKS:</label>
             <textarea
               rows={3}

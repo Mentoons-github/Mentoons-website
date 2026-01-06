@@ -29,7 +29,7 @@ const SquareCheckbox = ({
         ) : (
           <FaRegSquare className="text-gray-700" size={18} />
         )}
-        <span className="text-lg font-semibold">{label}</span>
+        <span className=" md:text-lg font-semibold">{label}</span>
       </div>
 
       {/* Inline input */}
@@ -52,10 +52,10 @@ const ReviewMechanismFourth = ({ uploadFile }: Props) => {
 
   return (
     <div className="flex justify-center bg-gray-100 print:bg-white p-2 border">
-      <div className="w-[210mm] min-h-[297mm] bg-white px-[15mm] py-[10mm] shadow-lg print:shadow-none">
+      <div className="w-[210mm] min-h-[297mm] bg-white px-4 md:px-[15mm] py-[10mm] shadow-lg print:shadow-none">
         {/* SECTION A */}
         <div className="border-b-2 border-gray-700 pb-8">
-          <h2 className="font-semibold text-xl mb-2">
+          <h2 className="font-semibold text-lg md:text-xl md:mb-2">
             4. OVERALL EVALUATION SUMMARY
           </h2>
 
@@ -84,11 +84,11 @@ const ReviewMechanismFourth = ({ uploadFile }: Props) => {
 
         {/* SECTION B */}
         <div className="mt-4">
-          <h2 className="font-semibold text-xl mb-4">
+          <h2 className="font-semibold text-lg md:text-xl mb-4">
             5. ACTION PLAN / NEXT STEPS
           </h2>
 
-          <div className="space-y-6 ml-5">
+          <div className="space-y-6 ml-2 md:ml-5">
             {[
               "CONTINUE INTERVENTION AS IS",
               "MODIFY INTERVENTION APPROACH",
@@ -119,7 +119,7 @@ const ReviewMechanismFourth = ({ uploadFile }: Props) => {
           )}
         </div>
         <div className="mt-6 ">
-          <label className="font-semibold text-xl">
+          <label className="font-semibold text-lg md:text-xl">
             PLANED CHANGES / RECOMMENDATIONS:
           </label>
           <textarea
@@ -144,21 +144,30 @@ const ReviewMechanismFourth = ({ uploadFile }: Props) => {
             </p>
           )}
 
-        <div className="space-y-3 text-[16px] mt-16">
-          <div className="flex items-center gap-4">
-            <span className="font-semibold">REVIEWER SIGNATURE:</span>
+        <div className="space-y-4 text-[16px] mt-16">
+          {/* SIGNATURE */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <span className="font-semibold whitespace-nowrap">
+              REVIEWER SIGNATURE:
+            </span>
 
-            {/* Signature Preview */}
-            {values.signature ? (
+            {/* Signature Preview / Placeholder */}
+            {values?.signature ? (
               <img
                 src={values.signature}
                 alt="Signature"
-                className="w-[40mm] h-[20mm] object-contain"
+                className="
+          h-[18mm]
+          w-auto
+          max-w-[160px]
+          object-contain
+        "
               />
             ) : (
-              <div className="w-[40mm] border-b border-dashed border-gray-700" />
+              <div className="print:w-[40mm] w-full sm:w-[160px] border-b border-dashed border-gray-700" />
             )}
 
+            {/* Hidden File Input */}
             <input
               type="file"
               accept="image/*"
@@ -172,17 +181,29 @@ const ReviewMechanismFourth = ({ uploadFile }: Props) => {
               }}
             />
 
+            {/* Upload Button */}
             <label
               htmlFor="signatureUpload"
-              className="px-4 py-2 bg-orange-500 text-white rounded cursor-pointer hover:bg-orange-600"
+              className="
+        inline-block
+        px-4 py-2
+        bg-orange-500
+        text-white
+        rounded
+        cursor-pointer
+        hover:bg-orange-600
+        text-sm
+        w-fit
+      "
             >
               Select Signature
             </label>
           </div>
 
-          <div className="font-semibold flex gap-2">
-            DATE:{" "}
-            <div className="w-[40mm] border-b border-dashed border-gray-700 bg-transparent focus:outline-none text-base font-normal" />
+          {/* DATE */}
+          <div className="font-semibold flex items-center gap-2">
+            <span>DATE:</span>
+            <div className="w-[40mm] border-b border-dashed border-gray-700" />
           </div>
         </div>
       </div>

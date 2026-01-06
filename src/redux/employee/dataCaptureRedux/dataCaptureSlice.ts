@@ -2,10 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   addDataCaptureReviewThunk,
   createDataCaptureThunk,
+  editDataCaptureThunk,
   fetchDataCaptureThunk,
   fetchSingleDataCaptureThunk,
 } from "./dataCaptureThunk";
-import { Details } from "@/types/employee/dataCaptureTypes";
+import {
+  DataCapturePagination,
+  Details,
+} from "@/types/employee/dataCaptureTypes";
 
 type InitialState = {
   message: string;
@@ -18,6 +22,7 @@ type InitialState = {
   fetchSingleSuccess: boolean;
   data: Details[];
   singleData: Details | null;
+  pagination: DataCapturePagination | null;
 };
 
 const initialState: InitialState = {
@@ -31,6 +36,7 @@ const initialState: InitialState = {
   fethLoading: false,
   fetchSingleSuccess: false,
   fethSuccess: false,
+  pagination: null,
 };
 
 const dataCaptureSlice = createSlice({
@@ -68,6 +74,32 @@ const dataCaptureSlice = createSlice({
         state.success = false;
       })
 
+      //edit data capture
+      .addCase(editDataCaptureThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(editDataCaptureThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.message = action.payload.message;
+        state.success = action.payload.success;
+        state.singleData = action.payload.data;
+        const index = state.data.findIndex(
+          (ele) => ele._id === action.payload.data._id
+        );
+
+        if (index !== -1) {
+          state.data[index] = action.payload.data;
+        }
+      })
+      .addCase(editDataCaptureThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Faild to create data capture";
+        state.success = false;
+      })
+
       //fetch datacapture
       .addCase(fetchDataCaptureThunk.pending, (state) => {
         state.fethLoading = true;
@@ -77,7 +109,8 @@ const dataCaptureSlice = createSlice({
       .addCase(fetchDataCaptureThunk.fulfilled, (state, action) => {
         state.fethLoading = false;
         state.error = null;
-        state.data = action.payload.data;
+        state.data = action.payload.data.data;
+        state.pagination = action.payload.data.pagination;
         state.fethSuccess = action.payload.success;
       })
       .addCase(fetchDataCaptureThunk.rejected, (state, action) => {

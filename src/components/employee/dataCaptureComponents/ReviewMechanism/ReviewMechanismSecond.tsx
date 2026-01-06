@@ -7,6 +7,7 @@ import { useFormikContext } from "formik";
 import { Check } from "lucide-react";
 
 const today = new Date().toLocaleDateString("en-GB");
+
 type ProgressValue = "Positive Change" | "No Change" | "Negative Change";
 type ProgressKey =
   | "emotionalRegulation"
@@ -31,14 +32,16 @@ const SquareRadio = ({
   return (
     <div
       onClick={() => onChange(value)}
-      className="flex items-center gap-3 text-sm cursor-pointer select-none"
+      className="flex items-start gap-3 cursor-pointer select-none"
     >
       {isChecked ? (
-        <FaRegSquareCheck className="text-orange-600" size={18} />
+        <FaRegSquareCheck className="text-orange-600 mt-1" size={18} />
       ) : (
-        <FaRegSquare className="text-gray-600" size={18} />
+        <FaRegSquare className="text-gray-600 mt-1" size={18} />
       )}
-      <span className="text-lg font-semibold">{label}</span>
+      <span className="font-semibold text-sm sm:text-base print:text-lg">
+        {label}
+      </span>
     </div>
   );
 };
@@ -55,13 +58,7 @@ const ReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
   const { values, setFieldValue, errors, touched } =
     useFormikContext<ReviewMechanismFormValues>();
 
-  const indicatorKeys: ProgressKey[] = [
-    "emotionalRegulation",
-    "behaviourAtHome",
-    "behaviourAtSchool",
-    "attentionAndFocus",
-    "socialInteraction",
-  ];
+  const indicatorKeys: ProgressKey[] = areas.map((a) => a.key);
 
   const hasIndicatorError =
     touched.observableProgressIndicators &&
@@ -80,172 +77,160 @@ const ReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
   };
 
   return (
-    <div className="flex justify-center bg-gray-100 print:bg-white p-2 border">
+    <div className="flex justify-center bg-gray-100 print:bg-white p-2">
+      {/* PAGE */}
       <div
         className="
-          w-[210mm] min-h-[297mm]
+          w-full max-w-[1100px]
+          print:w-[210mm] print:min-h-[297mm]
           bg-white
-          px-[15mm] py-[10mm]
-          flex flex-col
-          shadow-lg
-          print:shadow-none
+          px-4 sm:px-6 lg:px-10 print:px-[15mm]
+          py-6 sm:py-8 print:py-[10mm]
+          shadow-lg print:shadow-none
         "
       >
-        {/* HEADER DETAILS */}
-        <div className=" border-b-2 border-gray-700 pb-6">
-          <div className="space-y-3 text-[16px]">
-            <p className="font-semibold flex gap-2">
-              CHILD NAME:{" "}
-              <span className="w-[60mm] border-b border-dashed border-gray-700 text-base font-normal">
-                {singleData.demographic.child.name}
-              </span>
-            </p>
+        {/* HEADER */}
+        <div className="border-b-2 border-gray-700 pb-6 space-y-3">
+          <p className="font-semibold text-sm sm:text-base flex flex-wrap gap-2">
+            CHILD NAME:
+            <span className="print:w-[60mm] min-w-[180px] border-b border-dashed border-gray-700 font-normal">
+              {singleData.demographic.child.name}
+            </span>
+          </p>
 
-            <p className="font-semibold flex gap-2">
-              AGE:{" "}
-              <span className="w-[20mm] border-b border-dashed border-gray-700 text-base font-normal">
-                {singleData.demographic.child.age}
-              </span>
-            </p>
+          <p className="font-semibold text-sm sm:text-base flex gap-2">
+            AGE:
+            <span className="print:w-[20mm] min-w-[60px] border-b border-dashed border-gray-700 font-normal">
+              {singleData.demographic.child.age}
+            </span>
+          </p>
 
-            <p className="font-semibold flex gap-2">
-              DATE:{" "}
-              <span className="w-[30mm] border-b border-dashed border-gray-700 text-base font-normal">
-                {singleData.reviewMechanism?.date || today}
-              </span>
-            </p>
+          <p className="font-semibold text-sm sm:text-base flex gap-2">
+            DATE:
+            <span className="print:w-[30mm] min-w-[100px] border-b border-dashed border-gray-700 font-normal">
+              {singleData.reviewMechanism?.date || today}
+            </span>
+          </p>
 
-            <p className="font-semibold flex gap-2">
-              REVIEWER / THERAPIST:{" "}
-              <span className="w-[60mm] border-b border-dashed border-gray-700 text-base font-normal">
-                {singleData.psychologist?.user.name}
-              </span>
-            </p>
-          </div>
+          <p className="font-semibold text-sm sm:text-base flex flex-wrap gap-2">
+            REVIEWER / THERAPIST:
+            <span className="print:w-[60mm] min-w-[180px] border-b border-dashed border-gray-700 font-normal">
+              {singleData.psychologist?.user.name}
+            </span>
+          </p>
 
-          <div className="mt-4 flex gap-2">
-            <p className="font-semibold mb-2 text-[16px]">STEP(S) TAKEN:</p>
-
+          {/* STEPS */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <label className="font-semibold text-sm sm:text-base">
+              STEP(S) TAKEN:
+            </label>
             <input
               type="text"
               value={values.stepsTaken}
               onChange={(e) => setFieldValue("stepsTaken", e.target.value)}
-              className={`w-[60mm] border-b border-dashed border-gray-700 bg-transparent focus:outline-none text-base font-normal ${
-                touched.stepsTaken && errors.stepsTaken && "border-red-500"
-              } `}
+              className={`
+                w-full sm:max-w-[300px] print:w-[60mm]
+                border-b border-dashed border-gray-700
+                bg-transparent focus:outline-none
+                ${touched.stepsTaken && errors.stepsTaken && "border-red-500"}
+              `}
             />
-            {touched.stepsTaken && errors.stepsTaken && (
-              <p className="text-red-500 text-xs mt-1 block">
-                *{errors.stepsTaken}
-              </p>
-            )}
           </div>
+          {touched.stepsTaken && errors.stepsTaken && (
+            <p className="text-red-500 text-xs">*{errors.stepsTaken}</p>
+          )}
         </div>
 
-        {/* PROGRESS EFFECTIVENESS */}
-        <div className="mt-7  border-b-2 border-gray-700 pb-10">
-          <h2 className="font-semibold text-xl">
+        {/* EFFECTIVENESS */}
+        <div className="mt-6 border-b-2 border-gray-700 pb-8">
+          <h2 className="font-semibold text-lg sm:text-xl">
             1. PROGRESS EFFECTIVENESS RATING
           </h2>
-          <p className="text-base mb-4 ml-5 flex gap-2">
-            (<Check />
-            Tick the most appropriate option)
+
+          <p className="text-sm sm:text-base ml-2 sm:ml-5 flex gap-2 items-center">
+            <Check size={16} /> Tick the most appropriate option
           </p>
 
-          <div className="space-y-4 ml-5">
-            <SquareRadio
-              label="ACTION TAKEN IS WORKING WELL"
-              value="ACTION TAKEN IS WORKING WELL"
-              selected={values.progressEffectivenessRating}
-              onChange={(val) =>
-                setFieldValue("progressEffectivenessRating", val)
-              }
-            />
-            <SquareRadio
-              label="ACTION TAKEN IS WORKING 50/50 (PARTIAL EFFECTIVENESS)"
-              value="ACTION TAKEN IS WORKING 50/50 (PARTIAL EFFECTIVENESS)"
-              selected={values.progressEffectivenessRating}
-              onChange={(val) =>
-                setFieldValue("progressEffectivenessRating", val)
-              }
-            />
-            <SquareRadio
-              label="ACTION TAKEN IS NOT WORKING AT ALL"
-              value="ACTION TAKEN IS NOT WORKING AT ALL"
-              selected={values.progressEffectivenessRating}
-              onChange={(val) =>
-                setFieldValue("progressEffectivenessRating", val)
-              }
-            />
+          <div className="space-y-4 ml-2 sm:ml-5 mt-4">
+            {[
+              "ACTION TAKEN IS WORKING WELL",
+              "ACTION TAKEN IS WORKING 50/50 (PARTIAL EFFECTIVENESS)",
+              "ACTION TAKEN IS NOT WORKING AT ALL",
+            ].map((opt) => (
+              <SquareRadio
+                key={opt}
+                label={opt}
+                value={opt}
+                selected={values.progressEffectivenessRating}
+                onChange={(val) =>
+                  setFieldValue("progressEffectivenessRating", val)
+                }
+              />
+            ))}
           </div>
+
           {touched.progressEffectivenessRating &&
             errors.progressEffectivenessRating && (
-              <p className="text-red-500 text-xs ">
+              <p className="text-red-500 text-xs mt-2">
                 *{errors.progressEffectivenessRating}
               </p>
             )}
         </div>
 
-        {/* OBSERVABLE PROGRESS TABLE */}
-        <div className="mt-10">
-          <h2 className="font-semibold text-xl">
+        {/* TABLE */}
+        <div className="mt-8">
+          <h2 className="font-semibold text-lg sm:text-xl">
             2. OBSERVABLE PROGRESS INDICATORS
           </h2>
-          <p className="text-base mb-4 ml-5">(Briefly note changes observed)</p>
 
-          <table className="w-full border-collapse border-2 border-gray-700 text-base">
-            <thead>
-              <tr>
-                <th className="border-2 border-gray-700 p-3 text-left">
-                  Area Observed
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  Positive Change
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  No Change
-                </th>
-                <th className="border-2 border-gray-700 p-3 text-center">
-                  Negative Change
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {areas.map(({ label, key }) => (
-                <tr key={key}>
-                  <td className="border-2 border-gray-700 p-4">{label}</td>
-
-                  {["Positive Change", "No Change", "Negative Change"].map(
-                    (val) => (
-                      <td
-                        key={val}
-                        className="border-2 border-gray-700 p-4 cursor-pointer text-center"
-                        onClick={() =>
-                          handleProgressChange(key, val as ProgressValue)
-                        }
-                      >
-                        {values.observableProgressIndicators[key] === val ? (
-                          <FaRegSquareCheck className="text-orange-600" />
-                        ) : (
-                          <FaRegSquare />
-                        )}
-                      </td>
-                    )
-                  )}
+          <div className="overflow-x-auto mt-4">
+            <table className="min-w-[620px] w-full border-2 border-gray-700 text-sm sm:text-base">
+              <thead>
+                <tr>
+                  <th className="border p-3 text-left">Area Observed</th>
+                  <th className="border p-3 text-center">Positive</th>
+                  <th className="border p-3 text-center">No Change</th>
+                  <th className="border p-3 text-center">Negative</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {areas.map(({ label, key }) => (
+                  <tr key={key}>
+                    <td className="border p-3">{label}</td>
+                    {["Positive Change", "No Change", "Negative Change"].map(
+                      (val) => (
+                        <td
+                          key={val}
+                          className="border p-3 text-center cursor-pointer"
+                          onClick={() =>
+                            handleProgressChange(key, val as ProgressValue)
+                          }
+                        >
+                          {values.observableProgressIndicators[key] === val ? (
+                            <FaRegSquareCheck className="text-orange-600 mx-auto" />
+                          ) : (
+                            <FaRegSquare className="mx-auto" />
+                          )}
+                        </td>
+                      )
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
           {hasIndicatorError && (
             <p className="text-red-500 text-xs mt-2">
               *Please select progress for all observed areas
             </p>
           )}
         </div>
-        <div className="mt-8 flex  gap-2">
-          <label className="block mb-2 font-semibold text-base">NOTES:</label>
 
+        {/* NOTES */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-2">
+          <label className="font-semibold text-sm sm:text-base">NOTES:</label>
           <textarea
             rows={3}
             value={values.observableProgressIndicators.notes}
@@ -255,20 +240,12 @@ const ReviewMechanismSecond = ({ singleData }: { singleData: Details }) => {
                 e.target.value
               )
             }
-            placeholder="Write observations here..."
-            className={`w-full p-3 border rounded-md border-gray-700 text-base resize-none bg-transparent focus:outline-none ${
-              touched.observableProgressIndicators?.notes &&
-              errors.observableProgressIndicators?.notes &&
-              "border-red-500"
-            }`}
+            className={`
+              w-full p-3 border rounded-md resize-none
+              ${errors.observableProgressIndicators?.notes && "border-red-500"}
+            `}
           />
         </div>
-        {touched.observableProgressIndicators?.notes &&
-          errors.observableProgressIndicators?.notes && (
-            <p className="text-red-500 text-xs mt-1 ">
-              *{errors.observableProgressIndicators.notes}
-            </p>
-          )}
       </div>
     </div>
   );

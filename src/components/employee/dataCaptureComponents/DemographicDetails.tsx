@@ -47,7 +47,6 @@ const DemographicDetails = ({ details, setDetails, handleNext }: Props) => {
       </h1>
 
       <form className="space-y-6">
-        {/* ================= CHILD DETAILS ================= */}
         <div className="space-y-4 border rounded-xl p-4">
           <h2 className="font-bold text-lg text-orange-600">Child Details</h2>
 
@@ -76,6 +75,11 @@ const DemographicDetails = ({ details, setDetails, handleNext }: Props) => {
                 required
                 label="Date of Birth *"
                 type="date"
+                max={
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 6))
+                    .toISOString()
+                    .split("T")[0]
+                }
                 value={child.dateOfBirth}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChange("child", "dateOfBirth", e.target.value)

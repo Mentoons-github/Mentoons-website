@@ -15,13 +15,36 @@ export const creatDataCaptureApi = async (data: Details, token: string) => {
   });
 };
 
-//fetch data capture
-export const fetchDataCaptureApi = async (token: string) => {
-  return await axios.get(`${BASE_URL}/fetch`, {
+//edit new dataCapture
+export const editDataCaptureApi = async (
+  data: Details,
+  token: string,
+  dataCaptureId: string
+) => {
+  return await axios.put(`${BASE_URL}/edit/${dataCaptureId}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+//fetch data capture
+export const fetchDataCaptureApi = async (
+  token: string,
+  sortBy: string,
+  page: number,
+  limit: number,
+  search: string,
+  order: string
+) => {
+  return await axios.get(
+    `${BASE_URL}/fetch?sortBy=${sortBy}&page=${page}&limit=${limit}&search=${search}&order=${order}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 };
 
 //fetch single data capture

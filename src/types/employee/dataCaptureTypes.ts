@@ -146,7 +146,7 @@ export interface Details {
     user: {
       name: string;
       email: string;
-      phoneNumber:string
+      phoneNumber: string;
     };
   };
   demographic: DemographicDetails;
@@ -195,6 +195,13 @@ export type ReviewMechanismFormValues = {
   };
   actionPlanOrNextSteps: string[];
   plannedChangesOrRecommendations: string;
-  signature?:string;
+  signature?: string;
   evaluationSummary: string;
 };
+
+export interface DataCapturePagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

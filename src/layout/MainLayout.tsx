@@ -19,7 +19,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const hideLayout =
     location.pathname === "/sign-up" ||
     location.pathname === "/sign-in" ||
-    location.pathname === "/chat" ||
+    location.pathname.startsWith("/chat") ||
     location.pathname === "/puzzle/play" ||
     location.pathname.startsWith("/employee") ||
     location.pathname === "/add-password" ||
@@ -28,8 +28,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const isAddaGamePage = location.pathname === "/adda";
 
-  const isChatPage = location.pathname.startsWith("/chat");
-  const showFooter = !hideLayout && !isChatPage;
+  // const isChatPage = location.pathname.startsWith("/chat");
+  const showFooter = !hideLayout;
 
   return (
     <NotificationProvider>

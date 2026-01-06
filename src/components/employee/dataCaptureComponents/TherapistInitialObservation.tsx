@@ -2,6 +2,7 @@ import { Details } from "@/types/employee/dataCaptureTypes";
 import { Input, RadioGroup, TextArea } from "./FormInputs";
 
 type Props = {
+  from?: string;
   details: Details;
   setDetails: React.Dispatch<React.SetStateAction<Details>>;
   handleSubmit: (e: React.FormEvent) => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 const TherapistInitialObservation = ({
+  from,
   details,
   setDetails,
   handleSubmit,
@@ -91,13 +93,23 @@ const TherapistInitialObservation = ({
           >
             Previous
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="py-2 px-3 bg-orange-600 rounded-md disabled:bg-slate-700"
-          >
-            {loading ? "Submitting details" : "Submit"}
-          </button>
+          {from ? (
+            <button
+              type="submit"
+              disabled={loading}
+              className="py-2 px-3 bg-orange-600 rounded-md disabled:bg-slate-700"
+            >
+              {loading ? "Saving Changes." : "Save changes"}
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading}
+              className="py-2 px-3 bg-orange-600 rounded-md disabled:bg-slate-700"
+            >
+              {loading ? "Submitting details" : "Submit"}
+            </button>
+          )}
         </div>
       </form>
     </div>

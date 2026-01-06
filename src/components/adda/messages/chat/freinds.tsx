@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
 import { FaSearch } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -136,7 +137,6 @@ const Friends: React.FC<FriendsProps> = () => {
         );
 
         setFriends(response.data.data?.friends || []);
-
       } catch (err: unknown) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Error fetching friends:", err);
@@ -173,7 +173,6 @@ const Friends: React.FC<FriendsProps> = () => {
     });
   }, [conversations, debouncedSearch, activeFilter, onlineUsers, mongoUserId]);
 
-
   const conversationFriendIds = useMemo(
     () => conversations.map((conv) => conv.friend._id),
     [conversations]
@@ -206,24 +205,31 @@ const Friends: React.FC<FriendsProps> = () => {
     console.log("Online users updated in Friends component:", onlineUsers);
   }, [onlineUsers]);
 
-
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="w-full sm:max-w-[300px] md:max-w-[350px] bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 border border-white/20 h-full"
+      className="w-full bg-white/80 backdrop-blur-lg  shadow-2xl p-4 pl-2 sm:p-6 flex flex-col gap-4 sm:gap-5 border border-white/20 h-full"
     >
-      <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
-        <FaSearch className="text-gray-400 text-sm sm:text-base" />
-        <input
-          type="text"
-          placeholder="Search chats..."
-          className="outline-none bg-transparent w-full text-xs sm:text-sm text-gray-700 placeholder-gray-400"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Search chats"
-        />
+      <div className="flex gap-3 items-center">
+        <div
+          className="p-2 pl-0 text-gray-600 hover:text-indigo-500 transition-colors "
+          onClick={() => navigate("/")}
+        >
+          <FaArrowLeft size={18} />
+        </div>
+        <div className="flex flex-1  gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50/50 rounded-xl border border-gray-200/50">
+          <FaSearch className="text-gray-400 text-sm sm:text-base" />
+          <input
+            type="text"
+            placeholder="Search chats..."
+            className="outline-none bg-transparent w-full text-xs sm:text-sm text-gray-700 placeholder-gray-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Search chats"
+          />
+        </div>
       </div>
 
       <div className="relative flex items-center gap-1 p-1 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200/30 shadow-inner">
@@ -276,7 +282,6 @@ const Friends: React.FC<FriendsProps> = () => {
         <AnimatePresence>
           {(status === "conversationLoading" || friendsLoading) && (
             <div className="text-center py-5">Loading...</div>
-
           )}
           {error && (
             <div className="text-red-500 text-center py-4 sm:py-5 text-xs sm:text-sm">
@@ -291,9 +296,10 @@ const Friends: React.FC<FriendsProps> = () => {
               </div>
             )}
           {mergedResults.map((item, index) => {
-            const isOnline = item.type === "conversation" 
-              ? isUserOnline(item.data.friend._id)
-              : isUserOnline(item.data._id);
+            const isOnline =
+              item.type === "conversation"
+                ? isUserOnline(item.data.friend._id)
+                : isUserOnline(item.data._id);
 
             return (
               <motion.div
@@ -374,7 +380,6 @@ const Friends: React.FC<FriendsProps> = () => {
                     <>
                       <span className="text-xs text-gray-400">
                         {formatMessageTime(item.data.updatedAt)}
-
                       </span>
 
                       {item.data.unreadCounts?.[mongoUserId] > 0 && (

@@ -81,7 +81,7 @@ const EmployeeSidebar = ({ showSession }: { showSession: boolean }) => {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleDrawer}
-        className="fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white md:hidden"
+        className="fixed top-4 left-4 z-40 p-2 rounded-md bg-gray-800 text-white md:hidden"
         aria-label="Open menu"
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

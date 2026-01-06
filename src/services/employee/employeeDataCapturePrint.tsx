@@ -33,10 +33,21 @@ body {
   top: 0;
 }
 
-  .print-first-page-header {
-   text-align: right;
-    display: block;
+ .print-first-page-header {
+    display: flex;              /* keep flex */
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 12px;
+  }
+
+  .print-first-page-header img {
+    width: 140px;               /* stable size for print */
+    object-fit: contain;
+  }
+
+  .print-first-page-header p {
+    margin: 0;
+    line-height: 1.4;
   }
 
 /* Headings */

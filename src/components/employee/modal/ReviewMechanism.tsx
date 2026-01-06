@@ -104,7 +104,7 @@ const ReviewMechanism = ({
           }}
         >
           {({ setFieldValue }) => (
-            <Form className="space-y-6 p-4">
+            <Form className="space-y-6 p-2 md:p-4">
               <ReviewMechanismFirst singleData={singleData} />
               <ReviewMechanismSecond singleData={singleData} />
               <ReviewMechanismThird />

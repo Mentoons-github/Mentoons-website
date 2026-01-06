@@ -9,13 +9,15 @@ const SquareCheckboxShow = ({
   checked: boolean;
 }) => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3">
       {checked ? (
-        <FaRegSquareCheck className="text-orange-600" size={18} />
+        <FaRegSquareCheck className="text-orange-600 mt-1" size={18} />
       ) : (
-        <FaRegSquare className="text-gray-700" size={18} />
+        <FaRegSquare className="text-gray-700 mt-1" size={18} />
       )}
-      <span className="text-lg font-semibold">{label}</span>
+      <span className="font-semibold text-sm sm:text-base print:text-lg">
+        {label}
+      </span>
     </div>
   );
 };
@@ -24,18 +26,30 @@ const ShowReviewMechanismFourth = ({ singleData }: { singleData: Details }) => {
   const actionPlans = singleData?.reviewMechanism?.actionPlanOrNextSteps || [];
 
   return (
-    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:!p-0 border print:!border-0">
-      <div className="w-[210mm] bg-white px-[15mm] py-[10mm] print:!py-1 shadow-lg print:shadow-none">
+    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:p-0">
+      {/* PAGE */}
+      <div
+        className="
+          w-full max-w-[1100px]
+          print:w-[210mm]
+          bg-white
+          px-4 sm:px-6 lg:px-10 print:px-[15mm]
+          py-6 sm:py-8 print:py-[10mm]
+          shadow-lg print:shadow-none
+        "
+      >
         {/* SECTION 4 */}
         <div className="border-b-2 border-gray-700 pb-8">
-          <h2 className="font-semibold text-xl mb-2">
+          <h2 className="font-semibold text-lg sm:text-xl mb-2">
             4. OVERALL EVALUATION SUMMARY
           </h2>
 
-          <p className="text-base ml-5 mb-5">(Short professional judgement)</p>
+          <p className="text-sm sm:text-base ml-2 sm:ml-5 mb-4">
+            (Short professional judgement)
+          </p>
 
-          <div className="mt-5 border rounded-md p-3 min-h-[200px]">
-            <p className="text-base whitespace-pre-wrap">
+          <div className="border rounded-md p-3 min-h-[180px]">
+            <p className="text-sm sm:text-base whitespace-pre-wrap">
               {singleData?.reviewMechanism?.evaluationSummary || "-"}
             </p>
           </div>
@@ -43,11 +57,11 @@ const ShowReviewMechanismFourth = ({ singleData }: { singleData: Details }) => {
 
         {/* SECTION 5 */}
         <div className="mt-6">
-          <h2 className="font-semibold text-xl mb-4">
+          <h2 className="font-semibold text-lg sm:text-xl mb-4">
             5. ACTION PLAN / NEXT STEPS
           </h2>
 
-          <div className="space-y-6 ml-5">
+          <div className="space-y-4 ml-2 sm:ml-5">
             {[
               "CONTINUE INTERVENTION AS IS",
               "MODIFY INTERVENTION APPROACH",
@@ -67,12 +81,12 @@ const ShowReviewMechanismFourth = ({ singleData }: { singleData: Details }) => {
 
         {/* PLANNED CHANGES */}
         <div className="mt-6">
-          <label className="font-semibold text-xl">
-            PLANED CHANGES / RECOMMENDATIONS:
+          <label className="font-semibold text-lg sm:text-xl">
+            PLANNED CHANGES / RECOMMENDATIONS:
           </label>
 
           <div className="mt-3 border rounded-md p-3 min-h-[150px]">
-            <p className="text-base whitespace-pre-wrap">
+            <p className="text-sm sm:text-base whitespace-pre-wrap">
               {singleData?.reviewMechanism?.plannedChangesOrRecommendations ||
                 "-"}
             </p>
@@ -80,23 +94,28 @@ const ShowReviewMechanismFourth = ({ singleData }: { singleData: Details }) => {
         </div>
 
         {/* SIGNATURE */}
-        <div className="space-y-3 text-[16px] mt-16">
+        <div className="mt-12 space-y-4 text-sm sm:text-base print:text-[16px]">
           <p className="font-semibold flex gap-2 items-center">
-            REVIEVER SIGNATURE:
+            REVIEWER SIGNATURE:
             {singleData.reviewMechanism?.signature ? (
               <img
-                src={singleData.reviewMechanism?.signature}
+                src={singleData.reviewMechanism.signature}
                 alt="Signature"
-                className="w-[40mm] h-[20mm] object-contain"
+                className="
+                  h-[20mm]
+                  w-auto
+                  max-w-[160px]
+                  object-contain
+                "
               />
             ) : (
-              <div className="w-[40mm] border-b border-dashed border-gray-700" />
+              <div className="print:w-[40mm] w-[160px] border-b border-dashed border-gray-700" />
             )}
           </p>
 
-          <p className="font-semibold flex gap-2">
+          <p className="font-semibold flex flex-wrap gap-2">
             DATE:
-            <span className="w-[30mm] border-b border-dashed border-gray-700 text-base font-normal">
+            <span className="print:w-[30mm] min-w-[120px] border-b border-dashed border-gray-700 font-normal">
               {singleData.reviewMechanism?.date}
             </span>
           </p>

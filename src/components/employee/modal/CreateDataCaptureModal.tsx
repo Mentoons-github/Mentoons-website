@@ -11,7 +11,10 @@ import TherapistInitialObservation from "../dataCaptureComponents/TherapistIniti
 import OtherAddictionPattern from "../dataCaptureComponents/OtherAddictionPattern";
 import { Details } from "@/types/employee/dataCaptureTypes";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { createDataCaptureThunk } from "@/redux/employee/dataCaptureRedux/dataCaptureThunk";
+import {
+  createDataCaptureThunk,
+  editDataCaptureThunk,
+} from "@/redux/employee/dataCaptureRedux/dataCaptureThunk";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { resetDataCaptureSlice } from "@/redux/employee/dataCaptureRedux/dataCaptureSlice";
@@ -23,6 +26,7 @@ import {
   demographicSchema,
   developmentalSchema,
   familyEnvironmentalSchema,
+  getEmptyDetails,
   goalsSchema,
   otherAddictionSchema,
   screenAddictionSchema,
@@ -53,7 +57,15 @@ const sidebarTabs = [
   },
 ];
 
-const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
+const CreateDataCaptureModal = ({
+  from,
+  onClose,
+  singleData,
+}: {
+  from?: string;
+  onClose: () => void;
+  singleData: Details;
+}) => {
   const dispatch = useAppDispatch();
   const { error, loading, message, success } = useAppSelector(
     (state) => state.data_capture
@@ -62,147 +74,7 @@ const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
   const [tab, setTab] = useState(1);
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [details, setDetails] = useState<Details>({
-    demographic: {
-      child: {
-        name: "",
-        age: "",
-        dateOfBirth: "",
-        gender: "",
-        languages: [],
-        adress: "",
-        economicStatus: "",
-        class: "",
-        school: "",
-        religion: "",
-        culture: "",
-        sibilings: [],
-        sibilingType: "",
-      },
-      guardians: {
-        fathersName: "",
-        fathersOccupation: "",
-        fatherscontact: "",
-        fatherIncome: "",
-        fatherPovertyLine: "",
-        mothersName: "",
-        mothersOccupation: "",
-        mothercontact: "",
-        motherIncome: "",
-        motherPovertyLine: "",
-        primaryCareGiver: "",
-        familyStructure: "",
-        familyStructureOther: "",
-        map: "",
-      },
-    },
-    developmental: {
-      speech: "",
-      motorSkills: "",
-      socialInteraction: "",
-      medicalIllness: "",
-      learningDisability: "",
-      currentMedication: "",
-      sleepPattenrn: "",
-    },
-    academic: {
-      performance: "",
-      strugglesIn: "",
-      attentionIssues: "",
-      relationship: "",
-      participation: "",
-      behaviouralConcerns: "",
-    },
-    familyEnvironmental: {
-      parentingStyle: "",
-      screenExposure: "",
-      socialInteraction: "",
-      recentLifeEvents: "",
-      fightsAtHome: "",
-    },
-    behaviouralEmotional: {
-      aggressionOrTemper: { value: "", note: "" },
-      anxietyOrWorry: { value: "", note: "" },
-      moodSwings: { value: "", note: "" },
-      withdrawalOrIsolation: { value: "", note: "" },
-      hyperactivityOrRestlessness: { value: "", note: "" },
-      lyingOrStealing: { value: "", note: "" },
-      bullyingOrGetsBullied: { value: "", note: "" },
-    },
-    ScreenAndDigitalAddication: {
-      parentPerspective: {
-        screenTime: "",
-        typeOfScreenUsage: [],
-        irritatedIfDiviceTakenAway: "",
-        sneakingPhoneUseSecretly: "",
-        impactObserved: [],
-      },
-      childPerspective: {
-        enjoyMost: "",
-        dailyScreenSpend: "",
-        fellDeviceTakeAway: "",
-        canSpendDayWithoutMobile: "",
-        hobbiesAppartFromScreens: "",
-      },
-    },
-    otherAddictionPattern: {
-      gamingAddiction: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-      youtubeOrOttBinge: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-      sugarOrJunkFoodCravings: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-      nailBaitingOrHairPulling: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-      socialMediaScrolling: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-      pornExposure: {
-        present: false,
-        frequency: "",
-        duration: "",
-        observations: "",
-      },
-    },
-    childsSelfPerception: {
-      likesThemselves: [],
-      wantToImprove: [],
-      makeThemHappy: "",
-      fearOrWorries: "",
-    },
-    goalsAndExpectations: {
-      parentsGoals: [],
-      childsGoals: [],
-    },
-    therapistInitialObservation: {
-      childBehaviourDuringSession: "",
-      reportBuildingLevel: "",
-      initialImpressionRisks: "",
-      recomentedInventionPlan: "",
-      sessionRequired: "",
-      activitiesOrModulesSuggested: "",
-      parentalGuidanceOrBoundariesNeeded: "",
-    },
-  });
+  const [details, setDetails] = useState<Details>(getEmptyDetails());
 
   const fullSchema = Yup.object({
     ...demographicSchema.fields,
@@ -229,6 +101,16 @@ const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
     }
   }, [dispatch, error, message, onClose, success]);
 
+  useEffect(() => {
+    if (from && singleData) {
+      // EDIT MODE
+      setDetails(singleData);
+    } else {
+      // CREATE MODE
+      setDetails(getEmptyDetails());
+    }
+  }, [from, singleData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -236,9 +118,19 @@ const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
       await fullSchema.validate(details, { abortEarly: false });
 
       const token = await getToken();
-      dispatch(
-        createDataCaptureThunk({ data: details, token: token as string })
-      );
+      if (from) {
+        dispatch(
+          editDataCaptureThunk({
+            data: details,
+            token: token as string,
+            dataCaptureId: singleData._id as string,
+          })
+        );
+      } else {
+        dispatch(
+          createDataCaptureThunk({ data: details, token: token as string })
+        );
+      }
     } catch (err: any) {
       if (err.inner) {
         const errorMessages = err.inner
@@ -264,14 +156,21 @@ const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
       onClick={() => onClose()}
-      className="fixed inset-0 bg-black/70 flex justify-center backdrop:blur-md items-center p-4 z-50 transition-opacity duration-300"
+      className={`fixed ${
+        !from && " bg-black/70"
+      } inset-0 flex justify-center backdrop:blur-md items-center p-4 z-50 transition-opacity duration-300`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className="bg-white h-[650px] rounded-lg relative shadow-xl w-full max-w-7xl transform transition-all duration-300 ease-in-out overflow-auto"
       >
         <div className=" absolute top-3 right-3 flex justify-end mb-2 z-50">
-          <button className="text-sm text-gray-500" onClick={() => onClose()}>
+          <button
+            className="text-sm text-gray-500"
+            onClick={() => {
+              onClose();
+            }}
+          >
             <X className="text-orange-500 hover:text-orange-300" />
           </button>
         </div>
@@ -430,6 +329,7 @@ const CreateDataCaptureModal = ({ onClose }: { onClose: () => void }) => {
             )}
             {tab === 10 && (
               <TherapistInitialObservation
+                from={from}
                 details={details}
                 setDetails={setDetails}
                 handleSubmit={handleSubmit}

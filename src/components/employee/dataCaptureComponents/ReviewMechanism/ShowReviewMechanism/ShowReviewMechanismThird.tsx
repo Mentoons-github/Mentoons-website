@@ -11,14 +11,19 @@ const SquareCheckboxView = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <div className="flex items-center gap-3 select-none">
+    <div className="flex items-start gap-3 select-none ">
       {checked ? (
-        <FaRegSquareCheck className="text-orange-600" size={18} />
+        <FaRegSquareCheck className="text-orange-600 mt-1" size={18} />
       ) : (
-        <FaRegSquare className="text-gray-700" size={18} />
+        <FaRegSquare className="text-gray-700 mt-1" size={18} />
       )}
-      <span className="text-lg font-semibold">{label}</span>
-      {checked && children}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-semibold text-sm sm:text-base print:text-lg">
+          {label}
+        </span>
+        {checked && children}
+      </div>
     </div>
   );
 };
@@ -56,20 +61,29 @@ const ShowReviewMechanismThird = ({ singleData }: { singleData: Details }) => {
   ];
 
   return (
-    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:!p-0 border print:!border-0">
-      <div className="w-[210mm] bg-white px-[15mm] py-[10mm] print:py-[3mm] shadow-lg print:shadow-none">
+    <div className="flex justify-center bg-gray-100 print:bg-white p-2 print:p-0">
+      {/* PAGE */}
+      <div
+        className="
+          w-full max-w-[1100px]
+          print:w-[210mm]
+          bg-white
+          px-4 sm:px-6 lg:px-10 print:px-[15mm]
+          py-6 sm:py-8 print:py-[10mm]
+          shadow-lg print:shadow-none
+        "
+      >
         {/* SECTION A */}
-        <div className="border-b-2 border-gray-700 pb-12">
-          <h2 className="font-semibold text-xl mb-2">
+        <div className="border-b-2 border-gray-700 pb-10">
+          <h2 className="font-semibold text-lg sm:text-xl mb-2">
             3. REASONS WHY THE INTERVENTION IS / IS NOT WORKING
           </h2>
 
-          <p className="text-lg ml-5">
+          <p className="ml-2 sm:ml-5 text-sm sm:text-base print:text-lg">
             A. FACTORS RELATED TO MENTORS / INTERVENTION PROVIDER
           </p>
 
-
-          <div className="space-y-4 ml-5 mt-4">
+          <div className="space-y-4 ml-2 sm:ml-5 mt-4">
             {providerOptions.map((item) => (
               <SquareCheckboxView
                 key={item}
@@ -79,28 +93,39 @@ const ShowReviewMechanismThird = ({ singleData }: { singleData: Details }) => {
             ))}
 
             <SquareCheckboxView
-              label="OTHERS: "
+              label="OTHERS:"
               checked={provider.reasons.includes("OTHERS_PROVIDER")}
             >
-              <span className="ml-2 w-[350px] border-b border-dashed border-gray-700 text-base">
+              <span
+                className="
+                  min-w-[150px] sm:min-w-[250px]
+                  print:w-[350px]
+                  border-b border-dashed border-gray-700
+                  text-sm sm:text-base
+                "
+              >
                 {provider.otherReason}
               </span>
             </SquareCheckboxView>
           </div>
 
-          <div className="mt-6 flex gap-2 ml-5">
-            <label className="font-semibold text-base">REMARKS:</label>
-            <div className="w-full p-3 border  rounded-md min-h-[100px]">
+          <div className="mt-6 flex flex-col sm:flex-row gap-2 ml-2 sm:ml-5">
+            <label className="font-semibold text-sm sm:text-base print:text-base">
+              REMARKS:
+            </label>
+            <div className="w-full p-3 border rounded-md min-h-[100px]">
               {provider.remarks}
             </div>
           </div>
         </div>
 
         {/* SECTION B */}
-        <div className="mt-4">
-          <p className="text-lg ml-5">B. FACTORS RELATED TO THE CHILD</p>
+        <div className="mt-6">
+          <p className="ml-2 sm:ml-5 text-sm sm:text-base print:text-lg">
+            B. FACTORS RELATED TO THE CHILD
+          </p>
 
-          <div className="space-y-4 ml-5 mt-4">
+          <div className="space-y-4 ml-2 sm:ml-5 mt-4">
             {childOptions.map((item) => (
               <SquareCheckboxView
                 key={item}
@@ -113,15 +138,24 @@ const ShowReviewMechanismThird = ({ singleData }: { singleData: Details }) => {
               label="OTHERS:"
               checked={child.reasons.includes("OTHERS_CHILD")}
             >
-              <span className="ml-2 w-[350px] border-b border-dashed border-gray-700 text-base">
+              <span
+                className="
+                  min-w-[150px] sm:min-w-[250px]
+                  print:w-[350px]
+                  border-b border-dashed border-gray-700
+                  text-sm sm:text-base
+                "
+              >
                 {child.otherReason}
               </span>
             </SquareCheckboxView>
           </div>
 
-          <div className="mt-6 flex gap-2 ml-5">
-            <label className="font-semibold text-base">REMARKS:</label>
-            <div className="w-full p-3 border  rounded-md min-h-[100px]">
+          <div className="mt-6 flex flex-col sm:flex-row gap-2 ml-2 sm:ml-5">
+            <label className="font-semibold text-sm sm:text-base print:text-base">
+              REMARKS:
+            </label>
+            <div className="w-full p-3 border rounded-md min-h-[100px]">
               {child.remarks}
             </div>
           </div>
