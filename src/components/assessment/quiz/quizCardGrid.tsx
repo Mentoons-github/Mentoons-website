@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthModal } from "@/context/adda/authModalContext";
 import { useAuth } from "@clerk/clerk-react";
+import { useAuthModal } from "@/context/adda/authModalContext";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import {
   Dice6,
@@ -11,25 +11,20 @@ import {
   Briefcase,
   Tv,
   HelpCircle,
+  ChevronDown,
+  ChevronRight,
   Music,
+  Trophy,
 } from "lucide-react";
-import { QUIZES } from "@/constant/Quizes/quizeDatas";
-import { QuizSetTypes } from "@/types/adda/quiz";
-
-interface Category {
-  _id: string;
-  category: string;
-}
-// import { Category } from "@/pages/quiz/quizHome";
+import { Category } from "@/pages/quiz/quizHome";
+import { QUIZ_DATA_GAME } from "@/constant/adda/game/quiz";
+import { COLOR_SCHEME } from "@/constant/adda/quiz";
 
 const fadeContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
   },
 };
 
@@ -38,57 +33,73 @@ const fadeItem = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
-const colorSchemes = [
-  {
-    bgGradient: "from-purple-600 via-purple-500 to-pink-500",
-    shadowColor: "rgba(168, 85, 247, 0.4)",
-    glowColor: "rgba(168, 85, 247, 0.3)",
-  },
-  {
-    bgGradient: "from-blue-600 via-blue-500 to-cyan-500",
-    shadowColor: "rgba(59, 130, 246, 0.4)",
-    glowColor: "rgba(59, 130, 246, 0.3)",
-  },
-  {
-    bgGradient: "from-emerald-600 via-emerald-500 to-teal-500",
-    shadowColor: "rgba(16, 185, 129, 0.4)",
-    glowColor: "rgba(16, 185, 129, 0.3)",
-  },
-  {
-    bgGradient: "from-orange-600 via-orange-500 to-amber-500",
-    shadowColor: "rgba(249, 115, 22, 0.4)",
-    glowColor: "rgba(249, 115, 22, 0.3)",
-  },
-  {
-    bgGradient: "from-rose-600 via-rose-500 to-pink-500",
-    shadowColor: "rgba(244, 63, 94, 0.4)",
-    glowColor: "rgba(244, 63, 94, 0.3)",
-  },
-  {
-    bgGradient: "from-indigo-600 via-indigo-500 to-purple-500",
-    shadowColor: "rgba(99, 102, 241, 0.4)",
-    glowColor: "rgba(99, 102, 241, 0.3)",
-  },
-];
-
-interface QuizCardGrid {
+interface QuizCardGridProps {
   categories: Category[];
 }
 
-const QuizCardGrid = ({ categories }: QuizCardGrid) => {
+interface CategoryWithSubcategories extends Category {
+  subCategories?: { quizId: string; name: string }[];
+}
+
+const QuizCardGrid = ({ categories }: QuizCardGridProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { showStatus } = useStatusModal();
-  const [activeQuiz, setActiveQuiz] = useState<QuizSetTypes | null>(null);
+
+  const getCategoryIcon = (categoryName: string) => {
+    const name = categoryName.toLowerCase();
+    console.log(name);
+    if (name.includes("logo") || name.includes("guess"))
+      return <Dice6 className="w-16 h-16" />;
+    if (name.includes("social") || name.includes("mobile"))
+      return <Smartphone className="w-16 h-16" />;
+    if (name.includes("gaming") || name.includes("game"))
+      return <Gamepad2 className="w-16 h-16" />;
+    if (name.includes("tech") || name.includes("software"))
+      return <Briefcase className="w-16 h-16" />;
+    if (name.includes("entertainment")) return <Tv className="w-16 h-16" />;
+    if (name.includes("music")) return <Music className="w-16 h-16" />;
+    if (name.includes("gambling")) return <Dice6 className="w-16 h-16" />;
+    if (name.includes("performance")) return <Trophy className="w-16 h-16" />;
+    return <HelpCircle className="w-16 h-16" />;
+  };
+
+  const getDisplayName = (key: string) => {
+    return key
+      .split(/[\s&]+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const frontendLogoCategory: CategoryWithSubcategories[] = QUIZ_DATA_GAME.map(
+    (data) => ({
+      _id: data._id,
+      category: data.title,
+      subCategories: data.category?.map((item) => ({
+        quizId: item.quizId,
+        name: item.category,
+      })),
+    })
+  );
+
+  const frontendId = QUIZ_DATA_GAME.map((data) => data._id);
+
+  const backendCategories = categories.filter(
+    (c) => !frontendId.includes(c._id)
+  );
+
+  const allCategories: CategoryWithSubcategories[] = [
+    ...frontendLogoCategory,
+    ...backendCategories,
+  ];
 
   const handleCategoryClick = async (categoryId: string) => {
     const token = await getToken();
@@ -100,27 +111,36 @@ const QuizCardGrid = ({ categories }: QuizCardGrid) => {
       showStatus("error", "Invalid category. Please try another quiz.");
       return;
     }
-    const staticQuiz = QUIZES.find((q) => q._id === categoryId);
-    if (staticQuiz?.type?.length) {
-      setActiveQuiz(staticQuiz);
-      return;
-    }
     navigate(`/quiz/category/${categoryId}`);
   };
 
-  const getCategoryIcon = (categoryName: string) => {
-    const name = categoryName.toLowerCase();
-    if (name.includes("gambling")) return <Dice6 className="w-16 h-16" />;
-    if (name.includes("mobile")) return <Smartphone className="w-16 h-16" />;
-    if (name.includes("gaming")) return <Gamepad2 className="w-16 h-16" />;
-    if (name.includes("performance"))
-      return <Briefcase className="w-16 h-16" />;
-    if (name.includes("entertainment")) return <Tv className="w-16 h-16" />;
-    if (name.includes("music")) return <Music className="w-16 h-16" />;
-    return <HelpCircle className="w-16 h-16" />;
+  const handleSubcategoryClick = async (
+    categoryId: string,
+    quizId: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    const token = await getToken();
+    if (!token) {
+      openAuthModal("sign-in");
+      return;
+    }
+    navigate(`/quiz/category/${categoryId}?quiz=${quizId}`);
   };
 
-  if (categories.length === 0) {
+  const handleCardClick = (
+    index: number,
+    categoryId: string,
+    hasSubcategories: boolean
+  ) => {
+    if (hasSubcategories) {
+      setExpandedIndex(expandedIndex === index ? null : index);
+    } else {
+      handleCategoryClick(categoryId);
+    }
+  };
+
+  if (allCategories.length === 0) {
     return (
       <div className="relative w-full px-4 sm:px-6 lg:px-8 py-16 max-w-7xl mx-auto">
         <div className="text-center">
@@ -140,153 +160,136 @@ const QuizCardGrid = ({ categories }: QuizCardGrid) => {
         variants={fadeContainer}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
-        {[...categories, ...QUIZES].map((category, index) => {
-          const colorScheme = colorSchemes[index % colorSchemes.length];
+        {allCategories.map((category, index) => {
+          const scheme = COLOR_SCHEME[index % COLOR_SCHEME.length];
+          const isFrontendCategory = frontendId.includes(category._id);
+          const isExpanded = expandedIndex === index;
+          const hasSubcategories =
+            isFrontendCategory && !!category.subCategories?.length;
 
           return (
             <motion.div
               key={category._id}
               variants={fadeItem}
-              whileHover={{
-                scale: 1.03,
-                transition: { duration: 0.2 },
-              }}
-              whileTap={{ scale: 0.97 }}
-              onHoverStart={() => setHoveredIndex(index)}
-              onHoverEnd={() => setHoveredIndex(null)}
-              onClick={() => handleCategoryClick(category._id)}
-              className="relative cursor-pointer group"
+              layout
+              onHoverStart={() => !isExpanded && setHoveredIndex(index)}
+              onHoverEnd={() => !isExpanded && setHoveredIndex(null)}
+              className={`relative ${isExpanded ? "col-span-full" : ""}`}
             >
               <motion.div
-                className={`relative h-64 rounded-2xl overflow-hidden bg-gradient-to-br ${colorScheme.bgGradient} transition-all duration-300`}
+                layout
+                className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${
+                  scheme.bgGradient
+                } transition-all duration-300 ${
+                  isExpanded ? "min-h-[480px]" : "h-64"
+                } cursor-pointer group`}
                 style={{
                   boxShadow:
-                    hoveredIndex === index
-                      ? `0 20px 40px ${colorScheme.shadowColor}, 0 0 30px ${colorScheme.glowColor}`
-                      : `0 8px 24px ${colorScheme.shadowColor}`,
+                    hoveredIndex === index || isExpanded
+                      ? `0 20px 40px ${scheme.shadow}, 0 0 30px ${scheme.glow}`
+                      : `0 8px 24px ${scheme.shadow}`,
                 }}
+                whileHover={!isExpanded ? { scale: 1.03 } : {}}
+                whileTap={{ scale: 0.97 }}
+                onClick={() =>
+                  handleCardClick(index, category._id, hasSubcategories)
+                }
               >
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.3),transparent)]" />
-                  <motion.div
-                    className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)]"
-                    animate={{
-                      backgroundPosition:
-                        hoveredIndex === index
-                          ? ["0% 0%", "200% 200%"]
-                          : "0% 0%",
-                    }}
-                    transition={{
-                      duration: 2,
-                      ease: "linear",
-                      repeat: hoveredIndex === index ? Infinity : 0,
-                    }}
-                    style={{ backgroundSize: "200% 200%" }}
-                  />
-                </div>
+                <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.3),transparent)]" />
 
-                <div className="relative z-10 h-full flex flex-col items-center justify-center p-6 text-center">
-                  <motion.div
-                    className="mb-4 text-white"
-                    animate={{
-                      scale: hoveredIndex === index ? [1, 1.2, 1] : 1,
-                      rotate: hoveredIndex === index ? [0, 5, -5, 0] : 0,
-                    }}
-                    transition={{
-                      duration: 0.6,
-                      ease: "easeInOut",
-                    }}
-                  >
-                    {getCategoryIcon(category.category)}
-                  </motion.div>
+                <AnimatePresence mode="wait">
+                  {!isExpanded ? (
+                    <motion.div
+                      key="collapsed"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="relative z-10 h-full flex flex-col items-center justify-center p-6 text-center"
+                    >
+                      <motion.div className="mb-5 text-white">
+                        {getCategoryIcon(category.category)}
+                      </motion.div>
 
-                  <h3 className="text-2xl font-bold text-white mb-3 drop-shadow-lg">
-                    {category.category}
-                  </h3>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 drop-shadow-lg">
+                        {category.category}
+                      </h3>
 
-                  <motion.div
-                    className="mt-auto"
-                    initial={{ opacity: 0.8, y: 0 }}
-                    animate={{
-                      opacity: hoveredIndex === index ? 1 : 0.8,
-                      y: hoveredIndex === index ? -4 : 0,
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="inline-flex items-center gap-2 text-white text-sm font-semibold bg-white/20 backdrop-blur-sm px-5 py-2.5 rounded-xl border border-white/30 shadow-lg">
-                      Start Quiz
-                      <motion.span
-                        animate={{
-                          x: hoveredIndex === index ? [0, 4, 0] : 0,
-                        }}
-                        transition={{
-                          duration: 0.6,
-                          repeat: hoveredIndex === index ? Infinity : 0,
-                        }}
-                      >
-                        →
-                      </motion.span>
-                    </div>
-                  </motion.div>
-                </div>
+                      <motion.div className="mt-auto">
+                        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-semibold shadow-lg">
+                          {hasSubcategories ? "Choose Topic" : "Start Quiz"}
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
+                      </motion.div>
 
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  initial={{ x: "-100%" }}
-                  animate={{
-                    x: hoveredIndex === index ? "100%" : "-100%",
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    ease: "easeInOut",
-                  }}
-                />
+                      {hasSubcategories && (
+                        <div className="absolute top-5 right-5 text-white/80">
+                          <ChevronDown className="w-8 h-8" />
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="expanded"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="relative z-10 h-full p-8"
+                    >
+                      <div className="flex items-center justify-between mb-10">
+                        <div className="flex items-center gap-5">
+                          {getCategoryIcon(category.category)}
+                          <h3 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                            {category.category}
+                          </h3>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.15, rotate: 180 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedIndex(null);
+                          }}
+                          className="text-white/80 hover:text-white transition-colors"
+                        >
+                          <ChevronDown className="w-9 h-9 rotate-180" />
+                        </motion.button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {category.subCategories?.map((sub) => (
+                          <motion.button
+                            key={sub.quizId}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.05 }}
+                            whileHover={{ scale: 1.03, y: -3 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={(e) =>
+                              handleSubcategoryClick(
+                                category._id,
+                                sub.quizId,
+                                e
+                              )
+                            }
+                            className="bg-white/15 backdrop-blur-md border border-white/20 rounded-xl py-6 px-7 text-white font-medium text-left hover:bg-white/25 transition-all flex justify-between items-center group"
+                          >
+                            <span className="text-lg">
+                              {getDisplayName(sub.name)}
+                            </span>
+                            <ChevronRight className="w-6 h-6 opacity-70 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all" />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </motion.div>
           );
         })}
       </motion.div>
-      {activeQuiz && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          onClick={() => setActiveQuiz(null)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 20 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
-          >
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              Select Music Quiz Type
-            </h2>
-
-            <div className="space-y-3">
-              {activeQuiz.type?.map((type) => (
-                <button
-                  key={type._id}
-                  onClick={() => navigate(`/quiz/category/${type._id}`)}
-                  className="w-full py-3 px-4 rounded-xl border text-left hover:bg-gray-100 transition"
-                >
-                  🎵 {type.artists}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setActiveQuiz(null)}
-              className="mt-6 w-full py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 };

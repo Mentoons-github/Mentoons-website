@@ -22,19 +22,28 @@ export interface QuizData {
   results: ResultRange[];
 }
 
-export interface StaticTypes {
-  artists: string;
-  _id: string;
-  questions: {
-    _id: string;
-    question: string;
-    options: string[];
-    answer: string;
-  }[];
+export interface QuizOptions {
+  a: string;
+  b: string;
+  c: string;
+  d: string;
 }
 
-export interface QuizSetTypes {
-  _id: string;
+export interface QuizQuestion {
+  q: string;
+  options: QuizOptions;
+  answer: "a" | "b" | "c" | "d";
+  image?: string;
+}
+
+export interface QuizCategory {
+  quizId: string;
   category: string;
-  type: StaticTypes[];
+  questions: QuizQuestion[];
+}
+
+export interface QuizGame {
+  _id: string;
+  title: string;
+  category: QuizCategory[];
 }

@@ -18,6 +18,7 @@ import { ModalMessage } from "@/utils/enum";
 import { useSearchParams } from "react-router-dom";
 import AboutWorkshop from "@/components/Workshop/about";
 import ErrorModal from "@/components/adda/modal/error";
+import WorkshopPlan from "@/components/Workshop/plans/workshopPlan";
 
 const Workshopv2 = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -453,6 +454,7 @@ const Workshopv2 = () => {
             setDirection={setDirection}
           />
         </div>
+        <WorkshopPlan />
 
         {/* Challenges */}
         <WorkShopChallenges />

@@ -26,3 +26,21 @@ export interface WorkshopCategory {
   workshops: WorkshopFormValues[];
   subtitle: string;
 }
+
+export interface WorkshopPrice {
+  original: number;
+  introductory: number;
+  monthly: number;
+}
+
+export type WorkshopMode = "Online" | "Offline";
+
+export interface WorkshopPlan {
+  age: string;
+  duration: string;
+  mode: WorkshopMode[];
+  totalSession: number;
+  price: WorkshopPrice;
+  features: string[];
+  materials: string;
+}
