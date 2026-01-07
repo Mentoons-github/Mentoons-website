@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const Welcome = () => {
   return (
-    <div className="flex-1 flex flex-col justify-center items-center text-gray-400">
+    <div className="h-full flex flex-col justify-center items-center text-gray-400">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

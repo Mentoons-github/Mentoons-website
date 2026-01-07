@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { generateIconPositions } from "@/utils/assessment/quizAndAssessment";
 import QuizResult from "@/components/assessment/quiz/quisResult";
-import QuizQuestion from "@/components/assessment/quiz/quizQuestions";
 import { handlePayment } from "@/services/paymentService";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { QuizData } from "@/types/adda/quiz";
 import QuizSeconds from "@/components/adda/quiz/quizSeconds";
+import QuizQuestions from "@/components/assessment/quiz/QuizQuestions";
 
 const STORAGE_KEY = (id: string) => `quiz_${id}_state`;
 
@@ -31,7 +31,7 @@ const QuizPage: React.FC = () => {
   const [hasPaid, setHasPaid] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
-
+  
   useEffect(() => {
     if (hasQuizParam) {
       setLoading(false);
@@ -153,12 +153,16 @@ const QuizPage: React.FC = () => {
     }
   };
 
+
+
+
+
   const calculateResult = () => {
     const totalScore = Object.values(answers).reduce(
       (sum, score) => sum + score,
       0
     );
-    const result = quiz.results.find(
+    const result = quiz?.results?.find(
       (r) => totalScore >= r.minScore && totalScore <= r.maxScore
     );
     return result?.message || "No result found";
@@ -234,7 +238,7 @@ const QuizPage: React.FC = () => {
   if (showResults) {
     return (
       <QuizResult
-        quiz={quiz}
+        quiz={quiz as QuizData}
         answers={answers}
         result={calculateResult()}
         backgroundIcons={backgroundIcons}
@@ -245,19 +249,23 @@ const QuizPage: React.FC = () => {
 
   return (
     <div className="relative">
-      <QuizQuestion
-        quiz={quiz}
-        backgroundIcons={backgroundIcons}
-        currentQuestion={currentQuestion}
-        answers={answers}
-        progress={progress}
-        onAnswerSelect={handleAnswerSelect}
-        onNext={handleNext}
-        onPaymentPrompt={handleMockPayment}
-        hasPaid={hasPaid}
-        showPaymentModal={showPaymentModal}
-        onClosePaymentModal={handleCancelPayment}
-      />
+      {quiz && (
+        <QuizQuestions
+          quiz={quiz}
+          backgroundIcons={backgroundIcons}
+          currentQuestion={currentQuestion}
+          answers={answers}
+          progress={progress}
+          onAnswerSelect={handleAnswerSelect}
+          onNext={handleNext}
+          onPaymentPrompt={handleMockPayment}
+          hasPaid={hasPaid}
+          showPaymentModal={showPaymentModal}
+          onClosePaymentModal={handleCancelPayment}
+        />
+      )}
+
+     
 
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -293,7 +301,8 @@ const QuizPage: React.FC = () => {
               <>
                 <p className="text-gray-600 mb-6">
                   You've answered {FREE_QUESTION_LIMIT} free questions. Pay ₹9
-                  to unlock all {quiz.questions.length} questions and continue!
+                  to unlock all {quiz?.questions.length} questions and
+                  continue!
                 </p>
                 <div className="flex justify-center gap-4">
                   <button

@@ -12,6 +12,7 @@ import EmployeeProtectedRoute from "@/layout/employee/protectedRoute";
 // import JobReferralPortal from "@/pages/employee/referAndEarn/referAndEarn";
 import EmployeeProfile from "@/pages/employee/profile";
 import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
+import DataCapture from "@/pages/employee/dataCapture/dataCapture";
 
 const EmployeeRouter = () => {
   return (
@@ -34,6 +35,7 @@ const EmployeeRouter = () => {
           {/* <Route path="refer-and-earn" element={<JobReferralPortal />} /> */}
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="celebrations" element={<BirthdayCalendar />} />
+          <Route path="data_capture" element={<DataCapture />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
       </Routes>

@@ -82,7 +82,7 @@
     "react-share": "^5.2.2",
     "react-slick": "^0.30.2",
     "react-spinners": "^0.15.0",
-    "react-to-print": "^3.0.2",
+    "react-to-print": "^3.2.0",
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.29.1",
     "recharts": "^3.1.0",
