@@ -7,14 +7,12 @@ import { useState } from "react";
 import { RootState } from "@/redux/store";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import useSocket from "@/hooks/adda/useSocket";
-import { FaArrowLeft } from "react-icons/fa";
 
 const ChatPage = () => {
   const { selectedUser } = useParams();
   const { socket } = useSocket();
-  const navigate = useNavigate();
   const [messageToForward, setMessageToForward] = useState<Message | null>(
     null
   );

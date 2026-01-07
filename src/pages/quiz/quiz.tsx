@@ -32,9 +32,6 @@ const QuizPage: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   
-
- 
-
   useEffect(() => {
     if (hasQuizParam) {
       setLoading(false);

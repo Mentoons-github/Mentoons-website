@@ -149,7 +149,7 @@ const StickMaster = () => {
           score={score}
           setScore={setScore}
           setAllCorrect={setAllCorrect}
-          coins={coins}
+          coins={coins as CandyCoins}
         />
       )}
 
