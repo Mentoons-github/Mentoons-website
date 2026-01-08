@@ -4,6 +4,7 @@ import DropDown from "./nav/dropdown";
 import NavButton from "./nav/navButton";
 import { useEffect } from "react";
 import { COMMON_NAV } from "@/constant";
+import { X } from "lucide-react";
 
 const Sidebar = ({
   isOpen,
@@ -65,6 +66,10 @@ const Sidebar = ({
         isOpen ? "pointer-events-auto" : "pointer-events-none"
       } lg:hidden`}
     >
+      <X
+        className="absolute top-2 left-2 font-bold text-white"
+        onClick={() => setIsOpen(false)}
+      />
       <div className="flex flex-col items-center gap-8">
         {COMMON_NAV.map(({ id, label, url, items }) =>
           items ? (
