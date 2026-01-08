@@ -15,7 +15,7 @@ const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
   };
 
   return (
-    <div className="flex items-center justify-center p-8 md:p-20 min-h-screen">
+    <div className="flex items-center justify-center p-4 md:p-20 min-h-screen">
       <div className="w-full max-w-7xl">
         {/* Main Display Card */}
         <motion.div
@@ -23,14 +23,14 @@ const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className={`relative w-full h-[500px] rounded-3xl bg-gradient-to-br ${currentData.gradient} shadow-2xl overflow-hidden`}
+          className={`relative w-full lg:h-[500px] rounded-3xl bg-gradient-to-br ${currentData.gradient} shadow-2xl overflow-hidden`}
         >
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
           {/* Content */}
-          <div className="relative h-full flex flex-col items-center justify-center p-12 text-white">
+          <div className="relative h-full flex flex-col items-center justify-center p-4 lg:p-12 text-white">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedCategory}
@@ -38,15 +38,15 @@ const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -20, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-center space-y-6"
+                className="text-center space-y-4 lg:space-y-6"
               >
-                <div className="text-8xl mb-4 drop-shadow-2xl">
+                <div className="text-6xl md:text-8xl mb-4 drop-shadow-2xl">
                   {currentData.icon}
                 </div>
-                <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight drop-shadow-2xl">
+                <h1 className="text-3xl md:text-5xl lg:text-8xl font-extrabold tracking-tight drop-shadow-2xl">
                   {currentCategory}
                 </h1>
-                <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 max-w-3xl mx-auto">
+                <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 lg:p-6 max-w-3xl mx-auto">
                   <p className="text-xl md:text-2xl font-medium leading-relaxed text-white drop-shadow-lg px-4">
                     {currentData.description}
                   </p>
@@ -57,7 +57,7 @@ const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
         </motion.div>
 
         {/* Category Selection Pills */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 px-4">
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 ">
           {categories.map((category, index) => {
             const data =
               categoryData[category.category] ||
@@ -86,7 +86,7 @@ const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
                   }
                 `}
               >
-                <div className="relative z-10 px-6 py-4 flex flex-col items-center justify-center text-center min-w-[160px] min-h-[100px]">
+                <div className="relative z-10 lg:px-6 lg:py-4 flex flex-col items-center justify-center text-center min-w-[160px] min-h-[100px]">
                   <div className="text-3xl mb-2">{data.icon}</div>
                   <span className="font-semibold text-sm leading-tight">
                     {category.category}

@@ -20,7 +20,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -45,6 +45,16 @@ const ResumeSubmissionModal = ({
     "Failed to Submit Data",
   ];
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = "0px"; // Prevent layout shift
+
+    return () => {
+      document.body.style.overflow = "unset";
+      document.body.style.paddingRight = "0px";
+    };
+  }, []);
 
   const formik = useJobForm(async (values) => {
     setIsloading(true);
@@ -288,7 +298,7 @@ const ResumeSubmissionModal = ({
               Thank you for your application. We'll review it shortly.
             </p>
             <NavLink
-              to="/hiring"
+              to="/join-us/careers"
               className="inline-block px-4 py-2 mt-4 text-white transition bg-blue-600 rounded-lg shadow hover:bg-blue-700"
             >
               View Other Openings

@@ -82,23 +82,23 @@ const ProductNav = ({
   };
 
   return (
-    <div className="sticky top-[65px] bg-gray-100 border-b border-gray-300 shadow-sm z-50 md:hidden bg-white">
+    <div className="sticky top-[65px] border-b border-gray-300 shadow-sm z-20 md:hidden bg-white">
       <div className="px-4 py-1">
         <h3 className="text-sm font-semibold text-gray-800 mb-1">
           Shop by Age Group
         </h3>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex overflow-x-auto pb-2 scrollbar-hide">
           {ageCategories.map(({ age, label, imageUrl, gradient }) => {
             const isActive = activeCategory === age;
 
             return (
               <div
                 key={age}
-                className="flex-shrink-0 flex flex-col items-center gap-2"
+                className="flex-shrink-0 flex flex-col items-center p-2"
               >
                 <button
-                  className={`group relative w-20 h-20 rounded-2xl overflow-hidden transition-all duration-200 ${
+                  className={`group relative w-20 h-20 rounded-2xl  overflow-hidden transition-all duration-200 ${
                     isActive
                       ? "ring-2 ring-orange-500 shadow-lg"
                       : "shadow-md hover:shadow-lg"

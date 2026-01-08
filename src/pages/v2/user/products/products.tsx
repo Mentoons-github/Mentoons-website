@@ -11,7 +11,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaShoppingCart, FaFilter, FaTimes } from "react-icons/fa";
+import { FaShoppingCart, FaTimes } from "react-icons/fa";
 import { FaBolt, FaMagnifyingGlass, FaStar } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -44,7 +44,7 @@ const ProductsPage = () => {
 
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [inputValue, setInputValue] = useState(urlSearch);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // const [isFilterOpen, setIsFilterOpen] = useState(false);
   const section20Ref = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
@@ -289,7 +289,7 @@ const ProductsPage = () => {
   return (
     <div className="w-full max-w-full overflow-hidden min-h-screen">
       <div className="h-auto px-2 sm:px-4 py-6 sm:py-8 md:px-8 md:py-10 lg:px-12 lg:py-12 max-w-full">
-        <div className="max-w-full overflow-hidden">
+        <div className="max-w-full overflow-hidden mb-2">
           <ProductNav
             searchTerm={searchTerm}
             productType={productType}
@@ -298,7 +298,7 @@ const ProductsPage = () => {
           />
         </div>
 
-        <div className="relative p-3 sm:p-4 rounded-full shadow-lg mb-4 sm:mb-6 bg-white max-w-full">
+        <div className="relative p-3 sm:p-4 border rounded-full shadow-lg mb-4 sm:mb-6 bg-white max-w-full">
           <FaMagnifyingGlass className="absolute w-3 sm:w-4 h-3 sm:h-4 text-gray-400 transform -translate-y-1/2 top-1/2 left-3 sm:left-4" />
           <input
             type="text"
@@ -315,13 +315,13 @@ const ProductsPage = () => {
               <FaTimes />
             </button>
           )}
-          <button
+          {/* <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 md:hidden text-gray-600 hover:text-blue-600"
             aria-label="Toggle filters"
           >
             <FaFilter className="w-4 sm:w-5 h-4 sm:h-5" />
-          </button>
+          </button> */}
         </div>
 
         <div className="flex gap-4 sm:gap-6 w-full max-w-full overflow-hidden">
@@ -343,7 +343,7 @@ const ProductsPage = () => {
                   isInView={true}
                   selectedCategory={category}
                   setSelectedCategory={handleSelectedCategory}
-                  className="hidden md:grid w-full grid-cols-1 gap-4 sm:gap-6 mx-auto mt-8 sm:mt-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-8 md:gap-12 lg:gap-16"
+                  className="py-2 grid w-full grid-cols-5 gap-2 mx-auto mt-8 sm:mt-10  md:gap-8  lg:gap-16"
                 />
               </div>
             )}
