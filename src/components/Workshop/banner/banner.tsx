@@ -12,24 +12,6 @@ const WorkshopBanner = ({
   categories,
   onWorkshopClick,
 }: WorkshopBannerProps) => {
-  const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
-  const logos = [
-    {
-      src: "/assets/workshopv2/new/kalakrithi.png",
-      alt: "KalaKriti",
-      name: "KalaKriti",
-    },
-    {
-      src: "/assets/workshopv2/new/hasyaras-04.png",
-      alt: "Hasyaras",
-      name: "Hasyaras",
-    },
-    {
-      src: "/assets/workshopv2/new/instant katha-05.png",
-      alt: "Instant Katha",
-      name: "Instant Katha",
-    },
-  ];
   return (
     <div
       className="relative bg-orange-400 min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] xl:min-h-[82vh] flex items-center justify-center overflow-hidden border-0 outline-none"
