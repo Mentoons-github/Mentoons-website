@@ -1,5 +1,22 @@
 import { WorkshopPlan } from "@/types/workshop";
 
+export const PAYMENT_PLANS = {
+  fullPayment: {
+    label: "Full Payment",
+    description: "Pay the complete amount at the time of enrollment",
+  },
+  twoStep: {
+    label: "2-Step Payment",
+    advance: "50% on enrollment",
+    balance: "50% on the 45th day of the workshop",
+  },
+  emi: {
+    label: "EMI",
+    description: "Monthly installment option available for long-term programs",
+    note: "EMI duration varies based on course length",
+  },
+};
+
 export const COLOR_SCHEME = [
   {
     bgGradient: "from-purple-600 via-purple-500 to-pink-500",
@@ -36,6 +53,55 @@ export const COLOR_SCHEME = [
 export const WORKSHOP_PLANS: WorkshopPlan[] = [
   {
     age: "6-12",
+    duration: "1 Month",
+    mode: ["Online", "Offline"],
+    totalSession: 8,
+    price: {
+      original: 3999,
+      introductory: 2999,
+    },
+    features: [
+      "Ice-breaking, Laughter and Imagination",
+      "Art, Color & Emotions",
+      "Drama & expressive play",
+      "Music, Rhythm & Joy",
+      "Combination & Showcase",
+    ],
+    paymentOption: "fullPayment",
+    materials:
+      "Colors, drawing sheets, music tracks, storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
+  },
+  {
+    age: "6-12",
+    duration: "3 Months",
+    mode: ["Online", "Offline"],
+    totalSession: 12,
+    price: {
+      original: 10000,
+      introductory: 7129,
+      monthly: 3564.5,
+    },
+    features: [
+      "New friends introduction through fictional characters",
+      "Learning through stories, games and imagination",
+      "One-Minute word challenge",
+      "Story problem spark",
+      "Mini story creation",
+      "Voluntary Story share",
+      "Gentle Reconnect",
+      "Emotion Check-in",
+      "The Circle of Trust",
+      "Good Touch – Bad Touch (Feelings focused)",
+      "Logical Safety Thinking",
+      "The Safe Ending Story Challenge",
+      "Blog-Style Reflection & Closure",
+    ],
+    paymentOption: "twoStep",
+    materials:
+      "Activity kits, storytelling cards, games, worksheets, participation certificate",
+  },
+  {
+    age: "6-12",
     duration: "6 Months",
     mode: ["Online", "Offline"],
     totalSession: 20,
@@ -48,6 +114,7 @@ export const WORKSHOP_PLANS: WorkshopPlan[] = [
       "Revival of Ancient Values",
       "Understanding Thoughts, emotions, feeling, love",
     ],
+    paymentOption: "emi",
     materials:
       "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
   },
@@ -68,6 +135,7 @@ export const WORKSHOP_PLANS: WorkshopPlan[] = [
       "Revival of Ancient Values",
       "Understanding Thoughts, emotions, feeling, love",
     ],
+    paymentOption: "emi",
     materials:
       "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
   },
