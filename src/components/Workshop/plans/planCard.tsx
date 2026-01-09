@@ -2,7 +2,12 @@ import { CheckCircle } from "lucide-react";
 import { WorkshopPlan } from "@/types/workshop";
 import { useState } from "react";
 
-const PlanCard = ({ plan }: { plan: WorkshopPlan }) => {
+interface PlanCardProps {
+  plan: WorkshopPlan;
+  onPayClick?: (plan: WorkshopPlan) => void;
+}
+
+const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const backContent = [
@@ -96,7 +101,7 @@ const PlanCard = ({ plan }: { plan: WorkshopPlan }) => {
             style={{ perspective: "1000px" }}
           >
             <div
-              className="relative w-full transition-transform duration-700"
+              className="relative w-full h-full transition-transform duration-700"
               style={{
                 transformStyle: "preserve-3d",
                 transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
@@ -150,6 +155,45 @@ const PlanCard = ({ plan }: { plan: WorkshopPlan }) => {
             <p className="text-xs sm:text-sm text-center leading-relaxed">
               {plan.materials}
             </p>
+          </div>
+
+          <div className="space-y-2">
+            {plan.paymentOption === "fullPayment" && (
+              <div className="text-center py-1.5 bg-green-50 border border-green-200 rounded">
+                <p className="text-xs font-semibold text-green-700">
+                  FULL PAYMENT PLAN
+                </p>
+              </div>
+            )}
+
+            {plan.paymentOption === "twoStep" && (
+              <div className="text-center py-1.5 bg-blue-50 border border-blue-200 rounded">
+                <p className="text-xs font-semibold text-blue-700">
+                  TWO-STEP PAYMENT AVAILABLE
+                </p>
+              </div>
+            )}
+
+            {plan.paymentOption === "emi" && plan.price.monthly && (
+              <div className="text-center py-1.5 bg-orange-50 border border-orange-200 rounded">
+                <p className="text-xs font-semibold text-orange-700">
+                  MONTHLY EMI AVAILABLE
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                if (onPayClick) {
+                  onPayClick(plan);
+                } else {
+                  console.log("Processing payment for:", plan);
+                }
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-2.5 rounded-lg font-bold text-base hover:from-green-600 hover:to-green-800 transition-all shadow-md hover:shadow-xl"
+            >
+              Pay Now
+            </button>
           </div>
         </div>
       </div>

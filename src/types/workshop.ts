@@ -30,7 +30,7 @@ export interface WorkshopCategory {
 export interface WorkshopPrice {
   original: number;
   introductory: number;
-  monthly: number;
+  monthly?: number;
 }
 
 export type WorkshopMode = "Online" | "Offline";
@@ -42,5 +42,6 @@ export interface WorkshopPlan {
   totalSession: number;
   price: WorkshopPrice;
   features: string[];
+  paymentOption?: "fullPayment" | "twoStep" | "emi";
   materials: string;
 }

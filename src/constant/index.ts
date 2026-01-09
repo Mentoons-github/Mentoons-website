@@ -762,7 +762,7 @@ export const FOOTER_PAGELINKS = [
       {
         id: "AB_6",
         label: "Hiring",
-        url: "/hiring",
+        url: "/join-us/careers",
       },
     ],
   },

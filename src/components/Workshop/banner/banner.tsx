@@ -12,6 +12,24 @@ const WorkshopBanner = ({
   categories,
   onWorkshopClick,
 }: WorkshopBannerProps) => {
+  const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
+  const logos = [
+    {
+      src: "/assets/workshopv2/new/kalakrithi.png",
+      alt: "KalaKriti",
+      name: "KalaKriti",
+    },
+    {
+      src: "/assets/workshopv2/new/hasyaras-04.png",
+      alt: "Hasyaras",
+      name: "Hasyaras",
+    },
+    {
+      src: "/assets/workshopv2/new/instant katha-05.png",
+      alt: "Instant Katha",
+      name: "Instant Katha",
+    },
+  ];
   return (
     <div
       className="relative bg-orange-400 min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] xl:min-h-[82vh] flex items-center justify-center overflow-hidden border-0 outline-none"
@@ -188,12 +206,13 @@ const WorkshopBanner = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.2 }}
         >
-          {categories.map((category, catIndex) =>
-            category.workshops.map((workshop, workshopIndex) => {
-              const themeIndex =
-                (catIndex * category.workshops.length + workshopIndex) %
-                COLOR_THEME.length;
-              const theme = COLOR_THEME[themeIndex];
+          {categories &&
+            categories.map((category, catIndex) =>
+              category.workshops.map((workshop, workshopIndex) => {
+                const themeIndex =
+                  (catIndex * category.workshops.length + workshopIndex) %
+                  COLOR_THEME.length;
+                const theme = COLOR_THEME[themeIndex];
 
               const subheadingMap: Record<string, string> = {
                 "Music Therapy": "KalaKriti",
@@ -202,7 +221,7 @@ const WorkshopBanner = ({
                 "Laughter Therapy": "Hasyaras",
               };
 
-              const subheading = subheadingMap[workshop.workshopName] || "";
+                const subheading = subheadingMap[workshop.workshopName] || "";
 
               return (
                 <motion.button
@@ -221,44 +240,16 @@ const WorkshopBanner = ({
                     min-w-[80px] xs:min-w-[100px] sm:min-w-[120px] md:min-w-[140px] lg:min-w-[160px]
                     flex-shrink-0
                   `}
-                  initial={{ opacity: 0, y: 20, scale: 0.9, rotateX: -15 }}
-                  animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                  transition={{
-                    duration: 0.6,
-                    delay:
-                      1.4 +
-                      (catIndex * category.workshops.length + workshopIndex) *
-                        0.1,
-                    type: "spring",
-                    stiffness: 100,
-                  }}
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-                    y: -2,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <motion.div
-                    className={`absolute inset-0 bg-gradient-to-r ${theme.secondary} opacity-0`}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 opacity-0"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%", opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                  />
-                  <motion.div
-                    className={`absolute inset-0 ${theme.accent} rounded-lg xs:rounded-xl opacity-20`}
-                    animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.1, 0.2] }}
+                    initial={{ opacity: 0, y: 20, scale: 0.9, rotateX: -15 }}
+                    animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
                     transition={{
-                      duration: 2,
-                      repeat: Infinity,
+                      duration: 0.6,
                       delay:
+                        1.4 +
                         (catIndex * category.workshops.length + workshopIndex) *
-                        0.2,
+                          0.1,
+                      type: "spring",
+                      stiffness: 100,
                     }}
                   />
 
@@ -272,17 +263,11 @@ const WorkshopBanner = ({
 
                     {subheading && (
                       <motion.span
-                        className="text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs 
-                                   font-normal opacity-80 text-center leading-tight
-                                   hidden xs:block"
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.2 }}
+                        className="truncate max-w-[70px] xs:max-w-[80px] sm:max-w-[100px] md:max-w-none text-center leading-tight"
+                        whileHover={{ scale: 1.05 }}
                       >
-                        {subheading}
+                        {workshop.workshopName}
                       </motion.span>
-                    )}
-                  </span>
 
                   <motion.div
                     className={`absolute inset-0 rounded-lg xs:rounded-xl border-2 ${theme.border} opacity-0`}
@@ -298,31 +283,32 @@ const WorkshopBanner = ({
         </motion.div> */}
 
         {/* Workshop count - responsive text */}
-        {categories.reduce(
-          (count, category) => count + category.workshops.length,
-          0
-        ) > 0 && (
-          <motion.p
-            className="text-center text-white/80 text-[10px] xs:text-xs sm:text-sm md:text-base 
+        {categories &&
+          categories.reduce(
+            (count, category) => count + category.workshops.length,
+            0
+          ) > 0 && (
+            <motion.p
+              className="text-center text-white/80 text-[10px] xs:text-xs sm:text-sm md:text-base 
                        mt-3 xs:mt-4 sm:mt-6 px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1.8 }}
-          >
-            {categories.reduce(
-              (count, category) => count + category.workshops.length,
-              0
-            )}{" "}
-            Workshop
-            {categories.reduce(
-              (count, category) => count + category.workshops.length,
-              0
-            ) > 1
-              ? "s"
-              : ""}{" "}
-            Available
-          </motion.p>
-        )}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
+            >
+              {categories.reduce(
+                (count, category) => count + category.workshops.length,
+                0
+              )}{" "}
+              Workshop
+              {categories.reduce(
+                (count, category) => count + category.workshops.length,
+                0
+              ) > 1
+                ? "s"
+                : ""}{" "}
+              Available
+            </motion.p>
+          )}
       </div>
 
       {/* Wave divider - responsive height */}
