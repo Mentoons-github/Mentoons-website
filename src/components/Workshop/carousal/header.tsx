@@ -50,7 +50,6 @@ const CarouselHeader = ({
     }
   };
 
-
   const handleWorkshopClick = (index: number) => {
     const newDirection = index > currentWorkshopIndex ? 1 : -1;
     setDirection(newDirection);
@@ -78,22 +77,9 @@ const CarouselHeader = ({
       </p>
 
       {/* Workshop indicators */}
-      <div className="flex flex-wrap justify-start gap-3 mt-8">
-        {categories[currentCategoryIndex].workshops.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleWorkshopClick(index)}
-            className={`h-3 rounded-full transition-all duration-300 ${
-              currentWorkshopIndex === index
-                ? `w-12 bg-gradient-to-r ${currentTheme.primary}`
-                : "w-3 bg-slate-300 hover:bg-slate-400"
-            }`}
-          />
-        ))}
-      </div>
 
       {/* Category buttons */}
-      <div className="flex justify-start gap-3 mt-4">
+      <div className="flex justify-start gap-3 mt-8">
         {categories.map((_, index) => (
           <button
             key={index}
@@ -106,6 +92,19 @@ const CarouselHeader = ({
           >
             {categories[index].categoryName}
           </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap justify-start gap-3 mt-4">
+        {categories[currentCategoryIndex].workshops.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleWorkshopClick(index)}
+            className={`h-3 rounded-full transition-all duration-300 ${
+              currentWorkshopIndex === index
+                ? `w-12 bg-gradient-to-r ${currentTheme.primary}`
+                : "w-3 bg-slate-300 hover:bg-slate-400"
+            }`}
+          />
         ))}
       </div>
     </motion.div>
