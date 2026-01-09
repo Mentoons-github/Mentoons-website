@@ -13,7 +13,7 @@ const WorkshopBanner = ({
   categories,
   onWorkshopClick,
 }: WorkshopBannerProps) => {
-  const [hoveredLogo, setHoveredLogo] = useState(null);
+  const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
   const logos = [
     {
       src: "/assets/workshopv2/new/kalakrithi.png",
