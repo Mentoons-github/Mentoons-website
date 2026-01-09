@@ -38,3 +38,9 @@
 .custom-shape-divider-bottom-1756205904 .shape-fill {
   fill: #ffffff;
 }
+
+.custom-shape-divider-top-1756205524 svg,
+.custom-shape-divider-bottom-1756205904 svg {
+  display: block;
+  margin-bottom: -1px;
+}

@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import "./banner.css";
 import { WorkshopCategory } from "@/types";
-import { COLOR_THEME } from "@/constant/constants";
+import { WORKSHOP_TYPE_IMAGES } from "@/constant/workshops/colorTheme";
 
 interface WorkshopBannerProps {
   categories: WorkshopCategory[];
-  onWorkshopClick: (categoryIndex: number, workshopIndex: number) => void;
+  onWorkshopClick: (categoryIndex: number, workshopName: string) => void;
 }
 
 const WorkshopBanner = ({
@@ -119,8 +119,67 @@ const WorkshopBanner = ({
         >
           WORKSHOPS
         </motion.div>
-
         <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8
+             relative z-30 max-w-5xl mx-auto"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.12,
+              },
+            },
+          }}
+        >
+          {WORKSHOP_TYPE_IMAGES.map((ele, ind) => (
+            <motion.div
+              key={ele.workshop}
+              variants={{
+                hidden: { opacity: 0, y: 30, scale: 0.9 },
+                visible: { opacity: 1, y: 0, scale: 1 },
+              }}
+              whileHover={{
+                scale: 1.08,
+                rotate: 1,
+                boxShadow: "0 15px 30px rgba(0,0,0,0.25)",
+              }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 160, damping: 14 }}
+              onClick={() => onWorkshopClick(ind, ele.workshop)}
+              className="
+        cursor-pointer rounded-2xl overflow-hidden
+        bg-white/10 backdrop-blur-md
+        border border-white/20
+        p-3 sm:p-4
+        flex items-center justify-center
+        group
+      "
+            >
+              <motion.img
+                src={ele.img}
+                alt={ele.workshop}
+                className="
+          w-full h-24 sm:h-28 md:h-32
+          object-contain
+          transition-transform duration-300
+          group-hover:scale-110
+        "
+                whileHover={{ y: -4 }}
+              />
+
+              {/* subtle glow overlay */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl bg-white/10 opacity-0"
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* <motion.div
           className="flex items-center justify-center gap-2 xs:gap-3 sm:gap-4 md:gap-6 
                      mt-6 xs:mt-8 sm:mt-10 md:mt-12 
                      flex-wrap max-w-xs xs:max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 
@@ -140,7 +199,7 @@ const WorkshopBanner = ({
                 "Music Therapy": "KalaKriti",
                 "Art Therapy": "KalaKriti",
                 "Story Telling Therapy": "Instant Katha",
-                "Laughter Therapy": "Instant Katha",
+                "Laughter Therapy": "Hasyaras",
               };
 
               const subheading = subheadingMap[workshop.workshopName] || "";
@@ -148,7 +207,7 @@ const WorkshopBanner = ({
               return (
                 <motion.button
                   key={`${catIndex}-${workshopIndex}`}
-                  onClick={() => onWorkshopClick(catIndex, workshopIndex)}
+                  // onClick={() => onWorkshopClick(catIndex, workshopIndex)}
                   className={`
                     relative px-2 xs:px-3 sm:px-4 md:px-6 
                     py-2 xs:py-2.5 sm:py-3 md:py-4 
@@ -203,7 +262,6 @@ const WorkshopBanner = ({
                     }}
                   />
 
-                  {/* Workshop content - responsive text */}
                   <span className="relative z-10 flex flex-col items-center justify-center gap-0.5 xs:gap-1">
                     <motion.span
                       className="truncate max-w-[70px] xs:max-w-[80px] sm:max-w-[100px] md:max-w-none text-center leading-tight"
@@ -212,7 +270,6 @@ const WorkshopBanner = ({
                       {workshop.workshopName}
                     </motion.span>
 
-                    {/* Subheading - responsive visibility and sizing */}
                     {subheading && (
                       <motion.span
                         className="text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs 
@@ -238,7 +295,7 @@ const WorkshopBanner = ({
               );
             })
           )}
-        </motion.div>
+        </motion.div> */}
 
         {/* Workshop count - responsive text */}
         {categories.reduce(

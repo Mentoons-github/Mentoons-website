@@ -32,3 +32,22 @@ export const COLOR_THEME = [
     border: "border-gray-300",
   },
 ];
+
+export const WORKSHOP_TYPE_IMAGES = [
+  {
+    img: "/assets/workshopv2/new/kalakrithi.png",
+    workshop: "KalaKriti",
+  },
+  {
+    img: "/assets/workshopv2/new/instant katha-05.png",
+    workshop: "Instant Katha",
+  },
+  {
+    img: "/assets/workshopv2/new/hasyaras-04.png",
+    workshop: "Hasyaras",
+  },
+  {
+    img: "/assets/workshopv2/new/Swar.png",
+    workshop: "Swar",
+  },
+];

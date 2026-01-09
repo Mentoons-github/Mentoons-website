@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WorkshopCategory } from "@/types";
 import { COLOR_THEME } from "@/constant/constants";
@@ -34,11 +34,14 @@ const WorkshopInfoCarousel = ({
   const [currentWorkshopIndex, setCurrentWorkshopIndex] = useState(
     externalCurrentWorkshopIndex || 0
   );
-  const [currentAgeGroup, setCurrentAgeGroup] = useState(0);
+  const [currentAgeGroup, setCurrentAgeGroup] = useState<string>("");
   const [activeSection, setActiveSection] = useState<
-    "overview" | "ageGroups" | "whyChoose" | "services"
-  >("overview");
+    "overview" | "ageGroups" | "whyChoose" | "services" | ""
+  >("");
   const [direction, setDirection] = useState(externalDirection || 0);
+  const overviewRef = useRef<HTMLDivElement>(null);
+  const whyChooseRef = useRef<HTMLDivElement>(null);
+  const ageCategoryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
@@ -85,8 +88,8 @@ const WorkshopInfoCarousel = ({
   ]);
 
   useEffect(() => {
-    setCurrentAgeGroup(0);
-    setActiveSection("overview");
+    setCurrentAgeGroup("");
+    setActiveSection("");
   }, [currentCategoryIndex, currentWorkshopIndex]);
 
   const currentCategory = categories[currentCategoryIndex];
@@ -95,21 +98,21 @@ const WorkshopInfoCarousel = ({
 
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? "100vw" : "-100vw",
       opacity: 0,
-      scale: 0.8,
+      scale: 0.95,
     }),
     center: {
-      zIndex: 1,
       x: 0,
       opacity: 1,
       scale: 1,
+      zIndex: 1,
     },
     exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? "100vw" : "-100vw",
       opacity: 0,
-      scale: 0.8,
+      scale: 0.95,
+      zIndex: 0,
     }),
   };
 
@@ -155,6 +158,8 @@ const WorkshopInfoCarousel = ({
     if (externalSetDirection) externalSetDirection(newDirection);
   };
 
+  console.log(activeSection, "activvvv");
+
   if (!categories.length || !currentCategory?.workshops.length) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -176,7 +181,7 @@ const WorkshopInfoCarousel = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="lg:min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         <CarouselHeader
           categories={categories}
@@ -192,7 +197,7 @@ const WorkshopInfoCarousel = ({
         />
         <div className="relative">
           {categories.length > 1 && <NavigationArrows paginate={paginate} />}
-          <div className="px-4">
+          <div className="md:px-4">
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={`${currentCategoryIndex}-${currentWorkshopIndex}`}
@@ -213,6 +218,11 @@ const WorkshopInfoCarousel = ({
                   currentTheme={currentTheme}
                   activeSection={activeSection}
                   setActiveSection={setActiveSection}
+                  currentAgeGroup={currentAgeGroup}
+                  setCurrentAgeGroup={setCurrentAgeGroup}
+                  overviewRef={overviewRef}
+                  whyChooseRef={whyChooseRef}
+                  ageCategoryRef={ageCategoryRef}
                 />
                 <AnimatePresence mode="wait">
                   {activeSection === "overview" && (
@@ -221,6 +231,7 @@ const WorkshopInfoCarousel = ({
                       currentTheme={currentTheme}
                       setActiveSection={setActiveSection}
                       setCurrentAgeGroup={setCurrentAgeGroup}
+                      overviewRef={overviewRef}
                     />
                   )}
                   {activeSection === "ageGroups" && (
@@ -229,12 +240,16 @@ const WorkshopInfoCarousel = ({
                       currentTheme={currentTheme}
                       currentAgeGroup={currentAgeGroup}
                       setCurrentAgeGroup={setCurrentAgeGroup}
+                      ageCategoryRef={ageCategoryRef}
+                      setActiveSection={setActiveSection}
                     />
                   )}
                   {activeSection === "whyChoose" && (
                     <WhyChooseSection
                       workshop={currentWorkshop}
                       currentTheme={currentTheme}
+                      whyChooseRef={whyChooseRef}
+                      setActiveSection={setActiveSection}
                     />
                   )}
                 </AnimatePresence>

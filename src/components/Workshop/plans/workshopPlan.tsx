@@ -5,7 +5,7 @@ import { WORKSHOP_PLANS } from "@/constant/adda/quiz";
 
 const WorkshopPlan = () => {
   return (
-    <div className="my-20 mx-5 md:mx-20 space-y-10">
+    <div className="lg:my-20 mb-10 md:mb-0  mx-5 md:mx-20 space-y-10">
       <PlanHeader />
       <WorkshopsCategories />
       <div className="flex items-center justify-evenly gap-8 flex-wrap">

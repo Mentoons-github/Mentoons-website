@@ -44,12 +44,12 @@ const AboutWorkshop = ({
       initial="hidden"
       animate={headerInView ? "visible" : "hidden"}
       variants={fadeIn}
-      className="relative flex flex-col md:flex-row justify-between items-center overflow-hidden w-full px-4 sm:px-6 md:px-8 py-8 md:py-12"
+      className="relative flex flex-col lg:flex-row justify-between items-center overflow-hidden w-full px-4  lg:px-8 py-8 md:py-12"
     >
       {/* LEFT SECTION */}
       <motion.div
         variants={fadeInUp}
-        className="flex-1 w-full max-w-2xl px-4 sm:px-6 md:px-8 pt-8 md:pt-12 text-center md:text-left"
+        className="flex-1 w-full max-w-4xl px-4  lg:px-8 pt-8 md:pt-12 text-center md:text-left"
       >
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
           Workshops At Mentoons
@@ -66,7 +66,7 @@ const AboutWorkshop = ({
               "Offline and Online Workshops Available",
               "Led By Psychologists and Academicians",
             ]}
-            className="text-lg sm:text-xl md:text-2xl w-full md:w-[80%] mx-auto md:mx-0"
+            className="text-lg sm:text-xl md:text-2xl w-full md:w-[80%] mx-auto md:mx-0 text-orange-500"
           />
         </div>
         <p className="text-base sm:text-lg md:text-xl w-full md:w-[80%] mt-4 pb-4 mx-auto md:mx-0">

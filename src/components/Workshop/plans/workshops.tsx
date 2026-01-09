@@ -3,6 +3,7 @@ const WorkshopsCategories = () => {
     "/assets/workshopv2/new/hasyaras-04.png",
     "/assets/workshopv2/new/instant katha-05.png",
     "/assets/workshopv2/new/kalakrithi.png",
+    "/assets/workshopv2/new/Swar.png"
   ];
   return (
     <div className="flex items-center justify-evenly">

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { WorkshopFormValues } from "@/types";
+import { X } from "lucide-react";
 
 interface OverviewSectionProps {
   workshop: WorkshopFormValues;
@@ -11,8 +12,11 @@ interface OverviewSectionProps {
     light: string;
     border: string;
   };
-  setActiveSection: (section: "overview" | "ageGroups" | "whyChoose") => void;
-  setCurrentAgeGroup: (index: number) => void;
+  setActiveSection: (
+    section: "" | "overview" | "ageGroups" | "whyChoose"
+  ) => void;
+  setCurrentAgeGroup: (index: string) => void;
+  overviewRef: React.RefObject<HTMLDivElement>;
 }
 
 const OverviewSection = ({
@@ -20,16 +24,36 @@ const OverviewSection = ({
   currentTheme,
   setActiveSection,
   setCurrentAgeGroup,
+  overviewRef,
 }: OverviewSectionProps) => (
   <motion.div
     key="overview"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
-    className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
+    className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 p-5 md:p-10 md:mt-10 rounded-xl bg-gradient-to-br from-[#C8A2C8] to-[#C2B97F] relative"
+    ref={overviewRef}
   >
+    <motion.button
+      type="button"
+      onClick={() => setActiveSection("")}
+      initial={{ opacity: 0, scale: 0.6, rotate: -90 }}
+      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+      whileHover={{
+        scale: 1.1,
+        rotate: 90,
+        backgroundColor: "rgba(0,0,0,0.08)",
+      }}
+      whileTap={{ scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 260, damping: 18 }}
+      className="absolute top-2 right-3 z-0 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center backdrop-blur-md bg-white/70 shadow-lg border border-gray-200"
+      aria-label="Close overview"
+    >
+      <X className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
+    </motion.button>
+
     <div
-      className={`bg-gradient-to-br ${currentTheme.secondary} rounded-2xl p-8 ${currentTheme.border} border`}
+      className={`bg-gradient-to-br ${currentTheme.secondary} rounded-2xl p-4 md:p-8 ${currentTheme.border} border`}
     >
       <h3 className={`text-3xl font-bold ${currentTheme.text} mb-6`}>
         Workshop Overview
@@ -56,7 +80,7 @@ const OverviewSection = ({
                   key={index}
                   onClick={() => {
                     setActiveSection("ageGroups");
-                    setCurrentAgeGroup(index);
+                    setCurrentAgeGroup(`${minAge}-${maxAge}`);
                   }}
                   className={`w-full text-left ${
                     currentTheme.light
@@ -82,8 +106,8 @@ const OverviewSection = ({
         </div>
       </div>
     </div>
-    <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
-      <h3 className="text-3xl font-bold text-gray-800 mb-6">
+    <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl border border-gray-100">
+      <h3 className="text-3xl font-bold text-gray-800 mb-3 md:mb-6">
         Parent Testimonials
       </h3>
       <div className="space-y-6">
