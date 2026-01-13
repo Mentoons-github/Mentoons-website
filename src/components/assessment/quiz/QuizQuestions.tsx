@@ -43,7 +43,7 @@ interface QuizQuestionProps {
   onClosePaymentModal?: () => void;
 }
 
-const QuizQuestion: React.FC<QuizQuestionProps> = ({
+const QuizQuestions: React.FC<QuizQuestionProps> = ({
   quiz,
   backgroundIcons,
   currentQuestion,
@@ -206,4 +206,4 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   );
 };
 
-export default QuizQuestion;
+export default QuizQuestions;

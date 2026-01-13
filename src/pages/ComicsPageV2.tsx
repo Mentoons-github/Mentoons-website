@@ -331,24 +331,24 @@ const ComicsPageV2 = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="mt-10 md:mt-16 md:flex md:items-start"
+        className="mt-10 md:mt-16 lg:flex lg:items-start"
       >
         <div className="flex-1">
           <h1 className="py-2 text-2xl font-semibold text-center text-primary md:text-6xl md:py-8 md:pb-6">
             E-Comics & Audio Comics
           </h1>
-          <p className="w-3/4 px-4 py-4 mx-auto text-lg font-medium text-center md:text-left md:text-2xl">
+          <p className="lg:w-3/4 px-4 lg:py-4 mx-auto text-lg font-medium text-center lg:text-left md:text-2xl">
             Dive into colorful worlds and exciting stories that teach valuable
             lessons while entertaining young readers. Our diverse range of
             comics covers various subjects, from history and science to social
             skills and personal growth.
           </p>
         </div>
-        <div className="flex-1">
-          <h2 className="py-4 text-3xl text-center luckiest-guy-regular">
+        <div className="flex-1 mt-5 lg:mt-0">
+          <h2 className="py-4 text-xl md:text-3xl text-center luckiest-guy-regular">
             CHOOSE COMICS Beste FOR YOU!
           </h2>
-          <div className="flex items-center justify-center w-full p-4 lg:pr-24">
+          <div className="flex items-center justify-center w-full p-2 lg:p-4 lg:pr-24">
             <img
               src="/assets/comic-V2/comic-hero-v2.png"
               alt="comic page hero Image"
@@ -863,9 +863,9 @@ const ComicsPageV2 = () => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8 }}
-        className="px-6 py-10 md:py-12 md:flex md:items-center md:px-20 bg-gradient-to-r from-[#FFCF7B] to-[#FFFFFF]"
+        className="px-6 py-10 lg:py-12 flex flex-col-reverse lg:flex-row lg:items-center md:px-12 lg:px-20 bg-gradient-to-r from-[#FFCF7B] to-[#FFFFFF]"
       >
-        <div className="flex-1">
+        <div className="flex-1 pt-5 lg:pt-0">
           {WORKSHOP_MATTERS_POINTS.map((point, index) => (
             <motion.div
               key={point.id}

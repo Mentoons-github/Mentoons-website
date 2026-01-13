@@ -68,6 +68,9 @@ const MentoonsInfulencerRequestModal = ({
       .required("You must agree to the terms and conditions"),
   });
 
+  type FormValues = typeof formik.values;
+  type FormField = keyof FormValues;
+
   const formik = useFormik({
     initialValues: {
       // Step 1: Personal Information
@@ -101,7 +104,6 @@ const MentoonsInfulencerRequestModal = ({
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        console.log("Form values:", values);
 
         const response = await axios.post(
           `${import.meta.env.VITE_PROD_URL}/influencer-requests`,
@@ -130,9 +132,28 @@ const MentoonsInfulencerRequestModal = ({
     },
   });
 
-  const nextStep = () => {
+  const validateStep = async (fields: FormField[]) => {
+    const touchedFields = fields.reduce((acc, field) => {
+      acc[field] = true;
+      return acc;
+    }, {} as Partial<Record<FormField, boolean>>);
+
+    formik.setTouched(
+      {
+        ...formik.touched,
+        ...touchedFields,
+      },
+      true
+    );
+
+    const errors = await formik.validateForm();
+
+    return !fields.some((field) => Boolean(errors[field]));
+  };
+
+  const nextStep = async () => {
     if (step === 1) {
-      const step1Fields = [
+      const step1Fields: FormField[] = [
         "fullName",
         "email",
         "phone",
@@ -140,41 +161,30 @@ const MentoonsInfulencerRequestModal = ({
         "city",
         "state",
       ];
-      const step1Errors = Object.keys(formik.errors).filter(
-        (key) =>
-          step1Fields.includes(key) &&
-          formik.touched[key as keyof typeof formik.touched]
-      );
 
-      if (step1Errors.length === 0) {
+      const isValid = await validateStep(step1Fields);
+
+      if (isValid) {
         setStep(2);
         window.scrollTo(0, 0);
       } else {
-        // Highlight errors
-        step1Fields.forEach((field) => {
-          if (!formik.touched[field as keyof typeof formik.touched]) {
-            formik.setFieldTouched(field, true, true);
-          }
-        });
+        toast.warning("Please fill required fields");
       }
-    } else if (step === 2) {
-      const step2Fields = ["instagramHandle", "instagramFollowers"];
-      const step2Errors = Object.keys(formik.errors).filter(
-        (key) =>
-          step2Fields.includes(key) &&
-          formik.touched[key as keyof typeof formik.touched]
-      );
+    }
 
-      if (step2Errors.length === 0) {
+    if (step === 2) {
+      const step2Fields: FormField[] = [
+        "instagramHandle",
+        "instagramFollowers",
+      ];
+
+      const isValid = await validateStep(step2Fields);
+
+      if (isValid) {
         setStep(3);
         window.scrollTo(0, 0);
       } else {
-        // Highlight errors
-        step2Fields.forEach((field) => {
-          if (!formik.touched[field as keyof typeof formik.touched]) {
-            formik.setFieldTouched(field, true, true);
-          }
-        });
+        toast.warning("Please fill required fields");
       }
     }
   };

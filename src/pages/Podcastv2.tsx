@@ -327,19 +327,19 @@ const Podcastv2 = () => {
   return (
     <>
       <HeroSectionPodcast />
-      <div className="w-[90%] mx-auto mt-16">
+      <div className="w-[90%] mx-auto mt-4 md:mt-16">
         <motion.div
-          className="items-start gap-8 md:flex"
+          className="items-start gap-8 lg:flex"
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
           <div className="flex-1">
-            <h1 className="py-8 text-5xl font-semibold text-primary md:text-6xl">
+            <h1 className="py-4 md:py-8 text-3xl font-semibold text-primary md:text-6xl">
               Trending Podcast
             </h1>
-            <p className="text-xl font-semibold pb-8 w-[80%]">
+            <p className="md:text-xl font-semibold pb-8 md:w-[80%]">
               Tune in to our educational and entertaining podcasts designed
               specifically for young listeners. From fascinating facts to
               thought-provoking discussions, our podcasts make learning fun and
@@ -354,7 +354,7 @@ const Podcastv2 = () => {
             </div>
           </div>
           <div className="flex-1">
-            <h2 className="py-4 text-4xl font-semibold text-center luckiest-guy-regular text-neutral-700">
+            <h2 className="py-4 text-2xl md:text-4xl font-semibold text-center luckiest-guy-regular text-neutral-700">
               PODCAST ONLY FOR YOU
             </h2>
             <img
@@ -365,27 +365,27 @@ const Podcastv2 = () => {
           </div>
         </motion.div>
         <motion.div
-          className="flex flex-col py-12"
+          className="flex flex-col py-6 md:py-12"
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="pb-12 text-3xl font-semibold text-center">
+          <h2 className="pb-5 md:pb-8 lg:pb-12 text-3xl font-semibold text-center">
             This is What You Get
           </h2>
-          <div className="flex flex-col items-center gap-4 md:flex-row md:justify-around">
+          <div className=" gap-4 lg:gap-14 grid grid-cols-2 md:grid-cols-4">
             {PODCAST_OFFERINGS.map((podcast) => (
               <motion.div
                 key={podcast.label}
-                className="flex flex-col items-center gap-4 border p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                className="flex flex-col items-center  gap-4 border p-4 md:p-6 lg:p-10 rounded-xl  justify-center"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <img
                   src={podcast.imgeUrl}
                   alt={podcast.label}
-                  className="w-24 h-24"
+                  className="w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24"
                 />
                 <p
                   style={{ color: podcast.accentColor }}
@@ -398,21 +398,21 @@ const Podcastv2 = () => {
           </div>
         </motion.div>
         <motion.div
-          className="flex flex-col gap-12"
+          className="flex flex-col md:gap-12"
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
           <div>
-            <h2 className="py-8 text-2xl font-semibold text-center text-primary">
+            <h2 className="py-8 text-xl md:text-2xl font-semibold text-center text-primary">
               CATEGORIES TO CHOOSE FROM
             </h2>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-14 lg:px-12">
               {PODCAST_V2_CATEGORY.map((category) => (
                 <div
                   key={category.id}
-                  className={`flex items-center gap-4 border p-2 px-4 rounded-xl border-neutral-700 bg-orange-50 hover:ring-4 hover:ring-orange-300 cursor-pointer transition-all duration-200 ${
+                  className={`flex items-center justify-center gap-4 border p-2 px-4 rounded-xl border-neutral-700 bg-orange-50 hover:ring-4 hover:ring-orange-300 cursor-pointer transition-all duration-200 ${
                     selectedCategory === category.lable
                       ? `ring-4 ring-orange-300 shadow-xl shadow-orange-200`
                       : ""
@@ -432,7 +432,7 @@ const Podcastv2 = () => {
             </div>
           </div>
           <motion.div
-            className="my-12"
+            className="my-12 md:my-0"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -443,7 +443,7 @@ const Podcastv2 = () => {
                 <div className="relative overflow-hidden rounded-3xl shadow-lg bg-gradient-to-br from-orange-400 via-[#FF6C6C] to-pink-500">
                   <div className="absolute top-0 right-0 w-32 h-32 translate-x-1/2 -translate-y-1/2 bg-orange-300 rounded-full opacity-20 md:w-64 md:h-64"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-1/2 translate-y-1/2 bg-pink-300 rounded-full opacity-20 md:w-48 md:h-48"></div>
-                  <div className="flex flex-col items-start p-5 md:flex-row md:p-8">
+                  <div className="flex flex-col items-start p-2 lg:flex-row md:p-8">
                     <div className="relative flex-1 p-2 md:p-4 group">
                       <img
                         src={
@@ -579,7 +579,7 @@ const Podcastv2 = () => {
           </motion.div>
         </motion.div>
         <motion.div
-          className="relative my-20"
+          className="relative md:my-20"
           style={{
             scale: useTransform(
               useScroll().scrollYProgress,
@@ -593,7 +593,7 @@ const Podcastv2 = () => {
             ),
           }}
         >
-          <h2 className="relative z-10 pb-6 text-4xl font-bold text-primary">
+          <h2 className="relative z-10 lg:pb-6 text-2xl md:text-4xl font-bold text-primary">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
               Trending Podcast
             </span>
@@ -665,7 +665,7 @@ const Podcastv2 = () => {
           </button>
         </motion.div>
         <motion.div
-          className="relative my-24 overflow-hidden shadow-2xl bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl"
+          className="relative lg:my-24 overflow-hidden shadow-2xl bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl"
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -714,7 +714,7 @@ const Podcastv2 = () => {
               fill="none"
             />
           </svg>
-          <div className="flex flex-col-reverse md:flex-row md:items-center md:gap-8 bg-gradient-to-br from-[#FF6D6D]/90 via-orange-300/80 to-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="flex flex-col-reverse lg:flex-row md:items-center md:gap-8 bg-gradient-to-br from-[#FF6D6D]/90 via-orange-300/80 to-yellow-400 rounded-3xl shadow-2xl overflow-hidden">
             {filteredPodcast.length > 0 && (
               <div className="relative z-10 flex-1 p-8 md:p-12">
                 <div className="w-full h-[350px] rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
@@ -878,8 +878,8 @@ const Podcastv2 = () => {
                 </div>
               </div>
             )}
-            <div className="relative flex-1 p-8 md:p-12">
-              <h2 className="mb-8 text-5xl font-semibold text-center text-black drop-shadow-lg md:text-7xl luckiest-guy-regular">
+            <div className="relative flex-1 p-8 lg:p-12 ">
+              <h2 className=" text-3xl font-semibold text-center text-black drop-shadow-lg md:text-7xl luckiest-guy-regular">
                 CHECK OUT OUR
                 <span className="block py-2 mt-2 rounded-lg backdrop-blur-sm">
                   NEW RELEASE
@@ -952,17 +952,17 @@ const Podcastv2 = () => {
           </div>
         </motion.div>
         <motion.div
-          className="flex flex-col items-start gap-8 p-12 mb-16 text-white rounded-3xl bg-primary md:flex-row"
+          className="flex flex-col lg:flex-row items-start mt-10 gap-8 p-6 md:p-12 mb-16 text-white rounded-3xl bg-primary "
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="flex-1">
+          <div className="flex-1 space-y-3">
             <p className="tracking-wide">
               FOR THE PEOPLE WHO WANT TO BE HEARD...
             </p>
-            <p className="pt-2 text-6xl font-semibold luckiest-guy-regular">
+            <p className="pt-2 text-4xl md:text-6xl font-semibold luckiest-guy-regular">
               WANT YOUR VOICE TO BE HEARD
             </p>
             <p className="pb-4">
@@ -971,7 +971,7 @@ const Podcastv2 = () => {
             </p>
             <div className="flex items-center w-full gap-4">
               <form className="flex flex-col w-full gap-2">
-                <div className="flex flex-col w-full md:pr-36">
+                <div className="flex flex-col w-full lg:pr-36">
                   <input
                     type="text"
                     name="name"
@@ -991,7 +991,7 @@ const Podcastv2 = () => {
                     className="w-full p-4 text-black shadow-lg rounded-xl"
                   />
                 </div>
-                <div className="w-full md:pr-36">
+                <div className="w-full lg:pr-36">
                   <textarea
                     name="message"
                     id="message"
@@ -1003,7 +1003,7 @@ const Podcastv2 = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-12 py-3 text-lg font-semibold text-white bg-primary rounded-xl w-fit hover:bg-primary/90"
+                  className="px-12 py-3 text-lg font-semibold text-primary bg-white rounded-xl w-fit hover:bg-white/90"
                   onClick={handleSubmit}
                 >
                   Submit

@@ -92,7 +92,7 @@ const PrimaryHeader = () => {
   }
 
   return (
-    <div className="z-50 flex items-center justify-around w-full px-5 font-light text-white bg-gray-600 font-akshar">
+    <div className="z-50 flex items-center justify-between md:justify-around w-full px-1 md:px-5 font-light text-white bg-gray-600 font-akshar">
       <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:w-1/3 lg:w-1/2">
         <div className="hidden md:inline-flex items-center whitespace-nowrap gap-0 sm:gap-2 text-[10px] md:text-xs lg:text-sm xl:text-base">
           <FaClock className="hidden sm:block" />
@@ -110,12 +110,12 @@ const PrimaryHeader = () => {
         </a>
       </div>
 
-      <div className="flex items-center justify-center w-1/2 py-2 overflow-hidden md:w-1/4">
+      <div className="flex items-center justify-center w-2/5 py-2 overflow-hidden md:w-1/4">
         <motion.div
           variants={textAnimation}
           animate="animate"
           key="animation-texts"
-          className="flex gap-12 whitespace-nowrap"
+          className="flex gap-8 md:gap-12 whitespace-nowrap"
         >
           {animationTexts
             .concat(animationTexts)
@@ -130,7 +130,7 @@ const PrimaryHeader = () => {
         </motion.div>
       </div>
 
-      <div className="flex items-center justify-end w-auto gap-10 md:w-1/2">
+      <div className="flex items-center justify-end w-auto gap-6 lg:gap-10 md:w-1/2">
         <SignedIn>
           <button onClick={handleMessageClick} className="relative">
             <FaMessage />

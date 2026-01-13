@@ -16,7 +16,7 @@ import axiosInstance from "@/api/axios";
 import { Message, User } from "@/types";
 import useSocket from "@/hooks/adda/useSocket";
 import MorphingBubbleIndicator from "./TypingIndicator";
-import { FaShare } from "react-icons/fa6";
+import { FaArrowLeft, FaShare } from "react-icons/fa6";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { sendFileMessage, sendTextMessage } from "@/services/chatServices";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,6 +35,7 @@ import {
 import { getDateLabel } from "@/utils/formateDate";
 import { SkeletonLoader } from "./skelton";
 import { BiCheck, BiCheckDouble } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
 
 export interface ChatUser {
   id: number;
@@ -67,6 +68,7 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate()
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
@@ -456,22 +458,31 @@ const Chat: React.FC<ChatProps> = ({
           <SkeletonLoader />
         ) : (
           <>
-            <div className="flex justify-between items-center mb-6 px-2 pb-4 border-b border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="relative">
+            <div className="flex justify-between items-center  border-b border-gray-100">
+              <div className="flex items-center p-2">
+                <div className="lg:hidden flex items-center border-b ">
+                  <button
+                    onClick={() => navigate("/chat")}
+                    className="p-2 pl-0 text-gray-600 hover:text-indigo-500 transition-colors "
+                  >
+                    <FaArrowLeft size={18} />
+                  </button>
+                  
+                </div>
+                <div className="relative px-2">
                   <img
                     src={user?.picture}
                     alt={user?.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                   />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col ml-4">
                   <h1 className="text-lg font-semibold text-gray-800">
                     {user?.name}
                   </h1>
                 </div>
               </div>
-              <div className="flex items-center gap-4 relative">
+              <div className="flex items-center gap-4 relative px-2">
                 <BsThreeDotsVertical
                   className="text-xl cursor-pointer text-gray-500 hover:text-indigo-500 transition-colors"
                   onClick={() => setIsModalOpen(true)}
@@ -559,7 +570,9 @@ const Chat: React.FC<ChatProps> = ({
                         )}
 
                         {(!msg.fileType || msg.fileType === "text") && (
-                          <p className="text-sm">{msg.message}</p>
+                          <p className="text-sm break-words whitespace-pre-wrap max-w-full">
+                            {msg.message}
+                          </p>
                         )}
                         <div className="flex items-center justify-between mt-1">
                           <p

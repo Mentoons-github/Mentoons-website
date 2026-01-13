@@ -81,7 +81,7 @@ const WorkShopChallenges = () => {
                   className="object-contain w-full h-full"
                 />
               </div>
-              <h3 className="text-lg font-medium text-center md:text-xl">
+              <h3 className="text-xl font-semibold text-center ">
                 {item.title}
               </h3>
             </div>

@@ -136,7 +136,7 @@ const Assessment = () => {
               </div>
 
               {/* Sidebar - We Are Hiring */}
-              <aside className="w-full xl:w-[300px] 2xl:w-[340px] xl:sticky xl:top-24 xl:self-start">
+              <aside className="w-full xl:w-[300px] 2xl:w-[340px] xl:top-24 xl:self-start">
                 <div className="space-y-6">
                   <WeAreHiring hiring={hiring} />
                 </div>

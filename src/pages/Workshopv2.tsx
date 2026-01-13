@@ -245,13 +245,17 @@ const Workshopv2 = () => {
 
   const handleWorkshopButtonClick = (
     categoryIndex: number,
-    workshopIndex: number
+    // workshopIndex: number
+    workshopName: string
   ) => {
-    const workshopName =
-      categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
+    if (workshopName === "Swar") {
+      return;
+    }
+    // const workshopName =
+    //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
     setSelectedCategory(workshopName);
     setSelectedCategoryIndex(categoryIndex);
-    setSelectedWorkshopIndex(workshopIndex);
+    // setSelectedWorkshopIndex(workshopIndex);
     setCurrentSlide(categoryIndex);
     setDirection(categoryIndex > currentSlide ? 1 : -1);
     if (carouselRef.current) {

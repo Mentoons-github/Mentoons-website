@@ -17,23 +17,14 @@ const QuizBanner = ({ categories }: QuizBanner) => {
           minHeight: "75vh",
         }}
       >
-        <div className="flex items-start justify-start pt-16 md:pt-20">
+        <div className="flex items-start justify-start md:pt-20">
           <img
             src="/assets/assesments/quiz/bannerBG.png"
             alt="Quiz Banner Background"
-            className="
-    absolute 
-    hidden sm:block
-    sm:w-1/3 md:w-[25%] lg:w-[30%] xl:w-[45%] xl:w-[40%]
-    sm:right-[10%] lg:right-[6%] xl:right-[15%]
-    sm:top-[50%] md:top-[55%] lg:top-[10%]
-    object-contain
-    pointer-events-none 
-    z-0
-  "
+            className="absolute  bottom-10  right-[10%] lg:w-[30%] xl:w-[45%]  lg:right-[6%] xl:right-[15%] object-contain pointer-events-none z-0"
           />
 
-          <div className="ml-6 md:ml-20 space-y-6 max-w-3xl p-6 relative z-10">
+          <div className="ml-6 md:ml-20 space-y-6 max-w-3xl p-6 relative z-10 ">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               Challenge Your Mind with Fun Quizzes!
             </h1>

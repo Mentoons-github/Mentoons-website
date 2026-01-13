@@ -14,7 +14,7 @@ const WorkshopPlans = ({ plans }: { plans?: WorkshopPlan[] }) => {
   };
 
   return (
-    <div className="my-20 mx-5 md:mx-20 space-y-10">
+    <div className="lg:my-20 mb-10 md:mb-0  mx-5 md:mx-20 space-y-10">
       <PlanHeader />
       <WorkshopsCategories />
 

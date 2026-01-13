@@ -1,3 +1,4 @@
+import { spendCandyCoin } from "@/api/game/mentoonsCoin";
 import {
   getOperator,
   PUZZLE_DATA,
@@ -6,9 +7,14 @@ import {
   SegmentValues,
 } from "@/constant/adda/game/stickMaster";
 import { Difficulty } from "@/types/adda/game";
+import { CandyCoins } from "@/types/adda/game/candyCoins";
+import { useAuth } from "@clerk/clerk-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { BiBulb } from "react-icons/bi";
+import { toast } from "sonner";
 
 interface Props {
+  coins: CandyCoins;
   difficulty: Difficulty;
   onGameComplete: (score: number, totalRounds: number) => void;
   score: number;
@@ -86,6 +92,7 @@ const Op = React.memo(({ el, i, click, picked }: any) => {
 });
 
 const StickMasterPlayzone: React.FC<Props> = ({
+  coins,
   difficulty,
   onGameComplete,
   score,
@@ -103,9 +110,28 @@ const StickMasterPlayzone: React.FC<Props> = ({
   const [timeLeft, setTimeLeft] = useState(60);
   const [active, setActive] = useState(true);
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [puzzleModal, setPuzzleModal] = useState(false);
+  const [hintUsed, setHintUsed] = useState(false);
 
+  const { getToken } = useAuth();
   const current = puzzles[idx];
   const eq = useMemo(() => computeEquation(puz), [puz]);
+
+  useEffect(() => {
+    if (confirmModal || puzzleModal) {
+      setActive(false);
+    } else if (!gameCompleted) {
+      setActive(true);
+    }
+  }, [confirmModal, puzzleModal, gameCompleted]);
+
+  useEffect(() => {
+    // Reset hint state when moving to a new question
+    setHintUsed(false);
+    setConfirmModal(false);
+    setPuzzleModal(false);
+  }, [idx]);
 
   const loadPuzzle = useCallback(
     (i: number) => {
@@ -153,6 +179,34 @@ const StickMasterPlayzone: React.FC<Props> = ({
     );
     return () => clearInterval(t);
   }, [active, timeLeft, idx, loadPuzzle, gameCompleted]);
+
+  const handleConfirm = async () => {
+    if(coins.currentCoins<500){
+      toast.warning("You dont have much coin to unlock hinte")
+    }
+    try {
+      const token = await getToken();
+      if (!token) {
+        setMsg("Login required to use hint");
+        return;
+      }
+
+      const res = await spendCandyCoin(
+        token,
+        500,
+        `Used hint in 'Stick Master' game at round ${idx + 1}`
+      );
+
+      coins.currentCoins = res.currentCoins;
+
+      setHintUsed(true);
+      setConfirmModal(false);
+      setPuzzleModal(true);
+    } catch (err: any) {
+      setMsg(err?.response?.data?.message || "Not enough coins");
+      setConfirmModal(false);
+    }
+  };
 
   const handleClick = useCallback(
     (pos: number, seg: number, on: SegmentValues) => {
@@ -350,10 +404,34 @@ const StickMasterPlayzone: React.FC<Props> = ({
                   {timeLeft}s
                 </span>
               </div>
+              <div></div>
             </div>
           </div>
 
           <div className="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl border-2 border-orange-500/30">
+            <button
+              onClick={() => {
+                if (hintUsed) {
+                  // ✅ Hint already purchased for this question
+                  setPuzzleModal(true);
+                } else {
+                  // ✅ First time → ask for confirmation
+                  setConfirmModal(true);
+                }
+              }}
+              className="absolute top-4 right-4 z-20
+             bg-gradient-to-br from-yellow-500/20 to-orange-500/20
+             px-4 py-2 sm:px-6 sm:py-3
+             rounded-xl border border-yellow-500/30
+             backdrop-blur flex items-center gap-2
+             hover:scale-105 transition"
+            >
+              <BiBulb className="text-2xl text-yellow-500" />
+              <span className="hidden sm:inline text-yellow-300 font-semibold">
+                Hint
+              </span>
+            </button>
+
             <div className="text-center text-4xl sm:text-6xl lg:text-7xl font-mono text-orange-400 tracking-widest mb-6 sm:mb-8 font-bold">
               {eq}
             </div>
@@ -409,6 +487,70 @@ const StickMasterPlayzone: React.FC<Props> = ({
             </p>
           </div>
         </div>
+
+        {(confirmModal || puzzleModal) && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur">
+            <div className="relative bg-gray-900 rounded-2xl p-6 w-[90%] max-w-md border border-yellow-500 shadow-2xl">
+              {confirmModal && (
+                <>
+                  <h2 className="text-xl font-bold text-yellow-400 mb-4 text-center">
+                    Use Hint?
+                  </h2>
+
+                  <div className="absolute top-2 right-2 flex items-center gap-2 text-yellow-400">
+                    <img
+                      src="/assets/games/coins/candyCoin.png"
+                      alt="Coin"
+                      className="w-10 h-10"
+                    />
+                    {coins.currentCoins}
+                  </div>
+
+                  <p className="text-gray-300 text-center mb-6">
+                    This will cost{" "}
+                    <span className="text-yellow-400 font-bold">
+                      500 Candy Coin
+                    </span>
+                    . Do you want to continue?
+                  </p>
+
+                  <div className="flex justify-center gap-4">
+                    <button
+                      onClick={() => setConfirmModal(false)}
+                      className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      onClick={handleConfirm}
+                      className="px-5 py-2 rounded-lg bg-yellow-500 text-black font-bold hover:bg-yellow-400"
+                    >
+                      Use Coin
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {(hintUsed || puzzleModal) && (
+                <div className="text-center">
+                  <h2 className="text-2xl text-green-400 font-bold mb-4">
+                    Hint
+                  </h2>
+
+                  <p className="text-gray-200">{current?.hint}</p>
+
+                  <button
+                    onClick={() => setPuzzleModal(false)}
+                    className="mt-4 px-4 py-2 bg-green-500 rounded text-black font-bold"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

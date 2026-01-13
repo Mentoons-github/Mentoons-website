@@ -51,8 +51,9 @@ import BlockedPage from "./components/adda/auth/blockedPage.tsx";
 import ImageUploadFormSubmit from "./pages/v2/adda/ImageUploadFormSubmit.tsx";
 import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
-import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
+// import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 import Emi from "./pages/v2/workshop/emi.tsx";
+// import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -94,7 +95,7 @@ const routes = [
   },
   { path: "/free-download", element: <FreeDownload /> },
   { path: "/mentoons-workshops", element: <Workshopv2 /> },
-  { path: "/mentoons-workshopv2", element: <WorkshopV2 /> },
+  // { path: "/mentoons-workshopv2", element: <WorkshopV2 /> },
   {
     path: "/mentoons-podcast",
     element: (

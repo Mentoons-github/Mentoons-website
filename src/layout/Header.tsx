@@ -233,6 +233,14 @@ const Header = () => {
 
       {/* Desktop Right Nav + Cart at the END */}
       <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <div
+            onClick={handleSearchToggle}
+            className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
+          >
+            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </div>
+        </motion.div>
         {navRight.map(({ id, label, url, icon: Icon, items }) => {
           if ((label === "Games" || label === "My Library") && !userId)
             return null;
