@@ -52,6 +52,7 @@ import ImageUploadFormSubmit from "./pages/v2/adda/ImageUploadFormSubmit.tsx";
 import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
 import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
+import Emi from "./pages/v2/workshop/emi.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
 const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
@@ -143,6 +144,7 @@ const routes = [
   { path: "/why-comics", element: <WhyComics /> },
   { path: "payment", element: <PaymentDetailPage /> },
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
+  { path: "/emi", element: <Emi /> },
 ];
 
 const Router = () => {
