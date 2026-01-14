@@ -53,7 +53,7 @@ export const CONTENTS = {
       "Story Re-Teller Cards",
       "Conversation Story Cards",
     ],
-    link: `${import.meta.env.VITE_STATIC_URL}product`,
+    link: `${import.meta.env.VITE_STATIC_URL}products`,
   },
   podcast: {
     focus: ["Teenage Behavior", "Parenting", "Health", "Nutrition"],

@@ -105,7 +105,7 @@ const PrimaryHeader = () => {
         >
           <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
             <FaPhone className="flex-shrink-0" />{" "}
-            <span className="flex-shrink-0">+91 90360 33300</span>
+            <span className="flex-shrink-0">+91 7892858593</span>
           </div>
         </a>
       </div>
