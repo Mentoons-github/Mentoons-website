@@ -59,54 +59,64 @@ const OverviewSection = ({
         Workshop Overview
       </h3>
       <div className="space-y-4">
-        <p className="text-lg text-gray-700 leading-relaxed">
-          Our {workshop.workshopName} program is designed to provide children
-          with engaging, hands-on learning experiences that foster creativity,
-          critical thinking, and personal growth in a supportive environment.
-        </p>
-        <div className="mt-6">
-          <h4 className={`text-xl font-semibold ${currentTheme.text} mb-4`}>
-            Available Age Groups
-          </h4>
-          <div className="space-y-3">
-            {workshop.ageGroups.map((group, index) => {
-              const ageRange = group.ageRange;
-              const minAge = parseInt(ageRange.split("-")[0]);
-              const maxAge = parseInt(
-                ageRange.split("-")[1] || ageRange.split("-")[0]
-              );
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setActiveSection("ageGroups");
-                    setCurrentAgeGroup(`${minAge}-${maxAge}`);
-                  }}
-                  className={`w-full text-left ${
-                    currentTheme.light
-                  } rounded-xl p-4 border-l-4 ${currentTheme.border.replace(
-                    "border-",
-                    "border-l-"
-                  )} flex items-center space-x-3 hover:shadow-md transition-shadow cursor-pointer`}
-                >
-                  <div
-                    className={`w-10 h-10 ${currentTheme.accent} rounded-full flex items-center justify-center`}
-                  >
-                    <span className="text-white font-bold text-sm">
-                      {minAge}-{maxAge}
-                    </span>
-                  </div>
-                  <span className="font-semibold text-gray-800">
-                    Ages {minAge}–{maxAge} years
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {workshop.overview ? (
+          workshop.overview.split("\n").map((line, index) => (
+            <p key={index} className="text-lg text-gray-700 leading-relaxed">
+              {line}
+            </p>
+          ))
+        ) : (
+          <p className="text-lg text-gray-700 leading-relaxed">
+            Our {workshop.workshopName} program is designed to provide children
+            with engaging, hands-on learning experiences that foster creativity,
+            critical thinking, and personal growth in a supportive environment.
+          </p>
+        )}
       </div>
     </div>
-    <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl border border-gray-100">
+
+    <div className=" bg-white rounded-2xl p-4 md:p-8 shadow-xl border border-gray-100">
+      <h4 className={`text-xl font-semibold ${currentTheme.text} mb-4`}>
+        Available Age Groups
+      </h4>
+      <div className="space-y-3">
+        {workshop.ageGroups.map((group, index) => {
+          const ageRange = group.ageRange;
+          const minAge = parseInt(ageRange.split("-")[0]);
+          const maxAge = parseInt(
+            ageRange.split("-")[1] || ageRange.split("-")[0]
+          );
+          return (
+            <button
+              key={index}
+              onClick={() => {
+                setActiveSection("ageGroups");
+                setCurrentAgeGroup(`${minAge}-${maxAge}`);
+              }}
+              className={`w-full text-left ${
+                currentTheme.light
+              } rounded-xl p-4 border-l-4 ${currentTheme.border.replace(
+                "border-",
+                "border-l-"
+              )} flex items-center space-x-3 hover:shadow-md transition-shadow cursor-pointer`}
+            >
+              <div
+                className={`w-10 h-10 ${currentTheme.accent} rounded-full flex items-center justify-center`}
+              >
+                <span className="text-white font-bold text-sm">
+                  {minAge}-{maxAge}
+                </span>
+              </div>
+              <span className="font-semibold text-gray-800">
+                Ages {minAge}–{maxAge} years
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl border border-gray-100">
       <h3 className="text-3xl font-bold text-gray-800 mb-3 md:mb-6">
         Parent Testimonials
       </h3>
@@ -130,7 +140,7 @@ const OverviewSection = ({
           </span>
         </div>
       </div>
-    </div>
+    </div> */}
   </motion.div>
 );
 

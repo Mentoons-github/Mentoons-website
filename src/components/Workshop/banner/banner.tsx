@@ -14,7 +14,7 @@ const WorkshopBanner = ({
 }: WorkshopBannerProps) => {
   return (
     <div
-      className="relative bg-orange-400 min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] xl:min-h-[82vh] flex items-center justify-center overflow-hidden border-0 outline-none"
+      className="relative bg-orange-400 min-h-[50vh] lg:min-h-[80vh] xl:min-h-[82vh] flex items-center justify-center overflow-hidden border-0 outline-none"
       style={{ border: "none", boxShadow: "none" }}
     >
       <motion.img
@@ -93,7 +93,7 @@ const WorkshopBanner = ({
             },
             opacity: { duration: 1.5 },
           }}
-          className="relative text-transparent text-[2rem] xs:text-[2.5rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] xl:text-[12rem] 
+          className="relative text-transparent text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] xl:text-[12rem] 
                      font-extrabold font-sans bg-[url('/assets/assesments/Exercise/exercise-02.jpg')] bg-clip-text bg-cover bg-center
                      text-center leading-none"
           style={{

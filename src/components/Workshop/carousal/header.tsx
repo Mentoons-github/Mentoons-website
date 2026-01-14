@@ -68,18 +68,24 @@ const CarouselHeader = ({
       animate={{ opacity: 1, y: 0 }}
       className="mb-12"
     >
-      <h1 className="text-5xl md:text-7xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 text-start">
+      <h1 className="text-4xl md:text-7xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 text-start">
         {categories[currentCategoryIndex].categoryName}
       </h1>
-      <p className="text-xl text-slate-600 text-start">
-        Discover engaging, educational experiences designed to inspire and
-        nurture young minds
-      </p>
+      {categories[currentCategoryIndex].description ? (
+        <p className="text-xl text-slate-600 text-start">
+          {categories[currentCategoryIndex].description}
+        </p>
+      ) : (
+        <p className="text-xl text-slate-600 text-start">
+          Discover engaging, educational experiences designed to inspire and
+          nurture young minds
+        </p>
+      )}
 
       {/* Workshop indicators */}
 
       {/* Category buttons */}
-      <div className="flex justify-start gap-3 mt-8">
+      <div className="flex flex-wrap justify-start gap-3 mt-8">
         {categories.map((_, index) => (
           <button
             key={index}

@@ -248,9 +248,6 @@ const Workshopv2 = () => {
     // workshopIndex: number
     workshopName: string
   ) => {
-    if (workshopName === "Swar") {
-      return;
-    }
     // const workshopName =
     //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
     setSelectedCategory(workshopName);
@@ -471,10 +468,10 @@ const Workshopv2 = () => {
           initial="hidden"
           animate={registerInView ? "visible" : "hidden"}
           variants={fadeIn}
-          className="p-4 py-12 bg-orange-400 flex flex-col md:flex-row justify-center"
+          className="p-4 md:py-12 bg-orange-400 flex flex-col md:flex-row justify-center"
         >
           <motion.div className="flex flex-col flex-1 h-full">
-            <h2 className="pt-4 text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_white] w-[90%] mx-auto tracking-widest">
+            <h2 className="pt-4 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_white] w-[90%] mx-auto tracking-widest">
               REGISTER FOR OUR WORKSHOPS HERE
             </h2>
 
@@ -489,24 +486,24 @@ const Workshopv2 = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 src="/assets/workshopv2/workshop-registration.png"
                 alt=""
-                className="object-cover w-[50%]"
+                className="object-cover lg:w-[50%]"
               />
             </figure>
           </motion.div>
 
           <motion.div
             variants={fadeInUp}
-            className="flex-1 h-full my-12 md:flex-1"
+            className="flex-1 h-full "
           >
             <motion.div
               variants={scaleIn}
-              className="items-start justify-start flex-1 h-full px-6 lg:px-36"
+              className="items-start justify-start flex-1 h-full px-2 md:px-6 lg:px-36"
             >
               <form
                 className="flex flex-col visible w-full h-full gap-4"
                 onSubmit={handleRegisterationForm}
               >
-                <div className="box-border flex gap-4">
+                <div className="box-border space-y-4 lg:space-y-0 lg:flex gap-4">
                   <div className="flex-1">
                     <label
                       htmlFor="firstname"
@@ -543,7 +540,7 @@ const Workshopv2 = () => {
                     />
                   </div>
                 </div>
-                <div className="box-border flex gap-4">
+                <div className="box-border space-y-4 lg:space-y-0 lg:flex gap-4">
                   <div className="flex-1">
                     <label htmlFor="email" className="text-lg font-semibold">
                       Email
@@ -674,7 +671,7 @@ const Workshopv2 = () => {
           initial="hidden"
           animate={faqInView ? "visible" : "hidden"}
           variants={fadeIn}
-          className="p-8 md:px-28 bg-gradient-to-b from-[#FEB977] to-[#FF942E]"
+          className="p-4 md:p-8 md:px-10 lg:px-28 bg-gradient-to-b from-[#FEB977] to-[#FF942E]"
         >
           <motion.h2
             variants={fadeInUp}
@@ -682,7 +679,7 @@ const Workshopv2 = () => {
           >
             Frequently asked questions
           </motion.h2>
-          <motion.div variants={fadeInUp} className="md:flex md:gap-8">
+          <motion.div variants={fadeInUp} className="lg:flex md:gap-8">
             <motion.div
               variants={staggerContainer}
               className="flex flex-col flex-1 gap-4 mb-8"
@@ -711,7 +708,7 @@ const Workshopv2 = () => {
               variants={scaleIn}
               className="flex flex-col flex-1 gap-4 p-4 text-center border-2 border-white/80 bg-white/80 md:mb-8 rounded-xl"
             >
-              <div className="w-[80%] mx-auto">
+              <div className="md:px-4 lg:px-8 mx-auto">
                 <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 10 }}

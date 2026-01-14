@@ -19,6 +19,7 @@ export interface AgeGroupDetails {
 
 export interface IndividualWorkshop {
   workshopName: string;
+  overview: string;
   whyChooseUs: WhyChooseUs[];
   ageGroups: AgeGroupDetails[];
 }
@@ -27,6 +28,7 @@ export interface WorkshopFormValues {
   categoryName: string;
   workshops: IndividualWorkshop[];
   subtitle: string;
+  description: string;
 }
 
 export const AddWorkshopFormConfig = () => {
@@ -35,19 +37,24 @@ export const AddWorkshopFormConfig = () => {
     workshops: [
       {
         workshopName: "",
+        overview: "",
         whyChooseUs: [{ heading: "", description: "" }],
         ageGroups: [],
       },
     ],
     subtitle: "",
+    description: "",
   };
 
   const validationSchema = Yup.object({
     categoryName: Yup.string().required("Please type the category name"),
+    subtitle: Yup.string().required("Please type the subtitle name"),
+    description: Yup.string().required("Please add the description"),
     workshops: Yup.array()
       .of(
         Yup.object({
           workshopName: Yup.string().required("Please type the workshop name"),
+          overview: Yup.string().required("Please add the workshop overview"),
           whyChooseUs: Yup.array()
             .of(
               Yup.object({

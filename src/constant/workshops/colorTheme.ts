@@ -24,12 +24,12 @@ export const COLOR_THEME = [
     border: "border-amber-300",
   },
   {
-    primary: "from-gray-300 to-gray-400",
-    secondary: "from-gray-100 to-gray-200",
-    accent: "bg-gray-500",
-    text: "text-gray-950",
-    light: "bg-gray-100",
-    border: "border-gray-300",
+    primary: "from-sky-300 to-sky-400",
+    secondary: "from-gray-100 to-sky-200",
+    accent: "bg-sky-500",
+    text: "text-sky-950",
+    light: "bg-sky-100",
+    border: "border-sky-300",
   },
 ];
 
