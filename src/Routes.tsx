@@ -145,7 +145,7 @@ const routes = [
   { path: "/why-comics", element: <WhyComics /> },
   { path: "payment", element: <PaymentDetailPage /> },
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
-  { path: "/emi", element: <Emi /> },
+  { path: "/emi", element: <Emi /> }, 
 ];
 
 const Router = () => {
