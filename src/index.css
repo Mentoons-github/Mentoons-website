@@ -480,8 +480,5 @@ body {
   body * {
     background: none !important;
     -webkit-print-color-adjust: exact;
-    color-adjust: exact;
   }
 }
-
-

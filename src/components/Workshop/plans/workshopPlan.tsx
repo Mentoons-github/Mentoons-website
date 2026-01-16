@@ -2,16 +2,33 @@ import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import PlanHeader from "./header";
 import PlanCard from "./planCard";
 import WorkshopsCategories from "./workshops";
-import { WORKSHOP_PLANS } from "@/constant/adda/quiz";
 import { WorkshopPlan as WorkshopPlanType } from "@/types/workshop";
 import { useNavigate } from "react-router-dom";
+import { fetchWorkshopPlans } from "@/api/workshop/workshops";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { useEffect, useState } from "react";
 
-const WorkshopPlans = ({ plans }: { plans?: WorkshopPlan[] }) => {
+const WorkshopPlans = () => {
   const navigate = useNavigate();
+  const [workshopPlans, setWorkshopPlans] = useState<WorkshopPlan[] | []>([]);
+  const { showStatus } = useStatusModal();
 
   const handlePayClick = (plan: WorkshopPlanType) => {
     navigate("/payment", { state: { plan } });
   };
+
+  const fetchWorkshops = async () => {
+    try {
+      const data = await fetchWorkshopPlans();
+      setWorkshopPlans(data);
+    } catch (error: any) {
+      showStatus("error", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkshops();
+  }, []);
 
   return (
     <div className="lg:my-20 mb-10 md:mb-0  mx-5 md:mx-20 space-y-10">
@@ -71,16 +88,24 @@ const WorkshopPlans = ({ plans }: { plans?: WorkshopPlan[] }) => {
       </div>
 
       <div className="flex items-start justify-center gap-10 flex-wrap">
-        {plans && plans.length > 0 ? (
+        {workshopPlans && workshopPlans.length > 0 ? (
           <>
-            {plans.map((plan, index) => (
-              <PlanCard key={index} plan={plan} onPayClick={handlePayClick} />
+            {workshopPlans.map((plan) => (
+              <PlanCard
+                key={plan.planId}
+                plan={plan}
+                onPayClick={handlePayClick}
+              />
             ))}
           </>
         ) : (
           <>
-            {WORKSHOP_PLANS.map((plan, index) => (
-              <PlanCard key={index} plan={plan} onPayClick={handlePayClick} />
+            {workshopPlans.map((plan) => (
+              <PlanCard
+                key={plan.planId}
+                plan={plan}
+                onPayClick={handlePayClick}
+              />
             ))}
           </>
         )}
