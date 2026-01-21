@@ -121,8 +121,6 @@ const PostDetailsPage = () => {
 
   const { showStatus } = useStatusModal();
 
-  console.log(user?.id, "hhh");
-
   const fetchUser = async () => {
     try {
       const token = await getToken();
@@ -289,7 +287,7 @@ const PostDetailsPage = () => {
       );
 
       if (response.data.success === true) {
-        navigate(-1);
+        navigate("/adda/user-profile", { replace: true });
         showStatus("success", "Post deleted successfully.");
       } else {
         showStatus("error", "Failed to delete post.");
@@ -440,7 +438,6 @@ const PostDetailsPage = () => {
   }
 
   const isUser = userId == post?.user._id;
-  console.log(post,'postttttttt')
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -843,7 +840,7 @@ const PostDetailsPage = () => {
         <PostEditModal
           post={post}
           onClose={() => setEditModal(false)}
-          setPost = {setPost}
+          setPost={setPost}
         />
       )}
     </>

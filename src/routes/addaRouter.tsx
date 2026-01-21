@@ -23,6 +23,7 @@ import ColorClash from "@/pages/v2/adda/games/colorClash";
 import SpeedAdd from "@/pages/v2/adda/games/mindMath";
 import WordBuilder from "@/pages/v2/adda/games/wordBuilder";
 import SortMyDeck from "@/pages/v2/adda/games/sortMyDeck";
+import PatternRace from "@/pages/v2/adda/games/PatternRace";
 
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
@@ -109,6 +110,7 @@ const AddaRouter = () => {
         <Route path="game-lobby/mind-math" element={<SpeedAdd />} />
         <Route path="game-lobby/word-builder" element={<WordBuilder />} />
         <Route path="game-lobby/sort-my-deck" element={<SortMyDeck />} />
+        <Route path="game-lobby/pattern-race" element={<PatternRace />} />
         <Route path="leaderboard" element={<LeaderBoard />} />
       </Routes>
     </Suspense>

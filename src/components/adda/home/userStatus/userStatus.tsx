@@ -251,11 +251,11 @@ const UserStatus = () => {
 
   return (
     <section className="w-full">
-      <div className="flex items-center justify-start gap-4 px-2 sm:flex-row sm:gap-10 sm:px-4">
+      <div className="flex items-end justify-start gap-1 md:gap-4 md:px-2 sm:flex-row sm:gap-10 sm:px-4 ">
         <div className="flex flex-col items-center justify-center flex-shrink-0 gap-1">
           <button
             onClick={() => setIsGuidelinesOpen(true)}
-            className="text-[#EC9600]"
+            className="text-[#EC9600] text-xs"
           >
             View Guidelines
           </button>
@@ -276,12 +276,12 @@ const UserStatus = () => {
           </label>
           <span className="text-xs text-center sm:text-sm">Share Story</span>
         </div>
-        <div className="flex-grow w-full mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0">
+        <div className="flex-grow w-full mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 ">
           <Swiper
             spaceBetween={8}
             freeMode={true}
             modules={[FreeMode]}
-            className="w-full"
+            className="w-full pt-1 pl-1"
             slidesPerView="auto"
             breakpoints={{
               320: { slidesPerView: 3.5, spaceBetween: 5 },
@@ -340,7 +340,7 @@ const UserStatus = () => {
                     onClick={() => handleVideoClick(video)}
                   />
                 </div>
-                <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
+                <span className="text-xs sm:text-sm text-center truncate max-w-[60px] md:max-w-[80px]">
                   {video.title}
                 </span>
               </SwiperSlide>

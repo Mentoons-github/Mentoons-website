@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TrendingUp, CheckCircle, IndianRupee, ArrowLeft } from "lucide-react";
 import EmiTable from "@/components/Workshop/emi/emiTable";
+import InvoiceModal from "@/components/Workshop/emi/InvoiceModal";
+import { useAuth } from "@clerk/clerk-react";
+import { useAppDispatch } from "@/hooks/useRedux";
+import { getInvoiceDetailsThunk } from "@/redux/workshop/workshopThunk";
 
 export interface Payment {
   id: number;
@@ -24,6 +28,32 @@ const Emi: React.FC = () => {
     { id: 11, dueDate: "October 5th, 2025", amount: 4500, status: "pending" },
     { id: 12, dueDate: "November 5th, 2025", amount: 4500, status: "pending" },
   ]);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const { getToken } = useAuth();
+
+  const [token, setToken] = useState<string>("");
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const t = (await getToken()) as string;
+      setToken(t);
+    };
+
+    fetchToken();
+  }, [getToken]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    dispatch(
+      getInvoiceDetailsThunk({
+        transactionId: "pay_KIDS_DP_001",
+        token,
+      })
+    );
+  }, [dispatch, token]);
 
   const totalEmi = payments.length;
   const paidEmi = payments.filter((p) => p.status === "paid").length;
@@ -111,6 +141,12 @@ const Emi: React.FC = () => {
               Pending EMIs
             </h2>
             <EmiTable payments={pendingPayments} onPayment={handlePayment} />
+            <button
+              className="px-3 py-2 rounded-md bg-orange-500"
+              onClick={() => setInvoiceModalOpen(true)}
+            >
+              Invoice Details
+            </button>
           </div>
 
           <div className="lg:col-span-1">
@@ -209,6 +245,9 @@ const Emi: React.FC = () => {
           </div>
         </div>
       </div>
+      {invoiceModalOpen && (
+        <InvoiceModal onClose={() => setInvoiceModalOpen(false)} />
+      )}
     </div>
   );
 };

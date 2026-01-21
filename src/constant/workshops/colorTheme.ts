@@ -47,7 +47,7 @@ export const WORKSHOP_TYPE_IMAGES = [
     workshop: "Hasyaras",
   },
   {
-    img: "/assets/workshopv2/new/Swar.png",
+    img: "/assets/workshopv2/new/Swar2.png",
     workshop: "Swar",
   },
 ];

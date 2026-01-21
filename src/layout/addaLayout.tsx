@@ -56,7 +56,13 @@ const AddaLayout = () => {
     loadInitial();
   }, [dispatch, getToken]);
 
-  const handleGoBack = useCallback(() => navigate(-1), [navigate]);
+  const handleGoBack = useCallback(() => {
+    navigate(-1);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    });
+  }, [navigate]);
+
   const navigateToFriendRequestsPage = useCallback(
     () => navigate("/adda/search-friend"),
     [navigate]
@@ -81,9 +87,9 @@ const AddaLayout = () => {
             <UserStatus />
           </div>
 
-          <div className="flex flex-col md:flex-row md:gap-6 lg:gap-8 px-2 md:px-4 lg:px-0">
+          <div className="flex flex-col lg:flex-row md:gap-6 lg:gap-8 px-2 md:px-4 lg:px-0">
             <div className="hidden lg:block lg:w-1/4">
-              <div className="sticky top-20 space-y-6">
+              <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto scrollbar-hide space-y-6 pr-2">
                 <WhatWeOffer onActionButtonClick={handleActionButtonClick} />
                 <AboutMentoons />
               </div>
@@ -112,13 +118,13 @@ const AddaLayout = () => {
                   </svg>
                 </button>
               )}
-              <div className="pt-2">
+              <div className="pt-2" onClick={(e) => e.stopPropagation()}>
                 <Outlet />
               </div>
             </div>
 
-            <div className="hidden md:block lg:w-1/4">
-              <div className="sticky top-20 space-y-6">
+            <div className="hidden md:block lg:w-1/4 ">
+              <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto scrollbar-hide space-y-6 pr-2">
                 {isSignedIn && (
                   <div className="bg-white rounded-xl border border-orange-200 p-4 shadow-sm">
                     <FriendRequest />

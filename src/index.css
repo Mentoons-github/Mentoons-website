@@ -226,6 +226,14 @@ body {
   background: #969696;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .airplane-image,
 .company-image {
   filter: hue-rotate(180deg) brightness(0) invert(1) sepia(1) saturate(1000%)
@@ -483,5 +491,3 @@ body {
     color-adjust: exact;
   }
 }
-
-

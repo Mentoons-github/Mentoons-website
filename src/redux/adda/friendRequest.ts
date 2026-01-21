@@ -46,7 +46,7 @@ export const fetchFriendRequests = createAsyncThunk<
         `/adda/getMyFriendRequests?page=${page}&limit=${limit}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       const { pendingReceived, totalPages } = response.data.data;
       const transformedRequests = pendingReceived.map((data: any) => ({
@@ -63,10 +63,10 @@ export const fetchFriendRequests = createAsyncThunk<
       return rejectWithValue(
         error.response?.data?.error || {
           message: "Failed to fetch friend requests",
-        }
+        },
       );
     }
-  }
+  },
 );
 
 export const fetchFollowBackUsers = createAsyncThunk<
@@ -90,7 +90,7 @@ export const fetchFollowBackUsers = createAsyncThunk<
     return rejectWithValue(
       error.response?.data?.error || {
         message: "Failed to fetch follow back users",
-      }
+      },
     );
   }
 });
@@ -106,7 +106,7 @@ export const acceptFriendRequest = createAsyncThunk<
       const response = await axiosInstance.patch(
         `/adda/acceptRequest/${requestId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const { notification } = response.data;
 
@@ -120,7 +120,7 @@ export const acceptFriendRequest = createAsyncThunk<
               type: "friend_request_accepted",
               message: notification.message || "Friend request accepted",
             },
-          })
+          }),
         );
       }
 
@@ -132,10 +132,10 @@ export const acceptFriendRequest = createAsyncThunk<
       return rejectWithValue(
         error.response?.data?.error || {
           message: "Failed to accept friend request",
-        }
+        },
       );
     }
-  }
+  },
 );
 
 export const declineFriendRequest = createAsyncThunk<
@@ -149,14 +149,14 @@ export const declineFriendRequest = createAsyncThunk<
       const response = await axiosInstance.patch(
         `/adda/rejectRequest/${requestId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const { notification } = response.data;
 
       // Delete notification if it exists
       if (notification?.id) {
         dispatch(
-          deleteNotification({ notificationId: notification.id, token })
+          deleteNotification({ notificationId: notification.id, token }),
         );
       }
 
@@ -168,10 +168,10 @@ export const declineFriendRequest = createAsyncThunk<
       return rejectWithValue(
         error.response?.data?.error || {
           message: "Failed to decline friend request",
-        }
+        },
       );
     }
-  }
+  },
 );
 
 export const sendFollowBackRequest = createAsyncThunk<
@@ -185,17 +185,17 @@ export const sendFollowBackRequest = createAsyncThunk<
       const response = await axiosInstance.post(
         `/adda/request/${userId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       return { userId, success: response.data.success };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || {
           message: "Failed to send follow back request",
-        }
+        },
       );
     }
-  }
+  },
 );
 
 export const declineFollowBackRequest = createAsyncThunk<
@@ -209,17 +209,17 @@ export const declineFollowBackRequest = createAsyncThunk<
       const response = await axiosInstance.post(
         "/adda/decline-follow-back",
         { targetUserId: userId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       return { userId, success: response.data.success };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || {
           message: "Failed to decline follow back request",
-        }
+        },
       );
     }
-  }
+  },
 );
 
 const friendRequestSlice = createSlice({
@@ -232,6 +232,9 @@ const friendRequestSlice = createSlice({
       state.hasMore = true;
       state.loading = false;
       state.error = null;
+    },
+    incrementPage(state) {
+      state.page += 1;
     },
     resetFollowBackUsers(state) {
       state.followBackUsers = null;
@@ -247,11 +250,22 @@ const friendRequestSlice = createSlice({
       })
       .addCase(fetchFriendRequests.fulfilled, (state, action) => {
         state.loading = false;
-        state.requests = state.requests
-          ? [...state.requests, ...action.payload.pendingReceived]
-          : action.payload.pendingReceived;
-        state.page += 1;
-        state.hasMore = state.page <= action.payload.totalPages;
+        state.error = null;
+
+        const incoming = action.payload.pendingReceived;
+
+        if (!state.requests) {
+          state.requests = incoming;
+        } else {
+          const existingIds = new Set(state.requests.map((r) => r.requestId));
+
+          const uniqueIncoming = incoming.filter(
+            (r) => !existingIds.has(r.requestId),
+          );
+
+          state.requests.push(...uniqueIncoming);
+        }
+        state.hasMore = state.page < action.payload.totalPages;
       })
       .addCase(fetchFriendRequests.rejected, (state, action) => {
         state.loading = false;
@@ -279,14 +293,14 @@ const friendRequestSlice = createSlice({
           state.requests = state.requests.map((request) =>
             request.requestId === action.meta.arg.requestId
               ? { ...request, status: "accepting" }
-              : request
+              : request,
           );
         }
       })
       .addCase(acceptFriendRequest.fulfilled, (state, action) => {
         if (state.requests) {
           state.requests = state.requests.filter(
-            (request) => request.requestId !== action.payload.requestId
+            (request) => request.requestId !== action.payload.requestId,
           );
         }
       })
@@ -295,7 +309,7 @@ const friendRequestSlice = createSlice({
           state.requests = state.requests.map((request) =>
             request.requestId === action.meta.arg.requestId
               ? { ...request, status: "pending" }
-              : request
+              : request,
           );
         }
         state.error =
@@ -307,14 +321,14 @@ const friendRequestSlice = createSlice({
           state.requests = state.requests.map((request) =>
             request.requestId === action.meta.arg.requestId
               ? { ...request, status: "declining" }
-              : request
+              : request,
           );
         }
       })
       .addCase(declineFriendRequest.fulfilled, (state, action) => {
         if (state.requests) {
           state.requests = state.requests.filter(
-            (request) => request.requestId !== action.payload.requestId
+            (request) => request.requestId !== action.payload.requestId,
           );
         }
       })
@@ -323,7 +337,7 @@ const friendRequestSlice = createSlice({
           state.requests = state.requests.map((request) =>
             request.requestId === action.meta.arg.requestId
               ? { ...request, status: "pending" }
-              : request
+              : request,
           );
         }
         state.error =
@@ -335,14 +349,14 @@ const friendRequestSlice = createSlice({
           state.followBackUsers = state.followBackUsers.map((user) =>
             user._id === action.meta.arg.userId
               ? { ...user, status: "following-in-progress" }
-              : user
+              : user,
           );
         }
       })
       .addCase(sendFollowBackRequest.fulfilled, (state, action) => {
         if (state.followBackUsers) {
           state.followBackUsers = state.followBackUsers.filter(
-            (user) => user._id !== action.payload.userId
+            (user) => user._id !== action.payload.userId,
           );
         }
       })
@@ -351,7 +365,7 @@ const friendRequestSlice = createSlice({
           state.followBackUsers = state.followBackUsers.map((user) =>
             user._id === action.meta.arg.userId
               ? { ...user, status: undefined }
-              : user
+              : user,
           );
         }
         state.error =
@@ -363,14 +377,14 @@ const friendRequestSlice = createSlice({
           state.followBackUsers = state.followBackUsers.map((user) =>
             user._id === action.meta.arg.userId
               ? { ...user, status: "declining" }
-              : user
+              : user,
           );
         }
       })
       .addCase(declineFollowBackRequest.fulfilled, (state, action) => {
         if (state.followBackUsers) {
           state.followBackUsers = state.followBackUsers.filter(
-            (user) => user._id !== action.payload.userId
+            (user) => user._id !== action.payload.userId,
           );
         }
       })
@@ -379,7 +393,7 @@ const friendRequestSlice = createSlice({
           state.followBackUsers = state.followBackUsers.map((user) =>
             user._id === action.meta.arg.userId
               ? { ...user, status: undefined }
-              : user
+              : user,
           );
         }
         state.error =
@@ -389,6 +403,6 @@ const friendRequestSlice = createSlice({
   },
 });
 
-export const { resetRequests, resetFollowBackUsers } =
+export const { resetRequests, resetFollowBackUsers, incrementPage } =
   friendRequestSlice.actions;
 export default friendRequestSlice.reducer;
