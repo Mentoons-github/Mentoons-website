@@ -11,7 +11,7 @@ interface UserListModalProps {
   title: string;
   setShowModal: (show: boolean) => void;
   currentUserClerkId?: string;
-  currentUserId: string;
+  currentUserId?: string;
 }
 
 const UserListModal: React.FC<UserListModalProps> = ({
@@ -142,7 +142,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
                 .filter((us) => us.role === "USER")
                 .map((user, index) => {
                   const isMe = user._id === currentUserId;
-                  const isFollowing = user.followers?.includes(currentUserId);
+                  const isFollowing = user.followers?.includes(currentUserId as string);
 
                   return (
                     <div

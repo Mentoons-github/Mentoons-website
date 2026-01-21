@@ -68,7 +68,7 @@ export interface PostData {
 
 interface PostCardProps {
   post: PostData;
-  onDelete: (postId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
 interface Comment {
