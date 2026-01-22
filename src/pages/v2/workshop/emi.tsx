@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BASE_URL } from "@/api/game/postScore";
 import {
   TrendingUp,
   CheckCircle,
@@ -7,14 +8,36 @@ import {
   AlertCircle,
 } from "lucide-react";
 import EmiTable from "@/components/Workshop/emi/emiTable";
-import { fetchActiveEmi, fetchEmiStatistics } from "@/api/workshop/emi";
+import {
+  fetchActiveEmi,
+  fetchCompletedPayments,
+  fetchEmiStatistics,
+} from "@/api/workshop/emi";
 import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
+import { downloadInvoice } from "@/api/workshop/emi";
 
 export interface Payment {
-  id: number;
+  userPlanId: string;
   dueDate: string;
   amount: number;
   status: "paid" | "pending" | "overdue";
+}
+
+interface CompletedPayment {
+  paymentId: string;
+  transactionId: string;
+  paymentType: string;
+  amount: number;
+  paymentStatus: string;
+  paidAt: string;
+  emiDetails?: {
+    totalMonths: number;
+    paidMonths: number;
+    emiAmount: number;
+    nextDueDate: string;
+    emiStatus: string;
+  };
 }
 
 interface EmiStatistics {
@@ -29,9 +52,12 @@ interface EmiStatistics {
 
 const Emi = () => {
   const [pendingEmi, setPendingEmi] = useState<Payment[]>([]);
+  const [completedEmi, setCompletedEmi] = useState<CompletedPayment[]>([]);
   const [statistics, setStatistics] = useState<EmiStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const { getToken } = useAuth();
 
@@ -41,51 +67,45 @@ const Emi = () => {
         setLoading(true);
         setError(null);
 
-        const [activeEmiData, statisticsData] = await Promise.all([
-          fetchActiveEmi({ getToken }),
-          fetchEmiStatistics({ getToken }),
-        ]);
+        const [activeEmiResponse, statsResponse, completedResponse] =
+          await Promise.all([
+            fetchActiveEmi({ getToken }),
+            fetchEmiStatistics({ getToken }),
+            fetchCompletedPayments({ getToken }),
+          ]);
 
-        console.log(activeEmiData, statisticsData);
+        setStatistics(statsResponse.data ?? null);
 
-        if (!statisticsData) {
-          setStatistics(null);
-          setPendingEmi([]);
-          setLoading(false);
-          return;
+        let pending: Payment[] = [];
+
+        if (Array.isArray(activeEmiResponse.data)) {
+          pending = activeEmiResponse.data.map((item: any) => {
+            const emi = item || {};
+            const nextDue = emi.nextDueDate;
+            const dueDateObj = nextDue ? new Date(nextDue) : new Date(0);
+
+            return {
+              userPlanId: String(item.userPlanId || item._id || ""),
+              dueDate: nextDue ?? "",
+              amount: Number(emi.monthlyAmount || emi.emiAmount || 0),
+              status: dueDateObj < new Date() ? "overdue" : "pending",
+            };
+          });
         }
 
-        const emiPayments: Payment[] = (activeEmiData || []).map((val: any) => {
-          const dueDate = new Date(val.emiDetails.nextDueDate);
-          const today = new Date();
-
-          let status: "paid" | "pending" | "overdue" = "pending";
-          if (dueDate < today) {
-            status = "overdue";
-          }
-
-          return {
-            id: val._id,
-            dueDate: val.emiDetails.nextDueDate,
-            amount: val.emiDetails.emiAmount,
-            status: status,
-          };
-        });
-
-        setPendingEmi(emiPayments);
-        setStatistics(statisticsData);
-      } catch (err: any) {
-        console.error("Error loading EMI data:", err);
+        setPendingEmi(pending);
 
         if (
-          err.message &&
-          !err.message.includes("404") &&
-          !err.message.includes("No active")
+          completedResponse?.success &&
+          Array.isArray(completedResponse.data)
         ) {
-          setError(err.message || "Failed to load EMI data");
-        } else {
-          setStatistics(null);
-          setPendingEmi([]);
+          setCompletedEmi(completedResponse.data);
+        }
+      } catch (err: any) {
+        const msg = err?.message || "Unknown error";
+        console.log(err);
+        if (!msg.includes("404") && !msg.toLowerCase().includes("no active")) {
+          setError(msg);
         }
       } finally {
         setLoading(false);
@@ -95,25 +115,67 @@ const Emi = () => {
     loadEmiData();
   }, []);
 
-  const handlePayment = (id: string): void => {
-    setPendingEmi((prev) =>
-      prev.map((p) =>
-        p.id.toString() === id ? { ...p, status: "paid" as const } : p
-      )
-    );
+  const handlePayment = async (id: string) => {
+    const selected = pendingEmi.find((p) => p.userPlanId === id);
+    if (!selected) return;
 
-    if (statistics) {
-      setStatistics({
-        ...statistics,
-        paidEmis: statistics.paidEmis + 1,
-        pendingEmis: statistics.pendingEmis - 1,
-        paidAmount:
-          statistics.paidAmount +
-          (pendingEmi.find((p) => p.id.toString() === id)?.amount || 0),
-        remainingAmount:
-          statistics.remainingAmount -
-          (pendingEmi.find((p) => p.id.toString() === id)?.amount || 0),
+    setPaymentLoading(id);
+
+    try {
+      const token = await getToken();
+
+      const response = await axios.post(
+        `${BASE_URL}/workshop/pay-emi`,
+        { userPlanId: selected.userPlanId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = response.data;
+
+      const form = tempDiv.querySelector("form");
+      if (form) {
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        console.error("Form not found in the response HTML.");
+      }
+    } catch (err) {
+      alert("Payment failed. Please try again.");
+    } finally {
+      setPaymentLoading(null);
+    }
+  };
+
+  const handleDownloadInvoice = async (transactionId: string) => {
+    try {
+      const result = await downloadInvoice({
+        getToken,
+        transactionId,
       });
+
+      console.log(result)
+
+      if (typeof result === "string") {
+        alert(`Error: ${result}`);
+        return;
+      }
+
+      const url = window.URL.createObjectURL(result);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${transactionId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Invoice download failed:", err);
+      alert("Failed to download invoice. Please try again.");
     }
   };
 
@@ -157,7 +219,7 @@ const Emi = () => {
     );
   }
 
-  if (!statistics) {
+  if (!statistics || typeof statistics.totalEmiAmount !== "number") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
         <div className="max-w-7xl mx-auto">
@@ -183,17 +245,16 @@ const Emi = () => {
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">
-                No Active EMI Plans
+                EMI Data Not Available
               </h2>
               <p className="text-gray-600 mb-6">
-                You currently don't have any active EMI plans. Start a new plan
-                to manage your installment payments.
+                We couldn't load complete EMI statistics at the moment.
               </p>
               <button
-                onClick={() => window.history.back()}
+                onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md"
               >
-                Go Back
+                Refresh Page
               </button>
             </div>
           </div>
@@ -202,9 +263,10 @@ const Emi = () => {
     );
   }
 
-  const percentage = statistics
-    ? (statistics.paidEmis / statistics.totalEmis) * 100
-    : 0;
+  const percentage =
+    statistics.totalEmis > 0
+      ? (statistics.paidEmis / statistics.totalEmis) * 100
+      : 0;
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -232,7 +294,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Total EMI Amount</p>
                 <p className="text-3xl font-bold text-gray-800">
-                  ₹{statistics.totalEmiAmount.toLocaleString()}
+                  ₹{(statistics.totalEmiAmount ?? 0).toLocaleString()}
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
@@ -246,7 +308,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Amount Paid</p>
                 <p className="text-3xl font-bold text-green-600">
-                  ₹{statistics.paidAmount.toLocaleString()}
+                  ₹{(statistics.paidAmount ?? 0).toLocaleString()}
                 </p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
@@ -260,7 +322,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Remaining Amount</p>
                 <p className="text-3xl font-bold text-orange-600">
-                  ₹{statistics.remainingAmount.toLocaleString()}
+                  ₹{(statistics.remainingAmount ?? 0).toLocaleString()}
                 </p>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
@@ -271,11 +333,54 @@ const Emi = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Pending EMIs
-            </h2>
-            <EmiTable payments={pendingEmi} onPayment={handlePayment} />
+          <div className="lg:col-span-2 space-y-10">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                Pending EMIs
+              </h2>
+              <EmiTable
+                payments={pendingEmi}
+                onPayment={handlePayment}
+                onDownloadInvoice={handleDownloadInvoice}
+                loadingPayment={paymentLoading}
+                variant="pending"
+              />
+            </div>
+
+            <div>
+              <button
+                onClick={() => setShowCompleted(!showCompleted)}
+                className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium rounded-lg shadow-md transition-all duration-200 hover:shadow-lg"
+              >
+                {showCompleted ? "Hide" : "View"} Completed Payments
+                {completedEmi.length > 0 && (
+                  <span className="bg-white/30 px-2.5 py-1 rounded-full text-sm">
+                    {completedEmi.length}
+                  </span>
+                )}
+              </button>
+
+              {showCompleted && (
+                <div className="mt-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                    Completed Payments
+                  </h2>
+                  <EmiTable
+                    payments={completedEmi.map((p) => ({
+                      userPlanId: p.paymentId,
+                      dueDate: p.paidAt,
+                      amount: p.amount,
+                      status: "paid" as const,
+                      transactionId: p.transactionId,
+                    }))}
+                    onPayment={handlePayment}
+                    onDownloadInvoice={handleDownloadInvoice}
+                    loadingPayment={null}
+                    variant="completed"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="lg:col-span-1">

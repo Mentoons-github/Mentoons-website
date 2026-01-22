@@ -1,21 +1,49 @@
-import { Payment } from "@/pages/v2/workshop/emi";
-import { Calendar, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Download,
+} from "lucide-react";
 import { useState } from "react";
 
-interface EmiTableProps {
-  payments: Payment[];
-  onPayment: (id: string) => void;
+interface PaymentItem {
+  userPlanId: string;
+  dueDate: string;
+  amount: number;
+  status: "paid" | "pending" | "overdue";
+  transactionId?: string;
 }
 
-const EmiTable = ({ payments, onPayment }: EmiTableProps) => {
+interface EmiTableProps {
+  payments: PaymentItem[];
+  onPayment: (id: string) => void;
+  onDownloadInvoice: (transactionId: string) => Promise<void>;
+  loadingPayment: string | null;
+  variant?: "pending" | "completed";
+}
+
+const EmiTable = ({
+  payments,
+  onPayment,
+  onDownloadInvoice,
+  loadingPayment,
+  variant = "pending",
+}: EmiTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(payments.length / itemsPerPage);
 
-  const paginatedPayments = payments.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const isCompleted = variant === "completed";
+  const showPagination = !isCompleted && totalPages > 1;
+
+  const paginatedPayments = isCompleted
+    ? payments
+    : payments.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -33,10 +61,10 @@ const EmiTable = ({ payments, onPayment }: EmiTableProps) => {
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                EMI #
+                #
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Due Date
+                Date
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Amount
@@ -51,59 +79,96 @@ const EmiTable = ({ payments, onPayment }: EmiTableProps) => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paginatedPayments.length > 0 ? (
-              paginatedPayments.map((payment, index) => (
-                <tr
-                  key={payment.id}
-                  className="hover:bg-gray-50 transition-all duration-200"
-                >
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    #{index + 1 + (currentPage - 1) * itemsPerPage}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      {formatDate(payment.dueDate)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    ₹{payment.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        payment.status === "paid"
-                          ? "bg-green-100 text-green-800"
-                          : payment.status === "overdue"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {payment.status === "paid" && (
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                      )}
-                      {payment.status.charAt(0).toUpperCase() +
-                        payment.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {payment.status !== "paid" && (
-                      <button
-                        onClick={() => onPayment(payment.id.toString())}
-                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105"
+              paginatedPayments.map((payment, index) => {
+                const isLoading = loadingPayment === payment.userPlanId;
+
+                return (
+                  <tr
+                    key={payment.userPlanId}
+                    className="hover:bg-gray-50 transition-all duration-200"
+                  >
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      #{index + 1}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        {formatDate(payment.dueDate)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      ₹{payment.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          payment.status === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : payment.status === "overdue"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                        }`}
                       >
-                        Pay Now
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
+                        {payment.status === "paid" && (
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                        )}
+                        {payment.status.charAt(0).toUpperCase() +
+                          payment.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {isCompleted ? (
+                        <button
+                          onClick={() => {
+                            if (payment.transactionId) {
+                              onDownloadInvoice(payment.transactionId);
+                            } else {
+                              alert(
+                                "Transaction ID not available for this payment",
+                              );
+                            }
+                          }}
+                          disabled={!payment.transactionId}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Invoice
+                        </button>
+                      ) : (
+                        payment.status !== "paid" && (
+                          <button
+                            onClick={() => onPayment(payment.userPlanId)}
+                            disabled={isLoading}
+                            className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
+                          >
+                            {isLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              "Pay Now"
+                            )}
+                          </button>
+                        )
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                  <div className="flex flex-col items-center gap-2">
-                    <CheckCircle className="w-12 h-12 text-green-500" />
-                    <p className="font-medium">All EMIs are paid!</p>
-                    <p className="text-sm">You have no pending payments.</p>
+                <td
+                  colSpan={5}
+                  className="px-6 py-10 text-center text-gray-500"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <CheckCircle className="w-14 h-14 text-green-500" />
+                    <p className="font-medium text-lg">
+                      {isCompleted
+                        ? "No completed payments yet"
+                        : "No pending EMIs"}
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -112,7 +177,7 @@ const EmiTable = ({ payments, onPayment }: EmiTableProps) => {
         </table>
       </div>
 
-      {totalPages > 1 && (
+      {showPagination && (
         <div className="flex items-center justify-center gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

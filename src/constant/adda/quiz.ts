@@ -1,5 +1,3 @@
-import { WorkshopPlan } from "@/types/workshop";
-
 export const PAYMENT_PLANS = {
   fullPayment: {
     label: "Full Payment",
@@ -50,93 +48,93 @@ export const COLOR_SCHEME = [
   },
 ];
 
-export const WORKSHOP_PLANS: WorkshopPlan[] = [
-  {
-    age: "6-12",
-    duration: "1 Month",
-    mode: ["Online", "Offline"],
-    totalSession: 8,
-    price: {
-      original: 3999,
-      introductory: 2999,
-    },
-    features: [
-      "Ice-breaking, Laughter and Imagination",
-      "Art, Color & Emotions",
-      "Drama & expressive play",
-      "Music, Rhythm & Joy",
-      "Combination & Showcase",
-    ],
-    paymentOption: "fullPayment",
-    materials:
-      "Colors, drawing sheets, music tracks, storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
-  },
-  {
-    age: "6-12",
-    duration: "3 Months",
-    mode: ["Online", "Offline"],
-    totalSession: 12,
-    price: {
-      original: 10000,
-      introductory: 7129,
-      monthly: 3564.5,
-    },
-    features: [
-      "New friends introduction through fictional characters",
-      "Learning through stories, games and imagination",
-      "One-Minute word challenge",
-      "Story problem spark",
-      "Mini story creation",
-      "Voluntary Story share",
-      "Gentle Reconnect",
-      "Emotion Check-in",
-      "The Circle of Trust",
-      "Good Touch – Bad Touch (Feelings focused)",
-      "Logical Safety Thinking",
-      "The Safe Ending Story Challenge",
-      "Blog-Style Reflection & Closure",
-    ],
-    paymentOption: "twoStep",
-    materials:
-      "Activity kits, storytelling cards, games, worksheets, participation certificate",
-  },
-  {
-    age: "6-12",
-    duration: "6 Months",
-    mode: ["Online", "Offline"],
-    totalSession: 20,
-    price: { original: 90000, introductory: 75000, monthly: 12500 },
-    features: [
-      "Behavioral Change",
-      "Respecting elders",
-      "Moral Values",
-      "Introduction to spirituality",
-      "Revival of Ancient Values",
-      "Understanding Thoughts, emotions, feeling, love",
-    ],
-    paymentOption: "emi",
-    materials:
-      "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
-  },
-  {
-    age: "6-12",
-    duration: "1 Year",
-    mode: ["Online", "Offline"],
-    totalSession: 40,
-    price: { original: 150000, introductory: 120000, monthly: 10000 },
-    features: [
-      "Practicals",
-      "Become a mentor (10+ years)",
-      "Earn money through Storytelling, Voice-over, Acting, Singing",
-      "Behavioral Change",
-      "Respecting elders",
-      "Moral Values",
-      "Introduction to spirituality",
-      "Revival of Ancient Values",
-      "Understanding Thoughts, emotions, feeling, love",
-    ],
-    paymentOption: "emi",
-    materials:
-      "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
-  },
-];
+// export const WORKSHOP_PLANS: WorkshopPlan[] = [
+//   {
+//     age: "6-12",
+//     duration: "1 Month",
+//     mode: ["Online", "Offline"],
+//     totalSession: 8,
+//     price: {
+//       original: 3999,
+//       introductory: 2999,
+//     },
+//     features: [
+//       "Ice-breaking, Laughter and Imagination",
+//       "Art, Color & Emotions",
+//       "Drama & expressive play",
+//       "Music, Rhythm & Joy",
+//       "Combination & Showcase",
+//     ],
+//     paymentOptions: "fullPayment",
+//     materials:
+//       "Colors, drawing sheets, music tracks, storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
+//   },
+//   {
+//     age: "6-12",
+//     duration: "3 Months",
+//     mode: ["Online", "Offline"],
+//     totalSession: 12,
+//     price: {
+//       original: 10000,
+//       introductory: 7129,
+//       monthly: 3564.5,
+//     },
+//     features: [
+//       "New friends introduction through fictional characters",
+//       "Learning through stories, games and imagination",
+//       "One-Minute word challenge",
+//       "Story problem spark",
+//       "Mini story creation",
+//       "Voluntary Story share",
+//       "Gentle Reconnect",
+//       "Emotion Check-in",
+//       "The Circle of Trust",
+//       "Good Touch – Bad Touch (Feelings focused)",
+//       "Logical Safety Thinking",
+//       "The Safe Ending Story Challenge",
+//       "Blog-Style Reflection & Closure",
+//     ],
+//     paymentOption: "twoStep",
+//     materials:
+//       "Activity kits, storytelling cards, games, worksheets, participation certificate",
+//   },
+//   {
+//     age: "6-12",
+//     duration: "6 Months",
+//     mode: ["Online", "Offline"],
+//     totalSession: 20,
+//     price: { original: 90000, introductory: 75000, monthly: 12500 },
+//     features: [
+//       "Behavioral Change",
+//       "Respecting elders",
+//       "Moral Values",
+//       "Introduction to spirituality",
+//       "Revival of Ancient Values",
+//       "Understanding Thoughts, emotions, feeling, love",
+//     ],
+//     paymentOption: "emi",
+//     materials:
+//       "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
+//   },
+//   {
+//     age: "6-12",
+//     duration: "1 Year",
+//     mode: ["Online", "Offline"],
+//     totalSession: 40,
+//     price: { original: 150000, introductory: 120000, monthly: 10000 },
+//     features: [
+//       "Practicals",
+//       "Become a mentor (10+ years)",
+//       "Earn money through Storytelling, Voice-over, Acting, Singing",
+//       "Behavioral Change",
+//       "Respecting elders",
+//       "Moral Values",
+//       "Introduction to spirituality",
+//       "Revival of Ancient Values",
+//       "Understanding Thoughts, emotions, feeling, love",
+//     ],
+//     paymentOption: "emi",
+//     materials:
+//       "Comics, Workshop, Conversation Starter Kit, Games, Coloring Book, Learning Materials, Certifications",
+//   },
+// ];

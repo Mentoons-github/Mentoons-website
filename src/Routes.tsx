@@ -147,11 +147,7 @@ const routes = [
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   {
     path: "/emi",
-    element: (
-      <ProtectedRoute>
-        <Emi />
-      </ProtectedRoute>
-    ),
+    element: <Emi />,
   },
 ];
 
@@ -163,7 +159,7 @@ const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(
-    (store: RootState) => store.comics.currentHoverComic
+    (store: RootState) => store.comics.currentHoverComic,
   );
 
   const handlePopup = (value: boolean) => {

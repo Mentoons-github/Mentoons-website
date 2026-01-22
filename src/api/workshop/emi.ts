@@ -5,6 +5,11 @@ type FetchActiveEmiArgs = {
   getToken: (options?: { template?: string }) => Promise<string | null>;
 };
 
+interface DownloadInvoiceArgs {
+  getToken: GetTokenFn;
+  transactionId: string;
+}
+
 type GetTokenFn = (options?: { template?: string }) => Promise<string | null>;
 
 interface PaymentInterface {
@@ -15,7 +20,6 @@ interface PaymentInterface {
 export const fetchActiveEmi = async ({ getToken }: FetchActiveEmiArgs) => {
   try {
     const token = await getToken();
-    console.log(token);
     const response = await axios.get(`${BASE_URL}/workshop/active-emi`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -24,8 +28,8 @@ export const fetchActiveEmi = async ({ getToken }: FetchActiveEmiArgs) => {
 
     return response.data;
   } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>;
-    return error?.response?.data?.message;
+    const error = err as AxiosError<{ error: string }>;
+    return error?.response?.data?.error;
   }
 };
 
@@ -45,12 +49,51 @@ export const fetchEmiStatistics = async ({ getToken }: FetchActiveEmiArgs) => {
   }
 };
 
+export const fetchCompletedPayments = async ({
+  getToken,
+}: FetchActiveEmiArgs) => {
+  try {
+    const token = await getToken();
+    const response = await axios.get(`${BASE_URL}/workshop/completed-emi`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ error: string }>;
+    return error?.response?.data?.error;
+  }
+};
+
+export const downloadInvoice = async ({
+  getToken,
+  transactionId,
+}: DownloadInvoiceArgs) => {
+  try {
+    const token = await getToken();
+    const response = await axios.get(
+      `${BASE_URL}/workshop/invoice/${transactionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ error: string }>;
+    return error?.response?.data?.error;
+  }
+};
+
 export const handleFirstDownPayment = async ({
   paymentDetails,
   getToken,
 }: PaymentInterface) => {
   try {
-    console.log("calling the emi fucntion");
     const token = await getToken();
     const response = await axios.post(
       `${BASE_URL}/workshop/pay-downpayment`,
@@ -61,7 +104,7 @@ export const handleFirstDownPayment = async ({
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     console.log(response.data);
     return response.data;
