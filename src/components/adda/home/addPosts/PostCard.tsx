@@ -1,7 +1,5 @@
 import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 import { useAuthModal } from "@/context/adda/authModalContext";
-import { useStatusModal } from "@/context/adda/statusModalContext";
-import { Post } from "@/pages/v2/adda/userProfile";
 import { RewardEventType } from "@/types/rewards";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth, useUser } from "@clerk/clerk-react";
@@ -19,6 +17,7 @@ import Reactions from "./likes/reactions";
 import ReactionsDisplay from "./likes/ReactionsDisplay";
 import Share from "./share/share";
 import PostContent from "./renderPostContent";
+import axiosInstance from "@/api/axios";
 
 export type PostType =
   | "text"
@@ -69,8 +68,6 @@ export interface PostData {
 
 interface PostCardProps {
   post: PostData;
-  isUser?: boolean;
-  setUserPosts?: React.Dispatch<React.SetStateAction<Post[]>>;
   onDelete?: (postId: string) => void;
 }
 
@@ -85,12 +82,7 @@ interface Comment {
   content: string;
 }
 
-const PostCard = ({
-  post,
-  isUser = false,
-  onDelete,
-  setUserPosts,
-}: PostCardProps) => {
+const PostCard = ({ post, onDelete }: PostCardProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
@@ -104,11 +96,36 @@ const PostCard = ({
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
+  const [userId, setUserId] = useState<string>("");
 
-  const { showStatus } = useStatusModal();
   const user = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+
+  const fetchUser = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const res = await axiosInstance.get("user/user", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserId(res.data.data._id);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      console.error(
+        err instanceof Error ? err.message : "Failed to load user data",
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -138,7 +155,7 @@ const PostCard = ({
           }`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setIsUserBlocked(response.data.isBlocked);
       } catch (error) {
@@ -150,37 +167,10 @@ const PostCard = ({
   }, [post.user._id, isSignedIn, getToken]);
 
   const handleDeletePost = async () => {
-    try {
-      const token = await getToken();
-      const response = await axios.delete(
-        `${import.meta.env.VITE_PROD_URL}/posts/${post._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success === true) {
-        setUserPosts?.((prev) =>
-          prev.filter((userPost) => userPost._id !== post._id)
-        );
-        showStatus("success", "Post deleted successfully.");
-        if (onDelete) {
-          onDelete(post._id);
-        }
-      } else {
-        showStatus("error", "Failed to delete post.");
-      }
-    } catch (error: any) {
-      console.error("Error deleting post:", error);
-      showStatus(
-        "error",
-        error?.response?.data?.message || "Something went wrong."
-      );
-    } finally {
-      setShowDropdown(false);
+    if (onDelete) {
+      onDelete(post._id);
     }
+    setShowDropdown(false);
   };
 
   const handleReportAbuse = () => {
@@ -221,7 +211,7 @@ const PostCard = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setIsUserBlocked(false);
       toast.success("User unblocked successfully.");
@@ -281,7 +271,7 @@ const PostCard = ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data && response.data.data) {
@@ -291,7 +281,7 @@ const PostCard = ({
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         console.log("Server comment data:", serverComment.data.data);
         setComments(serverComment.data.data);
@@ -304,7 +294,7 @@ const PostCard = ({
       toast.error("Failed to add comment. Please try again.");
 
       setComments((prevComments) =>
-        prevComments.filter((comment) => comment._id !== tempId)
+        prevComments.filter((comment) => comment._id !== tempId),
       );
       setCommentCount((prev) => prev - 1);
     }
@@ -339,7 +329,7 @@ const PostCard = ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       console.log(response.data);
 
@@ -358,7 +348,7 @@ const PostCard = ({
     if (!isSignedIn) {
       openAuthModal("sign-in");
       return;
-    } else if (isUser) {
+    } else if (userId === post.user._id) {
       navigate("/adda/user-profile");
     } else {
       navigate(`/adda/user/${post.user._id}`);
@@ -373,7 +363,7 @@ const PostCard = ({
           `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
             post._id
           }/check-saved`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setIsSavedPost(response.data.data);
       } catch (error) {
@@ -385,7 +375,7 @@ const PostCard = ({
       const token = await getToken();
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setComments(response.data.data);
       setCommentCount(response.data.data.length);
@@ -431,7 +421,6 @@ const PostCard = ({
               className="p-2 text-gray-500 transition-colors rounded-full hover:bg-orange-100"
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("Toggling dropdown, current state:", showDropdown);
                 setShowDropdown((prev) => !prev);
               }}
             >
@@ -446,7 +435,7 @@ const PostCard = ({
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
               >
-                {isUser ? (
+                {userId === post.user._id ? (
                   <button
                     className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
                     onClick={handleDeletePost}

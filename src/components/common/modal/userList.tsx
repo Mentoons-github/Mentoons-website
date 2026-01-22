@@ -4,23 +4,28 @@ import { errorToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import { Loader2, User, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface UserListModalProps {
   userIds: string[];
   title: string;
-    setShowModal: (show: boolean) => void;
+  setShowModal: (show: boolean) => void;
+  currentUserClerkId?: string;
+  currentUserId?: string;
 }
 
 const UserListModal: React.FC<UserListModalProps> = ({
   userIds,
   title,
   setShowModal,
+  currentUserClerkId,
+  currentUserId,
 }) => {
   const { getToken } = useAuth();
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 10);
@@ -37,13 +42,18 @@ const UserListModal: React.FC<UserListModalProps> = ({
         const response = await axiosInstance.post(
           "/user/bulk",
           { userIds },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const fetchedUsers = response.data.data.map((user: any) => ({
           _id: user._id,
           name: user.name,
           picture: user.picture,
+          role: user.role,
+          clerkId: user.clerkId,
+          followers: user.followers,
+          following: user.following,
         }));
+
         setUsers(fetchedUsers);
       } catch (error) {
         errorToast("Failed to load users");
@@ -69,6 +79,12 @@ const UserListModal: React.FC<UserListModalProps> = ({
       handleClose();
     }
   };
+
+  const handleFollowToggle = (userId:string, isFollowing:boolean) => {
+
+    console.log(userId,'userddddd')
+    console.log(isFollowing,'jjjjjjjj')
+  }
 
   return (
     <div
@@ -122,43 +138,70 @@ const UserListModal: React.FC<UserListModalProps> = ({
             </div>
           ) : (
             <div className="space-y-1">
-              {users.map((user, index) => (
-                <NavLink
-                  to={`/adda/user/${user._id}`}
-                  key={user._id}
-                  className={`flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] ${
-                    isVisible ? "animate-slideInUp" : ""
-                  }`}
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                    animationFillMode: "both",
-                  }}
-                >
-                  <div className="relative">
-                    {user.picture ? (
-                      <img
-                        src={user.picture}
-                        alt={user.name}
-                        className="object-cover w-12 h-12 transition-shadow duration-200 border-2 border-white rounded-full shadow-md group-hover:shadow-lg"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center w-12 h-12 transition-shadow duration-200 rounded-full shadow-md bg-gradient-to-br from-blue-400 to-purple-500 group-hover:shadow-lg">
-                        <span className="text-sm font-medium text-white">
-                          {user.name[0]?.toUpperCase() || "U"}
-                        </span>
+              {users
+                .filter((us) => us.role === "USER")
+                .map((user, index) => {
+                  const isMe = user._id === currentUserId;
+                  const isFollowing = user.followers?.includes(currentUserId as string);
+
+                  return (
+                    <div
+                      key={user._id}
+                      className={`flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] ${
+                        isVisible ? "animate-slideInUp" : ""
+                      }`}
+                      style={{
+                        animationDelay: `${index * 50}ms`,
+                        animationFillMode: "both",
+                      }}
+                    >
+                      {/* Left: Avatar + Name */}
+                      <div
+                        className="flex items-center gap-3 flex-1 min-w-0"
+                        onClick={() =>
+                          navigate(
+                            user.clerkId === currentUserClerkId
+                              ? "/adda/user-profile"
+                              : `/adda/user/${user._id}`,
+                          )
+                        }
+                      >
+                        <div className="relative w-12 h-12">
+                          {user.picture ? (
+                            <img
+                              src={user.picture}
+                              alt={user.name}
+                              className="object-cover w-full h-full transition-shadow duration-200 border-2 border-white rounded-full shadow-md group-hover:shadow-lg"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center w-full h-full rounded-full shadow-md bg-gradient-to-br from-blue-400 to-purple-500 group-hover:shadow-lg">
+                              <span className="text-sm font-medium text-white">
+                                {user.name[0]?.toUpperCase() || "U"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-blue-600">
+                          {user.name}
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-blue-600">
-                      {user.name}
-                    </p>
-                  </div>
-                  <div className="transition-opacity duration-200 opacity-0 group-hover:opacity-100">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  </div>
-                </NavLink>
-              ))}
+
+                      {/* Right: Follow button (hidden if current user) */}
+                      {!isMe && (
+                        <button
+                          className={`py-1 px-3 rounded-md font-medium whitespace-nowrap ${
+                            isFollowing
+                              ? "bg-gray-300 text-gray-700"
+                              : "bg-orange-500 text-white"
+                          }`}
+                          onClick={() => handleFollowToggle(user._id, isFollowing as boolean)}
+                        >
+                          {isFollowing ? "Following" : "Follow"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>

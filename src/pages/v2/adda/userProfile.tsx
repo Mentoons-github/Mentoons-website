@@ -2130,8 +2130,8 @@ const UserProfile = () => {
                       <div className="space-y-4">
                         {userPosts.map((post) => (
                           <PostCard
-                            setUserPosts={setUserPosts}
-                            isUser={true}
+                            // setUserPosts={setUserPosts}
+                            // isUser={true}
                             key={post._id}
                             post={post as unknown as PostData}
                           />

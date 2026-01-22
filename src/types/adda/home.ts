@@ -31,6 +31,10 @@ export interface UserSummary {
   _id: string;
   name: string;
   picture: string;
+  role: string;
+  clerkId?: string;
+  followers?: string[];
+  following?: string[];
 }
 
 export interface FriendRequestResponse {

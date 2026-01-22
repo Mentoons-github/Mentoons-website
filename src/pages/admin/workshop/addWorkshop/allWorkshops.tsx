@@ -208,7 +208,7 @@ const AllWorkshops: React.FC = () => {
         sortField={String(sortField)}
         sortOrder={sortOrder}
         onSort={handleSort}
-        excludeColumns={["_id", "__v", "updatedAt", "workshops"]}
+        excludeColumns={["_id", "__v", "updatedAt", "workshops", "description"]}
         maxCellLength={50}
         formatCell={formatCell}
         formatHeader={formatHeader}

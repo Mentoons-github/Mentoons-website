@@ -12,13 +12,14 @@ import {
   declineFollowBackRequest,
   resetRequests,
   resetFollowBackUsers,
+  incrementPage,
 } from "@/redux/adda/friendRequest";
 import { RootState } from "@/redux/store";
 import { RequestSender, FollowBackUser } from "@/types/adda/friendRequest";
 
 const FriendRequestsList = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { getToken } = useAuth()
+  const { getToken } = useAuth();
   const {
     requests,
     followBackUsers,
@@ -36,6 +37,7 @@ const FriendRequestsList = () => {
     const fetchData = async () => {
       const token = await getToken();
       if (token) {
+        console.log("DISPATCH");
         dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
         dispatch(fetchFollowBackUsers(token));
       }
@@ -59,16 +61,17 @@ const FriendRequestsList = () => {
             getToken().then((token) => {
               if (token) {
                 dispatch(fetchFriendRequests({ page, limit: 10, token }));
+                dispatch(incrementPage());
               }
             });
           }
         },
-        { threshold: 0.8 }
+        { threshold: 0.8 },
       );
 
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore, page, dispatch, getToken]
+    [loading, hasMore, page, dispatch, getToken],
   );
 
   const handleAccept = async (requestId: string) => {
@@ -135,10 +138,10 @@ const FriendRequestsList = () => {
                 user.status === "declining"
                   ? "border-blue-200 bg-blue-50"
                   : user.status === "following"
-                  ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
-                  : user.status === "declined"
-                  ? "border-red-300 bg-red-100 transform scale-95 opacity-80"
-                  : "border-orange-100 bg-white hover:shadow-md"
+                    ? "border-green-300 bg-green-100 transform scale-95 opacity-80"
+                    : user.status === "declined"
+                      ? "border-red-300 bg-red-100 transform scale-95 opacity-80"
+                      : "border-orange-100 bg-white hover:shadow-md"
               }`}
             >
               <div className="flex items-center gap-3 mb-3 sm:mb-0 sm:flex-1">

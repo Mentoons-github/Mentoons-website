@@ -263,7 +263,6 @@ const ProfilePostCard = ({ post }: PostCardProps) => {
     <>
       <div >
         <div className="flex items-center justify-between w-full">
-          {/* <PostContent post={post} /> */}
           {renderPostContent()}
           {selectedPost && (
             <Highlight selectedPost={selectedPost} setPost={setSelectedPost} />

@@ -64,6 +64,7 @@ const AddWorkshop: React.FC = () => {
           setFormInitialValues({
             categoryName: workshopData.categoryName || "",
             subtitle: workshopData.subtitle || "",
+            description: workshopData.description || "",
             workshops: workshopData.workshops || [
               {
                 workshopName: "",
@@ -433,6 +434,29 @@ const AddWorkshop: React.FC = () => {
                     />
                   </div>
 
+                  {/* Description */}
+                  <div className="space-y-3 mb-4 sm:mb-6">
+                    <label
+                      htmlFor={`description`}
+                      className="block text-base sm:text-lg font-semibold text-gray-900"
+                    >
+                      Desctiption
+                    </label>
+                    <Field
+                      name={`description`}
+                      as="textarea"
+                      rows={3}
+                      placeholder={`Enter Description `}
+                      disabled={isSubmitting}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <ErrorMessage
+                      name={`description`}
+                      component="div"
+                      className="text-red-500 text-sm font-medium"
+                    />
+                  </div>
+
                   {/* Workshops */}
                   <div className="space-y-3">
                     <label className="block text-base sm:text-lg font-semibold text-gray-900">
@@ -445,6 +469,7 @@ const AddWorkshop: React.FC = () => {
                       }: {
                         push: (value: {
                           workshopName: string;
+                          overview: string;
                           whyChooseUs: {
                             heading: string;
                             description: string;
@@ -494,6 +519,29 @@ const AddWorkshop: React.FC = () => {
                                   name={`workshops[${workshopIndex}].workshopName`}
                                   component="div"
                                   className="text-red-500 text-sm font-medium flex items-center gap-1"
+                                />
+                              </div>
+
+                              {/* workshop overview */}
+                              <div className="space-y-3 mb-4 sm:mb-6">
+                                <label
+                                  htmlFor={`workshops[${workshopIndex}].overview`}
+                                  className="block text-base sm:text-lg font-semibold text-gray-900"
+                                >
+                                  Workshop Overview
+                                </label>
+                                <Field
+                                  name={`workshops[${workshopIndex}].overview`}
+                                  as="textarea"
+                                  rows={3}
+                                  placeholder={`Enter Workshop Overview `}
+                                  disabled={isSubmitting}
+                                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-base sm:text-lg rounded-xl bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                />
+                                <ErrorMessage
+                                  name={`workshops[${workshopIndex}].overview`}
+                                  component="div"
+                                  className="text-red-500 text-sm font-medium"
                                 />
                               </div>
 
@@ -936,6 +984,7 @@ const AddWorkshop: React.FC = () => {
                             onClick={() =>
                               push({
                                 workshopName: "",
+                                overview: "",
                                 whyChooseUs: [{ heading: "", description: "" }],
                                 ageGroups: [],
                               })

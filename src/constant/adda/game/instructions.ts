@@ -385,4 +385,27 @@ export const GAME_INSTRUCTIONS: Games[] = [
       },
     ],
   },
+  {
+    game: "Pattern Race",
+    steps: [
+      {
+        text: "You will see a pattern puzzle with some boxes already filled and some empty boxes.",
+        icon: "TrendingUp",
+        type: "image",
+        media: "/assets/games/patternRace/instructions/pattern.png",
+      },
+      {
+        text: "Drag and drop the correct image into the empty boxes to complete the pattern.",
+        icon: "Hand",
+        type: "video",
+        media: "/assets/games/patternRace/instructions/drag.mp4",
+      },
+      {
+        text: "Solve as many puzzles as you can before the timer ends. Each correct pattern gives you 10 points.",
+        icon: "BarChart3",
+        type: "image",
+        media: "/assets/games/patternRace/instructions/header.png",
+      },
+    ],
+  },
 ];

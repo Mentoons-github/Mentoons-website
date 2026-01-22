@@ -82,7 +82,7 @@ const ProductNav = ({
   };
 
   return (
-    <div className="sticky top-[65px] border-b border-gray-300 shadow-sm z-20 md:hidden bg-white">
+    <div className="sticky top-[65px] border-gray-300 shadow-sm z-20 md:hidden bg-white mt-2">
       <div className="px-4 py-1">
         <h3 className="text-sm font-semibold text-gray-800 mb-1">
           Shop by Age Group
