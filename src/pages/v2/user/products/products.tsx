@@ -289,6 +289,41 @@ const ProductsPage = () => {
   return (
     <div className="w-full max-w-full overflow-hidden min-h-screen">
       <div className="h-auto px-2 sm:px-4 py-6 sm:py-8 md:px-8 md:py-10 lg:px-12 lg:py-12 max-w-full">
+        <div className="lg:flex gap-4 items-center">
+          <div className="flex flex-col gap-4 text-center md:text-left max-w-4xl mx-auto">
+            <h1 className="text-3xl  md:text-6xl font-bold text-gray-900">
+              <span className="text-[#ff9800]">Mentoons Products</span>
+            </h1>
+            <p className=" md:text-lg text-gray-600">
+              Rediscover the perfect balance between{" "}
+              <span className="font-medium">work</span>,{" "}
+              <span className="font-medium">personal growth</span>, and{" "}
+              <span className="font-medium">well-being</span>.
+            </p>
+            <p className=" md:text-lg text-gray-600">
+              Each product is backed by{" "}
+              <span className="font-semibold text-gray-800">
+                extensive research
+              </span>{" "}
+              and real-world success stories. We are confident they will make a
+              difference, and we offer a{" "}
+              <span className="text-[#ff9800] font-semibold">
+                satisfaction guarantee
+              </span>{" "}
+              for peace of mind.
+            </p>
+          </div>
+          <ProductsSlider
+            shopNow={(title: string) => {
+              setSearchTerm(title);
+              setInputValue(title);
+              setHasInitialLoad(false);
+              const params = new URLSearchParams();
+              params.set("search", title);
+              navigate({ search: params.toString() });
+            }}
+          />
+        </div>
         <div className="max-w-full overflow-hidden mb-2">
           <ProductNav
             searchTerm={searchTerm}
@@ -298,7 +333,7 @@ const ProductsPage = () => {
           />
         </div>
 
-        <div className="relative p-3 sm:p-4 border rounded-full shadow-lg mb-4 sm:mb-6 bg-white max-w-full">
+        <div className="relative p-3 md:mt-5 lg:mt-10 sm:p-4 border rounded-full shadow-lg mb-4 sm:mb-6 bg-white max-w-full">
           <FaMagnifyingGlass className="absolute w-3 sm:w-4 h-3 sm:h-4 text-gray-400 transform -translate-y-1/2 top-1/2 left-3 sm:left-4" />
           <input
             type="text"
@@ -328,16 +363,6 @@ const ProductsPage = () => {
           <div className="flex-1 min-w-0 max-w-full">
             {!searchTerm && (
               <div className="max-w-full overflow-hidden">
-                <ProductsSlider
-                  shopNow={(title: string) => {
-                    setSearchTerm(title);
-                    setInputValue(title);
-                    setHasInitialLoad(false);
-                    const params = new URLSearchParams();
-                    params.set("search", title);
-                    navigate({ search: params.toString() });
-                  }}
-                />
                 <AgeButton
                   showAll={true}
                   isInView={true}
@@ -345,6 +370,28 @@ const ProductsPage = () => {
                   setSelectedCategory={handleSelectedCategory}
                   className="py-2 grid w-full grid-cols-5 gap-2 mx-auto mt-8 sm:mt-10  md:gap-8  lg:gap-16"
                 />
+              </div>
+            )}
+
+            {inputValue === "Conversation Starter Cards" && (
+              <div className="flex flex-col gap-4 text-center md:text-left lg:mx-5 ">
+                <h1 className="text-3xl  md:text-5xl font-bold text-gray-900">
+                  <span className="text-[#ff9800]">
+                    Conversation Starter Cards Kit
+                  </span>
+                </h1>
+                <p className=" md:text-lg text-gray-600">
+                  As parents ourselves, we've faced the same challenges you're
+                  experiencing. We've put our hearts into creating a solution
+                  that works. Our team of child psychologists and educators has
+                  carefully crafted each question to spark engaging
+                  conversations.
+                </p>
+                <p className=" md:text-lg text-gray-600">
+                  Trusted by thousands of families and recommended by leading
+                  child development experts, our Conversation Starter Cards are
+                  your key to unlocking your child's potential.
+                </p>
               </div>
             )}
 

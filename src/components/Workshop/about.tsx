@@ -49,7 +49,7 @@ const AboutWorkshop = ({
       {/* LEFT SECTION */}
       <motion.div
         variants={fadeInUp}
-        className="flex-1 w-full max-w-4xl px-4  lg:px-8 pt-8 md:pt-12 text-center md:text-left"
+        className="flex-1 w-full max-w-4xl px-2  lg:px-8 pt-8 md:pt-12 md:text-left"
       >
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
           Workshops At Mentoons
@@ -69,7 +69,7 @@ const AboutWorkshop = ({
             className="text-lg sm:text-xl md:text-2xl w-full md:w-[80%] mx-auto md:mx-0 text-orange-500"
           />
         </div>
-        <p className="text-base sm:text-lg md:text-xl w-full md:w-[80%] mt-4 pb-4 mx-auto md:mx-0">
+        {/* <p className="text-base sm:text-lg md:text-xl w-full md:w-[80%] mt-4 pb-4 mx-auto md:mx-0">
           At Mentoons, we conduct informative and interactive workshops that
           provide an effective and transformative experience for our
           participants.
@@ -78,6 +78,17 @@ const AboutWorkshop = ({
           Our expert-led workshops empower children, teens, and young adults to
           build healthier relationships with technology—without compromising
           fun, connection, or creativity.
+        </p> */}
+
+        <p className="text-base sm:text-lg md:text-xl w-full md:w-[80%] mt-2 pb-6 mx-auto md:mx-0">
+          These are specially designed workshops aimed at social media
+          de-addiction, cell-phone de-addiction, and gaming de-addiction by
+          improving productivity and overall quality of life.
+        </p>
+        <p className="text-base sm:text-lg md:text-xl w-full md:w-[80%] mt- pb-6 mx-auto md:mx-0">
+          Our team of Psychology Graduates, Certified Career Experts, and Human
+          Resources Experts, all trained in child psychology, work together to
+          provide a safe and supportive environment for our participants.
         </p>
       </motion.div>
 

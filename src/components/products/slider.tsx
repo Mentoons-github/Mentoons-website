@@ -175,7 +175,7 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
 
   return (
     <div
-      className="relative w-full max-w-[100vw] mx-auto px-2 sm:px-4"
+      className="relative w-full max-w-[100vw] lg:max-w-[52vw] mx-auto px-2 sm:px-4 mt-2"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -220,7 +220,7 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
         {products.map((product) => (
           <div
             key={product.id}
-            className={`min-w-[90vw] sm:min-w-[80vw] md:min-w-[75vw] lg:min-w-[70vw] border shadow-lg flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4 ${product.color} rounded-xl sm:rounded-2xl snap-start transition-transform hover:scale-[0.98] cursor-pointer`}
+            className={`min-w-[90vw] sm:min-w-[80vw] md:min-w-[80vw] lg:min-w-[40vw] border shadow-lg flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4 ${product.color} rounded-xl sm:rounded-2xl snap-start transition-transform hover:scale-[0.98] cursor-pointer`}
             data-index={product.id - 1}
           >
             <div className="flex-1 text-start mb-4 sm:mb-0 sm:ml-4 md:ml-6">
@@ -238,11 +238,11 @@ const ProductsSlider = ({ shopNow }: { shopNow: (val: string) => void }) => {
               </button>
             </div>
 
-            <div className="flex justify-center sm:justify-end flex-shrink-0 w-full sm:w-auto">
+            <div className="flex justify-center md:justify-end flex-shrink-0 w-full sm:w-auto ">
               <img
                 src={product.image}
                 alt={product.alt}
-                className="w-[150px] sm:w-[200px] md:w-[250px] lg:w-[300px] object-contain transform transition-transform hover:rotate-2"
+                className="w-[250px] lg:w-[300px] object-contain transform transition-transform hover:rotate-2"
               />
             </div>
           </div>

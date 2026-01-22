@@ -14,7 +14,6 @@ import ProfileCompletionWidget from "@/components/adda/cards/profileCompletion";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import Croppr from "croppr";
 import "croppr/dist/croppr.css";
-import PhotosCard from "./adda/userProfile/cards/photosCard";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Posts");
@@ -22,7 +21,7 @@ const Profile = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [modalType, setModalType] = useState<"followers" | "following" | null>(
-    null
+    null,
   );
   const [userPosts, setUserPosts] = useState<ProfilePost[]>([]);
   const [userSavedPosts, setUserSavedPosts] = useState<ProfilePost[]>([]);
@@ -44,6 +43,7 @@ const Profile = () => {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const [profileImageLoaded, setProfileImageLoaded] = useState(false);
+  const [userId, setUserId] = useState<string>("");
 
   const profileFields = [
     { field: "name", label: "Name", required: true },
@@ -135,7 +135,6 @@ const Profile = () => {
   const fetchUserData = async () => {
     setIsFetchingUserData(true);
     const token = await getToken();
-    console.log(token,'tokennnnnn')
     if (!token) {
       setIsFetchingUserData(false);
       return;
@@ -150,13 +149,14 @@ const Profile = () => {
             `${import.meta.env.VITE_PROD_URL}/posts/user/${
               user?.id
             }?currentUser=${user?.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           ),
           axios.get(`${import.meta.env.VITE_PROD_URL}/feeds/saved`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
       setUserDetails(userResponse.data.data);
+      setUserId(userResponse.data.data._id);
       setTotalFollowers(userResponse.data.data.followers || []);
       setTotalFollowing(userResponse.data.data.following || []);
       setUserPosts(
@@ -172,7 +172,7 @@ const Profile = () => {
           shares: post.shares || [],
           saves: post.saves || 0,
           visibility: post.visibility || "public",
-        }))
+        })),
       );
       setUserSavedPosts(
         savedPostsResponse.data.data.map((post: ProfilePost) => ({
@@ -187,7 +187,7 @@ const Profile = () => {
           shares: post.shares || [],
           saves: post.saves || 0,
           visibility: post.visibility || "public",
-        }))
+        })),
       );
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -327,7 +327,7 @@ const Profile = () => {
           type === "cover" ? "cover.jpg" : "profile.jpg",
           {
             type: "image/jpeg",
-          }
+          },
         );
         if (type === "cover") await handleCoverPhotoChange(croppedFile);
         else await handleProfilePhotoChange(croppedFile);
@@ -421,7 +421,7 @@ const Profile = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) throw new Error("Upload failed");
@@ -430,7 +430,7 @@ const Profile = () => {
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { coverImage: fileUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
       showModal({
@@ -475,7 +475,7 @@ const Profile = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) throw new Error("Upload failed");
@@ -483,7 +483,7 @@ const Profile = () => {
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { picture: fileUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
       showModal({
@@ -535,7 +535,7 @@ const Profile = () => {
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setUserDetails((prev) => ({ ...prev, ...profileData }));
       setShowCompletionForm(false);
@@ -583,7 +583,7 @@ const Profile = () => {
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         { interests: userDetails.interests || [] },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       showModal({
         isSubmitting: false,
@@ -722,10 +722,10 @@ const Profile = () => {
                           {tab === "Posts"
                             ? userPosts.length
                             : tab === "Rewards"
-                            ? 8
-                            : tab === "Saved"
-                            ? userSavedPosts.length
-                            : "1"}
+                              ? 8
+                              : tab === "Saved"
+                                ? userSavedPosts.length
+                                : "1"}
                         </span>
                       )}
                     </button>
@@ -746,9 +746,9 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 lg:mt-8">
+          {/* <div className="mt-4 sm:mt-6 lg:mt-8">
             <PhotosCard userPosts={userPosts} />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -757,6 +757,7 @@ const Profile = () => {
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
           title={modalType === "followers" ? "Followers" : "Following"}
           setShowModal={() => setModalType(null)}
+          currentUserId={userId}
         />
       )}
 

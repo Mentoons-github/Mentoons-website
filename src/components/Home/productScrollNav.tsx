@@ -112,14 +112,14 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
 
       <div
         ref={scrollContainerRef}
-        className="flex w-full gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
-        style={{ paddingLeft: "40px", paddingRight: "40px" }}
+        className="flex w-full px-2 md:px-10 gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
+        // style={{ paddingLeft: "40px", paddingRight: "40px" }}
       >
         {productsData.map((p) => (
           <a
             key={p.id}
             href={`/mentoons-store/product/${p.id}`}
-            className="flex-shrink-0 px-5 py-2 text-sm font-medium text-blue-700 transition-all duration-200 border border-blue-600 rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-md whitespace-nowrap"
+            className="flex-shrink-0 px-3 md:px-5 py-2 text-xs md:text-sm font-medium text-blue-700 transition-all duration-200 border border-blue-600 rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-md whitespace-nowrap"
           >
             {p.title}
           </a>

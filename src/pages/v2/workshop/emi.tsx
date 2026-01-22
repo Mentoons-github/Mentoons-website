@@ -1,27 +1,30 @@
 import { useEffect, useState } from "react";
-import { BASE_URL } from "@/api/game/postScore";
 import {
   TrendingUp,
   CheckCircle,
   IndianRupee,
   ArrowLeft,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import EmiTable from "@/components/Workshop/emi/emiTable";
 import {
   fetchActiveEmi,
   fetchCompletedPayments,
   fetchEmiStatistics,
+  downloadInvoice,
 } from "@/api/workshop/emi";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
-import { downloadInvoice } from "@/api/workshop/emi";
+import InvoiceModal from "@/components/Workshop/emi/InvoiceModal";
+import { BASE_URL } from "@/api/game/postScore";
 
 export interface Payment {
   userPlanId: string;
   dueDate: string;
   amount: number;
   status: "paid" | "pending" | "overdue";
+  transactionId?: string;
 }
 
 interface CompletedPayment {
@@ -31,13 +34,6 @@ interface CompletedPayment {
   amount: number;
   paymentStatus: string;
   paidAt: string;
-  emiDetails?: {
-    totalMonths: number;
-    paidMonths: number;
-    emiAmount: number;
-    nextDueDate: string;
-    emiStatus: string;
-  };
 }
 
 interface EmiStatistics {
@@ -50,14 +46,55 @@ interface EmiStatistics {
   nextDueDate: string | null;
 }
 
-const Emi = () => {
+interface InvoiceData {
+  amount: number;
+  createdAt: string;
+  gateway: string;
+  paymentType: string;
+  planId: string;
+  status: string;
+  transactionId: string;
+  updatedAt: string;
+  userId: string;
+  userPlanId: {
+    accessStatus: string;
+    bplApplied: boolean;
+    bplCardFile: any;
+    bplStatus: string;
+    createdAt: string;
+    emiDetails: {
+      downPayment: number;
+      emiAmount: number;
+      nextDueDate: string;
+      paidDownPayment: boolean;
+      paidMonths: number;
+      status: string;
+      totalMonths: number;
+    };
+    paymentType: string;
+    planId: string;
+    selectedMode: string;
+    totalAmount: number;
+    updatedAt: string;
+    userId: string;
+    _id: string;
+  };
+  _id: string;
+}
+
+const Emi: React.FC = () => {
   const [pendingEmi, setPendingEmi] = useState<Payment[]>([]);
   const [completedEmi, setCompletedEmi] = useState<CompletedPayment[]>([]);
   const [statistics, setStatistics] = useState<EmiStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
+    null,
+  );
 
   const { getToken } = useAuth();
 
@@ -67,27 +104,25 @@ const Emi = () => {
         setLoading(true);
         setError(null);
 
-        const [activeEmiResponse, statsResponse, completedResponse] =
-          await Promise.all([
-            fetchActiveEmi({ getToken }),
-            fetchEmiStatistics({ getToken }),
-            fetchCompletedPayments({ getToken }),
-          ]);
+        const [activeRes, statsRes, completedRes] = await Promise.all([
+          fetchActiveEmi({ getToken }),
+          fetchEmiStatistics({ getToken }),
+          fetchCompletedPayments({ getToken }),
+        ]);
 
-        setStatistics(statsResponse.data ?? null);
+        setStatistics(statsRes.data ?? null);
 
         let pending: Payment[] = [];
 
-        if (Array.isArray(activeEmiResponse.data)) {
-          pending = activeEmiResponse.data.map((item: any) => {
-            const emi = item || {};
-            const nextDue = emi.nextDueDate;
+        if (Array.isArray(activeRes.data)) {
+          pending = activeRes.data.map((item: any) => {
+            const nextDue = item.nextDueDate;
             const dueDateObj = nextDue ? new Date(nextDue) : new Date(0);
 
             return {
               userPlanId: String(item.userPlanId || item._id || ""),
               dueDate: nextDue ?? "",
-              amount: Number(emi.monthlyAmount || emi.emiAmount || 0),
+              amount: Number(item.monthlyAmount || item.emiAmount || 0),
               status: dueDateObj < new Date() ? "overdue" : "pending",
             };
           });
@@ -95,15 +130,11 @@ const Emi = () => {
 
         setPendingEmi(pending);
 
-        if (
-          completedResponse?.success &&
-          Array.isArray(completedResponse.data)
-        ) {
-          setCompletedEmi(completedResponse.data);
+        if (completedRes?.success && Array.isArray(completedRes.data)) {
+          setCompletedEmi(completedRes.data);
         }
       } catch (err: any) {
         const msg = err?.message || "Unknown error";
-        console.log(err);
         if (!msg.includes("404") && !msg.toLowerCase().includes("no active")) {
           setError(msg);
         }
@@ -113,13 +144,13 @@ const Emi = () => {
     };
 
     loadEmiData();
-  }, []);
+  }, [getToken]);
 
-  const handlePayment = async (id: string) => {
-    const selected = pendingEmi.find((p) => p.userPlanId === id);
+  const handlePayment = async (userPlanId: string) => {
+    const selected = pendingEmi.find((p) => p.userPlanId === userPlanId);
     if (!selected) return;
 
-    setPaymentLoading(id);
+    setPaymentLoading(userPlanId);
 
     try {
       const token = await getToken();
@@ -142,51 +173,53 @@ const Emi = () => {
         document.body.appendChild(form);
         form.submit();
       } else {
-        console.error("Form not found in the response HTML.");
+        console.error("Form not found in response HTML");
       }
     } catch (err) {
-      alert("Payment failed. Please try again.");
+      alert("Payment initiation failed. Please try again.");
     } finally {
       setPaymentLoading(null);
     }
   };
 
-  const handleDownloadInvoice = async (transactionId: string) => {
+  const handleOpenInvoice = async (transactionId: string) => {
+    if (invoiceLoadingId === transactionId) return;
+
+    setInvoiceLoadingId(transactionId);
+
     try {
       const result = await downloadInvoice({
         getToken,
         transactionId,
       });
 
-      console.log(result)
-
       if (typeof result === "string") {
         alert(`Error: ${result}`);
         return;
       }
 
-      const url = window.URL.createObjectURL(result);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `invoice-${transactionId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      setSelectedInvoice(result.data);
+      setInvoiceModalOpen(true);
     } catch (err) {
-      console.error("Invoice download failed:", err);
-      alert("Failed to download invoice. Please try again.");
+      console.error("Invoice fetch failed:", err);
+      alert("Failed to load invoice details.");
+    } finally {
+      setInvoiceLoadingId(null);
     }
   };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "None";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "Invalid date";
+    }
   };
 
   if (loading) {
@@ -248,7 +281,7 @@ const Emi = () => {
                 EMI Data Not Available
               </h2>
               <p className="text-gray-600 mb-6">
-                We couldn't load complete EMI statistics at the moment.
+                We couldn't load complete EMI statistics.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -294,7 +327,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Total EMI Amount</p>
                 <p className="text-3xl font-bold text-gray-800">
-                  ₹{(statistics.totalEmiAmount ?? 0).toLocaleString()}
+                  ₹{statistics.totalEmiAmount.toLocaleString()}
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
@@ -308,7 +341,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Amount Paid</p>
                 <p className="text-3xl font-bold text-green-600">
-                  ₹{(statistics.paidAmount ?? 0).toLocaleString()}
+                  ₹{statistics.paidAmount.toLocaleString()}
                 </p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
@@ -322,7 +355,7 @@ const Emi = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Remaining Amount</p>
                 <p className="text-3xl font-bold text-orange-600">
-                  ₹{(statistics.remainingAmount ?? 0).toLocaleString()}
+                  ₹{statistics.remainingAmount.toLocaleString()}
                 </p>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
@@ -341,8 +374,9 @@ const Emi = () => {
               <EmiTable
                 payments={pendingEmi}
                 onPayment={handlePayment}
-                onDownloadInvoice={handleDownloadInvoice}
+                onDownloadInvoice={handleOpenInvoice}
                 loadingPayment={paymentLoading}
+                loadingInvoiceId={invoiceLoadingId}
                 variant="pending"
               />
             </div>
@@ -370,12 +404,13 @@ const Emi = () => {
                       userPlanId: p.paymentId,
                       dueDate: p.paidAt,
                       amount: p.amount,
-                      status: "paid" as const,
+                      status: "paid",
                       transactionId: p.transactionId,
                     }))}
                     onPayment={handlePayment}
-                    onDownloadInvoice={handleDownloadInvoice}
+                    onDownloadInvoice={handleOpenInvoice}
                     loadingPayment={null}
+                    loadingInvoiceId={invoiceLoadingId}
                     variant="completed"
                   />
                 </div>
@@ -479,6 +514,27 @@ const Emi = () => {
           </div>
         </div>
       </div>
+
+      {invoiceModalOpen && selectedInvoice && (
+        <InvoiceModal
+          invoice={selectedInvoice}
+          onClose={() => {
+            setInvoiceModalOpen(false);
+            setSelectedInvoice(null);
+          }}
+        />
+      )}
+
+      {invoiceLoadingId && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+            <p className="text-gray-700 font-medium">
+              Fetching invoice details...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

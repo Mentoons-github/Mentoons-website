@@ -82,6 +82,8 @@ export const downloadInvoice = async ({
       },
     );
 
+    console.log(response.data);
+
     return response.data;
   } catch (err: unknown) {
     const error = err as AxiosError<{ error: string }>;

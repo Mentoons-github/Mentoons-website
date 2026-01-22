@@ -31,11 +31,11 @@ const WorkshopPlans = () => {
   }, []);
 
   return (
-    <div className="lg:my-20 mb-10 md:mb-0  mx-5 md:mx-20 space-y-10">
+    <div className="lg:my-20 mb-10 md:mb-0  mx-4 md:mx-10 lg:mx-20 space-y-10">
       <PlanHeader />
       <WorkshopsCategories />
 
-      <div className="relative overflow-hidden rounded-2xl bg-black p-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-black p-4 md:p-8 shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24"></div>
 
@@ -46,7 +46,7 @@ const WorkshopPlans = () => {
             </span>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-lg">
+          <h2 className="text-2xl md:text-5xl font-extrabold text-white mb-2 md:mb-4 drop-shadow-lg">
             70% OFF for BPL Families
           </h2>
 

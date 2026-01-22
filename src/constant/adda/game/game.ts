@@ -78,6 +78,11 @@ export const GAMES = [
     thumbnail: "/assets/games/sortMyDeck/thumbnail.png",
     link: `${base_url}adda/game-lobby/sort-my-deck`,
   },
+  {
+    title: "Pattern Race",
+    thumbnail: "/assets/games/patternRace/thumbnail.jpg",
+    link: `${base_url}adda/game-lobby/pattern-race`,
+  },
 ];
 
 export const getPodiumColor = (position: number) => {

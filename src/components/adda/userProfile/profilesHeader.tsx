@@ -19,6 +19,13 @@ import { AxiosError } from "axios";
 import SubscriptionModalManager, {
   AccessCheckResponse,
 } from "@/components/protected/subscriptionManager";
+import {
+  acceptFriendRequest,
+  fetchFollowBackUsers,
+  fetchFriendRequests,
+} from "@/redux/adda/friendRequest";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
 
 interface ProfileHeaderProps {
   user: User;
@@ -26,9 +33,13 @@ interface ProfileHeaderProps {
   totalFollowing: string[];
   totalFollowers: string[];
   isCurrentUser: boolean;
+  currentUserClerkId?: string;
+  reduceFollower: () => void;
+  addFollowing: () => void;
+  currentUserId: string;
 }
 
-type FriendStatus = "pending" | "accepted" | "rejected" | "one_way" | "none";
+type FriendStatus = "pending" | "accepted" | "rejected" | "none";
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
@@ -36,6 +47,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   totalFollowing,
   totalFollowers,
   isCurrentUser,
+  currentUserClerkId,
+  reduceFollower,
+  addFollowing,
+  currentUserId,
 }) => {
   const { getToken } = useAuth();
   const [friendStatus, setFriendStatus] = useState<FriendStatus>("none");
@@ -43,15 +58,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isStatusLoading, setIsStatusLoading] = useState(!isCurrentUser);
   const [isRequester, setIsRequester] = useState(false);
   const [requestId, setRequestId] = useState<string | undefined>(undefined);
+  const [receiverRequestId, setReceiverRequestId] = useState<string>("");
   const [modalType, setModalType] = useState<"followers" | "following" | null>(
-    null
+    null,
   );
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showCoverModal, setShowCoverModal] = useState(false);
   const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
-    null
+    null,
   );
   const [showModal, setShowModal] = useState(false);
+  const [receiveStatus, setReceiveStatus] = useState("none");
+  const dispatch = useDispatch<AppDispatch>();
 
   const isValidCoverImage =
     user.coverImage && !user.coverImage.includes("via.placeholder.com");
@@ -71,17 +89,26 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           `/adda/check-friend-status/${user._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
-        const { status, isRequester, requestId } = response.data.data || {};
+        const {
+          status,
+          isRequester,
+          requestId,
+          receiveRequestStatus,
+          receiveRequestId,
+        } = response.data.data || {};
+
         setFriendStatus(status || "none");
         setIsRequester(isRequester || false);
         setRequestId(requestId);
+        setReceiveStatus(receiveRequestStatus);
+        setReceiverRequestId(receiveRequestId);
       } catch (error) {
         console.error("Error checking friend status:", error);
         if (retries > 0) {
           console.log(
-            `Retrying friend status check... (${retries} attempts left)`
+            `Retrying friend status check... (${retries} attempts left)`,
           );
           return checkFriendStatus(retries - 1);
         }
@@ -110,18 +137,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       const token = await getToken();
       if (!token) throw new Error("Authentication token not found");
 
-      const isUnfriend =
-        friendStatus === "accepted" || friendStatus === "one_way";
+      const isUnfriend = friendStatus === "accepted" && isRequester;
       const isCancel = friendStatus === "pending" && isRequester;
       const isReject = friendStatus === "pending" && !isRequester;
+
+      if (isUnfriend) {
+        reduceFollower();
+      }
 
       const endpoint = isUnfriend
         ? `/adda/unfriend/${user._id}`
         : isCancel
-        ? `/adda/cancelRequest/${user._id}`
-        : isReject
-        ? `/adda/rejectRequest/${requestId}`
-        : `/adda/request/${user._id}`;
+          ? `/adda/cancelRequest/${user._id}`
+          : isReject
+            ? `/adda/rejectRequest/${requestId}`
+            : `/adda/request/${user._id}`;
       const method = isReject ? "patch" : "post";
 
       const response = await axiosInstance({
@@ -135,23 +165,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           (isUnfriend
             ? "none"
             : isCancel
-            ? "none"
-            : isReject
-            ? "rejected"
-            : "pending")
+              ? "none"
+              : isReject
+                ? "rejected"
+                : "pending"),
       );
       setIsRequester(response.data.isRequester || !isUnfriend);
       successToast(response.data.message || "Friend status updated");
     } catch (error) {
       if (error instanceof AxiosError) {
         const accessCheck: AccessCheckResponse = error.response?.data?.error;
-        console.log("accessCheck =================>: ", accessCheck);
         if (accessCheck?.upgradeRequired) {
           setAccessCheck(accessCheck);
           setShowModal(true);
         } else {
           errorToast(
-            error.response?.data.error || "Failed to send friend request"
+            error.response?.data.error || "Failed to send friend request",
           );
         }
       } else {
@@ -167,27 +196,42 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     try {
       const token = await getToken();
       if (!token) throw new Error("Authentication token not found");
-
-      await axiosInstance.patch(
-        `/adda/acceptRequest/${requestId}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const result = await dispatch(
+        acceptFriendRequest({
+          requestId:
+            friendStatus == "pending"
+              ? (requestId as string)
+              : (receiverRequestId as string),
+          token,
+        }),
       );
-      setFriendStatus("accepted");
+      if (acceptFriendRequest.fulfilled.match(result)) {
+        // Notification updates are handled in the thunk
+        dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
+        dispatch(fetchFollowBackUsers(token));
+      }
+      // await axiosInstance.patch(
+      //   `/adda/acceptRequest/${friendStatus == "pending" ? requestId : receiverRequestId}`,
+      //   {},
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   },
+      // );
+      friendStatus == "pending"
+        ? setFriendStatus("accepted")
+        : setReceiveStatus("accepted");
+      addFollowing();
       successToast("Friend request accepted");
     } catch (error: unknown) {
       errorToast("Failed to accept friend request");
       if (error instanceof AxiosError) {
         const accessCheck: AccessCheckResponse = error.response?.data?.error;
-        console.log("accessCheck =================>: ", accessCheck);
         if (accessCheck?.upgradeRequired) {
           setAccessCheck(accessCheck);
           setShowModal(true);
         } else {
           errorToast(
-            error.response?.data.error || "Failed to send friend request"
+            error.response?.data.error || "Failed to send friend request",
           );
         }
       } else {
@@ -203,13 +247,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       FriendStatus,
       { text: string; icon: JSX.Element; classes: string; action?: () => void }
     > = {
-      accepted: {
-        text: "Unfriend",
-        icon: <UserMinus size={14} />,
-        classes:
-          "bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-200 border-red-200",
-        action: handleFriendAction,
-      },
+      accepted: isRequester
+        ? {
+            text: "Unfollow",
+            icon: <UserMinus size={14} />,
+            classes:
+              "bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-200 border-red-200",
+            action: handleFriendAction,
+          }
+        : {
+            text: "Follow",
+            icon: <UserPlus size={14} />,
+            classes:
+              "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200 border-blue-200",
+            action: handleFriendAction,
+          },
       pending: isRequester
         ? {
             text: "Cancel Request",
@@ -231,15 +283,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200 border-blue-200",
         action: handleFriendAction,
       },
-      one_way: {
-        text: "Unfriend",
-        icon: <UserMinus size={14} />,
-        classes:
-          "bg-purple-50 text-purple-600 hover:bg-purple-100 focus:ring-purple-200 border-purple-200",
-        action: handleFriendAction,
-      },
       none: {
-        text: "Add Friend",
+        text: "Follow",
         icon: <UserPlus size={14} />,
         classes:
           "bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200 border-blue-200",
@@ -254,7 +299,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const handleModalBackdropClick = (
     e: React.MouseEvent,
-    modalType: "photo" | "cover"
+    modalType: "photo" | "cover",
   ) => {
     if (e.target === e.currentTarget) {
       if (modalType === "photo") setShowPhotoModal(false);
@@ -330,8 +375,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           )}
         </motion.div>
 
-        <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-3 sm:pb-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-3 sm:mb-6 -mt-8 sm:-mt-12">
+        <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-3 sm:pb-6 ">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-3 sm:mb-6 -mt-8 sm:-mt-12 ">
             <div className="relative mb-3 sm:mb-0 self-center sm:self-auto">
               {user.picture ? (
                 <img
@@ -371,7 +416,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     <Loader2 size={14} className="mr-2 animate-spin" />
                     Loading...
                   </div>
-                ) : friendStatus === "pending" && !isRequester ? (
+                ) : (!isRequester && friendStatus == "pending") ||
+                  (receiveStatus === "pending" && isRequester) ? (
                   <>
                     <motion.button
                       onClick={handleAcceptRequest}
@@ -423,12 +469,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                           {buttonConfig.text}
                         </span>
                         <span className="sm:hidden text-xs">
-                          {friendStatus === "accepted" ||
-                          friendStatus === "one_way"
+                          {friendStatus === "accepted"
                             ? "Remove"
-                            : friendStatus === "pending"
-                            ? "Cancel"
-                            : "Add"}
+                            : friendStatus === "pending" ||
+                                receiveStatus === "pending"
+                              ? "Cancel"
+                              : "Add"}
                         </span>
                       </>
                     )}
@@ -512,6 +558,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           userIds={modalType === "followers" ? totalFollowers : totalFollowing}
           title={modalType === "followers" ? "Followers" : "Following"}
           setShowModal={() => setModalType(null)}
+          currentUserClerkId={currentUserClerkId}
+          currentUserId={currentUserId}
         />
       )}
       {showPhotoModal && (

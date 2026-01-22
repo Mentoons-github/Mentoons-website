@@ -19,12 +19,14 @@ export interface AgeGroupDetails {
 
 export interface WorkshopFormValues {
   workshopName: string;
+  overview: string;
   whyChooseUs: WhyChooseUs[];
   ageGroups: AgeGroupDetails[];
 }
 
 export interface WorkshopCategory {
   categoryName: string;
+  description: string;
   workshops: WorkshopFormValues[];
   subtitle: string;
 }

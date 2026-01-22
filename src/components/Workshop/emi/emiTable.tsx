@@ -21,6 +21,7 @@ interface EmiTableProps {
   onPayment: (id: string) => void;
   onDownloadInvoice: (transactionId: string) => Promise<void>;
   loadingPayment: string | null;
+  loadingInvoiceId: string | null;
   variant?: "pending" | "completed";
 }
 
@@ -29,6 +30,7 @@ const EmiTable = ({
   onPayment,
   onDownloadInvoice,
   loadingPayment,
+  loadingInvoiceId,
   variant = "pending",
 }: EmiTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +82,9 @@ const EmiTable = ({
           <tbody className="divide-y divide-gray-200">
             {paginatedPayments.length > 0 ? (
               paginatedPayments.map((payment, index) => {
-                const isLoading = loadingPayment === payment.userPlanId;
+                const isPaymentLoading = loadingPayment === payment.userPlanId;
+                const isInvoiceLoading =
+                  loadingInvoiceId === payment.transactionId;
 
                 return (
                   <tr
@@ -128,20 +132,29 @@ const EmiTable = ({
                               );
                             }
                           }}
-                          disabled={!payment.transactionId}
+                          disabled={!payment.transactionId || isInvoiceLoading}
                           className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" />
-                          Invoice
+                          {isInvoiceLoading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4" />
+                              Invoice
+                            </>
+                          )}
                         </button>
                       ) : (
                         payment.status !== "paid" && (
                           <button
                             onClick={() => onPayment(payment.userPlanId)}
-                            disabled={isLoading}
+                            disabled={isPaymentLoading}
                             className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
                           >
-                            {isLoading ? (
+                            {isPaymentLoading ? (
                               <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
                                 Processing...
