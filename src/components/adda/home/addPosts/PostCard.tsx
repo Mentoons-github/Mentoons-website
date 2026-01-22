@@ -118,7 +118,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     } catch (err) {
       console.error("Error fetching user:", err);
       console.error(
-        err instanceof Error ? err.message : "Failed to load user data"
+        err instanceof Error ? err.message : "Failed to load user data",
       );
     }
   };
@@ -155,7 +155,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           }`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setIsUserBlocked(response.data.isBlocked);
       } catch (error) {
@@ -167,7 +167,9 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   }, [post.user._id, isSignedIn, getToken]);
 
   const handleDeletePost = async () => {
-    onDelete(post._id);
+    if (onDelete) {
+      onDelete(post._id);
+    }
     setShowDropdown(false);
   };
 
@@ -209,7 +211,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setIsUserBlocked(false);
       toast.success("User unblocked successfully.");
@@ -269,7 +271,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data && response.data.data) {
@@ -279,7 +281,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         console.log("Server comment data:", serverComment.data.data);
         setComments(serverComment.data.data);
@@ -292,7 +294,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
       toast.error("Failed to add comment. Please try again.");
 
       setComments((prevComments) =>
-        prevComments.filter((comment) => comment._id !== tempId)
+        prevComments.filter((comment) => comment._id !== tempId),
       );
       setCommentCount((prev) => prev - 1);
     }
@@ -327,7 +329,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       console.log(response.data);
 
@@ -361,7 +363,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
             post._id
           }/check-saved`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setIsSavedPost(response.data.data);
       } catch (error) {
@@ -373,7 +375,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
       const token = await getToken();
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/comments/post/${post._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setComments(response.data.data);
       setCommentCount(response.data.data.length);
