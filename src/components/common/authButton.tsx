@@ -2,7 +2,7 @@ import { FaUser, FaUserCircle } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, SquareUserRound } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { FaBox } from "react-icons/fa6";
 
@@ -127,6 +127,20 @@ const AuthButton = () => {
         duration: 0.1,
       },
     },
+  };
+
+  const role = user?.publicMetadata?.role as string;
+
+  const handleRoleAccess = () => {
+    if (role === "ADMIN") {
+      navigate("/admin/dashboard", { replace: true });
+      return;
+    }
+
+    if (role === "EMPLOYEE") {
+      navigate("/employee/dashboard", { replace: true });
+      return;
+    }
   };
 
   return (
@@ -280,6 +294,31 @@ const AuthButton = () => {
                       </p>
                     </div>
                   </motion.div>
+
+                  <div className="mx-4 my-2 border-t border-slate-200/60"></div>
+
+                  {(role === "EMPLOYEE" || role === "ADMIN") && (
+                    <motion.div
+                      variants={itemVariants}
+                      onClick={handleRoleAccess}
+                      whileHover={{ x: 4 }}
+                      className="px-6 py-4 hover:bg-blue-50/80 cursor-pointer flex items-center gap-4 text-slate-700 transition-all duration-200 group"
+                    >
+                      <div className="w-11 h-11 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-200 shadow-sm">
+                        <SquareUserRound className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-slate-900 block">
+                          {role.charAt(0).toUpperCase() +
+                            role.slice(1).toLowerCase()}{" "}
+                          Panel
+                        </span>
+                        <p className="text-xs text-slate-500">
+                          Go to your {role.toLocaleLowerCase()} panel
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
 
                   <div className="mx-4 my-2 border-t border-slate-200/60"></div>
 

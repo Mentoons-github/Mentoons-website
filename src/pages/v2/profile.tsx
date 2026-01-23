@@ -15,6 +15,13 @@ import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import Croppr from "croppr";
 import "croppr/dist/croppr.css";
 
+interface FollowType {
+  _id: string;
+  name: string;
+  picture: string;
+  role: string;
+}
+
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Posts");
   const [showCompletionForm, setShowCompletionForm] = useState(false);
@@ -157,8 +164,14 @@ const Profile = () => {
         ]);
       setUserDetails(userResponse.data.data);
       setUserId(userResponse.data.data._id);
-      setTotalFollowers(userResponse.data.data.followers || []);
-      setTotalFollowing(userResponse.data.data.following || []);
+      setTotalFollowers(
+        userResponse.data.data.followers.map((ele: FollowType) => ele._id) ||
+          [],
+      );
+      setTotalFollowing(
+        userResponse.data.data.following.map((ele: FollowType) => ele._id) ||
+          [],
+      );
       setUserPosts(
         postsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
@@ -613,6 +626,13 @@ const Profile = () => {
     );
   }
 
+  const reduceFollower = (id: string) => {
+    setTotalFollowers((prev) => prev.filter((_id) => _id !== id));
+  };
+  const addFollowing = (id: string) => {
+    setTotalFollowing((prev) => [...prev, id]);
+  };
+
   return (
     <>
       {showConfetti && (
@@ -758,6 +778,8 @@ const Profile = () => {
           title={modalType === "followers" ? "Followers" : "Following"}
           setShowModal={() => setModalType(null)}
           currentUserId={userId}
+          reduceFollower={reduceFollower}
+          addFollowing={addFollowing}
         />
       )}
 

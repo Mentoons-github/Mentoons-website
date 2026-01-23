@@ -98,6 +98,8 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
   const [userId, setUserId] = useState<string>("");
 
+  console.log(isUserBlocked,'isssssssbbblllll')
+
   const user = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();

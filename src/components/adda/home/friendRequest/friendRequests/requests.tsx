@@ -37,7 +37,6 @@ const FriendRequestsList = () => {
     const fetchData = async () => {
       const token = await getToken();
       if (token) {
-        console.log("DISPATCH");
         dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
         dispatch(fetchFollowBackUsers(token));
       }
