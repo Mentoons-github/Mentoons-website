@@ -270,8 +270,14 @@ body {
   color: #fff;
   cursor: pointer;
   display: inline-flex;
-  font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica,
-    Arial, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    system-ui,
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
   font-size: 16px;
   font-weight: 600;
   justify-content: center;
@@ -280,7 +286,9 @@ body {
   padding: 1rem 1rem;
   position: relative;
   text-decoration: none;
-  transition: background-color 0.3s ease, transform 0.3s ease,
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease,
     box-shadow 0.3s ease;
 }
 
@@ -295,7 +303,9 @@ body {
   border-radius: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
   pointer-events: none;
 }
 
@@ -488,6 +498,5 @@ body {
   body * {
     background: none !important;
     -webkit-print-color-adjust: exact;
-    color-adjust: exact;
   }
 }

@@ -158,8 +158,6 @@ const WorkshopInfoCarousel = ({
     if (externalSetDirection) externalSetDirection(newDirection);
   };
 
-  console.log(activeSection, "activvvv");
-
   if (!categories.length || !currentCategory?.workshops.length) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">

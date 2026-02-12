@@ -1,5 +1,6 @@
+import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import { CheckCircle } from "lucide-react";
-import { WorkshopPlan } from "@/types/workshop";
+
 import { useState } from "react";
 
 interface PlanCardProps {
@@ -19,12 +20,14 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
 
   if (!plan) return null;
 
-  return (
-    <div className="w-full max-w-sm sm:max-w-md mx-auto p-1
-      bg-gradient-to-tr from-orange-400 via-yellow-300 to-yellow-500 shadow-lg">
-      
-      <div className="relative bg-white p-4 sm:p-5">
+  const hasEMI = !!plan?.emi?.enabled;
 
+  return (
+    <div
+      className="w-full max-w-sm sm:max-w-md mx-auto p-1
+      bg-gradient-to-tr from-orange-400 via-yellow-300 to-yellow-500 shadow-lg"
+    >
+      <div className="relative bg-white p-4 sm:p-5">
         {/* Badge */}
         <div className="absolute -right-6 -top-6 sm:-right-10 sm:-top-10 w-20 h-20 sm:w-28 sm:h-28">
           <img
@@ -87,13 +90,16 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
             </span>
           </div>
 
-          <div className="mt-1 text-xs sm:text-sm text-gray-600">
-            or{" "}
-            <span className="font-semibold text-gray-900">
-              ₹{plan.price.monthly}/mo
-            </span>{" "}
-            for {plan.duration}
-          </div>
+          {hasEMI && (
+            <div className="mt-1 text-xs sm:text-sm text-gray-600">
+              or{" "}
+              <span className="font-semibold text-gray-900">
+                ₹{plan.emi?.monthlyAmount}/mo
+              </span>{" "}
+              for {plan.duration} •{" "}
+              <span className="text-green-600 font-bold">Interest Free</span>
+            </div>
+          )}
 
           {/* Flip Section */}
           <div
@@ -158,7 +164,7 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
           </div>
 
           <div className="space-y-2">
-            {plan.paymentOption === "fullPayment" && (
+            {plan.paymentOptions.includes("FULL") && (
               <div className="text-center py-1.5 bg-green-50 border border-green-200 rounded">
                 <p className="text-xs font-semibold text-green-700">
                   FULL PAYMENT PLAN
@@ -166,18 +172,11 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
               </div>
             )}
 
-            {plan.paymentOption === "twoStep" && (
-              <div className="text-center py-1.5 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-xs font-semibold text-blue-700">
-                  TWO-STEP PAYMENT AVAILABLE
-                </p>
-              </div>
-            )}
-
-            {plan.paymentOption === "emi" && plan.price.monthly && (
+            {plan.paymentOptions.includes("EMI") && hasEMI && (
               <div className="text-center py-1.5 bg-orange-50 border border-orange-200 rounded">
                 <p className="text-xs font-semibold text-orange-700">
-                  MONTHLY EMI AVAILABLE
+                  MONTHLY EMI AVAILABLE •{" "}
+                  <span className="font-bold">Interest Free</span>
                 </p>
               </div>
             )}

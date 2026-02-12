@@ -69,10 +69,9 @@ const Workshopv2 = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      console.log(response.data.data);
       const fetchedCategories = response.data.data as WorkshopCategory[];
       setCategories(fetchedCategories);
 
@@ -88,7 +87,7 @@ const Workshopv2 = () => {
         if (workshopName) {
           for (let i = 0; i < fetchedCategories.length; i++) {
             const workshopIndex = fetchedCategories[i].workshops.findIndex(
-              (w) => w.workshopName === workshopName
+              (w) => w.workshopName === workshopName,
             );
             if (workshopIndex !== -1) {
               initialCategoryIndex = i;
@@ -145,7 +144,7 @@ const Workshopv2 = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
         return response.data.data;
@@ -186,13 +185,13 @@ const Workshopv2 = () => {
       let found = false;
       for (let i = 0; i < categories.length; i++) {
         const workshopIndex = categories[i].workshops.findIndex(
-          (w) => w.workshopName === workshopName
+          (w) => w.workshopName === workshopName,
         );
         if (workshopIndex !== -1) {
           setSelectedCategoryIndex(i);
           setSelectedWorkshopIndex(workshopIndex);
           setSelectedCategory(
-            categories[i].workshops[workshopIndex].workshopName
+            categories[i].workshops[workshopIndex].workshopName,
           );
           setCurrentSlide(i);
           carouselRef.current.scrollIntoView({ behavior: "smooth" });
@@ -216,7 +215,7 @@ const Workshopv2 = () => {
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -228,7 +227,7 @@ const Workshopv2 = () => {
   const handleSelectedCategory = (
     category: string,
     categoryIndex: number,
-    workshopIndex: number
+    workshopIndex: number,
   ) => {
     setSelectedCategory(category);
     setSelectedCategoryIndex(categoryIndex);
@@ -246,7 +245,7 @@ const Workshopv2 = () => {
   const handleWorkshopButtonClick = (
     categoryIndex: number,
     // workshopIndex: number
-    workshopName: string
+    workshopName: string,
   ) => {
     // const workshopName =
     //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
@@ -275,7 +274,7 @@ const Workshopv2 = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (workshopRegistrationResponse.status === 200) {
         setShowRegistrationModal(true);
@@ -316,7 +315,7 @@ const Workshopv2 = () => {
           name: enquiryName,
           email: enquiryEmail,
           queryType: "workshop",
-        }
+        },
       );
       if (queryResponse.status === 201) {
         setEnquiryMessage("");
@@ -326,7 +325,7 @@ const Workshopv2 = () => {
       setEnquiryMessage("");
       setShowErrorModal(true);
       setShowErrorMessage(
-        error?.response?.data?.message || "Failed to submit message"
+        error?.response?.data?.message || "Failed to submit message",
       );
     }
   };
@@ -491,10 +490,7 @@ const Workshopv2 = () => {
             </figure>
           </motion.div>
 
-          <motion.div
-            variants={fadeInUp}
-            className="flex-1 h-full "
-          >
+          <motion.div variants={fadeInUp} className="flex-1 h-full ">
             <motion.div
               variants={scaleIn}
               className="items-start justify-start flex-1 h-full px-2 md:px-6 lg:px-36"
@@ -639,14 +635,14 @@ const Workshopv2 = () => {
                               handleSelectedCategory(
                                 workshop.workshopName,
                                 catIndex,
-                                workshopIndex
+                                workshopIndex,
                               )
                             }
                             className="w-4 h-4"
                           />
                           <span>{workshop.workshopName}</span>
                         </label>
-                      ))
+                      )),
                     )}
                   </div>
                 </div>
@@ -794,10 +790,6 @@ const Workshopv2 = () => {
             </motion.div>
           </motion.div>
         </motion.div>
-
-        {/* <div className="w-full">
-          <FAQ data={WORKSHOP_FAQ} />
-        </div> */}
       </div>
       {showRegistrationModal && (
         <RegirstrationModal

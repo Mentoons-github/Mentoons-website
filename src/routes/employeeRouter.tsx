@@ -15,6 +15,7 @@ import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
 import DataCapture from "@/pages/employee/dataCapture/dataCapture";
 import PsychologistWorkshops from "@/pages/employee/workshops/PsychologistWorkshops";
 import SinglePsychologistWorkshop from "@/pages/employee/workshops/SinglePsychologistWorkshop";
+import Incentive from "@/pages/employee/incentive/incentive";
 
 const EmployeeRouter = () => {
   return (
@@ -43,8 +44,10 @@ const EmployeeRouter = () => {
             path="workshops/:workshopId"
             element={<SinglePsychologistWorkshop />}
           />
+          <Route path="incentive" element={<Incentive />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
+        
       </Routes>
     </Suspense>
   );

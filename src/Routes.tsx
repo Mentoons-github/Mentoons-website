@@ -53,7 +53,12 @@ import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 import Emi from "./pages/v2/workshop/emi.tsx";
+<<<<<<< HEAD
 import CareerCorner from "./pages/CareerCorner.tsx";
+=======
+import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
+import Feedback from "./pages/v2/feedback/feedback.tsx";
+>>>>>>> upstream/main
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -111,9 +116,17 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
+<<<<<<< HEAD
   { path: "/join-us/careers", element: <CareerPage /> },
   { path: "/join-us/explore", element: <Explore /> },
   { path: "/career-corner", element: <CareerCorner /> },
+=======
+  { path: "/joinus/careers", element: <CareerPage /> },
+  { path: "/joinus/careers/:slug", element: <CareerPage /> },
+  { path: "/joinus/affiliate", element: <AffiliatePage /> },
+  { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
+  { path: "/joinus/explore", element: <Explore /> },
+>>>>>>> upstream/main
   {
     path: "/assessment-page",
     element: (
@@ -148,6 +161,7 @@ const routes = [
   { path: "payment", element: <PaymentDetailPage /> },
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   { path: "/emi", element: <Emi /> },
+  { path: "/feedback", element: <Feedback /> },
 ];
 
 const Router = () => {

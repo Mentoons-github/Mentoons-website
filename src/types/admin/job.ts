@@ -12,6 +12,7 @@ export interface JobData {
   responsibilities?: string[];
   requirements?: string[];
   whatWeOffer?: string[];
+  applicationSource?: string[];
 }
 
 export interface JobApplication {

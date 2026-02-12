@@ -68,7 +68,10 @@ const AdminSidebar = ({
           "/admin/view-applications",
         ],
       },
-      { title: "General Queries", paths: ["/admin/general-queries"] },
+      {
+        title: "Queries & Feedback",
+        paths: ["/admin/general-queries", "/admin/feedback"],
+      },
       { title: "Newsletter", paths: ["/admin/newsletter"] },
       {
         title: "Employees",
@@ -93,7 +96,7 @@ const AdminSidebar = ({
     ];
 
     const active = sections.find((s) =>
-      s.paths.some((p) => location.pathname.startsWith(p))
+      s.paths.some((p) => location.pathname.startsWith(p)),
     );
 
     if (!collapsed && active) setExpandedSection(active.title);
@@ -242,7 +245,10 @@ const AdminSidebar = ({
         <SidebarSection
           icon={<FaQuestionCircle size={collapsed ? 20 : 16} />}
           title="General Queries"
-          items={[{ href: "/admin/general-queries", label: "All Queries" }]}
+          items={[
+            { href: "/admin/general-queries", label: "All Queries" },
+            { href: "/admin/feedback", label: "Feedback" },
+          ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "General Queries"}
           toggleSection={() => toggleSection("General Queries")}

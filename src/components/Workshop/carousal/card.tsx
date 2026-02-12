@@ -16,7 +16,7 @@ interface WorkshopCardProps {
   };
   activeSection: "overview" | "ageGroups" | "whyChoose" | "services" | "";
   setActiveSection: (
-    section: "overview" | "ageGroups" | "whyChoose" | "services" | ""
+    section: "overview" | "ageGroups" | "whyChoose" | "services" | "",
   ) => void;
   currentAgeGroup: string;
   setCurrentAgeGroup: (index: string) => void;
@@ -200,9 +200,11 @@ const WorkshopCard = ({
           {workshop.ageGroups
             .filter((ageGroup) => ageGroup.image)
             .map((ageGroup, index) => (
-              <div className=" h-full flex flex-col justify-between items-center">
+              <div
+                className="h-full flex flex-col justify-between items-center"
+                key={index}
+              >
                 <motion.img
-                  key={index}
                   src={ageGroup.image!}
                   alt={`Age group ${ageGroup.ageRange}`}
                   className="h-32 w-32 md:h-40 md:w-40 xl:h-48 xl:w-48 
@@ -214,7 +216,6 @@ const WorkshopCard = ({
                 />
                 <div className="flex justify-center  mt-6">
                   <button
-                    key={index}
                     onClick={() => {
                       setCurrentAgeGroup(ageGroup.ageRange);
                       activeSection === "ageGroups" &&
