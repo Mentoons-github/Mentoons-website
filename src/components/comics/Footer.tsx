@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import * as Yup from "yup";
 import NewsletterModal from "../modals/NewsletterModal";
 import MapComponent from "./MapComponent";
+import { AxiosError } from "axios";
 
 interface ApiResponse {
   success: boolean;
@@ -50,14 +51,14 @@ const Footer = () => {
 
   const handleSubmit = async (
     values: FormValues,
-    { setSubmitting, resetForm }: FormikHelpers<FormValues>
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
   ) => {
     try {
       const response = await axiosInstance.post<ApiResponse>(
         "email/subscribeToNewsletter",
         {
           email: values.email,
-        }
+        },
       );
 
       const res: ApiResponse = response.data;
@@ -66,8 +67,10 @@ const Footer = () => {
       } else {
         throw new Error("Something went wrong");
       }
-    } catch (err) {
-      toast(` ${err}`);
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ error: string }>;
+
+      toast(` ${error.response?.data.error}`);
     } finally {
       resetForm();
       setSubmitting(false);
@@ -195,7 +198,7 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="bg-gradient-to-br from-orange-600 to-orange-400 p-6 rounded-2xl shadow-2xl flex flex-col items-center mb-6 lg:mb-0 border-2 border-orange-200/40 transition-all duration-300 hover:shadow-orange-500/30">
+        <div className="bg-gradient-to-br from-orange-600 to-orange-400 p-6 rounded-2xl shadow-2xl flex flex-col items-center mb-6 lg:mb-0 border-2 border-orange-200/40 transition-all duration-300 hover:shadow-orange-500/30 h-fit">
           <div className="text-center mb-4">
             <p className="text-orange-50 text-base font-medium tracking-wide">
               Scan to Contribute ₹1
@@ -242,34 +245,94 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-start justify-start flex-[0.24] mx-auto gap-4 ">
+        <div className="flex flex-col items-start justify-start flex-[0.24] mx-auto gap-4 shadow-xl p-3 bg-gradient-to-tr from-orange-600 t-orange-300 rounded-xl hover:shadow-none">
           <Formik
             initialValues={{ email: "" }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ isSubmitting, isValid, dirty }) => (
-              <Form className="flex flex-col w-full gap-4">
-                <div className="box-border w-full">
+              <Form className="relative flex flex-col w-full gap-6 p-3 rounded-2xl bg-gradient-to-br from-white to-orange-50 shadow-xl border-2 border-orange-200 overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full -translate-y-16 translate-x-16 blur-2xl opacity-50"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-200 rounded-full translate-y-12 -translate-x-12 blur-2xl opacity-40"></div>
+
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
+                      Wellness Subscription
+                    </h1>
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed pl-3">
+                    Get free Comics, self help books, relationships, menstrual
+                    cycle, friendship
+                  </p>
+                </div>
+
+                <div className="relative z-10 space-y-2">
                   <Field
                     name="email"
                     type="email"
-                    className="w-full p-2 px-4 rounded-full focus:outline-primary"
-                    placeholder="Enter your email"
+                    className="w-full p-3.5 px-5 rounded-full border-2 border-orange-200 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100 transition-all duration-300 bg-white text-gray-800 placeholder:text-gray-400"
+                    placeholder="Enter your email address"
                   />
                   <ErrorMessage
                     name="email"
                     component="div"
-                    className="text-red-800 text-[18px]"
+                    className="text-red-600 text-sm font-medium ml-5 flex items-center gap-1"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || !isValid || !dirty}
-                  className="w-full p-2 text-white transition-all duration-300 bg-orange-600 rounded-full cursor-pointer whitespace-nowrap hover:bg-orange-700 text-ellipsis"
+                  className="relative z-10 w-full p-3.5 text-white font-semibold transition-all duration-300 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full cursor-pointer shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none overflow-hidden group"
                 >
-                  Be the first to be Informed
+                  <span className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center justify-center gap-2">
+                    {isSubmitting ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Subscribing...
+                      </>
+                    ) : (
+                      <>
+                        Be the First to Get Notified
+                        <svg
+                          className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                      </>
+                    )}
+                  </span>
                 </button>
               </Form>
             )}

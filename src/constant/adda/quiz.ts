@@ -69,7 +69,7 @@ export const WORKSHOP_PLANS: WorkshopPlan[] = [
     ],
     paymentOption: "fullPayment",
     materials:
-      "Colors, drawing sheets, music tracks, storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
+      "Colors, drawing sheets, music tracks (YT), storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
   },
   {
     age: "6-12",

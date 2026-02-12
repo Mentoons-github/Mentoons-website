@@ -53,6 +53,8 @@ import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 import Emi from "./pages/v2/workshop/emi.tsx";
+import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
+import Feedback from "./pages/v2/feedback/feedback.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -110,8 +112,11 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
-  { path: "/join-us/careers", element: <CareerPage /> },
-  { path: "/join-us/explore", element: <Explore /> },
+  { path: "/joinus/careers", element: <CareerPage /> },
+  { path: "/joinus/careers/:slug", element: <CareerPage /> },
+  { path: "/joinus/affiliate", element: <AffiliatePage /> },
+  { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
+  { path: "/joinus/explore", element: <Explore /> },
   {
     path: "/assessment-page",
     element: (
@@ -146,6 +151,7 @@ const routes = [
   { path: "payment", element: <PaymentDetailPage /> },
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   { path: "/emi", element: <Emi /> },
+  { path: "/feedback", element: <Feedback /> },
 ];
 
 const Router = () => {
@@ -156,7 +162,7 @@ const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(
-    (store: RootState) => store.comics.currentHoverComic
+    (store: RootState) => store.comics.currentHoverComic,
   );
 
   const handlePopup = (value: boolean) => {

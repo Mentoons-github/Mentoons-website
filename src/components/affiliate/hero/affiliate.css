@@ -1,0 +1,36 @@
+.custom-shape-divider-bottom-affiliate {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.custom-shape-divider-bottom-affiliate svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+}
+
+.custom-shape-divider-bottom-affiliate .shape-fill-affiliate {
+  fill: #f9fafb;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}

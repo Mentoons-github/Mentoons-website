@@ -24,7 +24,7 @@ export interface Task {
     name: string;
   } | null;
   attachments: Attachment[];
-  status: "pending" | "in-progress" | "completed" | "overdue";
+  status: "pending" | "in-progress" | "completed" | "overdue" | "transferred";
   priority: "low" | "medium" | "high";
   submissionFailureReason?: string;
 }
@@ -75,7 +75,7 @@ export const fetchTasks = createAsyncThunk<
       page,
       limit,
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const params = new URLSearchParams();
@@ -107,10 +107,10 @@ export const fetchTasks = createAsyncThunk<
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       return rejectWithValue(
-        err.response?.data?.message || err.message || "Failed to fetch tasks"
+        err.response?.data?.message || err.message || "Failed to fetch tasks",
       );
     }
-  }
+  },
 );
 
 // Assign/Create Task
@@ -133,7 +133,7 @@ export const assignTask = createAsyncThunk<
     console.log(error);
     const err = error as AxiosError<{ message?: string }>;
     return rejectWithValue(
-      err.response?.data?.message || err.message || "Failed to assign task"
+      err.response?.data?.message || err.message || "Failed to assign task",
     );
   }
 });
@@ -153,7 +153,7 @@ export const submitTask = createAsyncThunk<
   "tasks/submitTask",
   async (
     { taskId, attachments, status, token, failureReason },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await axios.post<Task>(
@@ -168,16 +168,16 @@ export const submitTask = createAsyncThunk<
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       return rejectWithValue(
-        err.response?.data?.message || err.message || "Failed to submit task"
+        err.response?.data?.message || err.message || "Failed to submit task",
       );
     }
-  }
+  },
 );
 
 // Delete Task
@@ -195,7 +195,7 @@ export const deleteTask = createAsyncThunk<
   } catch (error) {
     const err = error as AxiosError<{ message?: string }>;
     return rejectWithValue(
-      err.response?.data?.message || err.message || "Failed to delete task"
+      err.response?.data?.message || err.message || "Failed to delete task",
     );
   }
 });
@@ -217,7 +217,7 @@ export const updateTaskStatus = createAsyncThunk<
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -225,10 +225,10 @@ export const updateTaskStatus = createAsyncThunk<
       return rejectWithValue(
         err.response?.data?.message ||
           err.message ||
-          "Failed to update task status"
+          "Failed to update task status",
       );
     }
-  }
+  },
 );
 
 // Remove Image
@@ -248,10 +248,10 @@ export const removeImage = createAsyncThunk<
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       return rejectWithValue(
-        err.response?.data?.message || err.message || "Failed to remove image"
+        err.response?.data?.message || err.message || "Failed to remove image",
       );
     }
-  }
+  },
 );
 
 export const extendTask = createAsyncThunk<
@@ -267,14 +267,14 @@ export const extendTask = createAsyncThunk<
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
     console.log(error);
     const err = error as AxiosError<{ message?: string }>;
     return rejectWithValue(
-      err?.response?.data?.message || "Something went wrong"
+      err?.response?.data?.message || "Something went wrong",
     );
   }
 });

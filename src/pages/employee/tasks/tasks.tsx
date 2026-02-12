@@ -32,6 +32,12 @@ import {
   ChevronRight,
   Flag,
   FileCheck,
+  Filter,
+  Search,
+  TrendingUp,
+  Target,
+  Zap,
+  Sparkles,
 } from "lucide-react";
 
 interface FileAttachment {
@@ -54,7 +60,7 @@ const Tasks = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
   const { loading, error, tasks } = useSelector(
-    (state: RootState) => state.tasks
+    (state: RootState) => state.tasks,
   );
 
   const [selectedTask, setSelectedTask] = useState<number | null>(null);
@@ -75,6 +81,8 @@ const Tasks = () => {
     total: 0,
     totalPages: 0,
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const { showStatus } = useStatusModal();
 
@@ -163,12 +171,13 @@ const Tasks = () => {
     if (newPage >= 1 && newPage <= pagination.totalPages && !loading) {
       setCurrentPage(newPage);
       loadTasks(selectedDate || undefined, newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
-    taskId: number
+    taskId: number,
   ) => {
     const files = Array.from(e.target.files || []);
 
@@ -249,7 +258,7 @@ const Tasks = () => {
             status: "overdue",
             failureReason,
             token,
-          })
+          }),
         );
 
         if (submitTask.fulfilled.match(resultAction)) {
@@ -269,7 +278,7 @@ const Tasks = () => {
         for (const attachment of attachments) {
           if (attachment.type === "file" && attachment.file) {
             const resultAction = await dispatch(
-              uploadFile({ file: attachment.file, getToken })
+              uploadFile({ file: attachment.file, getToken }),
             );
 
             if (uploadFile.fulfilled.match(resultAction)) {
@@ -289,13 +298,13 @@ const Tasks = () => {
             name: attachments[index]?.name || `Link ${index + 1}`,
             url,
             uploadedAt: new Date().toISOString(),
-          })
+          }),
         );
 
         if (uploadedAttachments.length === 0) {
           showStatus(
             "error",
-            "Please attach the completed task file before submitting."
+            "Please attach the completed task file before submitting.",
           );
           setUploadingTask(null);
           return;
@@ -307,7 +316,7 @@ const Tasks = () => {
             attachments: uploadedAttachments,
             status: "completed",
             token,
-          })
+          }),
         );
 
         if (submitTask.fulfilled.match(resultAction)) {
@@ -349,6 +358,7 @@ const Tasks = () => {
           lightBg: "bg-emerald-50",
           lightText: "text-emerald-700",
           icon: CheckCircle,
+          gradient: "from-emerald-500 to-green-600",
         };
       case "in-progress":
         return {
@@ -357,6 +367,7 @@ const Tasks = () => {
           lightBg: "bg-blue-50",
           lightText: "text-blue-700",
           icon: Clock,
+          gradient: "from-blue-500 to-indigo-600",
         };
       case "overdue":
         return {
@@ -365,6 +376,7 @@ const Tasks = () => {
           lightBg: "bg-red-50",
           lightText: "text-red-700",
           icon: AlertTriangle,
+          gradient: "from-red-500 to-rose-600",
         };
       default:
         return {
@@ -373,6 +385,7 @@ const Tasks = () => {
           lightBg: "bg-amber-50",
           lightText: "text-amber-700",
           icon: AlertCircle,
+          gradient: "from-amber-500 to-orange-600",
         };
     }
   };
@@ -380,15 +393,26 @@ const Tasks = () => {
   const getPriorityConfig = (priority: string) => {
     switch (priority) {
       case "high":
-        return { color: "bg-rose-500", ring: "ring-rose-200", text: "High" };
+        return {
+          color: "bg-rose-500",
+          ring: "ring-rose-200",
+          text: "High",
+          glow: "shadow-rose-200",
+        };
       case "medium":
         return {
           color: "bg-orange-500",
           ring: "ring-orange-200",
           text: "Medium",
+          glow: "shadow-orange-200",
         };
       default:
-        return { color: "bg-slate-400", ring: "ring-slate-200", text: "Low" };
+        return {
+          color: "bg-slate-400",
+          ring: "ring-slate-200",
+          text: "Low",
+          glow: "shadow-slate-200",
+        };
     }
   };
 
@@ -405,7 +429,7 @@ const Tasks = () => {
     const diffMs = end.getTime() - now.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
 
     if (diffMs < 0) {
@@ -433,13 +457,19 @@ const Tasks = () => {
   };
 
   const filteredTasks = tasks?.filter((task) => {
-    if (filterStatus === "all") return true;
-    if (filterStatus === "overdue")
-      return (
-        task.status === "overdue" ||
-        (task.status !== "completed" && new Date(task.deadline) < new Date())
-      );
-    return task.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" ||
+      (filterStatus === "overdue"
+        ? task.status === "overdue" ||
+          (task.status !== "completed" && new Date(task.deadline) < new Date())
+        : task.status === filterStatus);
+
+    const matchesSearch =
+      !searchQuery ||
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesStatus && matchesSearch;
   });
 
   const isTaskOverdue = (task: Task) =>
@@ -454,9 +484,13 @@ const Tasks = () => {
       tasks?.filter(
         (t) =>
           t.status === "overdue" ||
-          (t.status !== "completed" && new Date(t.deadline) < new Date())
+          (t.status !== "completed" && new Date(t.deadline) < new Date()),
       ).length || 0,
   };
+
+  const completionRate = tasks?.length
+    ? Math.round((statusCounts.completed / tasks.length) * 100)
+    : 0;
 
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -472,48 +506,102 @@ const Tasks = () => {
           key={i}
           onClick={() => handlePageChange(i)}
           disabled={loading}
-          className={`px-3 py-1.5 mx-1 rounded-lg text-sm font-medium transition-colors
+          className={`px-3 py-1.5 mx-1 rounded-lg text-sm font-medium transition-all
             ${
               i === currentPage
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
             }
             ${loading ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
           {i}
-        </button>
+        </button>,
       );
     }
     return pages;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                My Tasks
-              </h1>
-              <p className="text-slate-600">
-                Manage and complete your assigned tasks
-                {selectedDate && (
-                  <span className="ml-2 text-blue-600 font-medium">
-                    (Due: {new Date(selectedDate).toLocaleDateString()})
-                  </span>
-                )}
-              </p>
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    My Tasks
+                  </h1>
+                  <p className="text-slate-600 mt-1">
+                    Stay productive and organized
+                    {selectedDate && (
+                      <span className="ml-2 text-blue-600 font-medium">
+                        • {new Date(selectedDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-100 text-sm font-medium mb-1">
+                        Total Tasks
+                      </p>
+                      <p className="text-3xl font-bold">{statusCounts.all}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-emerald-100 text-sm font-medium mb-1">
+                        Completion
+                      </p>
+                      <p className="text-3xl font-bold">{completionRate}%</p>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-4 text-white shadow-lg col-span-2 lg:col-span-1">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-100 text-sm font-medium mb-1">
+                        Overdue
+                      </p>
+                      <p className="text-3xl font-bold">
+                        {statusCounts.overdue}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Zap className="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div className="flex gap-2">
               <button
                 onClick={handleManualRefresh}
                 disabled={isRefreshing}
-                className={`p-3 rounded-xl transition-all ${
+                className={`p-3 rounded-xl transition-all shadow-lg ${
                   isRefreshing
                     ? "bg-blue-100 text-blue-600 cursor-wait"
-                    : "bg-white text-slate-600 hover:bg-slate-50 hover:shadow-lg"
+                    : "bg-white text-slate-600 hover:bg-blue-50 hover:shadow-xl hover:scale-105"
                 }`}
                 title="Refresh tasks"
               >
@@ -524,9 +612,9 @@ const Tasks = () => {
 
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-3 rounded-xl transition-all ${
+                className={`p-3 rounded-xl transition-all shadow-lg ${
                   viewMode === "grid"
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200 scale-105"
                     : "bg-white text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -534,9 +622,9 @@ const Tasks = () => {
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-3 rounded-xl transition-all ${
+                className={`p-3 rounded-xl transition-all shadow-lg ${
                   viewMode === "list"
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200 scale-105"
                     : "bg-white text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -545,94 +633,168 @@ const Tasks = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl shadow-sm mb-6">
-            <div className="flex flex-col sm:flex-row gap-3 items-center">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-blue-600" />
-                <span className="font-medium text-gray-700">
-                  Filter by Date:
-                </span>
+          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50 mb-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search tasks by title or description..."
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
               </div>
 
-              <div className="flex gap-2 flex-1 w-full sm:w-auto">
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => handleDateFilterChange(e.target.value)}
-                  className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-
-                <button
-                  onClick={handleTodayFilter}
-                  className={`px-4 py-2 rounded-xl transition-colors font-medium ${
-                    selectedDate === todayStr
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  Today
-                </button>
-
-                <button
-                  onClick={handleClearDateFilter}
-                  className={`px-4 py-2 rounded-xl transition-colors font-medium ${
-                    !selectedDate
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  All Tasks
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            {Object.entries(statusCounts).map(([status, count]) => (
               <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`p-4 rounded-2xl transition-all ${
-                  filterStatus === status
-                    ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-xl shadow-blue-200 scale-105"
-                    : "bg-white hover:shadow-lg hover:scale-105"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
+                  showFilters
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                <div className="text-sm font-medium opacity-90 mb-1">
-                  {status.charAt(0).toUpperCase() +
-                    status.slice(1).replace("-", " ")}
-                </div>
-                <div className="text-3xl font-bold">{count}</div>
+                <Filter className="w-5 h-5" />
+                Filters
               </button>
-            ))}
+            </div>
+
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-200 animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <CalendarDays className="w-5 h-5 text-blue-600" />
+                  <span className="font-semibold text-gray-700">
+                    Filter by Date:
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => handleDateFilterChange(e.target.value)}
+                    className="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  />
+
+                  <button
+                    onClick={handleTodayFilter}
+                    className={`px-6 py-2.5 rounded-xl transition-all font-semibold ${
+                      selectedDate === todayStr
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Today
+                  </button>
+
+                  <button
+                    onClick={handleClearDateFilter}
+                    className={`px-6 py-2.5 rounded-xl transition-all font-semibold ${
+                      !selectedDate
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    All Tasks
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            {Object.entries(statusCounts).map(([status, count]) => {
+              const statusConfig = getStatusConfig(status);
+              const StatusIcon = statusConfig.icon;
+
+              return (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`p-4 rounded-2xl transition-all transform hover:scale-105 ${
+                    filterStatus === status
+                      ? `bg-gradient-to-br ${statusConfig.gradient} text-white shadow-xl scale-105`
+                      : "bg-white hover:shadow-lg border-2 border-gray-100"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <StatusIcon
+                      className={`w-5 h-5 ${
+                        filterStatus === status
+                          ? "text-white"
+                          : statusConfig.lightText
+                      }`}
+                    />
+                    <span
+                      className={`text-2xl font-bold ${
+                        filterStatus === status ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </div>
+                  <div
+                    className={`text-sm font-semibold ${
+                      filterStatus === status
+                        ? "text-white/90"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {status.charAt(0).toUpperCase() +
+                      status.slice(1).replace("-", " ")}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {loading && !tasks && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 font-medium">Loading tasks...</p>
+              <div className="relative w-20 h-20 mx-auto mb-6">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-t-blue-600 animate-spin"></div>
+                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <Target className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <p className="text-slate-700 font-semibold text-lg">
+                Loading your tasks...
+              </p>
+              <p className="text-slate-500 text-sm mt-1">
+                Please wait a moment
+              </p>
             </div>
           </div>
         )}
 
         {!loading && (!tasks || tasks.length === 0) && (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-slate-400" />
+            <div className="text-center max-w-md">
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CheckCircle className="w-16 h-16 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">
                 {selectedDate ? "No tasks for this date" : "All caught up!"}
               </h3>
-              <p className="text-slate-600 mb-6">
+              <p className="text-slate-600 text-lg mb-6">
                 {selectedDate
                   ? `No tasks found for ${new Date(
-                      selectedDate
+                      selectedDate,
                     ).toLocaleDateString()}`
-                  : "No tasks assigned at the moment."}
+                  : "Great job! You have no pending tasks at the moment."}
               </p>
+              {selectedDate && (
+                <button
+                  onClick={handleClearDateFilter}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-xl transition-all"
+                >
+                  View All Tasks
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -656,117 +818,109 @@ const Tasks = () => {
                 return (
                   <div
                     key={task.id}
-                    className={`bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 ${
+                    className={`group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 transform hover:-translate-y-1 ${
                       isOverdue
-                        ? "border-red-500 bg-red-50/30"
+                        ? "border-red-400 bg-gradient-to-br from-red-50/50 to-white"
                         : task.status === "completed"
-                        ? "border-green-500 bg-green-50/20"
-                        : "border-blue-200"
-                    } group`}
+                          ? "border-green-400 bg-gradient-to-br from-green-50/50 to-white"
+                          : "border-blue-200 hover:border-blue-300"
+                    }`}
                   >
-                    {/* Priority & Status Header Bar */}
-                    <div className={`h-3 ${priorityConfig.color} relative`}>
-                      <div className="absolute top-0 right-0 px-3 py-0.5 bg-white/90 backdrop-blur-sm rounded-bl-lg text-[10px] font-bold uppercase tracking-wider text-gray-700">
-                        {priorityConfig.text} Priority
+                    <div
+                      className={`h-2 bg-gradient-to-r ${priorityConfig.color} relative overflow-hidden`}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                    </div>
+
+                    <div className="absolute top-4 right-4 z-10">
+                      <div
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white ${priorityConfig.color} shadow-lg ${priorityConfig.glow} flex items-center gap-1.5`}
+                      >
+                        <Flag className="w-3 h-3" />
+                        {priorityConfig.text}
                       </div>
                     </div>
 
-                    <div className="p-5">
-                      {/* Title & Status Row - Always Visible */}
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
-                            {task.title}
-                          </h3>
-                          <div
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold ${
-                              statusConfig.lightBg
-                            } ${statusConfig.lightText} border-2 ${
-                              isOverdue
-                                ? "border-red-300"
-                                : task.status === "completed"
-                                ? "border-green-300"
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 pr-20 leading-tight group-hover:text-blue-600 transition-colors">
+                          {task.title}
+                        </h3>
+                        <div
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold ${
+                            statusConfig.lightBg
+                          } ${statusConfig.lightText} border-2 ${
+                            isOverdue
+                              ? "border-red-300 shadow-lg shadow-red-100"
+                              : task.status === "completed"
+                                ? "border-green-300 shadow-lg shadow-green-100"
                                 : "border-transparent"
-                            }`}
-                          >
-                            <StatusIcon className="w-4 h-4" />
-                            {task.status.charAt(0).toUpperCase() +
-                              task.status.slice(1).replace("-", " ")}
-                          </div>
-                        </div>
-                        <Flag
-                          className={`w-6 h-6 ${
-                            priorityConfig.color === "bg-rose-500"
-                              ? "text-rose-500"
-                              : priorityConfig.color === "bg-orange-500"
-                              ? "text-orange-500"
-                              : "text-slate-400"
                           }`}
-                        />
+                        >
+                          <StatusIcon className="w-4 h-4" />
+                          {task.status.charAt(0).toUpperCase() +
+                            task.status.slice(1).replace("-", " ")}
+                        </div>
                       </div>
 
-                      {/* Quick Info Panel - Critical Details */}
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-4 border border-blue-100">
-                        <div className="grid grid-cols-2 gap-3">
-                          {/* Deadline with countdown */}
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1">
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span className="font-medium">Deadline</span>
+                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-4 mb-4 border border-slate-200">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                              <Calendar className="w-4 h-4 text-blue-600" />
+                              Deadline
                             </div>
-                            <div className="font-bold text-sm text-gray-900">
+                            <div className="font-bold text-gray-900">
                               {new Date(task.deadline).toLocaleDateString(
                                 "en-US",
                                 {
                                   month: "short",
                                   day: "numeric",
-                                }
+                                  year: "numeric",
+                                },
                               )}
                             </div>
                             <div
-                              className={`text-xs font-semibold mt-0.5 ${
+                              className={`text-xs font-bold ${
                                 timeRemaining.isOverdue
                                   ? "text-red-600"
                                   : timeRemaining.isUrgent
-                                  ? "text-orange-600"
-                                  : "text-green-600"
+                                    ? "text-orange-600"
+                                    : "text-green-600"
                               }`}
                             >
                               {timeRemaining.text}
                             </div>
                           </div>
 
-                          {/* Assigned To */}
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1">
-                              <User className="w-3.5 h-3.5" />
-                              <span className="font-medium">Assigned To</span>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                              <User className="w-4 h-4 text-purple-600" />
+                              Assigned
                             </div>
-                            <div className="font-bold text-sm text-gray-900 truncate">
+                            <div className="font-bold text-gray-900 truncate">
                               {task.assignedTo?.name}
                             </div>
-                            <div className="text-xs text-slate-500 mt-0.5">
+                            <div className="text-xs text-slate-600">
                               {task.status === "completed"
-                                ? "✓ Done"
+                                ? "✓ Completed"
                                 : "In Progress"}
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Description - Visible at first sight */}
                       <div className="mb-4">
                         <p className="text-sm text-slate-700 leading-relaxed line-clamp-3">
                           {task.description}
                         </p>
                       </div>
 
-                      {/* Attachments Status */}
                       {task.attachments && task.attachments.length > 0 && (
-                        <div className="mb-4 p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                          <div className="flex items-center justify-between">
+                        <div className="mb-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <FileCheck className="w-4 h-4 text-green-600" />
+                              <FileCheck className="w-5 h-5 text-green-600" />
                               <span className="text-sm font-bold text-green-900">
                                 {task.attachments.length} File
                                 {task.attachments.length > 1 ? "s" : ""}{" "}
@@ -775,23 +929,25 @@ const Tasks = () => {
                             </div>
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           </div>
-                          <div className="mt-2 space-y-1">
+                          <div className="space-y-2">
                             {task.attachments.slice(0, 2).map((file, index) => (
                               <a
                                 key={index}
                                 href={file.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-xs text-green-700 hover:text-green-900 bg-white px-2 py-1.5 rounded-lg hover:shadow transition-all"
+                                className="flex items-center gap-3 text-sm text-green-700 hover:text-green-900 bg-white px-3 py-2 rounded-lg hover:shadow-md transition-all group"
                               >
-                                {getFileIcon(file.name)}
+                                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                  {getFileIcon(file.name)}
+                                </div>
                                 <span className="truncate font-medium flex-1">
                                   {file.name}
                                 </span>
                               </a>
                             ))}
                             {task.attachments.length > 2 && (
-                              <div className="text-xs text-green-600 font-medium pl-2">
+                              <div className="text-sm text-green-600 font-semibold pl-3">
                                 +{task.attachments.length - 2} more file
                                 {task.attachments.length - 2 > 1 ? "s" : ""}
                               </div>
@@ -801,26 +957,25 @@ const Tasks = () => {
                       )}
 
                       {task.submissionFailureReason && (
-                        <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-xl">
+                        <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
                           <div className="flex items-center gap-2 mb-2">
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                            <h4 className="text-xs font-bold text-red-900">
+                            <AlertCircle className="w-5 h-5 text-red-500" />
+                            <h4 className="text-sm font-bold text-red-900">
                               Failure Reason
                             </h4>
                           </div>
-                          <p className="text-xs text-red-800 leading-relaxed">
+                          <p className="text-sm text-red-800 leading-relaxed">
                             {task.submissionFailureReason}
                           </p>
                         </div>
                       )}
 
-                      {/* Action Section */}
                       {!task.submissionFailureReason &&
                         task.status !== "completed" && (
                           <div className="space-y-3">
                             {isOverdue || task.status === "overdue" ? (
                               <>
-                                <div className="flex items-center gap-2 p-2 bg-red-100 rounded-lg">
+                                <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-red-100 to-rose-100 rounded-xl border border-red-200">
                                   <AlertTriangle className="w-5 h-5 text-red-600" />
                                   <h4 className="text-sm font-bold text-red-900">
                                     Explain Why Task is Overdue
@@ -832,7 +987,7 @@ const Tasks = () => {
                                     setFailureReason(e.target.value)
                                   }
                                   placeholder="Explain why the task could not be completed on time..."
-                                  className="w-full p-3 border-2 border-red-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm outline-none resize-none h-20"
+                                  className="w-full p-4 border-2 border-red-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm outline-none resize-none h-24"
                                 />
                                 <button
                                   onClick={() =>
@@ -842,16 +997,16 @@ const Tasks = () => {
                                     uploadingTask === task.id ||
                                     !failureReason.trim()
                                   }
-                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-xl hover:shadow-red-200 transition-all disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed disabled:shadow-none font-bold text-sm"
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-xl hover:shadow-red-200 transition-all disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed disabled:shadow-none font-bold"
                                 >
                                   {uploadingTask === task.id ? (
                                     <>
-                                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                      <div className="animate-spin rounded-full h-5 w-5 border-3 border-white border-t-transparent"></div>
                                       <span>Submitting...</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Send className="w-4 h-4" />
+                                      <Send className="w-5 h-5" />
                                       <span>Submit Reason</span>
                                     </>
                                   )}
@@ -870,9 +1025,9 @@ const Tasks = () => {
                                       className="hidden"
                                       accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                                     />
-                                    <div className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-200 transition-all font-semibold text-sm">
-                                      <Upload className="w-4 h-4" />
-                                      <span>Upload</span>
+                                    <div className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-xl hover:shadow-blue-200 transition-all font-semibold">
+                                      <Upload className="w-5 h-5" />
+                                      <span>Upload Files</span>
                                     </div>
                                   </label>
 
@@ -881,9 +1036,9 @@ const Tasks = () => {
                                       setShowLinkInput(!showLinkInput);
                                       setSelectedTask(task.id);
                                     }}
-                                    className="px-3 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-200 transition-all"
+                                    className="px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:shadow-xl hover:shadow-purple-200 transition-all"
                                   >
-                                    <Link className="w-4 h-4" />
+                                    <Link className="w-5 h-5" />
                                   </button>
                                 </div>
 
@@ -896,11 +1051,11 @@ const Tasks = () => {
                                         setLinkInput(e.target.value)
                                       }
                                       placeholder="https://example.com/file"
-                                      className="flex-1 px-3 py-2 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm outline-none"
+                                      className="flex-1 px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm outline-none"
                                     />
                                     <button
                                       onClick={() => handleAddLink(task.id)}
-                                      className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors text-sm font-semibold"
+                                      className="px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-semibold"
                                     >
                                       Add
                                     </button>
@@ -909,37 +1064,37 @@ const Tasks = () => {
 
                                 {selectedTask === task.id &&
                                   attachments.length > 0 && (
-                                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <p className="text-xs font-bold text-slate-900">
+                                    <div className="p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border-2 border-slate-200">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <p className="text-sm font-bold text-slate-900">
                                           Files Ready ({attachments.length}/
                                           {MAX_FILES})
                                         </p>
                                       </div>
-                                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                                      <div className="space-y-2 max-h-40 overflow-y-auto">
                                         {attachments.map((att) => (
                                           <div
                                             key={att.id}
-                                            className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200"
+                                            className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 hover:shadow-md transition-all"
                                           >
-                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
                                               <div className="flex-shrink-0">
                                                 {att.type === "link" ? (
-                                                  <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
-                                                    <Link className="w-3.5 h-3.5 text-purple-600" />
+                                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center">
+                                                    <Link className="w-5 h-5 text-purple-600" />
                                                   </div>
                                                 ) : (
-                                                  <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                  <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
                                                     {getFileIcon(att.name)}
                                                   </div>
                                                 )}
                                               </div>
                                               <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-slate-900 truncate">
+                                                <p className="text-sm font-semibold text-slate-900 truncate">
                                                   {att.name}
                                                 </p>
                                                 {att.size && (
-                                                  <p className="text-[10px] text-slate-500">
+                                                  <p className="text-xs text-slate-500">
                                                     {formatFileSize(att.size)}
                                                   </p>
                                                 )}
@@ -949,9 +1104,9 @@ const Tasks = () => {
                                               onClick={() =>
                                                 removeAttachment(att.id)
                                               }
-                                              className="ml-2 p-1 hover:bg-red-50 rounded-lg transition-colors"
+                                              className="ml-2 p-2 hover:bg-red-50 rounded-lg transition-colors"
                                             >
-                                              <X className="w-3.5 h-3.5 text-red-500" />
+                                              <X className="w-4 h-4 text-red-500" />
                                             </button>
                                           </div>
                                         ))}
@@ -968,16 +1123,16 @@ const Tasks = () => {
                                     (selectedTask === task.id &&
                                       attachments.length === 0)
                                   }
-                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:shadow-xl hover:shadow-emerald-200 transition-all disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed disabled:shadow-none font-bold text-sm"
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:shadow-xl hover:shadow-emerald-200 transition-all disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed disabled:shadow-none font-bold text-base"
                                 >
                                   {uploadingTask === task.id ? (
                                     <>
-                                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                      <div className="animate-spin rounded-full h-5 w-5 border-3 border-white border-t-transparent"></div>
                                       <span>Submitting...</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Send className="w-4 h-4" />
+                                      <Send className="w-5 h-5" />
                                       <span>
                                         {selectedTask === task.id &&
                                         attachments.length === 0
@@ -992,9 +1147,8 @@ const Tasks = () => {
                           </div>
                         )}
 
-                      {/* Footer with created date */}
-                      <div className="mt-4 pt-3 border-t border-slate-100">
-                        <p className="text-[10px] text-slate-400">
+                      <div className="mt-4 pt-4 border-t border-slate-100">
+                        <p className="text-xs text-slate-400">
                           Created on{" "}
                           {new Date(task.createdAt).toLocaleDateString(
                             "en-US",
@@ -1002,7 +1156,7 @@ const Tasks = () => {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </p>
                       </div>
@@ -1013,8 +1167,8 @@ const Tasks = () => {
             </div>
 
             {pagination.totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 bg-white p-4 rounded-2xl shadow-sm">
-                <div className="text-sm text-gray-700">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50">
+                <div className="text-sm text-gray-700 font-medium">
                   Showing{" "}
                   <span className="font-bold text-blue-600">
                     {(currentPage - 1) * pagination.limit + 1}
@@ -1023,18 +1177,22 @@ const Tasks = () => {
                   <span className="font-bold text-blue-600">
                     {Math.min(currentPage * pagination.limit, pagination.total)}
                   </span>{" "}
-                  of <span className="font-bold">{pagination.total}</span> tasks
+                  of{" "}
+                  <span className="font-bold text-gray-900">
+                    {pagination.total}
+                  </span>{" "}
+                  tasks
                 </div>
 
-                <nav className="flex items-center gap-1">
+                <nav className="flex items-center gap-2">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1 || loading}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2
                       ${
                         currentPage === 1 || loading
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-300 hover:border-blue-300"
+                          : "bg-white text-gray-700 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white border-2 border-gray-200 hover:border-transparent shadow-md hover:shadow-lg"
                       }
                     `}
                   >
@@ -1044,18 +1202,18 @@ const Tasks = () => {
 
                   <div className="hidden sm:flex">{renderPageNumbers()}</div>
 
-                  <div className="sm:hidden px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold">
+                  <div className="sm:hidden px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg">
                     {currentPage} / {pagination.totalPages}
                   </div>
 
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === pagination.totalPages || loading}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2
                       ${
                         currentPage === pagination.totalPages || loading
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-300 hover:border-blue-300"
+                          : "bg-white text-gray-700 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white border-2 border-gray-200 hover:border-transparent shadow-md hover:shadow-lg"
                       }
                     `}
                   >
