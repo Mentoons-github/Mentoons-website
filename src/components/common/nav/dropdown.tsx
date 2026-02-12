@@ -22,6 +22,7 @@ const DropDown = ({
   const navigate = useNavigate();
 
   const handleClick = (category: string) => {
+    console.log(category);
     if (isOpen) isOpen(false);
 
     let basePath = "";
@@ -30,13 +31,14 @@ const DropDown = ({
     } else if (labelType === "workshops") {
       basePath = "/mentoons-workshops";
     } else if (labelType === "joinus") {
-      basePath = "/join-us";
+      basePath = "/joinus";
     } else {
       basePath = "/mentoons-games";
     }
 
     if (labelType === "joinus") {
       navigate(`${basePath}/${category.toLowerCase()}`);
+      // navigate(`${basePath}/careers`);
       return;
     }
 

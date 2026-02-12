@@ -35,6 +35,7 @@ interface JobFormValues {
   jobType: string;
   status?: string;
   applicationCount?: number;
+  applicationSource: string[];
 }
 
 interface ApiError {
@@ -83,7 +84,7 @@ const CreateJob: React.FC = () => {
           `${import.meta.env.VITE_PROD_URL}/admin/location/states`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         const stateNames = response.data.states
           .map((s: { state_name: string }) => s.state_name)
@@ -152,14 +153,14 @@ const CreateJob: React.FC = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     return res.data.data.fileDetails.url;
   };
 
   const handleFormSubmit = async (
     values: JobFormValues,
-    { setSubmitting }: FormikHelpers<JobFormValues>
+    { setSubmitting }: FormikHelpers<JobFormValues>,
   ) => {
     setIsSubmitting(true);
     setIsLoadingModalOpen(true);
@@ -176,7 +177,7 @@ const CreateJob: React.FC = () => {
       const payload = { ...values, thumbnail: thumbnailUrl } as JobData;
       if (jobId) {
         const r = await dispatch(
-          updateJob({ ...payload, _id: jobId })
+          updateJob({ ...payload, _id: jobId }),
         ).unwrap();
         successToast(r.data.message || "Job updated");
       } else {
@@ -215,6 +216,9 @@ const CreateJob: React.FC = () => {
     jobType: job?.jobType || "",
     status: job?.status || "open",
     applicationCount: job?.applicationCount || 0,
+    applicationSource: Array.isArray(job?.applicationSource)
+      ? job.applicationSource
+      : ["INTERNAL"],
   };
 
   const validationSchema = Yup.object({
@@ -229,6 +233,9 @@ const CreateJob: React.FC = () => {
     thumbnail: Yup.mixed().required("Thumbnail is required"),
     location: Yup.string().required("Location is required"),
     jobType: Yup.string().required("Job type is required"),
+    applicationSource: Yup.array()
+      .of(Yup.string().oneOf(["INTERNAL", "AFFILIATE", "COLLABORATE"]))
+      .min(1, "Select at least one application source"),
   });
 
   return (
@@ -370,6 +377,40 @@ const CreateJob: React.FC = () => {
               </div>
             </div>
 
+            {/* Added Application Source field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Application Source <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                {[
+                  { value: "INTERNAL", label: "Internal (Direct)" },
+                  { value: "AFFILIATE", label: "Affiliate" },
+                  { value: "COLLABORATE", label: "Collaborate / Partner" },
+                ].map((source) => (
+                  <label
+                    key={source.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <Field
+                      type="checkbox"
+                      name="applicationSource"
+                      value={source.value}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {source.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <ErrorMessage
+                name="applicationSource"
+                component="div"
+                className="text-sm text-red-500"
+              />
+            </div>
+
             <div className="space-y-2">
               <label
                 htmlFor="jobDescription"
@@ -426,10 +467,10 @@ const CreateJob: React.FC = () => {
                                 key === "skillsRequired"
                                   ? "JavaScript"
                                   : key === "responsibilities"
-                                  ? "Develop apps"
-                                  : key === "requirements"
-                                  ? "Bachelor's degree"
-                                  : "Competitive salary"
+                                    ? "Develop apps"
+                                    : key === "requirements"
+                                      ? "Bachelor's degree"
+                                      : "Competitive salary"
                               }`}
                             />
                             <button
@@ -440,7 +481,7 @@ const CreateJob: React.FC = () => {
                               Remove
                             </button>
                           </div>
-                        )
+                        ),
                       )}
                       <button
                         type="button"

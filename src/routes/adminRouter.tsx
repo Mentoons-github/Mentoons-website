@@ -9,6 +9,7 @@ import AdminAttendanceView from "@/pages/admin/employee/attendance";
 import CreateEmployee from "@/pages/admin/employee/createEmployee";
 import EmployeeTable from "@/pages/admin/employee/employeeTable";
 import AdminLeaveManagement from "@/pages/admin/employee/leaveManagement";
+import Feedback from "@/pages/admin/feedback/feedback";
 // import TaskAssignmentSystem from "@/pages/admin/employeeTask";
 import GeneralQueries from "@/pages/admin/generalQueries";
 import CreateJob from "@/pages/admin/jobs/addJob";
@@ -25,6 +26,7 @@ import PsychologistsTable from "@/pages/admin/professionalRecords/pychologists";
 import AdminProfile from "@/pages/admin/profile";
 import AddQuiz from "@/pages/admin/quiz/addQuiz";
 import QuizTable from "@/pages/admin/quiz/quiz";
+import Role from "@/pages/admin/roleSelection/role";
 // import SessionEnquiries from "@/pages/admin/sessionAllocation/session";
 import AdminTaskDashboard from "@/pages/admin/taskSubmissions";
 import Users from "@/pages/admin/users";
@@ -91,7 +93,9 @@ const AdminRouter = () => {
           <Route path="employee-attendance" element={<AdminAttendanceView />} />
           <Route path="add-quiz" element={<AddQuiz />} />
           <Route path="quiz" element={<QuizTable />} />
+          <Route path="feedback" element={<Feedback />} />
         </Route>
+        <Route path="/test" element={<Role />} />
       </Routes>
     </Suspense>
   );

@@ -1,4 +1,4 @@
-import { WorkshopPlan } from "@/types/workshop";
+import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import {
   CheckCircle,
   CreditCard,
@@ -24,7 +24,8 @@ const PaymentDetailPage = () => {
   const [showBPLUpload, setShowBPLUpload] = useState(false);
   const [bplCardFile, setBplCardFile] = useState<File | null>(null);
 
-  // Redirect if no plan data
+  console.log("payment details :", plan);
+
   if (!plan) {
     navigate("/workshops");
     return null;
@@ -43,14 +44,12 @@ const PaymentDetailPage = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type (only images)
       if (!file.type.startsWith("image/")) {
         alert("Please upload an image file (JPG, PNG, etc.)");
         return;
       }
 
-      // Validate file size (max 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         alert("File size must be less than 5MB");
         return;
@@ -67,7 +66,7 @@ const PaymentDetailPage = () => {
     setShowBPLUpload(false);
   };
 
-  const bplDiscountPrice = plan.price.introductory * 0.3; // 70% off
+  const bplDiscountPrice = plan.price.introductory * 0.3;
 
   const getPaymentOptions = () => {
     const options = [
@@ -86,33 +85,33 @@ const PaymentDetailPage = () => {
       },
     ];
 
-    if (plan.paymentOption === "twoStep") {
-      const firstPayment =
-        (showBPLDiscount ? bplDiscountPrice : plan.price.introductory) / 2;
-      options.push({
-        id: "twoStep",
-        name: "Two-Step Payment",
-        icon: <Calendar className="w-5 h-5" />,
-        available: true,
-        details: {
-          displayAmount: firstPayment,
-          total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
-          breakdown: `First payment: ₹${firstPayment.toFixed(
-            2
-          )} (2 payments total)`,
-        },
-      });
-    }
+    // if (plan.paymentOptions.includes("TWO-STEP")) {
+    //   const firstPayment =
+    //     (showBPLDiscount ? bplDiscountPrice : plan.price.introductory) / 2;
+    //   options.push({
+    //     id: "twoStep",
+    //     name: "Two-Step Payment",
+    //     icon: <Calendar className="w-5 h-5" />,
+    //     available: true,
+    //     details: {
+    //       displayAmount: firstPayment,
+    //       total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
+    //       breakdown: `First payment: ₹${firstPayment.toFixed(
+    //         2,
+    //       )} (2 payments total)`,
+    //     },
+    //   });
+    // }
 
-    if (plan.paymentOption === "emi" && plan.price.monthly) {
+    if (plan.paymentOptions?.includes("EMI") && plan.emi?.monthlyAmount) {
       const months = plan.duration.includes("3")
         ? 3
         : plan.duration.includes("6")
-        ? 6
-        : 12;
+          ? 6
+          : 12;
       const monthlyAmount = showBPLDiscount
         ? bplDiscountPrice / months
-        : plan.price.monthly;
+        : plan.emi.monthlyAmount;
 
       options.push({
         id: "emi",
@@ -123,7 +122,7 @@ const PaymentDetailPage = () => {
           displayAmount: monthlyAmount,
           total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
           breakdown: `First EMI: ₹${monthlyAmount.toFixed(
-            2
+            2,
           )} (${months} months total)`,
         },
       });
@@ -134,7 +133,7 @@ const PaymentDetailPage = () => {
 
   const paymentOptions = getPaymentOptions();
   const selectedOption = paymentOptions.find(
-    (opt) => opt.id === selectedPayment
+    (opt) => opt.id === selectedPayment,
   );
 
   return (

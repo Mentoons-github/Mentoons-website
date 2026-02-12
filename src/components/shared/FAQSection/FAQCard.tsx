@@ -4,12 +4,26 @@ import { applyForJob } from "@/redux/careerSlice";
 import { uploadFile } from "@/redux/fileUploadSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useAuth } from "@clerk/clerk-react";
-
 import React, { FormEvent, useState } from "react";
 import { IoAdd, IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+export interface HiringFormData {
+  name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  portfolioLink: string;
+  coverNote: string;
+  resume: File | null;
+}
+
+interface FormError {
+  [key: string]: string;
+}
+
 export type TWORKSHOPFAQ = {
   id: string;
   question: string;
@@ -84,27 +98,17 @@ const FAQCard = ({
 
 export default FAQCard;
 
-export interface HiringFormData {
-  name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  portfolioLink: string;
-  coverNote: string;
-  resume: File | null;
-}
-
-interface FormError {
-  [key: string]: string;
-}
-
-export function JobApplicationForm({
+export const JobApplicationForm = ({
   id,
   setIsFormOpen,
+  onSuccess,
+  applicationSource,
 }: {
   id: string;
   setIsFormOpen: (value: boolean) => void;
-}) {
+  onSuccess?: () => void;
+  applicationSource?: string;
+}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
@@ -125,7 +129,7 @@ export function JobApplicationForm({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -136,9 +140,10 @@ export function JobApplicationForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
       setFormData((prevData) => ({
         ...prevData,
-        resume: e.target.files![0],
+        resume: file,
       }));
     }
   };
@@ -179,16 +184,11 @@ export function JobApplicationForm({
     }
 
     if (!formData.resume) {
-      errors.resume = "Resume is required";
+      errors.resume = "Resume (PDF) is required";
     } else {
       const fileType = formData.resume.type;
-      const validTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ];
-      if (!validTypes.includes(fileType)) {
-        errors.resume = "File must be PDF, DOC, or DOCX";
+      if (fileType !== "application/pdf") {
+        errors.resume = "Only PDF files are allowed";
       } else if (formData.resume.size > 5000000) {
         errors.resume = "File size must be less than 5MB";
       }
@@ -220,7 +220,7 @@ export function JobApplicationForm({
         uploadFile({
           file: formData.resume,
           getToken: async () => token,
-        })
+        }),
       );
 
       const fileUrl = fileAction.payload?.data?.fileDetails.url;
@@ -232,12 +232,16 @@ export function JobApplicationForm({
         applyForJob({
           jobId: id,
           formData: { ...formData, resume: fileUrl },
-        })
+          source: applicationSource ? applicationSource : "INTERNAL",
+        }),
       );
 
       if (res.payload?.success) {
         toast.success("Application submitted successfully");
         setIsFormOpen(false);
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         toast.error(res.payload?.message || "Failed to submit application");
       }
@@ -384,14 +388,14 @@ export function JobApplicationForm({
 
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-gray-700">
-                Resume
+                Resume (PDF only)
               </label>
               <input
                 type="file"
                 id="resume"
                 name="resume"
                 onChange={handleFileChange}
-                accept=".pdf,.doc,.docx"
+                accept="application/pdf"
                 className="hidden"
               />
               <label htmlFor="resume">
@@ -400,12 +404,15 @@ export function JobApplicationForm({
                   onClick={() => document.getElementById("resume")?.click()}
                   className="w-full p-2 text-base text-white transition-all duration-300 bg-gray-600 rounded-lg hover:bg-gray-700"
                 >
-                  {formData.resume ? formData.resume.name : "Upload Resume"}
+                  {formData.resume ? formData.resume.name : "Upload PDF Resume"}
                 </Button>
               </label>
               {formErrors.resume && (
                 <p className="mt-1 text-xs text-red-500">{formErrors.resume}</p>
               )}
+              <p className="mt-1 text-xs text-gray-500">
+                Only PDF files are accepted (max 5MB)
+              </p>
             </div>
 
             <Button
@@ -420,4 +427,4 @@ export function JobApplicationForm({
       </div>
     </div>
   );
-}
+};

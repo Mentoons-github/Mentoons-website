@@ -5,8 +5,9 @@ export interface WorkshopModule {
 }
 
 export interface ModuleSession {
-  moduleId: string;
-  totalSessions: number;
+  title?: string;
+  description?: string;
+  sessionCount?: number;
 }
 
 export interface Price {
@@ -14,22 +15,34 @@ export interface Price {
   introductory: number;
 }
 
+export interface EmiConfig {
+  enabled: boolean;
+  downPayment?: number;
+  durationMonths?: number;
+  monthlyAmount?: number;
+  interestRate: number;
+}
+
 export interface WorkshopPlan {
   planId: string;
   name: string;
   age: string;
-  image: string;
   duration: string;
   durationMonths: number;
+  mode: ("Online" | "Offline")[];
   totalSession: number;
   price: Price;
-  paymentOption: "fullPayment" | "emi";
+  emi: EmiConfig;
   features: string[];
-  mode: ("Online" | "Offline")[];
+  paymentOptions: ("FULL" | "EMI")[];
+  image: string;
   materials: string;
   includesIntroSession: boolean;
   includesFinalSession: boolean;
   moduleSessions: ModuleSession[];
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Workshop {

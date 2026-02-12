@@ -9,11 +9,16 @@ export type TPOSITION = {
   _id: string;
   jobTitle: string;
   jobDescription: string;
+  slug: string;
   jobType: "FULLTIME" | "PARTTIME" | "CONTRACT" | "INTERNSHIP";
   location: string;
   skillsRequired: string[];
   applicationCount: number;
   thumbnail: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  whatWeOffer: string[];
+  applicationSource?: string[];
 };
 
 export interface CareerState {
@@ -21,6 +26,7 @@ export interface CareerState {
   error: string | null;
   success: boolean;
   openPositions: TPOSITION[];
+  selectedJob: TPOSITION | null;
   currentPage: number;
   totalPages: number;
   totalJobs: number;
@@ -31,6 +37,7 @@ const initialState: CareerState = {
   error: null,
   success: false,
   openPositions: [],
+  selectedJob: null,
   currentPage: 1,
   totalPages: 1,
   totalJobs: 0,
@@ -42,29 +49,38 @@ export const getOpenPositions = createAsyncThunk(
     page = 1,
     limit = 10,
     search = "",
+    source,
   }: {
     page?: number;
     limit?: number;
     search?: string;
+    source?: string;
   }) => {
     try {
       const response = await axiosInstance.get("/career/jobs", {
-        params: { page, limit, search },
+        params: { page, limit, search, source },
       });
       return response.data;
     } catch (error) {
       throw new Error("Failed to fetch open positions");
     }
-  }
+  },
 );
 
 export const applyForJob = createAsyncThunk(
   "career/applyForJob",
-  async (data: { jobId: string; formData: Partial<HiringFormData> }) => {
+  async (data: {
+    jobId: string;
+    formData: Partial<HiringFormData>;
+    source?: string;
+  }) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/career/jobs/apply/${data.jobId}`,
-        data.formData
+        {
+          ...data.formData,
+          source: data.source,
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -75,13 +91,29 @@ export const applyForJob = createAsyncThunk(
     } catch (error) {
       throw new Error("Failed to apply for job");
     }
-  }
+  },
+);
+
+export const getJobBySlug = createAsyncThunk(
+  "career/getJobBySlug",
+  async (slug: string) => {
+    try {
+      const response = await axiosInstance.get(`/career/jobs/slug/${slug}`);
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to fetch job details");
+    }
+  },
 );
 
 const careerSlice = createSlice({
   name: "career",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedJob: (state) => {
+      state.selectedJob = null;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getOpenPositions.pending, (state) => {
       state.loading = true;
@@ -114,7 +146,21 @@ const careerSlice = createSlice({
       state.loading = false;
       state.error = action.error.message || "Something went wrong!";
     });
+    builder.addCase(getJobBySlug.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(getJobBySlug.fulfilled, (state, action) => {
+      state.loading = false;
+      state.selectedJob = action.payload?.data || null;
+    });
+
+    builder.addCase(getJobBySlug.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "Something went wrong!";
+    });
   },
 });
 
+export const { clearSelectedJob } = careerSlice.actions;
 export default careerSlice.reducer;
