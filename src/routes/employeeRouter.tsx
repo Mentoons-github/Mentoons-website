@@ -13,6 +13,7 @@ import EmployeeProtectedRoute from "@/layout/employee/protectedRoute";
 import EmployeeProfile from "@/pages/employee/profile";
 import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
 import DataCapture from "@/pages/employee/dataCapture/dataCapture";
+import Incentive from "@/pages/employee/incentive/incentive";
 
 const EmployeeRouter = () => {
   return (
@@ -36,8 +37,10 @@ const EmployeeRouter = () => {
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="celebrations" element={<BirthdayCalendar />} />
           <Route path="data_capture" element={<DataCapture />} />
+          <Route path="incentive" element={<Incentive />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
+        
       </Routes>
     </Suspense>
   );

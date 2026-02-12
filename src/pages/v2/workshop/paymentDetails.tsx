@@ -161,7 +161,7 @@ const PaymentDetailPage = () => {
 
   const paymentOptions = getPaymentOptions();
   const selectedOption = paymentOptions.find(
-    (opt) => opt.id === selectedPayment
+    (opt) => opt.id === selectedPayment,
   );
 
   return (

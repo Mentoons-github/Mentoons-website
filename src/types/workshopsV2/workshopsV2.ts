@@ -19,6 +19,14 @@ export interface EMI {
   interestRate?: number;
 }
 
+export interface EmiConfig {
+  enabled: boolean;
+  downPayment?: number;
+  durationMonths?: number;
+  monthlyAmount?: number;
+  interestRate: number;
+}
+
 export interface WorkshopPlan {
   planId: string;
   name: string;

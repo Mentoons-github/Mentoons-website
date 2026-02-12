@@ -1,4 +1,4 @@
-import { FaUser, FaUserCircle } from "react-icons/fa";
+import { FaMoneyCheckAlt, FaUser, FaUserCircle } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,6 +41,7 @@ const AuthButton = () => {
 
   const handleNavigation = (nav: "profile" | "order" | "emi") => {
     setShowProfileDropdown(false);
+
     if (nav === "profile") {
       navigate("/adda/user-profile");
     } else if (nav === "order") {
@@ -240,6 +241,28 @@ const AuthButton = () => {
                   <div className="mx-4 my-2 border-t border-slate-200/60"></div>
 
                   {/* Orders */}
+                  <motion.div
+                    variants={itemVariants}
+                    onClick={() => handleNavigation("emi")}
+                    whileHover={{ x: 4 }}
+                    className="px-6 py-4 hover:bg-orange-50/80 cursor-pointer flex items-center gap-4 text-slate-700 transition-all duration-200 group"
+                  >
+                    <div className="w-11 h-11 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center group-hover:from-orange-200 group-hover:to-orange-300 transition-all duration-200 shadow-sm">
+                      <FaMoneyCheckAlt className="w-5 h-5 text-orange-600" />
+                    </div>
+
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-slate-900 block">
+                        EMI Plans
+                      </span>
+                      <p className="text-xs text-slate-500">
+                        View & manage monthly installments
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  <div className="mx-4 my-2 border-t border-slate-200/60"></div>
+
                   <motion.div
                     variants={itemVariants}
                     onClick={() => handleNavigation("order")}

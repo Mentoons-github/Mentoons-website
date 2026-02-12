@@ -42,7 +42,7 @@ const Header = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const filteredNav = COMMON_NAV.filter(
-    (item) => item.label !== "Profile" || userId
+    (item) => item.label !== "Profile" || userId,
   );
   const navLeft = filteredNav.slice(0, 5);
   const navRight = filteredNav.slice(5);
@@ -63,7 +63,7 @@ const Header = () => {
 
   const handleSearchSubmit = (
     e: React.FormEvent<HTMLFormElement>,
-    suggestion?: string
+    suggestion?: string,
   ) => {
     e.preventDefault();
     const query = suggestion || searchQuery.trim();
@@ -180,7 +180,7 @@ const Header = () => {
                 {label}
                 <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </NavLink>
-            )
+            ),
           )}
         </nav>
       </div>

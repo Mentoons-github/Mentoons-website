@@ -16,7 +16,7 @@ interface WorkshopCardProps {
   };
   activeSection: "overview" | "ageGroups" | "whyChoose" | "services" | "";
   setActiveSection: (
-    section: "overview" | "ageGroups" | "whyChoose" | "services" | ""
+    section: "overview" | "ageGroups" | "whyChoose" | "services" | "",
   ) => void;
   currentAgeGroup: string;
   setCurrentAgeGroup: (index: string) => void;

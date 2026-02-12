@@ -92,7 +92,7 @@ const ComicsPageV2 = () => {
       });
       setIsAtStart(carousel.scrollLeft === 0);
       setIsAtEnd(
-        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1
+        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1,
       );
     }
   };
@@ -121,12 +121,12 @@ const ComicsPageV2 = () => {
         product.type === "comic"
           ? "comics"
           : product.type === "audio comic"
-          ? "audioComics"
-          : "podcasts";
+            ? "audioComics"
+            : "podcasts";
       const response = await axiosInstance.post(
         `${import.meta.env.VITE_PROD_URL}/subscription/access`,
         { type, itemId: product._id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const { access, reason } = response.data;
       if (access) {
@@ -135,12 +135,12 @@ const ComicsPageV2 = () => {
       if (reason === "upgrade") {
         setLimitModalTitle("Upgrade Your Plan");
         setLimitModalMessage(
-          `You've reached the ${type} limit for your ${membershipType} plan. Upgrade to access more content!`
+          `You've reached the ${type} limit for your ${membershipType} plan. Upgrade to access more content!`,
         );
       } else if (reason === "charge") {
         setLimitModalTitle("Purchase Content");
         setLimitModalMessage(
-          `You've reached the ${type} limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+          `You've reached the ${type} limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
         );
       }
       setCurrentProductId(product._id || "");
@@ -156,7 +156,7 @@ const ComicsPageV2 = () => {
   const openComicModal = async (
     comicLink: string,
     comic?: ProductBase | null,
-    productType?: string
+    productType?: string,
   ) => {
     if (!comic) {
       setComicToView(comicLink);
@@ -193,7 +193,7 @@ const ComicsPageV2 = () => {
       const token = await getToken();
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.status === 200) {
         setDbUser(response.data.data);
@@ -209,7 +209,7 @@ const ComicsPageV2 = () => {
 
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    comic: ProductBase
+    comic: ProductBase,
   ) => {
     e.stopPropagation();
     if (comic.product_type) {
@@ -236,7 +236,7 @@ const ComicsPageV2 = () => {
           ageCategory: comic.ageCategory,
           productImage: comic.productImages?.[0].imageUrl,
           productDetails: comic.details,
-        })
+        }),
       );
       if (response.payload) {
         setSelectedComic(comic);
@@ -255,7 +255,7 @@ const ComicsPageV2 = () => {
 
   const handleBuyNow = async (
     e: React.MouseEvent<HTMLButtonElement>,
-    product: ProductBase
+    product: ProductBase,
   ) => {
     e.stopPropagation();
     if (product.product_type) {
@@ -294,7 +294,7 @@ const ComicsPageV2 = () => {
         const token = await getToken();
         if (selectedOption) {
           await dispatch(
-            fetchProducts({ type: selectedOption, token: token! })
+            fetchProducts({ type: selectedOption, token: token! }),
           );
           setSelectedComic(products[0]);
         } else {
@@ -334,19 +334,29 @@ const ComicsPageV2 = () => {
         className="mt-10 md:mt-16 lg:flex lg:items-start"
       >
         <div className="flex-1">
-          <h1 className="py-2 text-2xl font-semibold text-center text-primary md:text-6xl md:py-8 md:pb-6">
+          <p className="text-lg font-extrabold pl-14">Digital Wellness</p>
+          <h1 className="py-2 text-2xl font-semibold text-center text-primary md:text-6xl md:pb-4">
             E-Comics & Audio Comics
           </h1>
           <p className="lg:w-3/4 px-4 lg:py-4 mx-auto text-lg font-medium text-center lg:text-left md:text-2xl">
-            Dive into colorful worlds and exciting stories that teach valuable
-            lessons while entertaining young readers. Our diverse range of
-            comics covers various subjects, from history and science to social
-            skills and personal growth.
+            Welcome to the world of meaningful stories and valuable life
+            lessons.
+            <br /> Our Comics and stories are designed to help children and
+            teenagers navigate{" "}
+            <span className="text-orange-400 font-semibold">
+              important life
+            </span>{" "}
+            topics with ease and enjoyment.
+            <br /> Comic book series that address topics like social media,
+            safety, gadget addiction.
           </p>
         </div>
         <div className="flex-1 mt-5 lg:mt-0">
-          <h2 className="py-4 text-xl md:text-3xl text-center luckiest-guy-regular">
-            CHOOSE COMICS Beste FOR YOU!
+          <h2
+            className="py-4 text-xl md:text-3xl text-center luckiest-guy-regular"
+            style={{ wordSpacing: 8 }}
+          >
+            CHOOSE COMICS Best FOR YOU!
           </h2>
           <div className="flex items-center justify-center w-full p-2 lg:p-4 lg:pr-24">
             <img
@@ -451,7 +461,7 @@ const ComicsPageV2 = () => {
                           return openComicModal(
                             (product.details as ComicProduct["details"])
                               ?.sampleUrl || "",
-                            product
+                            product,
                           );
                         }}
                       >
@@ -526,7 +536,7 @@ const ComicsPageV2 = () => {
                                 setIsPlaying(false);
                               }
                             },
-                            { threshold: 0.5 }
+                            { threshold: 0.5 },
                           );
                           observer.observe(el);
                         }
@@ -575,7 +585,7 @@ const ComicsPageV2 = () => {
                             openComicModal(
                               (comic.details as ComicProduct["details"])
                                 ?.sampleUrl || "",
-                              comic
+                              comic,
                             );
                           }
                         }}
@@ -627,7 +637,7 @@ const ComicsPageV2 = () => {
               onClick={() => {
                 pauseAllVideos();
                 setCurrentIndex((prevIndex) =>
-                  prevIndex === 0 ? products.length - 1 : prevIndex - 1
+                  prevIndex === 0 ? products.length - 1 : prevIndex - 1,
                 );
               }}
               className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
@@ -638,7 +648,7 @@ const ComicsPageV2 = () => {
               onClick={() => {
                 pauseAllVideos();
                 setCurrentIndex(
-                  (prevIndex) => (prevIndex + 1) % products.length
+                  (prevIndex) => (prevIndex + 1) % products.length,
                 );
               }}
               className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
@@ -686,7 +696,7 @@ const ComicsPageV2 = () => {
                     <span className="px-3 py-1 text-sm font-medium rounded-lg bg-white/90">
                       {formatDateString(
                         (comic.details as ComicProduct["details"])
-                          ?.releaseDate || ""
+                          ?.releaseDate || "",
                       )}
                     </span>
                   </div>
@@ -753,7 +763,7 @@ const ComicsPageV2 = () => {
                             openComicModal(
                               comic.details.sampleUrl || "",
                               comic,
-                              comic.product_type
+                              comic.product_type,
                             );
                           }
                         }}

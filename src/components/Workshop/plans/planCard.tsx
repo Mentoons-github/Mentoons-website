@@ -1,5 +1,6 @@
 import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import { CheckCircle } from "lucide-react";
+
 import { useState } from "react";
 
 interface PlanCardProps {
@@ -18,6 +19,8 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
   ];
 
   if (!plan) return null;
+
+  const hasEMI = !!plan?.emi?.enabled;
 
   return (
     <div
@@ -87,13 +90,16 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
             </span>
           </div>
 
-          <div className="mt-1 text-xs sm:text-sm text-gray-600">
-            or{" "}
-            <span className="font-semibold text-gray-900">
-              ₹{plan.emi?.monthlyAmount}/mo
-            </span>{" "}
-            for {plan.duration}
-          </div>
+          {hasEMI && (
+            <div className="mt-1 text-xs sm:text-sm text-gray-600">
+              or{" "}
+              <span className="font-semibold text-gray-900">
+                ₹{plan.emi?.monthlyAmount}/mo
+              </span>{" "}
+              for {plan.duration} •{" "}
+              <span className="text-green-600 font-bold">Interest Free</span>
+            </div>
+          )}
 
           {/* Flip Section */}
           <div
@@ -158,18 +164,19 @@ const PlanCard = ({ plan, onPayClick }: PlanCardProps) => {
           </div>
 
           <div className="space-y-2">
-            {plan.paymentOptions?.includes("FULL") && (
+            {plan.paymentOptions.includes("FULL") && (
               <div className="text-center py-1.5 bg-green-50 border border-green-200 rounded">
                 <p className="text-xs font-semibold text-green-700">
-                  FULL PAYMENT AVAILABLE
+                  FULL PAYMENT PLAN
                 </p>
               </div>
             )}
 
-            {plan.paymentOptions?.includes("EMI") && plan.emi?.enabled && (
+            {plan.paymentOptions.includes("EMI") && hasEMI && (
               <div className="text-center py-1.5 bg-orange-50 border border-orange-200 rounded">
                 <p className="text-xs font-semibold text-orange-700">
-                  MONTHLY EMI AVAILABLE
+                  MONTHLY EMI AVAILABLE •{" "}
+                  <span className="font-bold">Interest Free</span>
                 </p>
               </div>
             )}

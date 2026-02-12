@@ -15,7 +15,7 @@ export interface TaskStats {
 export interface RecentTask {
   id: string;
   title: string;
-  status: "pending" | "in-progress" | "completed" | "overdue";
+  status: "pending" | "in-progress" | "completed" | "overdue" | "transferred";
   dueDate: string;
 }
 
@@ -40,7 +40,7 @@ export const fetchEmployee = createAsyncThunk<
   } catch (error: unknown) {
     const err = error as AxiosError<{ message: string }>;
     return rejectWithValue(
-      err?.response?.data?.message || "Error fetching employee data"
+      err?.response?.data?.message || "Error fetching employee data",
     );
   }
 });
@@ -73,7 +73,7 @@ export const editEmployee = createAsyncThunk<
     };
 
     const cleanData = JSON.parse(
-      JSON.stringify(validatedData)
+      JSON.stringify(validatedData),
     ) as Partial<EmployeeInterface>;
 
     const response = await axios.put(`${BASE_URL}/edit`, cleanData, {
@@ -85,7 +85,7 @@ export const editEmployee = createAsyncThunk<
   } catch (error: unknown) {
     const err = error as AxiosError<{ message: string }>;
     return rejectWithValue(
-      err?.response?.data?.message || "Failed to update employee"
+      err?.response?.data?.message || "Failed to update employee",
     );
   }
 });

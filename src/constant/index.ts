@@ -762,7 +762,12 @@ export const FOOTER_PAGELINKS = [
       {
         id: "AB_6",
         label: "Hiring",
-        url: "/join-us/careers",
+        url: "/joinus/careers",
+      },
+      {
+        id: "AB_7",
+        label: "Explore",
+        url: "/joinus/explore",
       },
     ],
   },
@@ -1273,12 +1278,22 @@ export const COMMON_NAV: NavLink[] = [
       {
         id: "JS_01",
         label: "Careers",
-        url: "/join-us/hiring",
+        url: "/joinus/hiring",
       },
       {
         id: "JS_02",
-        label: "Explore",
-        url: "/join-us/explore",
+        label: "Affiliate",
+        url: "/joinus/hiring",
+      },
+      {
+        id: "JS_03",
+        label: "Collaborate",
+        url: "/joinus/hiring",
+      },
+      {
+        id: "JS_04",
+        label: "Become mentor",
+        url: "/joinus/hiring",
       },
     ],
   },

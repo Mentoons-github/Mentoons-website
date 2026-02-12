@@ -15,12 +15,12 @@ const PostingContainer = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState<string | null>(null);
   const openPositions = useSelector(
-    (state: RootState) => state.career.openPositions
+    (state: RootState) => state.career.openPositions,
   );
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
   const selectedPosition = openPositions.find(
-    (position) => position.jobTitle === selectedPosting
+    (position) => position.jobTitle === selectedPosting,
   );
 
   const handlePostingClick = (postingTitle: string) => {
@@ -118,7 +118,7 @@ const PostingContainer = () => {
                             >
                               {skill}
                             </span>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
