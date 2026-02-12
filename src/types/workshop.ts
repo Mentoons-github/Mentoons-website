@@ -3,6 +3,8 @@ export interface Benefit {
   description: string;
 }
 
+export type PaymentOption = "FULL" | "EMI";
+
 export interface WhyChooseUs {
   heading: string;
   description: string;
@@ -44,6 +46,6 @@ export interface WorkshopPlan {
   totalSession: number;
   price: WorkshopPrice;
   features: string[];
-  paymentOption?: "fullPayment" | "twoStep" | "emi";
+  paymentOptions?: PaymentOption[];
   materials: string;
 }

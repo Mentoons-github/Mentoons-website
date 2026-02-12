@@ -1,18 +1,22 @@
-export interface WorkshopModule {
-  moduleId: string;
-  name: string;
-  image: string;
-}
-
-export interface ModuleSession {
-  title?: string;
-  description?: string;
-  sessionCount?: number;
-}
+export type PaymentOption = "FULL" | "EMI";
 
 export interface Price {
   original: number;
   introductory: number;
+}
+
+export interface ModuleSession {
+  title: string;
+  description: string;
+  sessionCount: number;
+}
+
+export interface EMI {
+  enabled: boolean;
+  downPayment: number;
+  durationMonths: number;
+  monthlyAmount: number;
+  interestRate?: number;
 }
 
 export interface EmiConfig {
@@ -32,28 +36,15 @@ export interface WorkshopPlan {
   mode: ("Online" | "Offline")[];
   totalSession: number;
   price: Price;
-  emi: EmiConfig;
+  emi?: EMI;
   features: string[];
-  paymentOptions: ("FULL" | "EMI")[];
+  paymentOptions: PaymentOption[];
   image: string;
   materials: string;
-  includesIntroSession: boolean;
-  includesFinalSession: boolean;
+  includesIntroSession?: boolean;
+  includesFinalSession?: boolean;
   moduleSessions: ModuleSession[];
-  isActive: boolean;
+  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface Workshop {
-  _id: string;
-  workshopCode: string;
-  name: string;
-  description: string;
-  isActive: boolean;
-  modules: WorkshopModule[];
-  plans: WorkshopPlan[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
 }

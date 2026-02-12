@@ -326,11 +326,7 @@ const OrderSummary: React.FC = () => {
       orderId: formData.order_id,
     };
 
-    console.log("order Data", orderData);
-
     try {
-      console.log("Sending order data:", orderData);
-      console.log("UserObjectClerk", user);
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/payment/initiate?type=downloads`,
         orderData,
@@ -341,10 +337,7 @@ const OrderSummary: React.FC = () => {
           },
         }
       );
-      console.log("response", response);
-      console.log("response.data", response.data);
 
-      // If payment is successful, deduct the redeemed points
       if (redeemPoints > 0) {
         try {
           // Use the redeemPoints action from useRewardActions

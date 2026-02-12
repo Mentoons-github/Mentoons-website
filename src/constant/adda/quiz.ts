@@ -1,5 +1,3 @@
-import { WorkshopPlan } from "@/types/workshop";
-
 export const PAYMENT_PLANS = {
   fullPayment: {
     label: "Full Payment",

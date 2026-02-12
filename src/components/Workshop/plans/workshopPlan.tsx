@@ -2,15 +2,19 @@ import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import PlanHeader from "./header";
 import PlanCard from "./planCard";
 import WorkshopsCategories from "./workshops";
-// import { WORKSHOP_PLANS } from "@/constant/adda/quiz";
+import { fetchWorkshopPlans } from "@/api/workshop/workshops";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { useEffect, useState } from "react";
 import { WorkshopPlan as WorkshopPlanType } from "@/types/workshop";
 import { useNavigate } from "react-router-dom";
 import { ChevronDownCircle, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { fetchAllPlans } from "@/api/workshop/workshop";
 
+
+const WorkshopPlans = () => {
+// import { WORKSHOP_PLANS } from "@/constant/adda/quiz";
 const WorkshopPlans = () => {
   const [showFAQ, setShowFAQ] = useState(false);
   const [plans, setPlans] = useState<WorkshopPlan[] | []>([]);
@@ -33,11 +37,25 @@ const WorkshopPlans = () => {
 
   const planNames = ["Kalakriti", "Instant Katha", "Hasyaras", "Swar"];
   const navigate = useNavigate();
+  const [workshopPlans, setWorkshopPlans] = useState<WorkshopPlan[] | []>([]);
+  const { showStatus } = useStatusModal();
 
   const handlePayClick = (plan: WorkshopPlanType) => {
     navigate("/payment", { state: { plan } });
   };
 
+  const fetchWorkshops = async () => {
+    try {
+      const data = await fetchWorkshopPlans();
+      setWorkshopPlans(data);
+    } catch (error: any) {
+      showStatus("error", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkshops();
+  }, []);
   const FAQ = [
     {
       q: "Will I receive a certificate after completing the workshop?",
@@ -171,6 +189,26 @@ const WorkshopPlans = () => {
         </div>
       </div>
 
+      <div className="flex items-start justify-center gap-10 flex-wrap">
+        {workshopPlans && workshopPlans.length > 0 ? (
+          <>
+            {workshopPlans.map((plan) => (
+              <PlanCard
+                key={plan.planId}
+                plan={plan}
+                onPayClick={handlePayClick}
+              />
+            ))}
+          </>
+        ) : (
+          <>
+            {workshopPlans.map((plan) => (
+              <PlanCard
+                key={plan.planId}
+                plan={plan}
+                onPayClick={handlePayClick}
+              />
+            ))}
       <AnimatePresence>
         {showFAQ && (
           <>

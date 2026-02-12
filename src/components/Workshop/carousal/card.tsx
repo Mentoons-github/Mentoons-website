@@ -201,7 +201,7 @@ const WorkshopCard = ({
             .filter((ageGroup) => ageGroup.image)
             .map((ageGroup, index) => (
               <div
-                className=" h-full flex flex-col justify-between items-center"
+                className="h-full flex flex-col justify-between items-center"
                 key={index}
               >
                 <motion.img
@@ -216,7 +216,6 @@ const WorkshopCard = ({
                 />
                 <div className="flex justify-center  mt-6">
                   <button
-                    key={index}
                     onClick={() => {
                       setCurrentAgeGroup(ageGroup.ageRange);
                       activeSection === "ageGroups" &&

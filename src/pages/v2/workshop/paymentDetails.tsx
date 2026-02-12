@@ -1,4 +1,3 @@
-import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import {
   CheckCircle,
   CreditCard,
@@ -12,52 +11,114 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import { handleFirstDownPayment } from "@/api/workshop/emi";
+import { useAuth } from "@clerk/clerk-react";
+import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 
 const PaymentDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const plan = location.state?.plan as WorkshopPlan;
 
-  const [selectedPayment, setSelectedPayment] = useState("oneTime");
+  const { getToken } = useAuth();
+  const { showStatus } = useStatusModal();
+
+  const [selectedPayment, setSelectedPayment] = useState<"FULL" | "EMI">(
+    "FULL"
+  );
   const [showBPLDiscount, setShowBPLDiscount] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<string>(plan.mode[0] || "");
+  const [selectedMode, setSelectedMode] = useState<string>(
+    plan?.mode?.[0] || ""
+  );
   const [showBPLUpload, setShowBPLUpload] = useState(false);
   const [bplCardFile, setBplCardFile] = useState<File | null>(null);
-
-  console.log("payment details :", plan);
 
   if (!plan) {
     navigate("/workshops");
     return null;
   }
 
-  const handleBackToPlans = () => {
-    navigate(-1);
-  };
+  const introductoryPrice = plan.price.introductory || 14999;
+  const bplDiscountPrice = introductoryPrice * 0.3;
+
+  const hasEMI = plan.paymentOptions?.includes("EMI") && plan.emi?.enabled;
+  const emiDownPayment = plan.emi?.downPayment || 3000;
+  const emiMonthly = plan.emi?.monthlyAmount || 1999;
+  const emiMonths = plan.emi?.durationMonths || plan.durationMonths || 6;
+
+  const handleBackToPlans = () => navigate(-1);
 
   const handleBPLApply = () => {
-    if (!showBPLUpload) {
-      setShowBPLUpload(true);
+    if (!showBPLUpload) setShowBPLUpload(true);
+  };
+
+  const handlePayment = async () => {
+    if (!selectedOption) {
+      showStatus("error", "Please select a payment option");
+      return;
+    }
+
+    const paymentDetails = {
+      planId: plan.planId,
+      plan,
+      paymentType: selectedPayment,
+      mode: selectedMode,
+      bplApplied: showBPLDiscount,
+      amount: selectedOption.details.total,
+      initialAmount: selectedOption.details.displayAmount,
+      bplCardFile: bplCardFile
+        ? {
+            name: bplCardFile.name,
+            size: bplCardFile.size,
+            type: bplCardFile.type,
+          }
+        : null,
+    };
+
+    try {
+      showStatus("info", "Initiating payment...");
+      const response = await handleFirstDownPayment({
+        paymentDetails,
+        getToken,
+      });
+      
+      if (response) {
+        showStatus("success", "Redirecting to payment gateway...");
+      }
+
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = response;
+
+      const form = tempDiv.querySelector("form");
+      if (form) {
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        console.error("Form not found in the response HTML.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      showStatus("error", "Failed to start payment. Please try again.");
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please upload an image file (JPG, PNG, etc.)");
-        return;
-      }
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert("File size must be less than 5MB");
-        return;
-      }
-
-      setBplCardFile(file);
-      setShowBPLDiscount(true);
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file (JPG, PNG, etc.)");
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    setBplCardFile(file);
+    setShowBPLDiscount(true);
   };
 
   const handleRemoveBPLCard = () => {
@@ -66,64 +127,31 @@ const PaymentDetailPage = () => {
     setShowBPLUpload(false);
   };
 
-  const bplDiscountPrice = plan.price.introductory * 0.3;
-
   const getPaymentOptions = () => {
+    const basePrice = showBPLDiscount ? bplDiscountPrice : introductoryPrice;
+
     const options = [
       {
-        id: "oneTime",
+        id: "FULL",
         name: "One-Time Payment",
         icon: <CreditCard className="w-5 h-5" />,
-        available: true,
         details: {
-          displayAmount: showBPLDiscount
-            ? bplDiscountPrice
-            : plan.price.introductory,
-          total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
+          displayAmount: basePrice,
+          total: basePrice,
           breakdown: "Pay full amount now",
         },
       },
     ];
 
-    // if (plan.paymentOptions.includes("TWO-STEP")) {
-    //   const firstPayment =
-    //     (showBPLDiscount ? bplDiscountPrice : plan.price.introductory) / 2;
-    //   options.push({
-    //     id: "twoStep",
-    //     name: "Two-Step Payment",
-    //     icon: <Calendar className="w-5 h-5" />,
-    //     available: true,
-    //     details: {
-    //       displayAmount: firstPayment,
-    //       total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
-    //       breakdown: `First payment: ₹${firstPayment.toFixed(
-    //         2,
-    //       )} (2 payments total)`,
-    //     },
-    //   });
-    // }
-
-    if (plan.paymentOptions?.includes("EMI") && plan.emi?.monthlyAmount) {
-      const months = plan.duration.includes("3")
-        ? 3
-        : plan.duration.includes("6")
-          ? 6
-          : 12;
-      const monthlyAmount = showBPLDiscount
-        ? bplDiscountPrice / months
-        : plan.emi.monthlyAmount;
-
+    if (hasEMI) {
       options.push({
-        id: "emi",
+        id: "EMI",
         name: "Monthly EMI",
         icon: <Calendar className="w-5 h-5" />,
-        available: true,
         details: {
-          displayAmount: monthlyAmount,
-          total: showBPLDiscount ? bplDiscountPrice : plan.price.introductory,
-          breakdown: `First EMI: ₹${monthlyAmount.toFixed(
-            2,
-          )} (${months} months total)`,
+          displayAmount: emiDownPayment,
+          total: basePrice,
+          breakdown: `Down payment: ₹${emiDownPayment} + ${emiMonths} × ₹${emiMonthly}/mo`,
         },
       });
     }
@@ -138,7 +166,6 @@ const PaymentDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="bg-black text-white py-6 px-4 border-b-4 border-black">
         <div className="max-w-5xl mx-auto">
           <button
@@ -155,9 +182,7 @@ const PaymentDetailPage = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 py-12">
-        {/* Workshop Summary */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-black mb-6 pb-3 border-b-2 border-black">
             Workshop Details
@@ -223,7 +248,6 @@ const PaymentDetailPage = () => {
           </div>
         </section>
 
-        {/* BPL Discount */}
         <section className="mb-12">
           <div className="bg-black text-white p-8">
             <div className="flex flex-col gap-6">
@@ -246,7 +270,6 @@ const PaymentDetailPage = () => {
                 )}
               </div>
 
-              {/* File Upload Section */}
               {showBPLUpload && !bplCardFile && (
                 <div className="border-2 border-white p-6 mt-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -262,13 +285,7 @@ const PaymentDetailPage = () => {
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
-                      className="block w-full text-sm text-gray-300
-                        file:mr-4 file:py-3 file:px-6
-                        file:border-2 file:border-white
-                        file:text-sm file:font-bold
-                        file:bg-white file:text-black
-                        hover:file:bg-gray-100
-                        file:cursor-pointer cursor-pointer"
+                      className="block w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-6 file:border-2 file:border-white file:text-sm file:font-bold file:bg-white file:text-black hover:file:bg-gray-100 file:cursor-pointer cursor-pointer"
                     />
                   </label>
                   <p className="text-xs text-gray-400 mt-3">
@@ -277,7 +294,6 @@ const PaymentDetailPage = () => {
                 </div>
               )}
 
-              {/* Uploaded File Display */}
               {bplCardFile && (
                 <div className="border-2 border-white p-6 mt-4 bg-white/10">
                   <div className="flex items-center justify-between">
@@ -311,7 +327,6 @@ const PaymentDetailPage = () => {
           </div>
         </section>
 
-        {/* Pricing */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-black mb-6 pb-3 border-b-2 border-black">
             Pricing Summary
@@ -327,9 +342,7 @@ const PaymentDetailPage = () => {
 
             <div className="flex justify-between items-center py-3 border-b-2 border-black">
               <span className="text-xl font-bold">Introductory Price</span>
-              <span className="text-2xl font-bold">
-                ₹{plan.price.introductory}
-              </span>
+              <span className="text-2xl font-bold">₹{introductoryPrice}</span>
             </div>
 
             {showBPLDiscount && (
@@ -339,14 +352,13 @@ const PaymentDetailPage = () => {
                     BPL Discount (70%)
                   </span>
                   <span className="text-lg font-bold">
-                    - ₹{(plan.price.introductory * 0.7).toFixed(2)}
+                    - ₹{(introductoryPrice * 0.7).toFixed(2)}
                   </span>
                 </div>
-
                 <div className="flex justify-between items-center py-4 bg-black text-white px-4">
                   <span className="text-2xl font-bold">Final Price</span>
                   <span className="text-3xl font-bold">
-                    ₹{bplDiscountPrice.toFixed(2)}
+                    ₹{bplDiscountPrice.toFixed(0)}
                   </span>
                 </div>
               </>
@@ -354,7 +366,6 @@ const PaymentDetailPage = () => {
           </div>
         </section>
 
-        {/* Payment Options */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-black mb-6 pb-3 border-b-2 border-black">
             Payment Method
@@ -364,7 +375,7 @@ const PaymentDetailPage = () => {
             {paymentOptions.map((option) => (
               <div
                 key={option.id}
-                onClick={() => setSelectedPayment(option.id)}
+                onClick={() => setSelectedPayment(option.id as "FULL" | "EMI")}
                 className={`border-4 p-6 cursor-pointer transition-all ${
                   selectedPayment === option.id
                     ? "border-black bg-gray-50"
@@ -391,7 +402,7 @@ const PaymentDetailPage = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold">
-                      ₹{option.details.displayAmount.toFixed(2)}
+                      ₹{option.details.displayAmount.toFixed(0)}
                     </div>
                     {selectedPayment === option.id && (
                       <div className="text-sm font-medium mt-1">Selected</div>
@@ -403,7 +414,6 @@ const PaymentDetailPage = () => {
           </div>
         </section>
 
-        {/* Payment Summary & CTA */}
         {selectedOption && (
           <section className="mb-12">
             <div className="border-4 border-black p-8 bg-gray-50">
@@ -414,27 +424,36 @@ const PaymentDetailPage = () => {
                   <p className="text-sm text-gray-500 mt-1">
                     {selectedOption.details.breakdown}
                   </p>
-                  {(selectedPayment === "twoStep" ||
-                    selectedPayment === "emi") && (
-                    <p className="text-sm text-gray-700 font-medium mt-2">
-                      Pay now: ₹
-                      {selectedOption.details.displayAmount.toFixed(2)}
-                    </p>
+
+                  {selectedPayment === "EMI" && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-lg font-bold text-blue-800">
+                        Pay Now: ₹{emiDownPayment.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-700 mt-1">
+                        Then ₹{emiMonthly.toLocaleString()}/month for{" "}
+                        {emiMonths} months
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Total course fee: ₹
+                        {selectedOption.details.total.toLocaleString()}
+                      </p>
+                    </div>
                   )}
                 </div>
+
                 <div className="text-right">
                   <p className="text-sm text-gray-600 mb-1">
-                    {selectedPayment === "oneTime"
+                    {selectedPayment === "FULL"
                       ? "Total Amount"
                       : "Total Course Fee"}
                   </p>
                   <div className="text-5xl font-bold">
-                    ₹{selectedOption.details.total.toFixed(2)}
+                    ₹{selectedOption.details.total.toFixed(0).toLocaleString()}
                   </div>
                 </div>
               </div>
 
-              {/* Trust Indicators */}
               <div className="flex flex-wrap justify-center gap-6 mb-8">
                 <div className="flex items-center gap-2">
                   <Shield className="w-5 h-5" />
@@ -452,26 +471,8 @@ const PaymentDetailPage = () => {
                 </div>
               </div>
 
-              {/* CTA Button */}
               <button
-                onClick={() => {
-                  console.log("Processing payment:", {
-                    plan,
-                    paymentType: selectedPayment,
-                    amount: selectedOption.details.total,
-                    firstPayment: selectedOption.details.displayAmount,
-                    selectedMode: selectedMode,
-                    bplApplied: showBPLDiscount,
-                    bplCardFile: bplCardFile
-                      ? {
-                          name: bplCardFile.name,
-                          size: bplCardFile.size,
-                          type: bplCardFile.type,
-                        }
-                      : null,
-                  });
-                  alert("Payment gateway integration would happen here!");
-                }}
+                onClick={handlePayment}
                 className="w-full bg-black text-white py-6 text-2xl font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-3"
               >
                 <Shield className="w-6 h-6" />
@@ -486,7 +487,6 @@ const PaymentDetailPage = () => {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="bg-black text-white py-8 px-4 mt-12">
         <div className="max-w-5xl mx-auto text-center">
           <p className="mb-2">
