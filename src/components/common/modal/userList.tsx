@@ -20,7 +20,7 @@ interface UserListModalProps {
   currentUserClerkId?: string;
   currentUserId?: string;
   reduceFollower?: (id: string) => void;
-  addFollowing?: (id: string) => void;
+  // addFollowing?: (id: string) => void;
 }
 
 type FollowStatus = "follow" | "following" | "requested" | "followBack";
@@ -32,7 +32,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
   currentUserClerkId,
   currentUserId,
   reduceFollower,
-  addFollowing,
+  // addFollowing,
 }) => {
   const { getToken } = useAuth();
   const [users, setUsers] = useState<UserSummary[]>([]);

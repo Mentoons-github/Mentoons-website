@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { ReviewMecahinsmInitialValues } from "@/constant/employee/reviewMechanismValues";
 import axios from "axios";
+import { resetDataCaptureSlice } from "@/redux/employee/dataCaptureRedux/dataCaptureSlice";
 
 const ReviewMechanism = ({
   onClose,
@@ -27,7 +28,7 @@ const ReviewMechanism = ({
   const { getToken } = useAuth();
   const dispatch = useAppDispatch();
   const { message, error, success } = useAppSelector(
-    (state) => state.data_capture
+    (state) => state.data_capture,
   );
 
   const uploadMediaFile = async (file: File) => {
@@ -44,7 +45,7 @@ const ReviewMechanism = ({
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       return response.data.data.fileDetails.url;
@@ -62,19 +63,21 @@ const ReviewMechanism = ({
         token: token as string,
         dataCaptureId: singleData._id as string,
         reviewMechanism: values,
-      })
+      }),
     );
   };
 
   useEffect(() => {
     if (success) {
       toast.success(message);
+      dispatch(resetDataCaptureSlice());
       onClose();
     }
     if (error) {
       toast.error(error);
+      dispatch(resetDataCaptureSlice());
     }
-  }, [error, message, onClose, success]);
+  }, [dispatch, error, message, onClose, success]);
 
   return (
     <div

@@ -53,6 +53,7 @@ import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 import Emi from "./pages/v2/workshop/emi.tsx";
+import CareerCorner from "./pages/CareerCorner.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -112,6 +113,7 @@ const routes = [
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
   { path: "/join-us/careers", element: <CareerPage /> },
   { path: "/join-us/explore", element: <Explore /> },
+  { path: "/career-corner", element: <CareerCorner /> },
   {
     path: "/assessment-page",
     element: (
@@ -156,7 +158,7 @@ const Router = () => {
   const [showPopup, setShowPopup] = useState<boolean>(isNewUser);
 
   const hoverComicCard = useSelector(
-    (store: RootState) => store.comics.currentHoverComic
+    (store: RootState) => store.comics.currentHoverComic,
   );
 
   const handlePopup = (value: boolean) => {

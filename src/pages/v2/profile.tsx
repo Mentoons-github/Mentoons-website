@@ -220,7 +220,8 @@ const Profile = () => {
   }, [user?.id, getToken]);
 
   useEffect(() => {
-    if (!isProfileComplete) setShowProfileModal(true);
+    const isModalShown = sessionStorage.getItem("modalShown");
+    if (!isModalShown) setShowProfileModal(true);
   }, [isProfileComplete]);
 
   useEffect(() => {
@@ -629,8 +630,13 @@ const Profile = () => {
   const reduceFollower = (id: string) => {
     setTotalFollowers((prev) => prev.filter((_id) => _id !== id));
   };
-  const addFollowing = (id: string) => {
-    setTotalFollowing((prev) => [...prev, id]);
+  // const addFollowing = (id: string) => {
+  //   setTotalFollowing((prev) => [...prev, id]);
+  // };
+
+  const handleCloseInitialModal = () => {
+    setShowProfileModal(false);
+    sessionStorage.setItem("modalShown", "true");
   };
 
   return (
@@ -644,7 +650,7 @@ const Profile = () => {
       )}
       <CompleteProfileModal
         isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
+        onClose={handleCloseInitialModal}
         onCompleteProfile={handleCompleteProfile}
       />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -779,7 +785,7 @@ const Profile = () => {
           setShowModal={() => setModalType(null)}
           currentUserId={userId}
           reduceFollower={reduceFollower}
-          addFollowing={addFollowing}
+          // addFollowing={addFollowing}
         />
       )}
 

@@ -21,12 +21,12 @@ const JobsList = forwardRef(
     const limit = 10;
 
     const { openPositions, totalPages, loading } = useSelector(
-      (state: RootState) => state.career
+      (state: RootState) => state.career,
     );
 
     useEffect(() => {
       dispatch(
-        getOpenPositions({ page: currentPage, limit, search: searchTerm })
+        getOpenPositions({ page: currentPage, limit, search: searchTerm }),
       );
     }, [dispatch, currentPage, limit, searchTerm]);
 
@@ -56,7 +56,7 @@ const JobsList = forwardRef(
 
           setTimeout(() => {
             const jobElement = document.querySelector(
-              `[data-job-id="${targetJob._id}"]`
+              `[data-job-id="${targetJob._id}"]`,
             );
             if (jobElement) {
               jobElement.scrollIntoView({
@@ -85,19 +85,19 @@ const JobsList = forwardRef(
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
             position.skillsRequired.some((skill) =>
-              skill.toLowerCase().includes(searchTerm.toLowerCase())
+              skill.toLowerCase().includes(searchTerm.toLowerCase()),
             ) ||
             (position.responsibilities &&
               position.responsibilities.some((responsibility) =>
-                responsibility.toLowerCase().includes(searchTerm.toLowerCase())
+                responsibility.toLowerCase().includes(searchTerm.toLowerCase()),
               )) ||
             (position.requirements &&
               position.requirements.some((requirement) =>
-                requirement.toLowerCase().includes(searchTerm.toLowerCase())
+                requirement.toLowerCase().includes(searchTerm.toLowerCase()),
               )) ||
             (position.whatWeOffer &&
               position.whatWeOffer.some((offer) =>
-                offer.toLowerCase().includes(searchTerm.toLowerCase())
+                offer.toLowerCase().includes(searchTerm.toLowerCase()),
               ))
         : true;
     });
@@ -176,7 +176,7 @@ const JobsList = forwardRef(
                   >
                     {page}
                   </button>
-                )
+                ),
               )}
             </div>
             <button
@@ -216,15 +216,15 @@ const JobsList = forwardRef(
           </div>
           <div className="w-72 md:w-[28rem] lg:w-[34rem]">
             <img
-              src="/assets/home/team007.png"
-              alt="team-image"
-              className="w-full h-auto rounded-2xl hover:scale-105 transition-transform duration-300"
+              src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/1234/team+Illustration+3.png"
+              alt=""
+              className="object-contain w-full"
             />
           </div>
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default JobsList;

@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { PostData } from "./PostCard";
 import Highlight from "@/components/common/modal/highlight";
 
 interface PostContentProps {
   post: PostData;
+  handlePostClick: (postId: string) => void;
 }
 
-const PostContent = ({ post }: PostContentProps) => {
+const PostContent = ({ post, handlePostClick }: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
-  const navigate = useNavigate();
   const charLimit = 100;
 
   const renderPostContent = () => {
@@ -97,10 +96,7 @@ const PostContent = ({ post }: PostContentProps) => {
         );
       case "article":
         return (
-          <div
-            className="w-full"
-            onClick={() => navigate(`/adda/post/${post._id}`)}
-          >
+          <div className="w-full" onClick={() => handlePostClick(post._id)}>
             <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
               {isExpanded
                 ? post.content
@@ -138,10 +134,7 @@ const PostContent = ({ post }: PostContentProps) => {
         );
       case "event":
         return (
-          <div
-            className="w-full"
-            onClick={() => navigate(`/adda/post/${post._id}`)}
-          >
+          <div className="w-full" onClick={() => handlePostClick(post._id)}>
             <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
               {isExpanded
                 ? post.content

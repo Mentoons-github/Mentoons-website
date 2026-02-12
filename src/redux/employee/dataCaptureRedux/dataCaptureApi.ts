@@ -1,6 +1,7 @@
 import {
   Details,
   ReviewMechanismFormValues,
+  ScoringSubmission,
 } from "@/types/employee/dataCaptureTypes";
 import axios from "axios";
 
@@ -19,7 +20,7 @@ export const creatDataCaptureApi = async (data: Details, token: string) => {
 export const editDataCaptureApi = async (
   data: Details,
   token: string,
-  dataCaptureId: string
+  dataCaptureId: string,
 ) => {
   return await axios.put(`${BASE_URL}/edit/${dataCaptureId}`, data, {
     headers: {
@@ -35,7 +36,7 @@ export const fetchDataCaptureApi = async (
   page: number,
   limit: number,
   search: string,
-  order: string
+  order: string,
 ) => {
   return await axios.get(
     `${BASE_URL}/fetch?sortBy=${sortBy}&page=${page}&limit=${limit}&search=${search}&order=${order}`,
@@ -43,14 +44,14 @@ export const fetchDataCaptureApi = async (
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 };
 
 //fetch single data capture
 export const fetchSingleDataCaptureApi = async (
   token: string,
-  dataCaptureId: string
+  dataCaptureId: string,
 ) => {
   return await axios.get(`${BASE_URL}/fetch-single/${dataCaptureId}`, {
     headers: {
@@ -63,7 +64,7 @@ export const fetchSingleDataCaptureApi = async (
 export const addDataCaptureReviewApi = async (
   token: string,
   dataCaptureId: string,
-  reviewMechanism: ReviewMechanismFormValues
+  reviewMechanism: ReviewMechanismFormValues,
 ) => {
   return await axios.put(
     `${BASE_URL}/add-review/${dataCaptureId}`,
@@ -72,6 +73,23 @@ export const addDataCaptureReviewApi = async (
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
+  );
+};
+
+// add dataCapture review
+export const addDataCaptureScoreApi = async (
+  token: string,
+  dataCaptureId: string,
+  scoringData: ScoringSubmission,
+) => {
+  return await axios.put(
+    `${BASE_URL}/add-score/${dataCaptureId}`,
+    scoringData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 };

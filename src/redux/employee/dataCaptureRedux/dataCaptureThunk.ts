@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   addDataCaptureReviewApi,
+  addDataCaptureScoreApi,
   creatDataCaptureApi,
   editDataCaptureApi,
   fetchDataCaptureApi,
@@ -11,6 +12,7 @@ import {
   DataCapturePagination,
   Details,
   ReviewMechanismFormValues,
+  ScoringSubmission,
 } from "@/types/employee/dataCaptureTypes";
 
 // create data capture
@@ -25,7 +27,7 @@ export const createDataCaptureThunk = createAsyncThunk<
   } catch (error: unknown) {
     const err = error as AxiosError<{ message: string }>;
     return rejectWithValue(
-      err?.response?.data?.message || "Error creating data capture"
+      err?.response?.data?.message || "Error creating data capture",
     );
   }
 });
@@ -44,10 +46,10 @@ export const editDataCaptureThunk = createAsyncThunk<
     } catch (error: unknown) {
       const err = error as AxiosError<{ message: string }>;
       return rejectWithValue(
-        err?.response?.data?.message || "Error updating data capture"
+        err?.response?.data?.message || "Error updating data capture",
       );
     }
-  }
+  },
 );
 
 //fetch dataCapture
@@ -73,7 +75,7 @@ export const fetchDataCaptureThunk = createAsyncThunk<
   "data-captue/fetch",
   async (
     { token, sortBy, page, limit, search, order },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const res = await fetchDataCaptureApi(
@@ -82,17 +84,17 @@ export const fetchDataCaptureThunk = createAsyncThunk<
         page,
         limit,
         search,
-        order
+        order,
       );
       console.log(res, "ress");
       return res.data;
     } catch (error: unknown) {
       const err = error as AxiosError<{ message: string }>;
       return rejectWithValue(
-        err?.response?.data?.message || "Error fetching data capture"
+        err?.response?.data?.message || "Error fetching data capture",
       );
     }
-  }
+  },
 );
 
 //fetch dataCapture
@@ -109,10 +111,10 @@ export const fetchSingleDataCaptureThunk = createAsyncThunk<
     } catch (error: unknown) {
       const err = error as AxiosError<{ message: string }>;
       return rejectWithValue(
-        err?.response?.data?.message || "Error fetching data capture"
+        err?.response?.data?.message || "Error fetching data capture",
       );
     }
-  }
+  },
 );
 
 export const addDataCaptureReviewThunk = createAsyncThunk<
@@ -130,15 +132,42 @@ export const addDataCaptureReviewThunk = createAsyncThunk<
       const res = await addDataCaptureReviewApi(
         token,
         dataCaptureId,
-        reviewMechanism
+        reviewMechanism,
       );
-      console.log(res.data, "daaaataaaa");
       return res.data;
     } catch (error: unknown) {
       const err = error as AxiosError<{ message: string }>;
       return rejectWithValue(
-        err?.response?.data?.message || "Error adding review on data capure"
+        err?.response?.data?.message || "Error adding review on data capure",
       );
     }
-  }
+  },
+);
+
+//add scoring
+export const addDataCaptureScoringThunk = createAsyncThunk<
+  { message: string; success: boolean; data: Details },
+  {
+    token: string;
+    dataCaptureId: string;
+    scoringData: ScoringSubmission;
+  },
+  { rejectValue: string }
+>(
+  "data-captue/add-scoring",
+  async ({ token, dataCaptureId, scoringData }, { rejectWithValue }) => {
+    try {
+      const res = await addDataCaptureScoreApi(
+        token,
+        dataCaptureId,
+        scoringData,
+      );
+      return res.data;
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
+      return rejectWithValue(
+        err?.response?.data?.message || "Error adding scoring on data capure",
+      );
+    }
+  },
 );

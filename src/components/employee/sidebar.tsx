@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ClipboardList,
+  Sheet,
 } from "lucide-react";
 
 interface NavItem {
@@ -55,6 +56,11 @@ const navItems: NavItem[] = [
     name: "Data Capture",
     icon: <ClipboardList className="w-5 h-5" />,
     path: "/employee/data_capture",
+  },
+  {
+    name: "Workshops",
+    icon: <Sheet className="w-5 h-5" />,
+    path: "/employee/workshops",
   },
 ];
 

@@ -65,7 +65,7 @@ export const CONTENTS = {
       "Inventors and Inventions",
       "M9-Character coloring books",
     ],
-    link: `${import.meta.env.VITE_STATIC_URL}product?category=6-12`,
+    link: `${import.meta.env.VITE_STATIC_URL}products?category=6-12`,
   },
   "Free Downloads": {
     description: "Access free games and emergency contacts",
@@ -87,7 +87,7 @@ export const CONTENTS = {
       "Self Talk",
       "My Pets",
     ],
-    link: `${import.meta.env.VITE_STATIC_URL}product?category=6-12`,
+    link: `${import.meta.env.VITE_STATIC_URL}products?category=6-12`,
   },
   games: {
     focus: [

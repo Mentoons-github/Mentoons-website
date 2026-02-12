@@ -281,7 +281,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
         <div className="relative flex flex-col w-full p-5 bg-white border border-orange-200 rounded-2xl shadow-md shadow-orange-100/70">
           {/* Top Section: Avatar + Blog Input */}
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-200">
+            <div className="flex-shrink-0  w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-200">
               {user?.imageUrl ? (
                 <img
                   onClick={() => navigate("/adda/user-profile")}
@@ -290,7 +290,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
                   className="object-cover w-full h-full cursor-pointer"
                 />
               ) : (
-                <FiUser className="w-10 h-10 text-gray-400" />
+                <FiUser className="w-10 h-10 mx-auto my-auto text-gray-400" />
               )}
             </div>
 

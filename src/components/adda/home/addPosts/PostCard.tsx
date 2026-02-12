@@ -82,6 +82,17 @@ interface Comment {
   content: string;
 }
 
+const formatDate = (dateString: string | Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 const PostCard = ({ post, onDelete }: PostCardProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
@@ -97,8 +108,6 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [reactionUpdateKey, setReactionUpdateKey] = useState(0);
   const [userId, setUserId] = useState<string>("");
-
-  console.log(isUserBlocked,'isssssssbbblllll')
 
   const user = useUser();
   const { getToken } = useAuth();
@@ -357,6 +366,15 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     }
   };
 
+  const handlePostClick = () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    } else {
+      navigate(`/adda/post/${post._id}`);
+    }
+  };
+
   useEffect(() => {
     const checkSavedPost = async () => {
       try {
@@ -411,7 +429,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             <div className="flex flex-col figtree">
               <span className="Futura Std">{post.user.name}</span>
               <span className="figtree text-[12px] text-[#807E7E]">
-                {new Date(post.createdAt).toLocaleString()}
+                {formatDate(post.createdAt)}
               </span>
             </div>
           </div>
@@ -479,7 +497,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           </div>
         </div>
 
-        <PostContent post={post} />
+        <PostContent post={post} handlePostClick={handlePostClick} />
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">

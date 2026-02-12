@@ -57,6 +57,7 @@ const AdminSidebar = ({
           "/admin/workshops",
           "/admin/add-workshop",
           "/admin/workshop-enquiries",
+          "/admin/workshop-sessions",
         ],
       },
       {
@@ -216,6 +217,7 @@ const AdminSidebar = ({
             { href: "/admin/workshops", label: "Workshops" },
             { href: "/admin/add-workshop", label: "Add Workshop" },
             { href: "/admin/workshop-enquiries", label: "Enquiries" },
+            { href: "/admin/workshop-sessions", label: "Workshop Sessions" },
           ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Workshops"}

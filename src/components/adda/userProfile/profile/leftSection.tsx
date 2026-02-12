@@ -10,7 +10,6 @@ import {
   MapPin,
   Phone,
   Plus,
-  UserPlus,
 } from "lucide-react";
 import ProfileFormModal from "@/pages/v2/adda/userProfile/profieForm";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
@@ -49,7 +48,7 @@ const LeftSection = ({
   const { showModal } = useSubmissionModal();
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -207,7 +206,7 @@ const LeftSection = ({
                     {userDetails.dateOfBirth
                       ? format(
                           new Date(userDetails.dateOfBirth),
-                          "MMMM d, yyyy"
+                          "MMMM d, yyyy",
                         )
                       : "Not provided"}
                   </span>
@@ -236,10 +235,10 @@ const LeftSection = ({
                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                 Edit Profile
               </button>
-              <button className="flex items-center justify-center gap-2 w-full bg-gray-100 text-gray-700 rounded-xl h-10 sm:h-12 font-semibold hover:bg-gray-200 transition-colors duration-300 text-xs sm:text-sm">
+              {/* <button className="flex items-center justify-center gap-2 w-full bg-gray-100 text-gray-700 rounded-xl h-10 sm:h-12 font-semibold hover:bg-gray-200 transition-colors duration-300 text-xs sm:text-sm">
                 <UserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
                 Share Profile
-              </button>
+              </button> */}
             </div>
           </div>
         </>

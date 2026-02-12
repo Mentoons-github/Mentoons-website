@@ -34,6 +34,8 @@ import AllWorkshops from "@/pages/admin/workshop/addWorkshop/allWorkshops";
 import AllMeetups from "@/pages/admin/workshop/allMeetups/allMeetups";
 import ViewEnquiry from "@/pages/admin/workshop/viewEnquiry";
 import GetWorkshopEnquiries from "@/pages/admin/workshop/workshopEnquiries";
+import WorkshopSessions from "@/pages/admin/workshop/WorkshopSessions";
+import SinglePsychologistWorkshop from "@/pages/employee/workshops/SinglePsychologistWorkshop";
 import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -77,6 +79,7 @@ const AdminRouter = () => {
           {/*Workshop */}
           <Route path="add-workshop" element={<AddWorkshop />} />
           <Route path="workshops" element={<AllWorkshops />} />
+          <Route path="workshop-sessions" element={<WorkshopSessions />} />
 
           {/*Meetup */}
           <Route path="add-meetup" element={<AddMeetup />} />
@@ -91,6 +94,10 @@ const AdminRouter = () => {
           <Route path="employee-attendance" element={<AdminAttendanceView />} />
           <Route path="add-quiz" element={<AddQuiz />} />
           <Route path="quiz" element={<QuizTable />} />
+          <Route
+            path="workshop-sessions/:workshopId"
+            element={<SinglePsychologistWorkshop />}
+          />
         </Route>
       </Routes>
     </Suspense>

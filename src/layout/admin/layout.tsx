@@ -16,7 +16,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   // ---------- Detect screen size ----------
   useEffect(() => {
     const onResize = () => {
-      const mobile = window.innerWidth <= 768;
+      const mobile =
+        window.innerWidth <=
+        // 768;
+        1000;
       setIsMobile(mobile);
       // Force collapsed on mobile
       setSidebarCollapsed(mobile);
