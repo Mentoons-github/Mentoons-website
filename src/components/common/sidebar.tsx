@@ -62,7 +62,7 @@ const Sidebar = ({
       animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : "100%" }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className={`fixed inset-0 w-full h-full bg-gray-900 bg-opacity-100 flex flex-col items-center justify-center gap-8 transition-opacity font-akshar ${
+      className={`fixed inset-0 w-full h-full bg-gray-900 bg-opacity-100 flex flex-col items-center justify-center gap-8 transition-opacity font-akshar  z-[999999] ${
         isOpen ? "pointer-events-auto" : "pointer-events-none"
       } lg:hidden`}
     >
@@ -121,7 +121,7 @@ const Sidebar = ({
             >
               {label}
             </Link>
-          )
+          ),
         )}
       </div>
     </motion.aside>

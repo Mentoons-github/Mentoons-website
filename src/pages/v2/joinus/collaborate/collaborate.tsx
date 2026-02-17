@@ -28,7 +28,7 @@ export type TPOSITION = {
   applicationSource?: string[];
 };
 
-const AffiliatePage = () => {
+const Collaborate = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
@@ -38,15 +38,15 @@ const AffiliatePage = () => {
     (state: RootState) => state.career,
   );
 
-  const title = "JOIN OUR AFFILIATE PROGRAM";
+  const title = "JOIN OUR COLLABORATION NETWORK";
   const subTitle =
-    "Discover exciting opportunities to partner with us — explore positions below";
+    "Partner with us on meaningful projects — browse available opportunities below";
 
   const [formJobId, setFormJobId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    dispatch(getOpenPositions({ source: "AFFILIATE" }));
+    dispatch(getOpenPositions({ source: "COLLABORATE" }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const AffiliatePage = () => {
   }, [slug, dispatch]);
 
   const handlePositionClick = (positionSlug: string) => {
-    navigate(`/joinus/affiliate/${positionSlug}`);
+    navigate(`/joinus/collaborate/${positionSlug}`);
   };
 
   const handleApply = (jobId: string) => {
@@ -67,7 +67,7 @@ const AffiliatePage = () => {
 
   const closeJobModal = () => {
     dispatch(clearSelectedJob());
-    navigate("/joinus/affiliate");
+    navigate("/joinus/collaborate");
   };
 
   const closeForm = () => {
@@ -77,7 +77,7 @@ const AffiliatePage = () => {
   const handleApplicationSuccess = () => {
     setFormJobId(null);
     dispatch(clearSelectedJob());
-    navigate("/joinus/affiliate");
+    navigate("/joinus/collaborate");
   };
 
   const handleSearch = (term: string) => {
@@ -116,15 +116,15 @@ const AffiliatePage = () => {
               id={formJobId}
               setIsFormOpen={closeForm}
               onSuccess={handleApplicationSuccess}
-              applicationSource={"AFFILIATE"}
+              applicationSource={"COLLABORATE"}
             />
           </div>
         </div>
       )}
 
       <JobHeroSection
-        title={title}
         subTitle={subTitle}
+        title={title}
         onSearch={handleSearch}
       />
 
@@ -139,4 +139,4 @@ const AffiliatePage = () => {
   );
 };
 
-export default AffiliatePage;
+export default Collaborate;

@@ -9,6 +9,11 @@ import { AuthModalProvider } from "./context/adda/authModalContext.tsx";
 import { StatusModalProvider } from "./context/adda/statusModalContext.tsx";
 import CustomCursor from "./components/common/customCursor/customCursor.tsx";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { gsap } from "gsap";
+import { Flip, ScrollTrigger, SplitText } from "gsap/all";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP, Flip, ScrollTrigger, SplitText);
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
@@ -53,5 +58,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </AuthModalProvider>
       </Provider>
     </BrowserRouter>
-  </ClerkProvider>
+  </ClerkProvider>,
 );

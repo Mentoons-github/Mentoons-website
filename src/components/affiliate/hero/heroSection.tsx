@@ -1,26 +1,145 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Search, X } from "lucide-react";
 import "./affiliate.css";
+import { useGSAP } from "@gsap/react";
+import gsap, { SplitText } from "gsap/all";
 
-interface AffiliateHeroSectionProps {
+interface JobHeroSectionProps {
+  title: string;
+  subTitle: string;
   onSearch: (term: string) => void;
 }
 
-const AffiliateHeroSection: React.FC<AffiliateHeroSectionProps> = ({
+const JobHeroSection: React.FC<JobHeroSectionProps> = ({
   onSearch,
+  title,
+  subTitle,
 }) => {
   const [inputValue, setInputValue] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      const titleSplit = new SplitText("#title", { type: "chars" });
+      tl.from(titleSplit.chars, {
+        y: 80,
+        opacity: 0,
+        rotateX: -90,
+        filter: "blur(8px)",
+        transformPerspective: 600,
+        duration: 0.9,
+        stagger: 0.05,
+      });
+
+      tl.from(
+        "#subTitle",
+        {
+          y: 40,
+          opacity: 0,
+          filter: "blur(12px)",
+          duration: 1.1,
+        },
+        "-=0.5",
+      );
+
+      tl.fromTo(
+        "#search-input",
+        {
+          y: 60,
+          opacity: 0,
+          scale: 0.92,
+          filter: "blur(6px)",
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 1,
+          ease: "power4.out",
+        },
+        "-=0.7",
+      );
+
+      tl.from(
+        "#search-input",
+        {
+          boxShadow: "0 0 0 0 rgba(255,255,255,0.4)",
+          duration: 1.5,
+          ease: "sine.out",
+        },
+        "<",
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  useGSAP(() => {
+    const inputContainer = searchRef.current;
+    if (!inputContainer) return;
+
+    const hoverTl = gsap.timeline({ paused: true });
+
+    hoverTl.to(inputContainer, {
+      scale: 1.03,
+      boxShadow: "0 25px 50px -12px rgba(0,0,0,0.4)",
+      background: "rgba(255,255,255,0.28)",
+      duration: 0.5,
+      ease: "power2.out",
+    });
+
+    inputContainer.addEventListener("mouseenter", () => hoverTl.play());
+    inputContainer.addEventListener("mouseleave", () => hoverTl.reverse());
+
+    const input = inputContainer.querySelector<HTMLInputElement>("input");
+
+    if (input) {
+      input.addEventListener("focus", () => {
+        gsap.to(inputContainer, {
+          scale: 1.04,
+          y: -6,
+          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.5)",
+          background: "rgba(255,255,255,0.35)",
+          duration: 0.6,
+          ease: "power3.out",
+        });
+      });
+
+      input.addEventListener("blur", () => {
+        gsap.to(inputContainer, {
+          scale: 1,
+          y: 0,
+          boxShadow: "0 10px 25px -5px rgba(0,0,0,0.25)",
+          background: "rgba(255,255,255,0.2)",
+          duration: 0.5,
+          ease: "power2.inOut",
+        });
+      });
+    }
+
+    return () => {
+      inputContainer.removeEventListener("mouseenter", () => hoverTl.play());
+      inputContainer.removeEventListener("mouseleave", () => hoverTl.reverse());
+      if (input) {
+        input.removeEventListener("focus", () => {});
+        input.removeEventListener("blur", () => {});
+      }
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    if (!newValue) {
+    if (!newValue.trim()) {
       onSearch("");
     }
   };
 
   const handleSearchClick = () => {
-    onSearch(inputValue);
+    onSearch(inputValue.trim());
   };
 
   const handleClearClick = () => {
@@ -57,25 +176,34 @@ const AffiliateHeroSection: React.FC<AffiliateHeroSectionProps> = ({
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-start h-full text-white text-center px-4 sm:px-6 md:px-8">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wider drop-shadow-lg mt-20 sm:mt-28 md:mt-36 lg:mt-44">
-          JOIN OUR AFFILIATE PROGRAM
+        <h1
+          id="title"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wider drop-shadow-lg mt-20 sm:mt-28 md:mt-36 lg:mt-44"
+        >
+          {title}
         </h1>
-        <p className="mt-4 text-base sm:text-lg md:text-xl opacity-90 max-w-lg sm:max-w-xl md:max-w-2xl">
-          Discover exciting opportunities to partner with us — explore positions
-          below
+        <p
+          id="subTitle"
+          className="mt-4 text-base sm:text-lg md:text-xl opacity-90 max-w-lg sm:max-w-xl md:max-w-2xl"
+        >
+          {subTitle}
         </p>
 
-        <div className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl hover:shadow-2xl transition-all">
+        <div
+          id="search-input"
+          ref={searchRef}
+          className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl transition-all duration-500"
+        >
           <input
             type="text"
             placeholder="Search affiliate positions..."
-            className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-lg sm:text-xl md:text-2xl"
+            className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-lg sm:text-xl md:text-2xl caret-white"
             value={inputValue}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
           />
           <button
-            className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors"
+            className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
             onClick={handleSearchClick}
             aria-label="Search"
           >
@@ -83,7 +211,7 @@ const AffiliateHeroSection: React.FC<AffiliateHeroSectionProps> = ({
           </button>
           {inputValue && (
             <button
-              className="ml-1 sm:ml-2 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors"
+              className="ml-1 sm:ml-2 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
               onClick={handleClearClick}
               aria-label="Clear search"
             >
@@ -96,4 +224,4 @@ const AffiliateHeroSection: React.FC<AffiliateHeroSectionProps> = ({
   );
 };
 
-export default AffiliateHeroSection;
+export default JobHeroSection;

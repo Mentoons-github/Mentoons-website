@@ -74,7 +74,7 @@ const UserStatus = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { getToken } = useAuth();
   const statusGroups = useSelector(
-    (state: RootState) => state.userStatus.statusGroups || []
+    (state: RootState) => state.userStatus.statusGroups || [],
   );
   const [selectedStatusGroup, setSelectedStatusGroup] =
     useState<UserStatusInterface | null>(null);
@@ -84,9 +84,9 @@ const UserStatus = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<(typeof videos)[0] | null>(
-    null
+    null,
   );
-  const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false); // State for guidelines modal
+  const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ const UserStatus = () => {
 
   const handleStatus = async (
     statusGroup: UserStatusInterface,
-    index: number = 0
+    index: number = 0,
   ) => {
     setSelectedStatusGroup(statusGroup);
     setCurrentStatusIndex(index);
@@ -135,7 +135,7 @@ const UserStatus = () => {
       }
     } else {
       const currentGroupIndex = statusGroups.findIndex(
-        (group) => group.user._id === selectedStatusGroup?.user._id
+        (group) => group.user._id === selectedStatusGroup?.user._id,
       );
       if (currentGroupIndex < statusGroups.length - 1) {
         const nextGroup = statusGroups[currentGroupIndex + 1];
@@ -152,7 +152,7 @@ const UserStatus = () => {
       setCurrentStatusIndex(currentStatusIndex - 1);
     } else {
       const currentGroupIndex = statusGroups.findIndex(
-        (group) => group.user._id === selectedStatusGroup?.user._id
+        (group) => group.user._id === selectedStatusGroup?.user._id,
       );
       if (currentGroupIndex > 0) {
         const prevGroup = statusGroups[currentGroupIndex - 1];
@@ -197,7 +197,7 @@ const UserStatus = () => {
 
   const handleSubmitStatus = async (
     imageWithText: Blob | null,
-    caption: string
+    caption: string,
   ) => {
     setIsSuccess(false);
     if (!selectedFile) return;
@@ -215,7 +215,7 @@ const UserStatus = () => {
           file: fileToUpload,
           caption,
           token,
-        })
+        }),
       ).unwrap();
       toast.success("Status uploaded successfully!");
       setIsSuccess(false);
@@ -226,7 +226,7 @@ const UserStatus = () => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to upload status. Please try again."
+          : "Failed to upload status. Please try again.",
       );
     } finally {
       setIsUploading(false);
@@ -244,7 +244,7 @@ const UserStatus = () => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to delete status. Please try again."
+          : "Failed to delete status. Please try again.",
       );
     }
   };
@@ -345,6 +345,13 @@ const UserStatus = () => {
                 </span>
               </SwiperSlide>
             ))}
+            <SwiperSlide className="!w-20 sm:!w-24 md:!w-28 lg:!w-32 flex flex-col items-center justify-center flex-shrink-0 pl-2 pr-4 md:pr-8">
+              <img
+                src="/assets/home/adda/help-care-heal.png"
+                alt="Friendly waving orange cat - end of stories"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-300"
+              />
+            </SwiperSlide>
           </Swiper>
         </div>
       </div>
@@ -362,14 +369,14 @@ const UserStatus = () => {
           hasNext={
             currentStatusIndex < selectedStatusGroup.statuses.length - 1 ||
             statusGroups.findIndex(
-              (group) => group.user._id === selectedStatusGroup.user._id
+              (group) => group.user._id === selectedStatusGroup.user._id,
             ) <
               statusGroups.length - 1
           }
           hasPrevious={
             currentStatusIndex > 0 ||
             statusGroups.findIndex(
-              (group) => group.user._id === selectedStatusGroup.user._id
+              (group) => group.user._id === selectedStatusGroup.user._id,
             ) > 0
           }
           totalStatuses={selectedStatusGroup.statuses.length}

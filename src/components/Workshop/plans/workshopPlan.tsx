@@ -32,7 +32,7 @@ const WorkshopPlans = () => {
       setPlans(response ?? []);
     } catch (err: any) {
       toast.error(err?.message || "Failed to load plans");
-      showStatus("error", err); // ← optional
+      showStatus("error", err);
     }
   };
 
@@ -148,7 +148,6 @@ const WorkshopPlans = () => {
               <span className="font-bold"> 70% discount</span> on all workshop
               plans!
             </p>
-            {/* ... rest of banner ... */}
           </div>
         </div>
 

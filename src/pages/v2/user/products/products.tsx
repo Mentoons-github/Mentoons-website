@@ -122,7 +122,7 @@ const ProductsPage = () => {
         setIsSearching(false);
       }
     },
-    [dispatch, getToken, category, productType, cardType, scrollToSection]
+    [dispatch, getToken, category, productType, cardType, scrollToSection],
   );
 
   const debouncedSearch = useRef(
@@ -130,8 +130,8 @@ const ProductsPage = () => {
       (searchValue: string, fetchFn: (search: string) => Promise<void>) => {
         fetchFn(searchValue);
       },
-      400
-    )
+      400,
+    ),
   ).current;
 
   useEffect(() => {
@@ -166,7 +166,7 @@ const ProductsPage = () => {
     window.history.replaceState(
       {},
       "",
-      `${location.pathname}?${params.toString()}`
+      `${location.pathname}?${params.toString()}`,
     );
 
     debouncedSearch(newValue, fetchProductsData);

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { PostData } from "./PostCard";
 import Highlight from "@/components/common/modal/highlight";
+import { useUser } from "@clerk/clerk-react";
+import { useAuthModal } from "@/context/adda/authModalContext";
+import { useNavigate } from "react-router-dom";
 
 interface PostContentProps {
   post: PostData;
@@ -10,7 +13,37 @@ interface PostContentProps {
 const PostContent = ({ post, handlePostClick }: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
+  const { isSignedIn } = useUser();
+  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
   const charLimit = 100;
+
+  const handleClick = (
+    type: "event" | "photo" | "text" | "video" | "article",
+    url?: string,
+  ) => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
+
+    switch (type) {
+      case "photo":
+      case "video":
+        if (url) {
+          setSelectedPost(url);
+        }
+        break;
+      case "article":
+      case "event":
+        navigate(`/adda/post/${post._id}`);
+        break;
+      case "text":
+        break;
+      default:
+        break;
+    }
+  };
 
   const renderPostContent = () => {
     switch (post.postType) {
@@ -21,79 +54,81 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
               ? post.content
               : post.content?.slice(0, charLimit) +
                 (post.content && post.content.length > charLimit ? "..." : "")}
-
             {post.content && post.content.length > charLimit && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="ml-2 text-blue-500"
+                className="ml-2 text-blue-500 hover:underline"
               >
                 {isExpanded ? "Read Less" : "Read More"}
               </button>
             )}
           </p>
         );
+
       case "photo":
         return (
           <div className="w-full">
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
+            {post.content && (
+              <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
+                {isExpanded
+                  ? post.content
+                  : post.content.slice(0, charLimit) +
+                    (post.content.length > charLimit ? "..." : "")}
+                {post.content.length > charLimit && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="ml-2 text-blue-500 hover:underline"
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </button>
+                )}
+              </p>
+            )}
             {post.media && post.media.length > 0 && (
               <img
                 src={post.media[0].url}
                 alt={post.title || "Photo"}
-                className="object-cover w-full h-auto rounded-lg"
-                onClick={() => setSelectedPost(post.media?.[0].url || null)}
+                className="object-cover w-full h-auto rounded-lg cursor-pointer"
+                onClick={() => handleClick("photo", post.media?.[0].url)}
               />
             )}
           </div>
         );
+
       case "video":
         return (
           <div className="w-full">
-            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-              {isExpanded
-                ? post.content
-                : post.content?.slice(0, charLimit) +
-                  (post.content && post.content.length > charLimit
-                    ? "..."
-                    : "")}
-              {post.content && post.content.length > charLimit && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-2 text-blue-500"
-                >
-                  {isExpanded ? "Read Less" : "Read More"}
-                </button>
-              )}
-            </p>
+            {post.content && (
+              <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
+                {isExpanded
+                  ? post.content
+                  : post.content.slice(0, charLimit) +
+                    (post.content.length > charLimit ? "..." : "")}
+                {post.content.length > charLimit && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="ml-2 text-blue-500 hover:underline"
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </button>
+                )}
+              </p>
+            )}
             {post.media &&
               post.media.length > 0 &&
               post.media[0].type === "video" && (
                 <div className="relative w-full overflow-hidden">
                   <video
-                    controls={true}
+                    controls
                     src={post.media[0].url}
-                    className="object-contain w-full rounded-lg h-96"
-                    onClick={() => setSelectedPost(post.media?.[0].url || null)}
+                    className="object-contain w-full rounded-lg h-96 cursor-pointer"
+                    onClick={() => handleClick("video", post.media?.[0].url)}
                   />
                 </div>
               )}
           </div>
         );
+
       case "article":
         return (
           <div className="w-full" onClick={() => handlePostClick(post._id)}>
@@ -114,7 +149,10 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
               )}
             </p>
             {post.article && (
-              <div className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div
+                className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleClick("article")}
+              >
                 <img
                   src={post.article.coverImage}
                   alt={post.title || "Article"}
@@ -132,6 +170,7 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
             )}
           </div>
         );
+
       case "event":
         return (
           <div className="w-full" onClick={() => handlePostClick(post._id)}>
@@ -152,7 +191,10 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
               )}
             </p>
             {post.event && (
-              <div className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div
+                className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleClick("event")}
+              >
                 <img
                   src={post.event.coverImage}
                   alt={post.title || "Event"}
@@ -163,7 +205,9 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
                   {new Date(post.event.startDate).toLocaleDateString()} -{" "}
-                  {new Date(post.event.endDate).toLocaleDateString()}
+                  {post.event.endDate
+                    ? new Date(post.event.endDate).toLocaleDateString()
+                    : "Ongoing"}
                 </p>
                 <p className="mt-1 text-sm text-gray-500">
                   Venue: {post.event.venue}
@@ -175,6 +219,7 @@ const PostContent = ({ post, handlePostClick }: PostContentProps) => {
             )}
           </div>
         );
+
       default:
         return null;
     }
