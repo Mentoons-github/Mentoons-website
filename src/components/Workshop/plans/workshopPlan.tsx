@@ -2,7 +2,7 @@ import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import PlanHeader from "./header";
 import PlanCard from "./planCard";
 import WorkshopsCategories from "./workshops";
-import { fetchAllPlans } from "@/api/workshop/workshop"; // ← using this one
+import { fetchAllPlans } from "@/api/workshop/workshop"; 
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

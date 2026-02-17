@@ -17,12 +17,12 @@ interface PodcastCardProps {
    * Called with this card's <audio> element on mount so the global manager
    * can pause it when another player starts.
    */
-  onRegisterAudio: (audio: HTMLAudioElement) => void;
+  onRegisterAudio?: (audio: HTMLAudioElement) => void;
   /**
    * True while the global manager is switching between players so onPause
    * is not treated as a user-initiated pause.
    */
-  isSwitchingRef: React.MutableRefObject<boolean>;
+  isSwitchingRef?: React.MutableRefObject<boolean>;
 }
 
 const PodcastCard: React.FC<PodcastCardProps> = ({
@@ -49,7 +49,9 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
   // Register audio with global manager on mount
   useEffect(() => {
     if (audioRef.current) {
-      onRegisterAudio(audioRef.current);
+      if (onRegisterAudio) {
+        onRegisterAudio(audioRef.current);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -62,7 +64,9 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
 
     if (isPlaying) {
       // Register so the global manager knows this is the active player
-      onRegisterAudio(audio);
+      if (onRegisterAudio) {
+        onRegisterAudio(audio);
+      }
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
@@ -71,11 +75,13 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
       }
     } else {
       if (!audio.paused) {
-        isSwitchingRef.current = true;
-        audio.pause();
-        setTimeout(() => {
-          isSwitchingRef.current = false;
-        }, 100);
+        if (isSwitchingRef) {
+          isSwitchingRef.current = true;
+          audio.pause();
+          setTimeout(() => {
+            isSwitchingRef.current = false;
+          }, 100);
+        }
       }
       audio.currentTime = 0;
     }
@@ -141,7 +147,9 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
           src={(podcast.details as PodcastProduct["details"]).sampleUrl || "#"}
           controlsList="nodownload"
           onPlay={async (e) => {
-            onRegisterAudio(e.currentTarget);
+            if (onRegisterAudio) {
+              onRegisterAudio(e.currentTarget);
+            }
             const granted = await Promise.resolve(
               onCheckAccessAndControlPlayback(podcast, e.currentTarget),
             );
@@ -152,7 +160,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
           }}
           onPause={() => {
             // Ignore pauses caused by the global manager switching players
-            if (isSwitchingRef.current) return;
+            if (isSwitchingRef?.current) return;
             if (
               playbackTracking &&
               playbackTracking.podcastId === String(podcast._id)

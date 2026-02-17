@@ -10,8 +10,8 @@ import { X } from "lucide-react";
 import { handlePrint } from "@/services/employee/employeeDataCapturePrint";
 import { BsThreeDots } from "react-icons/bs";
 import CreateDataCaptureModal from "./CreateDataCaptureModal";
-import AddScoringModal from "./AddScoringModal";
-import ShowScoreModal from "./ShowScoreModal";
+// import AddScoringModal from "./AddScoringModal";
+// import ShowScoreModal from "./ShowScoreModal";
 
 const ShowDataCaptureModal = ({
   onClose,
@@ -27,8 +27,8 @@ const ShowDataCaptureModal = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [clickMore, setClickMore] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(false);
-  const [addScoring, setAddScoring] = useState<boolean>(false);
-  const [showScore, setShowScore] = useState<boolean>(false);
+  // const [addScoring, setAddScoring] = useState<boolean>(false);
+  // const [showScore, setShowScore] = useState<boolean>(false);
 
   return (
     <div
@@ -92,7 +92,7 @@ const ShowDataCaptureModal = ({
               {singleData.scoringSystem ? (
                 <button
                   onClick={() => {
-                    setShowScore(true);
+                    // setShowScore(true);
                     setClickMore(false);
                   }}
                   className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
@@ -102,7 +102,7 @@ const ShowDataCaptureModal = ({
               ) : (
                 <button
                   onClick={() => {
-                    setAddScoring(true);
+                    // setAddScoring(true);
                     setClickMore(false);
                   }}
                   className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
@@ -114,19 +114,19 @@ const ShowDataCaptureModal = ({
           )}
         </div>
 
-        {addScoring && (
-          <AddScoringModal
-            onClose={() => setAddScoring(false)}
-            singleData={singleData}
-          />
+        {/* {addScoring && (
+          // <AddScoringModal
+          //   onClose={() => setAddScoring(false)}
+          //   singleData={singleData}
+          // />
         )}
 
         {showScore && (
-          <ShowScoreModal
-            onClose={() => setShowScore(false)}
-            singleData={singleData}
-          />
-        )}
+          // <ShowScoreModal
+          //   onClose={() => setShowScore(false)}
+          //   singleData={singleData}
+          // />
+        )} */}
 
         {edit ? (
           <CreateDataCaptureModal

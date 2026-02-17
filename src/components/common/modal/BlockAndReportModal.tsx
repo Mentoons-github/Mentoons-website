@@ -23,11 +23,6 @@ interface FormValues {
   customReason: string;
 }
 
-interface ResponseState {
-  type: "success" | "error" | null;
-  message: string;
-}
-
 const ReportAbuseModal = ({
   isOpen,
   setIsOpen,
@@ -38,10 +33,7 @@ const ReportAbuseModal = ({
   onSuccess,
 }: ReportAbuseModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [response, setResponse] = useState<ResponseState>({
-    type: null,
-    message: "",
-  });
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const textareaSectionRef = useRef<HTMLDivElement>(null);
@@ -92,7 +84,6 @@ const ReportAbuseModal = ({
   const handleSubmit = async (values: FormValues) => {
     console.log("first");
     setIsSubmitting(true);
-    setResponse({ type: null, message: "" });
 
     try {
       const token = await getToken();
@@ -166,40 +157,13 @@ const ReportAbuseModal = ({
         }
         toast.success(response.data.message);
 
-        setResponse({
-          type: "success",
-          message:
-            response.data.message ||
-            (modalType === "report"
-              ? "Report submitted successfully! We'll review it soon."
-              : modalType === "block"
-                ? "User blocked successfully! They can no longer contact you."
-                : "User unblocked successfully!"),
-        });
         setIsOpen(false);
       } else {
         toast.error(response.data.message);
-        setResponse({
-          type: "error",
-          message:
-            response.data.message || `Failed to ${modalType} user/content`,
-        });
       }
     } catch (error: any) {
       console.error(`Error during ${modalType}:`, error);
       toast.error(error.response.data.error);
-      setResponse({
-        type: "error",
-        message:
-          error?.response?.data?.error ||
-          `An error occurred while ${
-            modalType === "report"
-              ? "submitting the report"
-              : modalType === "block"
-                ? "blocking the user"
-                : "unblocking the user"
-          }. Please try again.`,
-      });
     } finally {
       setIsSubmitting(false);
     }

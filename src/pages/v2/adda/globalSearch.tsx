@@ -753,7 +753,7 @@ const SearchResultsPage = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                       {filteredResults.podcasts.map((podcast) => (
                         <PodcastCard
-                          key={podcast._id}
+                          // key={podcast._id}
                           podcast={podcast}
                           isPlaying={playingPodcastId === podcast._id}
                           onPlayToggle={onPlayToggle}

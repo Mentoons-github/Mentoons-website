@@ -1,7 +1,6 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
 import PodcastCard from "@/components/podcast/card";
-import { PlayPauseButton } from "@/components/podcast/PlayPauseButton";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";

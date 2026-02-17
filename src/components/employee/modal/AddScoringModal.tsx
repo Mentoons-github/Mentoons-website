@@ -72,6 +72,7 @@ const AddScoringModal = ({
     const init: ScoreState = {};
 
     currentSession!.scors.headings.forEach((main, m) => {
+      console.log(main);
       init[m] = {};
 
       currentSession!.scors.headings.forEach((main, m) => {
@@ -217,23 +218,23 @@ const AddScoringModal = ({
 
         <h2 className="text-2xl font-bold text-center">SCORING SYSTEM</h2>
         {/* {!isEdit && ( */}
-          <div>
-            <select
-              value={sessionName}
-              onChange={(e) => setSessionpName(e.target.value)}
-              className="border rounded px-3 py-2"
-            >
-              <option value="" disabled>
-                Select option
-              </option>
+        <div>
+          <select
+            value={sessionName}
+            onChange={(e) => setSessionpName(e.target.value)}
+            className="border rounded px-3 py-2"
+          >
+            <option value="" disabled>
+              Select option
+            </option>
 
-              {WORKSHOPS.map((w) => (
-                <option key={w.key} value={w.key}>
-                  {w.label}
-                </option>
-              ))}
-            </select>
-          </div>
+            {WORKSHOPS.map((w) => (
+              <option key={w.key} value={w.key}>
+                {w.label}
+              </option>
+            ))}
+          </select>
+        </div>
         {/* )} */}
 
         <div className="border rounded-lg p-4 space-y-4">
