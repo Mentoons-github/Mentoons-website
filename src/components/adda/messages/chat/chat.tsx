@@ -68,7 +68,7 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const fileUpload = useSelector((state: RootState) => state.fileUpload);
 
@@ -91,6 +91,7 @@ const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   // NEW: State for ShareUserModal
   // const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   // const [messageToForward, setMessageToForward] = useState<Message | null>(
@@ -105,7 +106,7 @@ const Chat: React.FC<ChatProps> = ({
       if (!token || !selectedUser) return;
 
       const result = await dispatch(
-        fetchConversationId({ selectedUserId: selectedUser, token })
+        fetchConversationId({ selectedUserId: selectedUser, token }),
       );
 
       if (fetchConversationId.fulfilled.match(result)) {
@@ -120,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({
           resetUnreadCount({
             conversationId: conversationId,
             userId: mongoUserId,
-          })
+          }),
         );
       }
     };
@@ -150,9 +151,28 @@ const Chat: React.FC<ChatProps> = ({
     }
   };
 
+  const fetchCurrentUser = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const response = await axiosInstance.get(`/user/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrentUser(response.data.data);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      setError(err instanceof Error ? err.message : "Failed to load user data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
-  }, [selectedUser]);
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -167,7 +187,7 @@ const Chat: React.FC<ChatProps> = ({
         userId: string;
       }) => {
         dispatch(markMessagesAsRead({ conversationId, userId }));
-      }
+      },
     );
 
     return () => {
@@ -189,7 +209,7 @@ const Chat: React.FC<ChatProps> = ({
           message: data.message,
           fileType: data.fileType,
           updatedAt: data.createdAt,
-        })
+        }),
       );
 
       if (currentConversation === data.conversationId) {
@@ -199,14 +219,14 @@ const Chat: React.FC<ChatProps> = ({
           resetUnreadCount({
             conversationId: data.conversationId,
             userId: mongoUserId,
-          })
+          }),
         );
       } else {
         dispatch(
           incrementUnreadCount({
             conversationId: data.conversationId,
             userId: mongoUserId,
-          })
+          }),
         );
       }
     });
@@ -229,7 +249,7 @@ const Chat: React.FC<ChatProps> = ({
       }
 
       const resultAction = await dispatch(
-        uploadFile({ file: selectedFile, getToken })
+        uploadFile({ file: selectedFile, getToken }),
       );
 
       if (uploadFile.fulfilled.match(resultAction)) {
@@ -239,7 +259,7 @@ const Chat: React.FC<ChatProps> = ({
           selectedUser,
           uploadedUrl,
           selectedFile.name,
-          fileType
+          fileType,
         );
       } else {
         console.error("File upload failed:", resultAction.payload);
@@ -397,7 +417,7 @@ const Chat: React.FC<ChatProps> = ({
     if (!selectedFile || !socket || !user) return;
 
     const resultAction = await dispatch(
-      uploadFile({ file: selectedFile, getToken })
+      uploadFile({ file: selectedFile, getToken }),
     );
 
     if (uploadFile.fulfilled.match(resultAction)) {
@@ -413,7 +433,7 @@ const Chat: React.FC<ChatProps> = ({
         selectedUser,
         uploadedUrl,
         selectedFile.name,
-        fileType
+        fileType,
       );
 
       setSelectedFile(null);
@@ -443,6 +463,36 @@ const Chat: React.FC<ChatProps> = ({
     }, 0);
     return () => clearTimeout(timeout);
   }, [groupedMessages]);
+  const currentUserBlocked = currentUser?.blockedUsers?.includes(
+    user?._id as string,
+  ) as boolean;
+  const chattingUserBlocked = user?.blockedUsers?.includes(
+    currentUser?._id as string,
+  ) as boolean;
+
+  const handleBlockSuccess = () => {
+    setCurrentUser((prev) => {
+      if (!prev || !user?._id) return prev;
+
+      if (prev.blockedUsers?.includes(user._id)) return prev;
+
+      return {
+        ...prev,
+        blockedUsers: [...(prev.blockedUsers || []), user._id],
+      };
+    });
+  };
+
+  const handleUnblockSuccess = () => {
+    setCurrentUser((prev) => {
+      if (!prev || !user?._id) return prev;
+
+      return {
+        ...prev,
+        blockedUsers: prev.blockedUsers?.filter((id) => id !== user._id) || [],
+      };
+    });
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -467,7 +517,6 @@ const Chat: React.FC<ChatProps> = ({
                   >
                     <FaArrowLeft size={18} />
                   </button>
-                  
                 </div>
                 <div className="relative px-2">
                   <img
@@ -492,6 +541,10 @@ const Chat: React.FC<ChatProps> = ({
                   isModalOpen={isModalOpen}
                   setIsModalOpen={setIsModalOpen}
                   conversationId={currentConversation}
+                  userId={selectedUser}
+                  currentUserBlocked={currentUserBlocked}
+                  handleUnblockSuccess={handleUnblockSuccess}
+                  handleBlockSuccess={handleBlockSuccess}
                 />
               </div>
             </div>
@@ -706,6 +759,8 @@ const Chat: React.FC<ChatProps> = ({
               handleSendMessage={handleSendMessage}
               selectedFile={selectedFile}
               isUpload={fileUpload.loading}
+              currentUserBlocked={currentUserBlocked}
+              chattingUserBlocked={chattingUserBlocked}
             />
 
             {/* {isShareModalOpen && messageToForward && (

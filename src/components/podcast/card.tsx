@@ -1,5 +1,6 @@
 import { ProductBase, PodcastProduct } from "@/types/productTypes";
 import { IoPlay } from "react-icons/io5";
+import React, { useEffect, useRef } from "react";
 
 interface PodcastCardProps {
   podcast: ProductBase;
@@ -7,11 +8,21 @@ interface PodcastCardProps {
   onPlayToggle: (podcastId: string) => void;
   onCheckAccessAndControlPlayback: (
     podcast: ProductBase,
-    audioElement?: HTMLAudioElement | null
+    audioElement?: HTMLAudioElement | null,
   ) => boolean | Promise<boolean>;
   onPlaybackTrackingUpdate: (update: (prev: any) => any) => void;
   onPodcastCompletion: (podcastId: string, podcastType: string) => void;
   playbackTracking: any;
+  /**
+   * Called with this card's <audio> element on mount so the global manager
+   * can pause it when another player starts.
+   */
+  onRegisterAudio: (audio: HTMLAudioElement) => void;
+  /**
+   * True while the global manager is switching between players so onPause
+   * is not treated as a user-initiated pause.
+   */
+  isSwitchingRef: React.MutableRefObject<boolean>;
 }
 
 const PodcastCard: React.FC<PodcastCardProps> = ({
@@ -22,8 +33,11 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
   onPlaybackTrackingUpdate,
   onPodcastCompletion,
   playbackTracking,
+  onRegisterAudio,
+  isSwitchingRef,
 }) => {
-  // Normalize product_type to capitalized form
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const productType = podcast.product_type
     ? ((podcast.product_type.charAt(0).toUpperCase() +
         podcast.product_type.slice(1).toLowerCase()) as
@@ -31,6 +45,41 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
         | "Prime"
         | "Platinum")
     : "Free";
+
+  // Register audio with global manager on mount
+  useEffect(() => {
+    if (audioRef.current) {
+      onRegisterAudio(audioRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Imperatively play/pause based on isPlaying prop — no conditional render,
+  // no mount/unmount race, no double-click needed.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      // Register so the global manager knows this is the active player
+      onRegisterAudio(audio);
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay was blocked or audio was paused by another player — ignore
+        });
+      }
+    } else {
+      if (!audio.paused) {
+        isSwitchingRef.current = true;
+        audio.pause();
+        setTimeout(() => {
+          isSwitchingRef.current = false;
+        }, 100);
+      }
+      audio.currentTime = 0;
+    }
+  }, [isPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -84,49 +133,51 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
             <IoPlay className="ml-1 text-2xl text-white" />
           )}
         </button>
-        {isPlaying && (
-          <audio
-            src={
-              (podcast.details as PodcastProduct["details"]).sampleUrl || "#"
-            }
-            autoPlay
-            controlsList="nodownload"
-            onPlay={(e) => {
-              const hasAccess = onCheckAccessAndControlPlayback(
-                podcast,
-                e.currentTarget
-              );
-              if (!hasAccess) {
-                e.currentTarget.pause();
-                onPlayToggle("");
-              }
-            }}
-            onPause={() => {
-              if (
-                playbackTracking &&
-                playbackTracking.podcastId === String(podcast._id)
-              ) {
-                onPlaybackTrackingUpdate((prev) =>
-                  prev ? { ...prev, paused: true } : null
-                );
-              }
-            }}
-            onSeeked={() => {
-              if (
-                playbackTracking &&
-                playbackTracking.podcastId === String(podcast._id)
-              ) {
-                onPlaybackTrackingUpdate((prev) =>
-                  prev ? { ...prev, skipped: true } : null
-                );
-              }
-            }}
-            onEnded={() => {
+
+        {/* Audio is always in the DOM — play/pause is controlled imperatively
+            via useEffect above. This eliminates mount/unmount timing races. */}
+        <audio
+          ref={audioRef}
+          src={(podcast.details as PodcastProduct["details"]).sampleUrl || "#"}
+          controlsList="nodownload"
+          onPlay={async (e) => {
+            onRegisterAudio(e.currentTarget);
+            const granted = await Promise.resolve(
+              onCheckAccessAndControlPlayback(podcast, e.currentTarget),
+            );
+            if (!granted) {
+              e.currentTarget.pause();
               onPlayToggle("");
-              onPodcastCompletion(String(podcast._id), productType);
-            }}
-          />
-        )}
+            }
+          }}
+          onPause={() => {
+            // Ignore pauses caused by the global manager switching players
+            if (isSwitchingRef.current) return;
+            if (
+              playbackTracking &&
+              playbackTracking.podcastId === String(podcast._id)
+            ) {
+              onPlaybackTrackingUpdate((prev: any) =>
+                prev ? { ...prev, paused: true } : null,
+              );
+            }
+          }}
+          onSeeked={() => {
+            if (
+              playbackTracking &&
+              playbackTracking.podcastId === String(podcast._id)
+            ) {
+              onPlaybackTrackingUpdate((prev: any) =>
+                prev ? { ...prev, skipped: true } : null,
+              );
+            }
+          }}
+          onEnded={() => {
+            onPlayToggle("");
+            onPodcastCompletion(String(podcast._id), productType);
+          }}
+        />
+
         <div className="absolute flex items-center gap-2 bottom-2 left-2">
           <div
             className={`py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize
@@ -135,25 +186,17 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
                 "mobile addiction"
                   ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
                   : (podcast.details as PodcastProduct["details"])?.category ===
-                    "electronic gadgets"
-                  ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
-                  : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
+                      "electronic gadgets"
+                    ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
+                    : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
               }`}
           >
             {(podcast.details as PodcastProduct["details"])?.category ||
               "Category"}
           </div>
-          {/* <div
-            className={`py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize
-              data-[type=Free]:bg-gradient-to-r data-[type=Free]:from-green-400 data-[type=Free]:to-green-500 data-[type=Free]:text-white
-              data-[type=Prime]:bg-gradient-to-r data-[type=Prime]:from-yellow-400 data-[type=Prime]:to-orange-500 data-[type=Prime]:text-white
-              data-[type=Platinum]:bg-gradient-to-r data-[type=Platinum]:from-gray-400 data-[type=Platinum]:to-gray-500 data-[type=Platinum]:text-white`}
-            data-type={productType}
-          >
-            {productType}
-          </div> */}
         </div>
       </div>
+
       <div className="space-y-2">
         <div className="flex items-start justify-between mb-2">
           <h3
@@ -172,10 +215,12 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
             {podcast.rating || "4.5"}
           </div>
         </div>
+
         <p className="text-sm text-gray-600 line-clamp-2">
           {podcast.description ||
             "Podcast Negative Impact of Mobile Phones takes a closer look at the consequences of our constant connection to the digital world."}
         </p>
+
         <div
           className={`flex items-center gap-2 ${
             isPlaying ? "text-white/90" : "text-gray-500"
@@ -196,6 +241,7 @@ const PodcastCard: React.FC<PodcastCardProps> = ({
             </p>
           )}
         </div>
+
         {isPlaying && (
           <div className="flex justify-center gap-1 pt-2">
             <span className="w-1 h-3 bg-white rounded-full animate-bounce"></span>

@@ -1,6 +1,7 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
 import PodcastCard from "@/components/podcast/card";
+import { PlayPauseButton } from "@/components/podcast/PlayPauseButton";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
 import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
@@ -49,7 +50,12 @@ const Podcastv2 = () => {
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Single source of truth: which podcast id is playing in the card carousel
+  // or "new-release". The featured <audio controls> player manages itself via
+  // the DOM — we only track it via currentAudioRef below.
   const [playingPodcastId, setPlayingPodcastId] = useState<string | null>(null);
+
   const [message, setMessage] = useState("");
   const [enquiryEmail, setEnquiryEmail] = useState("");
   const [enquiryName, setEnquiryName] = useState("");
@@ -69,6 +75,59 @@ const Podcastv2 = () => {
     return sessionStorage.getItem("newReleaseAutoPlayed") === "true";
   });
 
+  // ── Global audio manager ─────────────────────────────────────────────────
+  //
+  // currentAudioRef  — the <audio> element that is currently playing
+  // isSwitchingRef   — true for ~100 ms during a player switch so that the
+  //                    outgoing player's onPause is not treated as a user pause
+  //
+  // switchTo(audio) — pauses the current player (with flag set), then marks
+  //                   the new audio as current. Does NOT call .play() — the
+  //                   caller or the browser does that.
+  //
+  // stopAll()        — pauses current player and clears state
+  //
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isSwitchingRef = useRef(false);
+
+  const switchTo = useCallback((incoming: HTMLAudioElement) => {
+    const outgoing = currentAudioRef.current;
+    if (outgoing && outgoing !== incoming && !outgoing.paused) {
+      isSwitchingRef.current = true;
+      outgoing.pause();
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, 150);
+    }
+    currentAudioRef.current = incoming;
+  }, []);
+
+  const stopAll = useCallback(() => {
+    const current = currentAudioRef.current;
+    if (current && !current.paused) {
+      isSwitchingRef.current = true;
+      current.pause();
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, 150);
+    }
+    currentAudioRef.current = null;
+    setPlayingPodcastId(null);
+  }, []);
+
+  // Called by PodcastCard on mount so we always know every card's audio ref
+  const registerCardAudio = useCallback((audio: HTMLAudioElement) => {
+    // Only update currentAudioRef when this card is actually the active one;
+    // for idle cards we just store a weak reference via the DOM.
+    // (The card's own useEffect calls play/pause imperatively.)
+    // We expose this so the featured player can pause it via switchTo().
+    if (!audio.paused) {
+      currentAudioRef.current = audio;
+    }
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   const { isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
@@ -84,7 +143,7 @@ const Podcastv2 = () => {
     if (carousel) {
       setIsAtStart(carousel.scrollLeft === 0);
       setIsAtEnd(
-        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1
+        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1,
       );
     }
   };
@@ -98,7 +157,7 @@ const Podcastv2 = () => {
   };
 
   const handleSubmit = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     try {
@@ -109,7 +168,7 @@ const Podcastv2 = () => {
           name: enquiryName,
           email: enquiryEmail,
           queryType: "podcast",
-        }
+        },
       );
       if (queryResponse.status === 201) {
         setShowEnquiryModal(true);
@@ -124,7 +183,7 @@ const Podcastv2 = () => {
       const token = await getToken();
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.status === 200) {
         setDbUser(response.data.data);
@@ -166,7 +225,7 @@ const Podcastv2 = () => {
         const response = await axios.post(
           `${import.meta.env.VITE_PROD_URL}/subscription/access`,
           { type: "podcasts", itemId: podcast._id },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const { access, reason } = response.data;
         if (access) {
@@ -188,12 +247,12 @@ const Podcastv2 = () => {
         if (reason === "upgrade") {
           setLimitModalTitle("Upgrade Your Plan");
           setLimitModalMessage(
-            `You've reached the podcast limit for your ${membershipType} plan. Upgrade to access more content!`
+            `You've reached the podcast limit for your ${membershipType} plan. Upgrade to access more content!`,
           );
         } else if (reason === "charge") {
           setLimitModalTitle("Purchase Content");
           setLimitModalMessage(
-            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
           );
         }
         setCurrentProductId(podcast._id || "");
@@ -218,7 +277,7 @@ const Podcastv2 = () => {
       modalShownTimestamp,
       membershipType,
       fetchDBUser,
-    ]
+    ],
   );
 
   const handlePodcastCompletion = (podcastId: string, podcastType: string) => {
@@ -279,7 +338,7 @@ const Podcastv2 = () => {
         console.error("Error updating content consumption:", error);
       }
     },
-    [dbUser, isSignedIn, fetchDBUser]
+    [dbUser, isSignedIn, fetchDBUser],
   );
 
   useEffect(() => {
@@ -287,7 +346,7 @@ const Podcastv2 = () => {
       try {
         const token = await getToken();
         await dispatch(
-          fetchProducts({ type: ProductType.PODCAST, token: token! })
+          fetchProducts({ type: ProductType.PODCAST, token: token! }),
         );
       } catch (error) {
         console.error("Error fetching podcast data:", error);
@@ -300,7 +359,7 @@ const Podcastv2 = () => {
     const filtered = products.filter(
       (podcast) =>
         (podcast?.details as PodcastProduct["details"])?.category ===
-        selectedCategory
+        selectedCategory,
     );
     setFilteredPodcast(filtered);
   }, [products, selectedCategory]);
@@ -488,6 +547,12 @@ const Podcastv2 = () => {
                         </span>
                       </div>
                       <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20">
+                        {/*
+                          Featured <audio controls> — browser-native controls.
+                          On play: call switchTo() synchronously to pause any
+                          card/new-release audio via the DOM *before* React
+                          state updates, so this starts on the first click.
+                        */}
                         <audio
                           key={currentPodcastIndex}
                           className="w-full"
@@ -501,24 +566,29 @@ const Podcastv2 = () => {
                             )?.sampleUrl || "#"
                           }
                           onPlay={async (e) => {
+                            // 1. Synchronously pause any other audio via DOM
+                            switchTo(e.currentTarget);
+                            // 2. Clear card / new-release React state
+                            setPlayingPodcastId(null);
+                            // 3. Check access
                             const hasAccess =
                               await checkAccessAndControlPlayback(
                                 filteredPodcast[currentPodcastIndex],
-                                e.currentTarget
+                                e.currentTarget,
                               );
                             if (!hasAccess) {
                               e.currentTarget.pause();
-                              setPlayingPodcastId(null);
                             }
                           }}
                           onPause={() => {
+                            if (isSwitchingRef.current) return;
                             if (
                               playbackTracking &&
                               playbackTracking.podcastId ===
                                 String(filteredPodcast[currentPodcastIndex]._id)
                             ) {
                               setPlaybackTracking((prev) =>
-                                prev ? { ...prev, paused: true } : null
+                                prev ? { ...prev, paused: true } : null,
                               );
                             }
                           }}
@@ -529,18 +599,17 @@ const Podcastv2 = () => {
                                 String(filteredPodcast[currentPodcastIndex]._id)
                             ) {
                               setPlaybackTracking((prev) =>
-                                prev ? { ...prev, skipped: true } : null
+                                prev ? { ...prev, skipped: true } : null,
                               );
                             }
                           }}
                           onEnded={() => {
-                            setPlayingPodcastId(null);
                             handlePodcastCompletion(
                               String(filteredPodcast[currentPodcastIndex]._id),
                               String(
                                 filteredPodcast[currentPodcastIndex]
-                                  .product_type || "free"
-                              )
+                                  .product_type || "free",
+                              ),
                             );
                           }}
                         >
@@ -553,7 +622,7 @@ const Podcastv2 = () => {
                     <button
                       onClick={() =>
                         setCurrentPodcastIndex((prev) =>
-                          prev > 0 ? prev - 1 : filteredPodcast.length - 1
+                          prev > 0 ? prev - 1 : filteredPodcast.length - 1,
                         )
                       }
                       className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:-translate-x-1"
@@ -564,7 +633,7 @@ const Podcastv2 = () => {
                     <button
                       onClick={() =>
                         setCurrentPodcastIndex((prev) =>
-                          prev < filteredPodcast.length - 1 ? prev + 1 : 0
+                          prev < filteredPodcast.length - 1 ? prev + 1 : 0,
                         )
                       }
                       className="p-3 transition-all duration-200 bg-white rounded-full shadow-lg hover:bg-gray-100 hover:shadow-orange-200/50 hover:translate-x-1"
@@ -584,12 +653,12 @@ const Podcastv2 = () => {
             scale: useTransform(
               useScroll().scrollYProgress,
               [0.4, 0.8],
-              [1, 1]
+              [1, 1],
             ),
             opacity: useTransform(
               useScroll().scrollYProgress,
               [0.4, 0.8],
-              [1, 1]
+              [1, 1],
             ),
           }}
         >
@@ -627,8 +696,12 @@ const Podcastv2 = () => {
                 isPlaying={playingPodcastId === String(podcast._id)}
                 onPlayToggle={(podcastId) => {
                   if (playingPodcastId === podcastId) {
-                    setPlayingPodcastId(null);
+                    // User paused this card
+                    stopAll();
                   } else {
+                    // Stop featured / new-release audio synchronously via DOM,
+                    // then update state — card's useEffect will call .play()
+                    stopAll();
                     setPlayingPodcastId(podcastId);
                   }
                 }}
@@ -636,6 +709,8 @@ const Podcastv2 = () => {
                 onPlaybackTrackingUpdate={setPlaybackTracking}
                 onPodcastCompletion={handlePodcastCompletion}
                 playbackTracking={playbackTracking}
+                onRegisterAudio={registerCardAudio}
+                isSwitchingRef={isSwitchingRef}
               />
             ))}
           </div>
@@ -740,11 +815,11 @@ const Podcastv2 = () => {
                         )?.category === "mobile addiction"
                           ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
                           : (
-                              filteredPodcast[0]
-                                .details as PodcastProduct["details"]
-                            )?.category === "electronic gadgets"
-                          ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
-                          : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
+                                filteredPodcast[0]
+                                  .details as PodcastProduct["details"]
+                              )?.category === "electronic gadgets"
+                            ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
+                            : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
                       }`}
                     >
                       {(filteredPodcast[0].details as PodcastProduct["details"])
@@ -763,7 +838,7 @@ const Podcastv2 = () => {
                   </h2>
                   <p className="mb-4 text-lg text-white/90 line-clamp-3">
                     {filteredPodcast[0]?.description ||
-                      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives. Each episode explores how smartphones, tablets, and other gadgets..."}
+                      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives."}
                   </p>
                   <div className="flex items-center mb-6 text-sm text-white/80">
                     <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
@@ -788,8 +863,10 @@ const Podcastv2 = () => {
                   <button
                     onClick={() => {
                       if (playingPodcastId === "new-release") {
-                        setPlayingPodcastId(null);
+                        stopAll();
                       } else {
+                        // Stop anything currently playing via DOM first
+                        stopAll();
                         setPlayingPodcastId("new-release");
                       }
                     }}
@@ -829,12 +906,16 @@ const Podcastv2 = () => {
                             .details as PodcastProduct["details"]
                         )?.sampleUrl || "#"
                       }
-                      autoPlay={!hasPlayedNewRelease}
+                      autoPlay
+                      ref={(el) => {
+                        if (el) switchTo(el);
+                      }}
                       onPlay={async (e) => {
                         setHasPlayedNewRelease(true);
+                        switchTo(e.currentTarget);
                         const hasAccess = await checkAccessAndControlPlayback(
                           filteredPodcast[0],
-                          e.currentTarget
+                          e.currentTarget,
                         );
                         if (!hasAccess) {
                           e.currentTarget.pause();
@@ -842,13 +923,14 @@ const Podcastv2 = () => {
                         }
                       }}
                       onPause={() => {
+                        if (isSwitchingRef.current) return;
                         if (
                           playbackTracking &&
                           playbackTracking.podcastId ===
                             String(filteredPodcast[0]._id)
                         ) {
                           setPlaybackTracking((prev) =>
-                            prev ? { ...prev, paused: true } : null
+                            prev ? { ...prev, paused: true } : null,
                           );
                         }
                       }}
@@ -859,7 +941,7 @@ const Podcastv2 = () => {
                             String(filteredPodcast[0]._id)
                         ) {
                           setPlaybackTracking((prev) =>
-                            prev ? { ...prev, skipped: true } : null
+                            prev ? { ...prev, skipped: true } : null,
                           );
                         }
                       }}
@@ -868,7 +950,7 @@ const Podcastv2 = () => {
                         if (filteredPodcast[0]) {
                           handlePodcastCompletion(
                             String(filteredPodcast[0]._id),
-                            String(filteredPodcast[0].product_type || "free")
+                            String(filteredPodcast[0].product_type || "free"),
                           );
                         }
                       }}
@@ -1037,6 +1119,7 @@ const Podcastv2 = () => {
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
       )}
+    {/* <PlayPauseButton /> */}
     </>
   );
 };

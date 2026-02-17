@@ -8,6 +8,10 @@ interface ChatMenuModalProps {
   setIsModalOpen: (open: boolean) => void;
   buttonRef: React.RefObject<HTMLButtonElement>;
   conversationId: string;
+  userId: string;
+  currentUserBlocked: boolean;
+  handleBlockSuccess: () => void;
+  handleUnblockSuccess: () => void;
 }
 
 const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
@@ -15,6 +19,10 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
   setIsModalOpen,
   conversationId,
   buttonRef,
+  userId,
+  currentUserBlocked,
+  handleBlockSuccess,
+  handleUnblockSuccess,
 }) => {
   const [modalType, setModalType] = useState<
     "report" | "block" | "unblock" | null
@@ -39,6 +47,13 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
 
     setIsModalOpen(false);
   };
+
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.action === "Block User" && currentUserBlocked) return false;
+    if (item.action === "Unblock User" && !currentUserBlocked) return false;
+    return true;
+  });
+
   return (
     <div className="relative">
       <button
@@ -65,7 +80,7 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-200 w-48 py-2 z-50"
             >
-              {menuItems.map((item, index) => (
+              {filteredMenuItems.map((item, index) => (
                 <motion.button
                   key={item.action}
                   initial={{ opacity: 0, x: -10 }}
@@ -100,7 +115,16 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
           setIsOpen={() => setModalType(null)}
           modalType={modalType}
           contentId={conversationId}
-          reportType="conversation"
+          reportType="user"
+          userId={userId}
+          onSuccess={() => {
+            if (currentUserBlocked) {
+              handleUnblockSuccess();
+            }
+            if (!currentUserBlocked) {
+              handleBlockSuccess();
+            }
+          }}
         />
       )}
     </div>

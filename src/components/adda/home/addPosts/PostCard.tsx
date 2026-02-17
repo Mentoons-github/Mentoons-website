@@ -69,6 +69,7 @@ export interface PostData {
 interface PostCardProps {
   post: PostData;
   onDelete?: (postId: string) => void;
+  onUserBlocked?: (userId: string) => void;
 }
 
 interface Comment {
@@ -93,7 +94,7 @@ const formatDate = (dateString: string | Date) => {
   });
 };
 
-const PostCard = ({ post, onDelete }: PostCardProps) => {
+const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
@@ -154,29 +155,6 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     };
   }, []);
 
-  // Check if the user is blocked
-  useEffect(() => {
-    const checkBlockedStatus = async () => {
-      if (!isSignedIn) return;
-      try {
-        const token = await getToken();
-        const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/users/check-blocked/${
-            post.user._id
-          }`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        setIsUserBlocked(response.data.isBlocked);
-      } catch (error) {
-        console.error("Error checking blocked status:", error);
-      }
-    };
-
-    checkBlockedStatus();
-  }, [post.user._id, isSignedIn, getToken]);
-
   const handleDeletePost = async () => {
     if (onDelete) {
       onDelete(post._id);
@@ -206,33 +184,38 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     setShowDropdown(false);
   };
 
-  const handleUnblockUser = async () => {
-    if (!isSignedIn) {
-      openAuthModal("sign-in");
-      return;
-    }
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/users/unblock`,
-        {
-          userId: post.user._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setIsUserBlocked(false);
-      toast.success("User unblocked successfully.");
-    } catch (error) {
-      console.error("Error unblocking user:", error);
-      toast.error("Failed to unblock user. Please try again.");
-    } finally {
-      setShowDropdown(false);
-    }
+  const handleUnblockUser = () => {
+    console.log("first");
   };
+
+  //unblock
+  // const handleUnblockUser = async () => {
+  //   if (!isSignedIn) {
+  //     openAuthModal("sign-in");
+  //     return;
+  //   }
+  //   try {
+  //     const token = await getToken();
+  //     await axios.post(
+  //       `${import.meta.env.VITE_PROD_URL}/users/unblock`,
+  //       {
+  //         userId: post.user._id,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     setIsUserBlocked(false);
+  //     toast.success("User unblocked successfully.");
+  //   } catch (error) {
+  //     console.error("Error unblocking user:", error);
+  //     toast.error("Failed to unblock user. Please try again.");
+  //   } finally {
+  //     setShowDropdown(false);
+  //   }
+  // };
 
   const handleCommentSubmit = async () => {
     if (!isSignedIn) {
@@ -615,6 +598,13 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         userId={post.user._id}
         contentId={post._id}
         reportType="post"
+        onSuccess={() => {
+          setIsUserBlocked(true);
+
+          if (onUserBlocked) {
+            onUserBlocked(post.user._id);
+          }
+        }}
       />
     </>
   );

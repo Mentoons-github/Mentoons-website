@@ -12,6 +12,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Loader2, User, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ReportAbuseModal from "./BlockAndReportModal";
 
 interface UserListModalProps {
   userIds: string[];
@@ -20,6 +21,7 @@ interface UserListModalProps {
   currentUserClerkId?: string;
   currentUserId?: string;
   reduceFollower?: (id: string) => void;
+  onUnblockedUser?: (userId: string) => void;
   // addFollowing?: (id: string) => void;
 }
 
@@ -32,6 +34,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
   currentUserClerkId,
   currentUserId,
   reduceFollower,
+  onUnblockedUser,
   // addFollowing,
 }) => {
   const { getToken } = useAuth();
@@ -50,6 +53,8 @@ const UserListModal: React.FC<UserListModalProps> = ({
     useState<UserSummary | null>(null);
   const [statusClickedStatus, setStatusClickedStatus] =
     useState<FollowStatus | null>(null);
+  const [unblockModal, setUnblockModal] = useState<boolean>(false);
+  const [blockedUserId, setBlockedUserId] = useState<string>("");
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -200,6 +205,11 @@ const UserListModal: React.FC<UserListModalProps> = ({
     }
   };
 
+  const handleUnblock = (userId: string) => {
+    setUnblockModal(true);
+    setBlockedUserId(userId);
+  };
+
   return (
     <div
       className={`fixed inset-0 bg-black transition-all duration-300 ease-out flex items-center justify-center z-50 ${
@@ -304,23 +314,34 @@ const UserListModal: React.FC<UserListModalProps> = ({
                     {/* Right: Follow button (hidden if current user) */}
                     {!isMe && (
                       <button
-                        onClick={() => handleFollowToggle(user._id, status)}
+                        onClick={() =>
+                          title === "Blocked Users"
+                            ? handleUnblock(user._id) // or whatever your unblock function is
+                            : handleFollowToggle(user._id, status)
+                        }
                         className={`py-1 px-3 rounded-md font-medium whitespace-nowrap
-                          ${
-                            status === "following"
-                              ? "bg-gray-300 text-gray-700"
-                              : status === "requested"
-                                ? "bg-blue-200 text-blue-600"
-                                : status === "followBack"
-                                  ? "bg-green-500 text-white"
-                                  : "bg-orange-500 text-white"
-                          }
-                        `}
+                      ${
+                        title === "Blocked Users"
+                          ? "bg-red-500 text-white"
+                          : status === "following"
+                            ? "bg-gray-300 text-gray-700"
+                            : status === "requested"
+                              ? "bg-blue-200 text-blue-600"
+                              : status === "followBack"
+                                ? "bg-green-500 text-white"
+                                : "bg-orange-500 text-white"
+                      }
+                    `}
                       >
-                        {status === "following" && "Following"}
-                        {status === "requested" && "Requested"}
-                        {status === "followBack" && "Follow Back"}
-                        {status === "follow" && "Follow"}
+                        {title === "Blocked Users"
+                          ? "Unblock"
+                          : status === "following"
+                            ? "Following"
+                            : status === "requested"
+                              ? "Requested"
+                              : status === "followBack"
+                                ? "Follow Back"
+                                : "Follow"}
                       </button>
                     )}
                   </div>
@@ -404,6 +425,19 @@ const UserListModal: React.FC<UserListModalProps> = ({
           </div>
         </div>
       )}
+      <ReportAbuseModal
+        isOpen={unblockModal}
+        setIsOpen={setUnblockModal}
+        modalType={"unblock"}
+        userId={blockedUserId}
+        reportType="user"
+        onSuccess={() => {
+          if (onUnblockedUser) {
+            onUnblockedUser(blockedUserId as string);
+          }
+          handleClose();
+        }}
+      />
     </div>
   );
 };

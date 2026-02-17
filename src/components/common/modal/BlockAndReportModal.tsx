@@ -1,18 +1,12 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BLOCK_REASONS, REPORT_REASONS } from "@/constant/constants";
-import {
-  X,
-  Shield,
-  Flag,
-  HelpCircle,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import { X, Shield, Flag, HelpCircle } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface ReportAbuseModalProps {
   isOpen: boolean;
@@ -21,6 +15,7 @@ interface ReportAbuseModalProps {
   userId?: string;
   contentId?: string;
   reportType?: string;
+  onSuccess?: () => void;
 }
 
 interface FormValues {
@@ -40,6 +35,7 @@ const ReportAbuseModal = ({
   userId,
   contentId,
   reportType = "post",
+  onSuccess,
 }: ReportAbuseModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [response, setResponse] = useState<ResponseState>({
@@ -54,21 +50,20 @@ const ReportAbuseModal = ({
   const currentReasons =
     modalType === "report" ? REPORT_REASONS : BLOCK_REASONS;
 
-  const validationSchema = Yup.object({
-    selectedReason: Yup.string().when("modalType", {
-      is: (type: string) => type !== "unblock",
-      then: (schema) => schema.required("Please select a reason"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    customReason: Yup.string().when("selectedReason", {
-      is: "other",
-      then: (schema) =>
-        schema
-          .required("Please provide details")
-          .min(15, "Please provide at least 15 characters"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  });
+  const validationSchema =
+    modalType === "unblock"
+      ? Yup.object({}) // 👈 no validation needed
+      : Yup.object({
+          selectedReason: Yup.string().required("Please select a reason"),
+          customReason: Yup.string().when("selectedReason", {
+            is: "other",
+            then: (schema) =>
+              schema
+                .required("Please provide details")
+                .min(15, "Please provide at least 15 characters"),
+            otherwise: (schema) => schema.notRequired(),
+          }),
+        });
 
   const initialValues: FormValues = {
     selectedReason: "",
@@ -95,6 +90,7 @@ const ReportAbuseModal = ({
   };
 
   const handleSubmit = async (values: FormValues) => {
+    console.log("first");
     setIsSubmitting(true);
     setResponse({ type: null, message: "" });
 
@@ -165,6 +161,11 @@ const ReportAbuseModal = ({
       });
 
       if (response.data.success) {
+        if ((modalType === "block" || modalType === "unblock") && onSuccess) {
+          onSuccess();
+        }
+        toast.success(response.data.message);
+
         setResponse({
           type: "success",
           message:
@@ -172,10 +173,12 @@ const ReportAbuseModal = ({
             (modalType === "report"
               ? "Report submitted successfully! We'll review it soon."
               : modalType === "block"
-              ? "User blocked successfully! They can no longer contact you."
-              : "User unblocked successfully!"),
+                ? "User blocked successfully! They can no longer contact you."
+                : "User unblocked successfully!"),
         });
+        setIsOpen(false);
       } else {
+        toast.error(response.data.message);
         setResponse({
           type: "error",
           message:
@@ -184,16 +187,17 @@ const ReportAbuseModal = ({
       }
     } catch (error: any) {
       console.error(`Error during ${modalType}:`, error);
+      toast.error(error.response.data.error);
       setResponse({
         type: "error",
         message:
-          error?.response?.data?.message ||
+          error?.response?.data?.error ||
           `An error occurred while ${
             modalType === "report"
               ? "submitting the report"
               : modalType === "block"
-              ? "blocking the user"
-              : "unblocking the user"
+                ? "blocking the user"
+                : "unblocking the user"
           }. Please try again.`,
       });
     } finally {
@@ -269,8 +273,8 @@ const ReportAbuseModal = ({
                       modalType === "report"
                         ? "from-red-500 to-rose-500"
                         : modalType === "block"
-                        ? "from-amber-500 to-orange-500"
-                        : "from-green-500 to-teal-500"
+                          ? "from-amber-500 to-orange-500"
+                          : "from-green-500 to-teal-500"
                     } shadow-md`}
                   >
                     {modalType === "report" ? (
@@ -286,15 +290,15 @@ const ReportAbuseModal = ({
                       {modalType === "report"
                         ? "Report User"
                         : modalType === "block"
-                        ? "Block User"
-                        : "Unblock User"}
+                          ? "Block User"
+                          : "Unblock User"}
                     </h1>
                     <p className="text-gray-600 text-sm mt-1">
                       {modalType === "report"
                         ? "Help us maintain a safe community"
                         : modalType === "block"
-                        ? "Control your interactions"
-                        : "Restore communication with this user"}
+                          ? "Control your interactions"
+                          : "Restore communication with this user"}
                     </p>
                   </div>
                 </div>
@@ -315,7 +319,7 @@ const ReportAbuseModal = ({
               style={{ scrollBehavior: "smooth" }}
             >
               {/* Response Display */}
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {response.type && (
                   <motion.div
                     initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -374,7 +378,7 @@ const ReportAbuseModal = ({
                     </div>
                   </motion.div>
                 )}
-              </AnimatePresence>
+              </AnimatePresence> */}
 
               <Formik
                 initialValues={initialValues}
@@ -410,11 +414,11 @@ const ReportAbuseModal = ({
                                     value={reason.id}
                                     className="sr-only"
                                     onChange={(
-                                      e: React.ChangeEvent<HTMLInputElement>
+                                      e: React.ChangeEvent<HTMLInputElement>,
                                     ) => {
                                       setFieldValue(
                                         "selectedReason",
-                                        e.target.value
+                                        e.target.value,
                                       );
                                       if (e.target.value === "other") {
                                         scrollToTextarea();
@@ -545,10 +549,10 @@ const ReportAbuseModal = ({
                           isSubmitting
                             ? "bg-gray-400 cursor-not-allowed"
                             : modalType === "report"
-                            ? "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
-                            : modalType === "block"
-                            ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-                            : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                              ? "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
+                              : modalType === "block"
+                                ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                                : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
                         }`}
                         whileHover={!isSubmitting ? { scale: 1.02 } : {}}
                         whileTap={!isSubmitting ? { scale: 0.98 } : {}}
@@ -576,8 +580,8 @@ const ReportAbuseModal = ({
                             {modalType === "report"
                               ? "Submit Report"
                               : modalType === "block"
-                              ? "Block User"
-                              : "Unblock User"}
+                                ? "Block User"
+                                : "Unblock User"}
                           </>
                         )}
                       </motion.button>

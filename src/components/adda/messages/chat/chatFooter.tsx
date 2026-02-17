@@ -12,6 +12,8 @@ interface ChatFooterProps {
   isUpload: boolean;
   maxMessageLength?: number;
   disabled?: boolean;
+  currentUserBlocked: boolean;
+  chattingUserBlocked: boolean;
 }
 
 const ChatFooter: React.FC<ChatFooterProps> = ({
@@ -24,6 +26,8 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
   isUpload,
   maxMessageLength = 3000,
   disabled = false,
+  currentUserBlocked,
+  chattingUserBlocked,
 }) => {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -34,12 +38,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
         }
       }
     },
-    [
-      message,
-      selectedFile,
-      disabled,
-      handleSendMessage,
-    ]
+    [message, selectedFile, disabled, handleSendMessage],
   );
 
   // const handleRecordingToggle = useCallback(() => {
@@ -52,24 +51,18 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
     fileInputRef.current?.click();
   }, [disabled, fileInputRef]);
 
-  const handleSend = useCallback(() => {
-    if (canSend && !disabled) {
-      handleSendMessage();
-    }
-  }, [
-    message,
-    selectedFile,
-    isUpload,
-    disabled,
-    handleSendMessage,
-  ]);
+  const isBlocked = Boolean(currentUserBlocked || chattingUserBlocked);
 
   const canSend = Boolean(
-    (message.trim() || selectedFile) &&
-      !isUpload
+    (message.trim() || selectedFile) && !isUpload && !isBlocked,
   );
 
-  const isInputDisabled = disabled
+  const handleSend = useCallback(() => {
+    if (canSend && !disabled && !isBlocked) {
+      handleSendMessage();
+    }
+  }, [canSend, disabled, isBlocked, handleSendMessage]);
+
   const isOverLimit = message.length > maxMessageLength;
 
   const getInputClassName = () => {
@@ -78,6 +71,10 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
 
     if (disabled) {
       return `${baseClasses} border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed`;
+    }
+
+    if (isBlocked) {
+      return `${baseClasses} cursor-not-allowed placeholder:text-red-500`;
     }
 
     if (isOverLimit) {
@@ -119,13 +116,21 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
 
   return (
     <div className="flex items-center gap-2 p-4 bg-white border-t">
+      {isBlocked && (
+        <div className="absolute -top-10 left-0 right-0 text-center text-sm text-red-500 font-medium">
+          {currentUserBlocked
+            ? "You have blocked this user. Unblock to send messages."
+            : "You cannot send messages to this user."}
+        </div>
+      )}
+
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileUpload}
         className="hidden"
         accept="image/*,audio/*,application/*,video/*"
-        disabled={disabled}
+        disabled={disabled || isBlocked}
         aria-label="Upload file"
       />
 
@@ -148,12 +153,19 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
         <input
           type="text"
           value={message}
-          disabled={isInputDisabled}
+          disabled={disabled || isBlocked}
           onChange={handleMessageChange}
           onKeyDown={handleKeyDown}
           className={getInputClassName()}
           maxLength={maxMessageLength}
           aria-label="Message input"
+          placeholder={
+            currentUserBlocked
+              ? "You have blocked this user. Unblock to send messages."
+              : chattingUserBlocked
+                ? "User blocked you. You cannot send messages to this user."
+                : "Type a message"
+          }
           aria-invalid={isOverLimit}
           aria-describedby={isOverLimit ? "message-error" : undefined}
         />

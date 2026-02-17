@@ -5,12 +5,15 @@ import { FiAward } from "react-icons/fi";
 interface ProfileTabsProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
+  friendBlocked: boolean;
 }
 
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
   activeTab,
   setActiveTab,
+  friendBlocked,
 }) => {
+  if (friendBlocked) return null;
   return (
     <div className="border-b border-gray-200">
       <div className="flex space-x-8">

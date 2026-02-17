@@ -7,6 +7,7 @@ import {
   Calendar,
   Check,
   Clock,
+  EllipsisVertical,
   Loader2,
   User as UserIcon,
   UserMinus,
@@ -26,6 +27,8 @@ import {
 } from "@/redux/adda/friendRequest";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
+import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
+import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md";
 
 interface ProfileHeaderProps {
   user: User;
@@ -37,6 +40,10 @@ interface ProfileHeaderProps {
   reduceFollower: () => void;
   addFollowing: () => void;
   currentUserId: string;
+  blockedUsers: string[];
+  userId: string;
+  onUnblockSuccess: () => void;
+  friendBlocked: boolean;
 }
 
 type FriendStatus = "pending" | "accepted" | "rejected" | "none";
@@ -51,6 +58,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   reduceFollower,
   addFollowing,
   currentUserId,
+  blockedUsers,
+  userId,
+  onUnblockSuccess,
+  friendBlocked,
 }) => {
   const { getToken } = useAuth();
   const [friendStatus, setFriendStatus] = useState<FriendStatus>("none");
@@ -69,10 +80,41 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   );
   const [showModal, setShowModal] = useState(false);
   const [receiveStatus, setReceiveStatus] = useState("none");
+  const [reportModal, setReportModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isUserBlocked, setIsUserBlocked] = useState(
+    blockedUsers?.includes(userId),
+  );
+  const [modalTypeBlock, setModalTypeBlock] = useState<
+    "report" | "block" | "unblock"
+  >("report");
+  const dropdownRef = React.useRef<HTMLDivElement | null>(null);
+
   const dispatch = useDispatch<AppDispatch>();
 
   const isValidCoverImage =
-    user.coverImage && !user.coverImage.includes("via.placeholder.com");
+    user.coverImage &&
+    !user.coverImage.includes("via.placeholder.com") &&
+    !friendBlocked;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   useEffect(() => {
     if (isCurrentUser) {
@@ -189,6 +231,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleReportAbuse = () => {
+    setModalTypeBlock("report");
+    setReportModal(true);
+    setShowDropdown(false);
+  };
+
+  const handleBlockUser = () => {
+    setModalTypeBlock("block");
+    setReportModal(true);
+    setShowDropdown(false);
+  };
+
+  const handleUnblockUser = () => {
+    setModalTypeBlock("unblock");
+    setReportModal(true);
+    setShowDropdown(false);
   };
 
   const handleAcceptRequest = async () => {
@@ -378,7 +438,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-3 sm:pb-6 ">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-3 sm:mb-6 -mt-8 sm:-mt-12 ">
             <div className="relative mb-3 sm:mb-0 self-center sm:self-auto">
-              {user.picture ? (
+              {user.picture && !friendBlocked ? (
                 <img
                   src={user.picture}
                   alt={user.name}
@@ -410,145 +470,236 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               )}
             </div>
             {!isCurrentUser && (
-              <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-end">
-                {isStatusLoading ? (
-                  <div className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 rounded-full bg-gray-50 border border-gray-200">
-                    <Loader2 size={14} className="mr-2 animate-spin" />
-                    Loading...
-                  </div>
-                ) : (!isRequester && friendStatus == "pending") ||
-                  (receiveStatus === "pending" && isRequester) ? (
+              <>
+                {!friendBlocked && (
                   <>
-                    <motion.button
-                      onClick={handleAcceptRequest}
-                      disabled={isLoading}
-                      className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-green-600 rounded-full bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all duration-200 border border-green-200 font-medium min-w-[60px] sm:min-w-auto"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {isLoading ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <>
-                          <Check className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="hidden sm:inline">Accept</span>
-                        </>
-                      )}
-                    </motion.button>
-                    <motion.button
-                      onClick={handleFriendAction}
-                      disabled={isLoading}
-                      className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-red-600 rounded-full bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200 border border-red-200 font-medium min-w-[60px] sm:min-w-auto"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {isLoading ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <>
-                          <X className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="hidden sm:inline">Reject</span>
-                        </>
-                      )}
-                    </motion.button>
-                  </>
-                ) : buttonConfig?.action ? (
-                  <motion.button
-                    onClick={buttonConfig.action}
-                    disabled={isLoading}
-                    className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 border font-semibold ${buttonConfig.classes}`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {isLoading ? (
-                      <Loader2 size={14} className="animate-spin" />
+                    {" "}
+                    {isUserBlocked ? (
+                      <div className="flex justify-center sm:justify-end">
+                        <div className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
+                          You have blocked this user
+                        </div>
+                      </div>
                     ) : (
-                      <>
-                        {buttonConfig.icon}
-                        <span className="hidden sm:inline">
-                          {buttonConfig.text}
-                        </span>
-                        <span className="sm:hidden text-xs">
-                          {friendStatus === "accepted"
-                            ? "Remove"
-                            : friendStatus === "pending" ||
-                                receiveStatus === "pending"
-                              ? "Cancel"
-                              : "Add"}
-                        </span>
-                      </>
+                      <div className=" flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-end">
+                        {isStatusLoading ? (
+                          <div className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 rounded-full bg-gray-50 border border-gray-200">
+                            <Loader2 size={14} className="mr-2 animate-spin" />
+                            Loading...
+                          </div>
+                        ) : (!isRequester && friendStatus == "pending") ||
+                          (receiveStatus === "pending" && isRequester) ? (
+                          <>
+                            <motion.button
+                              onClick={handleAcceptRequest}
+                              disabled={isLoading}
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-green-600 rounded-full bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all duration-200 border border-green-200 font-medium min-w-[60px] sm:min-w-auto"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {isLoading ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <>
+                                  <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span className="hidden sm:inline">
+                                    Accept
+                                  </span>
+                                </>
+                              )}
+                            </motion.button>
+                            <motion.button
+                              onClick={handleFriendAction}
+                              disabled={isLoading}
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-red-600 rounded-full bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200 border border-red-200 font-medium min-w-[60px] sm:min-w-auto"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {isLoading ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <>
+                                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span className="hidden sm:inline">
+                                    Reject
+                                  </span>
+                                </>
+                              )}
+                            </motion.button>
+                          </>
+                        ) : buttonConfig?.action ? (
+                          <motion.button
+                            onClick={buttonConfig.action}
+                            disabled={isLoading}
+                            className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 border font-semibold ${buttonConfig.classes}`}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            {isLoading ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <>
+                                {buttonConfig.icon}
+                                <span className="hidden sm:inline">
+                                  {buttonConfig.text}
+                                </span>
+                                <span className="sm:hidden text-xs">
+                                  {friendStatus === "accepted"
+                                    ? "Remove"
+                                    : friendStatus === "pending" ||
+                                        receiveStatus === "pending"
+                                      ? "Cancel"
+                                      : "Add"}
+                                </span>
+                              </>
+                            )}
+                          </motion.button>
+                        ) : null}
+                      </div>
                     )}
-                  </motion.button>
-                ) : null}
-              </div>
+                  </>
+                )}
+              </>
             )}
           </div>
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4 relative">
+            {!friendBlocked && (
+              <div
+                className="top-5 right-0 absolute h-7 w-7 rounded-full flex items-center justify-center"
+                onClick={() => setShowDropdown(true)}
+              >
+                <EllipsisVertical className="w-10 h-10 hover:w-11 hover:h-11" />
+              </div>
+            )}
+            {showDropdown && (
+              <motion.div
+                ref={dropdownRef}
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
+              >
+                <>
+                  <button
+                    className="flex items-center w-full px-4 py-3 text-left text-orange-600 transition-colors hover:bg-gray-50"
+                    onClick={handleReportAbuse}
+                  >
+                    <MdReport className="w-5 h-5 mr-2" />
+                    Report Abuse
+                  </button>
+                  <button
+                    className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                    onClick={
+                      isUserBlocked ? handleUnblockUser : handleBlockUser
+                    }
+                  >
+                    {isUserBlocked ? (
+                      <>
+                        <MdPersonAdd className="w-5 h-5 mr-2" />
+                        Unblock User
+                      </>
+                    ) : (
+                      <>
+                        <MdBlock className="w-5 h-5 mr-2" />
+                        Block User
+                      </>
+                    )}
+                  </button>
+                </>
+              </motion.div>
+            )}
             <div>
               <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-1 sm:mb-2 text-center sm:text-left">
                 {user.name || "Unnamed User"}
               </h2>
-              <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-600">
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span>Joined {formatDate(user.joinedDate)}</span>
-              </div>
+              {!friendBlocked && (
+                <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-600">
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span>Joined {formatDate(user.joinedDate)}</span>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 py-3 sm:p-4 border-t border-b border-gray-200">
-              <button
-                onClick={() => setModalType("followers")}
-                className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
-                  {totalFollowers.length}
+            {friendBlocked && (
+              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200">
+                    <MdBlock className="w-6 h-6 text-gray-600" />
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Profile Unavailable
+                  </h3>
+
+                  <p className="text-sm text-gray-600 max-w-md">
+                    You can’t view this profile because the user has blocked
+                    you.
+                  </p>
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Followers
-                </div>
-              </button>
-              <button
-                onClick={() => setModalType("following")}
-                className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
-                  {totalFollowing.length}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Following
-                </div>
-              </button>
-              <div className="text-center p-2">
-                <div className="text-sm sm:text-lg font-semibold text-gray-800">
-                  {totalPosts}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">Posts</div>
-              </div>
-            </div>
-            {user.bio && (
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                  About
-                </h3>
-                <p className="text-sm text-gray-800 leading-relaxed">
-                  {user.bio}
-                </p>
               </div>
             )}
-            {user.interests?.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                  Interests
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {user.interests.map((interest, index) => (
-                    <span
-                      key={index}
-                      className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-blue-700 bg-blue-50 rounded-full border border-blue-200 font-medium hover:bg-blue-100 transition-colors"
-                    >
-                      {interest}
-                    </span>
-                  ))}
+            {!friendBlocked && (
+              <>
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 py-3 sm:p-4 border-t border-b border-gray-200">
+                  <button
+                    onClick={() => setModalType("followers")}
+                    className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
+                      {totalFollowers.length}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">
+                      Followers
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setModalType("following")}
+                    className="group text-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="text-sm sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600">
+                      {totalFollowing.length}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">
+                      Following
+                    </div>
+                  </button>
+                  <div className="text-center p-2">
+                    <div className="text-sm sm:text-lg font-semibold text-gray-800">
+                      {totalPosts}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">
+                      Posts
+                    </div>
+                  </div>
                 </div>
-              </div>
+                {user.bio && (
+                  <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                      About
+                    </h3>
+                    <p className="text-sm text-gray-800 leading-relaxed">
+                      {user.bio}
+                    </p>
+                  </div>
+                )}
+                {user.interests?.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                      Interests
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {user.interests.map((interest, index) => (
+                        <span
+                          key={index}
+                          className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-blue-700 bg-blue-50 rounded-full border border-blue-200 font-medium hover:bg-blue-100 transition-colors"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -624,6 +775,23 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         accessCheck={accessCheck}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+      />
+      <ReportAbuseModal
+        isOpen={reportModal}
+        setIsOpen={setReportModal}
+        modalType={modalTypeBlock}
+        userId={user._id}
+        reportType="user"
+        onSuccess={() => {
+          if (modalTypeBlock === "block") {
+            setIsUserBlocked(true);
+          }
+
+          if (modalTypeBlock === "unblock") {
+            setIsUserBlocked(false);
+            onUnblockSuccess?.();
+          }
+        }}
       />
     </>
   );

@@ -25,7 +25,7 @@ interface LeftSectionProps {
   totalFollowers: string[];
   totalFollowing: string[];
   setModalType: React.Dispatch<
-    React.SetStateAction<"followers" | "following" | null>
+    React.SetStateAction<"followers" | "following" | "blocked" | null>
   >;
   onProfilePhotoSelect?: (file: File) => void;
 }
