@@ -17,22 +17,22 @@ const BlockedGuard = ({ children }: BlockedGuardProps) => {
     if (!isLoaded || !isSignedIn) return;
 
     const isBlocked = user?.publicMetadata?.blocked;
-    const role = user?.publicMetadata?.role as string;
+    // const role = user?.publicMetadata?.role as string;
 
     if (isBlocked) {
       signOut({ redirectUrl: `/blocked` });
       return;
     }
 
-    if (role === "ADMIN" && !location.pathname.startsWith("/admin")) {
-      navigate("/admin", { replace: true });
-      return;
-    }
+    // if (role === "ADMIN" && !location.pathname.startsWith("/admin")) {
+    //   navigate("/admin", { replace: true });
+    //   return;
+    // }
 
-    if (role === "EMPLOYEE" && !location.pathname.startsWith("/employee")) {
-      navigate("/employee", { replace: true });
-      return;
-    }
+    // if (role === "EMPLOYEE" && !location.pathname.startsWith("/employee")) {
+    //   navigate("/employee", { replace: true });
+    //   return;
+    // }
   }, [isLoaded, isSignedIn, user, signOut, navigate, location]);
 
   if (!isLoaded) return <Loader />;

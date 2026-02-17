@@ -2,7 +2,7 @@ import LeftSection from "@/components/adda/userProfile/profile/leftSection";
 import ProfileFormModal from "./adda/userProfile/profieForm";
 import CompleteProfileModal from "@/components/adda/userProfile/CompleteProfileModal";
 import UserListModal from "@/components/common/modal/userList";
-import { Camera } from "lucide-react";
+import { Camera, Ellipsis, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Confetti from "react-confetti";
 import { useAuth, useUser } from "@clerk/clerk-react";
@@ -14,19 +14,28 @@ import ProfileCompletionWidget from "@/components/adda/cards/profileCompletion";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import Croppr from "croppr";
 import "croppr/dist/croppr.css";
+import UserProfileMoreModal from "@/components/common/modal/userProfile.tsx/UserProfileMoreModal";
+
+interface FollowType {
+  _id: string;
+  name: string;
+  picture: string;
+  role: string;
+}
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Posts");
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [modalType, setModalType] = useState<"followers" | "following" | null>(
-    null,
-  );
+  const [modalType, setModalType] = useState<
+    "followers" | "following" | "blocked" | null
+  >(null);
   const [userPosts, setUserPosts] = useState<ProfilePost[]>([]);
   const [userSavedPosts, setUserSavedPosts] = useState<ProfilePost[]>([]);
   const [totalFollowers, setTotalFollowers] = useState<string[]>([]);
   const [totalFollowing, setTotalFollowing] = useState<string[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [isFetchingUserData, setIsFetchingUserData] = useState(false);
   const { showModal, hideModal } = useSubmissionModal();
   const { getToken } = useAuth();
@@ -44,6 +53,7 @@ const Profile = () => {
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const [profileImageLoaded, setProfileImageLoaded] = useState(false);
   const [userId, setUserId] = useState<string>("");
+  const [moreModal, setMoreModal] = useState<boolean>(false);
 
   const profileFields = [
     { field: "name", label: "Name", required: true },
@@ -157,8 +167,17 @@ const Profile = () => {
         ]);
       setUserDetails(userResponse.data.data);
       setUserId(userResponse.data.data._id);
-      setTotalFollowers(userResponse.data.data.followers || []);
-      setTotalFollowing(userResponse.data.data.following || []);
+      setTotalFollowers(
+        userResponse.data.data.followers.map((ele: FollowType) => ele._id) ||
+          [],
+      );
+      setTotalFollowing(
+        userResponse.data.data.following.map((ele: FollowType) => ele._id) ||
+          [],
+      );
+      setBlockedUsers(
+        userResponse.data.data.blockedUsers.map((ele: string) => ele) || [],
+      );
       setUserPosts(
         postsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
@@ -207,7 +226,8 @@ const Profile = () => {
   }, [user?.id, getToken]);
 
   useEffect(() => {
-    if (!isProfileComplete) setShowProfileModal(true);
+    const isModalShown = sessionStorage.getItem("modalShown");
+    if (!isModalShown) setShowProfileModal(true);
   }, [isProfileComplete]);
 
   useEffect(() => {
@@ -613,6 +633,22 @@ const Profile = () => {
     );
   }
 
+  const reduceFollower = (id: string) => {
+    setTotalFollowers((prev) => prev.filter((_id) => _id !== id));
+  };
+  // const addFollowing = (id: string) => {
+  //   setTotalFollowing((prev) => [...prev, id]);
+  // };
+
+  const handleCloseInitialModal = () => {
+    setShowProfileModal(false);
+    sessionStorage.setItem("modalShown", "true");
+  };
+
+  const onUnblockSuccess = (userId: string) => {
+    setBlockedUsers((prev) => prev.filter((id) => id !== userId));
+  };
+
   return (
     <>
       {showConfetti && (
@@ -624,7 +660,7 @@ const Profile = () => {
       )}
       <CompleteProfileModal
         isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
+        onClose={handleCloseInitialModal}
         onCompleteProfile={handleCompleteProfile}
       />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -704,13 +740,13 @@ const Profile = () => {
             </div>
 
             <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+              <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
                 <div className="flex flex-wrap gap-2 sm:gap-3 bg-white rounded-xl p-1 w-fit shadow-sm">
                   {["Posts", "Rewards", "Saved", "Details"].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 relative ${
+                      className={`px-2 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 relative ${
                         activeTab === tab
                           ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md"
                           : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -730,6 +766,17 @@ const Profile = () => {
                       )}
                     </button>
                   ))}
+                </div>
+                <div className="relative">
+                  <div onClick={() => setMoreModal((prev) => !prev)}>
+                    {moreModal ? <X /> : <Ellipsis />}
+                  </div>
+                  {moreModal && (
+                    <UserProfileMoreModal
+                      setModalType={setModalType}
+                      onClose={() => setMoreModal(false)}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -754,10 +801,27 @@ const Profile = () => {
 
       {modalType && (
         <UserListModal
-          userIds={modalType === "followers" ? totalFollowers : totalFollowing}
-          title={modalType === "followers" ? "Followers" : "Following"}
+          userIds={
+            modalType === "followers"
+              ? totalFollowers
+              : modalType === "following"
+                ? totalFollowing
+                : blockedUsers
+          }
+          title={
+            modalType === "followers"
+              ? "Followers"
+              : modalType === "following"
+                ? "Following"
+                : "Blocked Users"
+          }
           setShowModal={() => setModalType(null)}
           currentUserId={userId}
+          reduceFollower={reduceFollower}
+          onUnblockedUser={(blockedUserId: string) =>
+            onUnblockSuccess(blockedUserId)
+          }
+          // addFollowing={addFollowing}
         />
       )}
 

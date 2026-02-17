@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   addDataCaptureReviewThunk,
+  addDataCaptureScoringThunk,
   createDataCaptureThunk,
   editDataCaptureThunk,
   fetchDataCaptureThunk,
@@ -67,6 +68,7 @@ const dataCaptureSlice = createSlice({
         state.error = null;
         state.message = action.payload.message;
         state.success = action.payload.success;
+        
       })
       .addCase(createDataCaptureThunk.rejected, (state, action) => {
         state.loading = false;
@@ -87,7 +89,7 @@ const dataCaptureSlice = createSlice({
         state.success = action.payload.success;
         state.singleData = action.payload.data;
         const index = state.data.findIndex(
-          (ele) => ele._id === action.payload.data._id
+          (ele) => ele._id === action.payload.data._id,
         );
 
         if (index !== -1) {
@@ -156,6 +158,27 @@ const dataCaptureSlice = createSlice({
       .addCase(addDataCaptureReviewThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Faild to create data capture";
+        state.success = false;
+      })
+
+      //add score on data capture
+      .addCase(addDataCaptureScoringThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(addDataCaptureScoringThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.message = action.payload.message;
+        state.success = action.payload.success;
+        if (state.singleData) {
+          state.singleData.scoringSystem = action.payload.data.scoringSystem;
+        }
+      })
+      .addCase(addDataCaptureScoringThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Faild to add score";
         state.success = false;
       });
   },

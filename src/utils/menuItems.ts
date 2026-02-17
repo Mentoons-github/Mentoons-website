@@ -12,6 +12,12 @@ export const menuItems = [
     action: "Block User",
   },
   {
+    label: "Unblock User",
+    icon: "🔓",
+    hoverBg: "hover:bg-green-50",
+    action: "Unblock User",
+  },
+  {
     label: "Cancel",
     icon: "❌",
     hoverBg: "hover:bg-gray-50",

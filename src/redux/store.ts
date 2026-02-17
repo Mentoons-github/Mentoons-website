@@ -26,6 +26,7 @@ import employeeReducer from "./employee/employee";
 import postReducer from "./adda/postSlice";
 import dataCaptureReducer from "./employee/dataCaptureRedux/dataCaptureSlice";
 import invoiceReducer from "./workshop/workshopSlice";
+import workshopBatchReducer from "./workshop/workshopBatches/workshopBatchSlice";
 
 export const store = configureStore<{
   tasks: ReturnType<typeof taskReducer>;
@@ -55,6 +56,7 @@ export const store = configureStore<{
   posts: ReturnType<typeof postReducer>;
   data_capture: ReturnType<typeof dataCaptureReducer>;
   invoice: ReturnType<typeof invoiceReducer>;
+  workshop_batch: ReturnType<typeof workshopBatchReducer>;
 }>({
   reducer: {
     tasks: taskReducer,
@@ -84,6 +86,7 @@ export const store = configureStore<{
     posts: postReducer,
     data_capture: dataCaptureReducer,
     invoice: invoiceReducer,
+    workshop_batch: workshopBatchReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

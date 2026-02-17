@@ -21,6 +21,8 @@ interface FriendRequestsState {
   page: number;
   accessCheck: AccessCheckResponse | null;
   error: string | null;
+  message: string;
+  success: boolean;
 }
 
 const initialState: FriendRequestsState = {
@@ -32,6 +34,8 @@ const initialState: FriendRequestsState = {
   page: 1,
   accessCheck: null,
   error: null,
+  message: "",
+  success: false,
 };
 
 export const fetchFriendRequests = createAsyncThunk<
@@ -198,6 +202,59 @@ export const sendFollowBackRequest = createAsyncThunk<
   },
 );
 
+export const unfollowUserThunk = createAsyncThunk<
+  { userId: string; success: boolean; message: string },
+  { userId: string; token: string },
+  { rejectValue: AccessCheckResponse }
+>("friendRequests/unfollow", async ({ userId, token }, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.post(
+      `/adda/unfriend/${userId}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return {
+      userId,
+      success: response.data.success,
+      message: response.data.message,
+    };
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.error || {
+        message: "Failed to decline follow back request",
+      },
+    );
+  }
+});
+
+export const cancelFriendRequestThunk = createAsyncThunk<
+  { userId: string; success: boolean; message: string },
+  { userId: string; token: string },
+  { rejectValue: AccessCheckResponse }
+>(
+  "friendRequests/cancelRequest",
+  async ({ userId, token }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/adda/cancelRequest/${userId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return {
+        userId,
+        success: response.data.success,
+        message: response.data.message,
+      };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || {
+          message: "Failed to decline follow back request",
+        },
+      );
+    }
+  },
+);
+
 export const declineFollowBackRequest = createAsyncThunk<
   { userId: string; success: boolean },
   { userId: string; token: string },
@@ -288,6 +345,7 @@ const friendRequestSlice = createSlice({
           action.payload?.message || "Failed to fetch follow back users";
         state.accessCheck = action.payload || null;
       })
+
       .addCase(acceptFriendRequest.pending, (state, action) => {
         if (state.requests) {
           state.requests = state.requests.map((request) =>
@@ -398,6 +456,40 @@ const friendRequestSlice = createSlice({
         }
         state.error =
           action.payload?.message || "Failed to decline follow back request";
+        state.accessCheck = action.payload || null;
+      })
+
+      //unfollow user
+      .addCase(unfollowUserThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(unfollowUserThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.message = action.payload.message;
+      })
+      .addCase(unfollowUserThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload?.message || "Failed to accept friend request";
+        state.accessCheck = action.payload || null;
+      })
+
+      //unfollow user
+      .addCase(cancelFriendRequestThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(cancelFriendRequestThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.message = action.payload.message;
+      })
+      .addCase(cancelFriendRequestThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload?.message || "Failed to accept friend request";
         state.accessCheck = action.payload || null;
       });
   },

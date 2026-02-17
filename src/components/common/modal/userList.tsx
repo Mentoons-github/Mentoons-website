@@ -1,10 +1,18 @@
 import axiosInstance from "@/api/axios";
+import { useAppDispatch } from "@/hooks/useRedux";
+import {
+  cancelFriendRequestThunk,
+  sendFollowBackRequest,
+  unfollowUserThunk,
+} from "@/redux/adda/friendRequest";
 import { UserSummary } from "@/types";
+import { FilteredFriendRequest } from "@/types/adda/home";
 import { errorToast } from "@/utils/toastResposnse";
 import { useAuth } from "@clerk/clerk-react";
 import { Loader2, User, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ReportAbuseModal from "./BlockAndReportModal";
 
 interface UserListModalProps {
   userIds: string[];
@@ -12,7 +20,12 @@ interface UserListModalProps {
   setShowModal: (show: boolean) => void;
   currentUserClerkId?: string;
   currentUserId?: string;
+  reduceFollower?: (id: string) => void;
+  onUnblockedUser?: (userId: string) => void;
+  // addFollowing?: (id: string) => void;
 }
+
+type FollowStatus = "follow" | "following" | "requested" | "followBack";
 
 const UserListModal: React.FC<UserListModalProps> = ({
   userIds,
@@ -20,12 +33,32 @@ const UserListModal: React.FC<UserListModalProps> = ({
   setShowModal,
   currentUserClerkId,
   currentUserId,
+  reduceFollower,
+  onUnblockedUser,
+  // addFollowing,
 }) => {
   const { getToken } = useAuth();
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const [filteredLists, setFilteredLists] = useState<FilteredFriendRequest[]>(
+    [],
+  );
+  const [localStatus, setLocalStatus] = useState<Record<string, FollowStatus>>(
+    {},
+  );
+  const [followStatusModalOpen, setFollowStatusModalOpen] =
+    useState<boolean>(false);
+  const [statusClickedUser, setStatusClickedUser] =
+    useState<UserSummary | null>(null);
+  const [statusClickedStatus, setStatusClickedStatus] =
+    useState<FollowStatus | null>(null);
+  const [unblockModal, setUnblockModal] = useState<boolean>(false);
+  const [blockedUserId, setBlockedUserId] = useState<string>("");
+
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  // const { loading } = useAppSelector((state) => state.friendRequests);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 10);
@@ -53,6 +86,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
           followers: user.followers,
           following: user.following,
         }));
+        setFilteredLists(response.data.freindRequests);
 
         setUsers(fetchedUsers);
       } catch (error) {
@@ -80,11 +114,101 @@ const UserListModal: React.FC<UserListModalProps> = ({
     }
   };
 
-  const handleFollowToggle = (userId:string, isFollowing:boolean) => {
+  const getStatus = (userId: string): FollowStatus => {
+    return localStatus[userId] ?? checkStatus(userId);
+  };
 
-    console.log(userId,'userddddd')
-    console.log(isFollowing,'jjjjjjjj')
-  }
+  const checkStatus = (userId: string): FollowStatus => {
+    const item = filteredLists.find((val) => val.id === userId);
+
+    if (!item) return "follow";
+
+    const { sentRequest, receivedRequest } = item;
+
+    if (sentRequest?.status === "accepted") {
+      return "following";
+    }
+
+    if (
+      sentRequest &&
+      sentRequest.receiverId === userId &&
+      sentRequest.status === "pending"
+    ) {
+      return "requested";
+    }
+
+    if (receivedRequest && receivedRequest.senderId === userId) {
+      return "followBack";
+    }
+
+    return "follow";
+  };
+
+  const handleFollowToggle = async (userId: string, status: string) => {
+    const token = await getToken();
+    if (!token) return;
+    if (status === "follow" || status === "followBack") {
+      setLocalStatus((prev) => ({
+        ...prev,
+        [userId]: "requested",
+      }));
+
+      await dispatch(sendFollowBackRequest({ userId, token })).unwrap();
+      return;
+    }
+    if (status === "requested" || status === "following") {
+      const user = users.find((u) => u._id === userId);
+      if (!user) return;
+
+      setStatusClickedUser(user);
+      setStatusClickedStatus(status);
+      setFollowStatusModalOpen(true);
+    }
+  };
+
+  const handleUnfollowCancelRequest = async (action: string) => {
+    if (!statusClickedUser) return;
+    const userId = statusClickedUser._id;
+    const item = filteredLists.find((val) => val.id === userId);
+
+    const token = await getToken();
+    if (!token) return;
+
+    if (action === "unfollow") {
+      await dispatch(unfollowUserThunk({ userId, token })).unwrap();
+
+      setLocalStatus((prev) => ({
+        ...prev,
+        [userId]:
+          item?.receivedRequest && item?.receivedRequest.senderId === userId
+            ? "followBack"
+            : "follow",
+      }));
+      if (reduceFollower) {
+        reduceFollower(userId);
+      }
+
+      setFollowStatusModalOpen(false);
+    }
+    if (action === "cancel") {
+      await dispatch(cancelFriendRequestThunk({ userId, token })).unwrap();
+
+      setLocalStatus((prev) => ({
+        ...prev,
+        [userId]:
+          item?.receivedRequest && item?.receivedRequest.senderId === userId
+            ? "followBack"
+            : "follow",
+      }));
+
+      setFollowStatusModalOpen(false);
+    }
+  };
+
+  const handleUnblock = (userId: string) => {
+    setUnblockModal(true);
+    setBlockedUserId(userId);
+  };
 
   return (
     <div
@@ -138,70 +262,91 @@ const UserListModal: React.FC<UserListModalProps> = ({
             </div>
           ) : (
             <div className="space-y-1">
-              {users
-                .filter((us) => us.role === "USER")
-                .map((user, index) => {
-                  const isMe = user._id === currentUserId;
-                  const isFollowing = user.followers?.includes(currentUserId as string);
+              {users.map((user, index) => {
+                const isMe = user._id === currentUserId;
+                // const isFollowing = user.followers?.includes(
+                //   currentUserId as string,
+                // );
+                const status = getStatus(user._id);
 
-                  return (
+                return (
+                  <div
+                    key={user._id}
+                    className={`flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] ${
+                      isVisible ? "animate-slideInUp" : ""
+                    }`}
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      animationFillMode: "both",
+                    }}
+                  >
+                    {/* Left: Avatar + Name */}
                     <div
-                      key={user._id}
-                      className={`flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] ${
-                        isVisible ? "animate-slideInUp" : ""
-                      }`}
-                      style={{
-                        animationDelay: `${index * 50}ms`,
-                        animationFillMode: "both",
-                      }}
+                      className="flex items-center gap-3 flex-1 min-w-0"
+                      onClick={() =>
+                        navigate(
+                          user.clerkId === currentUserClerkId
+                            ? "/adda/user-profile"
+                            : `/adda/user/${user._id}`,
+                        )
+                      }
                     >
-                      {/* Left: Avatar + Name */}
-                      <div
-                        className="flex items-center gap-3 flex-1 min-w-0"
-                        onClick={() =>
-                          navigate(
-                            user.clerkId === currentUserClerkId
-                              ? "/adda/user-profile"
-                              : `/adda/user/${user._id}`,
-                          )
-                        }
-                      >
-                        <div className="relative w-12 h-12">
-                          {user.picture ? (
-                            <img
-                              src={user.picture}
-                              alt={user.name}
-                              className="object-cover w-full h-full transition-shadow duration-200 border-2 border-white rounded-full shadow-md group-hover:shadow-lg"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center w-full h-full rounded-full shadow-md bg-gradient-to-br from-blue-400 to-purple-500 group-hover:shadow-lg">
-                              <span className="text-sm font-medium text-white">
-                                {user.name[0]?.toUpperCase() || "U"}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-blue-600">
-                          {user.name}
-                        </p>
+                      <div className="relative w-12 h-12">
+                        {user.picture ? (
+                          <img
+                            src={user.picture}
+                            alt={user.name}
+                            className="object-cover w-full h-full transition-shadow duration-200 border-2 border-white rounded-full shadow-md group-hover:shadow-lg"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center w-full h-full rounded-full shadow-md bg-gradient-to-br from-blue-400 to-purple-500 group-hover:shadow-lg">
+                            <span className="text-sm font-medium text-white">
+                              {user.name[0]?.toUpperCase() || "U"}
+                            </span>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Right: Follow button (hidden if current user) */}
-                      {!isMe && (
-                        <button
-                          className={`py-1 px-3 rounded-md font-medium whitespace-nowrap ${
-                            isFollowing
-                              ? "bg-gray-300 text-gray-700"
-                              : "bg-orange-500 text-white"
-                          }`}
-                          onClick={() => handleFollowToggle(user._id, isFollowing as boolean)}
-                        >
-                          {isFollowing ? "Following" : "Follow"}
-                        </button>
-                      )}
+                      <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-blue-600">
+                        {user.name}
+                      </p>
                     </div>
-                  );
-                })}
+
+                    {/* Right: Follow button (hidden if current user) */}
+                    {!isMe && (
+                      <button
+                        onClick={() =>
+                          title === "Blocked Users"
+                            ? handleUnblock(user._id) // or whatever your unblock function is
+                            : handleFollowToggle(user._id, status)
+                        }
+                        className={`py-1 px-3 rounded-md font-medium whitespace-nowrap
+                      ${
+                        title === "Blocked Users"
+                          ? "bg-red-500 text-white"
+                          : status === "following"
+                            ? "bg-gray-300 text-gray-700"
+                            : status === "requested"
+                              ? "bg-blue-200 text-blue-600"
+                              : status === "followBack"
+                                ? "bg-green-500 text-white"
+                                : "bg-orange-500 text-white"
+                      }
+                    `}
+                      >
+                        {title === "Blocked Users"
+                          ? "Unblock"
+                          : status === "following"
+                            ? "Following"
+                            : status === "requested"
+                              ? "Requested"
+                              : status === "followBack"
+                                ? "Follow Back"
+                                : "Follow"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -233,6 +378,66 @@ const UserListModal: React.FC<UserListModalProps> = ({
           }
         `}
       </style>
+      {followStatusModalOpen && statusClickedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
+            {/* User Info */}
+            <div className="flex items-center gap-3">
+              <img
+                src={statusClickedUser.picture}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div>
+                <p className="font-semibold">{statusClickedUser.name}</p>
+                <p className="text-xs text-gray-500">
+                  {statusClickedStatus === "requested"
+                    ? "Request pending"
+                    : "You are following this user"}
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            {statusClickedStatus === "requested" && (
+              <button
+                onClick={() => handleUnfollowCancelRequest("cancel")}
+                className="w-full py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600"
+              >
+                Cancel Request
+              </button>
+            )}
+
+            {statusClickedStatus === "following" && (
+              <button
+                onClick={() => handleUnfollowCancelRequest("unfollow")}
+                className="w-full py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600"
+              >
+                Unfollow
+              </button>
+            )}
+
+            <button
+              onClick={() => setFollowStatusModalOpen(false)}
+              className="w-full py-2 rounded-lg bg-gray-200 text-gray-700 font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+      <ReportAbuseModal
+        isOpen={unblockModal}
+        setIsOpen={setUnblockModal}
+        modalType={"unblock"}
+        userId={blockedUserId}
+        reportType="user"
+        onSuccess={() => {
+          if (onUnblockedUser) {
+            onUnblockedUser(blockedUserId as string);
+          }
+          handleClose();
+        }}
+      />
     </div>
   );
 };

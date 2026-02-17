@@ -48,7 +48,7 @@ export const COLOR_SCHEME = [
   },
 ];
 
-export const WORKSHOP_PLANS: WorkshopPlan[] = [
+export const WORKSHOP_PLANS = [
   {
     age: "6-12",
     duration: "1 Month",
@@ -65,7 +65,7 @@ export const WORKSHOP_PLANS: WorkshopPlan[] = [
       "Music, Rhythm & Joy",
       "Combination & Showcase",
     ],
-    paymentOption: "fullPayment",
+    paymentOptions: "fullPayment",
     materials:
       "Colors, drawing sheets, music tracks (YT), storytelling prompts, emotion games, movement activities, creative worksheets, participation appreciation",
   },

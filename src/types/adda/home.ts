@@ -46,3 +46,19 @@ export interface FriendRequestResponse {
   updatedAt: string;
   __v: number;
 }
+
+export interface FilteredData {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface FilteredFriendRequest {
+  id: string;
+  sentRequest: FilteredData;
+  receivedRequest: FilteredData;
+}

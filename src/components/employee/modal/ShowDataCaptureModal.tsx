@@ -10,6 +10,8 @@ import { X } from "lucide-react";
 import { handlePrint } from "@/services/employee/employeeDataCapturePrint";
 import { BsThreeDots } from "react-icons/bs";
 import CreateDataCaptureModal from "./CreateDataCaptureModal";
+// import AddScoringModal from "./AddScoringModal";
+// import ShowScoreModal from "./ShowScoreModal";
 
 const ShowDataCaptureModal = ({
   onClose,
@@ -25,11 +27,13 @@ const ShowDataCaptureModal = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [clickMore, setClickMore] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(false);
+  // const [addScoring, setAddScoring] = useState<boolean>(false);
+  // const [showScore, setShowScore] = useState<boolean>(false);
 
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/70 flex justify-center items-center p-2 md:p-4 z-40"
+      className="fixed inset-0 bg-black/70 flex justify-center items-center p-2 md:p-4 z-50"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -85,9 +89,44 @@ const ShowDataCaptureModal = ({
               >
                 Edit
               </button>
+              {singleData.scoringSystem ? (
+                <button
+                  onClick={() => {
+                    // setShowScore(true);
+                    setClickMore(false);
+                  }}
+                  className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
+                >
+                  Show Score
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    // setAddScoring(true);
+                    setClickMore(false);
+                  }}
+                  className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 hover:text-black"
+                >
+                  Add Scoring
+                </button>
+              )}
             </div>
           )}
         </div>
+
+        {/* {addScoring && (
+          // <AddScoringModal
+          //   onClose={() => setAddScoring(false)}
+          //   singleData={singleData}
+          // />
+        )}
+
+        {showScore && (
+          // <ShowScoreModal
+          //   onClose={() => setShowScore(false)}
+          //   singleData={singleData}
+          // />
+        )} */}
 
         {edit ? (
           <CreateDataCaptureModal

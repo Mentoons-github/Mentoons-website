@@ -28,7 +28,12 @@ const ProfileDetails = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  const friendBlocked: boolean = user?.blockedUsers?.includes(
+    currentUserId,
+  ) as boolean;
 
   const fetchUser = async () => {
     try {
@@ -42,6 +47,7 @@ const ProfileDetails = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      setBlockedUsers(res.data.data.blockedUsers);
       setCurrentUserId(res.data.data._id);
     } catch (err) {
       console.error("Error fetching user:", err);
@@ -175,6 +181,10 @@ const ProfileDetails = () => {
     );
   }
 
+  const onUnblockSuccess = () => {
+    setBlockedUsers((prev) => prev.filter((id) => id !== userId));
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "posts":
@@ -227,8 +237,16 @@ const ProfileDetails = () => {
           reduceFollower={reduceFollower}
           addFollowing={addFollowing}
           currentUserId={currentUserId}
+          blockedUsers={blockedUsers}
+          userId={userId as string}
+          onUnblockSuccess={() => onUnblockSuccess()}
+          friendBlocked={friendBlocked}
         />
-        <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ProfileTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          friendBlocked={friendBlocked}
+        />
         <div className="mt-4 sm:mt-6">{renderTabContent()}</div>
       </div>
     </div>

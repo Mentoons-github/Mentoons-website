@@ -216,9 +216,9 @@ const JobsList = forwardRef(
           </div>
           <div className="w-72 md:w-[28rem] lg:w-[34rem]">
             <img
-              src="/assets/home/team007.png"
-              alt="team-image"
-              className="w-full h-auto rounded-2xl hover:scale-105 transition-transform duration-300"
+              src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/1234/team+Illustration+3.png"
+              alt=""
+              className="object-contain w-full"
             />
           </div>
         </div>

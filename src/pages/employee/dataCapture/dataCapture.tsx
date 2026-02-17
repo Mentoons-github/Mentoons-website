@@ -23,7 +23,7 @@ const DataCapture = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { data, singleData, pagination } = useAppSelector(
-    (state) => state.data_capture
+    (state) => state.data_capture,
   );
   const { getToken } = useAuth();
   const [selected, setSelected] = useState("");
@@ -66,7 +66,7 @@ const DataCapture = () => {
           sortBy,
           order,
           search: debouncedSearch,
-        })
+        }),
       );
     };
     fetchData();
@@ -78,7 +78,7 @@ const DataCapture = () => {
         const token = await getToken();
         if (!token) return;
         dispatch(
-          fetchSingleDataCaptureThunk({ token, dataCaptureId: selected })
+          fetchSingleDataCaptureThunk({ token, dataCaptureId: selected }),
         );
       };
       fetchData();
@@ -199,7 +199,11 @@ const DataCapture = () => {
                 <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
                   <p className="text-xs text-gray-400">
                     {ele.createdAt
-                      ? new Date(ele.createdAt).toLocaleDateString()
+                      ? new Date(ele.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
                       : "--"}
                   </p>
 
