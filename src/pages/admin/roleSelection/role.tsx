@@ -1,22 +1,22 @@
 const Role = () => {
   const ROLES = [
     {
-      name: "Employee",
+      name: "Employees",
       gradient: "from-blue-500 to-blue-700",
       icon: "💼",
     },
     {
-      name: "Teacher",
+      name: "Teachers",
       gradient: "from-red-500 to-red-700",
       icon: "📚",
     },
     {
-      name: "Psychologist",
+      name: "Psychologists",
       gradient: "from-green-500 to-green-700",
       icon: "🧠",
     },
     {
-      name: "Freelancer",
+      name: "Freelancers",
       gradient: "from-yellow-500 to-yellow-700",
       icon: "✨",
     },

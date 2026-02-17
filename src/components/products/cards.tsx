@@ -15,11 +15,11 @@ const ProductDetailCards = ({
   productDetails: ProductBase[];
   handleAddToCart: (
     e: React.MouseEvent<HTMLButtonElement>,
-    product: ProductBase
+    product: ProductBase,
   ) => void;
   handleBuyNow: (
     e: React.MouseEvent<HTMLButtonElement>,
-    product: ProductBase
+    product: ProductBase,
   ) => void;
   isLoading: boolean;
   searchQuery?: string;
@@ -101,6 +101,11 @@ const ProductDetailCards = ({
             </div>
           </div>
         ))}
+        <img
+          src="/assets/workshopv2/our-children.png"
+          alt="Friendly waving orange cat - end of stories"
+          className="my-auto mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-52 md:h-52 lg:w-72 lg:h-72 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-300"
+        />
       </div>
     </div>
   );

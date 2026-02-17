@@ -769,6 +769,11 @@ export const FOOTER_PAGELINKS = [
         label: "Explore",
         url: "/joinus/explore",
       },
+      {
+        id: "AB_8",
+        label: "Feedback",
+        url: "/feedback",
+      },
     ],
   },
   {

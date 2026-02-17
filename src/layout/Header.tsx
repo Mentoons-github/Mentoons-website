@@ -13,6 +13,8 @@ import DropDown from "@/components/common/nav/dropdown";
 import NavButton from "@/components/common/nav/navButton";
 import Sidebar from "@/components/common/sidebar";
 import ShareModal from "@/components/modals/ShareModal";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const Header = () => {
   const location = useLocation();
@@ -28,6 +30,12 @@ const Header = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
+  const containerRef = useRef(null);
+  const splashLogoRef = useRef<HTMLDivElement>(null);
+  const headerLogoRef = useRef<HTMLDivElement>(null);
+  const splashRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+
   const [dropdown, setDropDown] = useState<DropDownInterface>({
     games: false,
     comics: false,
@@ -37,6 +45,143 @@ const Header = () => {
     workshops: false,
     joinus: false,
   });
+
+  const [hasAnimated, setHasAnimated] = useState(() => {
+    return sessionStorage.getItem("splashAnimationShown") === "true";
+  });
+
+  useGSAP(
+    () => {
+      const splashLogo = splashLogoRef.current;
+      const headerLogo = headerLogoRef.current;
+      const splash = splashRef.current;
+      const text = textRef.current;
+
+      if (!splashLogo || !headerLogo || !splash || !text) return;
+
+      if (hasAnimated) {
+        gsap.set(splash, { display: "none", pointerEvents: "none" });
+        gsap.set(headerLogo, { opacity: 1 });
+        return;
+      }
+
+      const headerLogoRect = headerLogo.getBoundingClientRect();
+      const splashLogoImg = splashLogo.querySelector("img");
+
+      if (!splashLogoImg) return;
+
+      const splashLogoRect = splashLogoImg.getBoundingClientRect();
+
+      const finalX = headerLogoRect.left + headerLogoRect.width / 2;
+      const finalY = headerLogoRect.top + headerLogoRect.height / 2;
+
+      const scaleRatio = headerLogoRect.width / splashLogoRect.width;
+
+      gsap.set(splashLogo, {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        xPercent: -50,
+        yPercent: -100,
+        scale: 1,
+        opacity: 0,
+        zIndex: 10002,
+      });
+
+      gsap.set(text, {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        xPercent: -50,
+        yPercent: 20,
+        opacity: 0,
+      });
+
+      gsap.set(headerLogo, { opacity: 0 });
+
+      const chars = text.querySelectorAll("span");
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        onComplete: () => {
+          sessionStorage.setItem("splashAnimationShown", "true");
+          setHasAnimated(true);
+        },
+      });
+
+      tl.to(splashLogo, {
+        opacity: 1,
+        duration: 0.9,
+        ease: "back.out(1.4)",
+      })
+        .to(
+          text,
+          {
+            opacity: 1,
+            duration: 0.6,
+          },
+          "-=0.3",
+        )
+        .fromTo(
+          chars,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.05 },
+          "-=0.6",
+        )
+        .to(
+          splashLogo,
+          {
+            left: finalX,
+            top: finalY,
+            xPercent: -50,
+            yPercent: -50,
+            scale: scaleRatio,
+            duration: 1.4,
+            ease: "power2.inOut",
+          },
+          "+=0.3",
+        )
+        .to(
+          text,
+          {
+            opacity: 0,
+            duration: 0.5,
+          },
+          "-=1.2",
+        )
+        .to(
+          headerLogo,
+          {
+            opacity: 1,
+            duration: 0.4,
+            ease: "power2.out",
+          },
+          "-=0.6",
+        )
+        .to(
+          splashLogo,
+          {
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.in",
+          },
+          "-=0.2",
+        )
+        .to(
+          splash,
+          {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.in",
+          },
+          "-=0.4",
+        )
+        .set(splash, { display: "none", pointerEvents: "none" })
+        .set(splashLogo, { clearProps: "all" })
+        .set(text, { clearProps: "all" });
+    },
+    { scope: containerRef, dependencies: [hasAnimated] },
+  );
 
   const { cart } = useSelector((state: RootState) => state.cart);
   const dispatch = useDispatch<AppDispatch>();
@@ -87,7 +232,6 @@ const Header = () => {
     navigate("/adda/user-profile");
   };
 
-  // Fixed: Proper async handling of getToken()
   useEffect(() => {
     const fetchCartData = async () => {
       if (!userId) return;
@@ -131,21 +275,159 @@ const Header = () => {
   if (location.pathname.startsWith("/employee")) return null;
 
   return (
-    <header
-      className={`${
-        isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-      } flex justify-between items-center bg-primary h-16 px-4 sm:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
-    >
-      {/* Left Nav */}
-      <div className="flex items-center lg:w-1/3">
-        <nav className="hidden lg:flex gap-6 xl:gap-8">
-          {navLeft.map(({ id, label, url, icon: Icon, items }) =>
-            label === "Browse Plans" ? (
+    <div ref={containerRef}>
+      <div
+        ref={splashRef}
+        className="fixed inset-0 bg-orange-500 z-[10000] pointer-events-none flex flex-col items-center justify-center overflow-hidden"
+        style={{ display: hasAnimated ? "none" : "flex" }}
+      >
+        <div ref={splashLogoRef}>
+          <img
+            src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+            alt="Mentooons Logo"
+            className="w-64 sm:w-80 md:w-96 lg:w-[28rem]"
+          />
+        </div>
+
+        <div
+          ref={textRef}
+          className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center px-6 mt-8"
+        >
+          {"Welcome to Mentooons".split("").map((char, i) => (
+            <span
+              key={i}
+              className="inline-block"
+              style={{ display: "inline-block" }}
+            >
+              {char === " " ? "\u00A0" : char}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <header
+        className={`${
+          isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
+        } flex justify-between items-center bg-primary h-16 px-4 sm:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
+      >
+        <div className="flex items-center lg:w-1/3">
+          <nav className="hidden lg:flex gap-6 xl:gap-8">
+            {navLeft.map(({ id, label, url, icon: Icon, items }) =>
+              label === "Browse Plans" ? (
+                <a
+                  key={id}
+                  href={url}
+                  onClick={handleBrowsePlansClick}
+                  className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                >
+                  {Icon && typeof Icon === "function" && (
+                    <Icon className="w-5 h-5" />
+                  )}
+                  {label}
+                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
+                </a>
+              ) : items?.length ? (
+                <div key={id} className="relative">
+                  <NavButton
+                    label={label}
+                    onMouseEnter={() => handleHover(label.toLowerCase())}
+                    onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                  >
+                    {dropdown[
+                      label.toLowerCase() as keyof DropDownInterface
+                    ] && (
+                      <DropDown
+                        labelType={label.toLowerCase() as any}
+                        items={items}
+                      />
+                    )}
+                  </NavButton>
+                </div>
+              ) : (
+                <NavLink
+                  key={id}
+                  to={url}
+                  className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                >
+                  {Icon && typeof Icon === "function" && (
+                    <Icon className="w-5 h-5" />
+                  )}
+                  {label}
+                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
+                </NavLink>
+              ),
+            )}
+          </nav>
+        </div>
+
+        <div
+          ref={headerLogoRef}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+          style={{ opacity: hasAnimated ? 1 : 0 }}
+        >
+          <NavLink to="/adda">
+            <img
+              src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
+              alt="Logo"
+              className="w-28 sm:w-32 lg:w-40"
+            />
+          </NavLink>
+        </div>
+
+        <div className="flex items-center gap-4 lg:hidden">
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <div
+              onClick={handleSearchToggle}
+              className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
+            >
+              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+          </motion.div>
+
+          <SignedIn>
+            <NavLink to="/cart" className="relative">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              {(cart?.totalItemCount ?? 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  {cart.totalItemCount}
+                </span>
+              )}
+            </NavLink>
+          </SignedIn>
+
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ rotate: 90, scale: 0.9 }}
+            onClick={() => setSideBarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? (
+              <FaTimes size={24} className="text-white" />
+            ) : (
+              <FaBars size={24} className="text-white" />
+            )}
+          </motion.div>
+        </div>
+
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <div
+              onClick={handleSearchToggle}
+              className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
+            >
+              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+          </motion.div>
+
+          {navRight.map(({ id, label, url, icon: Icon, items }) => {
+            if ((label === "Games" || label === "My Library") && !userId)
+              return null;
+
+            return label === "Browse Plans" ? (
               <a
                 key={id}
                 href={url}
                 onClick={handleBrowsePlansClick}
-                className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                className="group relative text-white flex items-center gap-2 text-base font-semibold"
               >
                 {Icon && typeof Icon === "function" && (
                   <Icon className="w-5 h-5" />
@@ -153,6 +435,58 @@ const Header = () => {
                 {label}
                 <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </a>
+            ) : label === "Share" ? (
+              <div
+                key={id}
+                onClick={() => setShowShareModal(true)}
+                className="group relative text-white flex items-center gap-2 text-base font-semibold cursor-pointer"
+              >
+                {Icon && typeof Icon === "function" && (
+                  <Icon className="w-5 h-5" />
+                )}
+                {label}
+                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
+              </div>
+            ) : label === "Profile" ? (
+              <div key={id} className="relative" ref={profileDropdownRef}>
+                <div
+                  onMouseEnter={handleProfileHover}
+                  onMouseLeave={handleProfileLeave}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    className="cursor-pointer"
+                  >
+                    <FaUserCircle className="w-7 h-7 text-white" />
+                  </motion.div>
+
+                  <AnimatePresence>
+                    {showProfileDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl py-2 z-[10001] border"
+                      >
+                        <div
+                          onClick={handleProfileNavigation}
+                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Profile</span>
+                        </div>
+                        <div
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
             ) : items?.length ? (
               <div key={id} className="relative">
                 <NavButton
@@ -161,10 +495,7 @@ const Header = () => {
                   onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
                 >
                   {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
-                    <DropDown
-                      labelType={label.toLowerCase() as any}
-                      items={items}
-                    />
+                    <DropDown labelType={"joinus"} items={items} />
                   )}
                 </NavButton>
               </div>
@@ -172,7 +503,7 @@ const Header = () => {
               <NavLink
                 key={id}
                 to={url}
-                className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                className="group relative text-white flex items-center gap-2 text-base font-semibold"
               >
                 {Icon && typeof Icon === "function" && (
                   <Icon className="w-5 h-5" />
@@ -180,239 +511,84 @@ const Header = () => {
                 {label}
                 <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </NavLink>
-            ),
-          )}
-        </nav>
-      </div>
+            );
+          })}
 
-      {/* Logo */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <NavLink to="/adda">
-          <img
-            src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
-            alt="Logo"
-            className="w-28 sm:w-32 lg:w-40"
-          />
-        </NavLink>
-      </div>
-
-      {/* Mobile Right Icons */}
-      <div className="flex items-center gap-4 lg:hidden">
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <div
-            onClick={handleSearchToggle}
-            className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
-          >
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-          </div>
-        </motion.div>
-
-        <SignedIn>
-          <NavLink to="/cart" className="relative">
-            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            {(cart?.totalItemCount ?? 0) > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                {cart.totalItemCount}
-              </span>
-            )}
-          </NavLink>
-        </SignedIn>
-
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ rotate: 90, scale: 0.9 }}
-          onClick={() => setSideBarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? (
-            <FaTimes size={24} className="text-white" />
-          ) : (
-            <FaBars size={24} className="text-white" />
-          )}
-        </motion.div>
-      </div>
-
-      {/* Desktop Right Nav + Cart at the END */}
-      <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <div
-            onClick={handleSearchToggle}
-            className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
-          >
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-          </div>
-        </motion.div>
-        {navRight.map(({ id, label, url, icon: Icon, items }) => {
-          if ((label === "Games" || label === "My Library") && !userId)
-            return null;
-
-          return label === "Browse Plans" ? (
-            <a
-              key={id}
-              href={url}
-              onClick={handleBrowsePlansClick}
-              className="group relative text-white flex items-center gap-2 text-base font-semibold"
-            >
-              {Icon && typeof Icon === "function" && (
-                <Icon className="w-5 h-5" />
+          <SignedIn>
+            <NavLink to="/cart" className="relative ml-6">
+              <ShoppingCart className="w-7 h-7 text-white" />
+              {(cart?.totalItemCount ?? 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                  {cart.totalItemCount}
+                </span>
               )}
-              {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
-            </a>
-          ) : label === "Share" ? (
-            <div
-              key={id}
-              onClick={() => setShowShareModal(true)}
-              className="group relative text-white flex items-center gap-2 text-base font-semibold cursor-pointer"
-            >
-              {Icon && typeof Icon === "function" && (
-                <Icon className="w-5 h-5" />
-              )}
-              {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
-            </div>
-          ) : label === "Profile" ? (
-            <div key={id} className="relative" ref={profileDropdownRef}>
-              <div
-                onMouseEnter={handleProfileHover}
-                onMouseLeave={handleProfileLeave}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="cursor-pointer"
-                >
-                  <FaUserCircle className="w-7 h-7 text-white" />
-                </motion.div>
-
-                <AnimatePresence>
-                  {showProfileDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl py-2 z-[10001] border"
-                    >
-                      <div
-                        onClick={handleProfileNavigation}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Profile</span>
-                      </div>
-                      <div
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Logout</span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          ) : items?.length ? (
-            <div key={id} className="relative">
-              <NavButton
-                label={label}
-                onMouseEnter={() => handleHover(label.toLowerCase())}
-                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
-              >
-                {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
-                  <DropDown labelType={"joinus"} items={items} />
-                )}
-              </NavButton>
-            </div>
-          ) : (
-            <NavLink
-              key={id}
-              to={url}
-              className="group relative text-white flex items-center gap-2 text-base font-semibold"
-            >
-              {Icon && typeof Icon === "function" && (
-                <Icon className="w-5 h-5" />
-              )}
-              {label}
-              <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
             </NavLink>
-          );
-        })}
+          </SignedIn>
+        </nav>
 
-        {/* CART AT THE VERY END */}
-        <SignedIn>
-          <NavLink to="/cart" className="relative ml-6">
-            <ShoppingCart className="w-7 h-7 text-white" />
-            {(cart?.totalItemCount ?? 0) > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                {cart.totalItemCount}
-              </span>
-            )}
-          </NavLink>
-        </SignedIn>
-      </nav>
-
-      {/* Search Modal & Sidebar & Share Modal */}
-      <AnimatePresence>
-        {showSearch && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-24"
-            onClick={handleSearchToggle}
-          >
+        <AnimatePresence>
+          {showSearch && (
             <motion.div
-              initial={{ y: -50, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -50, opacity: 0 }}
-              className="w-full max-w-2xl mx-4"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-24"
+              onClick={handleSearchToggle}
             >
-              <form
-                onSubmit={handleSearchSubmit}
-                className="bg-white rounded-2xl shadow-2xl overflow-hidden"
+              <motion.div
+                initial={{ y: -50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -50, opacity: 0 }}
+                className="w-full max-w-2xl mx-4"
+                onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center">
-                  <Search className="w-6 h-6 text-gray-400 ml-6" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search games, comics, podcasts..."
-                    className="flex-1 py-5 px-4 text-lg outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSearchToggle}
-                    className="p-3 mr-4 hover:bg-gray-100 rounded-full"
-                  >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
-                </div>
-              </form>
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="bg-white rounded-2xl shadow-2xl overflow-hidden"
+                >
+                  <div className="flex items-center">
+                    <Search className="w-6 h-6 text-gray-400 ml-6" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search games, comics, podcasts..."
+                      className="flex-1 py-5 px-4 text-lg outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchToggle}
+                      className="p-3 mr-4 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      <Sidebar
-        token={userId ?? null}
-        isOpen={sidebarOpen}
-        dropdown={dropdown}
-        handleHover={handleHover}
-        handleMouseLeave={handleMouseLeave}
-        setIsOpen={setSideBarOpen}
-        handlePlans={handleBrowsePlansClick}
-      />
-
-      {showShareModal && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          link={window.location.href}
+        <Sidebar
+          token={userId ?? null}
+          isOpen={sidebarOpen}
+          dropdown={dropdown}
+          handleHover={handleHover}
+          handleMouseLeave={handleMouseLeave}
+          setIsOpen={setSideBarOpen}
+          handlePlans={handleBrowsePlansClick}
         />
-      )}
-    </header>
+
+        {showShareModal && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            link={window.location.href}
+          />
+        )}
+      </header>
+    </div>
   );
 };
 

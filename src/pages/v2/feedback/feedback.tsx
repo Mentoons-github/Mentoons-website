@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa6";
 import { useAuth } from "@clerk/clerk-react";
 import { useStatusModal } from "@/context/adda/statusModalContext";
+import { useAuthModal } from "@/context/adda/authModalContext";
+import { useUser } from "@clerk/clerk-react";
 
 export interface FormValue {
   feedback: string;
@@ -26,6 +28,8 @@ export interface FeedbackItem {
 const Feedback = () => {
   const { getToken } = useAuth();
   const { showStatus } = useStatusModal();
+  const { openAuthModal } = useAuthModal();
+  const { isSignedIn } = useUser();
 
   const [formValues, setFormValues] = useState<FormValue>({
     feedback: "",
@@ -78,6 +82,10 @@ const Feedback = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    }
 
     if (!formValues.feedback.trim() || formValues.rating === 0) {
       setErrorMessage("Please enter your feedback and select a rating.");

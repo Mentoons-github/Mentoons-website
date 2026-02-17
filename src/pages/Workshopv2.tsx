@@ -375,10 +375,6 @@ const Workshopv2 = () => {
     },
   };
 
-  const [headerRef, headerInView] = useInView({
-    threshold: 0.2,
-    triggerOnce: true,
-  });
   const [registerRef, registerInView] = useInView({
     threshold: 0.2,
     triggerOnce: true,
@@ -434,13 +430,7 @@ const Workshopv2 = () => {
         onWorkshopClick={handleWorkshopButtonClick}
       />
       <div className="">
-        <AboutWorkshop
-          categories={categories}
-          fadeIn={fadeIn}
-          headerInView={headerInView}
-          headerRef={headerRef}
-          fadeInUp={fadeInUp}
-        />
+        <AboutWorkshop categories={categories} />
 
         {/* Workshop Carousel */}
         <div ref={carouselRef} className="mt-10">

@@ -24,6 +24,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axiosInstance from "@/api/axios";
+import ComicHero from "@/components/comics/hero";
+import ScrollTextSection from "@/components/comics/scrollText";
 
 interface DBUser {
   _id: string;
@@ -66,7 +68,6 @@ const ComicsPageV2 = () => {
 
   const membershipType = dbUser?.subscription.plan.toLowerCase() || "free";
 
-  const heroRef = useRef(null);
   const trendingRef = useRef(null);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -325,48 +326,7 @@ const ComicsPageV2 = () => {
         className="fixed top-0 left-0 right-0 z-50 h-1 origin-left bg-primary"
         style={{ scaleX }}
       />
-      <motion.div
-        ref={heroRef}
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mt-10 md:mt-16 lg:flex lg:items-start"
-      >
-        <div className="flex-1">
-          <p className="text-lg font-extrabold pl-14">Digital Wellness</p>
-          <h1 className="py-2 text-2xl font-semibold text-center text-primary md:text-6xl md:pb-4">
-            E-Comics & Audio Comics
-          </h1>
-          <p className="lg:w-3/4 px-4 lg:py-4 mx-auto text-lg font-medium text-center lg:text-left md:text-2xl">
-            Welcome to the world of meaningful stories and valuable life
-            lessons.
-            <br /> Our Comics and stories are designed to help children and
-            teenagers navigate{" "}
-            <span className="text-orange-400 font-semibold">
-              important life
-            </span>{" "}
-            topics with ease and enjoyment.
-            <br /> Comic book series that address topics like social media,
-            safety, gadget addiction.
-          </p>
-        </div>
-        <div className="flex-1 mt-5 lg:mt-0">
-          <h2
-            className="py-4 text-xl md:text-3xl text-center luckiest-guy-regular"
-            style={{ wordSpacing: 8 }}
-          >
-            CHOOSE COMICS Best FOR YOU!
-          </h2>
-          <div className="flex items-center justify-center w-full p-2 lg:p-4 lg:pr-24">
-            <img
-              src="/assets/comic-V2/comic-hero-v2.png"
-              alt="comic page hero Image"
-              className="w-full h-auto"
-            />
-          </div>
-        </div>
-      </motion.div>
+      <ComicHero />
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -374,7 +334,7 @@ const ComicsPageV2 = () => {
         transition={{ duration: 0.6 }}
         className=""
       >
-        <h2 className="py-6 text-4xl font-bold text-center">
+        <h2 className="text-4xl font-bold text-center py-6 text-black">
           Re-Discover the <br /> Passion of Reading
         </h2>
         <div className="flex items-center justify-center gap-6 pb-6">
@@ -658,13 +618,14 @@ const ComicsPageV2 = () => {
           </div>
         </motion.div>
       )}
+      <ScrollTextSection />
       <motion.div
         ref={trendingRef}
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="w-[95%] md:w-[90%] mx-auto mb-20 relative"
+        className="w-[95%] md:w-[90%] mx-auto mb-20 relative mt-10"
       >
         <h2 className="pb-6 text-3xl font-semibold md:text-4xl">
           Trending Comics For You!
