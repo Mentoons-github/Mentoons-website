@@ -19,7 +19,8 @@ const EmployeeProtectedRoute = ({
   }
 
   const role = user?.publicMetadata?.role;
-  if (role !== "EMPLOYEE" && role !== "ADMIN") {
+  // if (role !== "EMPLOYEE" && role !== "ADMIN") {
+  if (role !== "EMPLOYEE") {
     return <Navigate to="/adda" replace />;
   }
 

@@ -17,15 +17,16 @@ const RootRouteWrapper = () => {
       return;
     }
 
-    const role = user.publicMetadata?.role as string | undefined;
+    // const role = user.publicMetadata?.role as string | undefined;
 
-    if (role === "EMPLOYEE") {
-      setRedirectPath("/employee/dashboard");
-    } else if (role === "ADMIN") {
-      setRedirectPath("/admin/dashboard");
-    } else {
+
+    // if (role === "EMPLOYEE") {
+    //   setRedirectPath("/employee/dashboard");
+    // } else if (role === "ADMIN") {
+    //   setRedirectPath("/admin/dashboard");
+    // } else {
       setRedirectPath("/adda");
-    }
+    // }
   }, [isLoaded, isSignedIn, user]);
 
   if (!isLoaded || redirectPath === null) {

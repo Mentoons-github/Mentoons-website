@@ -100,7 +100,7 @@ const PrimaryHeader = () => {
           <span>10:00 AM - 8:00 PM</span>
         </div>
         <a
-          href="tel:+919036033300"
+          href="tel:+917892858593"
           className="flex-shrink-0 hidden no-underline xl:block"
         >
           <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">

@@ -52,7 +52,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { page: pageNum, limit: POSTS_PER_PAGE },
-          }
+          },
         );
 
         if (!data.success) throw new Error("Failed to fetch feeds");
@@ -64,7 +64,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
           pagination?.hasMore ??
             (pagination.page && pagination.pages
               ? pagination.page < pagination.pages
-              : newPosts.length === POSTS_PER_PAGE)
+              : newPosts.length === POSTS_PER_PAGE),
         );
 
         setUserFeeds((prev) => {
@@ -72,7 +72,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
 
           const existingIds = new Set(prev.map((p) => p._id));
           const filtered = newPosts.filter(
-            (post) => !existingIds.has(post._id)
+            (post) => !existingIds.has(post._id),
           );
 
           return [...prev, ...filtered];
@@ -93,12 +93,18 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
         setIsLoading(false);
       }
     },
-    [getToken, onFetchComplete]
+    [getToken, onFetchComplete],
   );
 
   useEffect(() => {
     fetchUserFeeds(1, true);
   }, []);
+
+  const removeUserPosts = (blockedUserId: string) => {
+    setUserFeeds((prev) =>
+      prev.filter((post) => post.user._id !== blockedUserId),
+    );
+  };
 
   useEffect(() => {
     if (!latestPost) return;
@@ -130,7 +136,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
           setPage((prev) => prev + 1);
         }
       },
-      { rootMargin: "150px" }
+      { rootMargin: "150px" },
     );
 
     observerRef.current.observe(loaderRef.current);
@@ -148,7 +154,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data.success === true) {
@@ -163,7 +169,7 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
       if (axios.isAxiosError(err)) {
         showStatus(
           "error",
-          err.response?.data?.message ?? "Failed to delete post."
+          err.response?.data?.message ?? "Failed to delete post.",
         );
       } else {
         showStatus("error", "Something went wrong.");
@@ -202,7 +208,14 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
   return (
     <div className="flex flex-col gap-4 w-full">
       {userFeeds.map((post) => (
-        <PostCard key={post._id} post={post} onDelete={handleDelete} />
+        <PostCard
+          key={post._id}
+          post={post}
+          onDelete={handleDelete}
+          onUserBlocked={(blockedUserId: string) =>
+            removeUserPosts(blockedUserId)
+          }
+        />
       ))}
 
       {hasMore && (

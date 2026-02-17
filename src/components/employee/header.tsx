@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeftToLine } from "lucide-react";
 
 const EmployeeHeader = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -25,7 +26,7 @@ const EmployeeHeader = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirectUrl: "/employee/login" });
+      await signOut({ redirectUrl: "/" });
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -89,6 +90,14 @@ const EmployeeHeader = () => {
                 />
               </svg>
               View Profile
+            </button>
+
+            <button
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeftToLine size={17}/>
+              Go back to Website
             </button>
 
             {/* Logout Option */}

@@ -160,6 +160,7 @@ export interface Details {
   goalsAndExpectations: GoalsAndExpectations;
   therapistInitialObservation: TherapistInitialObservation;
   reviewMechanism?: ReviewMechanismFormValues;
+  scoringSystem?: ScoringSubmission;
 }
 
 export type ReviewMechanismFormValues = {
@@ -204,4 +205,25 @@ export interface DataCapturePagination {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface ScoringQuestionFetch {
+  question: string;
+  point: number;
+  maxPoint: number;
+}
+
+export interface ScoringCategoryFetch {
+  heading: string;
+  point: number;
+  maxPoint?: number;
+  questions: ScoringQuestionFetch[];
+}
+
+export interface ScoringSubmission {
+  date?: string;
+  workshop?: string;
+  totalPoint: number;
+  maxPoint: number;
+  categories: ScoringCategoryFetch[];
 }

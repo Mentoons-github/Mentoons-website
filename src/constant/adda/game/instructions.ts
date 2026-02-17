@@ -256,15 +256,21 @@ export const GAME_INSTRUCTIONS: Games[] = [
         icon: "Lightbulb",
         type: "image",
         media:
-          "/assets/games/inventors/instructions/Screenshot 2025-12-16 182510.png",
+          "/assets/games/inventors/instructions/1st.png",
       },
       {
-        text: "Match the invention to its correct inventor using names and pictures.",
+        text: "Dreag and match the invention to its correct inventor using names and pictures.",
         icon: "UserCheck",
+        type: "video",
+        media:
+          "/assets/games/inventors/instructions/2nd.mp4",
       },
       {
-        text: "Complete all matches to finish the level.",
+        text: "Please Memmorize and complete level within given time.",
         icon: "CheckCircle",
+        type: "image",
+        media:
+          "/assets/games/inventors/instructions/3rd.png",
       },
     ],
   },

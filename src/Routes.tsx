@@ -53,6 +53,7 @@ import Explore from "./pages/v2/chnages.tsx";
 import PaymentDetailPage from "./pages/v2/workshop/paymentDetails.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 import Emi from "./pages/v2/workshop/emi.tsx";
+import CareerCorner from "./pages/CareerCorner.tsx";
 import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
 import Feedback from "./pages/v2/feedback/feedback.tsx";
 import Collaborate from "./pages/v2/joinus/collaborate/collaborate.tsx";
@@ -113,6 +114,9 @@ const routes = [
   { path: "/mentoons-store/product/:productId", element: <ProductDetails /> },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
+  { path: "/join-us/careers", element: <CareerPage /> },
+  { path: "/join-us/explore", element: <Explore /> },
+  { path: "/career-corner", element: <CareerCorner /> },
   { path: "/joinus/careers", element: <CareerPage /> },
   { path: "/joinus/careers/:slug", element: <CareerPage /> },
   { path: "/joinus/affiliate", element: <AffiliatePage /> },

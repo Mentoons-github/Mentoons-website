@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { PostData } from "./PostCard";
 import Highlight from "@/components/common/modal/highlight";
 import { useUser } from "@clerk/clerk-react";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { useNavigate } from "react-router-dom";
 
 interface PostContentProps {
   post: PostData;
+  handlePostClick: (postId: string) => void;
 }
 
-const PostContent = ({ post }: PostContentProps) => {
+const PostContent = ({ post, handlePostClick }: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const { isSignedIn } = useUser();
@@ -19,7 +20,7 @@ const PostContent = ({ post }: PostContentProps) => {
 
   const handleClick = (
     type: "event" | "photo" | "text" | "video" | "article",
-    url?: string, // For photo/video media URL
+    url?: string,
   ) => {
     if (!isSignedIn) {
       openAuthModal("sign-in");
@@ -38,7 +39,6 @@ const PostContent = ({ post }: PostContentProps) => {
         navigate(`/adda/post/${post._id}`);
         break;
       case "text":
-        // No special action for text clicks (already handled by Read More)
         break;
       default:
         break;
@@ -131,23 +131,23 @@ const PostContent = ({ post }: PostContentProps) => {
 
       case "article":
         return (
-          <div className="w-full">
-            {post.content && (
-              <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-                {isExpanded
-                  ? post.content
-                  : post.content.slice(0, charLimit) +
-                    (post.content.length > charLimit ? "..." : "")}
-                {post.content.length > charLimit && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="ml-2 text-blue-500 hover:underline"
-                  >
-                    {isExpanded ? "Read Less" : "Read More"}
-                  </button>
-                )}
-              </p>
-            )}
+          <div className="w-full" onClick={() => handlePostClick(post._id)}>
+            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
+              {isExpanded
+                ? post.content
+                : post.content?.slice(0, charLimit) +
+                  (post.content && post.content.length > charLimit
+                    ? "..."
+                    : "")}
+              {post.content && post.content.length > charLimit && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="ml-2 text-blue-500"
+                >
+                  {isExpanded ? "Read Less" : "Read More"}
+                </button>
+              )}
+            </p>
             {post.article && (
               <div
                 className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
@@ -173,23 +173,23 @@ const PostContent = ({ post }: PostContentProps) => {
 
       case "event":
         return (
-          <div className="w-full">
-            {post.content && (
-              <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
-                {isExpanded
-                  ? post.content
-                  : post.content.slice(0, charLimit) +
-                    (post.content.length > charLimit ? "..." : "")}
-                {post.content.length > charLimit && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="ml-2 text-blue-500 hover:underline"
-                  >
-                    {isExpanded ? "Read Less" : "Read More"}
-                  </button>
-                )}
-              </p>
-            )}
+          <div className="w-full" onClick={() => handlePostClick(post._id)}>
+            <p className="figtree text-[#3E3E59] text-base w-full break-words mb-3">
+              {isExpanded
+                ? post.content
+                : post.content?.slice(0, charLimit) +
+                  (post.content && post.content.length > charLimit
+                    ? "..."
+                    : "")}
+              {post.content && post.content.length > charLimit && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="ml-2 text-blue-500"
+                >
+                  {isExpanded ? "Read Less" : "Read More"}
+                </button>
+              )}
+            </p>
             {post.event && (
               <div
                 className="block w-full p-3 transition border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"

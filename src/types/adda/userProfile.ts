@@ -56,6 +56,7 @@ export interface User {
   role: UserRole | string;
   isOnline?: boolean;
   isBlocked?: boolean;
+  blockedUsers?: string[];
 }
 
 export interface Media {

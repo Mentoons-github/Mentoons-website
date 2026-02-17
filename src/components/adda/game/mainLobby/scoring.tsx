@@ -24,7 +24,7 @@ const ScoringDashboard = ({
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
             Dashboard
           </h2>
-          <div className="text-gray-400 group-hover:text-cyan-400 transition-colors">
+          <div className="text-blue-400 text-xs md:text-base group-hover:text-cyan-400 transition-colors">
             View Full Leaderboard
           </div>
         </div>

@@ -13,6 +13,8 @@ import EmployeeProtectedRoute from "@/layout/employee/protectedRoute";
 import EmployeeProfile from "@/pages/employee/profile";
 import BirthdayCalendar from "@/pages/employee/birthday/birthdayTracker";
 import DataCapture from "@/pages/employee/dataCapture/dataCapture";
+import PsychologistWorkshops from "@/pages/employee/workshops/PsychologistWorkshops";
+import SinglePsychologistWorkshop from "@/pages/employee/workshops/SinglePsychologistWorkshop";
 import Incentive from "@/pages/employee/incentive/incentive";
 
 const EmployeeRouter = () => {
@@ -37,6 +39,11 @@ const EmployeeRouter = () => {
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="celebrations" element={<BirthdayCalendar />} />
           <Route path="data_capture" element={<DataCapture />} />
+          <Route path="workshops" element={<PsychologistWorkshops />} />
+          <Route
+            path="workshops/:workshopId"
+            element={<SinglePsychologistWorkshop />}
+          />
           <Route path="incentive" element={<Incentive />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />

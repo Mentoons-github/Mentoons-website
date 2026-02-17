@@ -1,3 +1,7 @@
+import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
 const Role = () => {
   const ROLES = [
     {
@@ -21,6 +25,24 @@ const Role = () => {
       icon: "✨",
     },
   ];
+  const navigate = useNavigate();
+  const { user } = useUser();
+
+  const role = user?.publicMetadata?.role as string;
+
+  const handleNavigate = (roleName: string) => {
+    if (role === "ADMIN" && roleName === "Employee") {
+      navigate("/admin/dashboard");
+    } else if (role === "ADMIN" && roleName !== "Employee") {
+      toast.error("You cant access this portal");
+    } else if (role === "EMPLOYEE" && roleName === "Employee") {
+      navigate("/employee/dashboard");
+    } else if (role === "EMPLOYEE" && roleName !== "Employee") {
+      toast.error("You cant access this portal");
+    } else {
+      navigate("/employee/dashboard");
+    }
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -42,6 +64,7 @@ const Role = () => {
       <div className="grid grid-cols-2 h-full w-full">
         {ROLES.map((role, i) => (
           <button
+            onClick={() => handleNavigate(role.name)}
             key={i}
             className={`group relative overflow-hidden bg-gradient-to-br ${role.gradient} 
               border-2 border-white/20 hover:border-white/40

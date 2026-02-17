@@ -69,6 +69,7 @@ export interface PostData {
 interface PostCardProps {
   post: PostData;
   onDelete?: (postId: string) => void;
+  onUserBlocked?: (userId: string) => void;
 }
 
 interface Comment {
@@ -82,7 +83,18 @@ interface Comment {
   content: string;
 }
 
-const PostCard = ({ post, onDelete }: PostCardProps) => {
+const formatDate = (dateString: string | Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
   const { isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
   const [showComments, setShowComments] = useState(false);
@@ -143,29 +155,6 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     };
   }, []);
 
-  // Check if the user is blocked
-  useEffect(() => {
-    const checkBlockedStatus = async () => {
-      if (!isSignedIn) return;
-      try {
-        const token = await getToken();
-        const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/users/check-blocked/${
-            post.user._id
-          }`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        setIsUserBlocked(response.data.isBlocked);
-      } catch (error) {
-        console.error("Error checking blocked status:", error);
-      }
-    };
-
-    checkBlockedStatus();
-  }, [post.user._id, isSignedIn, getToken]);
-
   const handleDeletePost = async () => {
     if (onDelete) {
       onDelete(post._id);
@@ -195,33 +184,38 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     setShowDropdown(false);
   };
 
-  const handleUnblockUser = async () => {
-    if (!isSignedIn) {
-      openAuthModal("sign-in");
-      return;
-    }
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/users/unblock`,
-        {
-          userId: post.user._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setIsUserBlocked(false);
-      toast.success("User unblocked successfully.");
-    } catch (error) {
-      console.error("Error unblocking user:", error);
-      toast.error("Failed to unblock user. Please try again.");
-    } finally {
-      setShowDropdown(false);
-    }
+  const handleUnblockUser = () => {
+    console.log("first");
   };
+
+  //unblock
+  // const handleUnblockUser = async () => {
+  //   if (!isSignedIn) {
+  //     openAuthModal("sign-in");
+  //     return;
+  //   }
+  //   try {
+  //     const token = await getToken();
+  //     await axios.post(
+  //       `${import.meta.env.VITE_PROD_URL}/users/unblock`,
+  //       {
+  //         userId: post.user._id,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     setIsUserBlocked(false);
+  //     toast.success("User unblocked successfully.");
+  //   } catch (error) {
+  //     console.error("Error unblocking user:", error);
+  //     toast.error("Failed to unblock user. Please try again.");
+  //   } finally {
+  //     setShowDropdown(false);
+  //   }
+  // };
 
   const handleCommentSubmit = async () => {
     if (!isSignedIn) {
@@ -355,6 +349,15 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
     }
   };
 
+  const handlePostClick = () => {
+    if (!isSignedIn) {
+      openAuthModal("sign-in");
+      return;
+    } else {
+      navigate(`/adda/post/${post._id}`);
+    }
+  };
+
   useEffect(() => {
     const checkSavedPost = async () => {
       try {
@@ -409,7 +412,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             <div className="flex flex-col figtree">
               <span className="Futura Std">{post.user.name}</span>
               <span className="figtree text-[12px] text-[#807E7E]">
-                {new Date(post.createdAt).toLocaleString()}
+                {formatDate(post.createdAt)}
               </span>
             </div>
           </div>
@@ -477,7 +480,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           </div>
         </div>
 
-        <PostContent post={post} />
+        <PostContent post={post} handlePostClick={handlePostClick} />
 
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
@@ -595,6 +598,13 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         userId={post.user._id}
         contentId={post._id}
         reportType="post"
+        onSuccess={() => {
+          setIsUserBlocked(true);
+
+          if (onUserBlocked) {
+            onUserBlocked(post.user._id);
+          }
+        }}
       />
     </>
   );
