@@ -42,11 +42,13 @@ const AllMeetups = () => {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [meetupToDelete, setMeetupToDelete] = useState<MeetupFromAPI | null>(
-    null
+    null,
   );
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [meetupToView, setMeetupToView] = useState<MeetupFromAPI | null>(null);
+
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { getToken } = useAuth();
   const navigate = useNavigate();
@@ -98,7 +100,7 @@ const AllMeetups = () => {
               updatedAt: m.updatedAt || "",
               __v: m.__v || 0,
             };
-          }
+          },
         );
 
         setMeetups(processed);
@@ -157,7 +159,7 @@ const AllMeetups = () => {
     (item: MeetupFromAPI) => {
       navigate(`/admin/edit-meetup/${item._id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const addMeetup = useCallback(() => {
@@ -176,7 +178,7 @@ const AllMeetups = () => {
   const formatCell = (
     value: any,
     key: string,
-    item: MeetupFromAPI
+    item: MeetupFromAPI,
   ): React.ReactNode => {
     if (key === "venue") return item.isOnline ? item.platform : item.place;
     if (key === "dateTime") {
@@ -195,6 +197,10 @@ const AllMeetups = () => {
     if (key === "venue") return "Venue";
     if (key === "dateTime") return "Date & Time";
     return key.charAt(0).toUpperCase() + key.slice(1);
+  };
+
+  const handleSort = () => {
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   };
 
   return (
@@ -231,6 +237,9 @@ const AllMeetups = () => {
         formatHeader={formatHeader}
         idKey="_id"
         isLoading={loading}
+        onSort={handleSort}
+        sortOrder={sortOrder}
+        sortField="createdAt"
       />
 
       <DeleteConfirmationModal

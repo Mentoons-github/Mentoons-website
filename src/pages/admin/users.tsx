@@ -17,7 +17,7 @@ const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortField, setSortField] = useState("createdAt");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -42,10 +42,11 @@ const Users = () => {
           params: {
             limit,
             page: currentPage,
-            sort: `${sortField}:${sortOrder}`,
+            sortField,
+            sortOrder,
             search: debouncedSearchTerm,
           },
-        }
+        },
       );
       console.log(data);
 
@@ -80,7 +81,7 @@ const Users = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setUsers((prev) => prev.filter((u) => u._id !== userToDelete._id));
       toast.success("User deleted successfully");
@@ -104,8 +105,8 @@ const Users = () => {
 
     setUsers((prev) =>
       prev.map((u) =>
-        u._id === user._id ? { ...u, isBlocked: willBeBlocked } : u
-      )
+        u._id === user._id ? { ...u, isBlocked: willBeBlocked } : u,
+      ),
     );
 
     try {
@@ -118,7 +119,7 @@ const Users = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       await fetchUsers();
@@ -127,7 +128,7 @@ const Users = () => {
     } catch (error: any) {
       setUsers(originalUsers);
       toast.error(
-        error.response?.data?.message || "Failed to update block status"
+        error.response?.data?.message || "Failed to update block status",
       );
     }
   };
@@ -139,7 +140,7 @@ const Users = () => {
 
   const debouncedSearch = useCallback(
     debounce((value: string) => setDebouncedSearchTerm(value), 500),
-    []
+    [],
   );
 
   const handleSearch = (term: string) => {

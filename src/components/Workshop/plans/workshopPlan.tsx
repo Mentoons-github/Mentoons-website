@@ -2,19 +2,57 @@ import { WorkshopPlan } from "@/types/workshopsV2/workshopsV2";
 import PlanHeader from "./header";
 import PlanCard from "./planCard";
 import WorkshopsCategories from "./workshops";
-import { fetchAllPlans } from "@/api/workshop/workshop"; 
+import { fetchAllPlans } from "@/api/workshop/workshop";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDownCircle, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import PlanCarousel from "./PlanCarousel";
+import WorkshopBplForm from "@/components/modals/wokshop/WorkshopBplForm";
+import { useAuth } from "@clerk/clerk-react";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { checkAppliedOrNotThunk } from "@/redux/workshop/workshopThunk";
+
+interface CarouselClickType {
+  from: string;
+  title: string;
+}
 
 const WorkshopPlans = () => {
   const [showFAQ, setShowFAQ] = useState(false);
   const [plans, setPlans] = useState<WorkshopPlan[]>([]);
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number | null>(
     null,
+  );
+  const [carouselClick, setCarouselClick] = useState<CarouselClickType | null>(
+    null,
+  );
+  const { userAppliedDetails } = useAppSelector((state) => state.invoice);
+  const [bplApplyModal, setBplApplyModal] = useState<boolean>(false);
+  const [formStatus, setFormStatus] = useState<string | undefined>(
+    userAppliedDetails?.status,
+  );
+  const dispatch = useAppDispatch();
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setFormStatus(userAppliedDetails?.status ?? "");
+  }, [userAppliedDetails]);
+
+  const handleCarouselClick = (from: string, title: string) => {
+    setCarouselClick((prev) => {
+      if (prev?.from === from && prev?.title === title) {
+        return null;
+      }
+
+      return { from, title };
+    });
+  };
+
+  const selectedPlan = plans.find(
+    (plan) => plan.duration === carouselClick?.title,
   );
 
   const navigate = useNavigate();
@@ -24,6 +62,11 @@ const WorkshopPlans = () => {
 
   const handlePayClick = (plan: WorkshopPlan) => {
     navigate("/payment", { state: { plan } });
+  };
+
+  const fetchUserApplied = async () => {
+    const token = await getToken();
+    dispatch(checkAppliedOrNotThunk({ token: token as string }));
   };
 
   const fetchWorkshopPlans = async () => {
@@ -38,6 +81,7 @@ const WorkshopPlans = () => {
 
   useEffect(() => {
     fetchWorkshopPlans();
+    fetchUserApplied();
   }, []);
 
   const FAQ = [
@@ -127,39 +171,106 @@ const WorkshopPlans = () => {
         <PlanHeader />
         <WorkshopsCategories />
 
-        {/* Special Offer Banner */}
-        <div className="relative overflow-hidden rounded-2xl bg-black p-4 md:p-8 shadow-2xl">
-          {/* ... same banner content ... */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24"></div>
+        <PlanCarousel
+          handleCarouselClick={(from, title) =>
+            handleCarouselClick(from, title)
+          }
+          carouselClick={carouselClick}
+        />
 
-          <div className="relative z-10 text-center">
-            <div className="inline-block mb-4">
-              <span className="bg-white text-orange-600 px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg">
-                Special Offer
-              </span>
+        {/* Special Offer Banner */}
+        {carouselClick?.from === "offer" && (
+          <div className="md:grid grid-cols-2">
+            <div className="flex justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="relative w-full max-w-sm sm:max-w-md rounded-2xl border-4 border-[#00b8fe] bg-[#d1f1ff] p-8 md:p-10 shadow-xl overflow-hidden"
+              >
+                {/* Decorative Background Effects */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -translate-y-32 translate-x-32 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-52 h-52 bg-white/20 rounded-full translate-y-28 -translate-x-28 blur-2xl" />
+
+                <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+                  <div className="bg-[#1bd070] text-white px-6 py-2 rounded-full text-sm font-bold shadow-md animate-pulse">
+                    DigiLocker Verified Required
+                  </div>
+                  <span className="inline-block bg-white text-[#00b8fe] px-5 py-2 rounded-full text-xs md:text-sm font-semibold uppercase tracking-wider shadow-sm">
+                    Exclusive Benefit
+                  </span>
+
+                  <div className="space-y-3">
+                    <h2 className="text-4xl lg:text-6xl font-extrabold text-[#00b8fe] leading-none">
+                      70% OFF
+                    </h2>
+
+                    <h3 className="text-lg sm:text-2xl font-bold text-gray-800">
+                      For BPL Families
+                    </h3>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-16 h-1 bg-[#00b8fe] rounded-full" />
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <p className="text-gray-700 text-base md:text-lg">
+                      Submit your valid Digilocker BPL document
+                    </p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Approval within 7 days
+                    </p>
+                  </div>
+
+                  {!formStatus && (
+                    <button
+                      className="mt-4 bg-[#00b8fe] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:scale-105 transition-transform duration-300"
+                      onClick={() => setBplApplyModal(true)}
+                    >
+                      Apply Now
+                    </button>
+                  )}
+
+                  {formStatus === "Pending" && (
+                    <div className="mt-4 bg-yellow-100 text-yellow-700 px-6 py-3 rounded-lg font-semibold shadow-sm">
+                      ⏳ Your application is under review
+                    </div>
+                  )}
+
+                  {formStatus === "Approved" && (
+                    <div className="mt-4 bg-green-100 text-green-700 px-6 py-3 rounded-lg font-semibold shadow-sm">
+                      ✅ Your BPL verification is approved
+                    </div>
+                  )}
+
+                  {formStatus === "Rejected" && (
+                    <button
+                      className="mt-4 bg-red-100 text-red-700 px-6 py-3 rounded-lg font-semibold shadow-sm hover:bg-red-200 transition"
+                      onClick={() => setBplApplyModal(true)}
+                    >
+                      Reapply Now
+                    </button>
+                  )}
+                </div>
+              </motion.div>
             </div>
-            <h2 className="text-2xl md:text-5xl font-extrabold text-white mb-2 md:mb-4 drop-shadow-lg">
-              70% OFF for BPL Families
-            </h2>
-            <p className="text-white text-lg md:text-xl mb-6 max-w-3xl mx-auto">
-              We believe every child deserves quality education. Below Poverty
-              Line (BPL) families can avail
-              <span className="font-bold"> 70% discount</span> on all workshop
-              plans!
-            </p>
+            <div className="flex items-center justify-center">
+              <motion.img
+                src="/assets/workshopv2/jar.png"
+                alt="jar illustration"
+                className=" w-[500px] h-[500px]  object-contain"
+                initial={{ opacity: 0, x: -40, scale: 0.85 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Plans Grid */}
-        <div className="flex items-start justify-center gap-10 flex-wrap">
-          {plans.length > 0 ? (
-            plans.map((plan, index) => (
-              <PlanCard key={index} plan={plan} onPayClick={handlePayClick} />
-            ))
-          ) : (
-            <p className="text-gray-500 text-lg">Loading plans...</p>
-          )}
+        <div className="">
+          <PlanCard plan={selectedPlan} onPayClick={handlePayClick} />
         </div>
       </div>
 
@@ -267,6 +378,12 @@ const WorkshopPlans = () => {
           </>
         )}
       </AnimatePresence>
+      {bplApplyModal && (
+        <WorkshopBplForm
+          onClose={() => setBplApplyModal(false)}
+          onUpdateStatus={() => setFormStatus("Pending")}
+        />
+      )}
     </>
   );
 };

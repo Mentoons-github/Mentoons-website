@@ -9,9 +9,14 @@ import {
   Edit,
   UserX,
   UserCheck,
+  SortDesc,
+  SortAsc,
 } from "lucide-react";
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
+import BplApplicationViewModal from "./workshop/BplApplicationViewModal";
+
+type BblApplicationFilterStatus = "" | "Pending" | "Approved" | "Rejected";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -48,10 +53,13 @@ interface DynamicTableProps<T> {
     | "employee"
     | "job"
     | "workshop"
-    | "meetups";
+    | "meetups"
+    | "bplVerification";
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
+  updateStatus?: ((applicationId: string, status: string) => void) | undefined;
+  handleFilter?: (value: BblApplicationFilterStatus) => void;
 }
 
 const DynamicTable = <T extends Record<string, any>>({
@@ -64,7 +72,7 @@ const DynamicTable = <T extends Record<string, any>>({
   searchTerm = "",
   onSearch,
   sortField,
-  sortOrder = "asc",
+  sortOrder,
   onSort,
   excludeColumns = [],
   maxCellLength = 50,
@@ -77,15 +85,26 @@ const DynamicTable = <T extends Record<string, any>>({
   selectedItems = new Set(),
   onSelectItem,
   onSelectAll,
+  updateStatus,
+  handleFilter,
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<T | null>(null);
   const [commonModalOpen, setCommonModalOpen] = useState(false);
-  const [commonModalData, setCommonModalData] = useState<any>(null);
+  const [commonModalData, setCommonModalData] = useState<T | null>(null);
+  const [bplApplicationModalOpen, setBplApplicationModalOpen] =
+    useState<boolean>(false);
+  const [selectedBplApplication, setSelectedBplApplication] =
+    useState<T | null>(null);
 
   useEffect(() => setLocalSearchTerm(searchTerm), [searchTerm]);
+
+  const handleBplApplicationModal = (item: any) => {
+    setSelectedBplApplication(item);
+    setBplApplicationModalOpen(true);
+  };
 
   useEffect(() => {
     if (onSearch) onSearch(debouncedSearchTerm);
@@ -95,7 +114,7 @@ const DynamicTable = <T extends Record<string, any>>({
     if (!data.length) return [];
     const set = new Set<string>();
     data.forEach((i) =>
-      Object.keys(i).forEach((k) => !excludeColumns.includes(k) && set.add(k))
+      Object.keys(i).forEach((k) => !excludeColumns.includes(k) && set.add(k)),
     );
     return Array.from(set);
   };
@@ -108,7 +127,7 @@ const DynamicTable = <T extends Record<string, any>>({
       columns.some((c) => {
         const v = item[c];
         return v != null && String(v).toLowerCase().includes(term);
-      })
+      }),
     );
   }, [data, debouncedSearchTerm, columns, onSearch]);
 
@@ -166,7 +185,7 @@ const DynamicTable = <T extends Record<string, any>>({
     onSelectAll?.(e.target.checked);
   const handleSelectChange = (
     id: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => onSelectItem?.(id, e.target.checked);
 
   const BlockButton = ({ item }: { item: T }) => {
@@ -238,6 +257,8 @@ const DynamicTable = <T extends Record<string, any>>({
         <ViewButton
           pendingEdit={pendingEdit}
           onClick={() => handleView(item)}
+          itemType={itemType}
+          handleBplApplicationModal={() => handleBplApplicationModal(item)}
         />
         {onEdit && (
           <button
@@ -280,6 +301,8 @@ const DynamicTable = <T extends Record<string, any>>({
         <ViewButton
           pendingEdit={pendingEdit}
           onClick={() => handleView(item)}
+          itemType={itemType}
+          handleBplApplicationModal={() => handleBplApplicationModal(item)}
         />
         {onEdit && (
           <button
@@ -323,6 +346,9 @@ const DynamicTable = <T extends Record<string, any>>({
           localSearchTerm={localSearchTerm}
           onSearch={handleSearchChange}
           itemType={itemType}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          handleFilter={handleFilter}
         />
         <EmptyState onAdd={onAdd} />
       </div>
@@ -337,6 +363,9 @@ const DynamicTable = <T extends Record<string, any>>({
           localSearchTerm={localSearchTerm}
           onSearch={handleSearchChange}
           itemType={itemType}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          handleFilter={handleFilter}
         />
         <NoResults />
       </div>
@@ -350,6 +379,9 @@ const DynamicTable = <T extends Record<string, any>>({
         localSearchTerm={localSearchTerm}
         onSearch={handleSearchChange}
         itemType={itemType}
+        sortOrder={sortOrder}
+        onSort={onSort}
+        handleFilter={handleFilter}
       />
 
       <div className="hidden sm:block overflow-x-auto">
@@ -411,7 +443,7 @@ const DynamicTable = <T extends Record<string, any>>({
                         {(formatCell || defaultFormatCell)(
                           item[col],
                           col,
-                          item
+                          item,
                         )}
                       </div>
                     </td>
@@ -485,6 +517,17 @@ const DynamicTable = <T extends Record<string, any>>({
         isOpen={commonModalOpen}
         onClose={setCommonModalOpen}
       />
+
+      {bplApplicationModalOpen && selectedBplApplication && (
+        <BplApplicationViewModal
+          data={selectedBplApplication}
+          onClose={() => {
+            setBplApplicationModalOpen(false);
+            setSelectedBplApplication(null);
+          }}
+          updateStatus={updateStatus!}
+        />
+      )}
     </div>
   );
 };
@@ -494,6 +537,9 @@ interface HeaderProps {
   localSearchTerm: string;
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
   itemType: DynamicTableProps<any>["itemType"];
+  onSort?: (field: string) => void;
+  sortOrder?: "asc" | "desc";
+  handleFilter?: (value: BblApplicationFilterStatus) => void;
 }
 
 const Header = ({
@@ -501,17 +547,49 @@ const Header = ({
   localSearchTerm,
   onSearch,
   itemType,
+  onSort,
+  sortOrder,
+  handleFilter,
 }: HeaderProps) => (
   <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-    <div className="relative flex-1 max-w-md w-full">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-      <input
-        type="text"
-        placeholder="Search items..."
-        value={localSearchTerm}
-        onChange={onSearch}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-      />
+    <div className="md:flex items-center w-full space-y-2 md:space-y-0 justify-between gap-5">
+      <div className="relative flex-1 max-w-md ">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Search items..."
+          value={localSearchTerm}
+          onChange={onSearch}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        />
+      </div>
+      <div className="flex items-center gap-3 md:gap-5 justify-between md:justify-normal ">
+        {itemType === "bplVerification" && (
+          <div>
+            <select
+              className="border px-2 md:px-3 py-1 md:py-2 rounded-md"
+              onChange={(e) =>
+                handleFilter &&
+                handleFilter(e.target.value as BblApplicationFilterStatus)
+              }
+            >
+              <option value="">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        )}
+        <div
+          className="flex px-2 md:px-3 py-1 md:py-2 border rounded-md cursor-pointer space-x-2 items-center "
+          onClick={() => onSort && onSort("createdAt")}
+        >
+          <h4>
+            {sortOrder === "desc" ? "Newest First" : "Oldest First"}{" "}
+          </h4>
+          {sortOrder === "asc" ? <SortAsc /> : <SortDesc />}
+        </div>
+      </div>
     </div>
 
     {onAdd && itemType !== "user" && (
@@ -555,13 +633,26 @@ const NoResults = () => (
 
 interface ViewButtonProps {
   pendingEdit: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  itemType?: string;
+  handleBplApplicationModal?: () => void;
 }
 
-const ViewButton = ({ pendingEdit, onClick }: ViewButtonProps) => (
+const ViewButton = ({
+  pendingEdit,
+  onClick,
+  itemType,
+  handleBplApplicationModal,
+}: ViewButtonProps) => (
   <div className="relative inline-block">
     <button
-      onClick={onClick}
+      onClick={() => {
+        if (itemType === "bplVerification") {
+          handleBplApplicationModal?.();
+        } else {
+          onClick?.();
+        }
+      }}
       className={`p-1 ${
         pendingEdit
           ? "text-red-600 hover:text-red-800 hover:bg-red-100"

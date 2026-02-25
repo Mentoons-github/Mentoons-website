@@ -115,8 +115,8 @@ const ProductTable = () => {
             },
           }
         );
-        console.log(response.data.data, "response");
 
+        console.log(response.data.data,'ssssssssssssssssssss')
         const product = response.data.data.map((item: any) => {
           const {
             details,
@@ -154,6 +154,7 @@ const ProductTable = () => {
 
     fetchProducts();
   }, [currentPage, limit, debouncedSearchTerm, getToken, sortOrder]);
+
 
   return (
     <div className="w-full max-w-full flex-1 overflow-x-hidden">
