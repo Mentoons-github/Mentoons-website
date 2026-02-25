@@ -6,17 +6,29 @@ import { getEmployees } from "@/redux/admin/employee/api";
 import { AppDispatch, RootState } from "@/redux/store";
 import { Employee } from "@/types/employee";
 import { useNavigate } from "react-router-dom";
+import Pagination from "@/components/admin/pagination";
 
 const PsychologistsTable: React.FC = () => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const { employees, loading, error } = useSelector(
-    (state: RootState) => state.employee
+  const { employees, loading, error, totalPages, totalEmployees } = useSelector(
+    (state: RootState) => state.employee,
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -25,22 +37,17 @@ const PsychologistsTable: React.FC = () => {
 
       dispatch(
         getEmployees({
-          sortOrder: "asc",
+          sortOrder,
           searchTerm,
-          page: 1,
-          limit: 1000,
-        })
+          page: currentPage,
+          limit,
+          from: "psychologist",
+        }),
       );
     };
 
     load();
-  }, [dispatch, getToken, searchTerm]);
-
-  const psychologists = employees.filter(
-    (emp) =>
-      emp.department?.toLowerCase() === "psychology" ||
-      emp.department?.toLowerCase() === "psychologist"
-  );
+  }, [currentPage, dispatch, getToken, limit, searchTerm, sortOrder]);
 
   const handleEdit = (item: Employee) => {
     console.log("Edit psychologist:", item);
@@ -60,6 +67,10 @@ const PsychologistsTable: React.FC = () => {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
+  };
+
+  const handleSort = () => {
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   };
 
   if (loading) {
@@ -84,21 +95,35 @@ const PsychologistsTable: React.FC = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Psychologists Management</h1>
 
-      {psychologists.length === 0 ? (
+      {employees.length === 0 ? (
         <p className="text-gray-600">No psychologists found.</p>
       ) : (
-        <DynamicTable
-          data={psychologists}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAdd={handleAdd}
-          onView={handleView}
-          onSearch={handleSearch}
-          itemType="employee"
-          excludeColumns={[]}
-          idKey="_id"
-          maxCellLength={30}
-        />
+        <div>
+          <DynamicTable
+            data={employees}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAdd={handleAdd}
+            onView={handleView}
+            onSort={handleSort}
+            sortOrder={sortOrder}
+            sortField="createdAt"
+            onSearch={handleSearch}
+            searchTerm={searchTerm}
+            itemType="employee"
+            excludeColumns={[]}
+            idKey="_id"
+            maxCellLength={30}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages || 1}
+            totalItems={totalEmployees || 0}
+            limit={limit}
+            onLimitChange={handleLimitChange}
+            onPageChange={handlePageChange}
+          />
+        </div>
       )}
     </div>
   );

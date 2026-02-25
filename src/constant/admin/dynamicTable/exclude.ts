@@ -63,3 +63,11 @@ export const EXCLUDE_MEETUPS = [
   "__v",
   "meetingLink",
 ];
+
+export const EXCLUDE_BPL_APPLICATIONS = [
+  "_id",
+  "updatedAt",
+  "createdAt",
+  "__v",
+  "document",
+];

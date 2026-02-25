@@ -58,6 +58,7 @@ const AdminSidebar = ({
           "/admin/add-workshop",
           "/admin/workshop-enquiries",
           "/admin/workshop-sessions",
+          "/admin/bpl-verification"
         ],
       },
       {
@@ -221,6 +222,7 @@ const AdminSidebar = ({
             { href: "/admin/add-workshop", label: "Add Workshop" },
             { href: "/admin/workshop-enquiries", label: "Enquiries" },
             { href: "/admin/workshop-sessions", label: "Workshop Sessions" },
+            { href: "/admin/bpl-verification", label: "BPL Verification" },
           ]}
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Workshops"}

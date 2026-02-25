@@ -24,6 +24,7 @@ import SpeedAdd from "@/pages/v2/adda/games/mindMath";
 import WordBuilder from "@/pages/v2/adda/games/wordBuilder";
 import SortMyDeck from "@/pages/v2/adda/games/sortMyDeck";
 import PatternRace from "@/pages/v2/adda/games/PatternRace";
+import WordsQuest from "@/pages/v2/adda/games/WordsQuest";
 
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
 const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
@@ -31,7 +32,7 @@ const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
 const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
 const Notification = lazy(
-  () => import("@/components/adda/home/notifications/notification")
+  () => import("@/components/adda/home/notifications/notification"),
 );
 const MemePage = lazy(() => import("@/pages/v2/adda/MemePage"));
 const MemeDetails = lazy(() => import("@/pages/v2/adda/memeDetails"));
@@ -111,6 +112,7 @@ const AddaRouter = () => {
         <Route path="game-lobby/word-builder" element={<WordBuilder />} />
         <Route path="game-lobby/sort-my-deck" element={<SortMyDeck />} />
         <Route path="game-lobby/pattern-race" element={<PatternRace />} />
+        <Route path="game-lobby/words-quest" element={<WordsQuest />} />
         <Route path="leaderboard" element={<LeaderBoard />} />
       </Routes>
     </Suspense>

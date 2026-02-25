@@ -6,26 +6,21 @@ import HowToPlay from "@/components/adda/game/howToPlay/howToPlay";
 import { FaChevronLeft } from "react-icons/fa6";
 import { BiBulb } from "react-icons/bi";
 import { useStatusModal } from "@/context/adda/statusModalContext";
-import GameDifficultyModal from "@/components/adda/game/difficultyModal";
 import RewardPointsModal from "@/components/modals/candyCoin";
 import postScore from "@/api/game/postScore";
 import { GAME_INSTRUCTIONS } from "@/constant/adda/game/instructions";
-import PatternRaceLobby from "@/components/adda/game/patternRace/lobby";
-import PatternRacePlayzone from "@/components/adda/game/patternRace/playzone";
 import PatternRaceResultScreen from "@/components/adda/game/patternRace/resultScreen";
+import WordsQuestLobby from "@/components/adda/game/wordsquest/WordsQuestLobby";
+import WordsQuestPlayzone from "@/components/adda/game/wordsquest/WordsQuestPlayzone";
 
-type Difficulty = "easy" | "medium" | "hard";
-
-const PatternRace = () => {
+const WordsQuest = () => {
   const GAME_TIME = 60;
 
   const [timer, setTimer] = useState(GAME_TIME);
   const [gameOver, setGameOver] = useState(false);
   const { showStatus } = useStatusModal();
   const [currentState, setCurrentState] = useState<CurrentState>("lobby");
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [finalScore, setFinalScore] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [isInstructionOpen, setInstructionOpen] = useState(false);
@@ -50,7 +45,7 @@ const PatternRace = () => {
     return () => clearInterval(interval);
   }, [currentState, gameOver]);
 
-  const gameId = `pattern_race_${difficulty}`;
+  const gameId = `words_quest_`;
 
   const gameInstructions = GAME_INSTRUCTIONS.find(
     (inst) =>
@@ -68,7 +63,7 @@ const PatternRace = () => {
         if (token) {
           const success = score > 0;
           const response = await postScore({
-            body: { score, gameId, difficulty, success },
+            body: { score, gameId, difficulty: "noDifficulty", success },
             token,
           });
           if (response?.rewardPoints) {
@@ -90,16 +85,13 @@ const PatternRace = () => {
   const handlePlayAgain = () => {
     setFinalScore(0);
     setCurrentState("lobby");
-    setIsModalOpen(true);
   };
 
-  const startGame = (selectedDifficulty: Difficulty) => {
-    setDifficulty(selectedDifficulty);
-    setTimer(GAME_TIME); // ✅ reset here ONLY
+  const startGame = () => {
+    setTimer(GAME_TIME);
     setGameOver(false);
     setFinalScore(0);
     setCurrentState("play");
-    setIsModalOpen(false);
   };
 
   const goToLobby = () => {
@@ -116,7 +108,7 @@ const PatternRace = () => {
 
       <div className="absolute top-10 md:top-14 lg:top-10 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 z-50 flex items-center justify-between gap-2">
         <button
-          onClick={() => navigate("/adda/game-lobby")}
+          onClick={() => setCurrentState("lobby")}
           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-sm shadow-md hover:bg-black/40 transition-all flex-shrink-0"
         >
           <FaChevronLeft className="text-white text-xl sm:text-2xl" />
@@ -133,18 +125,12 @@ const PatternRace = () => {
       </div>
 
       {currentState === "lobby" && (
-        <PatternRaceLobby showDifficultyModal={() => setIsModalOpen(true)} />
+        <WordsQuestLobby showDifficultyModal={() => startGame()} />
       )}
 
       {currentState === "play" && (
-        // <WordBuilderPlayzone
-        //   difficulty={difficulty}
-        //   items={selectRounds}
-        //   onGameComplete={handleGameComplete}
-        // />
-
-        <PatternRacePlayzone
-          difficulty={difficulty}
+        <WordsQuestPlayzone
+          difficulty={"hard"}
           timer={timer}
           timeOver={timer <= 0}
           onGameComplete={handleGameComplete}
@@ -152,7 +138,7 @@ const PatternRace = () => {
         />
       )}
 
-      {currentState === "result" && (
+      {/* {currentState === "result" && (
         <PatternRaceResultScreen
           score={finalScore}
           difficulty={difficulty}
@@ -161,14 +147,7 @@ const PatternRace = () => {
           onPlayAgain={handlePlayAgain}
           goToLobby={goToLobby}
         />
-      )}
-
-      {isModalOpen && (
-        <GameDifficultyModal
-          isClose={() => setIsModalOpen(false)}
-          setDifficulty={startGame}
-        />
-      )}
+      )} */}
 
       {showRewardModal && rewardPoints !== null && (
         <RewardPointsModal
@@ -180,4 +159,4 @@ const PatternRace = () => {
   );
 };
 
-export default PatternRace;
+export default WordsQuest;
