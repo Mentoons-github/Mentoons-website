@@ -9,6 +9,7 @@ import {
   Edit,
   UserX,
   UserCheck,
+  Share,
 } from "lucide-react";
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
@@ -52,6 +53,7 @@ interface DynamicTableProps<T> {
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
+  onShare?: (val: T) => void;
 }
 
 const DynamicTable = <T extends Record<string, any>>({
@@ -77,6 +79,7 @@ const DynamicTable = <T extends Record<string, any>>({
   selectedItems = new Set(),
   onSelectItem,
   onSelectAll,
+  onShare,
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
@@ -95,7 +98,7 @@ const DynamicTable = <T extends Record<string, any>>({
     if (!data.length) return [];
     const set = new Set<string>();
     data.forEach((i) =>
-      Object.keys(i).forEach((k) => !excludeColumns.includes(k) && set.add(k))
+      Object.keys(i).forEach((k) => !excludeColumns.includes(k) && set.add(k)),
     );
     return Array.from(set);
   };
@@ -108,24 +111,30 @@ const DynamicTable = <T extends Record<string, any>>({
       columns.some((c) => {
         const v = item[c];
         return v != null && String(v).toLowerCase().includes(term);
-      })
+      }),
     );
   }, [data, debouncedSearchTerm, columns, onSearch]);
 
   const displayData = onSearch ? data : filteredData;
+  console.log(filteredData);
   const isAllSelected =
     displayData.length > 0 &&
     displayData.every((i) => selectedItems.has(String(i[idKey])));
 
+  const isLikelyDate = (value: any): boolean => {
+    if (value instanceof Date) return true;
+    if (typeof value !== "string") return false;
+    const dateRegex = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$|^\d{2}\/\d{2}\/\d{4}$/;
+    return dateRegex.test(value.trim()) && !isNaN(Date.parse(value));
+  };
+
   const defaultFormatCell = (value: any): React.ReactNode => {
     if (value == null) return "-";
-    if (value instanceof Date || !isNaN(Date.parse(String(value))))
-      return new Date(value).toLocaleDateString();
+    if (isLikelyDate(value)) return new Date(value).toLocaleDateString();
     if (Array.isArray(value))
       return value.length ? `${value.length} items` : "None";
     if (typeof value === "object") return "Object";
     if (typeof value === "boolean") return value ? "Yes" : "No";
-
     const s = String(value);
     return s.length > maxCellLength ? `${s.slice(0, maxCellLength)}...` : s;
   };
@@ -166,7 +175,7 @@ const DynamicTable = <T extends Record<string, any>>({
     onSelectAll?.(e.target.checked);
   const handleSelectChange = (
     id: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => onSelectItem?.(id, e.target.checked);
 
   const BlockButton = ({ item }: { item: T }) => {
@@ -255,6 +264,15 @@ const DynamicTable = <T extends Record<string, any>>({
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+        {onShare && (
+          <button
+            onClick={() => onShare(item)}
+            className="relative p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+            title="Share"
+          >
+            <Share className="w-4 h-4" />
           </button>
         )}
         <BlockButton item={item} />
@@ -411,7 +429,7 @@ const DynamicTable = <T extends Record<string, any>>({
                         {(formatCell || defaultFormatCell)(
                           item[col],
                           col,
-                          item
+                          item,
                         )}
                       </div>
                     </td>

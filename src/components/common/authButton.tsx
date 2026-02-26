@@ -1,12 +1,11 @@
-import { FaMoneyCheckAlt, FaUser, FaUserCircle } from "react-icons/fa";
+import { FaUser, FaUserCircle } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, LogOut, ChevronDown, SquareUserRound } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { FaBox } from "react-icons/fa6";
-// You can choose a better icon for EMI if you want (optional)
-import { MdPayment } from "react-icons/md"; // ← nice choice for EMI/payments
+import { MdPayment } from "react-icons/md";
 
 const AuthButton = () => {
   const { user } = useUser();
@@ -139,7 +138,6 @@ const AuthButton = () => {
             onClick={handleProfileClick}
             className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 hover:from-slate-700 hover:via-slate-600 hover:to-slate-700 border border-slate-600/50 hover:border-slate-500/70 rounded-xl cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
           >
-            {/* ... profile avatar + name + chevron ... (unchanged) */}
             <div className="relative flex-shrink-0">
               <motion.div
                 animate={isHovered ? { rotate: [0, -5, 5, 0] } : { rotate: 0 }}
@@ -193,12 +191,10 @@ const AuthButton = () => {
                     "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
                 }}
               >
-                {/* Profile header section (unchanged) */}
                 <motion.div
                   variants={itemVariants}
                   className="px-6 py-5 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-200/80"
                 >
-                  {/* ... profile image + name + email ... */}
                   <div className="flex items-center gap-4">
                     <div className="relative flex-shrink-0">
                       {user?.imageUrl ? (
@@ -232,7 +228,6 @@ const AuthButton = () => {
                 </motion.div>
 
                 <div className="py-2">
-                  {/* View Profile */}
                   <motion.div
                     variants={itemVariants}
                     onClick={() => handleNavigation("profile")}
@@ -248,29 +243,6 @@ const AuthButton = () => {
                       </span>
                       <p className="text-xs text-slate-500">
                         Manage your personal information
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  <div className="mx-4 my-2 border-t border-slate-200/60"></div>
-
-                  {/* Orders */}
-                  <motion.div
-                    variants={itemVariants}
-                    onClick={() => handleNavigation("emi")}
-                    whileHover={{ x: 4 }}
-                    className="px-6 py-4 hover:bg-orange-50/80 cursor-pointer flex items-center gap-4 text-slate-700 transition-all duration-200 group"
-                  >
-                    <div className="w-11 h-11 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center group-hover:from-orange-200 group-hover:to-orange-300 transition-all duration-200 shadow-sm">
-                      <FaMoneyCheckAlt className="w-5 h-5 text-orange-600" />
-                    </div>
-
-                    <div className="flex-1">
-                      <span className="text-sm font-semibold text-slate-900 block">
-                        EMI Plans
-                      </span>
-                      <p className="text-xs text-slate-500">
-                        View & manage monthly installments
                       </p>
                     </div>
                   </motion.div>
@@ -323,7 +295,6 @@ const AuthButton = () => {
 
                   <div className="mx-4 my-2 border-t border-slate-200/60"></div>
 
-                  {/* ← New EMI option */}
                   <motion.div
                     variants={itemVariants}
                     onClick={() => handleNavigation("emi")}

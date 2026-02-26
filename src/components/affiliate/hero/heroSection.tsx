@@ -3,20 +3,30 @@ import { Search, X } from "lucide-react";
 import "./affiliate.css";
 import { useGSAP } from "@gsap/react";
 import gsap, { SplitText } from "gsap/all";
+import { JobApplicationForm } from "@/components/shared/FAQSection/FAQCard";
+import FaqButton from "@/components/common/faqButton";
 
 interface JobHeroSectionProps {
   title: string;
   subTitle: string;
-  onSearch: (term: string) => void;
+  onSearch?: (term: string) => void;
+  jobId?: string;
+  setShowFAQ?: (val: boolean) => void;
 }
 
 const JobHeroSection: React.FC<JobHeroSectionProps> = ({
   onSearch,
   title,
   subTitle,
+  jobId,
+  setShowFAQ,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
+  const [showApplication, setShowApplication] = useState(false);
+
+  const decor1Ref = useRef<HTMLImageElement>(null);
+  const decor2Ref = useRef<HTMLImageElement>(null);
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -72,6 +82,72 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
         },
         "<",
       );
+
+      tl.fromTo(
+        "#become-mentor",
+        {
+          y: 55,
+          scale: 0.9,
+          opacity: 0,
+          rotationX: 30,
+          transformPerspective: 900,
+          filter: "blur(8px)",
+        },
+        {
+          y: 0,
+          scale: 1,
+          opacity: 1,
+          rotationX: 0,
+          filter: "blur(0px)",
+          duration: 1.5,
+          ease: "power4.out",
+        },
+        "-=0.9",
+      ).fromTo(
+        "#become-mentor",
+        { "--glow": "0 0 15px rgba(255,255,255,0)" },
+        {
+          "--glow": "0 0 35px rgba(255,255,255,0.5)",
+          duration: 2,
+          ease: "sine.out",
+        },
+        "<+=0.4",
+      );
+
+      // Fade-in for the two decorative images
+      gsap.fromTo(
+        [decor1Ref.current, decor2Ref.current],
+        { opacity: 0, y: 40, scale: 0.85 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.8,
+          stagger: 0.3,
+          ease: "power3.out",
+        },
+        "-=1.2",
+      );
+
+      // Gentle floating animation – left image
+      gsap.to(decor1Ref.current, {
+        y: "-=20",
+        rotation: 3,
+        duration: 12,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      // Gentle floating animation – right image
+      gsap.to(decor2Ref.current, {
+        y: "+=25",
+        rotation: -4,
+        duration: 14,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
     });
 
     return () => ctx.revert();
@@ -133,18 +209,18 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    if (!newValue.trim()) {
+    if (!newValue.trim() && onSearch) {
       onSearch("");
     }
   };
 
   const handleSearchClick = () => {
-    onSearch(inputValue.trim());
+    onSearch?.(inputValue.trim());
   };
 
   const handleClearClick = () => {
     setInputValue("");
-    onSearch("");
+    onSearch?.("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -155,20 +231,38 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
 
   return (
     <div className="relative h-screen bg-gradient-to-br from-orange-500 via-orange-400 to-red-500 overflow-hidden">
-      <div className="custom-shape-divider-bottom-affiliate">
-        <svg
-          data-name="Layer 1"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-          className="w-full h-[60px] sm:h-[80px] md:h-[100px] lg:h-[120px] rotate-180"
-        >
-          <path
-            d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
-            className="shape-fill-affiliate"
-          />
-        </svg>
-      </div>
+      <img
+        ref={decor1Ref}
+        src="/assets/hiring/collaborate/collaborate1.png"
+        alt="decorative element left"
+        className="absolute top-[0%] left-[6%] w-32 sm:w-40 md:w-44 opacity-100 pointer-events-none select-none"
+      />
+
+      <img
+        ref={decor2Ref}
+        src="/assets/hiring/collaborate/collaborate.png"
+        alt="decorative element right"
+        className="absolute bottom-[12%] right-[0%] w-64 sm:w-80 md:w-[28rem] lg:w-[32rem] opacity-100 rounded-full pointer-events-none select-none"
+      />
+
+      {onSearch && (
+        <div className="custom-shape-divider-bottom-affiliate">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="w-full h-[60px] sm:h-[80px] md:h-[100px] lg:h-[120px] rotate-180"
+          >
+            <path
+              d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+              className="shape-fill-affiliate"
+            />
+          </svg>
+        </div>
+      )}
+
+      {setShowFAQ && <FaqButton setShowFAQ={setShowFAQ} />}
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -189,37 +283,55 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
           {subTitle}
         </p>
 
-        <div
-          id="search-input"
-          ref={searchRef}
-          className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl transition-all duration-500"
-        >
-          <input
-            type="text"
-            placeholder="Search affiliate positions..."
-            className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-lg sm:text-xl md:text-2xl caret-white"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-          />
-          <button
-            className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
-            onClick={handleSearchClick}
-            aria-label="Search"
+        {onSearch ? (
+          <div
+            id="search-input"
+            ref={searchRef}
+            className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl transition-all duration-500"
           >
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-          </button>
-          {inputValue && (
+            <input
+              type="text"
+              placeholder="Search affiliate positions..."
+              className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-lg sm:text-xl md:text-2xl caret-white"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+            />
             <button
-              className="ml-1 sm:ml-2 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
-              onClick={handleClearClick}
-              aria-label="Clear search"
+              className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
+              onClick={handleSearchClick}
+              aria-label="Search"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
-          )}
-        </div>
+            {inputValue && (
+              <button
+                className="ml-1 sm:ml-2 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
+                onClick={handleClearClick}
+                aria-label="Clear search"
+              >
+                <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowApplication(true)}
+            id="become-mentor"
+            className="px-10 py-3 rounded-2xl text-xl font-semibold mt-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-600/50 hover:-translate-y-2 active:scale-95 active:shadow-inner transition-all duration-400 ease-out [box-shadow:var(--glow,0_0_15px_rgba(255,255,255,0))_inset]"
+          >
+            Join as Mentor
+          </button>
+        )}
       </div>
+
+      {showApplication && (
+        <JobApplicationForm
+          id={jobId!}
+          setIsFormOpen={setShowApplication}
+          applicationSource="INTERNAL"
+        />
+      )}
     </div>
   );
 };

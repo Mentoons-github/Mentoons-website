@@ -57,6 +57,7 @@ import CareerCorner from "./pages/CareerCorner.tsx";
 import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
 import Feedback from "./pages/v2/feedback/feedback.tsx";
 import Collaborate from "./pages/v2/joinus/collaborate/collaborate.tsx";
+import BecomeMentor from "./pages/v2/joinus/becomeMentor.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -123,6 +124,7 @@ const routes = [
   { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
   { path: "/joinus/collaborate", element: <Collaborate /> },
   { path: "/joinus/collaborate/:slug", element: <Collaborate /> },
+  { path: "/joinus/become-mentor", element: <BecomeMentor /> },
   { path: "/joinus/explore", element: <Explore /> },
   {
     path: "/assessment-page",

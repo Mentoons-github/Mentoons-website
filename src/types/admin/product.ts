@@ -11,6 +11,14 @@ export interface Products {
     imageUrl: string;
     _id: string;
   }[];
+  type?: string;
+}
+
+export interface ProductFilter {
+  types: string[];
+  ageCategories: string[];
+  membershipTypes: string[];
+  price: { minPrice: number; maxPrice: number };
 }
 
 type Details =
@@ -165,7 +173,7 @@ export interface AssessmentProduct extends ProductBase {
         imageUrl: string;
         options: string[];
         correctAnswer: string;
-      }
+      },
     ];
   };
 }

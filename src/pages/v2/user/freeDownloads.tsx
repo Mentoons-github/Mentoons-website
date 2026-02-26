@@ -13,7 +13,6 @@ const FreeDownloads = () => {
     thumbnail_url: "",
     pdf_url: "",
   });
-
   const [showFreeDownloadForm, setShowFreeDownloadForm] =
     useState<boolean>(false);
 
@@ -26,6 +25,7 @@ const FreeDownloads = () => {
           setShowFreeDownloadForm={setShowFreeDownloadForm}
         />
       </div>
+
       {showFreeDownloadForm && (
         <FreeDownloadForm
           page="freedownload"

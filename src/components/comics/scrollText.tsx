@@ -177,24 +177,6 @@ const ScrollTextSection = () => {
                   {item.subtitle}
                 </p>
               </div>
-
-              {i === 0 && (
-                <img
-                  src="/assets/comic-V2/comics.png"
-                  alt="welcome comic decoration"
-                  className="
-                  absolute 
-                  -top-72 
-                  right-0 
-                  w-56 sm:w-72 md:w-96 lg:w-[180px] xl:w-[360px] 
-                  h-auto 
-                  z-30 
-                  opacity-92 
-                  pointer-events-none 
-                  rotate-[-8deg]
-                "
-                />
-              )}
             </div>
 
             <h1
