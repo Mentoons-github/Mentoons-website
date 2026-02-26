@@ -115,7 +115,7 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
       );
 
       // Fade-in for the two decorative images
-      gsap.fromTo(
+      tl.fromTo(
         [decor1Ref.current, decor2Ref.current],
         { opacity: 0, y: 40, scale: 0.85 },
         {
