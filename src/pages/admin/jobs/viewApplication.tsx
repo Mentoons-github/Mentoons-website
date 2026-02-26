@@ -10,10 +10,14 @@ import { JobApplication } from "@/types/admin";
 import JobApplicationModal from "@/components/admin/modal/jobApplication";
 import { AppDispatch, RootState } from "../../../redux/store";
 import * as XLSX from "xlsx";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
 import { errorToast, successToast } from "@/utils/toastResposnse";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { BASE_URL } from "@/api/game/postScore";
+import { useStatusModal } from "@/context/adda/statusModalContext";
+import ShareModal from "@/components/admin/modal/shareModal";
+import SortDropdown from "@/components/admin/job/sortDropDown";
 
 const ViewApplications = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -23,6 +27,7 @@ const ViewApplications = () => {
     loading: isLoading,
     error,
   } = useSelector((state: RootState) => state.careerAdmin);
+
   const [sortOrder, setSortOrder] = useState<1 | -1>(-1);
   const [sortField, setSortField] = useState<string>("createdAt");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -37,9 +42,18 @@ const ViewApplications = () => {
   const [applicationToDelete, setApplicationToDelete] =
     useState<JobApplication | null>(null);
   const [selectedApplications, setSelectedApplications] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [shareApplication, setShareApplication] =
+    useState<JobApplication | null>(null);
+  const [openShareModal, setOpenShareModal] = useState(false);
+  const [shareModalLoader, setShareModalLoader] = useState(false);
+  const [shareModalResponse, setShareModalResponse] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+
+  const { showStatus } = useStatusModal();
 
   useEffect(() => {
     const fetchAppliedJobs = async () => {
@@ -52,7 +66,7 @@ const ViewApplications = () => {
             searchTerm: debouncedSearchTerm,
             page: Number(currentPage),
             limit,
-          })
+          }),
         );
       }
     };
@@ -70,7 +84,7 @@ const ViewApplications = () => {
   const fetchAllApplications = async () => {
     const token = await getToken();
     if (!token) {
-      alert("Authentication token not found.");
+      showStatus("error", "Authentication token not found.");
       return [];
     }
 
@@ -81,7 +95,7 @@ const ViewApplications = () => {
         searchTerm: debouncedSearchTerm,
         page: 1,
         limit: 1000,
-      })
+      }),
     ).unwrap();
 
     return result.data?.jobs || [];
@@ -137,6 +151,59 @@ const ViewApplications = () => {
     }
   };
 
+  const onShare = async () => {
+    setShareModalLoader(true);
+    setShareModalResponse(null);
+
+    if (!shareApplication) {
+      setShareModalLoader(false);
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        setShareModalResponse({
+          success: false,
+          message: "Authentication token not found",
+        });
+        return;
+      }
+
+      const { _id } = shareApplication;
+
+      const response = await axios.post(
+        `${BASE_URL}/career/jobs/${_id}/forward-to-super-admin`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setShareModalResponse({
+        success: response.data.success === true,
+        message: response.data.message || "Application forwarded successfully",
+      });
+    } catch (err) {
+      const error = err as AxiosError<{ error?: string; message?: string }>;
+
+      const errorMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to forward application";
+
+      setShareModalResponse({
+        success: false,
+        message: errorMessage,
+      });
+    } finally {
+      setShareModalLoader(false);
+    }
+  };
+
   const exportSelectedToExcel = () => {
     if (selectedApplications.size === 0) {
       alert("No applications selected.");
@@ -149,7 +216,7 @@ const ViewApplications = () => {
     }
 
     const selectedData = data.data.jobs.filter((job: JobApplication) =>
-      selectedApplications.has(job._id)
+      selectedApplications.has(job._id),
     );
 
     const exportData = selectedData.map((job: JobApplication) => ({
@@ -197,43 +264,11 @@ const ViewApplications = () => {
     setIsModalOpen(true);
   };
 
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
-    } else {
-      setSortField(field);
-      setSortOrder(-1);
-    }
-    setCurrentPage(1);
-    setIsSortDropdownOpen(false);
-  };
-
-  const toggleSortDropdown = () => {
-    setIsSortDropdownOpen(!isSortDropdownOpen);
-  };
-
-  const getSortDisplayText = () => {
-    const sortOptions = {
-      createdAt: "Date",
-      name: "Name",
-      email: "Email",
-      jobTitle: "Job Title",
-      phone: "Phone",
-      gender: "Gender",
-    };
-
-    const displayField =
-      sortOptions[sortField as keyof typeof sortOptions] || sortField;
-    return `Sort by ${displayField} ${
-      sortOrder === 1 ? "Ascending" : "Descending"
-    }`;
-  };
-
   const debouncedSearch = useCallback(
     debounce((value: string) => {
       setDebouncedSearchTerm(value);
     }, 300),
-    []
+    [],
   );
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -281,17 +316,14 @@ const ViewApplications = () => {
           errorToast("Authentication token not found.");
           return;
         }
-        console.log("Deleting application with ID:", applicationToDelete._id);
 
         await axios.delete(
-          `${import.meta.env.VITE_PROD_URL}/career/applied/${
-            applicationToDelete._id
-          }`,
+          `${import.meta.env.VITE_PROD_URL}/career/applied/${applicationToDelete._id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         successToast("Job application deleted successfully");
         dispatch(
@@ -301,7 +333,7 @@ const ViewApplications = () => {
             searchTerm: debouncedSearchTerm,
             page: currentPage,
             limit,
-          })
+          }),
         );
       } catch (error: any) {
         const errorMessage =
@@ -320,23 +352,6 @@ const ViewApplications = () => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".sort-dropdown-container")) {
-        setIsSortDropdownOpen(false);
-      }
-    };
-
-    if (isSortDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isSortDropdownOpen]);
-
   if (isLoading) return <Loader />;
   if (error) return <div>Error: {error}</div>;
   if (!data?.data?.jobs)
@@ -349,103 +364,27 @@ const ViewApplications = () => {
   const { totalPages, totalJobs } = data.data;
 
   const sortOptions = [
-    { field: "createdAt", label: "Date Applied", icon: "Calendar" },
-    { field: "name", label: "Applicant Name", icon: "User" },
-    { field: "email", label: "Email", icon: "Mail" },
-    { field: "jobTitle", label: "Job Title", icon: "Briefcase" },
-    { field: "phone", label: "Phone", icon: "Phone" },
-    { field: "gender", label: "Gender", icon: "Users" },
+    { field: "createdAt", label: "Date Applied" },
+    { field: "name", label: "Applicant Name" },
+    { field: "email", label: "Email" },
+    { field: "phone", label: "Phone" },
   ];
 
   return (
     <div className="w-full max-w-full p-5">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">View All Job Applications</h1>
-        <div className="flex gap-2">
-          <div className="sort-dropdown-container relative">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleSortDropdown}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 relative z-10"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                />
-              </svg>
-              {getSortDisplayText()}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-4 w-4 ml-1 transition-transform ${
-                  isSortDropdownOpen ? "rotate-180" : ""
-                }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </motion.button>
-
-            <AnimatePresence>
-              {isSortDropdownOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-20"
-                  style={{ top: "100%" }}
-                >
-                  <div className="py-1">
-                    {sortOptions.map((option) => (
-                      <motion.button
-                        key={option.field}
-                        whileHover={{ backgroundColor: "#f3f4f6" }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleSort(option.field)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
-                          sortField === option.field
-                            ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
-                            : ""
-                        }`}
-                      >
-                        <span className="text-lg">{option.icon}</span>
-                        <span className="flex-1">{option.label}</span>
-                        {sortField === option.field && (
-                          <span
-                            className={`text-xs font-medium ${
-                              sortOrder === 1
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {sortOrder === 1
-                              ? "Ascending Ascending"
-                              : "Descending Descending"}
-                          </span>
-                        )}
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        <div className="flex gap-3">
+          <SortDropdown
+            sortField={sortField}
+            sortOrder={sortOrder}
+            onSortChange={(field: string, order: 1 | -1) => {
+              setSortField(field);
+              setSortOrder(order);
+              setCurrentPage(1);
+            }}
+            options={sortOptions}
+          />
 
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -480,6 +419,7 @@ const ViewApplications = () => {
               </>
             )}
           </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -518,7 +458,7 @@ const ViewApplications = () => {
           sortField={sortField}
           onDelete={handleDelete}
           onView={handleView}
-          onSort={handleSort}
+          onSort={() => {}}
           sortOrder={sortOrder === 1 ? "asc" : "desc"}
           searchTerm={searchTerm}
           handleSearch={handleSearch}
@@ -526,6 +466,10 @@ const ViewApplications = () => {
           selectedItems={selectedApplications}
           onSelectItem={handleSelectApplication}
           onSelectAll={handleSelectAll}
+          onShare={(val: JobApplication) => {
+            setOpenShareModal(true);
+            setShareApplication(val);
+          }}
         />
       </div>
 
@@ -556,6 +500,15 @@ const ViewApplications = () => {
             : ""
         }
       />
+
+      {openShareModal && shareApplication && (
+        <ShareModal
+          isLoading={shareModalLoader}
+          response={shareModalResponse}
+          onClose={() => setOpenShareModal(false)}
+          onShare={onShare}
+        />
+      )}
     </div>
   );
 };

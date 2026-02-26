@@ -47,41 +47,55 @@ interface EmiStatistics {
 }
 
 interface InvoiceData {
-  amount: number;
-  createdAt: string;
-  gateway: string;
-  paymentType: string;
-  planId: string;
-  status: string;
-  transactionId: string;
-  updatedAt: string;
-  userId: string;
-  userPlanId: {
-    accessStatus: string;
-    bplApplied: boolean;
-    bplCardFile: any;
-    bplStatus: string;
-    createdAt: string;
-    emiDetails: {
-      downPayment: number;
-      emiAmount: number;
-      nextDueDate: string;
-      paidDownPayment: boolean;
-      paidMonths: number;
-      status: string;
-      totalMonths: number;
-    };
-    paymentType: string;
-    planId: string;
-    selectedMode: string;
-    totalAmount: number;
-    updatedAt: string;
-    userId: string;
-    _id: string;
-  };
   _id: string;
-}
+  transactionId: string;
+  amount: number;
+  paymentType: "DOWN_PAYMENT" | "FULL" | "EMI";
+  status: "SUCCESS" | "FAILED" | "PENDING" | string;
+  gateway: string;
+  createdAt: string;
+  updatedAt?: string;
 
+  userId: {
+    _id?: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+  };
+
+  planId: {
+    _id?: string;
+    name: string;
+    age: string;
+    duration: string;
+    mode: string[];
+  };
+
+  userPlanId: {
+    _id: string;
+    userId: string;
+    planId: string;
+    paymentType: "EMI" | "FULL" | string;
+    totalAmount: number;
+    selectedMode: "Online" | "Offline" | string;
+    accessStatus?: string;
+    bplApplied?: boolean;
+    bplStatus?: string;
+    bplCardFile?: any;
+    createdAt: string;
+    updatedAt?: string;
+
+    emiDetails?: {
+      downPayment: number;
+      paidDownPayment: boolean;
+      emiAmount: number;
+      totalMonths: number;
+      paidMonths: number;
+      nextDueDate: string;
+      status: string;
+    };
+  };
+}
 const Emi: React.FC = () => {
   const [pendingEmi, setPendingEmi] = useState<Payment[]>([]);
   const [completedEmi, setCompletedEmi] = useState<CompletedPayment[]>([]);
@@ -134,7 +148,8 @@ const Emi: React.FC = () => {
           setCompletedEmi(completedRes.data);
         }
       } catch (err: any) {
-        const msg = err?.message || "Unknown error";
+        console.log("error found : ", err);
+        const msg = err || "Unknown error";
         if (!msg.includes("404") && !msg.toLowerCase().includes("no active")) {
           setError(msg);
         }
