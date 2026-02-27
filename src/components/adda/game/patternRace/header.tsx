@@ -15,6 +15,11 @@ const PatterRaceHeader = ({
     return "text-red-400";
   };
 
+  const minutes = Math.floor(timer / 60);
+  const seconds = timer % 60;
+
+  const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
   return (
     <div className="flex items-center justify-around bg-[url('/assets/games/wordBuilder/topbar.png')] bg-cover h-12 sm:h-14 md:h-16 px-2 sm:px-4 ">
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
@@ -38,7 +43,7 @@ const PatterRaceHeader = ({
               timer <= 10 ? "animate-pulse" : ""
             }`}
           >
-            {timer}
+            {formattedTime}
           </span>{" "}
           <span className="hidden sm:inline">sec</span>
           <span className="inline sm:hidden">s</span>

@@ -1,108 +1,115 @@
-import {
-  DndContext,
-  DragEndEvent,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
 import { useEffect, useState } from "react";
 
-import {
-  generatePatternRound,
-  PatternItem,
-} from "@/constant/adda/game/patternRace";
-import PatterRaceHeader from "../patternRace/header";
-import DropSlot from "../patternRace/dropSlot";
-import DraggableItem from "../patternRace/draggableItem";
 import WordBoard from "./WordBoard";
 import { WORDS_QUEST } from "@/constant/adda/game/wordsQuest";
+import PatterRaceHeader from "../patternRace/header";
+import { ArrowRight } from "lucide-react";
 
 interface PatternRacePlayzoneProps {
-  difficulty: "easy" | "medium" | "hard";
   timeOver: boolean;
   timer: number;
-  onGameComplete: (score: number) => void;
+  onGameComplete: (roundScores: {
+    title: string;
+    score: number;
+    foundWords: string[];
+  }) => void;
   increaseRoundCount: () => void;
+  decreaswRoundCount: () => void;
+  roundCount: number;
+  resetTimer: () => void;
 }
 
 const WordsQuestPlayzone = ({
-  difficulty,
   timeOver,
   onGameComplete,
   timer,
   increaseRoundCount,
+  decreaswRoundCount,
+  roundCount,
+  resetTimer,
 }: PatternRacePlayzoneProps) => {
-  const [round, setRound] = useState(() => generatePatternRound(difficulty));
-  const [userPattern, setUserPattern] = useState<(PatternItem | null)[]>([]);
+  // const [level, setLevel] = useState<number>(0);
+  const [foundCells, setFoundCells] = useState<number[][]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedCells, setSelectedCells] = useState<number[][]>([]);
+  const [foundWords, setFoundWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
-  const [roundCompleted, setRoundCompleted] = useState(false);
-  const [level, setLevel] = useState<number>(0);
-
-  const currentGame = WORDS_QUEST[level];
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // prevents accidental scroll
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
-      },
-    }),
-  );
 
   useEffect(() => {
-    setUserPattern(
-      round.pattern.map((item, i) => (round.blanks.includes(i) ? null : item)),
-    );
-    setRoundCompleted(false);
-  }, [round]);
+    if (!timeOver) return;
+    handleNext();
+    resetTimer();
+  }, [timeOver]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
+  console.log(decreaswRoundCount);
 
-    const index = Number(over.id);
+  const currentGame = WORDS_QUEST[roundCount];
 
-    // ✅ Only allow drop on blank slots (user-fillable positions)
-    if (!round.blanks.includes(index)) return;
+  const { fixedBoard, wordsToFind } = currentGame;
 
-    const selected = round.options.find((o) => o.id === active.id);
-    if (!selected) return;
+  const handleMouseDown = (row: number, col: number) => {
+    setIsDragging(true);
+    setSelectedCells([[row, col]]);
+  };
 
-    setUserPattern((prev) => {
-      const copy = [...prev];
-      copy[index] = selected;
-      return copy;
+  const handleMouseEnter = (row: number, col: number) => {
+    if (!isDragging) return;
+
+    setSelectedCells((prev) => {
+      const alreadySelected = prev.some(([r, c]) => r === row && c === col);
+      if (alreadySelected) return prev;
+
+      return [...prev, [row, col]];
     });
   };
 
-  const isRoundComplete =
-    userPattern.length > 0 &&
-    round.blanks.every((i) => userPattern[i]?.id === round.pattern[i].id);
+  const handleMouseUp = () => {
+    setIsDragging(false);
 
-  //   useEffect(() => {
-  //     if (!isRoundComplete || roundCompleted) return;
+    const selectedWord = selectedCells
+      .map(([r, c]) => fixedBoard[r][c])
+      .join("");
 
-  //     setRoundCompleted(true);
+    const reversedWord = selectedWord.split("").reverse().join("");
 
-  //     setScore((prev) => prev + 10);
-  //     increaseRoundCount();
+    const matchedWord = wordsToFind.find(
+      (w) => w === selectedWord || w === reversedWord,
+    );
 
-  //     setTimeout(() => {
-  //       setRound(generatePatternRound(difficulty));
-  //     }, 700);
-  //   }, [isRoundComplete, roundCompleted, difficulty, increaseRoundCount]);
+    if (matchedWord && !foundWords.includes(matchedWord)) {
+      setFoundWords((prev) => [...prev, matchedWord]);
+      setFoundCells((prev) => [...prev, ...selectedCells]);
+      setScore((prev) => prev + 1);
+    }
 
-  //   useEffect(() => {
-  //     if (timeOver) {
-  //       onGameComplete(score);
-  //     }
-  //   }, [score, onGameComplete, timeOver]);
+    setSelectedCells([]);
+  };
+
+  const handleNext = () => {
+    const roundData = {
+      title: currentGame.title,
+      score,
+      foundWords,
+    };
+
+    if (roundCount + 1 >= WORDS_QUEST.length) {
+      onGameComplete(roundData);
+      return;
+    }
+
+    onGameComplete(roundData); // send every round up
+    increaseRoundCount();
+
+    setScore(0);
+    setSelectedCells([]);
+    setFoundCells([]);
+    setFoundWords([]);
+    resetTimer();
+  };
+
+  // const handlePrevious = () => {
+  //   decreaswRoundCount();
+  // };
 
   return (
     <div
@@ -114,25 +121,44 @@ const WordsQuestPlayzone = ({
       }}
     >
       {/* Content */}
-      {/* <div className="relative z-20">
+      <div className="relative z-20">
         <PatterRaceHeader score={score} timer={timer} />
-      </div> */}
-      <div className="relative z- flex flex-col items-center justify-center">
-        <img
-          src="/assets/games/wordsQuest/characters.png"
-          alt=""
-          className="h-screen absolute "
-        />
-        <WordBoard level={level} currentGame={currentGame} />
       </div>
-      <div className="absolute bottom-10 right-10">
+      <div className="relative flex flex-col items-center justify-center">
+        <img
+          src="/assets/games/wordsQuest/characters1.png"
+          alt=""
+          className="block absolute -top-14 md:-top-20 -bottom-5 left-1/2 -translate-x-1/2 w-full  lg:w-[85%] lg:h-auto lg:object-contain"
+        />
+        <WordBoard
+          currentGame={currentGame}
+          foundCells={foundCells}
+          foundWords={foundWords}
+          handleMouseDown={handleMouseDown}
+          handleMouseEnter={handleMouseEnter}
+          handleMouseUp={handleMouseUp}
+          selectedCells={selectedCells}
+          isDragging = {isDragging}
+        />
+      </div>
+      <div className="absolute bottom-4  lg:top-28 right-10 z-10">
         <button
-          className="bg-[#fff000] px-3 py-1 rounded text-[#e85100] border-2 border-[#e85100]"
-          onClick={() => setLevel((prev) => prev + 1)}
+          className="bg-[#c66930] flex items-center justify-center gap-2 px-3 py-1 rounded text-lg font-bold text-white border-2 border-white hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
+          onClick={handleNext}
         >
           Next
+          <ArrowRight />
         </button>
       </div>
+      {/* <div className="absolute bottom-4  lg:top-28 left-10 z-10">
+        <button
+          className="bg-[#c66930] flex items-center justify-center gap-2 px-3 py-1 rounded text-lg font-bold text-white border-2 border-white hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
+          onClick={handlePrevious}
+        >
+          <ArrowLeft />
+          Previous
+        </button>
+      </div> */}
     </div>
   );
 };

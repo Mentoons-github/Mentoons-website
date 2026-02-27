@@ -1,7 +1,6 @@
 import { CurrentState } from "@/types/adda/game";
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom";
 import HowToPlay from "@/components/adda/game/howToPlay/howToPlay";
 import { FaChevronLeft } from "react-icons/fa6";
 import { BiBulb } from "react-icons/bi";
@@ -9,18 +8,25 @@ import { useStatusModal } from "@/context/adda/statusModalContext";
 import RewardPointsModal from "@/components/modals/candyCoin";
 import postScore from "@/api/game/postScore";
 import { GAME_INSTRUCTIONS } from "@/constant/adda/game/instructions";
-import PatternRaceResultScreen from "@/components/adda/game/patternRace/resultScreen";
 import WordsQuestLobby from "@/components/adda/game/wordsquest/WordsQuestLobby";
 import WordsQuestPlayzone from "@/components/adda/game/wordsquest/WordsQuestPlayzone";
+import { WORDS_QUEST } from "@/constant/adda/game/wordsQuest";
+import WordsQuestScoreBoard from "@/components/adda/game/wordsquest/WordsQuestScoreBoard";
+import { useNavigate } from "react-router-dom";
+
+interface RoundScore {
+  title: string;
+  score: number;
+  foundWords: string[];
+}
 
 const WordsQuest = () => {
-  const GAME_TIME = 60;
+  const GAME_TIME = 300;
 
   const [timer, setTimer] = useState(GAME_TIME);
-  const [gameOver, setGameOver] = useState(false);
   const { showStatus } = useStatusModal();
   const [currentState, setCurrentState] = useState<CurrentState>("lobby");
-  const [finalScore, setFinalScore] = useState(0);
+  const [finalScore, setFinalScore] = useState<RoundScore[]>([]);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [isInstructionOpen, setInstructionOpen] = useState(false);
@@ -29,21 +35,15 @@ const WordsQuest = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentState !== "play" || gameOver) return;
+    if (currentState !== "play") return;
+    if (timer === 0) return;
 
     const interval = setInterval(() => {
-      setTimer((t) => {
-        if (t <= 1) {
-          clearInterval(interval);
-          setGameOver(true);
-          return 0;
-        }
-        return t - 1;
-      });
+      setTimer((prev) => prev - 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentState, gameOver]);
+  }, [currentState, timer]);
 
   const gameId = `words_quest_`;
 
@@ -53,27 +53,46 @@ const WordsQuest = () => {
       "patternrace",
   );
 
-  const handleGameComplete = async (score: number) => {
-    setFinalScore(score);
-    setCurrentState("result");
+  const handleGameComplete = (roundData: RoundScore) => {
+    setFinalScore((prev) => {
+      const updated = [...prev, roundData];
 
-    if (score > 70) {
-      try {
-        const token = await getToken();
-        if (token) {
-          const success = score > 0;
-          const response = await postScore({
-            body: { score, gameId, difficulty: "noDifficulty", success },
-            token,
-          });
-          if (response?.rewardPoints) {
-            setRewardPoints(response.rewardPoints);
-            setShowRewardModal(true);
-          }
-        }
-      } catch (error: unknown) {
-        showStatus("error", error as string);
+      if (updated.length === WORDS_QUEST.length) {
+        finishGame(updated);
       }
+
+      return updated;
+    });
+  };
+
+  const finishGame = async (roundScores: RoundScore[]) => {
+    setCurrentState("result");
+    setRoundCount(0);
+
+    const totalScore = roundScores.reduce((sum, r) => sum + r.score, 0);
+
+    try {
+      const token = await getToken();
+      if (token) {
+        const success = totalScore > 0;
+
+        const response = await postScore({
+          body: {
+            score: totalScore,
+            gameId,
+            difficulty: "noDifficulty",
+            success,
+          },
+          token,
+        });
+
+        if (response?.rewardPoints) {
+          setRewardPoints(response.rewardPoints);
+          setShowRewardModal(true);
+        }
+      }
+    } catch (error: unknown) {
+      showStatus("error", error as string);
     }
   };
 
@@ -83,14 +102,13 @@ const WordsQuest = () => {
   };
 
   const handlePlayAgain = () => {
-    setFinalScore(0);
+    setFinalScore([]);
     setCurrentState("lobby");
   };
 
   const startGame = () => {
     setTimer(GAME_TIME);
-    setGameOver(false);
-    setFinalScore(0);
+    setFinalScore([]);
     setCurrentState("play");
   };
 
@@ -98,8 +116,16 @@ const WordsQuest = () => {
     setCurrentState("lobby");
   };
 
+  const handleBack = () => {
+    if (currentState == "lobby") {
+      navigate("/adda/game-lobby");
+    } else {
+      setCurrentState("lobby");
+    }
+  };
+
   return (
-    <>
+    <div className="h-screen">
       <HowToPlay
         instructions={gameInstructions?.steps || []}
         isModalOpen={isInstructionOpen}
@@ -108,7 +134,7 @@ const WordsQuest = () => {
 
       <div className="absolute top-10 md:top-14 lg:top-10 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 z-50 flex items-center justify-between gap-2">
         <button
-          onClick={() => setCurrentState("lobby")}
+          onClick={handleBack}
           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-sm shadow-md hover:bg-black/40 transition-all flex-shrink-0"
         >
           <FaChevronLeft className="text-white text-xl sm:text-2xl" />
@@ -130,24 +156,24 @@ const WordsQuest = () => {
 
       {currentState === "play" && (
         <WordsQuestPlayzone
-          difficulty={"hard"}
           timer={timer}
           timeOver={timer <= 0}
           onGameComplete={handleGameComplete}
           increaseRoundCount={() => setRoundCount((prev) => prev + 1)}
+          decreaswRoundCount={() => setRoundCount((pre) => pre - 1)}
+          roundCount={roundCount}
+          resetTimer={() => setTimer(GAME_TIME)}
         />
       )}
 
-      {/* {currentState === "result" && (
-        <PatternRaceResultScreen
+      {currentState === "result" && (
+        <WordsQuestScoreBoard
           score={finalScore}
-          difficulty={difficulty}
-          totalRounds={roundCount}
-          totalTime={60}
           onPlayAgain={handlePlayAgain}
           goToLobby={goToLobby}
+          answers={WORDS_QUEST}
         />
-      )} */}
+      )}
 
       {showRewardModal && rewardPoints !== null && (
         <RewardPointsModal
@@ -155,7 +181,7 @@ const WordsQuest = () => {
           onClose={handleCloseRewardModal}
         />
       )}
-    </>
+    </div>
   );
 };
 
