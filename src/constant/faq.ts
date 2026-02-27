@@ -1,3 +1,5 @@
+import { Site_FAQData } from "@/types";
+
 export const FAQ = [
   {
     question: "What is Mentoons Adda?",
@@ -27,7 +29,6 @@ export const FAQ_PRODUCT = {
     "No, we do not offer team reports or workshops. This is a personalized product for individuals.",
   "What if I need help understanding my results?":
     "Our expert counselors and mentors are available to help you interpret your results and provide guidance on your personal development journey. You can schedule a one-on-one consultation through our platform.",
-
 };
 
 export const FAQ_ASSESSMENT = {
@@ -86,5 +87,137 @@ export const FAQ_PRODUCT_DETAILS = [
     question: "What if I need help understanding my results?",
     answer:
       "Our expert counselors and mentors are available to help you interpret your results and provide guidance on your personal development journey. You can schedule a one-on-one consultation through our platform.",
+  },
+];
+
+export const SITE_CATEGORIES = [
+  "All",
+  "About Our Services",
+  "Programs and Workshops",
+  "General Inquiries",
+  "Post-Registration",
+  "Additional Resources",
+] as const;
+
+export const COLORED_CATEGORIES = [
+  {
+    label: "All" as const,
+    active: "bg-gray-800 border-gray-800 text-white shadow-gray-300",
+    idle: "border-gray-300 text-gray-700 hover:bg-gray-100",
+  },
+  {
+    label: "About Our Services" as const,
+    active: "bg-blue-600 border-blue-600 text-white shadow-blue-200",
+    idle: "border-blue-300 text-blue-600 hover:bg-blue-50",
+  },
+  {
+    label: "Programs and Workshops" as const,
+    active: "bg-emerald-600 border-emerald-600 text-white shadow-emerald-200",
+    idle: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+  },
+  {
+    label: "General Inquiries" as const,
+    active: "bg-amber-500 border-amber-500 text-white shadow-amber-200",
+    idle: "border-amber-300 text-amber-600 hover:bg-amber-50",
+  },
+  {
+    label: "Post-Registration" as const,
+    active: "bg-violet-600 border-violet-600 text-white shadow-violet-200",
+    idle: "border-violet-300 text-violet-600 hover:bg-violet-50",
+  },
+  {
+    label: "Additional Resources" as const,
+    active: "bg-pink-600 border-pink-600 text-white shadow-pink-200",
+    idle: "border-pink-300 text-pink-600 hover:bg-pink-50",
+  },
+] as const;
+
+export const SITE_FAQ: Site_FAQData[] = [
+  {
+    category: "About Our Services",
+    icon: "🎯",
+    color: "from-yellow-400 to-orange-500",
+    faqs: [
+      {
+        question: "What exactly is Mentoons?",
+        answer:
+          "Mentoons is a unique platform that blends mentoring with the art of cartoons. We aim to address issues like social media addiction and enhance skills like self-awareness through interactive workshops and resources. Our programs are designed for children, teenagers, and adults who seek meaningful personal development in a creative and engaging way.",
+      },
+      {
+        question: "How can Mentoons help with social media addiction?",
+        answer:
+          "At Mentoons, we tackle social media addiction by offering specially designed workshops that focus on building real-world connections and healthier habits. Participants engage in creative activities that foster a sense of community and connectivity without relying on digital interactions.",
+      },
+    ],
+  },
+  {
+    category: "Programs and Workshops",
+    icon: "🎨",
+    color: "from-orange-400 to-red-500",
+    faqs: [
+      {
+        question: "How do I choose the right workshop or program?",
+        answer:
+          "Visit our website and browse through the various programs offered. Each listing includes details that help you understand the focus of the workshop and whom it's best suited for, whether you're a parent looking to engage your child or a professional seeking self-development.",
+      },
+      {
+        question: "How do I sign up for a workshop?",
+        answer:
+          "Signing up is easy: Visit our enrollment page, choose your desired workshop, click on 'Enroll Now' or fill out the application form, and complete your registration with the necessary details and payment.",
+      },
+      {
+        question: "What should I expect after registering for a workshop?",
+        answer:
+          "You will receive access to the necessary materials and resources for the workshop. Engage with the content at scheduled times or at your own pace, depending on the format. Experience interactive learning designed to encourage personal growth and community interaction.",
+      },
+    ],
+  },
+  {
+    category: "General Inquiries",
+    icon: "❓",
+    color: "from-yellow-300 to-orange-400",
+    faqs: [
+      {
+        question: "Who can benefit most from Mentoons?",
+        answer:
+          "Our programs are ideal for anyone looking to overcome digital addiction issues, enhance personal skills like communication and creativity, and develop meaningful social connections. This includes children, teenagers, families, and professionals.",
+      },
+      {
+        question:
+          "What makes Mentoons different from other personal development programs?",
+        answer:
+          "Unlike traditional methods, Mentoons uses a combination of mentoring and cartoon-based storytelling to make the learning process enjoyable and effective. Our method is evidence-based, focusing on real-world outcomes and improvements in behavior and personal interaction skills.",
+      },
+    ],
+  },
+  {
+    category: "Post-Registration",
+    icon: "📋",
+    color: "from-red-400 to-orange-600",
+    faqs: [
+      {
+        question: "What happens if I miss a live session?",
+        answer:
+          "Don't worry! All live sessions are recorded, allowing you to catch up at your convenience. Plus, our instructors are always available for questions during their office hours.",
+      },
+    ],
+  },
+  {
+    category: "Additional Resources",
+    icon: "📚",
+    color: "from-orange-300 to-yellow-500",
+    faqs: [
+      {
+        question: "Are there resources available aside from the workshops?",
+        answer:
+          "Absolutely! Mentoons provides additional resources such as articles, cartoons, and interactive tools available through our platform to reinforce your learning and development.",
+      },
+      {
+        question:
+          "How can I stay updated with new workshops and Mentoons news?",
+        answer:
+          "To stay updated, subscribe to our newsletter, check our website regularly, and follow us on social media. We continually announce upcoming workshops and new content that could benefit you and your family.",
+      },
+    ],
   },
 ];

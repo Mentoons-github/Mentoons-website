@@ -6,6 +6,9 @@ import { useAuth } from "@clerk/clerk-react";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useAuthModal } from "@/context/adda/authModalContext";
 import { useUser } from "@clerk/clerk-react";
+import { useGSAP } from "@gsap/react";
+import { SplitText } from "gsap/all";
+import gsap from "gsap";
 
 export interface FormValue {
   feedback: string;
@@ -45,6 +48,65 @@ const Feedback = () => {
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(true);
   const [feedbackError, setFeedbackError] = useState("");
+
+  useGSAP(() => {
+    const headingText = new SplitText("#heading", { type: "chars" });
+    headingText.chars.map((char) => char.classList.add("h-word"));
+
+    const para = new SplitText("#sub-text", { type: "lines" });
+
+    gsap.from(".h-word", {
+      stagger: 0.1,
+      yPercent: -50,
+      opacity: 0,
+      duration: 0.02,
+      ease: "power1.in",
+    });
+
+    gsap.from(para.lines, {
+      delay: 1.2,
+      yPercent: -50,
+      ease: "back.inOut",
+      duration: 0.4,
+      stagger: 0.3,
+      opacity: 0,
+    });
+
+    gsap.from("#textarea-feedback", {
+      xPercent: -60,
+      delay: 1.4,
+      duration: 0.5,
+      opacity: 0,
+    });
+
+    gsap.from(".star-child", {
+      stagger: 0.4,
+      ease: "power3.in",
+      delay: 1.5,
+      scale: 1.2,
+      duration: 0.3,
+      opacity: 0,
+    });
+
+    gsap.from("#submit-btn", {
+      xPercent: -100,
+      opacity: 0,
+      ease: "sine",
+      delay: 1.6,
+      scale: 2,
+    });
+  }, []);
+
+  useGSAP(() => {
+    if (feedbacks.length > 0) {
+      gsap.from(".user-feedback", {
+        stagger: 0.4,
+        scale: 2,
+        ease: "power4",
+        opacity: 0,
+      });
+    }
+  }, [feedbacks]);
 
   useEffect(() => {
     const loadFeedback = async () => {
@@ -132,16 +194,22 @@ const Feedback = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
       <div className="flex items-center justify-center gap-4 bg-gradient-to-b from-blue-600 to-blue-400 w-full lg:max-w-[50%] p-6 sm:p-8 lg:p-10">
         <div className="flex flex-col items-center justify-center w-full max-w-xl px-4 sm:px-6">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white w-full">
+          <h1
+            id="heading"
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white w-full"
+          >
             Submit{" "}
             <span className="text-yellow-500">
               Your <br /> Feedback
             </span>
           </h1>
-          <p className="text-base sm:text-lg font-light text-white mt-4 sm:mt-6 max-w-3xl">
+          <p
+            id="sub-text"
+            className="text-base sm:text-lg font-light text-white mt-4 sm:mt-6 max-w-3xl"
+          >
             We'd love to hear your thoughts! Share your experience, suggestions,
             or ideas to help us improve and build something even better for you.
           </p>
@@ -151,6 +219,7 @@ const Feedback = () => {
             className="w-full mt-6 sm:mt-8 lg:mt-10 space-y-4 sm:space-y-5"
           >
             <textarea
+              id="textarea-feedback"
               rows={6}
               placeholder="Enter your feedback..."
               value={formValues.feedback}
@@ -167,7 +236,7 @@ const Feedback = () => {
                 return (
                   <label
                     key={i}
-                    className="cursor-pointer flex-1 h-12 sm:h-14 lg:h-16 flex items-center justify-center bg-white/90 rounded-xl shadow hover:bg-white transition-colors"
+                    className="star-child cursor-pointer flex-1 h-12 sm:h-14 lg:h-16 flex items-center justify-center bg-white/90 rounded-xl shadow hover:bg-white transition-colors"
                   >
                     <input
                       type="radio"
@@ -195,6 +264,7 @@ const Feedback = () => {
 
             <div className="flex justify-end">
               <button
+                id="submit-btn"
                 type="submit"
                 disabled={isSubmitting}
                 className={`px-6 sm:px-8 lg:px-10 py-3 sm:py-4 rounded-xl bg-yellow-400 text-lg sm:text-xl font-bold text-gray-800 hover:bg-yellow-300 transition-colors shadow-lg ${

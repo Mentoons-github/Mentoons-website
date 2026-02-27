@@ -798,7 +798,7 @@ export const FOOTER_PAGELINKS = [
       },
       {
         id: "S_4",
-        label: "Conversataion Story Card",
+        label: "Conversataion Story Cards",
         url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
       {
@@ -1297,7 +1297,7 @@ export const COMMON_NAV: NavLink[] = [
       },
       {
         id: "JS_04",
-        label: "Become mentor",
+        label: "Join as mentor",
         url: "/joinus/hiring",
       },
     ],

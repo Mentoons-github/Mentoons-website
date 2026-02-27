@@ -1,18 +1,19 @@
 import ProductDisplay from "@/components/mythos/about/ProductDisplay";
 import { ABOUT_HOW_IT_WORKS, ABOUT_WHAT_WE_OFFER } from "@/constant";
 import { motion } from "framer-motion";
-import { Suspense, useEffect, useState } from "react";
-
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
 import Team from "@/components/comics/Team";
 import { FAQ_ABOUT_US } from "@/constant/faq";
 import { useNavigate } from "react-router-dom";
 import FAQ from "../pages/v2/user/faq/faq";
+import gsap, { SplitText } from "gsap/all";
 
-// aboutmentoon_Audio :"https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Others/about-mentoons.mp3"
 const AboutMentoons = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  // const audioRef = React.useRef<HTMLAudioElement>(null);
   const navigate = useNavigate();
+  const sectionRef1 = useRef<HTMLDivElement | null>(null);
+  const sectionRef2 = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (window.location.hash === "#fun-section") {
@@ -27,28 +28,178 @@ const AboutMentoons = () => {
     setSelectedVideo(null);
   };
 
+  useGSAP(() => {
+    const paraSplit = new SplitText(".sub-para", { type: "lines" });
+
+    gsap.from("#heading", {
+      y: 40,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power3.out",
+    });
+
+    gsap.from("#heading-part", {
+      y: 40,
+      opacity: 0,
+      delay: 0.35,
+      duration: 0.7,
+      ease: "power3.out",
+    });
+
+    gsap.from(paraSplit.lines, {
+      y: 30,
+      opacity: 0,
+      stagger: 0.18,
+      duration: 0.9,
+      ease: "power2.out",
+    });
+
+    gsap.from("#about-mentoons", {
+      opacity: 0,
+      scale: 0.92,
+      delay: 0.5,
+      duration: 1.1,
+      ease: "power2.out",
+    });
+
+    return () => paraSplit.revert();
+  }, []);
+
+  useGSAP(() => {
+    const howHelpSplit = new SplitText("#how-helps", { type: "chars" });
+    const howHelpPara = new SplitText("#help-para", { type: "lines" });
+
+    const tl1 = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef1.current,
+        start: "top 75%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    tl1
+      .from(howHelpSplit.chars, {
+        yPercent: -120,
+        opacity: 0,
+        stagger: 0.018,
+        duration: 0.9,
+        ease: "back.out(1.4)",
+      })
+      .from(
+        howHelpPara.lines,
+        {
+          y: 40,
+          opacity: 0,
+          stagger: 0.14,
+          duration: 0.8,
+          ease: "power3.out",
+        },
+        "-=0.6",
+      )
+      .from(
+        ".help-stickers",
+        {
+          y: 60,
+          opacity: 0,
+          scale: 0.75,
+          stagger: 0.16,
+          duration: 0.9,
+          ease: "back.out(1.2)",
+        },
+        "-=0.7",
+      );
+
+    return () => {
+      howHelpPara.revert();
+      howHelpSplit.revert();
+    };
+  }, []);
+
+  // "What We Offer?" section – improved animation
+  useGSAP(() => {
+    const offerTitleSplit = new SplitText("#we-offer", { type: "chars,words" });
+    const offerParaSplit = new SplitText("#offer-para", { type: "lines" });
+
+    const tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef2.current,
+        start: "top 75%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    tl2
+      .from(offerTitleSplit.chars, {
+        yPercent: 140,
+        opacity: 0,
+        stagger: 0.024,
+        duration: 1,
+        ease: "back.out(1.6)",
+      })
+      .from(
+        offerParaSplit.lines,
+        {
+          y: 50,
+          opacity: 0,
+          stagger: 0.16,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "-=0.8",
+      )
+      .from(
+        ".offer-card",
+        {
+          y: 80,
+          opacity: 0,
+          scale: 0.88,
+          stagger: {
+            amount: 0.65,
+            from: "center",
+          },
+          duration: 1.1,
+          ease: "back.out(1.3)",
+        },
+        "-=0.9",
+      );
+
+    return () => {
+      offerParaSplit.revert();
+      offerTitleSplit.revert();
+    };
+  }, []);
+
   return (
     <div className="w-full">
       {/* hero section */}
       <div className="relative flex flex-col items-start justify-center gap-12 p-12 md:flex-row">
         <div className="w-full md:w-[50%] flex flex-col items-center md:items-start">
-          <h2 className="text-3xl font-semibold text-center md:text-4xl lg:text-6xl md:text-start">
-            About <span className="text-primary">Mentoons</span>
+          <h2
+            id="heading"
+            className="text-3xl font-semibold text-center md:text-4xl lg:text-6xl md:text-start"
+          >
+            About{" "}
+            <span id="heading-part" className="text-primary">
+              Mentoons
+            </span>
           </h2>
-          <p className="mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
+          <p className="sub-para mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
             At Mentoons, we believe that gadgets shouldn't replace goodness.
             We're on a mission to help children and families rediscover
             balance—between digital play and real-life values.
           </p>
 
-          <p className="mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
+          <p className="sub-para mt-4 md:mt-8 text-lg md:text-xl leading-relaxed md:leading-loose w-full md:w-[75%] font-medium text-center md:text-start">
             Through engaging workshops, stories, and community-led programs, we
             empower kids to be tech-smart, emotionally resilient, and culturally
             rooted.
           </p>
         </div>
 
-        <div className="relative w-full md:w-[410px] lg:w-[500px] xl:w-[590px] h-auto flex justify-center items-center p-6 ">
+        <div
+          id="about-mentoons"
+          className="relative w-full md:w-[410px] lg:w-[500px] xl:w-[590px] h-auto flex justify-center items-center p-6"
+        >
           <img
             src="/assets/home/addaTV/Rectangle 285.png"
             alt="tv"
@@ -67,22 +218,27 @@ const AboutMentoons = () => {
               playsInline
             >
               <source
-                src={`${
-                  import.meta.env.VITE_STATIC_URL
-                }static/Mentoons Team Video_03.mp4`}
+                src={`${import.meta.env.VITE_STATIC_URL}static/Mentoons Team Video_03.mp4`}
                 type="video/mp4"
               />
             </video>
           </div>
         </div>
       </div>
-      <section className="p-4 py-6 pb-24 md:p-12 lg:p-24">
-        <div className="flex flex-col items-start justify-center gap-6 ">
+
+      <section ref={sectionRef1} className="p-4 py-6 pb-24 md:p-12 lg:p-24">
+        <div className="flex flex-col items-start justify-center gap-6">
           <div>
-            <h2 className="pb-4 text-4xl font-semibold text-center md:text-start">
+            <h2
+              id="how-helps"
+              className="pb-4 text-4xl font-semibold text-center md:text-start"
+            >
               How It Helps Your Kids?
             </h2>
-            <p className="text-xl  md:w-[75%]  text-center md:text-start">
+            <p
+              id="help-para"
+              className="text-xl md:w-[75%] text-center md:text-start"
+            >
               Today’s children are growing up online—but growing apart from
               self-awareness, empathy, and heritage. We’re here to change that.
             </p>
@@ -93,7 +249,7 @@ const AboutMentoons = () => {
               <motion.div
                 key={offering.id}
                 custom={index}
-                className="flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
+                className="help-stickers flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
                 whileHover={{
                   scale: 1.05,
                   transition: { duration: 0.3 },
@@ -115,34 +271,36 @@ const AboutMentoons = () => {
           </motion.div>
         </div>
       </section>
-      <section className="p-4 py-6 pb-24 md:p-12 lg:p-24 ">
-        <div className="flex flex-col items-start justify-center gap-6 ">
-          <div className="pb-8 ">
-            <h2 className="pb-4 text-4xl font-semibold text-center md:text-start">
+
+      <section ref={sectionRef2} className="p-4 py-6 pb-24 md:p-12 lg:p-24">
+        <div className="flex flex-col items-start justify-center gap-6">
+          <div className="pb-8">
+            <h2
+              id="we-offer"
+              className="pb-4 text-4xl font-semibold text-center md:text-start"
+            >
               What We Offer?
             </h2>
-            <p className="text-xl md:w-[75%] text-center md:text-start">
+            <p
+              id="offer-para"
+              className="text-xl md:w-[75%] text-center md:text-start"
+            >
               Today’s children are growing up online—but growing apart from
               self-awareness, empathy, and heritage. We’re here to change that.
             </p>
           </div>
 
-          <motion.div className="flex flex-col items-center w-full gap-4 md:flex-row md:justify-between">
-            {ABOUT_WHAT_WE_OFFER.map((offering, index) => (
-              <motion.div
+          <div className="flex flex-col items-center w-full gap-6 md:flex-row md:flex-wrap md:justify-center lg:justify-between">
+            {ABOUT_WHAT_WE_OFFER.map((offering) => (
+              <div
                 key={offering.id}
-                custom={index}
-                className="flex flex-col items-center gap-4 p-4 rounded-xl w-[280px] h-[280px] justify-center"
-                whileHover={{
-                  scale: 1.05,
-                  transition: { duration: 0.3 },
-                }}
+                className="offer-card flex flex-col items-center gap-4 p-5 rounded-2xl w-[280px] h-[280px] justify-center cursor-pointer bg-white/40 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow"
                 onClick={() => navigate(offering.link)}
               >
                 <img
                   src={offering.imageUrl}
                   alt={offering.title}
-                  className="w-full h-full"
+                  className="w-full h-full object-contain"
                 />
                 <p
                   style={{ color: offering.accentColor }}
@@ -150,11 +308,12 @@ const AboutMentoons = () => {
                 >
                   {offering.title}
                 </p>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
+
       <ProductDisplay />
       <Suspense fallback={<div>Loading...</div>}>
         <Team />
@@ -162,174 +321,7 @@ const AboutMentoons = () => {
       <section className="py-12">
         <FAQ data={FAQ_ABOUT_US} />
       </section>
-      {/* New Mentors Section */}
-      {/*<section className="bg-[#B0E0E6]">
-        <div className="relative px-2 py-12 text-2xl font-semibold text-center md:py-16 md:text-4xl">
-          <h2 className="relative z-20 pb-8">Meet Our Mentors</h2>
-          <p className="text-3xl text-blue-700 md:text-5xl">
-            Inspiring Journeys of Guidance
-          </p>
-          <div className="absolute top-10 right-5 z-2 md:right-[30%]">
-            <img
-              src="/assets/images/persona-family.png"
-              alt=""
-              className="w-36 md:w-52"
-            />
-          </div>
-        </div>
 
-         <div className="relative">
-          <div className="p-4">
-            <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 items-center gap-4 mx-auto relative z-20 w-[80%]">
-                {newMentorVideos.map((video) => (
-                  <div
-                    key={video.title}
-                    className="relative rounded-lg cursor-pointer group"
-                    onClick={() => setSelectedVideo(video.src)}
-                  >
-                    <div className="relative image-wrapper rounded-2xl">
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="w-full h-auto transition-transform duration-300 group-hover:scale-105 rounded-2xl"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 bg-black opacity-0 bg-opacity-30 group-hover:opacity-100 rounded-2xl">
-                        <div className="p-2 bg-white rounded-full">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-12 h-12 text-blue-500"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-2 text-center">
-                      <h3 className="font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-700">
-                        {video.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute left-0 z-0 -top-20">
-            <img
-              src="/assets/images/decorative-illustration.png"
-              alt=""
-              className="rounded-lg w-52 md:w-72"
-            />
-          </div>
-        </div>
-      </section> */}
-      {/* Team Section
-      <Suspense fallback={<div>Loading...</div>}>
-        <Team />
-      </Suspense> */}
-      {/* Fun @ Mentoons Section */}
-      {/* <div>
-        <div className="flex flex-col py-10 text-white bg-mt-teal space-y-7">
-          <div className="py-8 space-y-7" id="fun-section">
-            <div className="space-y-4 text-start">
-              <div className="text-5xl text-center lg:text-7xl w-full font-extrabold tracking-wide leading-[1.10]">
-                Fun @mentoons
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-20 rounded-2xl">
-              <video
-                src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/miscellaneous/Team+Celebration+Video+03.mp4"
-                controls
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-[80%] mx-auto rounded-2xl"
-              ></video>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* Mentoons In Action Section */}
-      {/* <section className="bg-[#FFDB67]">
-        <div className="relative px-2 py-12 text-2xl font-semibold text-center md:py-16 md:text-4xl">
-          <h2 className="relative z-20 pb-8">Mentoons In Action</h2>
-          <p className="text-3xl text-orange-600 md:text-5xl">
-            Behind the Scene with our Guides
-          </p>
-          <div className="absolute top-10 right-5 z-2 md:right-[30%]">
-            <img
-              src="/assets/images/persona-family.png"
-              alt=""
-              className="w-36 md:w-52"
-            />
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="p-4">
-            <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-4 mx-auto relative z-20 w-[80%]">
-                {mentorVideos.map((video) => (
-                  <div
-                    key={video.title}
-                    className="relative rounded-lg cursor-pointer group"
-                    onClick={() => setSelectedVideo(video.src)}
-                  >
-                    <div className="relative image-wrapper rounded-2xl">
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="w-full h-auto transition-transform duration-300 group-hover:scale-105 rounded-2xl"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 bg-black opacity-0 bg-opacity-30 group-hover:opacity-100 rounded-2xl">
-                        <div className="p-2 bg-white rounded-full">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-12 h-12 text-orange-500"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.3A1.125 1.125 0 0 1 9 15.183V8.817c0-.857.921-1.4 1.671-.983l5.603 3.3Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-2 text-center">
-                      <h3 className="font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        {video.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute left-0 z-0 -top-20">
-            <img
-              src="/assets/images/decorative-illustration.png"
-              alt=""
-              className="rounded-lg w-52 md:w-72"
-            />
-          </div>
-        </div>
-      </section> */}
-      {/* Video Modal */}
       {selectedVideo && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"

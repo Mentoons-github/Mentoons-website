@@ -17,6 +17,7 @@ import {
   UserStatusInterface,
   WatchStatusParams,
 } from "./adda/status";
+import { SiteCategory, Site_FAQ, Site_FAQData } from "./faq";
 import { UserSummary } from "./adda/home";
 import { DropDownInterface } from "./common/header";
 import { Groups } from "./groups/groups";
@@ -153,6 +154,9 @@ export type {
   Celebration,
   ApiErrorResponse,
   UpcomingCelebration,
+  SiteCategory,
+  Site_FAQ,
+  Site_FAQData,
 };
 
 export { MediaType, PostType };

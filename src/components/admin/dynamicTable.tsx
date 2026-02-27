@@ -11,6 +11,7 @@ import {
   UserCheck,
   SortDesc,
   SortAsc,
+  Share,
 } from "lucide-react";
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
@@ -60,6 +61,7 @@ interface DynamicTableProps<T> {
   onSelectAll?: (isSelected: boolean) => void;
   updateStatus?: ((applicationId: string, status: string) => void) | undefined;
   handleFilter?: (value: BblApplicationFilterStatus) => void;
+  onShare?: (val: T) => void;
 }
 
 const DynamicTable = <T extends Record<string, any>>({
@@ -87,6 +89,7 @@ const DynamicTable = <T extends Record<string, any>>({
   onSelectAll,
   updateStatus,
   handleFilter,
+  onShare,
 }: DynamicTableProps<T>) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
@@ -132,19 +135,25 @@ const DynamicTable = <T extends Record<string, any>>({
   }, [data, debouncedSearchTerm, columns, onSearch]);
 
   const displayData = onSearch ? data : filteredData;
+  console.log(filteredData);
   const isAllSelected =
     displayData.length > 0 &&
     displayData.every((i) => selectedItems.has(String(i[idKey])));
 
+  const isLikelyDate = (value: any): boolean => {
+    if (value instanceof Date) return true;
+    if (typeof value !== "string") return false;
+    const dateRegex = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$|^\d{2}\/\d{2}\/\d{4}$/;
+    return dateRegex.test(value.trim()) && !isNaN(Date.parse(value));
+  };
+
   const defaultFormatCell = (value: any): React.ReactNode => {
     if (value == null) return "-";
-    if (value instanceof Date || !isNaN(Date.parse(String(value))))
-      return new Date(value).toLocaleDateString();
+    if (isLikelyDate(value)) return new Date(value).toLocaleDateString();
     if (Array.isArray(value))
       return value.length ? `${value.length} items` : "None";
     if (typeof value === "object") return "Object";
     if (typeof value === "boolean") return value ? "Yes" : "No";
-
     const s = String(value);
     return s.length > maxCellLength ? `${s.slice(0, maxCellLength)}...` : s;
   };
@@ -276,6 +285,15 @@ const DynamicTable = <T extends Record<string, any>>({
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+        {onShare && (
+          <button
+            onClick={() => onShare(item)}
+            className="relative p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+            title="Share"
+          >
+            <Share className="w-4 h-4" />
           </button>
         )}
         <BlockButton item={item} />

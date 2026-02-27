@@ -15,7 +15,7 @@ interface RightSectionProps {
 
 const RightSection = ({ feedback, pos }: RightSectionProps) => {
   return (
-    <div className={`flex items-center justify-${pos} w-full`}>
+    <div className={`user-feedback flex items-center justify-${pos} w-full`}>
       <div className="flex items-start justify-center gap-3 sm:gap-4 lg:gap-5 w-full sm:w-5/6 lg:w-3/4 h-full p-3 sm:p-4 rounded-xl shadow-md border border-gray-300">
         <div className="rounded-full w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 overflow-hidden flex-shrink-0">
           <img

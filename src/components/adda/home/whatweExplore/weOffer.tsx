@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { gsap } from "gsap";
 
 const WhatWeOffer = ({
   onActionButtonClick,
@@ -32,14 +33,82 @@ const WhatWeOffer = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLButtonElement>(null);
+  const actionButtonRef = useRef<HTMLButtonElement>(null);
+  const listItemRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.fromTo(
+      containerRef.current,
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5 },
+    )
+      .fromTo(
+        titleRef.current,
+        { x: -20, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.4 },
+        "-=0.2",
+      )
+      .fromTo(
+        actionButtonRef.current,
+        { scale: 0, opacity: 0, rotate: -180 },
+        {
+          scale: 1,
+          opacity: 1,
+          rotate: 0,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        },
+        "-=0.2",
+      );
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const targets = listItemRefs.current.filter(Boolean);
+      gsap.fromTo(
+        targets,
+        { x: -30, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.35,
+          stagger: 0.08,
+          ease: "power2.out",
+        },
+      );
+    }
+  }, [isOpen]);
+
   const toggleDetails = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleActionHoverEnter = () => {
+    gsap.to(actionButtonRef.current, {
+      rotate: 15,
+      scale: 1.15,
+      duration: 0.25,
+      ease: "power2.out",
+    });
+  };
+
+  const handleActionHoverLeave = () => {
+    gsap.to(actionButtonRef.current, {
+      rotate: 0,
+      scale: 1,
+      duration: 0.25,
+      ease: "power2.out",
+    });
+  };
+
   return (
-    <div className="p-5 font-inter bg-[#FFEDD5] rounded-xl">
+    <div ref={containerRef} className="p-5 font-inter bg-[#FFEDD5] rounded-xl">
       <div className="flex items-center justify-between gap-4 mb-4">
         <button
+          ref={titleRef}
           onClick={toggleDetails}
           className="flex items-center gap-2 text-[#F97316] text-3xl font-bold whitespace-nowrap focus:outline-none focus:ring-0 active:outline-none active:ring-0"
           aria-expanded={isOpen}
@@ -66,7 +135,10 @@ const WhatWeOffer = ({
         </button>
 
         <motion.button
+          ref={actionButtonRef}
           onClick={onActionButtonClick}
+          onMouseEnter={handleActionHoverEnter}
+          onMouseLeave={handleActionHoverLeave}
           initial={{ scale: 1 }}
           animate={{ scale: [1, 1.2, 1] }}
           transition={{
@@ -97,11 +169,25 @@ const WhatWeOffer = ({
             className="mx-auto space-y-4 mt-6 overflow-hidden"
           >
             {Object.entries(details).map(([key, value], index) => (
-              <li key={index}>
+              <li key={index} ref={(el) => (listItemRefs.current[index] = el)}>
                 <NavLink
                   to={value.link}
                   className="w-full text-left flex items-start gap-2 md:gap-5 bg-white hover:bg-orange-100 text-gray-700 p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400"
                   aria-label={`Learn more about ${key}`}
+                  onMouseEnter={(e) =>
+                    gsap.to(e.currentTarget, {
+                      x: 4,
+                      duration: 0.2,
+                      ease: "power2.out",
+                    })
+                  }
+                  onMouseLeave={(e) =>
+                    gsap.to(e.currentTarget, {
+                      x: 0,
+                      duration: 0.2,
+                      ease: "power2.out",
+                    })
+                  }
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -57,6 +57,7 @@ import CareerCorner from "./pages/CareerCorner.tsx";
 import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
 import Feedback from "./pages/v2/feedback/feedback.tsx";
 import Collaborate from "./pages/v2/joinus/collaborate/collaborate.tsx";
+import BecomeMentor from "./pages/v2/joinus/becomeMentor.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -64,7 +65,7 @@ const ComicsPageV2 = lazy(() => import("./pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("./pages/Podcastv2"));
 const Workshopv2 = lazy(() => import("./pages/Workshopv2"));
 const FreeDownload = lazy(() => import("./pages/v2/user/freeDownloads.tsx"));
-const FAQ = lazy(() => import("./components/common/FAQ"));
+const FAQ = lazy(() => import("./pages/faq.tsx"));
 const Plans = lazy(() => import("./components/common/Plans"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const QuizHome = lazy(() => import("./pages/quiz/quizHome.tsx"));
@@ -123,6 +124,7 @@ const routes = [
   { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
   { path: "/joinus/collaborate", element: <Collaborate /> },
   { path: "/joinus/collaborate/:slug", element: <Collaborate /> },
+  { path: "/joinus/become-mentor", element: <BecomeMentor /> },
   { path: "/joinus/explore", element: <Explore /> },
   {
     path: "/assessment-page",

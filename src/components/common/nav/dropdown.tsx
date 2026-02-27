@@ -37,6 +37,10 @@ const DropDown = ({
     }
 
     if (labelType === "joinus") {
+      if (category === "Join as mentor") {
+        navigate(`${basePath}/become-mentor`);
+        return;
+      }
       navigate(`${basePath}/${category.toLowerCase()}`);
       // navigate(`${basePath}/careers`);
       return;
