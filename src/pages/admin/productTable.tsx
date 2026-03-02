@@ -174,6 +174,18 @@ const ProductTable = () => {
       try {
         setIsLoading(true);
         const token = await getToken();
+        // const response = await axios.get(
+        //   `${
+        //     import.meta.env.VITE_PROD_URL
+        //   }/products?search=${debouncedSearchTerm}&sortBy=createdAt&order=${sortOrder}&page=${currentPage}&limit=${limit}`,
+        //   {
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       Accept: "application/json",
+        //       Authorization: `Bearer ${token}`,
+        //     },
+        //   }
+        // );
         const query = buildQuery();
         const url = `${import.meta.env.VITE_PROD_URL}/products?${query}`;
 
@@ -185,6 +197,7 @@ const ProductTable = () => {
           },
         });
 
+        console.log(response.data.data, "ssssssssssssssssssss");
         const product = response.data.data.map((item: any) => {
           const {
             details,

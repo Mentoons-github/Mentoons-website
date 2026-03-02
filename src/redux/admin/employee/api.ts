@@ -10,14 +10,23 @@ const BASE_URL = `${import.meta.env.VITE_PROD_URL}/employee`;
 
 export const getEmployees = createAsyncThunk<
   EmployeeDataResponse,
-  { sortOrder: string; searchTerm: string; page: number; limit: number }
->("employees/getEmployees", async ({ sortOrder, searchTerm, page, limit }) => {
-  const { data } = await axios.get<EmployeeDataResponse>(`${BASE_URL}/`, {
-    params: { sortOrder, search: searchTerm, page, limit },
-    headers: { Accept: "application/json" },
-  });
-  return data;
-});
+  {
+    sortOrder: string;
+    searchTerm: string;
+    page: number;
+    limit: number;
+    from?: string;
+  }
+>(
+  "employees/getEmployees",
+  async ({ sortOrder, searchTerm, page, limit, from }) => {
+    const { data } = await axios.get<EmployeeDataResponse>(`${BASE_URL}/`, {
+      params: { sort: sortOrder, search: searchTerm, page, limit, from },
+      headers: { Accept: "application/json" },
+    });
+    return data;
+  },
+);
 
 // Get Employee by ID
 export const getEmployeeById = createAsyncThunk<
@@ -28,7 +37,7 @@ export const getEmployeeById = createAsyncThunk<
     `${BASE_URL}/${id}`,
     {
       headers: { Accept: "application/json" },
-    }
+    },
   );
   return data;
 });
@@ -47,7 +56,7 @@ export const createEmployee = createAsyncThunk<
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    }
+    },
   );
   return data;
 });
@@ -80,8 +89,7 @@ export const updateEmployee = createAsyncThunk<
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    }
+    },
   );
   return data;
 });
-

@@ -32,26 +32,26 @@ export const getJobs = createAsyncThunk(
       page,
       limit,
     }: { sortOrder: string; searchTerm: string; page: number; limit: number },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/career/jobs`,
         {
-          params: { sortOrder, search: searchTerm, page, limit },
+          params: { sort: sortOrder, search: searchTerm, page, limit },
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
       return response.data as JobDataResponse;
     } catch (error: any) {
       return rejectWithValue(
-        axios.isAxiosError(error) ? error.message : "Failed to fetch jobs"
+        axios.isAxiosError(error) ? error.message : "Failed to fetch jobs",
       );
     }
-  }
+  },
 );
 
 export const getJobById = createAsyncThunk(
@@ -65,15 +65,15 @@ export const getJobById = createAsyncThunk(
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
       return response.data as singleJobDataResponse;
     } catch (error: any) {
       return rejectWithValue(
-        axios.isAxiosError(error) ? error.message : "Failed to fetch job"
+        axios.isAxiosError(error) ? error.message : "Failed to fetch job",
       );
     }
-  }
+  },
 );
 
 export const createJob = createAsyncThunk(
@@ -88,15 +88,15 @@ export const createJob = createAsyncThunk(
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
-        axios.isAxiosError(error) ? error.message : "Failed to create job"
+        axios.isAxiosError(error) ? error.message : "Failed to create job",
       );
     }
-  }
+  },
 );
 
 export const updateJob = createAsyncThunk(
@@ -111,15 +111,15 @@ export const updateJob = createAsyncThunk(
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
-        axios.isAxiosError(error) ? error.message : "Failed to update job"
+        axios.isAxiosError(error) ? error.message : "Failed to update job",
       );
     }
-  }
+  },
 );
 
 export const deleteJob = createAsyncThunk(
@@ -135,10 +135,10 @@ export const deleteJob = createAsyncThunk(
       return { id };
     } catch (error: any) {
       return rejectWithValue(
-        axios.isAxiosError(error) ? error.message : "Failed to delete job"
+        axios.isAxiosError(error) ? error.message : "Failed to delete job",
       );
     }
-  }
+  },
 );
 
 export const getAppliedJobs = createAsyncThunk(
@@ -157,7 +157,7 @@ export const getAppliedJobs = createAsyncThunk(
       page: number;
       limit: number;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await axios.get(
@@ -168,17 +168,17 @@ export const getAppliedJobs = createAsyncThunk(
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
       return response.data as JobApplicationResponse;
     } catch (error: any) {
       return rejectWithValue(
         axios.isAxiosError(error)
           ? error.message
-          : "Failed to fetch applied jobs"
+          : "Failed to fetch applied jobs",
       );
     }
-  }
+  },
 );
 
 const careerSlice = createSlice({
@@ -255,7 +255,7 @@ const careerSlice = createSlice({
       const updatedJob = action.payload.data;
       if (state.jobs?.data?.jobs) {
         state.jobs.data.jobs = state.jobs.data.jobs.map((job) =>
-          job._id === updatedJob._id ? updatedJob : job
+          job._id === updatedJob._id ? updatedJob : job,
         );
       }
       if (state.job?.data && state.job.data._id === updatedJob._id) {
@@ -276,11 +276,11 @@ const careerSlice = createSlice({
       const id = action.payload.id;
       if (state.jobs?.data?.jobs) {
         state.jobs.data.jobs = state.jobs.data.jobs.filter(
-          (job) => job._id !== id
+          (job) => job._id !== id,
         );
         state.jobs.data.totalJobs = Math.max(
           (state.jobs.data.totalJobs || 0) - 1,
-          0
+          0,
         );
       }
     });

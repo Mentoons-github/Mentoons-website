@@ -24,6 +24,9 @@ export default {
       "3xl": "1920px",
     },
     extend: {
+      gridTemplateColumns: {
+        13: "repeat(13, minmax(0, 1fr))",
+      },
       fontFamily: {
         montserrat: "Montserrat",
         akshar: ["Akshar", "sans-serif"],

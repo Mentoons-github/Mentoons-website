@@ -136,7 +136,16 @@ const EmployeeSidebar = ({ showSession }: { showSession: boolean }) => {
         <nav className="flex-1 overflow-y-auto py-4 px-2">
           <ul className="space-y-1">
             {navItems
-              .filter((item) => item.name !== "Session Calls" || showSession)
+              .filter((item) => {
+                if (!showSession) {
+                  return ![
+                    "Session Calls",
+                    "Workshops",
+                    "Data Capture",
+                  ].includes(item.name);
+                }
+                return true;
+              })
               .map((item) => (
                 <Tooltip
                   key={item.name}

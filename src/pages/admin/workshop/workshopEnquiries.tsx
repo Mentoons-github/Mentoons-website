@@ -23,7 +23,7 @@ const GetWorkshopEnquiries = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [enquiryToDelete, setEnquiryToDelete] =
     useState<WorkshopEnquiry | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);

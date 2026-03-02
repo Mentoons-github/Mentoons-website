@@ -30,7 +30,24 @@ const CommonModal = ({ values, isOpen, onClose }: CommonModalProps) => {
               <div className="font-semibold text-gray-800 capitalize text-sm">
                 {k.replace(/([A-Z])/g, " $1").trim()}
               </div>
-              <div className="mt-1 text-gray-600 text-sm">{renderValue(v)}</div>
+
+              <div className="mt-1 text-gray-600 text-sm">
+                {(typeof v === "string" &&
+                  (k.toLowerCase().includes("portfolio") ||
+                    k.toLowerCase().includes("resume"))) ||
+                k.toLocaleLowerCase().includes("document") ? (
+                  <a
+                    href={v as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline break-all hover:text-blue-800"
+                  >
+                    View Document
+                  </a>
+                ) : (
+                  renderValue(v)
+                )}
+              </div>
             </div>
           ))}
         </div>
