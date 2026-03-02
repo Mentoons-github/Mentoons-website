@@ -16,7 +16,7 @@ const Celebrations = () => {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedBirthdayDate, setSearchedBirthdayDate] = useState<Date | null>(
-    null
+    null,
   );
   const [confetti, setConfetti] = useState(false);
 
@@ -25,7 +25,7 @@ const Celebrations = () => {
       const match = celebrations.find(
         (c) =>
           c.type === "Birthday" &&
-          c.name.toLowerCase().includes(searchQuery.toLowerCase())
+          c.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       if (match) {
         const d = new Date(match.date);
@@ -50,7 +50,7 @@ const Celebrations = () => {
         if (isNaN(cd.getTime())) return null;
         if (cd < today) cd.setFullYear(today.getFullYear() + 1);
         const daysUntil = Math.ceil(
-          (cd.getTime() - today.getTime()) / 86400000
+          (cd.getTime() - today.getTime()) / 86400000,
         );
         return { ...c, daysUntil };
       })
@@ -59,7 +59,7 @@ const Celebrations = () => {
   }, [celebrations]);
 
   const currentMonthCelebs = celebrations.filter(
-    (c) => new Date(c.date).getMonth() === currentDate.getMonth()
+    (c) => new Date(c.date).getMonth() === currentDate.getMonth(),
   );
   const todaysCelebs = celebrations.filter((c) => {
     const cd = new Date(c.date);
@@ -71,53 +71,60 @@ const Celebrations = () => {
 
   if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-2xl">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-4xl mb-3 animate-bounce">🎂</div>
+          <p className="text-gray-400 font-medium text-sm">
+            Loading celebrations...
+          </p>
+        </div>
       </div>
     );
+
   if (error)
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-xl text-red-600">{error}</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <p className="text-rose-500 font-medium">{error}</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-4 md:p-6 lg:p-8 relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 sm:w-72 sm:h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div
-          className="absolute top-40 right-10 w-64 h-64 sm:w-72 sm:h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div
-          className="absolute -bottom-8 left-1/2 w-64 h-64 sm:w-72 sm:h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"
-          style={{ animationDelay: "4s" }}
-        ></div>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      {/* Subtle dot-grid background pattern */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, #d1d5db 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.4,
+        }}
+      />
 
+      {/* Confetti overlay */}
       {confetti && (
-        <div className="fixed inset-0 pointer-events-none z-50">
-          {[...Array(50)].map((_, i) => (
+        <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+          {[...Array(40)].map((_, i) => (
             <div
               key={i}
-              className="absolute text-xl sm:text-2xl"
+              className="absolute text-lg"
               style={{
                 left: `${Math.random() * 100}%`,
-                top: `-50px`,
-                animation: `fall ${2 + Math.random() * 3}s linear`,
+                top: `-40px`,
+                animation: `fall ${2 + Math.random() * 3}s linear forwards`,
+                animationDelay: `${Math.random() * 0.5}s`,
               }}
             >
               {
-                ["Party", "Balloon", "Gift", "Sparkles", "Celebrate"][
-                  Math.floor(Math.random() * 5)
+                ["🎉", "🎈", "🎁", "✨", "🥳", "🌟"][
+                  Math.floor(Math.random() * 6)
                 ]
               }
             </div>
           ))}
         </div>
       )}
-      <style>{`@keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }`}</style>
+      <style>{`@keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }`}</style>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <CelebrationHeader />
@@ -136,7 +143,7 @@ const Celebrations = () => {
           onConfettiLeave={() => setConfetti(false)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
           <div className="lg:col-span-2">
             <CelebrationCalender
               currentDate={currentDate}
@@ -147,8 +154,8 @@ const Celebrations = () => {
                   new Date(
                     currentDate.getFullYear(),
                     currentDate.getMonth() - 1,
-                    1
-                  )
+                    1,
+                  ),
                 )
               }
               onNextMonth={() =>
@@ -156,8 +163,8 @@ const Celebrations = () => {
                   new Date(
                     currentDate.getFullYear(),
                     currentDate.getMonth() + 1,
-                    1
-                  )
+                    1,
+                  ),
                 )
               }
               onToday={() => setCurrentDate(new Date())}
@@ -165,7 +172,7 @@ const Celebrations = () => {
             />
           </div>
 
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4">
             <ThisMonthPanel
               celebrations={currentMonthCelebs}
               onDateClick={setSelectedDate}
@@ -186,7 +193,7 @@ const Celebrations = () => {
             celebrations={celebrations.filter(
               (c) =>
                 new Date(c.date).getDate() === selectedDate &&
-                new Date(c.date).getMonth() === currentDate.getMonth()
+                new Date(c.date).getMonth() === currentDate.getMonth(),
             )}
             onClose={() => setSelectedDate(null)}
           />
