@@ -11,10 +11,11 @@ const PAGE_SIZE = 3;
 
 const ComingSoonPanel: React.FC<ComingSoonPanelProps> = ({ celebrations }) => {
   const [page, setPage] = useState(0);
+  const filtered = celebrations.filter((celeb) => celeb.daysUntil <= 31);
 
-  const totalPages = Math.max(1, Math.ceil(celebrations.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const start = page * PAGE_SIZE;
-  const visible = celebrations.slice(start, start + PAGE_SIZE);
+  const visible = filtered.slice(start, start + PAGE_SIZE);
 
   const goPrev = () => setPage((p) => Math.max(0, p - 1));
   const goNext = () => setPage((p) => Math.min(totalPages - 1, p + 1));

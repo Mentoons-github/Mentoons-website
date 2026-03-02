@@ -52,9 +52,7 @@ const Categories = ({
       { scale: 0.93 },
       { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.4)" },
     );
-
-    // If clicking the already-active category, keep it selected (don't deselect)
-    // unless it's not "All" — clicking "All" again keeps "All"
+    
     const next = active === label && label !== "All" ? null : label;
     setActive(next ?? ("All" as SiteCategory));
     onSelect?.(next);
