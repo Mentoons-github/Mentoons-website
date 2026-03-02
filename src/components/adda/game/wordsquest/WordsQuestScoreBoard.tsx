@@ -20,8 +20,6 @@ const WordsQuestScoreBoard: React.FC<PatternRaceResultScreenProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  console.log(answers, "answeerrrss");
-
   const totalScore = score.reduce((acc, curr) => acc + curr.score, 0);
 
   return (

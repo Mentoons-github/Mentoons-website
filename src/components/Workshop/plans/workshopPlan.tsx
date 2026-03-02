@@ -24,9 +24,9 @@ import FAQCommon from "@/components/adda/faq";
 const WorkshopPlans = () => {
   const [showFAQ, setShowFAQ] = useState(false);
   const [plans, setPlans] = useState<WorkshopPlan[]>([]);
-  const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number | null>(
-    null,
-  );
+  // const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number | null>(
+  //   null,
+  // );
   const [carouselClick, setCarouselClick] = useState<CarouselClickType | null>(
     null,
   );
@@ -135,7 +135,7 @@ const WorkshopPlans = () => {
           }
           carouselClick={carouselClick}
         />
-        <div className="relative overflow-hidden rounded-2xl bg-black p-4 md:p-8 shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl  p-4 md:p-8 shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24"></div>
 
@@ -233,17 +233,7 @@ const WorkshopPlans = () => {
           <div className="">
             <PlanCard plan={selectedPlan} onPayClick={handlePayClick} />
             <div className="flex items-start justify-center gap-10 flex-wrap">
-              {plans.length > 0 ? (
-                plans.map((plan, index) => (
-                  <PlanCard
-                    key={index}
-                    plan={plan}
-                    onPayClick={handlePayClick}
-                  />
-                ))
-              ) : (
-                <p className="text-gray-500 text-lg">Loading plans...</p>
-              )}
+          
             </div>
           </div>
         </div>

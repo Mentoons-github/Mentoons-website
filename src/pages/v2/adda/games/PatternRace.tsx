@@ -35,6 +35,7 @@ const PatternRace = () => {
 
   useEffect(() => {
     if (currentState !== "play" || gameOver) return;
+    if (isInstructionOpen) return;
 
     const interval = setInterval(() => {
       setTimer((t) => {
@@ -48,7 +49,7 @@ const PatternRace = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentState, gameOver]);
+  }, [currentState, gameOver, isInstructionOpen]);
 
   const gameId = `pattern_race_${difficulty}`;
 

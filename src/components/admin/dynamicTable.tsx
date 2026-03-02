@@ -16,6 +16,7 @@ import {
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
 import BplApplicationViewModal from "./workshop/BplApplicationViewModal";
+import { BplVerificationTypes } from "@/types/workshopsV2/bplVerificationTypes";
 
 type BblApplicationFilterStatus = "" | "Pending" | "Approved" | "Rejected";
 
@@ -100,7 +101,7 @@ const DynamicTable = <T extends Record<string, any>>({
   const [bplApplicationModalOpen, setBplApplicationModalOpen] =
     useState<boolean>(false);
   const [selectedBplApplication, setSelectedBplApplication] =
-    useState<T | null>(null);
+    useState<BplVerificationTypes | null>(null);
 
   useEffect(() => setLocalSearchTerm(searchTerm), [searchTerm]);
 

@@ -37,20 +37,21 @@ const WordsQuest = () => {
   useEffect(() => {
     if (currentState !== "play") return;
     if (timer === 0) return;
+    if (isInstructionOpen) return;
 
     const interval = setInterval(() => {
       setTimer((prev) => prev - 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentState, timer]);
+  }, [currentState, isInstructionOpen, timer]);
 
   const gameId = `words_quest_`;
 
   const gameInstructions = GAME_INSTRUCTIONS.find(
     (inst) =>
       inst.game.toLowerCase().replace(/_/g, "").replace(/\s+/g, "") ===
-      "patternrace",
+      "wordsquest",
   );
 
   const handleGameComplete = (roundData: RoundScore) => {
@@ -74,7 +75,7 @@ const WordsQuest = () => {
     try {
       const token = await getToken();
       if (token) {
-        const success = totalScore > 0;
+        const success = totalScore > 80;
 
         const response = await postScore({
           body: {

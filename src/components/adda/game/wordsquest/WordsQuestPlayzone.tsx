@@ -14,7 +14,7 @@ interface PatternRacePlayzoneProps {
     foundWords: string[];
   }) => void;
   increaseRoundCount: () => void;
-  decreaswRoundCount: () => void;
+  decreaswRoundCount?: () => void;
   roundCount: number;
   resetTimer: () => void;
 }
@@ -24,7 +24,7 @@ const WordsQuestPlayzone = ({
   onGameComplete,
   timer,
   increaseRoundCount,
-  decreaswRoundCount,
+  // decreaswRoundCount,
   roundCount,
   resetTimer,
 }: PatternRacePlayzoneProps) => {
@@ -41,7 +41,7 @@ const WordsQuestPlayzone = ({
     resetTimer();
   }, [timeOver]);
 
-  console.log(decreaswRoundCount);
+  // console.log(decreaswRoundCount);
 
   const currentGame = WORDS_QUEST[roundCount];
 
@@ -76,10 +76,15 @@ const WordsQuestPlayzone = ({
       (w) => w === selectedWord || w === reversedWord,
     );
 
-    if (matchedWord && !foundWords.includes(matchedWord)) {
-      setFoundWords((prev) => [...prev, matchedWord]);
-      setFoundCells((prev) => [...prev, ...selectedCells]);
-      setScore((prev) => prev + 1);
+    if (matchedWord) {
+      setFoundWords((prev) => {
+        if (prev.includes(matchedWord)) return prev;
+
+        setFoundCells((cells) => [...cells, ...selectedCells]);
+        setScore((score) => score + 1);
+
+        return [...prev, matchedWord];
+      });
     }
 
     setSelectedCells([]);
@@ -110,6 +115,7 @@ const WordsQuestPlayzone = ({
   // const handlePrevious = () => {
   //   decreaswRoundCount();
   // };
+  
 
   return (
     <div
@@ -120,9 +126,8 @@ const WordsQuestPlayzone = ({
         backgroundPosition: "center",
       }}
     >
-      {/* Content */}
       <div className="relative z-20">
-        <PatterRaceHeader score={score} timer={timer} />
+        <PatterRaceHeader score={score} timer={timer} roundCount={roundCount} />
       </div>
       <div className="relative flex flex-col items-center justify-center">
         <img
@@ -138,7 +143,7 @@ const WordsQuestPlayzone = ({
           handleMouseEnter={handleMouseEnter}
           handleMouseUp={handleMouseUp}
           selectedCells={selectedCells}
-          isDragging = {isDragging}
+          isDragging={isDragging}
         />
       </div>
       <div className="absolute bottom-4  lg:top-28 right-10 z-10">
@@ -146,19 +151,19 @@ const WordsQuestPlayzone = ({
           className="bg-[#c66930] flex items-center justify-center gap-2 px-3 py-1 rounded text-lg font-bold text-white border-2 border-white hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
           onClick={handleNext}
         >
-          Next
+          {roundCount === WORDS_QUEST.length - 1 ? "Finish" : "Next"}
           <ArrowRight />
         </button>
       </div>
-      {/* <div className="absolute bottom-4  lg:top-28 left-10 z-10">
-        <button
+      <div className="absolute bottom-4  lg:top-28 left-10 z-10">
+        {/* <button
           className="bg-[#c66930] flex items-center justify-center gap-2 px-3 py-1 rounded text-lg font-bold text-white border-2 border-white hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
-          onClick={handlePrevious}
+          // onClick={handlePrevious}
         >
           <ArrowLeft />
           Previous
-        </button>
-      </div> */}
+        </button> */}
+      </div>
     </div>
   );
 };

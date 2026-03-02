@@ -255,22 +255,19 @@ export const GAME_INSTRUCTIONS: Games[] = [
         text: "Look at the inventions and inventors displayed.",
         icon: "Lightbulb",
         type: "image",
-        media:
-          "/assets/games/inventors/instructions/1st.png",
+        media: "/assets/games/inventors/instructions/1st.png",
       },
       {
         text: "Dreag and match the invention to its correct inventor using names and pictures.",
         icon: "UserCheck",
         type: "video",
-        media:
-          "/assets/games/inventors/instructions/2nd.mp4",
+        media: "/assets/games/inventors/instructions/2nd.mp4",
       },
       {
         text: "Please Memmorize and complete level within given time.",
         icon: "CheckCircle",
         type: "image",
-        media:
-          "/assets/games/inventors/instructions/3rd.png",
+        media: "/assets/games/inventors/instructions/3rd.png",
       },
     ],
   },
@@ -411,6 +408,29 @@ export const GAME_INSTRUCTIONS: Games[] = [
         icon: "BarChart3",
         type: "image",
         media: "/assets/games/patternRace/instructions/header.png",
+      },
+    ],
+  },
+  {
+    game: "Words Quest",
+    steps: [
+      {
+        text: "You are given a word grid containing 10 hidden words.",
+        icon: "TrendingUp",
+        type: "image",
+        media: "/assets/games/wordsQuest/instructions/instruction1.png",
+      },
+      {
+        text: "Drag across the letters to find and unlock the hidden words.",
+        icon: "Hand",
+        type: "video",
+        media: "/assets/games/wordsQuest/instructions/instruction2.mp4",
+      },
+      {
+        text: "Find all the words within the given time limit.",
+        icon: "BarChart3",
+        type: "image",
+        media: "/assets/games/wordsQuest/instructions/instruction3.png",
       },
     ],
   },
