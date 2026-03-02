@@ -34,6 +34,7 @@ import ViewProduct from "@/pages/admin/viewProducts";
 import AddWorkshop from "@/pages/admin/workshop/addWorkshop/addWorkshop";
 import AllWorkshops from "@/pages/admin/workshop/addWorkshop/allWorkshops";
 import AllMeetups from "@/pages/admin/workshop/allMeetups/allMeetups";
+import BplVerification from "@/pages/admin/workshop/BplVerification";
 import ViewEnquiry from "@/pages/admin/workshop/viewEnquiry";
 import GetWorkshopEnquiries from "@/pages/admin/workshop/workshopEnquiries";
 import WorkshopSessions from "@/pages/admin/workshop/WorkshopSessions";
@@ -82,6 +83,7 @@ const AdminRouter = () => {
           <Route path="add-workshop" element={<AddWorkshop />} />
           <Route path="workshops" element={<AllWorkshops />} />
           <Route path="workshop-sessions" element={<WorkshopSessions />} />
+          <Route path="bpl-verification" element={<BplVerification />} />
 
           {/*Meetup */}
           <Route path="add-meetup" element={<AddMeetup />} />

@@ -18,7 +18,7 @@ const AllJobs = () => {
   const { jobs, loading, error } = useSelector(
     (state: RootState) => state.careerAdmin
   );
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);

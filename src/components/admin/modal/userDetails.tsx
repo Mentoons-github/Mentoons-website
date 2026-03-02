@@ -33,7 +33,8 @@ interface DetailsModalProps {
     | "employee"
     | "job"
     | "workshop"
-    | "meetups";
+    | "meetups"
+    | "bplVerification";
   onClose: () => void;
   sortOrder?: string;
   searchTerm?: string;
@@ -66,7 +67,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           const token = await getToken();
           const res = await axios.get(
             `${import.meta.env.VITE_PROD_URL}/employee/${item._id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           setEmployee(res.data.data.fullDetails || res.data.data);
         } catch (err) {
@@ -94,14 +95,14 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           token,
           action: action === "approve" ? "approved" : "rejected",
           employeeId: data._id,
-        })
+        }),
       );
 
       if (handleProfileEdit.fulfilled.match(result)) {
         successToast(
           action === "approve"
             ? "Profile edit approved"
-            : "Profile edit rejected"
+            : "Profile edit rejected",
         );
         setActionStatus({
           status: "success",

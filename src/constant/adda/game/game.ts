@@ -83,6 +83,11 @@ export const GAMES = [
     thumbnail: "/assets/games/patternRace/thumbnail.jpg",
     link: `${base_url}adda/game-lobby/pattern-race`,
   },
+  {
+    title: "Words Quest",
+    thumbnail: "/assets/games/wordsQuest/title Logo.png",
+    link: `${base_url}adda/game-lobby/words-quest`,
+  },
 ];
 
 export const getPodiumColor = (position: number) => {
