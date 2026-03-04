@@ -60,13 +60,11 @@ const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
-  // 1. Filter by category
   const categoryFiltered =
     selectedCategory === "All"
       ? SITE_FAQ
       : SITE_FAQ.filter((item) => item.category === selectedCategory);
 
-  // 2. Filter by search query
   const filteredFaqs =
     searchQuery.trim() === ""
       ? categoryFiltered
@@ -112,22 +110,25 @@ const FAQ = () => {
   return (
     <div className="min-h-screen bg-gray-50/40">
       <FaqHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-      <div className="pt-16">
+
+      <div className="pt-14 sm:pt-16">
         <Categories
           categories={CATEGORY_CONFIGS}
           defaultCategory="All"
           onSelect={(cat) => setSelectedCategory(cat ?? "All")}
         />
 
-        <div ref={listRef} className="mt-12 space-y-10 px-6 md:px-20 pb-20">
+        <div
+          ref={listRef}
+          className="mt-10 sm:mt-12 space-y-8 sm:space-y-10 px-4 sm:px-8 md:px-14 lg:px-20 pb-16 sm:pb-20"
+        >
           {hasResults ? (
             filteredFaqs.map((section) => (
               <div key={section.category} className="faq-section">
-                <h2 className="text-2xl font-bold mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                   {section.icon} {section.category}
                 </h2>
-
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {section.faqs.map((faq, index) => (
                     <FaqCard
                       key={index}
@@ -140,9 +141,9 @@ const FAQ = () => {
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <span className="text-6xl mb-4">🔍</span>
-              <p className="text-xl font-semibold text-gray-500">
+            <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center">
+              <span className="text-5xl sm:text-6xl mb-4">🔍</span>
+              <p className="text-lg sm:text-xl font-semibold text-gray-500">
                 No results for &quot;{searchQuery}&quot;
               </p>
               <p className="text-gray-400 mt-2 text-sm">
@@ -150,7 +151,7 @@ const FAQ = () => {
               </p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="mt-4 px-5 py-2 rounded-full border-2 border-violet-300 text-violet-600 font-medium hover:bg-violet-50 transition-colors"
+                className="mt-4 px-5 py-2 rounded-full border-2 border-violet-300 text-violet-600 font-medium hover:bg-violet-50 transition-colors text-sm sm:text-base"
               >
                 Clear search
               </button>

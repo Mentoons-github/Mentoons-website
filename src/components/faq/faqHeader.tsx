@@ -106,45 +106,45 @@ const FaqHeader = ({ searchQuery, onSearchChange }: FaqHeaderProps) => {
 
   return (
     <div ref={headerRef} className="relative">
-      <div className="relative flex items-center justify-center bg-blue-300/75 rounded-b-[60px] overflow-hidden">
+      <div className="relative flex items-center justify-center bg-blue-300/75 rounded-b-[40px] sm:rounded-b-[60px] overflow-hidden min-h-[180px] sm:min-h-[220px]">
         <img
           ref={sunRef}
           src="assets/faq/sun.png"
           alt="sun"
-          className="absolute right-0 -top-2 w-36 h-36"
+          className="absolute right-0 -top-2 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36"
         />
         <img
           ref={star1Ref}
           src="assets/faq/star.png"
           alt="star"
-          className="absolute left-5 top-2 w-14 h-14"
+          className="absolute left-3 top-2 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14"
         />
         <img
           ref={star2Ref}
           src="assets/faq/faceless-star.png"
           alt="star"
-          className="absolute left-20 top-1/3 w-8 h-8"
+          className="absolute left-12 sm:left-16 md:left-20 top-1/3 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8"
         />
         <img
           ref={star3Ref}
           src="assets/faq/star.png"
           alt="star"
-          className="absolute left-5 top-1/2 w-10 h-10"
+          className="absolute left-3 top-1/2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10"
         />
 
-        <FaQuestionCircle className="faq-q-icon text-4xl text-gray-500/75 rotate-45" />
+        <FaQuestionCircle className="faq-q-icon hidden sm:block text-3xl md:text-4xl text-gray-500/75 rotate-45" />
         <div
           ref={titleRef}
-          className="px-10 py-8 rounded-3xl bg-white text-6xl font-extrabold m-20 shadow-xl"
+          className="px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-8 rounded-2xl sm:rounded-3xl bg-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mx-6 sm:mx-12 md:mx-20 my-8 sm:my-12 md:my-16 shadow-xl text-center"
         >
           Help and FAQ
         </div>
-        <FaQuestionCircle className="faq-q-icon text-4xl text-gray-500/75 -rotate-45 scale-x-[-1]" />
+        <FaQuestionCircle className="faq-q-icon hidden sm:block text-3xl md:text-4xl text-gray-500/75 -rotate-45 scale-x-[-1]" />
       </div>
 
       <div
         ref={searchRef}
-        className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 flex items-center gap-3 bg-white border-2 border-neutral-200 hover:border-black w-1/3 mx-auto rounded-full z-20 shadow-md transition-all duration-200"
+        className="absolute -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2 sm:gap-3 bg-white border-2 border-neutral-200 hover:border-black w-[90%] sm:w-3/4 md:w-1/2 lg:w-1/3 mx-auto rounded-full z-20 shadow-md transition-all duration-200"
         onMouseEnter={() =>
           gsap.to(searchRef.current, {
             scale: 1.02,
@@ -161,7 +161,7 @@ const FaqHeader = ({ searchQuery, onSearchChange }: FaqHeaderProps) => {
         }
       >
         <svg
-          className="shrink-0 w-5 h-5 text-neutral-400"
+          className="shrink-0 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -176,19 +176,18 @@ const FaqHeader = ({ searchQuery, onSearchChange }: FaqHeaderProps) => {
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search FAQ questions..."
-          className="flex-1 py-4 bg-transparent text-lg focus:outline-none placeholder:text-neutral-400"
+          className="flex-1 py-3 sm:py-4 bg-transparent text-sm sm:text-base md:text-lg focus:outline-none placeholder:text-neutral-400"
         />
 
-        {/* Clear button — appears when there's text */}
         {searchQuery && (
           <button
             onClick={() => onSearchChange("")}
             aria-label="Clear search"
-            className="text-neutral-400 hover:text-neutral-600 transition-colors"
+            className="text-neutral-400 hover:text-neutral-600 transition-colors shrink-0"
           >
             <svg
-              width="16"
-              height="16"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -201,9 +200,9 @@ const FaqHeader = ({ searchQuery, onSearchChange }: FaqHeaderProps) => {
           </button>
         )}
 
-        <div className="w-px h-6 bg-neutral-200 shrink-0" />
+        <div className="w-px h-5 sm:h-6 bg-neutral-200 shrink-0" />
 
-        <div className="relative group">
+        <div className="relative group shrink-0">
           <button
             onMouseEnter={(e) =>
               gsap.to(e.currentTarget, {
@@ -222,9 +221,9 @@ const FaqHeader = ({ searchQuery, onSearchChange }: FaqHeaderProps) => {
               })
             }
           >
-            <FaSmileBeam className="text-5xl text-yellow-300 bg-black rounded-full" />
+            <FaSmileBeam className="text-4xl sm:text-5xl text-yellow-300 bg-black rounded-full" />
           </button>
-          <div className="absolute top-full group-hover:block hidden right-0 mt-1 px-2 py-1 text-sm bg-black rounded-xl text-white whitespace-nowrap">
+          <div className="absolute top-full group-hover:block hidden right-0 mt-1 px-2 py-1 text-xs sm:text-sm bg-black rounded-xl text-white whitespace-nowrap">
             Search
           </div>
         </div>

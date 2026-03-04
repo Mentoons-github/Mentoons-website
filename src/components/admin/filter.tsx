@@ -138,7 +138,11 @@ const FilterButton = ({
               />
               <NestedFilterGroup
                 label="Age Category"
-                items={filters.ageCategories}
+                items={filters.ageCategories.sort((a, b) => {
+                  const aa = a === "All" ? -1 : Number(a.split(/[-+]/)[0]);
+                  const bb = b === "All" ? -1 : Number(b.split(/[-+]/)[0]);
+                  return aa - bb;
+                })}
                 selected={selectedFilter}
                 onSelect={(val) => {
                   onSelect(val);
