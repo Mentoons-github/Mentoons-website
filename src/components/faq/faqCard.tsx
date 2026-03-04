@@ -31,7 +31,6 @@ const FaqCard = ({
     const body = bodyRef.current;
     if (!body) return;
 
-    // Trigger wiggle animation on open
     if (!open) {
       setWiggle(true);
       setTimeout(() => setWiggle(false), 500);
@@ -132,7 +131,6 @@ const FaqCard = ({
           }
         }}
       >
-        {/* Decorative dots top-right */}
         <div
           style={{
             position: "absolute",
@@ -149,8 +147,8 @@ const FaqCard = ({
               key={i}
               className={`faq-dot-${i + 1}`}
               style={{
-                width: "7px",
-                height: "7px",
+                width: "6px",
+                height: "6px",
                 borderRadius: "50%",
                 background: color.accent,
               }}
@@ -158,29 +156,27 @@ const FaqCard = ({
           ))}
         </div>
 
-        {/* Header row */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "14px",
-            padding: "18px 20px",
+            gap: "12px",
+            padding: "clamp(12px, 3vw, 18px) clamp(14px, 3vw, 20px)",
           }}
         >
-          {/* Emoji badge */}
           <div
             className={`faq-emoji ${wiggle ? "faq-emoji-wiggle" : ""}`}
             style={{
               flexShrink: 0,
-              width: "48px",
-              height: "48px",
+              width: "clamp(36px, 6vw, 48px)",
+              height: "clamp(36px, 6vw, 48px)",
               borderRadius: "14px",
               background: color.dot,
               border: `2.5px solid ${color.accent}60`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "24px",
+              fontSize: "clamp(16px, 3vw, 24px)",
               boxShadow: `0 3px 0 ${color.accent}40`,
               transition: "background 0.3s ease",
             }}
@@ -188,12 +184,11 @@ const FaqCard = ({
             {emoji}
           </div>
 
-          {/* Question */}
           <h3
             style={{
               fontFamily: "'Fredoka One', cursive",
               fontWeight: 400,
-              fontSize: "1.15rem",
+              fontSize: "clamp(0.9rem, 2.5vw, 1.15rem)",
               lineHeight: 1.35,
               color: open ? color.icon : "#2D2D2D",
               margin: 0,
@@ -205,13 +200,12 @@ const FaqCard = ({
             {question}
           </h3>
 
-          {/* Toggle button */}
           <div
             className="faq-toggle-btn"
             style={{
               flexShrink: 0,
-              width: "34px",
-              height: "34px",
+              width: "clamp(28px, 5vw, 34px)",
+              height: "clamp(28px, 5vw, 34px)",
               borderRadius: "50%",
               background: open ? color.accent : color.dot,
               border: `2.5px solid ${open ? color.accent : color.accent + "60"}`,
@@ -222,8 +216,8 @@ const FaqCard = ({
             }}
           >
             <svg
-              width="14"
-              height="14"
+              width="12"
+              height="12"
               viewBox="0 0 14 14"
               fill="none"
               style={{
@@ -253,7 +247,6 @@ const FaqCard = ({
           </div>
         </div>
 
-        {/* Collapsible body */}
         <div
           ref={bodyRef}
           style={{
@@ -269,13 +262,13 @@ const FaqCard = ({
         >
           <div
             style={{
-              padding: "0 20px 20px 82px",
+              padding:
+                "0 clamp(14px, 3vw, 20px) clamp(14px, 3vw, 20px) clamp(62px, 10vw, 82px)",
             }}
           >
-            {/* Wavy divider */}
             <svg
               viewBox="0 0 200 12"
-              style={{ width: "120px", marginBottom: "10px", display: "block" }}
+              style={{ width: "100px", marginBottom: "10px", display: "block" }}
             >
               <path
                 d="M0,6 C20,0 40,12 60,6 C80,0 100,12 120,6 C140,0 160,12 180,6 C190,3 196,4 200,6"
@@ -290,7 +283,7 @@ const FaqCard = ({
               style={{
                 fontFamily: "'Nunito', sans-serif",
                 fontWeight: 600,
-                fontSize: "1rem",
+                fontSize: "clamp(0.85rem, 2vw, 1rem)",
                 lineHeight: 1.8,
                 color: "#4A4A4A",
                 margin: 0,
@@ -300,7 +293,6 @@ const FaqCard = ({
               {answer}
             </p>
 
-            {/* Fun footer tag */}
             <div
               style={{
                 marginTop: "12px",
@@ -313,11 +305,11 @@ const FaqCard = ({
                 border: `2px solid ${color.accent}50`,
               }}
             >
-              <span style={{ fontSize: "14px" }}>⭐</span>
+              <span style={{ fontSize: "13px" }}>⭐</span>
               <span
                 style={{
                   fontFamily: "'Fredoka One', cursive",
-                  fontSize: "0.78rem",
+                  fontSize: "0.75rem",
                   color: color.icon,
                   letterSpacing: "0.03em",
                 }}
