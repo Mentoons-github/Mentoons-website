@@ -1,4 +1,13 @@
-import { Trash2, Plus } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Star,
+  Sparkles,
+  Trophy,
+  AlertCircle,
+  CheckCircle2,
+  Smile,
+} from "lucide-react";
 import { useFormik } from "formik";
 import { api } from "@/api/axiosInstance/axiosInstance";
 import {
@@ -18,6 +27,73 @@ const CATEGORY_OPTIONS = [
   "sample",
 ] as const;
 
+const CATEGORY_EMOJIS: Record<string, string> = {
+  "Gambling addiction": "🎲",
+  "Mobile addiction": "📱",
+  "Gaming addiction": "🎮",
+  "Performance addiction": "🏆",
+  "Entertainment addiction": "🎬",
+  sample: "✨",
+};
+
+const OPTION_COLORS = [
+  {
+    wrap: "bg-pink-100 border-pink-300 hover:bg-pink-200",
+    badge: "bg-pink-400",
+  },
+  {
+    wrap: "bg-yellow-100 border-yellow-300 hover:bg-yellow-200",
+    badge: "bg-yellow-400",
+  },
+  {
+    wrap: "bg-green-100 border-green-300 hover:bg-green-200",
+    badge: "bg-green-400",
+  },
+  {
+    wrap: "bg-blue-100 border-blue-300 hover:bg-blue-200",
+    badge: "bg-blue-400",
+  },
+  {
+    wrap: "bg-purple-100 border-purple-300 hover:bg-purple-200",
+    badge: "bg-purple-400",
+  },
+];
+
+const Q_HEADERS = [
+  "from-blue-500 to-cyan-500",
+  "from-purple-500 to-pink-500",
+  "from-green-500 to-teal-500",
+  "from-orange-500 to-red-500",
+];
+
+const RANGE_THEMES = [
+  {
+    card: "bg-gradient-to-br from-green-100 to-emerald-100 border-green-300",
+    bar: "bg-green-400",
+    emoji: "😊",
+  },
+  {
+    card: "bg-gradient-to-br from-yellow-100 to-amber-100 border-yellow-300",
+    bar: "bg-yellow-400",
+    emoji: "😐",
+  },
+  {
+    card: "bg-gradient-to-br from-orange-100 to-red-100 border-orange-300",
+    bar: "bg-orange-400",
+    emoji: "😟",
+  },
+  {
+    card: "bg-gradient-to-br from-red-100 to-pink-100 border-red-300",
+    bar: "bg-red-400",
+    emoji: "😰",
+  },
+  {
+    card: "bg-gradient-to-br from-purple-100 to-violet-100 border-purple-300",
+    bar: "bg-purple-400",
+    emoji: "🌟",
+  },
+];
+
 const AddQuiz = () => {
   const { showModal } = useSubmissionModal();
   const navigate = useNavigate();
@@ -32,7 +108,6 @@ const AddQuiz = () => {
           currentStep: "uploading",
           message: "Preparing quiz data...",
         });
-
         const questionsAndOptions = values.questions.map((q) => ({
           question: q.question,
           options: q.options.map((o) => ({
@@ -40,27 +115,22 @@ const AddQuiz = () => {
             score: Number(o.score),
           })),
         }));
-
         const payload = {
           category: values.category,
           questionsAndOptions,
           results: values.results,
         };
-
         showModal({
           isSubmitting: true,
           currentStep: "saving",
           message: "Saving quiz to server...",
         });
-
         const response = await api.post("/quiz/add", payload);
-
         showModal({
           isSubmitting: false,
           currentStep: "success",
           message: response.data.message || "Quiz saved successfully!",
         });
-
         setTimeout(() => navigate("/admin/quiz"), 2000);
       } catch (err: any) {
         showModal({
@@ -90,8 +160,10 @@ const AddQuiz = () => {
   };
 
   const removeQuestion = (index: number) => {
-    const newQ = formik.values.questions.filter((_, i) => i !== index);
-    formik.setFieldValue("questions", newQ);
+    formik.setFieldValue(
+      "questions",
+      formik.values.questions.filter((_, i) => i !== index),
+    );
   };
 
   const updateQuestion = (qIdx: number, val: string) =>
@@ -101,11 +173,12 @@ const AddQuiz = () => {
     qIdx: number,
     oIdx: number,
     field: "text" | "score",
-    val: string | number
-  ) => {
-    const value = field === "score" ? Number(val) || 0 : val;
-    formik.setFieldValue(`questions[${qIdx}].options[${oIdx}].${field}`, value);
-  };
+    val: string | number,
+  ) =>
+    formik.setFieldValue(
+      `questions[${qIdx}].options[${oIdx}].${field}`,
+      field === "score" ? Number(val) || 0 : val,
+    );
 
   const getQuestionError = (qIdx: number) => {
     const err = formik.errors.questions?.[qIdx];
@@ -117,7 +190,7 @@ const AddQuiz = () => {
   const getOptionError = (
     qIdx: number,
     oIdx: number,
-    field: "text" | "score"
+    field: "text" | "score",
   ) => {
     const err = formik.errors.questions?.[qIdx];
     if (typeof err === "object" && "options" in err) {
@@ -133,30 +206,31 @@ const AddQuiz = () => {
     const last = formik.values.results?.[formik.values.results!.length - 1];
     const start = last ? last.maxScore + 1 : 0;
     const end = totalPossibleScore > start ? totalPossibleScore : start;
-
     formik.setFieldValue("results", [
       ...(formik.values.results || []),
       { minScore: start, maxScore: end, message: "" },
     ]);
   };
 
-  const removeResultRange = (idx: number) => {
-    const newRes = (formik.values.results || []).filter((_, i) => i !== idx);
-    formik.setFieldValue("results", newRes);
-  };
+  const removeResultRange = (idx: number) =>
+    formik.setFieldValue(
+      "results",
+      (formik.values.results || []).filter((_, i) => i !== idx),
+    );
 
   const updateResult = (
     idx: number,
     field: "minScore" | "maxScore" | "message",
-    val: string | number
-  ) => {
-    const value = field === "message" ? val : Number(val);
-    formik.setFieldValue(`results[${idx}].${field}`, value);
-  };
+    val: string | number,
+  ) =>
+    formik.setFieldValue(
+      `results[${idx}].${field}`,
+      field === "message" ? val : Number(val),
+    );
 
   const getResultError = (
     idx: number,
-    field: "minScore" | "maxScore" | "message"
+    field: "minScore" | "maxScore" | "message",
   ) => {
     const err = formik.errors.results?.[idx];
     return typeof err === "object" && field in err
@@ -166,505 +240,672 @@ const AddQuiz = () => {
 
   const totalPossibleScore = formik.values.questions.reduce(
     (tot, q) => tot + q.options.reduce((s, o) => s + (o.score || 0), 0),
-    0
+    0,
   );
 
-  const getRangeColor = (idx: number) => {
-    const colors = [
-      "border-green-400 bg-green-50",
-      "border-yellow-400 bg-yellow-50",
-      "border-orange-400 bg-orange-50",
-      "border-red-400 bg-red-50",
-      "border-purple-400 bg-purple-50",
-    ];
-    return colors[idx % colors.length];
-  };
-
   return (
-    <div className="min-h-screen bg-sky-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            Create New Quiz
-          </h1>
-          <div className="flex gap-4 text-sm">
-            <div className="bg-sky-100 px-4 py-2 rounded">
-              <span className="font-semibold text-sky-700">
-                Total Questions:{" "}
-              </span>
-              <span className="text-sky-900 font-bold text-lg">
-                {formik.values.questions.length}
-              </span>
-            </div>
-            <div className="bg-green-100 px-4 py-2 rounded">
-              <span className="font-semibold text-green-700">Category: </span>
-              <span className="text-green-900 font-bold">
-                {formik.values.category || "Not Set"}
-              </span>
-            </div>
-            <div className="bg-purple-100 px-4 py-2 rounded">
-              <span className="font-semibold text-purple-700">
-                Result Ranges:{" "}
-              </span>
-              <span className="text-purple-900 font-bold text-lg">
-                {formik.values.results?.length || 0}
-              </span>
+    <div
+      className="min-h-screen relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #fef9c3 0%, #fce7f3 40%, #dbeafe 75%, #dcfce7 100%)",
+      }}
+    >
+      <div className="absolute top-[-80px] left-[-80px] w-64 h-64 bg-yellow-300 rounded-full opacity-20 animate-pulse pointer-events-none" />
+      <div className="absolute top-20 right-[-60px] w-48 h-48 bg-pink-300 rounded-full opacity-20 animate-pulse pointer-events-none" />
+      <div className="absolute bottom-40 left-10 w-32 h-32 bg-blue-300 rounded-full opacity-20 animate-pulse pointer-events-none" />
+      <div className="absolute bottom-[-60px] right-20 w-56 h-56 bg-green-300 rounded-full opacity-20 animate-pulse pointer-events-none" />
+
+      <div className="relative z-10">
+        <div className="bg-white/85 backdrop-blur-sm border-b-4 border-yellow-300 shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center shadow-lg text-2xl flex-shrink-0">
+                  🧩
+                </div>
+                <div>
+                  <h1
+                    className="text-2xl sm:text-3xl font-black text-slate-800 leading-tight"
+                    style={{
+                      fontFamily: "'Fredoka One', 'Comic Sans MS', cursive",
+                    }}
+                  >
+                    Build a Quiz!{" "}
+                    <Sparkles className="inline w-6 h-6 text-yellow-500" />
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                    Create a fun assessment quiz 🎉
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
+                {[
+                  {
+                    icon: "📝",
+                    label: `${formik.values.questions.length} Questions`,
+                    bg: "bg-blue-100 border-blue-300 text-blue-700",
+                  },
+                  {
+                    icon: "⭐",
+                    label: `${totalPossibleScore} pts`,
+                    bg: "bg-yellow-100 border-yellow-300 text-yellow-700",
+                  },
+                  {
+                    icon: "🏅",
+                    label: `${formik.values.results?.length || 0} Outcomes`,
+                    bg: "bg-pink-100 border-pink-300 text-pink-700",
+                  },
+                ].map((s) => (
+                  <div
+                    key={s.label}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 font-bold text-xs ${s.bg}`}
+                  >
+                    <span>{s.icon}</span> {s.label}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        <form onSubmit={formik.handleSubmit}>
-          <div className="flex gap-6">
-            <div className="flex-1 space-y-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Quiz Category
-                </h2>
-                <select
-                  name="category"
-                  value={formik.values.category}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className={`w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none ${
-                    formik.touched.category && formik.errors.category
-                      ? "border-red-500"
-                      : "border-sky-200 focus:border-sky-500"
-                  }`}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          <form onSubmit={formik.handleSubmit}>
+            <div className="flex flex-col xl:flex-row gap-6">
+              <div className="flex-1 min-w-0 space-y-6">
+                <div
+                  className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg p-5 sm:p-6"
+                  style={{ border: "3px solid #fde047" }}
                 >
-                  <option value="" disabled>
-                    -- Select a category --
-                  </option>
-                  {CATEGORY_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                {formik.touched.category && formik.errors.category && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {formik.errors.category}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800 bg-white rounded-lg shadow p-4">
-                  Questions ({formik.values.questions.length})
-                </h2>
-
-                {formik.values.questions.map((q, qIdx) => {
-                  const qErr = getQuestionError(qIdx);
-                  return (
-                    <div
-                      key={qIdx}
-                      className="bg-white rounded-lg shadow p-6 border-l-4 border-sky-500"
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-sky-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg">
-                            {qIdx + 1}
-                          </div>
-                          <h3 className="text-xl font-bold text-gray-800">
-                            Question #{qIdx + 1}
-                          </h3>
-                        </div>
-                        {formik.values.questions.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeQuestion(qIdx)}
-                            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center gap-2"
-                          >
-                            <Trash2 className="w-4 h-4" /> Delete
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                          Question Text:
-                        </label>
-                        <textarea
-                          value={q.question}
-                          onChange={(e) => updateQuestion(qIdx, e.target.value)}
-                          onBlur={formik.handleBlur}
-                          rows={3}
-                          className={`w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none ${
-                            formik.touched.questions?.[qIdx]?.question && qErr
-                              ? "border-red-500"
-                              : "border-gray-300 focus:border-sky-500"
-                          }`}
-                          placeholder="Type your question here..."
-                        />
-                        {formik.touched.questions?.[qIdx]?.question && qErr && (
-                          <p className="mt-1 text-sm text-red-600">{qErr}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-3">
-                          Answer Options & Scores:
-                        </label>
-                        <div className="bg-sky-100 rounded-t-lg px-4 py-3 grid grid-cols-12 gap-4 font-bold text-gray-700">
-                          <div className="col-span-1">Option</div>
-                          <div className="col-span-8">Answer Text</div>
-                          <div className="col-span-3 text-center">
-                            Score Points
-                          </div>
-                        </div>
-
-                        <div className="border-2 border-sky-100 rounded-b-lg">
-                          {q.options.map((opt, oIdx) => {
-                            const txtErr = getOptionError(qIdx, oIdx, "text");
-                            const scrErr = getOptionError(qIdx, oIdx, "score");
-                            return (
-                              <div
-                                key={oIdx}
-                                className="px-4 py-3 grid grid-cols-12 gap-4 items-center border-b border-sky-100 last:border-b-0 hover:bg-sky-50"
-                              >
-                                <div className="col-span-1">
-                                  <div className="w-8 h-8 bg-sky-500 text-white rounded-full flex items-center justify-center font-bold">
-                                    {String.fromCharCode(65 + oIdx)}
-                                  </div>
-                                </div>
-
-                                <div className="col-span-8">
-                                  <input
-                                    type="text"
-                                    value={opt.text}
-                                    onChange={(e) =>
-                                      updateOption(
-                                        qIdx,
-                                        oIdx,
-                                        "text",
-                                        e.target.value
-                                      )
-                                    }
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-3 py-2 border-2 rounded focus:outline-none ${
-                                      formik.touched.questions?.[qIdx]
-                                        ?.options?.[oIdx]?.text && txtErr
-                                        ? "border-red-500"
-                                        : "border-gray-300 focus:border-sky-500"
-                                    }`}
-                                    placeholder={`Enter option ${oIdx + 1}`}
-                                  />
-                                  {formik.touched.questions?.[qIdx]?.options?.[
-                                    oIdx
-                                  ]?.text &&
-                                    txtErr && (
-                                      <p className="mt-1 text-xs text-red-600">
-                                        {txtErr}
-                                      </p>
-                                    )}
-                                </div>
-
-                                <div className="col-span-3">
-                                  <input
-                                    type="number"
-                                    value={opt.score}
-                                    onChange={(e) =>
-                                      updateOption(
-                                        qIdx,
-                                        oIdx,
-                                        "score",
-                                        e.target.value
-                                      )
-                                    }
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-3 py-2 border-2 rounded focus:outline-none text-center font-bold text-lg ${
-                                      formik.touched.questions?.[qIdx]
-                                        ?.options?.[oIdx]?.score && scrErr
-                                        ? "border-red-500"
-                                        : "border-gray-300 focus:border-sky-500"
-                                    }`}
-                                    placeholder="0"
-                                  />
-                                  {formik.touched.questions?.[qIdx]?.options?.[
-                                    oIdx
-                                  ]?.score &&
-                                    scrErr && (
-                                      <p className="mt-1 text-xs text-red-600">
-                                        {scrErr}
-                                      </p>
-                                    )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded">
-                          <span className="font-semibold">
-                            Total Possible Points for this Question:{" "}
-                          </span>
-                          <span className="font-bold text-sky-600 text-lg">
-                            {q.options.reduce((s, o) => s + (o.score || 0), 0)}{" "}
-                            points
-                          </span>
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-amber-400 rounded-2xl flex items-center justify-center text-xl shadow flex-shrink-0">
+                      🏷️
                     </div>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  onClick={addQuestion}
-                  className="w-full py-4 bg-sky-500 text-white rounded-lg font-bold text-lg hover:bg-sky-600 flex items-center justify-center gap-2 shadow"
-                >
-                  <Plus className="w-6 h-6" /> Add New Question
-                </button>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  Quiz Summary:
-                </h3>
-                <div className="space-y-1 text-gray-700">
-                  <p>
-                    Category:{" "}
-                    <span className="font-bold">
-                      {formik.values.category || "Not Set"}
-                    </span>
-                  </p>
-                  <p>
-                    Total Questions:{" "}
-                    <span className="font-bold">
-                      {formik.values.questions.length}
-                    </span>
-                  </p>
-                  <p>
-                    Total Possible Score:{" "}
-                    <span className="font-bold text-sky-600">
-                      {totalPossibleScore} points
-                    </span>
-                  </p>
-                  <p>
-                    Result Ranges:{" "}
-                    <span className="font-bold text-purple-600">
-                      {formik.values.results?.length || 0}
-                    </span>
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={formik.isSubmitting || !formik.isValid}
-                  className={`mt-6 w-full py-4 rounded-lg font-bold text-xl shadow-lg transition-colors ${
-                    formik.isValid
-                      ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                >
-                  Submit Quiz
-                </button>
-              </div>
-            </div>
-
-            <div className="w-96 space-y-6 sticky top-6 self-start">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800">
-                      Result Ranges
-                    </h2>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Define score ranges & messages
+                    <div>
+                      <h2
+                        className="text-lg font-black text-slate-800"
+                        style={{ fontFamily: "'Fredoka One', cursive" }}
+                      >
+                        Pick a Category!
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        What kind of quiz are you making?
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {CATEGORY_OPTIONS.map((opt) => {
+                      const selected = formik.values.category === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => formik.setFieldValue("category", opt)}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-left transition-all duration-150 ${
+                            selected
+                              ? "bg-yellow-100 text-yellow-800 shadow-md scale-105"
+                              : "bg-slate-50 text-slate-700 hover:bg-yellow-50 hover:scale-102"
+                          }`}
+                          style={{
+                            border: selected
+                              ? "3px solid #facc15"
+                              : "3px solid #e2e8f0",
+                          }}
+                        >
+                          <span className="text-2xl">
+                            {CATEGORY_EMOJIS[opt]}
+                          </span>
+                          <span className="flex-1">{opt}</span>
+                          {selected && (
+                            <CheckCircle2 className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {formik.touched.category && formik.errors.category && (
+                    <p className="mt-3 text-sm text-red-600 font-bold flex items-center gap-1.5 bg-red-50 px-3 py-2 rounded-xl">
+                      <AlertCircle className="w-4 h-4" />{" "}
+                      {formik.errors.category}
                     </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addResultRange}
-                    className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 flex items-center gap-1 font-semibold shadow text-sm"
-                  >
-                    <Plus className="w-4 h-4" /> Add
-                  </button>
+                  )}
                 </div>
 
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded mb-4">
-                  <div className="text-xs text-blue-800">
-                    <p className="font-semibold mb-1">Quick Guide:</p>
-                    <ul className="space-y-1 ml-2">
-                      <li>
-                        • Total score:{" "}
-                        <strong className="text-blue-600">
-                          {totalPossibleScore} pts
-                        </strong>
-                      </li>
-                      <li>• Cover all scores (0-{totalPossibleScore})</li>
-                      <li>• No gaps between ranges</li>
-                    </ul>
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center text-xl shadow flex-shrink-0">
+                      📋
+                    </div>
+                    <h2
+                      className="text-lg font-black text-slate-800"
+                      style={{ fontFamily: "'Fredoka One', cursive" }}
+                    >
+                      Questions{" "}
+                      <span className="ml-1 bg-blue-100 text-blue-600 text-sm px-3 py-0.5 rounded-full border-2 border-blue-300 font-black">
+                        {formik.values.questions.length}
+                      </span>
+                    </h2>
                   </div>
-                </div>
 
-                {formik.values.results?.length === 0 && (
-                  <p className="text-gray-500 text-center py-4 text-sm">
-                    No ranges added yet
-                  </p>
-                )}
-
-                <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-                  {formik.values.results?.map((range, rIdx) => {
-                    const minErr = getResultError(rIdx, "minScore");
-                    const maxErr = getResultError(rIdx, "maxScore");
-                    const msgErr = getResultError(rIdx, "message");
+                  {formik.values.questions.map((q, qIdx) => {
+                    const qErr = getQuestionError(qIdx);
+                    const qScore = q.options.reduce(
+                      (s, o) => s + (o.score || 0),
+                      0,
+                    );
+                    const headerGrad = Q_HEADERS[qIdx % Q_HEADERS.length];
                     return (
                       <div
-                        key={rIdx}
-                        className={`border-2 rounded-lg p-3 ${getRangeColor(
-                          rIdx
-                        )}`}
+                        key={qIdx}
+                        className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg overflow-hidden"
+                        style={{ border: "3px solid #e2e8f0" }}
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                              {rIdx + 1}
+                        <div
+                          className={`bg-gradient-to-r ${headerGrad} px-5 py-4 flex items-center justify-between`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/25 rounded-2xl flex items-center justify-center text-white font-black text-lg backdrop-blur-sm">
+                              {qIdx + 1}
                             </div>
-                            <span className="text-sm font-semibold text-gray-700">
-                              Range {rIdx + 1}
-                            </span>
+                            <div>
+                              <span
+                                className="text-white font-black text-base"
+                                style={{ fontFamily: "'Fredoka One', cursive" }}
+                              >
+                                Question {qIdx + 1}
+                              </span>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <Star className="w-3 h-3 text-yellow-200 fill-yellow-200" />
+                                <span className="text-white/80 text-xs font-bold">
+                                  {qScore} pts
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          {formik.values.results!.length > 1 && (
+                          {formik.values.questions.length > 1 && (
                             <button
                               type="button"
-                              onClick={() => removeResultRange(rIdx)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-100 p-1 rounded transition-colors"
+                              onClick={() => removeQuestion(qIdx)}
+                              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/35 text-white px-3 py-2 rounded-xl text-xs font-black transition-all"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Remove</span>
                             </button>
                           )}
                         </div>
 
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-xs font-bold text-gray-700 mb-1">
-                                Min Score
-                              </label>
-                              <input
-                                type="number"
-                                value={range.minScore}
-                                onChange={(e) =>
-                                  updateResult(rIdx, "minScore", e.target.value)
-                                }
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-2 py-1.5 border-2 rounded focus:outline-none font-semibold text-sm ${
-                                  minErr
-                                    ? "border-red-500"
-                                    : "border-gray-300 focus:border-indigo-500"
-                                }`}
-                                placeholder="0"
-                              />
-                              {minErr && (
-                                <p className="mt-0.5 text-xs text-red-600">
-                                  {minErr}
-                                </p>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block text-xs font-bold text-gray-700 mb-1">
-                                Max Score
-                              </label>
-                              <input
-                                type="number"
-                                value={range.maxScore}
-                                onChange={(e) =>
-                                  updateResult(rIdx, "maxScore", e.target.value)
-                                }
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-2 py-1.5 border-2 rounded focus:outline-none font-semibold text-sm ${
-                                  maxErr
-                                    ? "border-red-500"
-                                    : "border-gray-300 focus:border-indigo-500"
-                                }`}
-                                placeholder={totalPossibleScore.toString()}
-                              />
-                              {maxErr && (
-                                <p className="mt-0.5 text-xs text-red-600">
-                                  {maxErr}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
+                        <div className="p-5 sm:p-6 space-y-5">
                           <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1">
-                              Result Message
+                            <label className="block text-sm font-black text-slate-700 mb-2 flex items-center gap-2">
+                              <Smile className="w-4 h-4 text-blue-500" /> What's
+                              your question?
                             </label>
                             <textarea
-                              value={range.message}
+                              value={q.question}
                               onChange={(e) =>
-                                updateResult(rIdx, "message", e.target.value)
+                                updateQuestion(qIdx, e.target.value)
                               }
                               onBlur={formik.handleBlur}
                               rows={3}
-                              className={`w-full px-2 py-2 border-2 rounded focus:outline-none text-sm ${
-                                msgErr
-                                  ? "border-red-500"
-                                  : "border-gray-300 focus:border-indigo-500"
-                              }`}
-                              placeholder="Message for this score range..."
+                              className="w-full px-4 py-3 text-sm font-medium rounded-2xl focus:outline-none resize-none transition-all bg-blue-50 focus:bg-white text-slate-700 placeholder-slate-400"
+                              style={{
+                                border:
+                                  formik.touched.questions?.[qIdx]?.question &&
+                                  qErr
+                                    ? "3px solid #f87171"
+                                    : "3px solid #bfdbfe",
+                              }}
+                              placeholder="✍️ Type your question here..."
                             />
-                            {msgErr && (
-                              <p className="mt-0.5 text-xs text-red-600">
-                                {msgErr}
-                              </p>
-                            )}
+                            {formik.touched.questions?.[qIdx]?.question &&
+                              qErr && (
+                                <p className="mt-1.5 text-xs text-red-600 font-bold flex items-center gap-1 bg-red-50 px-3 py-1.5 rounded-xl">
+                                  <AlertCircle className="w-3.5 h-3.5" /> {qErr}
+                                </p>
+                              )}
                           </div>
 
-                          <div className="bg-white bg-opacity-60 p-2 rounded border border-gray-300">
-                            <p className="text-xs">
-                              <span className="font-semibold">Preview:</span>{" "}
-                              Score
-                              <span className="font-bold text-indigo-600 mx-1">
-                                {range.minScore}-{range.maxScore}
-                              </span>
-                              →{" "}
-                              <span className="italic text-gray-700">
-                                "{range.message || "No message"}"
-                              </span>
-                            </p>
+                          <div>
+                            <label className="block text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
+                              <span>🔤</span> Answer choices & star points
+                            </label>
+                            <div className="space-y-2.5">
+                              {q.options.map((opt, oIdx) => {
+                                const c =
+                                  OPTION_COLORS[oIdx % OPTION_COLORS.length];
+                                const txtErr = getOptionError(
+                                  qIdx,
+                                  oIdx,
+                                  "text",
+                                );
+                                const scrErr = getOptionError(
+                                  qIdx,
+                                  oIdx,
+                                  "score",
+                                );
+                                return (
+                                  <div
+                                    key={oIdx}
+                                    className={`flex items-start gap-3 p-3 rounded-2xl border-2 transition-all ${c.wrap}`}
+                                  >
+                                    <div
+                                      className={`w-8 h-8 ${c.badge} rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0 mt-0.5 shadow-sm`}
+                                    >
+                                      {String.fromCharCode(65 + oIdx)}
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row gap-2">
+                                      <div className="flex-1">
+                                        <input
+                                          type="text"
+                                          value={opt.text}
+                                          onChange={(e) =>
+                                            updateOption(
+                                              qIdx,
+                                              oIdx,
+                                              "text",
+                                              e.target.value,
+                                            )
+                                          }
+                                          onBlur={formik.handleBlur}
+                                          className="w-full px-3 py-2 text-sm font-medium bg-white/70 border-2 border-white rounded-xl focus:outline-none focus:bg-white transition-all placeholder-slate-400"
+                                          placeholder={`Option ${String.fromCharCode(65 + oIdx)} answer...`}
+                                        />
+                                        {formik.touched.questions?.[qIdx]
+                                          ?.options?.[oIdx]?.text &&
+                                          txtErr && (
+                                            <p className="mt-1 text-xs text-red-600 font-bold">
+                                              {txtErr}
+                                            </p>
+                                          )}
+                                      </div>
+                                      <div className="w-full sm:w-28 flex-shrink-0">
+                                        <div className="flex items-center gap-1.5 bg-white/70 border-2 border-white rounded-xl px-2 py-2 focus-within:bg-white transition-all">
+                                          <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-400 flex-shrink-0" />
+                                          <input
+                                            type="number"
+                                            value={opt.score}
+                                            onChange={(e) =>
+                                              updateOption(
+                                                qIdx,
+                                                oIdx,
+                                                "score",
+                                                e.target.value,
+                                              )
+                                            }
+                                            onBlur={formik.handleBlur}
+                                            className="w-full bg-transparent text-sm font-black text-slate-700 focus:outline-none text-center"
+                                            placeholder="0"
+                                          />
+                                          <span className="text-xs text-slate-400 font-bold flex-shrink-0">
+                                            pts
+                                          </span>
+                                        </div>
+                                        {formik.touched.questions?.[qIdx]
+                                          ?.options?.[oIdx]?.score &&
+                                          scrErr && (
+                                            <p className="mt-1 text-xs text-red-600 font-bold">
+                                              {scrErr}
+                                            </p>
+                                          )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className="mt-3 flex items-center justify-end gap-2 text-sm font-black text-amber-700 bg-amber-50 rounded-2xl px-4 py-2.5 border-2 border-amber-200">
+                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                              This question is worth {qScore} points!
+                            </div>
                           </div>
                         </div>
                       </div>
                     );
                   })}
+
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    className="w-full py-4 rounded-3xl font-black text-base text-blue-700 bg-blue-50 hover:bg-blue-100 transition-all flex items-center justify-center gap-3 group"
+                    style={{ border: "3px dashed #93c5fd" }}
+                  >
+                    <div className="w-8 h-8 bg-blue-500 group-hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors shadow-md">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                    ✨ Add Another Question!
+                  </button>
                 </div>
 
-                {formik.errors.results &&
-                  typeof formik.errors.results === "string" && (
-                    <p className="text-xs text-red-600 mt-2">
-                      {formik.errors.results}
-                    </p>
-                  )}
-
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mt-4">
-                  <h3 className="font-bold text-indigo-900 mb-2 text-sm">
-                    Summary:
-                  </h3>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-indigo-700">Total Score:</span>
-                      <span className="font-bold text-indigo-900">
-                        {totalPossibleScore} pts
-                      </span>
+                <div
+                  className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg p-5 sm:p-6"
+                  style={{ border: "3px solid #a7f3d0" }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-teal-400 rounded-2xl flex items-center justify-center text-xl shadow flex-shrink-0">
+                      📊
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-indigo-700">Ranges:</span>
-                      <span className="font-bold text-indigo-900">
-                        {formik.values.results?.length || 0}
-                      </span>
+                    <div>
+                      <h3
+                        className="text-lg font-black text-slate-800"
+                        style={{ fontFamily: "'Fredoka One', cursive" }}
+                      >
+                        Quiz Summary
+                      </h3>
+                      <p className="text-xs text-slate-500">Almost ready! 🎉</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                    {[
+                      {
+                        emoji: "🏷️",
+                        label: "Category",
+                        value: formik.values.category
+                          ? formik.values.category.split(" ")[0]
+                          : "Not set",
+                        bg: "bg-yellow-50 border-yellow-200",
+                      },
+                      {
+                        emoji: "📝",
+                        label: "Questions",
+                        value: String(formik.values.questions.length),
+                        bg: "bg-blue-50 border-blue-200",
+                      },
+                      {
+                        emoji: "⭐",
+                        label: "Max Score",
+                        value: String(totalPossibleScore),
+                        bg: "bg-purple-50 border-purple-200",
+                      },
+                      {
+                        emoji: "🏅",
+                        label: "Outcomes",
+                        value: String(formik.values.results?.length || 0),
+                        bg: "bg-pink-50 border-pink-200",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className={`${item.bg} rounded-2xl p-3 text-center border-2`}
+                      >
+                        <div className="text-2xl mb-1">{item.emoji}</div>
+                        <div className="text-lg font-black text-slate-800 truncate">
+                          {item.value}
+                        </div>
+                        <div className="text-xs text-slate-500 font-bold">
+                          {item.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    className={`flex items-center gap-2 mb-4 px-4 py-2.5 rounded-2xl text-sm font-bold border-2 ${
+                      formik.isValid
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}
+                  >
+                    {formik.isValid ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> Your
+                        quiz looks great! Ready to publish! 🚀
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" /> Fill
+                        in all the fields above first! 👆
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={formik.isSubmitting || !formik.isValid}
+                    className={`w-full py-4 rounded-2xl font-black text-base transition-all duration-200 flex items-center justify-center gap-3 ${
+                      formik.isValid && !formik.isSubmitting
+                        ? "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white shadow-lg shadow-green-200 hover:scale-105 active:scale-100"
+                        : "bg-slate-100 text-slate-400 cursor-not-allowed border-2 border-slate-200"
+                    }`}
+                  >
+                    {formik.isSubmitting ? (
+                      <>
+                        <span className="animate-spin text-xl">⏳</span> Saving
+                        your quiz...
+                      </>
+                    ) : (
+                      <>
+                        <Trophy className="w-5 h-5" /> Publish My Quiz! 🎉
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="w-full xl:w-80 2xl:w-96 xl:flex-shrink-0">
+                <div className="xl:sticky xl:top-24">
+                  <div
+                    className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg overflow-hidden"
+                    style={{ border: "3px solid #f9a8d4" }}
+                  >
+                    <div className="bg-gradient-to-r from-pink-500 to-rose-500 px-5 py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 bg-white/25 rounded-xl flex items-center justify-center text-xl backdrop-blur-sm flex-shrink-0">
+                            🏆
+                          </div>
+                          <div>
+                            <h2
+                              className="text-white font-black text-sm"
+                              style={{ fontFamily: "'Fredoka One', cursive" }}
+                            >
+                              Result Outcomes!
+                            </h2>
+                            <p className="text-pink-200 text-xs font-medium">
+                              What do the scores mean?
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addResultRange}
+                          className="flex items-center gap-1.5 bg-white/25 hover:bg-white/40 text-white px-3 py-2 rounded-xl text-xs font-black transition-all"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add!
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="bg-pink-50 rounded-2xl px-4 py-3 mb-4 border-2 border-pink-100">
+                        <p className="text-xs font-bold text-pink-700 flex items-center gap-1.5 mb-1">
+                          <Sparkles className="w-3.5 h-3.5" /> Quick Tip
+                        </p>
+                        <p className="text-xs text-pink-600">
+                          Total points:{" "}
+                          <strong>{totalPossibleScore} pts</strong>. Make sure
+                          your ranges cover 0 to {totalPossibleScore}!
+                        </p>
+                      </div>
+
+                      {(formik.values.results?.length || 0) === 0 && (
+                        <div className="text-center py-8">
+                          <div className="text-5xl mb-3">🏅</div>
+                          <p className="text-sm font-black text-slate-500">
+                            No outcomes yet!
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Tap "Add!" to create score ranges
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-3 max-h-[60vh] xl:max-h-[calc(100vh-380px)] overflow-y-auto">
+                        {formik.values.results?.map((range, rIdx) => {
+                          const theme =
+                            RANGE_THEMES[rIdx % RANGE_THEMES.length];
+                          const minErr = getResultError(rIdx, "minScore");
+                          const maxErr = getResultError(rIdx, "maxScore");
+                          const msgErr = getResultError(rIdx, "message");
+                          return (
+                            <div
+                              key={rIdx}
+                              className={`rounded-2xl border-2 overflow-hidden ${theme.card}`}
+                            >
+                              <div
+                                className={`${theme.bar} flex items-center justify-between px-3 py-2.5`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{theme.emoji}</span>
+                                  <span className="text-white font-black text-xs">
+                                    Outcome {rIdx + 1}
+                                  </span>
+                                </div>
+                                {(formik.values.results?.length || 0) > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeResultRange(rIdx)}
+                                    className="bg-white/25 hover:bg-white/40 text-white p-1.5 rounded-lg transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="p-3 space-y-2.5">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="block text-xs font-black text-slate-600 mb-1">
+                                      Min ⬇️
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={range.minScore}
+                                      onChange={(e) =>
+                                        updateResult(
+                                          rIdx,
+                                          "minScore",
+                                          e.target.value,
+                                        )
+                                      }
+                                      onBlur={formik.handleBlur}
+                                      className={`w-full px-2.5 py-2 border-2 rounded-xl focus:outline-none text-sm font-black text-center bg-white/80 focus:bg-white transition-all ${minErr ? "border-red-400" : "border-white"}`}
+                                      placeholder="0"
+                                    />
+                                    {minErr && (
+                                      <p className="mt-1 text-xs text-red-600 font-bold">
+                                        {minErr}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-black text-slate-600 mb-1">
+                                      Max ⬆️
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={range.maxScore}
+                                      onChange={(e) =>
+                                        updateResult(
+                                          rIdx,
+                                          "maxScore",
+                                          e.target.value,
+                                        )
+                                      }
+                                      onBlur={formik.handleBlur}
+                                      className={`w-full px-2.5 py-2 border-2 rounded-xl focus:outline-none text-sm font-black text-center bg-white/80 focus:bg-white transition-all ${maxErr ? "border-red-400" : "border-white"}`}
+                                      placeholder={String(totalPossibleScore)}
+                                    />
+                                    {maxErr && (
+                                      <p className="mt-1 text-xs text-red-600 font-bold">
+                                        {maxErr}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-black text-slate-600 mb-1">
+                                    Message 💬
+                                  </label>
+                                  <textarea
+                                    value={range.message}
+                                    onChange={(e) =>
+                                      updateResult(
+                                        rIdx,
+                                        "message",
+                                        e.target.value,
+                                      )
+                                    }
+                                    onBlur={formik.handleBlur}
+                                    rows={2}
+                                    className={`w-full px-3 py-2 border-2 rounded-xl focus:outline-none text-xs font-medium resize-none bg-white/80 focus:bg-white transition-all ${msgErr ? "border-red-400" : "border-white"}`}
+                                    placeholder="Message kids will see for this score..."
+                                  />
+                                  {msgErr && (
+                                    <p className="mt-1 text-xs text-red-600 font-bold">
+                                      {msgErr}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="bg-white/60 rounded-xl px-3 py-2 text-xs">
+                                  <span className="font-black text-slate-500">
+                                    Preview:{" "}
+                                  </span>
+                                  <span className="font-black text-slate-700">
+                                    {range.minScore}–{range.maxScore} pts
+                                  </span>
+                                  <span className="mx-1 text-slate-400">→</span>
+                                  <span className="italic text-slate-600">
+                                    {range.message || "No message yet..."}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {formik.errors.results &&
+                        typeof formik.errors.results === "string" && (
+                          <p className="text-xs text-red-600 font-bold mt-2 flex items-center gap-1 bg-red-50 px-3 py-2 rounded-xl">
+                            <AlertCircle className="w-3.5 h-3.5" />{" "}
+                            {formik.errors.results}
+                          </p>
+                        )}
+
+                      <div className="grid grid-cols-2 gap-2 mt-4">
+                        <div className="bg-pink-50 border-2 border-pink-100 rounded-2xl p-3 text-center">
+                          <div className="text-xl">⭐</div>
+                          <div className="text-lg font-black text-slate-800">
+                            {totalPossibleScore}
+                          </div>
+                          <div className="text-xs text-slate-500 font-bold">
+                            Max Points
+                          </div>
+                        </div>
+                        <div className="bg-rose-50 border-2 border-rose-100 rounded-2xl p-3 text-center">
+                          <div className="text-xl">🏅</div>
+                          <div className="text-lg font-black text-slate-800">
+                            {formik.values.results?.length || 0}
+                          </div>
+                          <div className="text-xs text-slate-500 font-bold">
+                            Outcomes
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default AddQuiz;
+``
