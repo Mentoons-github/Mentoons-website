@@ -10,11 +10,9 @@ type Difficulty = "easy" | "medium" | "hard";
 const GameDifficultyModal = ({
   isClose,
   setDifficulty,
-  from,
 }: {
   isClose: () => void;
   setDifficulty: (val: Difficulty) => void;
-  from?: string;
 }) => {
   const difficulties = [
     {
@@ -40,9 +38,6 @@ const GameDifficultyModal = ({
     },
   ];
 
-  const isComingSoon = (level: Difficulty) =>
-    from === "wordsQuest" && level === "hard";
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className="relative w-full max-w-4xl bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-2xl">
@@ -66,16 +61,13 @@ const GameDifficultyModal = ({
 
           <div className="flex flex-col gap-3 sm:gap-4 md:hidden">
             {difficulties.map((difficulty) => {
-              const comingSoon = isComingSoon(difficulty.level);
-
               const Icon = difficulty.icon;
               return (
                 <button
                   key={difficulty.level}
                   onClick={() => {
-                    if (!comingSoon) setDifficulty(difficulty.level);
+                    setDifficulty(difficulty.level);
                   }}
-                  disabled={comingSoon}
                   aria-label={`Select ${difficulty.level} difficulty (recommended for ages ${difficulty.age})`}
                   className="group relative overflow-hidden rounded-xl p-4 sm:p-5 transition-all bg-white border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
                 >
@@ -105,7 +97,7 @@ const GameDifficultyModal = ({
                     <div
                       className={`flex-shrink-0 px-4 py-2 sm:px-6 sm:py-2.5 font-bold text-white text-sm sm:text-base capitalize transition-all bg-gradient-to-r ${difficulty.color} rounded-full group-hover:shadow-lg`}
                     >
-                      {comingSoon ? "Coming Soon" : difficulty.level}
+                      {difficulty.level}
                     </div>
                   </div>
                 </button>
@@ -115,16 +107,13 @@ const GameDifficultyModal = ({
 
           <div className="hidden grid-cols-3 gap-6 md:grid lg:gap-8">
             {difficulties.map((difficulty) => {
-              const comingSoon = isComingSoon(difficulty.level);
-
               const Icon = difficulty.icon;
               return (
                 <button
                   key={difficulty.level}
                   onClick={() => {
-                    if (!comingSoon) setDifficulty(difficulty.level);
+                    setDifficulty(difficulty.level);
                   }}
-                  disabled={comingSoon}
                   aria-label={`Select ${difficulty.level} difficulty (recommended for ages ${difficulty.age})`}
                   className="group relative overflow-hidden rounded-xl p-6 lg:p-8 transition-all bg-white border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
                 >
@@ -159,7 +148,7 @@ const GameDifficultyModal = ({
                     <div
                       className={`px-6 py-2 lg:px-8 lg:py-3 font-semibold text-white transition-all bg-gradient-to-r ${difficulty.color} rounded-full group-hover:shadow-lg`}
                     >
-                      {comingSoon ? "Coming Soon" : "Select"}
+                      Select
                     </div>
                   </div>
                 </button>
