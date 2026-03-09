@@ -67,13 +67,28 @@ const FriendSearch = () => {
   const [loadingRequests, setLoadingRequests] = useState<boolean>(false);
   const [hasFriends, setHasFriends] = useState<boolean>(true);
   const [accessCheck, setAccessCheck] = useState<AccessCheckResponse | null>(
-    null
+    null,
   );
   const [showModal, setShowModal] = useState(false);
+
+  // New state for connection suggestions (shown below friends)
+  const [connectionSuggestions, setConnectionSuggestions] = useState<Friend[]>(
+    [],
+  );
+  const [suggestionOnlyPage, setSuggestionOnlyPage] = useState<number>(1);
+  const [suggestionOnlyHasMore, setSuggestionOnlyHasMore] =
+    useState<boolean>(true);
+  const [loadingConnectionSuggestions, setLoadingConnectionSuggestions] =
+    useState<boolean>(false);
+  const [hasFetchedSuggestions, setHasFetchedSuggestions] =
+    useState<boolean>(false);
+
   const navigate = useNavigate();
   const observer = useRef<IntersectionObserver | null>(null);
+  const suggestionsObserver = useRef<IntersectionObserver | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const loadMoreSuggestionsRef = useRef<HTMLDivElement>(null);
   const { getToken } = useAuth();
 
   const fetchFriendRequestCount = useCallback(async () => {
@@ -81,7 +96,7 @@ const FriendSearch = () => {
       const token = await getToken();
       const response = await axiosInstance.get(
         "/adda/getMyFriendRequests?page=1&limit=1",
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.success) {
         setRequestCount(response.data.data.totalCount || 0);
@@ -104,7 +119,7 @@ const FriendSearch = () => {
       const token = await getToken();
       const response = await axiosInstance.get(
         "/adda/getMyFriendRequests?page=1&limit=10",
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const { pendingReceived } = response.data.data;
       const transformedRequests = (pendingReceived || []).map((data: any) => ({
@@ -159,7 +174,7 @@ const FriendSearch = () => {
         setSearchResults((prev) =>
           searchPage === 1
             ? results.suggestions
-            : [...prev, ...results.suggestions]
+            : [...prev, ...results.suggestions],
         );
         setSearchHasMore(results.hasMore);
         if (results.hasMore) {
@@ -182,7 +197,7 @@ const FriendSearch = () => {
 
       const friendsResponse = await axiosInstance.get(
         `/adda/getFriends?page=${suggestionPage}&limit=10`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const { friends, totalPages, totalCount } = friendsResponse.data.data;
@@ -199,7 +214,7 @@ const FriendSearch = () => {
           .filter((f: UserInfo): f is Friend => !!f._id);
         setSuggestionHasMore(suggestionPage < totalPages);
         setSuggestions((prev) =>
-          suggestionPage === 1 ? mappedFriends : [...prev, ...mappedFriends]
+          suggestionPage === 1 ? mappedFriends : [...prev, ...mappedFriends],
         );
         if (suggestionPage < totalPages) {
           setSuggestionPage((prev) => prev + 1);
@@ -208,7 +223,7 @@ const FriendSearch = () => {
         setHasFriends(false);
         const suggestionsResponse = await axiosInstance.get(
           `/adda/requestSuggestions?page=${suggestionPage}&limit=10`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         const { suggestions, hasMore } = suggestionsResponse.data.data;
@@ -224,7 +239,7 @@ const FriendSearch = () => {
         setSuggestions((prev) =>
           suggestionPage === 1
             ? mappedSuggestions
-            : [...prev, ...mappedSuggestions]
+            : [...prev, ...mappedSuggestions],
         );
         if (hasMore) {
           setSuggestionPage((prev) => prev + 1);
@@ -242,15 +257,55 @@ const FriendSearch = () => {
     fetchFriendsOrSuggestions();
   }, [fetchFriendsOrSuggestions]);
 
+  // Fetch connection suggestions (always shown below friends list)
+  const fetchConnectionSuggestions = useCallback(async () => {
+    if (loadingConnectionSuggestions) return;
+    setLoadingConnectionSuggestions(true);
+    try {
+      const token = await getToken();
+      const suggestionsResponse = await axiosInstance.get(
+        `/adda/requestSuggestions?page=${suggestionOnlyPage}&limit=10`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const { suggestions: newSuggestions, hasMore } =
+        suggestionsResponse.data.data;
+      const mapped: Friend[] = (newSuggestions || [])
+        .map((s: UserInfo) => ({
+          _id: s._id || "",
+          name: s.name || "Unknown",
+          picture: s.picture || "/default-avatar.png",
+          status: "connect" as const,
+        }))
+        .filter((f: UserInfo): f is Friend => !!f._id);
+      setSuggestionOnlyHasMore(hasMore);
+      setConnectionSuggestions((prev) =>
+        suggestionOnlyPage === 1 ? mapped : [...prev, ...mapped],
+      );
+      if (hasMore) {
+        setSuggestionOnlyPage((prev) => prev + 1);
+      }
+      setHasFetchedSuggestions(true);
+    } catch (error) {
+      console.error("Failed to fetch connection suggestions:", error);
+    } finally {
+      setLoadingConnectionSuggestions(false);
+    }
+  }, [getToken, suggestionOnlyPage, loadingConnectionSuggestions]);
+
+  // Trigger connection suggestions fetch once we know the user has friends
+  useEffect(() => {
+    if (hasFriends && !hasFetchedSuggestions) {
+      fetchConnectionSuggestions();
+    }
+  }, [hasFriends, hasFetchedSuggestions]);
+
   const searchFriends = async (searchQuery: string, page: number) => {
     if (!searchQuery.trim()) return { suggestions: [], hasMore: false };
     try {
       const token = await getToken();
       const response = await axiosInstance.get(
-        `/user/search-friend?page=${page}&search=${encodeURIComponent(
-          searchQuery
-        )}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/user/search-friend?page=${page}&search=${encodeURIComponent(searchQuery)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const suggestions = (response.data.data.suggestions || [])
         .map((item: Friend) => ({
@@ -280,19 +335,19 @@ const FriendSearch = () => {
         const response = await axiosInstance.post(
           `/adda/request/${friendId}`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.data.success === true) {
-          const newRequestId = response.data.data.requestId;
+          const newRequestId = response.data.data?.requestId;
           if (isSearchMode) {
             setSearchResults((prev) =>
               prev
                 .filter((s): s is Friend => !!s && !!s._id)
                 .map((s) =>
                   s._id === friendId
-                    ? { ...s, status: "pendingSent", requestId: newRequestId }
-                    : s
-                )
+                    ? { ...s, status: "pendingSent", requestId: friendId }
+                    : s,
+                ),
             );
           } else {
             setSuggestions((prev) =>
@@ -300,9 +355,19 @@ const FriendSearch = () => {
                 .filter((s): s is Friend => !!s && !!s._id)
                 .map((s) =>
                   s._id === friendId
+                    ? { ...s, status: "pendingSent", requestId: friendId }
+                    : s,
+                ),
+            );
+            // Also update connectionSuggestions if the friend is there
+            setConnectionSuggestions((prev) =>
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s._id === friendId
                     ? { ...s, status: "pendingSent", requestId: newRequestId }
-                    : s
-                )
+                    : s,
+                ),
             );
           }
           successToast("Friend request sent successfully");
@@ -318,7 +383,6 @@ const FriendSearch = () => {
         }
       } catch (error) {
         console.error("Failed to send friend request:", error);
-        errorToast("Failed to send friend request");
         if (error instanceof AxiosError) {
           const accessCheck: AccessCheckResponse = error.response?.data?.error;
           if (accessCheck?.upgradeRequired) {
@@ -326,7 +390,7 @@ const FriendSearch = () => {
             setShowModal(true);
           } else {
             errorToast(
-              error.response?.data.error || "Failed to send friend request"
+              error.response?.data.error || "Failed to send friend request",
             );
           }
         } else {
@@ -342,7 +406,7 @@ const FriendSearch = () => {
       suggestionHasMore,
       getToken,
       fetchFriendsOrSuggestions,
-    ]
+    ],
   );
 
   const handleCancelRequest = useCallback(
@@ -352,7 +416,7 @@ const FriendSearch = () => {
         const response = await axiosInstance.post(
           `/adda/cancelRequest/${requestId}`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.data.success === true) {
           if (isSearchMode) {
@@ -362,8 +426,8 @@ const FriendSearch = () => {
                 .map((s) =>
                   s.requestId === requestId
                     ? { ...s, status: "connect", requestId: undefined }
-                    : s
-                )
+                    : s,
+                ),
             );
           } else {
             setSuggestions((prev) =>
@@ -376,8 +440,18 @@ const FriendSearch = () => {
                         status: hasFriends ? "friends" : "connect",
                         requestId: undefined,
                       }
-                    : s
-                )
+                    : s,
+                ),
+            );
+            // Also update connectionSuggestions
+            setConnectionSuggestions((prev) =>
+              prev
+                .filter((s): s is Friend => !!s && !!s._id)
+                .map((s) =>
+                  s.requestId === requestId
+                    ? { ...s, status: "connect", requestId: undefined }
+                    : s,
+                ),
             );
           }
           successToast("Friend request cancelled successfully");
@@ -387,7 +461,7 @@ const FriendSearch = () => {
         errorToast("Failed to cancel friend request");
       }
     },
-    [isSearchMode, hasFriends]
+    [isSearchMode, hasFriends],
   );
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -396,13 +470,10 @@ const FriendSearch = () => {
     setSearchPage(1);
   }, []);
 
+  // IntersectionObserver for friends list
   useEffect(() => {
     if (isSearchMode || !suggestionHasMore) return;
-    const options = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.5,
-    };
+    const options = { root: null, rootMargin: "0px", threshold: 0.5 };
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
       if (
         entries[0].isIntersecting &&
@@ -417,15 +488,44 @@ const FriendSearch = () => {
       observer.current.observe(loadMoreRef.current);
     }
     return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
+      if (observer.current) observer.current.disconnect();
     };
   }, [
     suggestionHasMore,
     loadingSuggestions,
     isSearchMode,
     fetchFriendsOrSuggestions,
+  ]);
+
+  // IntersectionObserver for connection suggestions
+  useEffect(() => {
+    if (isSearchMode || !suggestionOnlyHasMore || !hasFriends) return;
+    const options = { root: null, rootMargin: "0px", threshold: 0.5 };
+    const handleObserver = (entries: IntersectionObserverEntry[]) => {
+      if (
+        entries[0].isIntersecting &&
+        suggestionOnlyHasMore &&
+        !loadingConnectionSuggestions
+      ) {
+        fetchConnectionSuggestions();
+      }
+    };
+    suggestionsObserver.current = new IntersectionObserver(
+      handleObserver,
+      options,
+    );
+    if (loadMoreSuggestionsRef.current) {
+      suggestionsObserver.current.observe(loadMoreSuggestionsRef.current);
+    }
+    return () => {
+      if (suggestionsObserver.current) suggestionsObserver.current.disconnect();
+    };
+  }, [
+    suggestionOnlyHasMore,
+    loadingConnectionSuggestions,
+    isSearchMode,
+    hasFriends,
+    fetchConnectionSuggestions,
   ]);
 
   useEffect(() => {
@@ -457,28 +557,28 @@ const FriendSearch = () => {
       prev.map((request) =>
         request.requestId === requestId
           ? { ...request, status: "accepting" }
-          : request
-      )
+          : request,
+      ),
     );
     try {
       const token = await getToken();
       const response = await axiosInstance.patch(
         `/adda/acceptRequest/${requestId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.success === true) {
         setRequests((prev) =>
           prev.map((request) =>
             request.requestId === requestId
               ? { ...request, status: "accepted", message: "Request accepted!" }
-              : request
-          )
+              : request,
+          ),
         );
         setRequestCount((count) => Math.max(0, count - 1));
         setTimeout(() => {
           setRequests((prev) =>
-            prev.filter((request) => request.requestId !== requestId)
+            prev.filter((request) => request.requestId !== requestId),
           );
           setSuggestionPage(1);
           setSuggestions([]);
@@ -502,8 +602,8 @@ const FriendSearch = () => {
         prev.map((request) =>
           request.requestId === requestId
             ? { ...request, status: "pending" }
-            : request
-        )
+            : request,
+        ),
       );
     }
   };
@@ -513,28 +613,28 @@ const FriendSearch = () => {
       prev.map((request) =>
         request.requestId === requestId
           ? { ...request, status: "declining" }
-          : request
-      )
+          : request,
+      ),
     );
     try {
       const token = await getToken();
       const response = await axiosInstance.patch(
         `/adda/rejectRequest/${requestId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.success === true) {
         setRequests((prev) =>
           prev.map((request) =>
             request.requestId === requestId
               ? { ...request, status: "declined", message: "Request declined" }
-              : request
-          )
+              : request,
+          ),
         );
         setRequestCount((count) => Math.max(0, count - 1));
         setTimeout(() => {
           setRequests((prev) =>
-            prev.filter((request) => request.requestId !== requestId)
+            prev.filter((request) => request.requestId !== requestId),
           );
         }, 1500);
       }
@@ -544,8 +644,8 @@ const FriendSearch = () => {
         prev.map((request) =>
           request.requestId === requestId
             ? { ...request, status: "pending" }
-            : request
-        )
+            : request,
+        ),
       );
     }
   };
@@ -757,6 +857,7 @@ const FriendSearch = () => {
 
   return (
     <div className="relative flex flex-col w-full max-w-3xl mx-auto bg-orange-50 min-h-screen p-4">
+      {/* Header */}
       <div className="sticky top-0 z-10 bg-white shadow-md rounded-lg mb-4 p-3">
         <div className="flex items-center justify-between">
           <button
@@ -900,6 +1001,8 @@ const FriendSearch = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Friend Requests Panel */}
       <AnimatePresence>
         {showRequests && (
           <motion.div
@@ -954,13 +1057,16 @@ const FriendSearch = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         {isSearchMode ? (
+          // ── Search Results ──
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-3">
               Search Results
             </h2>
-            {loadingSearch ? (
+            {loadingSearch && searchResults.length === 0 ? (
               <div className="flex justify-center p-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
               </div>
@@ -1004,7 +1110,6 @@ const FriendSearch = () => {
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       strokeLinecap="round"
@@ -1046,6 +1151,7 @@ const FriendSearch = () => {
           </div>
         ) : (
           <>
+            {/* ── Friends List ── */}
             <h2 className="text-lg font-semibold text-gray-800 mb-3">
               {hasFriends ? "Your Friends" : "Suggested Connections"}
             </h2>
@@ -1058,7 +1164,7 @@ const FriendSearch = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-3 gap-3"
+                className="grid grid-cols-2 md:grid-cols-3 gap-3"
               >
                 {suggestions
                   .filter((f): f is Friend => !!f && !!f._id)
@@ -1096,9 +1202,71 @@ const FriendSearch = () => {
                   </p>
                 </div>
               )}
+
+            {/* ── Suggested Connections (shown below friends when hasFriends = true) ── */}
+            {hasFriends && (
+              <div className="mt-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                  Suggested Connections
+                </h2>
+                {loadingConnectionSuggestions &&
+                connectionSuggestions.length === 0 ? (
+                  <div className="flex justify-center p-6">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : connectionSuggestions.length > 0 ? (
+                  <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                  >
+                    {connectionSuggestions
+                      .filter((f): f is Friend => !!f && !!f._id)
+                      .map((friend, index) => (
+                        <FriendCard
+                          key={`${friend._id}-${index}`}
+                          index={index}
+                          friend={friend}
+                          onSendRequest={handleSendRequest}
+                          onCancelRequest={handleCancelRequest}
+                          isConnecting={connectingIds.includes(friend._id)}
+                        />
+                      ))}
+                    {suggestionOnlyHasMore && (
+                      <div
+                        ref={loadMoreSuggestionsRef}
+                        className="col-span-3 h-4"
+                      />
+                    )}
+                  </motion.div>
+                ) : hasFetchedSuggestions ? (
+                  <div className="text-center py-6 text-gray-500 text-sm">
+                    No new connection suggestions available.
+                  </div>
+                ) : null}
+                {loadingConnectionSuggestions &&
+                  connectionSuggestions.length > 0 && (
+                    <div className="flex justify-center p-4 mt-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                      <span className="ml-2 text-gray-500">
+                        Loading more...
+                      </span>
+                    </div>
+                  )}
+                {!loadingConnectionSuggestions &&
+                  !suggestionOnlyHasMore &&
+                  connectionSuggestions.length > 0 && (
+                    <div className="text-center p-4 mt-2">
+                      <p className="text-gray-500">No more suggestions</p>
+                    </div>
+                  )}
+              </div>
+            )}
           </>
         )}
       </div>
+
       <SubscriptionModalManager
         accessCheck={accessCheck}
         isOpen={showModal}

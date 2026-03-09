@@ -14,9 +14,6 @@ const JobApplicationModal = ({
   onClose,
   application,
 }: JobApplicationModalProps) => {
-  const [activeTab, setActiveTab] = useState<
-    "details" | "coverNote" | "documents"
-  >("details");
   const [showActionMenu, setShowActionMenu] = useState(false);
 
   useEffect(() => {
@@ -97,177 +94,10 @@ const JobApplicationModal = ({
     exit: { y: 50, opacity: 0 },
   };
 
-  const tabContentVariants = {
-    hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
-  };
-
   const actionMenuVariants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } },
     exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
-  };
-
-  const TabButton = ({
-    tab,
-    label,
-  }: {
-    tab: "details" | "coverNote" | "documents";
-    label: string;
-  }) => (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => setActiveTab(tab)}
-      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-        activeTab === tab
-          ? "bg-blue-600 text-white"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-      }`}
-    >
-      {label}
-    </motion.button>
-  );
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "details":
-        return (
-          <motion.div
-            key="details"
-            variants={tabContentVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="space-y-6"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
-                {application.name.charAt(0)}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">
-                  {application.name}
-                </h3>
-                <p className="text-gray-500">{application.gender}</p>
-                <p className="text-gray-600 font-medium">
-                  {application.jobTitle}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-500 mb-1">
-                  Email Address
-                </h4>
-                <a
-                  href={`mailto:${application.email}`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {application.email}
-                </a>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-500 mb-1">
-                  Phone Number
-                </h4>
-                <a
-                  href={`tel:${application.phone}`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {application.phone}
-                </a>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
-                <h4 className="text-sm font-medium text-gray-500 mb-1">
-                  Portfolio
-                </h4>
-                <a
-                  href={application.portfolioLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {application.portfolioLink}
-                </a>
-              </div>
-            </div>
-          </motion.div>
-        );
-      case "coverNote":
-        return (
-          <motion.div
-            key="coverNote"
-            variants={tabContentVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="bg-gray-50 p-6 rounded-lg"
-          >
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Cover Note
-            </h3>
-            <div className="prose prose-sm max-w-none text-gray-600">
-              {application.coverNote.split("\n").map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
-            </div>
-          </motion.div>
-        );
-      case "documents":
-        return (
-          <motion.div
-            key="documents"
-            variants={tabContentVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="space-y-4"
-          >
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-800">Resume</h4>
-                  <p className="text-sm text-gray-500">
-                    View or download resume
-                  </p>
-                </div>
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href={application.resume}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm"
-                >
-                  Open Resume
-                </motion.a>
-              </div>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-800">Cover Letter</h4>
-                  <p className="text-sm text-gray-500">
-                    View or download cover letter
-                  </p>
-                </div>
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href={application.coverLetterLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm"
-                >
-                  Open Cover Letter
-                </motion.a>
-              </div>
-            </div>
-          </motion.div>
-        );
-    }
   };
 
   return (
@@ -312,16 +142,125 @@ const JobApplicationModal = ({
                 </svg>
               </motion.button>
             </div>
-            <div className="flex space-x-2 px-6 py-4 border-b">
-              <TabButton tab="details" label="Details" />
-              <TabButton tab="coverNote" label="Cover Note" />
-              <TabButton tab="documents" label="Documents" />
+
+            <div className="px-6 py-6 overflow-auto max-h-[calc(90vh-150px)] space-y-8">
+              {/* Candidate Header */}
+              <div className="flex items-center gap-4 border-b pb-4">
+                <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                  {application.name.charAt(0)}
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {application.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {application.jobTitle}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Applied on{" "}
+                    {new Date(application.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Contact Information
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="border rounded-lg p-4">
+                    <p className="text-xs text-gray-500">Email</p>
+                    <a
+                      href={`mailto:${application.email}`}
+                      className="text-blue-600 font-medium"
+                    >
+                      {application.email}
+                    </a>
+                  </div>
+
+                  <div className="border rounded-lg p-4">
+                    <p className="text-xs text-gray-500">Phone</p>
+                    <a
+                      href={`tel:${application.phone}`}
+                      className="text-blue-600 font-medium"
+                    >
+                      {application.phone}
+                    </a>
+                  </div>
+
+                  <div className="border rounded-lg p-4">
+                    <p className="text-xs text-gray-500">Gender</p>
+                    <p className="font-medium text-gray-700">
+                      {application.gender}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cover Note */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Cover Note
+                </h3>
+
+                <div className="bg-gray-50 rounded-lg p-5 text-gray-700 leading-relaxed">
+                  {application.coverNote?.split("\n").map((para, i) => (
+                    <p key={i} className="mb-3">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Documents */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Documents
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Resume</h4>
+                      <p className="text-sm text-gray-500">
+                        Candidate resume document
+                      </p>
+                    </div>
+
+                    <a
+                      href={application.resume}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+                    >
+                      View
+                    </a>
+                  </div>
+
+                  <div className="border rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Portfolio</h4>
+                      <p className="text-sm text-gray-500">
+                        Candidate Portfolio document
+                      </p>
+                    </div>
+
+                    <a
+                      href={application.portfolioLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+                    >
+                      View
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="px-6 py-6 overflow-auto max-h-[calc(90vh-150px)]">
-              <AnimatePresence mode="wait">
-                {renderTabContent()}
-              </AnimatePresence>
-            </div>
+
             <div className="border-t px-6 py-4 flex justify-end gap-3 bg-gray-50">
               <motion.button
                 whileHover={{ scale: 1.05 }}

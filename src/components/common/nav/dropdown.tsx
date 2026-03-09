@@ -125,7 +125,7 @@ const DropDown = ({
         exit="exit"
         className={`absolute ${
           alignLeft ? "right-0" : "left-0"
-        } mt-3 w-40 md:w-56 bg-white shadow-2xl z-50 rounded-xl overflow-hidden border border-gray-100 backdrop-blur-sm`}
+        } mt-3 w-48 md:w-56 bg-white shadow-2xl z-50 rounded-xl overflow-hidden border border-gray-100 backdrop-blur-sm`}
         style={{
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
           boxShadow:
@@ -138,7 +138,7 @@ const DropDown = ({
           </h3>
         </div>
 
-        <div className="py-2">
+        <div className="md:py-2">
           {items.map((data, index) => {
             // Only for workshops, add a side line based on the label
             let sideLine = "";
@@ -160,7 +160,7 @@ const DropDown = ({
                 <motion.button
                   variants={hoverVariants}
                   onClick={() => handleClick(data.label)}
-                  className="w-full px-4 py-3 text-left transition-all duration-200 flex items-center justify-between group border-l-4 border-transparent hover:border-blue-500"
+                  className="w-full px-4 py-2 md:py-3 text-left transition-all duration-200 flex items-center justify-between group border-l-4 border-transparent hover:border-blue-500"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>

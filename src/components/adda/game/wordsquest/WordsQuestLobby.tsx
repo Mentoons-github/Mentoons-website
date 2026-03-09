@@ -6,7 +6,7 @@ const WordsQuestLobby = ({
   return (
     <div className="h-screen bg-[url('/assets/games/wordsQuest/bg.jpg')] bg-cover bg-center flex flex-col items-center justify-center gap-4 sm:gap-8 p-4">
       <img
-        src="/assets/games/wordsQuest/title Logo.png"
+        src="/assets/games/wordsQuest/word quest logo.png"
         alt="title"
         className="w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 max-w-2xl"
       />

@@ -68,6 +68,9 @@ const HowToPlay = ({ instructions, isModalOpen, setClose }: HowToPlayProps) => {
           <p className="text-white/70 text-xs sm:text-sm font-medium">
             Step {currentStep + 1} of {instructions.length}
           </p>
+          <p className="text-center text-white text-xs sm:text-sm md:text-base lg:text-lg leading-snug font-semibold drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] max-w-3xl">
+                  {currentInstruction.text}
+                </p>
         </div>
 
         {isFullscreen && hasMedia && (
@@ -245,9 +248,7 @@ const HowToPlay = ({ instructions, isModalOpen, setClose }: HowToPlayProps) => {
                     strokeWidth={1.5}
                   />
                 </div>
-                <p className="text-center text-white text-xs sm:text-sm md:text-base lg:text-lg leading-snug font-semibold drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] max-w-3xl">
-                  {currentInstruction.text}
-                </p>
+                
               </div>
             </>
           ) : (

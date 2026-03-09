@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { categoryData } from "@/utils/quiz";
 
 const QuizTimelineSection = ({ categories }: { categories: Category[] }) => {
-  console.log(categories);
   const [selectedCategory, setSelectedCategory] = useState(0);
   const currentCategory = categories[selectedCategory]?.category || "";
   const currentData = categoryData[currentCategory] || {

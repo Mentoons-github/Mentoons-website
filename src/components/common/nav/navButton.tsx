@@ -27,6 +27,7 @@ const NavButton = ({
   onMouseLeave,
   icon,
   className = "text-center text-[12px] sm:text-sm md:text-base font-semibold text-white",
+  onClick,
 }: {
   children: React.ReactNode;
   label: string;
@@ -34,6 +35,7 @@ const NavButton = ({
   onMouseEnter: (menu: string) => void;
   onMouseLeave: (menu: string) => void;
   className?: string;
+  onClick?: (menu: string) => void;
 }) => {
   const menuKey = label.toLowerCase();
   return (
@@ -41,6 +43,11 @@ const NavButton = ({
       className="relative"
       onMouseEnter={() => onMouseEnter(menuKey)}
       onMouseLeave={() => onMouseLeave(menuKey)}
+      onClick={() => {
+        if (onClick) {
+          onClick(menuKey);
+        }
+      }}
     >
       <button
         className={`bg-transparent outline-none cursor-pointer ${className}  group relative bg-transparent outline-none cursor-pointer text-center text-white flex items-center gap-1 transition-all duration-300 ease-in-out hover:text-yellow-500`}

@@ -21,7 +21,7 @@ const QuizBanner = ({ categories }: QuizBanner) => {
           <img
             src="/assets/assesments/quiz/bannerBG.png"
             alt="Quiz Banner Background"
-            className="absolute  bottom-10  right-[10%] lg:w-[30%] xl:w-[45%]  lg:right-[6%] xl:right-[15%] object-contain pointer-events-none z-0"
+            className="absolute bottom-20 md:bottom-10  right-[10%] lg:w-[30%] xl:w-[45%]  lg:right-[6%] xl:right-[15%] object-contain pointer-events-none z-0"
           />
 
           <div className="ml-6 md:ml-20 space-y-6 max-w-3xl p-6 relative z-10 ">

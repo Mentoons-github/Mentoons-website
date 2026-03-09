@@ -192,6 +192,7 @@ const ProfileDetails = () => {
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto ">
             {userPosts.map((post) => (
               <div
+                key={post._id}
                 onClick={() => navigate(`/adda/post/${post._id}`)}
                 className="flex flex-col items-center justify-start w-full gap-5 p-2 border border-orange-200 rounded-xl min-h-fit"
               >

@@ -6,6 +6,7 @@ import PatterRaceHeader from "../patternRace/header";
 import { ArrowRight } from "lucide-react";
 
 interface PatternRacePlayzoneProps {
+  difficulty: "easy" | "medium" | "hard";
   timeOver: boolean;
   timer: number;
   onGameComplete: (roundScores: {
@@ -20,6 +21,7 @@ interface PatternRacePlayzoneProps {
 }
 
 const WordsQuestPlayzone = ({
+  difficulty,
   timeOver,
   onGameComplete,
   timer,
@@ -43,7 +45,7 @@ const WordsQuestPlayzone = ({
 
   // console.log(decreaswRoundCount);
 
-  const currentGame = WORDS_QUEST[roundCount];
+  const currentGame = WORDS_QUEST[difficulty][roundCount];
 
   const { fixedBoard, wordsToFind } = currentGame;
 
@@ -97,7 +99,7 @@ const WordsQuestPlayzone = ({
       foundWords,
     };
 
-    if (roundCount + 1 >= WORDS_QUEST.length) {
+    if (roundCount + 1 >= WORDS_QUEST[difficulty].length) {
       onGameComplete(roundData);
       return;
     }
@@ -115,7 +117,6 @@ const WordsQuestPlayzone = ({
   // const handlePrevious = () => {
   //   decreaswRoundCount();
   // };
-  
 
   return (
     <div
@@ -131,7 +132,7 @@ const WordsQuestPlayzone = ({
       </div>
       <div className="relative flex flex-col items-center justify-center">
         <img
-          src="/assets/games/wordsQuest/characters1.png"
+          src={difficulty === "easy" ?"/assets/games/wordsQuest/Characterskids.png":"/assets/games/wordsQuest/characters1.png"} 
           alt=""
           className="block absolute -top-14 md:-top-20 -bottom-5 left-1/2 -translate-x-1/2 w-full  lg:w-[85%] lg:h-auto lg:object-contain"
         />
@@ -151,7 +152,9 @@ const WordsQuestPlayzone = ({
           className="bg-[#c66930] flex items-center justify-center gap-2 px-3 py-1 rounded text-lg font-bold text-white border-2 border-white hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
           onClick={handleNext}
         >
-          {roundCount === WORDS_QUEST.length - 1 ? "Finish" : "Next"}
+          {roundCount === WORDS_QUEST[difficulty].length - 1
+            ? "Finish"
+            : "Next"}
           <ArrowRight />
         </button>
       </div>
