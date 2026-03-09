@@ -15,8 +15,6 @@ import {
 } from "lucide-react";
 import CommonModal from "../common/modal/commonModal";
 import UserDetailsModal from "./modal/userDetails";
-import BplApplicationViewModal from "./workshop/BplApplicationViewModal";
-import { BplVerificationTypes } from "@/types/workshopsV2/bplVerificationTypes";
 
 type BblApplicationFilterStatus = "" | "Pending" | "Approved" | "Rejected";
 
@@ -60,7 +58,6 @@ interface DynamicTableProps<T> {
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
-  updateStatus?: ((applicationId: string, status: string) => void) | undefined;
   handleFilter?: (value: BblApplicationFilterStatus) => void;
   onShare?: (val: T) => void;
 }
@@ -88,7 +85,6 @@ const DynamicTable = <T extends Record<string, any>>({
   selectedItems = new Set(),
   onSelectItem,
   onSelectAll,
-  updateStatus,
   handleFilter,
   onShare,
 }: DynamicTableProps<T>) => {
@@ -98,17 +94,8 @@ const DynamicTable = <T extends Record<string, any>>({
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
   const [commonModalOpen, setCommonModalOpen] = useState(false);
   const [commonModalData, setCommonModalData] = useState<T | null>(null);
-  const [bplApplicationModalOpen, setBplApplicationModalOpen] =
-    useState<boolean>(false);
-  const [selectedBplApplication, setSelectedBplApplication] =
-    useState<BplVerificationTypes | null>(null);
 
   useEffect(() => setLocalSearchTerm(searchTerm), [searchTerm]);
-
-  const handleBplApplicationModal = (item: any) => {
-    setSelectedBplApplication(item);
-    setBplApplicationModalOpen(true);
-  };
 
   useEffect(() => {
     if (onSearch) onSearch(debouncedSearchTerm);
@@ -136,7 +123,6 @@ const DynamicTable = <T extends Record<string, any>>({
   }, [data, debouncedSearchTerm, columns, onSearch]);
 
   const displayData = onSearch ? data : filteredData;
-  console.log(filteredData);
   const isAllSelected =
     displayData.length > 0 &&
     displayData.every((i) => selectedItems.has(String(i[idKey])));
@@ -180,14 +166,14 @@ const DynamicTable = <T extends Record<string, any>>({
     );
 
   const handleView = (item: any) => {
-    if (["workshop", "job"].includes(itemType)) {
-      setCommonModalData(item);
-      setCommonModalOpen(true);
-    } else if (["user", "employee"].includes(itemType)) {
+    if (["user", "employee"].includes(itemType)) {
       setSelectedItem(item);
       setIsModalOpen(true);
     } else if (onView) {
       onView(item);
+    } else {
+      setCommonModalData(item);
+      setCommonModalOpen(true);
     }
   };
 
@@ -267,8 +253,6 @@ const DynamicTable = <T extends Record<string, any>>({
         <ViewButton
           pendingEdit={pendingEdit}
           onClick={() => handleView(item)}
-          itemType={itemType}
-          handleBplApplicationModal={() => handleBplApplicationModal(item)}
         />
         {onEdit && (
           <button
@@ -320,8 +304,6 @@ const DynamicTable = <T extends Record<string, any>>({
         <ViewButton
           pendingEdit={pendingEdit}
           onClick={() => handleView(item)}
-          itemType={itemType}
-          handleBplApplicationModal={() => handleBplApplicationModal(item)}
         />
         {onEdit && (
           <button
@@ -536,17 +518,6 @@ const DynamicTable = <T extends Record<string, any>>({
         isOpen={commonModalOpen}
         onClose={setCommonModalOpen}
       />
-
-      {bplApplicationModalOpen && selectedBplApplication && (
-        <BplApplicationViewModal
-          data={selectedBplApplication}
-          onClose={() => {
-            setBplApplicationModalOpen(false);
-            setSelectedBplApplication(null);
-          }}
-          updateStatus={updateStatus!}
-        />
-      )}
     </div>
   );
 };
@@ -603,9 +574,7 @@ const Header = ({
           className="flex px-2 md:px-3 py-1 md:py-2 border rounded-md cursor-pointer space-x-2 items-center "
           onClick={() => onSort && onSort("createdAt")}
         >
-          <h4>
-            {sortOrder === "desc" ? "Newest First" : "Oldest First"}{" "}
-          </h4>
+          <h4>{sortOrder === "desc" ? "Newest First" : "Oldest First"} </h4>
           {sortOrder === "asc" ? <SortAsc /> : <SortDesc />}
         </div>
       </div>
@@ -653,24 +622,13 @@ const NoResults = () => (
 interface ViewButtonProps {
   pendingEdit: boolean;
   onClick?: () => void;
-  itemType?: string;
-  handleBplApplicationModal?: () => void;
 }
 
-const ViewButton = ({
-  pendingEdit,
-  onClick,
-  itemType,
-  handleBplApplicationModal,
-}: ViewButtonProps) => (
+const ViewButton = ({ pendingEdit, onClick }: ViewButtonProps) => (
   <div className="relative inline-block">
     <button
       onClick={() => {
-        if (itemType === "bplVerification") {
-          handleBplApplicationModal?.();
-        } else {
-          onClick?.();
-        }
+        onClick?.();
       }}
       className={`p-1 ${
         pendingEdit

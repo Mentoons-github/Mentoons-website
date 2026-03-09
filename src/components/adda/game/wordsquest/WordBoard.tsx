@@ -1,11 +1,11 @@
-import { WordsQuestType } from "@/types/adda/game/wordsQuestTypes";
+import { WordsQuestTypeDatas } from "@/types/adda/game/wordsQuestTypes";
 import { LockKeyhole } from "lucide-react";
 import { useRef } from "react";
 
 // Example fixed board (replace with your 10 boards)
 
 interface Props {
-  currentGame: WordsQuestType;
+  currentGame: WordsQuestTypeDatas;
   foundWords: string[];
   foundCells: number[][];
   selectedCells: number[][];
@@ -128,6 +128,7 @@ export default function WordBoard({
                     onPointerUp={handleMouseUp}
                     className={`w-6 h-6 md:w-9 md:h-9 lg:w-8 lg:h-8 flex items-center justify-center text-[16px] md:text-lg font-bold cursor-pointer select-none touch-none
                                ${
+                                 //foundcells
                                  foundCells.some(
                                    ([r, c]) => r === rowIndex && c === colIndex,
                                  )

@@ -13,12 +13,15 @@ import WordsQuestPlayzone from "@/components/adda/game/wordsquest/WordsQuestPlay
 import { WORDS_QUEST } from "@/constant/adda/game/wordsQuest";
 import WordsQuestScoreBoard from "@/components/adda/game/wordsquest/WordsQuestScoreBoard";
 import { useNavigate } from "react-router-dom";
+import GameDifficultyModal from "@/components/adda/game/difficultyModal";
 
 interface RoundScore {
   title: string;
   score: number;
   foundWords: string[];
 }
+
+type Difficulty = "easy" | "medium" | "hard";
 
 const WordsQuest = () => {
   const GAME_TIME = 300;
@@ -31,6 +34,9 @@ const WordsQuest = () => {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [isInstructionOpen, setInstructionOpen] = useState(false);
   const [roundCount, setRoundCount] = useState<number>(0);
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [difficultyModalOpen, setDifficultyModalOpen] = useState(false);
+
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
@@ -58,7 +64,7 @@ const WordsQuest = () => {
     setFinalScore((prev) => {
       const updated = [...prev, roundData];
 
-      if (updated.length === WORDS_QUEST.length) {
+      if (updated.length === WORDS_QUEST[difficulty].length) {
         finishGame(updated);
       }
 
@@ -81,7 +87,7 @@ const WordsQuest = () => {
           body: {
             score: totalScore,
             gameId,
-            difficulty: "noDifficulty",
+            difficulty,
             success,
           },
           token,
@@ -107,10 +113,12 @@ const WordsQuest = () => {
     setCurrentState("lobby");
   };
 
-  const startGame = () => {
+  const startGame = (difficulty: Difficulty) => {
+    setDifficulty(difficulty);
     setTimer(GAME_TIME);
     setFinalScore([]);
     setCurrentState("play");
+    setDifficultyModalOpen(false);
   };
 
   const goToLobby = () => {
@@ -122,6 +130,8 @@ const WordsQuest = () => {
       navigate("/adda/game-lobby");
     } else {
       setCurrentState("lobby");
+      setRoundCount(0);
+      setFinalScore([]);
     }
   };
 
@@ -152,11 +162,14 @@ const WordsQuest = () => {
       </div>
 
       {currentState === "lobby" && (
-        <WordsQuestLobby showDifficultyModal={() => startGame()} />
+        <WordsQuestLobby
+          showDifficultyModal={() => setDifficultyModalOpen(true)}
+        />
       )}
 
       {currentState === "play" && (
         <WordsQuestPlayzone
+          difficulty={difficulty}
           timer={timer}
           timeOver={timer <= 0}
           onGameComplete={handleGameComplete}
@@ -172,7 +185,7 @@ const WordsQuest = () => {
           score={finalScore}
           onPlayAgain={handlePlayAgain}
           goToLobby={goToLobby}
-          answers={WORDS_QUEST}
+          answers={WORDS_QUEST[difficulty]}
         />
       )}
 
@@ -180,6 +193,14 @@ const WordsQuest = () => {
         <RewardPointsModal
           rewardPoints={rewardPoints}
           onClose={handleCloseRewardModal}
+        />
+      )}
+
+      {difficultyModalOpen && (
+        <GameDifficultyModal
+          isClose={() => setDifficultyModalOpen(false)}
+          setDifficulty={startGame}
+          from="wordsQuest"
         />
       )}
     </div>

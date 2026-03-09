@@ -80,7 +80,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
 
   if (!item) return null;
   const data = itemType === "employee" ? employee || item : item;
-  console.log(data);
+  console.log(data, "dddddddaaaaaaaaaaa");
 
   const handleProfileEditRequest = async (action: "approve" | "reject") => {
     const token = await getToken();
@@ -274,7 +274,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-500 font-medium">Email</p>
                     <p className="text-sm text-gray-800 font-medium truncate">
-                      {data.email}
+                      {data.email || data.user?.email}
                     </p>
                   </div>
                 </div>

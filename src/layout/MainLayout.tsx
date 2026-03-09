@@ -26,7 +26,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     (location.pathname !== "/adda/game-lobby" &&
       location.pathname.startsWith("/adda/game-lobby"));
 
-  const isAddaGamePage = location.pathname === "/adda";
+  // const isAddaGamePage = location.pathname === "/adda";
+  const gamePages = location.pathname.startsWith("/adda/game-lobby");
+  const chatPage = location.pathname.startsWith("/chat");
 
   // const isChatPage = location.pathname.startsWith("/chat");
   const showFooter = !hideLayout;
@@ -44,13 +46,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Header />
           </>
         )}
-        <div className={!isAddaGamePage ? "" : "pt-[20px] md:pt-[30px]"}>
+        <div>
           <Outlet />
           {children}
         </div>
         {showFooter && <Footer />}
         <div className="fixed bottom-20 right-8 flex flex-col items-center justify-center gap-4">
-          <WhatsappGroup />
+          {!gamePages && !chatPage && <WhatsappGroup />}
           {showFooter && <ScrollToTopButton />}
         </div>
       </div>

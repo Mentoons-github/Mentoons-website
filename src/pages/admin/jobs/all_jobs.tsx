@@ -11,12 +11,13 @@ import { JobData } from "@/types/admin";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 import { AppDispatch, RootState } from "../../../redux/store";
 import { EXCLUDE_JOBS } from "@/constant/admin";
+import AdminViewJobModal from "@/components/admin/modal/job/AdminViewJobModal";
 
 const AllJobs = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { jobs, loading, error } = useSelector(
-    (state: RootState) => state.careerAdmin
+    (state: RootState) => state.careerAdmin,
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -25,6 +26,8 @@ const AllJobs = () => {
   const [limit, setLimit] = useState<number>(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobData | null>(null);
+  const [jobViewModalOpen, setJobViewModalOpen] = useState<boolean>(false);
+  const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
 
   useEffect(() => {
     dispatch(
@@ -33,7 +36,7 @@ const AllJobs = () => {
         searchTerm: debouncedSearchTerm,
         page: currentPage,
         limit,
-      })
+      }),
     );
   }, [dispatch, sortOrder, debouncedSearchTerm, currentPage, limit]);
 
@@ -60,7 +63,8 @@ const AllJobs = () => {
   };
 
   const handleView = (job: JobData) => {
-    navigate(`/job-details/${job._id}`);
+    setSelectedJob(job);
+    setJobViewModalOpen(true);
   };
 
   const handleSort = () => {
@@ -71,7 +75,7 @@ const AllJobs = () => {
     debounce((value: string) => {
       setDebouncedSearchTerm(value);
     }, 300),
-    []
+    [],
   );
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +96,7 @@ const AllJobs = () => {
   const formatCell = (
     value: any,
     key: string,
-    item: JobData
+    item: JobData,
   ): React.ReactNode => {
     if (key === "thumbnail" && typeof value === "string" && value) {
       return (
@@ -175,6 +179,14 @@ const AllJobs = () => {
         onConfirm={confirmDelete}
         itemName={jobToDelete ? jobToDelete.jobTitle || "this job" : ""}
       />
+      {jobViewModalOpen && selectedJob && (
+        <AdminViewJobModal
+          onClose={() => {
+            (setJobViewModalOpen(false), setSelectedJob(null));
+          }}
+          data={selectedJob}
+        />
+      )}
     </div>
   );
 };

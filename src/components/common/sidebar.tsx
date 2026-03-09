@@ -2,9 +2,10 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import DropDown from "./nav/dropdown";
 import NavButton from "./nav/navButton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { COMMON_NAV } from "@/constant";
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const Sidebar = ({
   isOpen,
@@ -22,12 +23,15 @@ const Sidebar = ({
     products: boolean;
     services: boolean;
     workshops: boolean;
+    joinus: boolean;
   };
   handleHover: (key: string) => void;
   handleMouseLeave: (key: string) => void;
   setIsOpen: (val: boolean) => void;
   handlePlans: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }) => {
+  const [isClicked, setIsClicked] = useState(false);
+
   useEffect(() => {
     const handleBreakPoint = () => {
       if (window.innerWidth >= 1024) {
@@ -50,13 +54,22 @@ const Sidebar = ({
     };
   }, [isOpen, setIsOpen]);
 
+  const handleSubNav = (label: string) => {
+    if (isClicked) {
+      handleMouseLeave(label.toLowerCase().replace(/\s/g, ""));
+    } else {
+      handleHover(label.toLowerCase().replace(/\s/g, ""));
+    }
+    setIsClicked((prev) => !prev);
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     console.log("clicked");
     setIsOpen(false);
     handlePlans(e);
   };
 
-  return (
+  return createPortal(
     <motion.aside
       initial={{ opacity: 0, x: "100%" }}
       animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : "100%" }}
@@ -81,12 +94,31 @@ const Sidebar = ({
                 icon={false}
                 onMouseEnter={() => handleHover(label.toLowerCase())}
                 onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                onClick={() => handleSubNav(label)}
               >
                 {label === "Products" && dropdown.products && (
                   <DropDown
                     isOpen={setIsOpen}
                     items={items}
                     labelType="products"
+                  />
+                )}
+              </NavButton>
+            ) : label === "Join Us" ? (
+              <NavButton
+                key={id ? id : label}
+                className="text-white text-2xl sm:text-3xl md:text-4xl"
+                label={label}
+                icon={false}
+                onMouseEnter={() => handleHover(label.toLowerCase())}
+                onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                onClick={() => handleSubNav(label)}
+              >
+                {label === "Join Us" && dropdown.joinus && (
+                  <DropDown
+                    isOpen={setIsOpen}
+                    items={items}
+                    labelType="joinus"
                   />
                 )}
               </NavButton>
@@ -98,6 +130,7 @@ const Sidebar = ({
                 icon={false}
                 onMouseEnter={() => handleHover(label.toLowerCase())}
                 onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
+                onClick={() => handleSubNav(label)}
               >
                 {label === "Workshops" && dropdown.workshops && (
                   <DropDown
@@ -124,7 +157,8 @@ const Sidebar = ({
           ),
         )}
       </div>
-    </motion.aside>
+    </motion.aside>,
+    document.body,
   );
 };
 

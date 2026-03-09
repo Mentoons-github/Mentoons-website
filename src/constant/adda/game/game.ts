@@ -85,7 +85,7 @@ export const GAMES = [
   },
   {
     title: "Words Quest",
-    thumbnail: "/assets/games/wordsQuest/title Logo.png",
+    thumbnail: "/assets/games/wordsQuest/word quest logo.png",
     link: `${base_url}adda/game-lobby/words-quest`,
   },
 ];

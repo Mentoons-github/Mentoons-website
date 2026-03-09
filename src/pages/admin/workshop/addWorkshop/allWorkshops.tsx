@@ -4,6 +4,7 @@ import axios from "axios";
 import DynamicTable from "@/components/admin/dynamicTable";
 import { useAuth } from "@clerk/clerk-react";
 import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
+import AdminWorkshopViewModal from "@/components/admin/modal/workshop/AdminWorkshopViewModal";
 
 interface WhyChooseUs {
   heading: string;
@@ -22,12 +23,19 @@ interface AgeGroup {
   benefits: Benefit[];
 }
 
-interface Workshop {
+export interface Workshop {
   _id: string;
   workshopName: string;
   whyChooseUs: WhyChooseUs[];
   ageGroups: AgeGroup[];
   createdAt: string | Date;
+}
+
+export interface WorkshopCategory {
+  categoryName: string;
+  description: string;
+  workshops: Workshop[];
+  subtitle: string;
 }
 
 interface Pagination {
@@ -60,8 +68,12 @@ const AllWorkshops: React.FC = () => {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [workshopToDelete, setWorkshopToDelete] = useState<Workshop | null>(
-    null
+    null,
   );
+  const [workshopViewModalOpen, setWorkshopViewModalOpen] =
+    useState<boolean>(false);
+  const [workshopViewData, setWorkshopViewData] =
+    useState<WorkshopCategory | null>(null);
   const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_PROD_URL;
 
@@ -83,7 +95,7 @@ const AllWorkshops: React.FC = () => {
               sortOrder,
               ...(searchTerm && { search: searchTerm }),
             },
-          }
+          },
         );
 
         if (!response.data.success) {
@@ -111,7 +123,7 @@ const AllWorkshops: React.FC = () => {
     const typedField = field as keyof Workshop;
     setSortField(typedField);
     setSortOrder((prev) =>
-      prev === "asc" && field === sortField ? "desc" : "asc"
+      prev === "asc" && field === sortField ? "desc" : "asc",
     );
     setPage(1);
   };
@@ -130,11 +142,12 @@ const AllWorkshops: React.FC = () => {
       try {
         const token = await getToken();
         const response = await axios.delete(
-          `${API_BASE_URL}/workshop/${workshopToDelete._id}`,{
+          `${API_BASE_URL}/workshop/${workshopToDelete._id}`,
+          {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
         if (response.status !== 200) {
@@ -142,7 +155,7 @@ const AllWorkshops: React.FC = () => {
         }
 
         setWorkshops((prev) =>
-          prev.filter((workshop) => workshop._id !== workshopToDelete._id)
+          prev.filter((workshop) => workshop._id !== workshopToDelete._id),
         );
         if (workshops.length === 1 && page > 1) {
           setPage((prev) => prev - 1);
@@ -157,6 +170,11 @@ const AllWorkshops: React.FC = () => {
 
   const handleAdd = () => {
     navigate("/admin/add-workshop");
+  };
+
+  const handleView = (workshops: WorkshopCategory) => {
+    setWorkshopViewModalOpen(true);
+    setWorkshopViewData(workshops);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -199,6 +217,7 @@ const AllWorkshops: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">All Workshops</h1>
       <DynamicTable<Workshop>
+        onView={handleView}
         data={workshops}
         onEdit={handleEdit}
         onDelete={handleDelete}
@@ -249,6 +268,12 @@ const AllWorkshops: React.FC = () => {
         onConfirm={confirmDelete}
         itemName={workshopToDelete ? workshopToDelete.workshopName : ""}
       />
+      {workshopViewModalOpen && workshopViewData && (
+        <AdminWorkshopViewModal
+          onClose={() => setWorkshopViewModalOpen(false)}
+          data={workshopViewData}
+        />
+      )}
     </div>
   );
 };

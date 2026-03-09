@@ -54,18 +54,20 @@ const Report = ({
   };
 
   const clampedScore = Math.min(Math.max(result?.score.correct ?? 1, 1), 10);
-
   const progressWidth = `${(clampedScore / 10) * 100}%`;
 
   return (
+    // Backdrop: overflow-auto so on small screens the user can scroll to see the full modal
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-[10000] bg-black bg-opacity-50 overflow-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose(false);
       }}
     >
+      {/* Fixed 800px wide modal — never changes size on any screen */}
       <div
-        className="relative bg-white rounded-lg shadow-xl w-[90%] max-w-[800px] max-h-[90vh] overflow-y-auto"
+        style={{ width: "800px" }}
+        className="relative bg-white rounded-lg shadow-xl my-10 mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -74,7 +76,9 @@ const Report = ({
         >
           <FaTimes size={24} />
         </button>
+
         <div ref={reportRef} className="p-6">
+          {/* Header */}
           <div className="flex items-center justify-between border-b border-black pb-2">
             <img
               src="https://mentoons-website.s3.ap-northeast-1.amazonaws.com/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
@@ -152,6 +156,7 @@ const Report = ({
               </div>
             </div>
           </div>
+
           <div className="mt-6">
             <h3 className="text-md font-semibold">
               Emotional Health Breakdown
@@ -167,52 +172,16 @@ const Report = ({
               </thead>
               <tbody>
                 {[
-                  {
-                    name: "Anxiety",
-                    status: "Attention",
-                    responsibility: "You",
-                    note: "Signs of worry were observed.",
-                  },
-                  {
-                    name: "Stress",
-                    status: "Attention",
-                    responsibility: "You",
-                    note: "Some stress detected.",
-                  },
-                  {
-                    name: "Mood Stability",
-                    status: "On track",
-                    responsibility: "You",
-                    note: "Mostly stable mood.",
-                  },
-                  {
-                    name: "Friendships",
-                    status: "On track",
-                    responsibility: "Peers/Friends",
-                    note: "Good social interaction.",
-                  },
-                  {
-                    name: "Relationships",
-                    status: "On track",
-                    responsibility: "Peers",
-                    note: "You have a stable social circle, maintaining good personal and professional relationships.",
-                  },
-                  {
-                    name: "Social Impact",
-                    status: "On track",
-                    responsibility: "Society",
-                    note: "Your interactions positively influence your surroundings, contributing to a supportive environment.",
-                  },
+                  { name: "Anxiety", status: "Attention", responsibility: "You", note: "Signs of worry were observed." },
+                  { name: "Stress", status: "Attention", responsibility: "You", note: "Some stress detected." },
+                  { name: "Mood Stability", status: "On track", responsibility: "You", note: "Mostly stable mood." },
+                  { name: "Friendships", status: "On track", responsibility: "Peers/Friends", note: "Good social interaction." },
+                  { name: "Relationships", status: "On track", responsibility: "Peers", note: "You have a stable social circle, maintaining good personal and professional relationships." },
+                  { name: "Social Impact", status: "On track", responsibility: "Society", note: "Your interactions positively influence your surroundings, contributing to a supportive environment." },
                 ].map((item, idx) => (
                   <tr key={idx} className="border-t">
                     <td className="p-2 text-center">{item.name}</td>
-                    <td
-                      className={`p-2 text-white w-40 text-center ${
-                        item.status === "Attention"
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
-                      }`}
-                    >
+                    <td className={`p-2 text-white w-40 text-center ${item.status === "Attention" ? "bg-yellow-500" : "bg-green-500"}`}>
                       {item.status}
                     </td>
                     <td className="p-5">{item.responsibility}</td>
@@ -222,36 +191,24 @@ const Report = ({
               </tbody>
             </table>
           </div>
+
           <div className="flex justify-between items-start w-full space-x-10 mt-6">
             <div className="w-1/2 flex flex-col space-y-5">
               <h2 className="text-xl font-bold text-gray-700">Reports</h2>
               {REPORTS.map((data, index) => (
-                <div
-                  key={index}
-                  className="flex space-x-3 items-center p-3 rounded-lg"
-                >
+                <div key={index} className="flex space-x-3 items-center p-3 rounded-lg">
                   <div className="w-14 h-14 flex-shrink-0">
-                    <img
-                      src={data.icon}
-                      alt={data.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={data.icon} alt={data.title} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 bg-gray-100">
-                    <h1 className="text-lg font-semibold text-sm">
-                      {data.title}:
-                    </h1>
+                    <h1 className="text-lg font-semibold text-sm">{data.title}:</h1>
                     <p className="text-gray-600 text-sm">{data.description}</p>
                   </div>
                 </div>
               ))}
             </div>
             <div className="w-1/2 flex flex-col justify-center items-center bg-gray-100 p-5 rounded-lg mt-20">
-              <img
-                src="/assets/assesments/text contact us.png"
-                alt="contact-us"
-                className="w-1/2 mb-4"
-              />
+              <img src="/assets/assesments/text contact us.png" alt="contact-us" className="w-1/2 mb-4" />
               <div className="w-full text-center space-y-8 mt-5">
                 <a
                   href="tel:+919036033300"
@@ -260,7 +217,6 @@ const Report = ({
                   <FaPhone />
                   <span>+91 9036033300</span>
                 </a>
-
                 <a
                   href="mailto:metalmahesh@gmail.com"
                   className="flex items-center justify-center space-x-3 bg-yellow-500 text-white px-4 py-4 rounded-full"
@@ -271,6 +227,7 @@ const Report = ({
               </div>
             </div>
           </div>
+
           <div className="flex justify-center mt-6">
             <button
               onClick={generatePDF}

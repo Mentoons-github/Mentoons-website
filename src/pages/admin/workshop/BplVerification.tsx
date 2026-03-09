@@ -1,6 +1,7 @@
 import DynamicTable from "@/components/admin/dynamicTable";
 import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
 import Pagination from "@/components/admin/pagination";
+import BplApplicationViewModal from "@/components/admin/workshop/BplApplicationViewModal";
 import { EXCLUDE_BPL_APPLICATIONS } from "@/constant/admin/dynamicTable/exclude";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { resetInvoiceReducer } from "@/redux/workshop/workshopSlice";
@@ -37,6 +38,11 @@ const BplVerification = () => {
   const [limit, setLimit] = useState(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteApplication, setDeleteApplication] =
+    useState<BplVerificationTypes | null>(null);
+
+  const [bplApplicationModalOpen, setBplApplicationModalOpen] =
+    useState<boolean>(false);
+  const [selectedBplApplication, setSelectedBplApplication] =
     useState<BplVerificationTypes | null>(null);
 
   const { getToken } = useAuth();
@@ -115,6 +121,11 @@ const BplVerification = () => {
     setCurrentPage(1);
   };
 
+  const handleView = (data: BplVerificationTypes) => {
+    setSelectedBplApplication(data);
+    setBplApplicationModalOpen(true);
+  };
+
   const handleFilter = (value: Status) => {
     setFilterOptions(value);
   };
@@ -142,7 +153,7 @@ const BplVerification = () => {
         data={allApplications}
         // onEdit={editEnquiry}
         onDelete={handleDelete}
-        // onView={viewEnquiry}
+        onView={handleView}
         sortField={sortField}
         onSort={handleSort}
         sortOrder={sortOrder}
@@ -150,7 +161,6 @@ const BplVerification = () => {
         handleSearch={handleSearch}
         itemType="bplVerification"
         excludeColumns={EXCLUDE_BPL_APPLICATIONS}
-        updateStatus={updateStatus}
         handleFilter={handleFilter}
       />
       <Pagination
@@ -167,6 +177,17 @@ const BplVerification = () => {
         onConfirm={confirmDelete}
         itemName={"this application"}
       />
+
+      {bplApplicationModalOpen && selectedBplApplication && (
+        <BplApplicationViewModal
+          data={selectedBplApplication}
+          onClose={() => {
+            setBplApplicationModalOpen(false);
+            setSelectedBplApplication(null);
+          }}
+          updateStatus={updateStatus!}
+        />
+      )}
     </div>
   );
 };

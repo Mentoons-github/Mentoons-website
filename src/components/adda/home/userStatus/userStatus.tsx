@@ -320,7 +320,7 @@ const UserStatus = () => {
           </button>
           <label
             htmlFor="upload"
-            className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-[#FFE5B2] transition-all duration-200"
+            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-[#FFE5B2] transition-all duration-200"
           >
             <div
               ref={uploadButtonRef}
@@ -345,7 +345,7 @@ const UserStatus = () => {
 
         <div
           ref={swiperWrapperRef}
-          className="flex-grow w-full mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 "
+          className="flex-grow w-full  mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 "
         >
           <Swiper
             spaceBetween={8}
@@ -370,7 +370,7 @@ const UserStatus = () => {
               >
                 <div
                   ref={(el) => (avatarRefs.current[i] = el)}
-                  className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full ${
+                  className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full ${
                     !statusGroup.isRead && !statusGroup.isOwner
                       ? "outline outline-[#EC9600]"
                       : "outline outline-gray-300"
@@ -407,13 +407,14 @@ const UserStatus = () => {
             {categories.map((category, i) => (
               <SwiperSlide
                 key={category.path}
-                className="!w-fit flex flex-col gap-1 flex-shrink-0"
+                className="!w-[70px] md:!w-[90px]  flex flex-col items-center gap-1"
+
                 style={{ justifyItems: "center" }}
               >
                 <NavLink
                   to={category.path}
                   className={({ isActive }) =>
-                    `relative group w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex justify-center items-center cursor-pointer transition-all duration-200 overflow-hidden ${
+                    `relative group w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex justify-center items-center cursor-pointer transition-all duration-200 overflow-hidden ${
                       isActive
                         ? "ring-2 ring-offset-2 ring-[#EC9600]"
                         : "outline outline-[#EC9600]"
@@ -449,7 +450,7 @@ const UserStatus = () => {
                     {category.hover}
                   </div>
                 </NavLink>
-                <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
+                <span className="text-xs sm:text-sm text-center truncate max-w-[70px] md:max-w-[80px]">
                   {category.name}
                 </span>
               </SwiperSlide>

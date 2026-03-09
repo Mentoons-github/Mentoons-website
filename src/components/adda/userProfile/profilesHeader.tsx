@@ -29,6 +29,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 import { MdBlock, MdPersonAdd, MdReport } from "react-icons/md";
+import { createPortal } from "react-dom";
 
 interface ProfileHeaderProps {
   user: User;
@@ -704,50 +705,58 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       </motion.div>
-      {modalType && (
-        <UserListModal
-          userIds={modalType === "followers" ? totalFollowers : totalFollowing}
-          title={modalType === "followers" ? "Followers" : "Following"}
-          setShowModal={() => setModalType(null)}
-          currentUserClerkId={currentUserClerkId}
-          currentUserId={currentUserId}
-        />
-      )}
-      {showPhotoModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"
-          onClick={(e) => handleModalBackdropClick(e, "photo")}
-        >
-          <div className="relative">
-            <button
-              onClick={() => setShowPhotoModal(false)}
-              className="absolute z-10 p-2 sm:p-3 text-gray-600 bg-white rounded-full shadow-xl -top-3 -right-3 sm:-top-4 sm:-right-4 hover:text-gray-800 hover:bg-gray-100 hover:scale-110 transition-all"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            <div className="w-[80vw] h-[80vw] max-w-[280px] max-h-[280px] sm:w-[70vw] sm:h-[70vw] sm:max-w-[400px] sm:max-h-[400px] md:max-w-[500px] md:max-h-[500px] lg:max-w-[600px] lg:max-h-[600px] rounded-full overflow-hidden shadow-2xl animate-modal">
-              {user.picture ? (
-                <img
-                  src={user.picture}
-                  alt={user.name}
-                  className="object-cover w-full h-full animate-image"
-                  onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-image">
-                  <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-500">
-                    {user.name ? (
-                      user.name[0].toUpperCase()
-                    ) : (
-                      <UserIcon className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-500" />
-                    )}
-                  </span>
-                </div>
-              )}
+      {modalType &&
+        createPortal(
+          <UserListModal
+            userIds={
+              modalType === "followers" ? totalFollowers : totalFollowing
+            }
+            title={modalType === "followers" ? "Followers" : "Following"}
+            setShowModal={() => setModalType(null)}
+            currentUserClerkId={currentUserClerkId}
+            currentUserId={currentUserId}
+          />,
+          document.body,
+        )}
+      {showPhotoModal &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"
+            onClick={(e) => handleModalBackdropClick(e, "photo")}
+          >
+            <div className="relative">
+              <button
+                onClick={() => setShowPhotoModal(false)}
+                className="absolute z-10 p-2 sm:p-3 text-gray-600 bg-white rounded-full shadow-xl -top-3 -right-3 sm:-top-4 sm:-right-4 hover:text-gray-800 hover:bg-gray-100 hover:scale-110 transition-all"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+              <div className="w-[80vw] h-[80vw] max-w-[280px] max-h-[280px] sm:w-[70vw] sm:h-[70vw] sm:max-w-[400px] sm:max-h-[400px] md:max-w-[500px] md:max-h-[500px] lg:max-w-[600px] lg:max-h-[600px] rounded-full overflow-hidden shadow-2xl animate-modal">
+                {user.picture ? (
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="object-cover w-full h-full animate-image"
+                    onError={(e) =>
+                      (e.currentTarget.src = "/default-avatar.png")
+                    }
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-image">
+                    <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-500">
+                      {user.name ? (
+                        user.name[0].toUpperCase()
+                      ) : (
+                        <UserIcon className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-500" />
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
       {showCoverModal && isValidCoverImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"

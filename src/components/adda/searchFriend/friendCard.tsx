@@ -4,6 +4,7 @@ import axiosInstance from "@/api/axios";
 import { useAuth } from "@clerk/clerk-react";
 import { errorToast } from "@/utils/toastResposnse";
 import { highlightText } from "@/utils/highlightText";
+import { useNavigate } from "react-router-dom";
 
 interface Friend {
   _id: string;
@@ -74,6 +75,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const { getToken } = useAuth();
+  const navigate = useNavigate();
 
   const fetchUserDetails = useCallback(async () => {
     if (isLoadingDetails) return;
@@ -86,7 +88,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
         `/user/other-user/${friend._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (data.success) {
@@ -128,7 +130,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
       placement = "center";
       left = Math.max(
         8,
-        Math.min(rect.left + rect.width / 2 - modalW / 2, vw - modalW - 8)
+        Math.min(rect.left + rect.width / 2 - modalW / 2, vw - modalW - 8),
       );
     }
 
@@ -214,7 +216,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
           onSendRequest(friend._id);
         }}
         disabled={isConnecting}
-        className={`w-full px-3 py-1.5 text-sm font-medium text-white rounded-full transition-colors duration-200 min-h-[44px] flex items-center justify-center focus:ring-2 focus:ring-orange-400 focus:outline-none ${
+        className={`w-full px-3 py-1.5 text-sm font-medium text-white rounded-full transition-colors duration-200  flex items-center justify-center focus:ring-2 focus:ring-orange-400 focus:outline-none ${
           isConnecting
             ? "bg-orange-400 cursor-not-allowed"
             : "bg-orange-500 hover:bg-orange-600"
@@ -242,6 +244,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
         onMouseEnter={startHover}
         onMouseLeave={endHover}
         className="relative"
+        onClick={() => navigate(`/adda/user/${friend._id}`)}
       >
         <motion.div
           variants={cardVariants}
@@ -261,7 +264,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
               {highlightText(friend.name, searchQuery)}
             </h3>
             <p className="text-xs text-gray-500 capitalize mb-3">
-              {friend.status.replace(/([A-Z])/g, " $1").trim()}
+              {friend?.status?.replace(/([A-Z])/g, " $1").trim()}
             </p>
             {renderButton()}
           </div>
@@ -284,7 +287,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
               left: `${modalPos.left}px`,
               zIndex: 9999,
             }}
-            className="w-80"
+            className="w-80 z-50"
           >
             <div className="bg-white rounded-xl shadow-2xl border border-orange-100 overflow-hidden">
               {modalPos.placement === "left" && (

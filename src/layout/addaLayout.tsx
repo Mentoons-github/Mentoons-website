@@ -160,8 +160,8 @@ const AddaLayout = () => {
     <>
       <div className="flex justify-center w-full min-h-screen">
         <div className="w-full max-w-8xl">
-          <div ref={topNavRef} className="border-b border-gray-200 bg-white">
-            <div className="overflow-x-auto">
+          <div ref={topNavRef} className=" bg-white">
+            <div className="overflow-x-auto pt-[20px] md:pt-[30px]">
               <ProductScrollNav
                 productsData={productsData}
                 loading={loading}
