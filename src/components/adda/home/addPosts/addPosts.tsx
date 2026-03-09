@@ -345,7 +345,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
           <hr className="w-full my-4 border-t border-orange-100" />
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-1">
             {PHOTO_POST.map(({ icon, purpose }, index) => (
               <button
                 key={index}
@@ -355,17 +355,25 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
                       | "photo"
                       | "video"
                       | "event"
-                      | "article"
+                      | "article",
                   )
                 }
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 transition rounded-lg hover:bg-orange-50 hover:text-orange-600"
+                className="group relative flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 transition rounded-lg hover:bg-orange-50 hover:text-orange-600 flex-1"
               >
                 <img
                   src={icon}
                   alt={purpose}
-                  className="w-5 h-5 sm:w-6 sm:h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
                 />
-                <span className="figtree">{purpose}</span>
+                {/* Text: visible on md+, hidden on small */}
+                <span className="figtree hidden sm:inline whitespace-nowrap">
+                  {purpose}
+                </span>
+
+                {/* Tooltip overlay: only shows on small screens on hover */}
+                <span className="sm:hidden absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                  {purpose}
+                </span>
               </button>
             ))}
           </div>
@@ -392,7 +400,7 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
         />
       </>
     );
-  }
+  },
 );
 
 export default AddPosts;

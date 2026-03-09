@@ -1,13 +1,5 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  FaChevronDown,
-  FaEnvelope,
-  FaFilter,
-  FaPhone,
-  FaUser,
-} from "react-icons/fa";
-import { MdMessage, MdPendingActions } from "react-icons/md";
 import { errorToast, successToast } from "@/utils/toastResposnse";
 
 interface Query {
@@ -26,6 +18,40 @@ interface Query {
   createdAt: string;
 }
 
+const STATUS_CONFIG = {
+  pending: {
+    color: "bg-amber-100 text-amber-700 border-2 border-amber-300",
+    emoji: "⏳",
+    label: "Waiting!",
+    bg: "bg-amber-50",
+  },
+  "in-progress": {
+    color: "bg-sky-100 text-sky-700 border-2 border-sky-300",
+    emoji: "🚀",
+    label: "On it!",
+    bg: "bg-sky-50",
+  },
+  resolved: {
+    color: "bg-emerald-100 text-emerald-700 border-2 border-emerald-300",
+    emoji: "✅",
+    label: "Done!",
+    bg: "bg-emerald-50",
+  },
+  closed: {
+    color: "bg-purple-100 text-purple-700 border-2 border-purple-300",
+    emoji: "🎉",
+    label: "Closed",
+    bg: "bg-purple-50",
+  },
+};
+
+const QUERY_TYPE_EMOJI: Record<string, string> = {
+  general: "💬",
+  assessment: "📝",
+  product: "🛍️",
+  workshop: "🎨",
+};
+
 const GeneralQueries = () => {
   const [queries, setQueries] = useState<Query[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,9 +69,8 @@ const GeneralQueries = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/query`
+          `${import.meta.env.VITE_PROD_URL}/query`,
         );
-        console.log(response.data);
         setQueries(response.data.data);
         setOriginalQueries(response.data.data);
         setLoading(false);
@@ -73,7 +98,6 @@ const GeneralQueries = () => {
 
   const handleSubmitResponse = async () => {
     if (!selectedQuery) return;
-
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/email/sendQueryResponseEmail`,
@@ -85,19 +109,17 @@ const GeneralQueries = () => {
           queryType: selectedQuery.queryType,
           status,
           responseMessage,
-        }
+        },
       );
-
       if (response.status === 200) {
-        // Update both queries and originalQueries to maintain consistency
         const updatedQuery = { ...selectedQuery, status, responseMessage };
         setQueries(
-          queries.map((q) => (q._id === selectedQuery._id ? updatedQuery : q))
+          queries.map((q) => (q._id === selectedQuery._id ? updatedQuery : q)),
         );
         setOriginalQueries(
           originalQueries.map((q) =>
-            q._id === selectedQuery._id ? updatedQuery : q
-          )
+            q._id === selectedQuery._id ? updatedQuery : q,
+          ),
         );
         closeModal();
         successToast("Query updated successfully");
@@ -105,278 +127,752 @@ const GeneralQueries = () => {
     } catch (err) {
       console.error("Failed to update query:", err);
       errorToast(
-        `Failed to update query: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`
+        `Failed to update query: ${err instanceof Error ? err.message : "Unknown error"}`,
       );
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "resolved":
-        return "bg-green-100 text-green-800";
-      case "closed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff9800]"></div>
+      <div
+        className="flex flex-col items-center justify-center h-screen gap-4"
+        style={{
+          background: "linear-gradient(135deg, #fff9f0 0%, #f0f7ff 100%)",
+        }}
+      >
+        <div className="text-6xl animate-bounce">🌀</div>
+        <p
+          className="text-2xl font-bold text-purple-500"
+          style={{ fontFamily: "'Fredoka One', cursive" }}
+        >
+          Loading your messages...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
-        <p>{error}</p>
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <div className="text-6xl">😔</div>
+        <p className="text-xl font-bold text-red-400">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="container px-4 py-8 mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-[#ff9800] pb-2">
-        All Queries
-      </h1>
-      <div className="flex flex-col gap-3 mb-6 md:flex-row md:items-center">
-        <div className="flex items-center">
-          <FaFilter className="mr-2 text-[#ffb74d]" />
-          <label
-            htmlFor="queryTypeFilter"
-            className="text-lg font-semibold text-gray-800"
-          >
-            Filter Queries:
-          </label>
-        </div>
-        <div className="relative w-full md:w-64">
-          <select
-            id="queryTypeFilter"
-            className="w-full p-2 pl-4 pr-10 text-gray-700 bg-white border border-[#ffb74d] rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-[#ffb74d] focus:border-transparent transition-all duration-300"
-            onChange={(e) => {
-              const filterValue = e.target.value;
-              console.log(filterValue);
-              if (filterValue === "all") {
-                // Reset to original queries from the API response
-                setQueries(originalQueries || []);
-              } else {
-                // Filter the original queries to maintain the complete dataset
-                setQueries(
-                  (originalQueries || []).filter(
-                    (query) => query.queryType === filterValue
-                  )
-                );
-              }
+    <>
+      {/* Google Fonts */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+        * { box-sizing: border-box; }
+
+        .query-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          cursor: pointer;
+        }
+        .query-card:hover {
+          transform: translateY(-6px) rotate(0.5deg);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+        }
+
+        .filter-select {
+          appearance: none;
+          background: white;
+          border: 3px solid #fbbf24;
+          border-radius: 16px;
+          padding: 10px 40px 10px 16px;
+          font-family: 'Nunito', sans-serif;
+          font-weight: 700;
+          font-size: 15px;
+          color: #374151;
+          cursor: pointer;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-select:focus {
+          border-color: #f59e0b;
+          box-shadow: 0 0 0 4px rgba(251,191,36,0.2);
+        }
+
+        .submit-btn {
+          background: linear-gradient(135deg, #fb923c, #f97316);
+          color: white;
+          border: none;
+          border-radius: 16px;
+          padding: 12px 28px;
+          font-family: 'Nunito', sans-serif;
+          font-weight: 800;
+          font-size: 16px;
+          cursor: pointer;
+          transition: transform 0.15s, box-shadow 0.15s;
+          box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+        }
+        .submit-btn:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(249,115,22,0.5);
+        }
+        .submit-btn:active { transform: scale(0.98); }
+
+        .cancel-btn {
+          background: #f3f4f6;
+          color: #6b7280;
+          border: none;
+          border-radius: 16px;
+          padding: 12px 24px;
+          font-family: 'Nunito', sans-serif;
+          font-weight: 700;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .cancel-btn:hover { background: #e5e7eb; }
+
+        .modal-backdrop {
+          animation: fadeIn 0.2s ease;
+        }
+        .modal-box {
+          animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(40px) scale(0.95); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          border-radius: 999px;
+          padding: 4px 12px;
+          font-size: 13px;
+          font-weight: 800;
+          font-family: 'Nunito', sans-serif;
+        }
+
+        .section-label {
+          font-family: 'Nunito', sans-serif;
+          font-weight: 700;
+          font-size: 13px;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 4px;
+        }
+        .section-value {
+          font-family: 'Nunito', sans-serif;
+          font-size: 15px;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        textarea, select.response-select {
+          font-family: 'Nunito', sans-serif;
+          font-size: 15px;
+          border: 3px solid #e5e7eb;
+          border-radius: 16px;
+          padding: 12px 16px;
+          width: 100%;
+          outline: none;
+          resize: vertical;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          color: #374151;
+        }
+        textarea:focus, select.response-select:focus {
+          border-color: #fb923c;
+          box-shadow: 0 0 0 4px rgba(251,146,60,0.15);
+        }
+        select.response-select {
+          appearance: none;
+          cursor: pointer;
+          background: white;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%23fb923c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          background-size: 20px;
+          padding-right: 40px;
+        }
+
+        .doodle-bg {
+          background-color: #fffbf5;
+          background-image:
+            radial-gradient(circle at 15% 10%, rgba(251,191,36,0.12) 0%, transparent 50%),
+            radial-gradient(circle at 85% 20%, rgba(167,243,208,0.15) 0%, transparent 45%),
+            radial-gradient(circle at 50% 80%, rgba(196,181,253,0.12) 0%, transparent 50%),
+            radial-gradient(circle at 5% 90%, rgba(253,186,116,0.1) 0%, transparent 40%);
+        }
+
+        .card-stripe {
+          height: 8px;
+          border-radius: 4px 4px 0 0;
+        }
+
+        .wiggle:hover { animation: wiggle 0.4s ease; }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-3deg); }
+          75% { transform: rotate(3deg); }
+        }
+      `}</style>
+
+      <div
+        className="doodle-bg min-h-screen"
+        style={{ fontFamily: "'Nunito', sans-serif" }}
+      >
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 24px" }}>
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="text-5xl wiggle" style={{ cursor: "default" }}>
+              📬
+            </div>
+            <div>
+              <h1
+                style={{
+                  fontFamily: "'Fredoka One', cursive",
+                  fontSize: "clamp(28px, 5vw, 42px)",
+                  color: "#1f2937",
+                  lineHeight: 1.1,
+                  marginBottom: 4,
+                }}
+              >
+                Message Center
+              </h1>
+              <p style={{ fontSize: 15, color: "#9ca3af", fontWeight: 600 }}>
+                {queries.length} message{queries.length !== 1 ? "s" : ""} to
+                check out 👀
+              </p>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: 24,
+              padding: "16px 24px",
+              marginBottom: 32,
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 12,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+              border: "2px solid #fef3c7",
             }}
           >
-            <option value="all">All Queries</option>
-            {["general", "assessment", "product", "workshop"].map((item) => (
-              <option
-                key={item}
-                value={item}
-                className="text-gray-700 capitalize"
+            <span style={{ fontSize: 22 }}>🔍</span>
+            <span
+              style={{
+                fontFamily: "'Fredoka One', cursive",
+                fontSize: 18,
+                color: "#374151",
+              }}
+            >
+              Show me:
+            </span>
+            <div style={{ position: "relative" }}>
+              <select
+                className="filter-select"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setQueries(
+                    v === "all"
+                      ? originalQueries
+                      : originalQueries.filter((q) => q.queryType === v),
+                  );
+                }}
               >
-                {item.charAt(0).toUpperCase() + item.slice(1)}
-              </option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            <FaChevronDown className="text-[#ffb74d]" />
+                <option value="all">🌟 All Messages</option>
+                {["general", "assessment", "product", "workshop"].map(
+                  (item) => (
+                    <option key={item} value={item}>
+                      {QUERY_TYPE_EMOJI[item]}{" "}
+                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
           </div>
+
+          {/* Empty State */}
+          {queries.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "80px 24px",
+                background: "white",
+                borderRadius: 32,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+              }}
+            >
+              <div style={{ fontSize: 72, marginBottom: 16 }}>📭</div>
+              <p
+                style={{
+                  fontFamily: "'Fredoka One', cursive",
+                  fontSize: 28,
+                  color: "#9ca3af",
+                }}
+              >
+                No messages here!
+              </p>
+              <p style={{ color: "#d1d5db", fontSize: 16, marginTop: 8 }}>
+                Check back later 😊
+              </p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {queries.map((query, i) => {
+                const s = STATUS_CONFIG[query.status] || STATUS_CONFIG.pending;
+                const stripeColors = [
+                  "linear-gradient(90deg,#fbbf24,#f59e0b)",
+                  "linear-gradient(90deg,#34d399,#10b981)",
+                  "linear-gradient(90deg,#60a5fa,#3b82f6)",
+                  "linear-gradient(90deg,#f472b6,#ec4899)",
+                  "linear-gradient(90deg,#a78bfa,#8b5cf6)",
+                ];
+                const stripe = stripeColors[i % stripeColors.length];
+                return (
+                  <div
+                    key={query._id}
+                    className="query-card"
+                    onClick={() => handleQueryClick(query)}
+                    style={{
+                      background: "white",
+                      borderRadius: 24,
+                      overflow: "hidden",
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {/* Color stripe */}
+                    <div
+                      className="card-stripe"
+                      style={{ background: stripe }}
+                    />
+
+                    <div style={{ padding: "18px 20px 20px" }}>
+                      {/* Top Row */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          marginBottom: 14,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ fontSize: 28 }}>
+                            {QUERY_TYPE_EMOJI[query.queryType] || "💬"}
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: "'Fredoka One', cursive",
+                              fontSize: 20,
+                              color: "#1f2937",
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {query.queryType || "General"}
+                          </span>
+                        </div>
+                        <span className={`status-badge ${s.color}`}>
+                          {s.emoji} {s.label}
+                        </span>
+                      </div>
+
+                      {/* Info rows */}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                          marginBottom: 14,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ fontSize: 18 }}>👤</span>
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 700,
+                              color: "#4b5563",
+                            }}
+                          >
+                            {query.name || "Anonymous"}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ fontSize: 16 }}>📧</span>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              color: "#9ca3af",
+                              fontWeight: 600,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: "220px",
+                            }}
+                          >
+                            {query.email || "No email"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Message preview */}
+                      <div
+                        style={{
+                          background: "#f9fafb",
+                          borderRadius: 14,
+                          padding: "10px 14px",
+                          borderLeft: "4px solid #fbbf24",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: 14,
+                            color: "#6b7280",
+                            lineHeight: 1.5,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            margin: 0,
+                          }}
+                        >
+                          {query.message}
+                        </p>
+                      </div>
+
+                      {/* Click hint */}
+                      <p
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          color: "#d1d5db",
+                          marginTop: 12,
+                          fontWeight: 700,
+                        }}
+                      >
+                        Tap to read & reply 👆
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-      {queries?.length === 0 ? (
-        <div className="p-8 text-center text-gray-500">
-          <p>No queries found</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {queries?.map((query) => (
-            <div
-              key={query._id}
-              className="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg"
-              onClick={() => handleQueryClick(query)}
-            >
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-xl font-semibold text-gray-800 capitalize truncate">
-                    {query?.queryType || "No Subject"}
-                  </h2>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      query.status
-                    )}`}
-                  >
-                    {query.status}
-                  </span>
-                </div>
-
-                <div className="flex items-center mb-2 text-gray-600">
-                  <FaUser className="mr-2 text-[#ff9800]" />
-                  <span className="truncate">{query.name || "Anonymous"}</span>
-                </div>
-
-                <div className="flex items-center mb-2 text-gray-600">
-                  <FaEnvelope className="mr-2 text-[#ff9800]" />
-                  <span className="truncate">
-                    {query.email || "No email provided"}
-                  </span>
-                </div>
-
-                <div className="pt-3 mt-3 border-t">
-                  <p className="text-gray-700 line-clamp-2">{query.message}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Modal */}
-      {isModalOpen && selectedQuery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {selectedQuery.queryType.charAt(0).toUpperCase() +
-                    selectedQuery.queryType.slice(1) || "No Subject"}
-                </h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+      {isModalOpen &&
+        selectedQuery &&
+        (() => {
+          const s =
+            STATUS_CONFIG[selectedQuery.status] || STATUS_CONFIG.pending;
+          return (
+            <div
+              className="modal-backdrop"
+              onClick={closeModal}
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 50,
+                background: "rgba(0,0,0,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <div
+                className="modal-box"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: "white",
+                  borderRadius: 32,
+                  width: "100%",
+                  maxWidth: 680,
+                  maxHeight: "90vh",
+                  overflowY: "auto",
+                  fontFamily: "'Nunito', sans-serif",
+                  boxShadow: "0 24px 60px rgba(0,0,0,0.2)",
+                }}
+              >
+                {/* Modal Header */}
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #fff7ed, #fef3c7)",
+                    borderRadius: "32px 32px 0 0",
+                    padding: "24px 28px 20px",
+                    borderBottom: "2px dashed #fde68a",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 12 }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
-                <div className="flex items-center">
-                  <FaUser className="mr-2 text-[#ff9800]" />
-                  <span className="font-medium">Name:</span>
-                  <span className="ml-2">
-                    {selectedQuery.name || "Anonymous"}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <FaEnvelope className="mr-2 text-[#ff9800]" />
-                  <span className="font-medium">Email:</span>
-                  <span className="ml-2">
-                    {selectedQuery.email || "No email provided"}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <FaPhone className="mr-2 text-[#ff9800]" />
-                  <span className="font-medium">Phone:</span>
-                  <span className="ml-2">
-                    {selectedQuery.phone || "No phone provided"}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <MdPendingActions className="mr-2 text-[#ff9800]" />
-                  <span className="font-medium">Status:</span>
-                  <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      selectedQuery.status
-                    )}`}
-                  >
-                    {selectedQuery.status}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex items-start mb-2">
-                  <MdMessage className="mr-2 text-[#ff9800] mt-1" />
-                  <span className="font-medium">Message:</span>
-                </div>
-                <div className="p-4 whitespace-pre-wrap rounded-lg bg-gray-50">
-                  {selectedQuery.message}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h3 className="mb-3 text-lg font-semibold">Response</h3>
-
-                <div className="mb-4">
-                  <label className="block mb-2 text-gray-700">Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) =>
-                      setStatus(
-                        e.target.value as
-                          | "pending"
-                          | "in-progress"
-                          | "resolved"
-                          | "closed"
-                      )
-                    }
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#ff9800] focus:border-[#ff9800]"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block mb-2 text-gray-700">
-                    Response Message
-                  </label>
-                  <textarea
-                    value={responseMessage}
-                    onChange={(e) => setResponseMessage(e.target.value)}
-                    rows={4}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#ff9800] focus:border-[#ff9800]"
-                    placeholder="Enter your response..."
-                  ></textarea>
-                </div>
-
-                <div className="flex justify-end">
+                    <span style={{ fontSize: 36 }}>
+                      {QUERY_TYPE_EMOJI[selectedQuery.queryType] || "💬"}
+                    </span>
+                    <div>
+                      <h2
+                        style={{
+                          fontFamily: "'Fredoka One', cursive",
+                          fontSize: 26,
+                          color: "#1f2937",
+                          margin: 0,
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {selectedQuery.queryType} Message
+                      </h2>
+                      <span
+                        className={`status-badge ${s.color}`}
+                        style={{ marginTop: 4, display: "inline-flex" }}
+                      >
+                        {s.emoji} {s.label}
+                      </span>
+                    </div>
+                  </div>
                   <button
                     onClick={closeModal}
-                    className="px-4 py-2 mr-2 text-gray-800 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
+                    style={{
+                      background: "#fee2e2",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 40,
+                      height: 40,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      transition: "background 0.2s, transform 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        "#fecaca";
+                      (e.currentTarget as HTMLButtonElement).style.transform =
+                        "scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        "#fee2e2";
+                      (e.currentTarget as HTMLButtonElement).style.transform =
+                        "scale(1)";
+                    }}
                   >
-                    Cancel
+                    ✕
                   </button>
-                  <button
-                    onClick={handleSubmitResponse}
-                    className="px-4 py-2 bg-[#ff9800] text-white rounded-lg hover:bg-[#f57c00] transition-colors"
+                </div>
+
+                <div style={{ padding: "24px 28px" }}>
+                  {/* Contact Info */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 16,
+                      marginBottom: 24,
+                    }}
                   >
-                    Submit Response
-                  </button>
+                    {[
+                      {
+                        emoji: "👤",
+                        label: "Name",
+                        value: selectedQuery.name || "Anonymous",
+                      },
+                      {
+                        emoji: "📧",
+                        label: "Email",
+                        value: selectedQuery.email || "No email",
+                      },
+                      {
+                        emoji: "📞",
+                        label: "Phone",
+                        value: selectedQuery.phone || "No phone",
+                      },
+                      {
+                        emoji: "🗓️",
+                        label: "Date",
+                        value: new Date(
+                          selectedQuery.createdAt,
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        }),
+                      },
+                    ].map(({ emoji, label, value }) => (
+                      <div
+                        key={label}
+                        style={{
+                          background: "#f9fafb",
+                          borderRadius: 16,
+                          padding: "12px 16px",
+                          border: "2px solid #f3f4f6",
+                        }}
+                      >
+                        <div className="section-label">
+                          {emoji} {label}
+                        </div>
+                        <div
+                          className="section-value"
+                          style={{ wordBreak: "break-all" }}
+                        >
+                          {value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Original Message */}
+                  <div style={{ marginBottom: 24 }}>
+                    <div className="section-label" style={{ marginBottom: 8 }}>
+                      💌 Their Message
+                    </div>
+                    <div
+                      style={{
+                        background: "#f0fdf4",
+                        borderRadius: 16,
+                        padding: "16px 18px",
+                        border: "2px solid #bbf7d0",
+                        whiteSpace: "pre-wrap",
+                        fontSize: 15,
+                        lineHeight: 1.6,
+                        color: "#374151",
+                      }}
+                    >
+                      {selectedQuery.message}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 24,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 2,
+                        background: "#fde68a",
+                        borderRadius: 2,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: "'Fredoka One', cursive",
+                        fontSize: 18,
+                        color: "#f59e0b",
+                      }}
+                    >
+                      ✏️ Your Reply
+                    </span>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 2,
+                        background: "#fde68a",
+                        borderRadius: 2,
+                      }}
+                    />
+                  </div>
+
+                  {/* Status Selector */}
+                  <div style={{ marginBottom: 18 }}>
+                    <div className="section-label" style={{ marginBottom: 8 }}>
+                      🚦 Update Status
+                    </div>
+                    <select
+                      className="response-select"
+                      value={status}
+                      onChange={(e) =>
+                        setStatus(e.target.value as typeof status)
+                      }
+                    >
+                      <option value="pending">
+                        ⏳ Pending – Still waiting
+                      </option>
+                      <option value="in-progress">
+                        🚀 In Progress – Working on it!
+                      </option>
+                      <option value="resolved">✅ Resolved – All done!</option>
+                      <option value="closed">🎉 Closed – Wrapped up</option>
+                    </select>
+                  </div>
+
+                  {/* Response Message */}
+                  <div style={{ marginBottom: 24 }}>
+                    <div className="section-label" style={{ marginBottom: 8 }}>
+                      💬 Write Your Reply
+                    </div>
+                    <textarea
+                      value={responseMessage}
+                      onChange={(e) => setResponseMessage(e.target.value)}
+                      rows={4}
+                      placeholder="Type something nice here... 😊"
+                    />
+                  </div>
+
+                  {/* Actions */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 12,
+                    }}
+                  >
+                    <button className="cancel-btn" onClick={closeModal}>
+                      Nevermind
+                    </button>
+                    <button
+                      className="submit-btn"
+                      onClick={handleSubmitResponse}
+                    >
+                      Send Reply 🚀
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          );
+        })()}
+    </>
   );
 };
 
