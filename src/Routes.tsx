@@ -58,6 +58,7 @@ import AffiliatePage from "./pages/v2/joinus/affiliate/affiliate.tsx";
 import Feedback from "./pages/v2/feedback/feedback.tsx";
 import Collaborate from "./pages/v2/joinus/collaborate/collaborate.tsx";
 import BecomeMentor from "./pages/v2/joinus/becomeMentor.tsx";
+import NewLandingPage from "./pages/v2/NewLandingPage.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -161,6 +162,7 @@ const routes = [
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   { path: "/emi", element: <Emi /> },
   { path: "/feedback", element: <Feedback /> },
+  { path: "landing", element: <NewLandingPage /> },
 ];
 
 const Router = () => {

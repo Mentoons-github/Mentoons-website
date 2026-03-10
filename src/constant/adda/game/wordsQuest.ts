@@ -766,7 +766,7 @@ export const WORDS_QUEST: WordsQuestType = {
         "CLARITY",
         "PURPOSE",
         "DISCIPLINE",
-        "HEAL",
+        "HEALING",
         "PATIENCE",
         "COURAGE",
         "BELIEF",
