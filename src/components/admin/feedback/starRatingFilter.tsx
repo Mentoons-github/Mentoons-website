@@ -1,39 +1,46 @@
 import { FaStar } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 
 interface StarRatingFilterProps {
-  onFilterChange?: (rating: number | null) => void;
+  selected?: number | null;
+  onChange?: (rating: number | null) => void;
   showClearAll?: boolean;
-  ratingCounts?: { [key: number]: number };
+  ratingCounts?: Record<number, number>;
 }
 
 const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
-  onFilterChange,
+  selected = null,
+  onChange,
   showClearAll = true,
   ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
 }) => {
-  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [internalRating, setInternalRating] = useState<number | null>(selected);
+
+  useEffect(() => {
+    setInternalRating(selected);
+  }, [selected]);
+
+  const currentRating = internalRating;
 
   const handleRatingClick = (rating: number) => {
-    const newRating = selectedRating === rating ? null : rating;
-    setSelectedRating(newRating);
-    onFilterChange?.(newRating);
+    const newRating = currentRating === rating ? null : rating;
+    setInternalRating(newRating);
+    onChange?.(newRating);
   };
 
   const handleClearFilter = () => {
-    setSelectedRating(null);
-    onFilterChange?.(null);
+    setInternalRating(null);
+    onChange?.(null);
   };
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filter Buttons */}
       <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start">
         {[5, 4, 3, 2, 1].map((rating) => {
-          const isSelected = selectedRating === rating;
-          const count = ratingCounts[rating as keyof typeof ratingCounts] || 0;
+          const isSelected = currentRating === rating;
+          const count = ratingCounts[rating] || 0;
 
           return (
             <motion.button
@@ -56,7 +63,6 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
                 border-2 ${isSelected ? "border-amber-500" : count === 0 ? "border-gray-200" : "border-gray-200 hover:border-amber-300"}
               `}
             >
-              {/* Stars */}
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <FaStar
@@ -76,7 +82,6 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
                 ))}
               </div>
 
-              {/* Count Badge */}
               <span
                 className={`
                   text-xs font-semibold px-2 py-0.5 rounded-full
@@ -93,12 +98,11 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
                 {count}
               </span>
 
-              {/* Tooltip */}
               {count > 0 && (
                 <AnimatePresence>
                   <motion.div
                     initial={{ opacity: 0, y: 5 }}
-                    whileHover={{ opacity: 1, y: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
                     className={`
                       absolute -top-10 left-1/2 -translate-x-1/2
                       bg-gray-900 text-white px-3 py-1.5 rounded-lg
@@ -118,7 +122,6 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
                 </AnimatePresence>
               )}
 
-              {/* Selected Indicator */}
               <AnimatePresence>
                 {isSelected && (
                   <motion.div
@@ -147,9 +150,8 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
           );
         })}
 
-        {/* Clear Filter Button */}
         <AnimatePresence>
-          {selectedRating !== null && showClearAll && (
+          {currentRating !== null && showClearAll && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8, x: -10 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -175,9 +177,8 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Active Filter Indicator */}
       <AnimatePresence>
-        {selectedRating !== null && (
+        {currentRating !== null && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -189,13 +190,12 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
               <span>
                 Showing{" "}
                 <strong className="text-amber-700">
-                  {ratingCounts[selectedRating as keyof typeof ratingCounts]}
+                  {ratingCounts[currentRating] || 0}
                 </strong>{" "}
                 review
-                {ratingCounts[selectedRating as keyof typeof ratingCounts] !== 1
-                  ? "s"
-                  : ""}{" "}
-                with {selectedRating} star{selectedRating !== 1 ? "s" : ""}
+                {(ratingCounts[currentRating] || 0) !== 1 ? "s" : ""} with{" "}
+                {currentRating} star
+                {currentRating !== 1 ? "s" : ""}
               </span>
             </div>
           </motion.div>
