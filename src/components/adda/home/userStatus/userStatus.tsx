@@ -345,7 +345,7 @@ const UserStatus = () => {
 
         <div
           ref={swiperWrapperRef}
-          className="flex-grow w-full  mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 "
+          className="flex-grow w-full mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 "
         >
           <Swiper
             spaceBetween={8}
@@ -365,7 +365,7 @@ const UserStatus = () => {
             {statusGroups.map((statusGroup, i) => (
               <SwiperSlide
                 key={statusGroup.user._id}
-                className="!w-fit flex flex-col gap-1 flex-shrink-0"
+                className="!w-[70px] md:!w-[90px]  flex flex-col items-center gap-1"
                 style={{ justifyItems: "center" }}
               >
                 <div
@@ -408,7 +408,6 @@ const UserStatus = () => {
               <SwiperSlide
                 key={category.path}
                 className="!w-[70px] md:!w-[90px]  flex flex-col items-center gap-1"
-
                 style={{ justifyItems: "center" }}
               >
                 <NavLink

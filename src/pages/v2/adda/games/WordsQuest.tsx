@@ -200,7 +200,6 @@ const WordsQuest = () => {
         <GameDifficultyModal
           isClose={() => setDifficultyModalOpen(false)}
           setDifficulty={startGame}
-          from="wordsQuest"
         />
       )}
     </div>
