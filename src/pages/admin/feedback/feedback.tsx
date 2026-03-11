@@ -10,101 +10,205 @@ import { useAuth } from "@clerk/clerk-react";
 
 const KidsStyles = () => (
   <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Boogaloo&display=swap');
+
     :root {
-      --pink: #ff79c6;
-      --purple: #9d4edd;
-      --blue: #5c7cfa;
-      --green: #51cf66;
-      --red: #ff6b6b;
-      --yellow: #ffdd57;
+      --pink:   #FF79C6;
+      --purple: #9D4EDD;
+      --blue:   #3A86FF;
+      --green:  #2DC653;
+      --red:    #FF4D6D;
+      --yellow: #FFD60A;
+      --orange: #FF9F1C;
+      --sky:    #56CFE1;
+      --ink:    #1a1a2e;
     }
-    .btn-sticker {
-      padding: 12px 24px;
-      border-radius: 9999px;
-      font-weight: bold;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.15);
-      transition: all 0.15s ease;
+
+    body { font-family: 'Baloo 2', cursive; }
+
+    .kd { font-family: 'Boogaloo', cursive; }
+    .kf { font-family: 'Baloo 2', cursive; }
+
+    @keyframes stripe-march {
+      from { background-position: 0 0; }
+      to   { background-position: 56px 0; }
     }
-    .btn-sticker:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+    @keyframes wobble {
+      0%,100% { transform: rotate(-2deg) scale(1); }
+      25%     { transform: rotate(2deg) scale(1.04); }
+      75%     { transform: rotate(-1deg) scale(0.97); }
     }
+    @keyframes hop {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      30%     { transform: translateY(-18px) rotate(-4deg); }
+      60%     { transform: translateY(-8px) rotate(3deg); }
+    }
+    @keyframes spin-star {
+      from { transform: rotate(0deg) scale(1); }
+      50%  { transform: rotate(180deg) scale(1.2); }
+      to   { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes float-e {
+      0%,100% { transform: translateY(0px) rotate(-5deg); }
+      50%     { transform: translateY(-20px) rotate(5deg); }
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(80px) rotate(720deg); opacity: 0; }
+    }
+    @keyframes rainbow-bg {
+      0%,100% { background-color: rgba(255,77,109,0.1); }
+      25%     { background-color: rgba(255,214,10,0.1); }
+      50%     { background-color: rgba(45,198,83,0.1); }
+      75%     { background-color: rgba(58,134,255,0.1); }
+    }
+    @keyframes bloop {
+      0%   { transform: scale(0) rotate(-15deg); }
+      60%  { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .wobble    { animation: wobble 3s ease-in-out infinite; }
+    .hop       { animation: hop 2.4s ease-in-out infinite; }
+    .spin-star { animation: spin-star 6s linear infinite; }
+    .bloop     { animation: bloop 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+    .candy-stripe {
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--red) 0px, var(--red) 14px,
+        #fff 14px, #fff 28px
+      );
+      background-size: 56px 56px;
+      animation: stripe-march 1.5s linear infinite;
+    }
+
+    .dotted-bg {
+      background-color: #FFFBF0;
+      background-image: radial-gradient(circle, rgba(255,214,10,0.45) 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+    }
+
     .card-kids {
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-      transition: all 0.25s ease;
+      border-radius: 24px;
+      border: 4px solid var(--ink);
+      box-shadow: 6px 6px 0 var(--ink);
+      transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
     .card-kids:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 35px rgba(0,0,0,0.12);
+      transform: translate(-3px,-5px) rotate(-0.4deg);
+      box-shadow: 10px 12px 0 var(--ink);
     }
+
     .selected-card {
-      border: 4px solid var(--green);
-      box-shadow: 0 0 0 8px rgba(81,207,102,0.25);
-      transform: scale(1.03);
+      border-color: var(--green) !important;
+      box-shadow: 6px 6px 0 var(--green), 0 0 0 6px rgba(45,198,83,0.2) !important;
     }
+
+    .btn-sticker {
+      border: 4px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--ink);
+      border-radius: 9999px;
+      font-family: 'Boogaloo', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+      transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s ease;
+      cursor: pointer;
+      padding: 12px 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-sticker:hover  { transform: translate(-2px,-3px); box-shadow: 8px 9px 0 var(--ink); }
+    .btn-sticker:active { transform: translate(3px,3px); box-shadow: 2px 2px 0 var(--ink); }
+    .btn-sticker:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
     .avatar-kids {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      border: 4px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      font-size: 1.5rem;
+      font-family: 'Boogaloo', cursive;
+      font-size: 1.6rem;
       color: white;
       flex-shrink: 0;
+      overflow: hidden;
     }
+
     .ribbon {
       position: absolute;
-      top: 12px;
-      right: -36px;
-      background: var(--purple);
+      top: -2px;
+      right: -2px;
+      background: var(--green);
       color: white;
-      padding: 6px 44px;
+      padding: 4px 12px;
+      font-family: 'Boogaloo', cursive;
       font-size: 0.85rem;
-      font-weight: bold;
-      transform: rotate(45deg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-radius: 0 20px 0 20px;
+      border: 3px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+      z-index: 10;
     }
+
+    .stat-bubble {
+      border: 4px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--ink);
+      border-radius: 20px;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+    }
+    .stat-bubble:hover {
+      transform: translate(-2px,-3px);
+      box-shadow: 8px 9px 0 var(--ink);
+    }
+
+    .star-twinkle { transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+    .star-twinkle:hover { transform: scale(1.5) rotate(20deg); }
+
+    .selection-banner { animation: rainbow-bg 4s linear infinite; }
+
+    .conf { position:absolute; width:10px; height:10px; border-radius:2px; pointer-events:none; }
+    .conf-1 { background:var(--red);    top:10%; left:15%; animation:confetti-fall 2.8s 0.1s ease-in infinite; }
+    .conf-2 { background:var(--yellow); top:5%;  left:40%; animation:confetti-fall 3.2s 0.4s ease-in infinite; }
+    .conf-3 { background:var(--blue);   top:8%;  left:65%; animation:confetti-fall 2.5s 0.9s ease-in infinite; }
+    .conf-4 { background:var(--green);  top:6%;  left:80%; animation:confetti-fall 3.5s 0.2s ease-in infinite; }
+    .conf-5 { background:var(--purple); top:3%;  left:55%; animation:confetti-fall 2.9s 1.1s ease-in infinite; }
+    .conf-6 { background:var(--pink);   top:12%; left:25%; animation:confetti-fall 3.1s 0.7s ease-in infinite; }
+    .conf-7 { background:var(--orange); top:4%;  left:90%; animation:confetti-fall 2.6s 1.5s ease-in infinite; }
+    .conf-8 { background:var(--sky);    top:9%;  left:5%;  animation:confetti-fall 3.3s 0.3s ease-in infinite; }
+
+    .ef { position:fixed; pointer-events:none; z-index:0; opacity:0.14; font-size:2.4rem; }
+    .ef1 { top:12%; left:1%;   animation:float-e 4.0s 0.0s ease-in-out infinite; }
+    .ef2 { top:30%; right:2%;  animation:float-e 3.5s 1.0s ease-in-out infinite; }
+    .ef3 { top:55%; left:2%;   animation:float-e 5.0s 2.0s ease-in-out infinite; }
+    .ef4 { top:70%; right:1%;  animation:float-e 4.5s 0.5s ease-in-out infinite; }
+    .ef5 { bottom:8%; left:4%; animation:float-e 3.8s 1.5s ease-in-out infinite; }
   `}</style>
 );
 
 const ConfettiBar = () => (
-  <div className="absolute top-0 left-0 right-0 h-1.5 overflow-hidden">
+  <div
+    className="relative overflow-hidden h-6 candy-stripe w-full"
+    style={{ borderBottom: "4px solid var(--ink)" }}
+  >
     {[...Array(8)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute h-full w-8 animate-slide"
-        style={{
-          background: `hsl(${i * 45}, 90%, 60%)`,
-          left: `${i * 12.5}%`,
-          animationDelay: `${i * 0.08}s`,
-        }}
-      />
+      <div key={i} className={`conf conf-${i + 1}`} />
     ))}
   </div>
 );
 
 const FloatingEmojis = () => (
   <>
-    <span className="absolute text-4xl animate-float-1 left-[10%] top-[15%]">
-      🌈
-    </span>
-    <span className="absolute text-5xl animate-float-2 right-[12%] top-[22%]">
-      ⭐
-    </span>
-    <span className="absolute text-4xl animate-float-3 left-[18%] bottom-[20%]">
-      🎈
-    </span>
-    <span className="absolute text-5xl animate-float-4 right-[15%] bottom-[25%]">
-      🦄
-    </span>
-    <span className="absolute text-4xl animate-float-1 left-[25%] top-[8%]">
-      🎉
-    </span>
+    <span className="ef ef1">🌈</span>
+    <span className="ef ef2">⭐</span>
+    <span className="ef ef3">🎈</span>
+    <span className="ef ef4">🦄</span>
+    <span className="ef ef5">🎉</span>
   </>
 );
 
@@ -122,17 +226,23 @@ const StatBubble = ({
   delay: number;
 }) => (
   <motion.div
-    initial={{ y: 40, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    transition={{ delay, duration: 0.6, type: "spring" }}
-    className="flex flex-col items-center p-5 rounded-2xl shadow-xl backdrop-blur-sm"
-    style={{ background: `linear-gradient(135deg, ${color}22, ${color}15)` }}
+    initial={{ y: 40, opacity: 0, scale: 0.8 }}
+    animate={{ y: 0, opacity: 1, scale: 1 }}
+    transition={{
+      delay,
+      duration: 0.5,
+      type: "spring",
+      stiffness: 280,
+      damping: 18,
+    }}
+    className="stat-bubble flex flex-col items-center p-5 text-center"
+    style={{ background: `${color}22` }}
   >
-    <span className="text-4xl mb-2">{emoji}</span>
-    <span className="text-3xl font-black" style={{ color }}>
+    <span className="text-4xl mb-2 wobble inline-block">{emoji}</span>
+    <span className="kd text-4xl leading-none" style={{ color: "var(--ink)" }}>
       {value}
     </span>
-    <span className="text-sm font-medium text-gray-600 mt-1">{label}</span>
+    <span className="kf text-sm font-600 text-gray-600 mt-1">{label}</span>
   </motion.div>
 );
 
@@ -141,8 +251,8 @@ const StarRow = ({ rating }: { rating: number }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       <FaStar
         key={i}
-        className={i < rating ? "text-yellow-400" : "text-gray-300"}
-        size={20}
+        className={`star-twinkle ${i < rating ? "text-amber-400" : "text-gray-200"}`}
+        size={22}
       />
     ))}
   </div>
@@ -282,24 +392,91 @@ const Feedback = () => {
   return (
     <>
       <KidsStyles />
+      <FloatingEmojis />
 
-      <div className="relative min-h-screen bg-gradient-to-b from-pink-50 via-purple-50 to-blue-50 pb-20 overflow-hidden">
-        <FloatingEmojis />
+      <div
+        className="kf relative min-h-screen dotted-bg pb-20 overflow-hidden"
+        style={{ zIndex: 1 }}
+      >
         <ConfettiBar />
 
-        <div className="max-w-6xl mx-auto px-5 pt-12 pb-16 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent">
-                Feedback Time!
-              </h1>
-              <p className="text-xl text-gray-700 mt-3 font-medium">
-                See what everyone thinks 💬✨
-              </p>
+        <div
+          className="relative overflow-hidden py-10 px-4"
+          style={{
+            background:
+              "linear-gradient(160deg,#FFD60A 0%,#FF9F1C 45%,#FF4D6D 100%)",
+            borderBottom: "5px solid var(--ink)",
+          }}
+        >
+          <div className="spin-star absolute -top-6 -left-6 text-7xl opacity-20 select-none pointer-events-none">
+            ⭐
+          </div>
+          <div
+            className="spin-star absolute -bottom-4 -right-4 text-8xl opacity-15 select-none pointer-events-none"
+            style={{ animationDirection: "reverse" }}
+          >
+            🌟
+          </div>
+
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-center gap-5">
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 14 }}
+              >
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center text-5xl bg-white"
+                  style={{
+                    border: "4px solid var(--ink)",
+                    boxShadow: "5px 5px 0 var(--ink)",
+                  }}
+                >
+                  🌟
+                </div>
+              </motion.div>
+              <div>
+                <motion.h1
+                  initial={{ x: -40, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 18,
+                    delay: 0.1,
+                  }}
+                  className="kd text-6xl md:text-7xl text-white"
+                  style={{
+                    textShadow: "4px 4px 0 var(--ink)",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  Feedback Time!
+                </motion.h1>
+                <motion.p
+                  initial={{ x: -30, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  className="kf text-white text-lg font-700 mt-1"
+                  style={{ textShadow: "2px 2px 0 rgba(0,0,0,0.25)" }}
+                >
+                  See what everyone thinks 💬✨
+                </motion.p>
+              </div>
             </div>
 
             {feedbackData.length > 0 && (
-              <button
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 16,
+                  delay: 0.3,
+                }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.93 }}
                 onClick={() =>
                   selectionMode ? cancelSelection() : setSelectionMode(true)
                 }
@@ -310,59 +487,111 @@ const Feedback = () => {
                 }}
               >
                 {selectionMode ? "✖ Cancel" : "🌟 Pick Star Reviews!"}
-              </button>
+              </motion.button>
             )}
           </div>
+        </div>
 
-          {selectionMode && (
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="bg-white/80 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border-2 border-purple-200 mb-10 relative overflow-hidden"
-            >
-              <div className="flex justify-center gap-4 mb-5 text-4xl">
+        {selectionMode && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="selection-banner border-b-4 px-4 py-5"
+            style={{ borderColor: "var(--ink)" }}
+          >
+            <div className="max-w-6xl mx-auto">
+              <div className="flex justify-center gap-4 mb-4 text-4xl">
                 {Array.from({ length: MAX }).map((_, i) => (
-                  <span key={i}>
+                  <motion.div
+                    key={i}
+                    animate={{
+                      scale: i < selectedForDisplay.size ? [1, 1.4, 1] : 1,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className="w-12 h-12 rounded-full border-4 flex items-center justify-center text-2xl font-bold"
+                    style={{
+                      borderColor: "var(--ink)",
+                      background:
+                        i < selectedForDisplay.size
+                          ? "var(--yellow)"
+                          : "#e5e7eb",
+                      boxShadow:
+                        i < selectedForDisplay.size
+                          ? "3px 3px 0 var(--ink)"
+                          : "2px 2px 0 #9ca3af",
+                    }}
+                  >
                     {i < selectedForDisplay.size ? "⭐" : i + 1}
-                  </span>
+                  </motion.div>
                 ))}
               </div>
-              <h3 className="text-2xl font-bold text-center text-purple-700 mb-2">
+              <h3
+                className="kd text-3xl text-center mb-1"
+                style={{ color: "var(--ink)" }}
+              >
                 Pick {MAX} awesome reviews! 🎯
               </h3>
-              <p className="text-center text-gray-600 mb-6">
+              <p className="kf text-center text-gray-600 mb-5 font-600">
                 {selectedForDisplay.size} of {MAX} chosen
               </p>
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={cancelSelection}
-                  className="btn-sticker bg-gray-500 hover:bg-gray-600 text-white"
+                  className="btn-sticker"
+                  style={{ background: "#f3f4f6", color: "#374151" }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || selectedForDisplay.size !== MAX}
-                  className="btn-sticker text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-sticker text-white"
                   style={{
                     background:
                       selectedForDisplay.size === MAX
-                        ? "var(--purple)"
-                        : "gray",
+                        ? "var(--green)"
+                        : "#d1d5db",
+                    cursor:
+                      selectedForDisplay.size === MAX
+                        ? "pointer"
+                        : "not-allowed",
                   }}
                 >
                   {saving ? (
-                    <>Saving…</>
+                    <>
+                      <svg
+                        className="animate-spin w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          className="opacity-25"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          className="opacity-75"
+                        />
+                      </svg>
+                      Saving…
+                    </>
                   ) : (
                     `🚀 Save! (${selectedForDisplay.size}/${MAX})`
                   )}
                 </button>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div>
+        )}
 
+        <div className="max-w-6xl mx-auto px-5 pt-10 pb-16 relative z-10">
           {feedbackData.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
               <StatBubble
                 emoji="⭐"
                 label="Average Rating"
@@ -395,52 +624,77 @@ const Feedback = () => {
           )}
 
           {!selectionMode && feedbackData.length > 0 && (
-            <div className="mb-10 flex flex-col items-center">
-              <h3 className="text-2xl font-bold mb-4 text-purple-700">
-                🔍 Filter by Stars!
-              </h3>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.28 }}
+              className="card-kids p-5 mb-10"
+              style={{ background: "#FFF9F0" }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">🔍</span>
+                <span className="kd text-2xl" style={{ color: "var(--ink)" }}>
+                  Filter by Stars!
+                </span>
+              </div>
               <StarRatingFilter
                 selected={selectedRating}
                 onChange={setSelectedRating}
                 ratingCounts={ratingCounts}
               />
-            </div>
+            </motion.div>
           )}
 
           {loading && feedbackData.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-6 animate-spin">⭐</div>
-              <p className="text-xl text-gray-600">Loading fun stuff…</p>
+            <div className="flex flex-col items-center py-24 gap-6">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                className="text-7xl"
+              >
+                ⭐
+              </motion.div>
+              <p className="kd text-3xl text-gray-500">Loading fun stuff…</p>
             </div>
           )}
 
           {!loading &&
             filteredData.length === 0 &&
             feedbackData.length === 0 && (
-              <div className="text-center py-24">
-                <div className="text-8xl mb-6">😶</div>
-                <h2 className="text-3xl font-bold text-gray-700 mb-3">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="card-kids p-16 text-center"
+                style={{ background: "#FFF9F0" }}
+              >
+                <div className="text-8xl hop mb-4">😶</div>
+                <p className="kd text-4xl mb-2" style={{ color: "var(--ink)" }}>
                   Nothing here yet!
-                </h2>
-                <p className="text-xl text-gray-500">
+                </p>
+                <p className="kf text-gray-500 text-lg font-600">
                   Be the first to leave feedback! 🚀
                 </p>
-              </div>
+              </motion.div>
             )}
 
           {!loading && filteredData.length === 0 && feedbackData.length > 0 && (
-            <div className="text-center py-20">
-              <div className="text-7xl mb-6">🔍</div>
-              <h2 className="text-3xl font-bold text-gray-700 mb-3">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="card-kids p-16 text-center"
+              style={{ background: "#F0F8FF" }}
+            >
+              <div className="text-8xl hop mb-4">🔍</div>
+              <p className="kd text-4xl mb-2" style={{ color: "var(--ink)" }}>
                 No {selectedRating}★ reviews!
-              </h2>
-              <p className="text-xl text-gray-600">
+              </p>
+              <p className="kf text-gray-500 text-lg font-600">
                 Try a different star filter! ✨
               </p>
-            </div>
+            </motion.div>
           )}
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredData.map((feedback, index) => {
               const id = feedback._id || `feedback-${index}`;
               const isSel = selectedForDisplay.has(id);
@@ -458,17 +712,20 @@ const Feedback = () => {
               return (
                 <motion.div
                   key={id}
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.08 }}
+                  initial={{ y: 30, opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  animate={{ y: 0, opacity: 1, x: 0 }}
+                  transition={{
+                    delay: index * 0.08,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20,
+                  }}
                   onClick={
                     selectionMode && feedback._id && !saving
                       ? () => toggleSelection(id)
                       : undefined
                   }
-                  className={`card-kids p-6 relative ${isSel ? "selected-card" : ""} ${
-                    selectionMode ? "cursor-pointer" : ""
-                  }`}
+                  className={`card-kids p-6 relative ${isSel ? "selected-card" : ""} ${selectionMode ? "cursor-pointer" : ""}`}
                   style={{ background: cardBg }}
                 >
                   {feedback.showToUser && !isSel && (
@@ -477,26 +734,42 @@ const Feedback = () => {
 
                   {selectionMode && (
                     <div className="absolute top-4 right-4 z-10">
-                      <div
-                        className={`w-8 h-8 rounded-full border-3 flex items-center justify-center text-white font-bold ${
-                          isSel
-                            ? "bg-green-500 border-green-600"
-                            : "bg-white border-gray-300"
-                        }`}
+                      <motion.div
+                        key={isSel ? "sel" : "not"}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                        className="w-10 h-10 rounded-full border-4 flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--ink)",
+                          background: isSel ? "var(--green)" : "#e5e7eb",
+                          boxShadow: isSel
+                            ? "3px 3px 0 var(--ink)"
+                            : "2px 2px 0 #9ca3af",
+                        }}
                       >
-                        {isSel && <MdCheckCircle size={28} />}
-                      </div>
+                        {isSel && (
+                          <MdCheckCircle
+                            className="text-white bloop"
+                            size={24}
+                          />
+                        )}
+                      </motion.div>
                     </div>
                   )}
 
                   <div className="flex items-center gap-4 mb-5">
                     {feedback.user?.picture ? (
-                      <img
-                        src={feedback.user.picture}
-                        alt={feedback.user.name}
+                      <div
                         className="avatar-kids"
                         style={{ background: avatarBg }}
-                      />
+                      >
+                        <img
+                          src={feedback.user.picture}
+                          alt={feedback.user.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     ) : (
                       <div
                         className="avatar-kids"
@@ -507,10 +780,13 @@ const Feedback = () => {
                     )}
 
                     <div>
-                      <div className="font-bold text-lg">
+                      <div
+                        className="kd text-2xl leading-tight"
+                        style={{ color: "var(--ink)" }}
+                      >
                         {feedback.user?.name || "Anonymous Friend"}
                       </div>
-                      <div className="text-sm text-gray-500 flex items-center gap-1.5">
+                      <div className="kf text-sm text-gray-500 flex items-center gap-1.5 mt-0.5 font-600">
                         <MdDateRange size={16} />
                         {feedback.createdAt
                           ? formatDate(feedback.createdAt)
@@ -525,14 +801,24 @@ const Feedback = () => {
                     </div>
                   )}
 
-                  <p className="text-gray-800 leading-relaxed text-lg">
+                  <p className="kf text-gray-800 leading-relaxed text-[1.05rem] font-600">
                     {feedback.feedback}
                   </p>
 
                   {isSel && (
-                    <div className="mt-4 inline-block bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium">
+                    <motion.div
+                      initial={{ scale: 0, rotate: -10 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                      className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full kd text-base text-white"
+                      style={{
+                        background: "var(--green)",
+                        border: "3px solid var(--ink)",
+                        boxShadow: "3px 3px 0 var(--ink)",
+                      }}
+                    >
                       ✅ Selected for display!
-                    </div>
+                    </motion.div>
                   )}
                 </motion.div>
               );
@@ -543,7 +829,11 @@ const Feedback = () => {
             hasMore &&
             filteredData.length > 0 &&
             !loading && (
-              <div className="text-center mt-16">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-14 flex justify-center"
+              >
                 <button
                   onClick={() => {
                     const n = currentPage + 1;
@@ -559,16 +849,21 @@ const Feedback = () => {
                 >
                   🎈 Load More! ({currentPage + 1}/{totalPages})
                 </button>
-              </div>
+              </motion.div>
             )}
 
           {selectedRating !== null && filteredData.length > 0 && (
-            <div className="text-center mt-12 text-xl font-medium text-purple-700">
+            <p
+              className="mt-10 text-center kd text-xl"
+              style={{ color: "var(--purple)" }}
+            >
               Showing {filteredData.length} {selectedRating}⭐ review
               {filteredData.length !== 1 ? "s" : ""}
-            </div>
+            </p>
           )}
         </div>
+
+        <ConfettiBar />
       </div>
     </>
   );
