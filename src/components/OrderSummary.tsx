@@ -42,7 +42,7 @@ const OrderSummary: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
   const productId: string | null = new URLSearchParams(location.search).get(
-    "productId"
+    "productId",
   );
   const [productDetail, setProductDetail] = useState<ProductBase>();
   const { totalPoints } = useRewards();
@@ -60,7 +60,7 @@ const OrderSummary: React.FC = () => {
   const maxRedeemableCandyCoins = coins
     ? Math.min(
         coins.currentCoins,
-        MAX_CANDY_DISCOUNT_RUPEE / CANDY_TO_RUPEE_RATIO
+        MAX_CANDY_DISCOUNT_RUPEE / CANDY_TO_RUPEE_RATIO,
       )
     : 0;
 
@@ -82,7 +82,7 @@ const OrderSummary: React.FC = () => {
 
     if (redeemCandyCoins > maxRedeemableCandyCoins) {
       toast.error(
-        `You can redeem only up to ${Math.floor(maxRedeemableCandyCoins)} coins`
+        `You can redeem only up to ${Math.floor(maxRedeemableCandyCoins)} coins`,
       );
       return;
     }
@@ -106,13 +106,12 @@ const OrderSummary: React.FC = () => {
     try {
       const token = await getToken();
       const response = await fetchCandyCoin(token!);
-      console.log("response data :", response);
       setCoins(response.candyCoins);
     } catch (error) {
       showStatus(
         "error",
         (error as string) ||
-          "Error takin coins, Please try again after sometimes"
+          "Error takin coins, Please try again after sometimes",
       );
     }
   };
@@ -138,17 +137,12 @@ const OrderSummary: React.FC = () => {
     fetchProduct();
   }, [productId, dispatch]);
 
-  console.log("productDetail :", productDetail);
-
-  // Calculate the maximum discount allowed based on product type
   const calculateMaxDiscount = () => {
     if (productDetail) {
-      // For single product purchase
       return (
         MAX_DISCOUNT_LIMITS[productDetail.type] || MAX_DISCOUNT_LIMITS.DEFAULT
       );
     } else if (cart.items && cart.items.length > 0) {
-      // For cart with multiple items, use the sum of max discounts per item
       return cart.items.reduce((total, item) => {
         const maxForItem =
           MAX_DISCOUNT_LIMITS[item.productType as keyof typeof ProductType] ||
@@ -162,7 +156,7 @@ const OrderSummary: React.FC = () => {
   // Maximum points the user can redeem based on their total points and the max discount
   const maxRedeemablePoints = Math.min(
     totalPoints,
-    calculateMaxDiscount() * POINTS_TO_RUPEE_RATIO
+    calculateMaxDiscount() * POINTS_TO_RUPEE_RATIO,
   );
 
   // Calculate the discount amount based on points
@@ -184,7 +178,7 @@ const OrderSummary: React.FC = () => {
 
     if (redeemPoints > maxRedeemablePoints) {
       toast.error(
-        `You can only redeem up to ${maxRedeemablePoints} points for this purchase`
+        `You can only redeem up to ${maxRedeemablePoints} points for this purchase`,
       );
       return;
     }
@@ -335,7 +329,7 @@ const OrderSummary: React.FC = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (redeemPoints > 0) {
@@ -356,7 +350,7 @@ const OrderSummary: React.FC = () => {
           await spendCandyCoin(
             token,
             redeemCandyCoins,
-            `Redeem coin for buy porduct : ${productId}`
+            `Redeem coin for buy porduct : ${productId}`,
           );
 
           toast.success(`${redeemCandyCoins} Candy Coins redeemed!`);
@@ -366,7 +360,6 @@ const OrderSummary: React.FC = () => {
         }
       }
 
-      // Award points for purchase
       if (productDetail) {
         rewardPurchaseProduct(productDetail._id);
       }
@@ -374,18 +367,17 @@ const OrderSummary: React.FC = () => {
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = response.data;
 
-      // Append the form to the body and submit it
       const form = tempDiv.querySelector("form");
       if (form) {
         document.body.appendChild(form);
-        form.submit(); // Submit the form
+        form.submit();
       } else {
         console.error("Form not found in the response HTML.");
       }
     } catch (error: any) {
       console.log(error);
       toast.error(
-        error.message || "Failed to process payment. Please try again later."
+        error.message || "Failed to process payment. Please try again later.",
       );
     }
   };
@@ -518,7 +510,10 @@ const OrderSummary: React.FC = () => {
                 value={redeemPoints}
                 onChange={(e) =>
                   setRedeemPoints(
-                    Math.min(parseInt(e.target.value) || 0, maxRedeemablePoints)
+                    Math.min(
+                      parseInt(e.target.value) || 0,
+                      maxRedeemablePoints,
+                    ),
                   )
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -573,7 +568,7 @@ const OrderSummary: React.FC = () => {
               value={redeemCandyCoins}
               onChange={(e) =>
                 setRedeemCandyCoins(
-                  Math.min(+e.target.value || 0, maxRedeemableCandyCoins)
+                  Math.min(+e.target.value || 0, maxRedeemableCandyCoins),
                 )
               }
               disabled={appliedCandyDiscount > 0}

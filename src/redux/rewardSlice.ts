@@ -84,7 +84,6 @@ export const fetchUserRewards = createAsyncThunk(
   "rewards/fetchUserRewards",
   async ({ token }: { token: string }, { rejectWithValue }) => {
     try {
-      console.log("Fetching user rewards with token");
       const response = await axiosInstance.get("/rewards/user-rewards", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -106,22 +105,16 @@ export const addRewardPoints = createAsyncThunk(
 
   async (request: AddPointsRequest, { rejectWithValue }) => {
     try {
-      console.log("Adding reward points:", request);
       if (!request.token) {
         console.error("No authentication token available");
         return rejectWithValue("Authentication required");
       }
 
-      console.log("Making API request to add reward points:", request);
-
-      // If this is a redemption, use the points value from the request
-      // otherwise use the value from POINTS_CONFIG
       const pointsToAdd =
         request.eventType === RewardEventType.REDEEM_POINTS
-          ? request.points || 0 // Use the points from request (negative for redemption)
+          ? request.points || 0
           : POINTS_CONFIG[request.eventType];
 
-      // Create a modified request with the calculated points
       const modifiedRequest = {
         ...request,
         points: pointsToAdd,
@@ -137,7 +130,6 @@ export const addRewardPoints = createAsyncThunk(
         }
       );
 
-      console.log("Reward points API response:", response.data);
       return response.data;
     } catch (error: unknown) {
       console.error("Failed to add reward points:", error);
@@ -153,7 +145,6 @@ const rewardSlice = createSlice({
   name: "rewards",
   initialState,
   reducers: {
-    // Local point addition without API call (for testing/development)
     addPointsLocally: (
       state,
       action: PayloadAction<{
@@ -164,10 +155,9 @@ const rewardSlice = createSlice({
       const { eventType, referenceId } = action.payload;
       const points = POINTS_CONFIG[eventType];
 
-      // Add the transaction
       const newTransaction: PointTransaction = {
-        _id: Date.now().toString(), // Mock ID
-        userId: "current-user", // This would be the actual user ID in production
+        _id: Date.now().toString(),
+        userId: "current-user",
         eventType,
         points,
         description: `Earned ${points} points for ${eventType.replace(

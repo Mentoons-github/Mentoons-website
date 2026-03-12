@@ -85,6 +85,8 @@ import {
   UpcomingCelebration,
 } from "./common/celebrations";
 
+import { Slide, SlideShape } from "./adda/landingBanner";
+
 export type {
   QuizType,
   MeetupFormValues,
@@ -157,6 +159,8 @@ export type {
   SiteCategory,
   Site_FAQ,
   Site_FAQData,
+  Slide,
+  SlideShape,
 };
 
 export { MediaType, PostType };
