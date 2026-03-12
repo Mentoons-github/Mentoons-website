@@ -189,7 +189,7 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
   return (
     <div
       ref={wrapperRef}
-      className="relative flex items-center w-full group overflow-hidden"
+      className="relative flex items-center w-full group overflow-hidden "
     >
       {showLeftArrow && (
         <button
@@ -217,7 +217,7 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
 
       <div
         ref={scrollContainerRef}
-        className="flex w-full px-2 md:px-10 gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex w-full px-2 md:px-10 gap-5 overflow-x-auto scrollbar-hide scroll-smooth md:pt-3"
       >
         {productsData.map((p, i) => (
           <a

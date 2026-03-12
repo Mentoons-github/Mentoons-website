@@ -18,7 +18,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import NewsletterModal from "../modals/NewsletterModal";
-import MapComponent from "./MapComponent";
+// import MapComponent from "./MapComponent";
 import { AxiosError } from "axios";
 
 interface ApiResponse {
@@ -361,7 +361,7 @@ const Footer = () => {
             </div>
           )}
           <div className="w-full space-y-2">
-            <MapComponent />{" "}
+            {/* <MapComponent />{" "} */}
             <div className="flex items-center justify-start w-full text-lg font-medium tracking-wide">
               <MdLocationOn />
               Domlur, Bangalore{" "}

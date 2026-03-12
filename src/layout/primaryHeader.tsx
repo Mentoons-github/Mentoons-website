@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axiosInstance from "@/api/axios";
 import PlatinumMembershipModal from "@/components/common/modal/platinumSubscriptionModal";
+import { CiMail } from "react-icons/ci";
 
 const PrimaryHeader = () => {
   const { socket } = useSocket();
@@ -65,12 +66,12 @@ const PrimaryHeader = () => {
 
   const adda = useMemo(
     () => location.pathname.startsWith("/adda"),
-    [location.pathname]
+    [location.pathname],
   );
 
   const animationTexts = useMemo(
     () => (adda ? ANIMATION_TEXTS_ADDA : ANIMATION_TEXTS_HOME),
-    [adda]
+    [adda],
   );
 
   const textAnimation = {
@@ -107,6 +108,17 @@ const PrimaryHeader = () => {
             <FaPhone className="flex-shrink-0" />{" "}
             <span className="flex-shrink-0">+91 7892858593</span>
           </div>
+        </a>
+
+        <a
+          href="mailto:info@mentoons.com"
+          className=" text-white hidden xl:block"
+        >
+          <div className="bg-white text-[10px] md:text-[12px] font-semibold rounded-full px-2 md:px-3 py-1 flex justify-center items-center gap-1 text-primary whitespace-nowrap">
+            <CiMail className="flex-shrink-0" />{" "}
+            <span className="flex-shrink-0">info@mentoons.com</span>
+          </div>
+          
         </a>
       </div>
 

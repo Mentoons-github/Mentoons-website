@@ -26,7 +26,6 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      // Prevent scrolling when modal is open
       document.body.style.overflow = "hidden";
     }
 
@@ -36,7 +35,6 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  // Close on escape key press
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -53,34 +51,52 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({
     };
   }, [isOpen, onClose]);
   if (!isOpen) return null;
+
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center z-[999999] "
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 flex items-center justify-center z-[999999] bg-black/40 backdrop-blur-sm px-4">
       <div
-        className="bg-white p-6 rounded-lg shadow-lg w-[600px] py-10"
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 md:p-10 text-center animate-[fadeIn_.3s_ease]"
       >
-        <div className="flex justify-center items-center  relative  ">
-          <div className="bg-[#FFD9AA] flex items-center justify-center p-4 rounded-full">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center
+        rounded-full bg-gray-100 hover:bg-gray-200 transition"
+        >
+          <IoClose className="text-xl text-gray-700" />
+        </button>
+
+        <div className="flex justify-center mb-6">
+          <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-orange-100 shadow-inner">
             <img
               src="/assets/modals/check-verified.svg"
-              alt="Verifed check"
-              className="w-10 h-10 object-cover "
+              alt="Verified"
+              className="w-10 h-10"
             />
+
+            <div className="absolute inset-0 rounded-full bg-orange-200 blur-xl opacity-40"></div>
           </div>
+        </div>
+
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+          Thank You!
+        </h2>
+
+        <p className="text-gray-600 text-lg leading-relaxed max-w-md mx-auto">
+          {message}
+        </p>
+
+        <div className="mt-8">
           <button
             onClick={onClose}
-            className="text-4xl text-nuetral-700 text-neutral-700 bg-white shadow-md p-1 rounded-lg absolute top-0 right-0"
+            className="px-8 py-3 rounded-xl text-white font-semibold
+          bg-gradient-to-r from-orange-400 to-orange-500
+          hover:from-orange-500 hover:to-orange-600
+          shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <IoClose className="text-2xl" />
+            Close
           </button>
-        </div>
-        <h1 className="text-4xl text-black py-6 text-center">Thank You</h1>
-        <div className="w-[80%] mx-auto text-neutral-600 font-normal  text-xl text-center leading-2 ">
-          <p>{message}</p>
         </div>
       </div>
     </div>
