@@ -1,64 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import gsap from "gsap";
-
-type SlideShape = "circle" | "triangle" | "star";
-
-interface Slide {
-  id: number;
-  tag: string;
-  headline: string;
-  sub: string;
-  cta: string;
-  accent: string;
-  bg: string;
-  shape: SlideShape;
-  emoji: string;
-  badges: string[];
-  highlightWord: string;
-}
-
-const slides: Slide[] = [
-  {
-    id: 1,
-    tag: "⚡ LIMITED OFFER",
-    headline: "3 Day Trial",
-    highlightWord: "Trial",
-    sub: "Try everything free for 3 days — full access with zero hassle.",
-    cta: "Claim Your Trial",
-    accent: "#a8ff78",
-    bg: "from-[#071a0e] via-[#0f2e1a] to-[#1a4a2e]",
-    shape: "circle",
-    emoji: "🎯",
-    badges: ["✓ Full Access", "✓ Zero Risk"],
-  },
-  {
-    id: 2,
-    tag: "🎓 WORKSHOPS",
-    headline: "Workshops",
-    highlightWord: "Workshops",
-    sub: "Workshops for ages 6–12 with hands-on play-based learning, and ages 13–19 with advanced, expert-led sessions.",
-    cta: "Explore Workshops",
-    accent: "#f9c74f",
-    bg: "from-[#0a0a1e] via-[#1a1a2e] to-[#16213e]",
-    shape: "triangle",
-    emoji: "🧠",
-    badges: ["Ages 6–12", "Ages 13–19", "Expert Led", "Live Sessions"],
-  },
-  {
-    id: 3,
-    tag: "🛍️ PRODUCTS",
-    headline: "Products",
-    highlightWord: "Products",
-    sub: "Products built for kids, teens, adults and parents — designed around how each age group thinks, plays, and grows.",
-    cta: "Shop by Age",
-    accent: "#ff9f43",
-    bg: "from-[#1a0505] via-[#2e0f0f] to-[#4a1a1a]",
-    shape: "star",
-    emoji: "🚀",
-    badges: ["Kids", "Teens", "Adults", "Parents"],
-  },
-];
+import { SlideShape } from "@/types";
+import { SLIDES } from "@/constant/adda/Landing/slide";
 
 interface ShapeDecorProps {
   shape: SlideShape;
@@ -68,20 +12,14 @@ interface ShapeDecorProps {
 
 const ShapeDecor = ({ shape, accent, shapeRef }: ShapeDecorProps) => {
   const base = "absolute pointer-events-none opacity-90";
+  const cls = "w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52";
+  const pos = `${base} right-4 sm:right-8 top-4 sm:top-8`;
+  const glow = { filter: `drop-shadow(0 0 40px ${accent}99)` };
 
   if (shape === "circle")
     return (
-      <div
-        ref={shapeRef}
-        className={`${base} right-4 sm:right-8 top-4 sm:top-8`}
-        style={{ filter: `drop-shadow(0 0 40px ${accent}99)` }}
-      >
-        <svg
-          width="180"
-          height="180"
-          viewBox="0 0 220 220"
-          className="w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52"
-        >
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
           <circle
             cx="110"
             cy="110"
@@ -102,17 +40,8 @@ const ShapeDecor = ({ shape, accent, shapeRef }: ShapeDecorProps) => {
 
   if (shape === "triangle")
     return (
-      <div
-        ref={shapeRef}
-        className={`${base} right-4 sm:right-8 top-4 sm:top-8`}
-        style={{ filter: `drop-shadow(0 0 40px ${accent}99)` }}
-      >
-        <svg
-          width="180"
-          height="180"
-          viewBox="0 0 220 220"
-          className="w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52"
-        >
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
           <polygon
             points="110,12 208,198 12,198"
             fill="none"
@@ -136,33 +65,206 @@ const ShapeDecor = ({ shape, accent, shapeRef }: ShapeDecorProps) => {
       </div>
     );
 
+  if (shape === "star")
+    return (
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
+          <polygon
+            points="110,10 130,80 210,80 150,125 170,200 110,155 50,200 70,125 10,80 90,80"
+            fill="none"
+            stroke={accent}
+            strokeWidth="3"
+          />
+          <polygon
+            points="110,45 124,88 168,88 133,112 146,155 110,132 74,155 87,112 52,88 96,88"
+            fill={accent}
+            fillOpacity="0.15"
+          />
+          <polygon
+            points="110,75 118,98 142,98 123,112 130,136 110,122 90,136 97,112 78,98 102,98"
+            fill={accent}
+            fillOpacity="0.25"
+          />
+        </svg>
+      </div>
+    );
+
+  if (shape === "wave")
+    return (
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
+          <path
+            d="M10,110 C40,60 80,60 110,110 C140,160 180,160 210,110"
+            fill="none"
+            stroke={accent}
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M10,80 C40,30 80,30 110,80 C140,130 180,130 210,80"
+            fill="none"
+            stroke={accent}
+            strokeWidth="2"
+            strokeOpacity="0.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M10,140 C40,90 80,90 110,140 C140,190 180,190 210,140"
+            fill="none"
+            stroke={accent}
+            strokeWidth="2"
+            strokeOpacity="0.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M10,110 C40,60 80,60 110,110 C140,160 180,160 210,110 L210,220 L10,220 Z"
+            fill={accent}
+            fillOpacity="0.07"
+          />
+          <circle cx="10" cy="110" r="5" fill={accent} fillOpacity="0.8" />
+          <circle cx="110" cy="110" r="5" fill={accent} fillOpacity="0.8" />
+          <circle cx="210" cy="110" r="5" fill={accent} fillOpacity="0.8" />
+          <circle cx="60" cy="72" r="4" fill={accent} fillOpacity="0.5" />
+          <circle cx="160" cy="148" r="4" fill={accent} fillOpacity="0.5" />
+        </svg>
+      </div>
+    );
+
+  if (shape === "square")
+    return (
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
+          <rect
+            x="15"
+            y="15"
+            width="190"
+            height="190"
+            rx="8"
+            fill="none"
+            stroke={accent}
+            strokeWidth="3"
+          />
+          <rect
+            x="45"
+            y="45"
+            width="130"
+            height="130"
+            rx="4"
+            fill={accent}
+            fillOpacity="0.08"
+          />
+          <rect
+            x="75"
+            y="75"
+            width="70"
+            height="70"
+            rx="2"
+            fill={accent}
+            fillOpacity="0.15"
+          />
+          <circle cx="15" cy="15" r="6" fill={accent} fillOpacity="0.9" />
+          <circle cx="205" cy="15" r="6" fill={accent} fillOpacity="0.9" />
+          <circle cx="205" cy="205" r="6" fill={accent} fillOpacity="0.9" />
+          <circle cx="15" cy="205" r="6" fill={accent} fillOpacity="0.9" />
+          <circle cx="110" cy="110" r="5" fill={accent} fillOpacity="0.4" />
+          {/* Corner tick marks */}
+          <line
+            x1="15"
+            y1="50"
+            x2="15"
+            y2="15"
+            stroke={accent}
+            strokeWidth="2"
+            strokeOpacity="0.4"
+          />
+          <line
+            x1="15"
+            y1="15"
+            x2="50"
+            y2="15"
+            stroke={accent}
+            strokeWidth="2"
+            strokeOpacity="0.4"
+          />
+        </svg>
+      </div>
+    );
+
+  if (shape === "hexagon")
+    return (
+      <div ref={shapeRef} className={pos} style={glow}>
+        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
+          <polygon
+            points="110,12 198,60 198,160 110,208 22,160 22,60"
+            fill="none"
+            stroke={accent}
+            strokeWidth="3"
+          />
+          <polygon
+            points="110,45 175,82 175,138 110,175 45,138 45,82"
+            fill={accent}
+            fillOpacity="0.08"
+          />
+          <polygon
+            points="110,78 148,100 148,144 110,166 72,144 72,100"
+            fill={accent}
+            fillOpacity="0.15"
+          />
+          {/* Vertices dots */}
+          <circle cx="110" cy="12" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="198" cy="60" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="198" cy="160" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="110" cy="208" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="22" cy="160" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="22" cy="60" r="5" fill={accent} fillOpacity="0.9" />
+          <circle cx="110" cy="110" r="7" fill={accent} fillOpacity="0.35" />
+        </svg>
+      </div>
+    );
+
+  // diamond
   return (
-    <div
-      ref={shapeRef}
-      className={`${base} right-4 sm:right-8 top-4 sm:top-8`}
-      style={{ filter: `drop-shadow(0 0 40px ${accent}99)` }}
-    >
-      <svg
-        width="180"
-        height="180"
-        viewBox="0 0 220 220"
-        className="w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52"
-      >
+    <div ref={shapeRef} className={pos} style={glow}>
+      <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
         <polygon
-          points="110,10 130,80 210,80 150,125 170,200 110,155 50,200 70,125 10,80 90,80"
+          points="110,10 210,110 110,210 10,110"
           fill="none"
           stroke={accent}
           strokeWidth="3"
         />
         <polygon
-          points="110,45 124,88 168,88 133,112 146,155 110,132 74,155 87,112 52,88 96,88"
+          points="110,45 175,110 110,175 45,110"
           fill={accent}
-          fillOpacity="0.15"
+          fillOpacity="0.09"
         />
         <polygon
-          points="110,75 118,98 142,98 123,112 130,136 110,122 90,136 97,112 78,98 102,98"
+          points="110,80 140,110 110,140 80,110"
           fill={accent}
-          fillOpacity="0.25"
+          fillOpacity="0.2"
+        />
+        {/* Cardinal dots */}
+        <circle cx="110" cy="10" r="6" fill={accent} fillOpacity="0.9" />
+        <circle cx="210" cy="110" r="6" fill={accent} fillOpacity="0.9" />
+        <circle cx="110" cy="210" r="6" fill={accent} fillOpacity="0.9" />
+        <circle cx="10" cy="110" r="6" fill={accent} fillOpacity="0.9" />
+        {/* Inner sparkle lines */}
+        <line
+          x1="110"
+          y1="10"
+          x2="110"
+          y2="210"
+          stroke={accent}
+          strokeWidth="1"
+          strokeOpacity="0.12"
+        />
+        <line
+          x1="10"
+          y1="110"
+          x2="210"
+          y2="110"
+          stroke={accent}
+          strokeWidth="1"
+          strokeOpacity="0.12"
         />
       </svg>
     </div>
@@ -292,8 +394,8 @@ const LandingBanner = () => {
       );
       setCurrent((prev) =>
         dir === "next"
-          ? (prev + 1) % slides.length
-          : (prev - 1 + slides.length) % slides.length,
+          ? (prev + 1) % SLIDES.length
+          : (prev - 1 + SLIDES.length) % SLIDES.length,
       );
       setIsAnimating(false);
     });
@@ -343,7 +445,7 @@ const LandingBanner = () => {
     };
   }, []);
 
-  const slide = slides[current];
+  const slide = SLIDES[current];
 
   const headlineParts = slide.headline.split(slide.highlightWord);
 
@@ -530,7 +632,7 @@ const LandingBanner = () => {
         </div>
 
         <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-20">
-          {slides.map((_, i) => (
+          {SLIDES.map((_, i) => (
             <button
               key={i}
               onClick={() => {

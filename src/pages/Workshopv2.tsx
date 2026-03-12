@@ -43,8 +43,6 @@ const Workshopv2 = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState("");
 
-  console.log(categories,'sssss')
-
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",

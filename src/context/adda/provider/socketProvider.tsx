@@ -6,7 +6,7 @@ import SocketContext from "../socket";
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const { getToken } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [onlineUsers, setOnlineUsers] = useState<{_id: string}[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ _id: string }[]>([]);
   const [mongoUserId, setMongoUserId] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
@@ -30,16 +30,16 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         setSocket(newSocket);
 
         newSocket.on("connect", () => {
-          console.log("Socket connected:", newSocket.id);
+          console.log("Socket connected");
         });
 
         newSocket.on("mongo_user_id", ({ userId }) => {
           setMongoUserId(userId);
-          console.log("MongoDB user ID from socket:", userId);
+          console.log("MongoDB user ID from socket");
         });
 
-        newSocket.on("online_users", (users: {_id: string}[]) => {
-          console.log("Online users updated:", users);
+        newSocket.on("online_users", (users: { _id: string }[]) => {
+          console.log("Online users updated");
           setOnlineUsers(users);
         });
 
@@ -66,11 +66,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         return () => {
           window.removeEventListener("beforeunload", handleBeforeUnload);
         };
-
       } catch (error) {
         console.error("Error connecting socket:", error);
       }
-
     };
 
     connectSocket();
