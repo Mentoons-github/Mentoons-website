@@ -1,11 +1,16 @@
+import { FilteredFriendRequest } from "./home";
+
+interface User {
+  _id: string;
+  name: string;
+  picture: string;
+}
+
 export interface GroupMessage {
-  senderId: string;
-  senderName: string;
-  profilePicture: string;
-  text: string;
-  createdAt?: string;
-  updatedAt?: string;
-  _id?: string;
+  _id: string;
+  senderId: User;
+  message: string;
+  createdAt: string;
 }
 
 export interface PollOption {
@@ -48,8 +53,16 @@ export interface Group {
 export type ActiveTabType = "MEMBERS" | "CHAT" | "POLLS";
 
 export interface GroupState {
-  data: Group[];
+  data: {
+    joinedGroups: Group[];
+    suggestedGroups: Group[];
+  };
   loading?: boolean;
   error?: string | null;
   selectedGroup: Group | null;
+  message: string;
+  joinSuccess: boolean;
+  groupMessages: GroupMessage[];
+  groupMembers: User[];
+  friendRequests:FilteredFriendRequest[]
 }

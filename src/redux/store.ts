@@ -19,7 +19,7 @@ import EmployeeAdminReducer from "./admin/employee/employeeSlice";
 import friendRequestReducer from "./adda/friendRequest";
 import careerAdminReducer from "./admin/job/jobSlice";
 import sessionCallAdmin from "./admin/sessionCall/sessionCall";
-import groupReducer from "./adda/groupSlice";
+import groupReducer from "./community/groupSlice";
 import taskReducer from "./admin/task/taskSlice";
 import AdminReducer from "./admin/admin/admin";
 import employeeReducer from "./employee/employee";

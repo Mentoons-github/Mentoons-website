@@ -117,10 +117,10 @@ const CreateOwnGroup: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen px-4 py-12">
+      <div className="min-h-screen px-4 md:py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center space-y-6 mb-12">
-            <h1 className="text-6xl font-extrabold leading-tight">
+          <div className="text-center space-y-6 md:mb-12">
+            <h1 className="text-2xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
               BUILD YOUR COMMUNITY
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">

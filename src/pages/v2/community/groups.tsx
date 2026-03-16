@@ -8,9 +8,15 @@ import GroupDescription from "@/components/community/group/description";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { fetchGroupById } from "@/api/groups/groupsApi";
+import {
+  fetchGroupById,
+  fetchGroupMessages,
+  fetchMembers,
+} from "@/redux/community/groupsThunk";
 import { useAuth } from "@clerk/clerk-react";
 import { useAuthModal } from "@/context/adda/authModalContext";
+import { GroupMessage } from "@/types";
+import useSocket from "@/hooks/adda/useSocket";
 
 export type ActiveTabType = "MEMBERS" | "CHAT" | "POLLS";
 
@@ -22,9 +28,53 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
   const { openAuthModal } = useAuthModal();
   const { id: groupId } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const { selectedGroup, error, loading } = useSelector(
-    (state: RootState) => state.groups
-  );
+  const {
+    selectedGroup,
+    error,
+    loading,
+    groupMessages,
+    groupMembers,
+    friendRequests,
+  } = useSelector((state: RootState) => state.groups);
+  const [messages, setMessages] = useState<GroupMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  const { socket, mongoUserId } = useSocket();
+
+  useEffect(() => {
+    setMessages(groupMessages);
+  }, [groupMessages]);
+
+  const fetchMessages = async () => {
+    if (!groupId) {
+      console.warn("No groupId provided in URL params!");
+      return;
+    }
+    const token = await getToken();
+    if (!token) {
+      openAuthModal("sign-in");
+      return;
+    }
+    await dispatch(fetchGroupMessages({ groupId, token }));
+  };
+
+  const fetchGroupMembers = async () => {
+    if (!groupId) {
+      console.warn("No groupId provided in URL params!");
+      return;
+    }
+    const token = await getToken();
+    if (!token) {
+      openAuthModal("sign-in");
+      return;
+    }
+    await dispatch(fetchMembers({ groupId, token }));
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    fetchGroupMembers();
+  }, []);
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -45,13 +95,8 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
 
   const handleTabChange = (tab: ActiveTabType) => {
     setActiveTab(tab);
-    console.log("Tab changed to:", tab);
   };
 
-  // Log for debugging
-  console.log("groupId:", groupId);
-  console.log("selectedGroup:", selectedGroup);
-  console.log("loading:", loading, "error:", error);
 
   if (loading) {
     return (
@@ -120,9 +165,23 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
       <GroupTabs activeTab={activeTab} setActiveTab={handleTabChange} />
       <div className="pb-10">
         {activeTab === "MEMBERS" && (
-          <GroupMembers members={selectedGroup.members || []} />
+          <GroupMembers
+            members={groupMembers}
+            mongoUserId={mongoUserId}
+            friendRequests={friendRequests}
+          />
         )}
-        {activeTab === "CHAT" && <GroupChat />}
+        {activeTab === "CHAT" && (
+          <GroupChat
+            groupId={groupId}
+            messages={messages}
+            setMessages={setMessages}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            socket={socket}
+            mongoUserId={mongoUserId}
+          />
+        )}
         {activeTab === "POLLS" && <GroupPolls groupId={groupId} />}
       </div>
     </>

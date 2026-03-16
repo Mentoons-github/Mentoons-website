@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { fetchGroupById } from "@/api/groups/groupsApi";
+import { fetchGroupById } from "@/redux/community/groupsThunk";
 import PollHeader from "@/components/community/group/polls/pollHeader";
 import PollList from "@/components/community/group/polls/pollsList";
 import PollStats from "@/components/community/group/polls/pollStats";

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { X, Trash2 } from "lucide-react";
 import { AppDispatch } from "@/redux/store";
-import { createPoll, fetchGroupById } from "@/api/groups/groupsApi";
+import { createPoll, fetchGroupById } from "@/redux/community/groupsThunk";
 import { Poll } from "@/types";
 import { useAuth } from "@clerk/clerk-react";
 import { useAuthModal } from "@/context/adda/authModalContext";

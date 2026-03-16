@@ -47,6 +47,20 @@ const AddaLayout = () => {
     location.pathname === "/adda/user-profile";
 
   useEffect(() => {
+    if (isSignedIn) return;
+
+    const alreadyShown = sessionStorage.getItem("welcomeModalShown");
+    if (alreadyShown) return;
+
+    const timer = setTimeout(() => {
+      setShowWelcome(true);
+      sessionStorage.setItem("welcomeModalShown", "true");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [isSignedIn]);
+
+  useEffect(() => {
     const loadInitial = async () => {
       const token = await getToken();
       if (token) {
@@ -260,7 +274,9 @@ const AddaLayout = () => {
         </div>
       )}
 
-      {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
+      {showWelcome && !isSignedIn && (
+        <WelcomeModal onClose={() => setShowWelcome(false)} />
+      )}
     </>
   );
 };

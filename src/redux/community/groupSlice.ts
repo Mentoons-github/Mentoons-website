@@ -8,20 +8,33 @@ import {
   fetchPolls,
   votePoll,
   fetchGroupById,
-} from "@/api/groups/groupsApi";
-import { Group, GroupMessage, Poll, GroupState } from "@/types";
+  joinGroupThunk,
+} from "@/redux/community/groupsThunk";
+import { Group, Poll, GroupState } from "@/types";
 
 const initialState: GroupState = {
-  data: [],
+  data: {
+    joinedGroups: [],
+    suggestedGroups: [],
+  },
   loading: false,
   error: null,
   selectedGroup: null,
+  message: "",
+  joinSuccess: false,
+  groupMessages:[],
+  groupMembers:[],
+  friendRequests:[]
 };
 
 const groupSlice = createSlice({
   name: "group",
   initialState,
   reducers: {
+    clearGroupReduces(state) {
+      state.message = "";
+      state.joinSuccess = false;
+    },
     setSelectedGroup(state, action: PayloadAction<Group | null>) {
       state.selectedGroup = action.payload;
     },
@@ -37,10 +50,16 @@ const groupSlice = createSlice({
     });
     builder.addCase(
       fetchGroups.fulfilled,
-      (state, action: PayloadAction<Group[]>) => {
+      (
+        state,
+        action: PayloadAction<{
+          joinedGroups: Group[];
+          suggestedGroups: Group[];
+        }>,
+      ) => {
         state.loading = false;
         state.data = action.payload;
-      }
+      },
     );
     builder.addCase(fetchGroups.rejected, (state, action) => {
       state.loading = false;
@@ -52,32 +71,29 @@ const groupSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(
-      fetchGroupById.fulfilled,
-      (
-        state,
-        action: PayloadAction<
-          Group,
-          string,
-          {
-            arg: { groupId: string; token: string };
-            requestId: string;
-            requestStatus: "fulfilled";
-          }
-        >
-      ) => {
-        state.loading = false;
-        const groupIndex = state.data.findIndex(
-          (g) => g._id === action.payload._id
-        );
-        if (groupIndex !== -1) {
-          state.data[groupIndex] = action.payload;
-        } else {
-          state.data.push(action.payload);
-        }
-        state.selectedGroup = action.payload;
+
+    builder.addCase(fetchGroupById.fulfilled, (state, action) => {
+      state.loading = false;
+
+      const group = action.payload;
+
+      const joinedIndex = state.data.joinedGroups.findIndex(
+        (g) => g._id === group._id,
+      );
+
+      const suggestedIndex = state.data.suggestedGroups.findIndex(
+        (g) => g._id === group._id,
+      );
+
+      if (joinedIndex !== -1) {
+        state.data.joinedGroups[joinedIndex] = group;
+      } else if (suggestedIndex !== -1) {
+        state.data.suggestedGroups[suggestedIndex] = group;
       }
-    );
+
+      state.selectedGroup = group;
+    });
+
     builder.addCase(fetchGroupById.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
@@ -92,19 +108,12 @@ const groupSlice = createSlice({
       fetchMembers.fulfilled,
       (
         state,
-        action: PayloadAction<
-          { name: string; picture: string; _id: string }[],
-          string,
-          { arg: string; requestId: string; requestStatus: "fulfilled" }
-        >
+        action
       ) => {
         state.loading = false;
-        const groupId = action.meta.arg;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
-        if (groupIndex !== -1) {
-          state.data[groupIndex].members = action.payload;
-        }
-      }
+        state.groupMembers = action.payload.data
+        state.friendRequests = action.payload.friendRequests
+      },
     );
     builder.addCase(fetchMembers.rejected, (state, action) => {
       state.loading = false;
@@ -120,19 +129,47 @@ const groupSlice = createSlice({
       fetchGroupMessages.fulfilled,
       (
         state,
-        action: PayloadAction<GroupMessage[], string, { arg: string }>
+        action,
       ) => {
         state.loading = false;
-        const groupId = action.meta.arg;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
-        if (groupIndex !== -1) {
-          state.data[groupIndex].message = action.payload;
-        }
-      }
+        state.groupMessages = action.payload
+      },
     );
     builder.addCase(fetchGroupMessages.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
+    });
+
+    // -------------------- JOIN GROUPS --------------------
+    builder.addCase(joinGroupThunk.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.joinSuccess = false;
+    });
+    builder.addCase(joinGroupThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      state.message = action.payload;
+      state.joinSuccess = true;
+
+      const { groupId } = action.meta.arg;
+
+      const groupIndex = state.data.suggestedGroups.findIndex(
+        (g) => g._id === groupId,
+      );
+
+      if (groupIndex !== -1) {
+        const joinedGroup = state.data.suggestedGroups[groupIndex];
+
+        state.data.suggestedGroups.splice(groupIndex, 1);
+
+        state.data.joinedGroups.unshift(joinedGroup);
+      }
+    });
+
+    builder.addCase(joinGroupThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+      state.joinSuccess = false;
     });
 
     // -------------------- FETCH POLLS --------------------
@@ -145,11 +182,13 @@ const groupSlice = createSlice({
       (state, action: PayloadAction<Poll[], string, { arg: string }>) => {
         state.loading = false;
         const groupId = action.meta.arg;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
+        const groupIndex = state.data.joinedGroups.findIndex(
+          (g) => g._id === groupId,
+        );
         if (groupIndex !== -1) {
-          state.data[groupIndex].polls = action.payload;
+          state.data.joinedGroups[groupIndex].polls = action.payload;
         }
-      }
+      },
     );
     builder.addCase(fetchPolls.rejected, (state, action) => {
       state.loading = false;
@@ -169,16 +208,19 @@ const groupSlice = createSlice({
           Poll,
           string,
           { arg: { groupId: string; pollData: Partial<Poll> } }
-        >
+        >,
       ) => {
         state.loading = false;
         const groupId = action.meta.arg.groupId;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
+        const groupIndex = state.data.joinedGroups.findIndex(
+          (g) => g._id === groupId,
+        );
         if (groupIndex !== -1) {
-          state.data[groupIndex].polls = state.data[groupIndex].polls || [];
-          state.data[groupIndex].polls.push(action.payload);
+          state.data.joinedGroups[groupIndex].polls =
+            state.data.joinedGroups[groupIndex].polls || [];
+          state.data.joinedGroups[groupIndex].polls.push(action.payload);
         }
-      }
+      },
     );
     builder.addCase(createPoll.rejected, (state, action) => {
       state.loading = false;
@@ -201,19 +243,22 @@ const groupSlice = createSlice({
               optionIndex: number;
             };
           }
-        >
+        >,
       ) => {
         const groupId = action.meta.arg.groupId;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
+        const groupIndex = state.data.joinedGroups.findIndex(
+          (g) => g._id === groupId,
+        );
         if (groupIndex !== -1) {
-          const pollIndex = state.data[groupIndex].polls.findIndex(
-            (p) => p._id === action.meta.arg.pollId
+          const pollIndex = state.data.joinedGroups[groupIndex].polls.findIndex(
+            (p) => p._id === action.meta.arg.pollId,
           );
           if (pollIndex !== -1) {
-            state.data[groupIndex].polls[pollIndex] = action.payload;
+            state.data.joinedGroups[groupIndex].polls[pollIndex] =
+              action.payload;
           }
         }
-      }
+      },
     );
 
     // -------------------- CLOSE POLL --------------------
@@ -225,22 +270,26 @@ const groupSlice = createSlice({
           Poll,
           string,
           { arg: { groupId: string; pollId: string } }
-        >
+        >,
       ) => {
         const groupId = action.meta.arg.groupId;
-        const groupIndex = state.data.findIndex((g) => g._id === groupId);
+        const groupIndex = state.data.joinedGroups.findIndex(
+          (g) => g._id === groupId,
+        );
         if (groupIndex !== -1) {
-          const pollIndex = state.data[groupIndex].polls.findIndex(
-            (p) => p._id === action.meta.arg.pollId
+          const pollIndex = state.data.joinedGroups[groupIndex].polls.findIndex(
+            (p) => p._id === action.meta.arg.pollId,
           );
           if (pollIndex !== -1) {
-            state.data[groupIndex].polls[pollIndex] = action.payload;
+            state.data.joinedGroups[groupIndex].polls[pollIndex] =
+              action.payload;
           }
         }
-      }
+      },
     );
   },
 });
 
-export const { setSelectedGroup, clearSelectedGroup } = groupSlice.actions;
+export const { setSelectedGroup, clearSelectedGroup, clearGroupReduces } =
+  groupSlice.actions;
 export default groupSlice.reducer;

@@ -1,49 +1,83 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Group, GroupMessage, Poll } from "@/types";
+import {
+  fetchGroupMessagesApi,
+  fetchGroupsApi,
+  fetchMembersApi,
+  joinGroupApi,
+} from "./groupsApi";
+import { FilteredFriendRequest } from "@/types/adda/home";
+import { User } from "@/types/adda/notification";
 
 const BASE_URL = `${import.meta.env.VITE_PROD_URL}/groups`;
 
 // -------------------- GROUP ASYNC THUNKS --------------------
 
 // Fetch all groups
-export const fetchGroups = createAsyncThunk<Group[]>(
-  "group/fetchGroups",
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await axios.get(`${BASE_URL}`);
-      return data.data as Group[];
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
+export const fetchGroups = createAsyncThunk<
+  { joinedGroups: Group[]; suggestedGroups: Group[] },
+  string
+>("group/fetchGroups", async (token, { rejectWithValue }) => {
+  try {
+    const res = await fetchGroupsApi(token);
+    return res.data.data;
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+    return rejectWithValue(
+      error?.response?.data?.message || "Fetch groups error",
+    );
   }
-);
+});
 
 // Fetch members of a group
 export const fetchMembers = createAsyncThunk<
-  { name: string; picture: string; _id: string }[],
-  string
->("group/fetchMembers", async (groupId, { rejectWithValue }) => {
+  { data: User[]; friendRequests: FilteredFriendRequest[] },
+  { token: string; groupId: string }
+>("group/fetchMembers", async ({ groupId, token }, { rejectWithValue }) => {
   try {
-    const { data } = await axios.get(`${BASE_URL}/${groupId}/members`);
-    return data.data;
-  } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || err.message);
+    const { data } = await fetchMembersApi(groupId, token);
+    return data;
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+    return rejectWithValue(
+      error?.response?.data?.message || "Error from fetch members",
+    );
   }
 });
 
 // Fetch messages of a group
-export const fetchGroupMessages = createAsyncThunk<GroupMessage[], string>(
-  "group/fetchMessages",
-  async (groupId, { rejectWithValue }) => {
-    try {
-      const { data } = await axios.get(`${BASE_URL}/${groupId}/messages`);
-      return data.data as GroupMessage[];
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
+export const fetchGroupMessages = createAsyncThunk<
+  GroupMessage[],
+  { groupId: string; token: string }
+>("group/fetchMessages", async ({ groupId, token }, { rejectWithValue }) => {
+  try {
+    const { data } = await fetchGroupMessagesApi(groupId, token);
+    return data.data as GroupMessage[];
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+    return rejectWithValue(
+      error?.response?.data?.message || "Cant fetch messages from this group",
+    );
   }
-);
+});
+
+// join group thunk
+export const joinGroupThunk = createAsyncThunk<
+  string,
+  { groupId: string; token: string },
+  { rejectValue: string }
+>("group/join-group", async ({ groupId, token }, { rejectWithValue }) => {
+  try {
+    const res = await joinGroupApi(groupId, token);
+    return res.data.message;
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+    return rejectWithValue(
+      error?.response?.data?.message || "Cant join group now",
+    );
+  }
+});
 
 // -------------------- POLL ASYNC THUNKS --------------------
 
@@ -57,7 +91,7 @@ export const fetchPolls = createAsyncThunk<Poll[], string>(
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
 // Create a new poll
@@ -83,13 +117,13 @@ export const votePoll = createAsyncThunk<
     try {
       const { data } = await axios.post(
         `${BASE_URL}/${groupId}/polls/${pollId}/vote`,
-        { voterId, optionIndex }
+        { voterId, optionIndex },
       );
       return data.poll as Poll;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
 // Close a poll
@@ -99,7 +133,7 @@ export const closePoll = createAsyncThunk<
 >("group/closePoll", async ({ groupId, pollId }, { rejectWithValue }) => {
   try {
     const { data } = await axios.patch(
-      `${BASE_URL}/${groupId}/polls/${pollId}/close`
+      `${BASE_URL}/${groupId}/polls/${pollId}/close`,
     );
     return data.poll as Poll;
   } catch (err: any) {
@@ -112,7 +146,6 @@ export const fetchGroupById = createAsyncThunk<
   { groupId: string; token: string }
 >("group/fetchById", async ({ groupId, token }, { rejectWithValue }) => {
   try {
-    console.log("fetching group", groupId, token);
     const response = await axios.get(`${BASE_URL}/${groupId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -122,7 +155,7 @@ export const fetchGroupById = createAsyncThunk<
     return response.data.data as Group;
   } catch (error: any) {
     return rejectWithValue(
-      error.response?.data?.message || "Failed to fetch group"
+      error.response?.data?.message || "Failed to fetch group",
     );
   }
 });

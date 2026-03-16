@@ -89,7 +89,7 @@ const GroupBanner = ({ group }: { group: Group }) => {
   };
 
   return (
-    <div className="relative flex items-center justify-between h-[80vh] bg-orange-400 p-10 overflow-hidden">
+    <div className="relative flex items-center justify-between py-20 bg-orange-400 p-10 overflow-hidden">
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
         <svg
           data-name="Layer 1"
@@ -106,13 +106,13 @@ const GroupBanner = ({ group }: { group: Group }) => {
       </div>
 
       {/* Left side - Text content */}
-      <div className="relative z-10 space-y-5 ml-10 flex-1">
+      <div className="relative z-10 space-y-5 md:ml-10 flex-1">
         {/* Animated Heading with word velocity */}
         <motion.h1
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-7xl font-extrabold tracking-wider text-shadow-xl text-white max-w-4xl"
+          className="text-3xl md:text-5xl lg:text-7xl font-extrabold tracking-wider text-shadow-xl text-white max-w-4xl"
         >
           {headingWords.map((word, index) => (
             <motion.span
@@ -147,7 +147,7 @@ const GroupBanner = ({ group }: { group: Group }) => {
         variants={videoContainerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 mr-16 flex-shrink-0"
+        className="hidden lg:block relative z-10 mr-16 flex-shrink-0"
       >
         <div className="relative w-96 h-64 bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20">
           {/* Video element */}
