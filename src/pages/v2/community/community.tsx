@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
-import { fetchGroups } from "@/api/groups/groupsApi";
+import { fetchGroups } from "@/redux/community/groupsThunk";
 
 import CommunityBanner from "@/components/community/banner";
 import CreateOwnGroup from "@/components/community/createGroup";
 import GroupsSection from "@/components/community/groups";
 import LetsRevive from "@/components/community/letsRevive/letsRevive";
+import { useAuth } from "@clerk/clerk-react";
 
 const Community = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,19 +16,28 @@ const Community = () => {
     error,
     loading,
   } = useSelector((state: RootState) => state.groups);
+  const { getToken } = useAuth();
+
+  const fetchAllGroups = async () => {
+    const token = await getToken();
+    if (!token) return;
+    await dispatch(fetchGroups(token));
+  };
 
   useEffect(() => {
-    dispatch(fetchGroups());
-  }, [dispatch]);
-
-  if (loading) return <p className="text-center">Loading groups...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+    fetchAllGroups();
+  }, []);
 
   return (
     <>
       <CommunityBanner />
       <div className="max-w-7xl my-5 mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        <GroupsSection groups={groups} />
+        <GroupsSection
+          groups={groups}
+          loading={loading}
+          error={error}
+          refetch={fetchAllGroups}
+        />
         <LetsRevive />
         <CreateOwnGroup />
       </div>

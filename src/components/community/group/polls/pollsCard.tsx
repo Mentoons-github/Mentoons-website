@@ -13,7 +13,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { AppDispatch } from "@/redux/store";
-import { votePoll, fetchGroupById } from "@/api/groups/groupsApi";
+import { votePoll, fetchGroupById } from "@/redux/community/groupsThunk";
 import { Poll } from "@/types";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
