@@ -167,7 +167,6 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
       openAuthModal("sign-in");
       return;
     }
-    console.log("Opening Report Abuse modal");
     setModalType("report");
     setIsModalOpen(true);
     setShowDropdown(false);
@@ -178,7 +177,6 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
       openAuthModal("sign-in");
       return;
     }
-    console.log("Opening Block User modal");
     setModalType("block");
     setIsModalOpen(true);
     setShowDropdown(false);
@@ -187,35 +185,6 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
   const handleUnblockUser = () => {
     console.log("first");
   };
-
-  //unblock
-  // const handleUnblockUser = async () => {
-  //   if (!isSignedIn) {
-  //     openAuthModal("sign-in");
-  //     return;
-  //   }
-  //   try {
-  //     const token = await getToken();
-  //     await axios.post(
-  //       `${import.meta.env.VITE_PROD_URL}/users/unblock`,
-  //       {
-  //         userId: post.user._id,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       },
-  //     );
-  //     setIsUserBlocked(false);
-  //     toast.success("User unblocked successfully.");
-  //   } catch (error) {
-  //     console.error("Error unblocking user:", error);
-  //     toast.error("Failed to unblock user. Please try again.");
-  //   } finally {
-  //     setShowDropdown(false);
-  //   }
-  // };
 
   const handleCommentSubmit = async () => {
     if (!isSignedIn) {
@@ -277,7 +246,6 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
             },
           },
         );
-        console.log("Server comment data:", serverComment.data.data);
         setComments(serverComment.data.data);
         setCommentCount(serverComment.data.data?.length);
 
@@ -363,9 +331,7 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${
-            post._id
-          }/check-saved`,
+          `${import.meta.env.VITE_PROD_URL}/feeds/posts/${post._id}/check-saved`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         setIsSavedPost(response.data.data);
@@ -387,9 +353,7 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
     checkSavedPost();
   }, [post._id, user?.user?.id, getToken]);
 
-  // Function to handle reaction updates from the interactive component
   const handleReactionUpdate = (counts: Record<string, number>) => {
-    // Force re-render the display component
     setReactionUpdateKey((prev) => prev + 1);
     console.log("Reaction update counts:", counts);
   };
@@ -507,12 +471,12 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
                   boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
                 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="flex items-center justify-center w-1 border border-red-400 rounded-full sm:w-12 sm:h-12"
+                className="flex items-center justify-center w-10 h-10 border border-red-400 rounded-full sm:w-12 sm:h-12 shrink-0"
                 onClick={() => setShowComments(!showComments)}
               >
-                <BiComment className="w-1 text-orange-500 sm:w-6 sm:h-6" />
+                <BiComment className="w-5 h-5 text-orange-500 sm:w-6 sm:h-6 shrink-0" />
               </motion.button>
-              <div className="text-[#605F5F] text-sm sm:text-base figtree relative">
+              <div className="text-[#605F5F] text-sm sm:text-base figtree">
                 {commentCount}
               </div>
             </div>
@@ -556,13 +520,13 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
                     <img
                       src={comment.user.picture}
                       alt="profile-picture"
-                      className="object-cover w-10 h-10 border border-gray-300 rounded-full"
+                      className="object-cover w-10 h-10 border border-gray-300 rounded-full shrink-0"
                     />
-                    <div className="flex flex-col flex-1 w-full p-3 overflow-hidden bg-gray-100 rounded-md">
-                      <span className="font-semibold text-gray-800">
+                    <div className="flex flex-col flex-1 min-w-0 p-3 bg-gray-100 rounded-md overflow-hidden">
+                      <span className="font-semibold text-gray-800 truncate">
                         {comment.user.name}
                       </span>
-                      <p className="w-full max-w-full text-gray-600 break-words">
+                      <p className="w-full text-gray-600 break-words text-sm">
                         {comment.content}
                       </p>
                     </div>
@@ -578,12 +542,12 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="flex-1 min-w-0 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                 placeholder="Write a comment..."
               />
               <button
                 onClick={handleCommentSubmit}
-                className="px-4 py-2 text-white transition bg-orange-500 rounded-lg hover:bg-orange-600"
+                className="px-3 py-2 text-white text-sm transition bg-orange-500 rounded-lg hover:bg-orange-600 shrink-0"
               >
                 Send
               </button>
@@ -600,7 +564,6 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
         reportType="post"
         onSuccess={() => {
           setIsUserBlocked(true);
-
           if (onUserBlocked) {
             onUserBlocked(post.user._id);
           }

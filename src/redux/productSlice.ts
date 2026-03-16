@@ -87,7 +87,6 @@ export const fetchProducts = createAsyncThunk<
           },
         }
       );
-      console.log(response);
       return { items: response.data.data, total: response.data.total };
     } catch (error: unknown) {
       console.log("error found while fetching : ", error);

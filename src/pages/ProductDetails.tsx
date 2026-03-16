@@ -71,7 +71,6 @@ const ProductDetails = () => {
     const scrollAmount = direction === "left" ? -400 : 400;
     container.scrollBy({ left: scrollAmount, behavior: "smooth" });
 
-    // Update scroll position after scroll
     setScrollPosition(container.scrollLeft + scrollAmount);
   };
 
@@ -89,10 +88,6 @@ const ProductDetails = () => {
           return;
         }
         const productResponse = await dispatch(fetchProductById(productId));
-        console.log(
-          "ProductResponse =====================================================================>",
-          productResponse.payload
-        );
         if (
           typeof productResponse.payload === "object" &&
           productResponse.payload !== null
@@ -123,8 +118,7 @@ const ProductDetails = () => {
   useEffect(() => {
     const RecommendedProducts = async () => {
       try {
-        const recommendedProducts = await dispatch(fetchProducts({}));
-        console.log("Recommended Products", recommendedProducts.payload);
+        await dispatch(fetchProducts({}));
       } catch (error) {
         console.error("Error fetching recommended products", error);
         toast.error("Failed to fetch recommended products");
@@ -311,7 +305,6 @@ const ProductDetails = () => {
       </div>
     );
   }
-  console.log("Product", product);
 
   return (
     <div className="w-[90%] mx-auto my-20 mt-10">
