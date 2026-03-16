@@ -7,12 +7,13 @@ export const SLIDES: Slide[] = [
     headline: "3 Day Trial",
     highlightWord: "Trial",
     sub: "Try everything free for 3 days — full access with zero hassle.",
-    cta: "Claim Your Trial",
+    cta: "Browse Plans",
     accent: "#a8ff78",
     bg: "from-[#071a0e] via-[#0f2e1a] to-[#1a4a2e]",
     shape: "circle",
     emoji: "🎯",
     badges: ["✓ Full Access", "✓ Zero Risk"],
+    link: "/membership",
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ export const SLIDES: Slide[] = [
     shape: "triangle",
     emoji: "🧠",
     badges: ["Ages 6–12", "Ages 13–19", "Expert Led", "Live Sessions"],
+    link: "/mentoons-workshops",
   },
   {
     id: 3,
@@ -39,6 +41,7 @@ export const SLIDES: Slide[] = [
     shape: "star",
     emoji: "🚀",
     badges: ["Kids", "Teens", "Adults", "Parents"],
+    link: "/products",
   },
 
   {
@@ -53,6 +56,7 @@ export const SLIDES: Slide[] = [
     shape: "wave",
     emoji: "🎙️",
     badges: ["Storytelling", "Expert Talks", "Learning Audio"],
+    link: "/mentoons-podcast",
   },
 
   {
@@ -67,6 +71,7 @@ export const SLIDES: Slide[] = [
     shape: "square",
     emoji: "💥",
     badges: ["Life Lessons", "Fun Stories", "Visual Learning"],
+    link: "/mentoons-comics",
   },
   {
     id: 6,
@@ -80,6 +85,7 @@ export const SLIDES: Slide[] = [
     shape: "hexagon",
     emoji: "🕹️",
     badges: ["Brain Games", "Fun Learning", "Skill Building"],
+    link: "/adda/game-lobby",
   },
   {
     id: 7,
@@ -93,5 +99,6 @@ export const SLIDES: Slide[] = [
     shape: "diamond",
     emoji: "🧩",
     badges: ["Knowledge Test", "Multiple Topics", "Challenge Yourself"],
+    link: "/quiz",
   },
 ];

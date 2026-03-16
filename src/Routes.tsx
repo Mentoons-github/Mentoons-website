@@ -14,7 +14,7 @@ import Membership from "./components/LandingPage/membership/membership.tsx";
 import LogIn from "./pages/Auth/LogIn";
 import Register from "./pages/Auth/Register";
 import CareerPage from "./pages/CareerPage";
-import Home from "./pages/Home";
+// import Home from "./pages/Home";
 import MentoonsStore from "./pages/MentoonsStore";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
 
@@ -60,6 +60,7 @@ import Collaborate from "./pages/v2/joinus/collaborate/collaborate.tsx";
 import BecomeMentor from "./pages/v2/joinus/becomeMentor.tsx";
 import NewLandingPage from "./pages/v2/NewLandingPage.tsx";
 import MessageFromFounder from "./pages/v2/MessageFromFounder.tsx";
+// import NewHome from "./pages/v2/home/home.tsx";
 // import WorkshopV2 from "./pages/v2/workshop/workshopV2.tsx";
 
 const Cart = lazy(() => import("./pages/Cart"));
@@ -77,8 +78,15 @@ const PuzzleContent = lazy(() => import("./pages/v2/puzzle/puzzleContent.tsx"));
 const WordCrossPuzzle = lazy(() => import("./pages/v2/puzzle/wordCross.tsx"));
 
 const routes = [
-  { path: "/", element: <RootRedirect /> },
-  { path: "/mentoons", element: <Home /> },
+  {
+    path: "/",
+    element: (
+      <RootRedirect>
+        <NewLandingPage />
+      </RootRedirect>
+    ),
+  },
+  // { path: "/mentoons", element: <Home /> },
   { path: "/sign-up", element: <Register /> },
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <AboutMentoons /> },
@@ -163,7 +171,6 @@ const routes = [
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   { path: "/emi", element: <Emi /> },
   { path: "/feedback", element: <Feedback /> },
-  { path: "landing", element: <NewLandingPage /> },
   { path: "/messag-from-founder", element: <MessageFromFounder /> },
 ];
 
