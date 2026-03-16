@@ -1,275 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import gsap from "gsap";
-import { SlideShape } from "@/types";
 import { SLIDES } from "@/constant/adda/Landing/slide";
-
-interface ShapeDecorProps {
-  shape: SlideShape;
-  accent: string;
-  shapeRef: React.RefObject<HTMLDivElement>;
-}
-
-const ShapeDecor = ({ shape, accent, shapeRef }: ShapeDecorProps) => {
-  const base = "absolute pointer-events-none opacity-90";
-  const cls = "w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52";
-  const pos = `${base} right-4 sm:right-8 top-4 sm:top-8`;
-  const glow = { filter: `drop-shadow(0 0 40px ${accent}99)` };
-
-  if (shape === "circle")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <circle
-            cx="110"
-            cy="110"
-            r="100"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-          />
-          <circle cx="110" cy="110" r="70" fill={accent} fillOpacity="0.07" />
-          <circle cx="110" cy="110" r="40" fill={accent} fillOpacity="0.12" />
-          <circle cx="65" cy="65" r="12" fill={accent} fillOpacity="0.5" />
-          <circle cx="155" cy="155" r="8" fill={accent} fillOpacity="0.6" />
-          <circle cx="160" cy="70" r="5" fill={accent} fillOpacity="0.8" />
-          <circle cx="55" cy="150" r="6" fill={accent} fillOpacity="0.4" />
-        </svg>
-      </div>
-    );
-
-  if (shape === "triangle")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <polygon
-            points="110,12 208,198 12,198"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-          />
-          <polygon
-            points="110,55 170,162 50,162"
-            fill={accent}
-            fillOpacity="0.12"
-          />
-          <polygon
-            points="110,90 140,145 80,145"
-            fill={accent}
-            fillOpacity="0.18"
-          />
-          <circle cx="110" cy="12" r="7" fill={accent} fillOpacity="0.9" />
-          <circle cx="208" cy="198" r="7" fill={accent} fillOpacity="0.9" />
-          <circle cx="12" cy="198" r="7" fill={accent} fillOpacity="0.9" />
-        </svg>
-      </div>
-    );
-
-  if (shape === "star")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <polygon
-            points="110,10 130,80 210,80 150,125 170,200 110,155 50,200 70,125 10,80 90,80"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-          />
-          <polygon
-            points="110,45 124,88 168,88 133,112 146,155 110,132 74,155 87,112 52,88 96,88"
-            fill={accent}
-            fillOpacity="0.15"
-          />
-          <polygon
-            points="110,75 118,98 142,98 123,112 130,136 110,122 90,136 97,112 78,98 102,98"
-            fill={accent}
-            fillOpacity="0.25"
-          />
-        </svg>
-      </div>
-    );
-
-  if (shape === "wave")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <path
-            d="M10,110 C40,60 80,60 110,110 C140,160 180,160 210,110"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          <path
-            d="M10,80 C40,30 80,30 110,80 C140,130 180,130 210,80"
-            fill="none"
-            stroke={accent}
-            strokeWidth="2"
-            strokeOpacity="0.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M10,140 C40,90 80,90 110,140 C140,190 180,190 210,140"
-            fill="none"
-            stroke={accent}
-            strokeWidth="2"
-            strokeOpacity="0.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M10,110 C40,60 80,60 110,110 C140,160 180,160 210,110 L210,220 L10,220 Z"
-            fill={accent}
-            fillOpacity="0.07"
-          />
-          <circle cx="10" cy="110" r="5" fill={accent} fillOpacity="0.8" />
-          <circle cx="110" cy="110" r="5" fill={accent} fillOpacity="0.8" />
-          <circle cx="210" cy="110" r="5" fill={accent} fillOpacity="0.8" />
-          <circle cx="60" cy="72" r="4" fill={accent} fillOpacity="0.5" />
-          <circle cx="160" cy="148" r="4" fill={accent} fillOpacity="0.5" />
-        </svg>
-      </div>
-    );
-
-  if (shape === "square")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <rect
-            x="15"
-            y="15"
-            width="190"
-            height="190"
-            rx="8"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-          />
-          <rect
-            x="45"
-            y="45"
-            width="130"
-            height="130"
-            rx="4"
-            fill={accent}
-            fillOpacity="0.08"
-          />
-          <rect
-            x="75"
-            y="75"
-            width="70"
-            height="70"
-            rx="2"
-            fill={accent}
-            fillOpacity="0.15"
-          />
-          <circle cx="15" cy="15" r="6" fill={accent} fillOpacity="0.9" />
-          <circle cx="205" cy="15" r="6" fill={accent} fillOpacity="0.9" />
-          <circle cx="205" cy="205" r="6" fill={accent} fillOpacity="0.9" />
-          <circle cx="15" cy="205" r="6" fill={accent} fillOpacity="0.9" />
-          <circle cx="110" cy="110" r="5" fill={accent} fillOpacity="0.4" />
-          {/* Corner tick marks */}
-          <line
-            x1="15"
-            y1="50"
-            x2="15"
-            y2="15"
-            stroke={accent}
-            strokeWidth="2"
-            strokeOpacity="0.4"
-          />
-          <line
-            x1="15"
-            y1="15"
-            x2="50"
-            y2="15"
-            stroke={accent}
-            strokeWidth="2"
-            strokeOpacity="0.4"
-          />
-        </svg>
-      </div>
-    );
-
-  if (shape === "hexagon")
-    return (
-      <div ref={shapeRef} className={pos} style={glow}>
-        <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-          <polygon
-            points="110,12 198,60 198,160 110,208 22,160 22,60"
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-          />
-          <polygon
-            points="110,45 175,82 175,138 110,175 45,138 45,82"
-            fill={accent}
-            fillOpacity="0.08"
-          />
-          <polygon
-            points="110,78 148,100 148,144 110,166 72,144 72,100"
-            fill={accent}
-            fillOpacity="0.15"
-          />
-          {/* Vertices dots */}
-          <circle cx="110" cy="12" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="198" cy="60" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="198" cy="160" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="110" cy="208" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="22" cy="160" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="22" cy="60" r="5" fill={accent} fillOpacity="0.9" />
-          <circle cx="110" cy="110" r="7" fill={accent} fillOpacity="0.35" />
-        </svg>
-      </div>
-    );
-
-  // diamond
-  return (
-    <div ref={shapeRef} className={pos} style={glow}>
-      <svg width="180" height="180" viewBox="0 0 220 220" className={cls}>
-        <polygon
-          points="110,10 210,110 110,210 10,110"
-          fill="none"
-          stroke={accent}
-          strokeWidth="3"
-        />
-        <polygon
-          points="110,45 175,110 110,175 45,110"
-          fill={accent}
-          fillOpacity="0.09"
-        />
-        <polygon
-          points="110,80 140,110 110,140 80,110"
-          fill={accent}
-          fillOpacity="0.2"
-        />
-        {/* Cardinal dots */}
-        <circle cx="110" cy="10" r="6" fill={accent} fillOpacity="0.9" />
-        <circle cx="210" cy="110" r="6" fill={accent} fillOpacity="0.9" />
-        <circle cx="110" cy="210" r="6" fill={accent} fillOpacity="0.9" />
-        <circle cx="10" cy="110" r="6" fill={accent} fillOpacity="0.9" />
-        {/* Inner sparkle lines */}
-        <line
-          x1="110"
-          y1="10"
-          x2="110"
-          y2="210"
-          stroke={accent}
-          strokeWidth="1"
-          strokeOpacity="0.12"
-        />
-        <line
-          x1="10"
-          y1="110"
-          x2="210"
-          y2="110"
-          stroke={accent}
-          strokeWidth="1"
-          strokeOpacity="0.12"
-        />
-      </svg>
-    </div>
-  );
-};
+import ShapeDecor from "@/components/Home/newVersion/shapeDecor";
+import { NavLink } from "react-router-dom";
 
 const LandingBanner = () => {
   const [current, setCurrent] = useState<number>(0);
@@ -426,6 +160,7 @@ const LandingBanner = () => {
       yoyo: true,
       ease: "sine.inOut",
     });
+
     const floatEmoji = gsap.to(emojiRef.current, {
       y: -12,
       rotation: 5,
@@ -436,7 +171,7 @@ const LandingBanner = () => {
       delay: 0.5,
     });
 
-    const autoPlay = setInterval(() => go("next"), 8000);
+    const autoPlay = setInterval(() => go("next"), 15000);
 
     return () => {
       floatShape.kill();
@@ -446,76 +181,70 @@ const LandingBanner = () => {
   }, []);
 
   const slide = SLIDES[current];
-
   const headlineParts = slide.headline.split(slide.highlightWord);
+
+  const navBtnStyle = {
+    width: "clamp(32px, 4.5vw, 48px)",
+    height: "clamp(32px, 4.5vw, 48px)",
+    background: "rgba(0,0,0,0.6)",
+    backdropFilter: "blur(10px)",
+    boxShadow: `0 4px 20px ${slide.accent}44`,
+  };
 
   return (
     <section
-      className="relative w-full select-none"
-      style={{ minHeight: 340, height: "clamp(340px, 50vw, 520px)" }}
+      className="relative w-full select-none px-0"
+      style={{ minHeight: 280, height: "clamp(280px, 46vw, 500px)" }}
     >
       <button
         onClick={() => go("prev")}
         aria-label="Previous slide"
-        className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full border border-white/40 hover:scale-110 transition-all duration-200 group"
-        style={{
-          width: "clamp(36px,5vw,52px)",
-          height: "clamp(36px,5vw,52px)",
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(8px)",
-          boxShadow: `0 4px 20px ${slide.accent}44`,
-        }}
+        className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full border border-white/30 hover:scale-110 hover:border-white/60 transition-all duration-200"
+        style={navBtnStyle}
       >
         <FaChevronLeft
-          className="transition-colors"
-          style={{ fontSize: "clamp(12px,1.5vw,16px)", color: "#fff" }}
+          style={{ fontSize: "clamp(11px, 1.3vw, 15px)", color: "#fff" }}
         />
       </button>
+
       <button
         onClick={() => go("next")}
         aria-label="Next slide"
-        className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full border border-white/40 hover:scale-110 transition-all duration-200 group"
-        style={{
-          width: "clamp(36px,5vw,52px)",
-          height: "clamp(36px,5vw,52px)",
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(8px)",
-          boxShadow: `0 4px 20px ${slide.accent}44`,
-        }}
+        className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full border border-white/30 hover:scale-110 hover:border-white/60 transition-all duration-200"
+        style={navBtnStyle}
       >
         <FaChevronRight
-          className="transition-colors"
-          style={{ fontSize: "clamp(12px,1.5vw,16px)", color: "#fff" }}
+          style={{ fontSize: "clamp(11px, 1.3vw, 15px)", color: "#fff" }}
         />
       </button>
 
       <div
         ref={cardRef}
-        className={`mx-10 sm:mx-12 md:mx-14 rounded-2xl sm:rounded-3xl h-full bg-gradient-to-br ${slide.bg} overflow-hidden relative mt-4`}
-        style={{ boxShadow: `-6px 6px 0px #000, 0 0 60px ${slide.accent}22` }}
+        className={`mx-8 sm:mx-11 md:mx-13 rounded-2xl sm:rounded-3xl h-full bg-gradient-to-br ${slide.bg} overflow-hidden relative mt-3 sm:mt-4`}
+        style={{ boxShadow: `-5px 5px 0px #000, 0 0 60px ${slide.accent}1a` }}
       >
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
               "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-            backgroundSize: "24px 24px",
+            backgroundSize: "22px 22px",
           }}
         />
 
         <div
           ref={glowRef}
-          className="absolute inset-0 opacity-0 transition-opacity duration-700"
+          className="absolute inset-0 opacity-0 pointer-events-none"
           style={{
-            background: `radial-gradient(ellipse at 75% 50%, ${slide.accent}22 0%, transparent 65%)`,
+            background: `radial-gradient(ellipse at 78% 50%, ${slide.accent}1e 0%, transparent 65%)`,
           }}
         />
 
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%)",
+              "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 55%)",
           }}
         />
 
@@ -527,29 +256,30 @@ const LandingBanner = () => {
 
         <div
           ref={emojiRef}
-          className="absolute hidden sm:block"
+          className="absolute hidden sm:block pointer-events-none"
           style={{
-            right: "clamp(160px, 22vw, 260px)",
-            top: "clamp(16px, 4vw, 48px)",
-            fontSize: "clamp(32px, 5vw, 64px)",
-            filter: `drop-shadow(0 0 20px ${slide.accent}bb)`,
+            right: "clamp(130px, 18vw, 230px)",
+            top: "clamp(12px, 3.5vw, 44px)",
+            fontSize: "clamp(28px, 4.5vw, 58px)",
+            filter: `drop-shadow(0 0 18px ${slide.accent}bb)`,
           }}
         >
           {slide.emoji}
         </div>
 
-        <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-8 md:px-12 max-w-[58%] sm:max-w-[60%]">
+        <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-8 md:px-12 lg:px-16 max-w-[62%] sm:max-w-[58%] md:max-w-[55%]">
           <div
             ref={tagRef}
-            className="mb-2 sm:mb-4 inline-flex items-center gap-2"
+            className="mb-2 sm:mb-3 inline-flex items-center gap-2"
           >
             <span
-              className="font-black tracking-widest px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase"
+              className="font-black tracking-widest rounded-full uppercase whitespace-nowrap"
               style={{
                 background: slide.accent,
                 color: "#111",
-                fontSize: "clamp(8px, 1.2vw, 11px)",
-                letterSpacing: "0.18em",
+                fontSize: "clamp(7px, 1.1vw, 11px)",
+                letterSpacing: "0.16em",
+                padding: "clamp(3px,0.5vw,5px) clamp(8px,1.2vw,14px)",
               }}
             >
               {slide.tag}
@@ -558,18 +288,18 @@ const LandingBanner = () => {
 
           <h2
             ref={headlineRef}
-            className="font-black text-white leading-none mb-2 sm:mb-4"
+            className="font-black text-white leading-[1.05] mb-2 sm:mb-3 md:mb-4"
             style={{
               fontFamily: "'Georgia', 'Times New Roman', serif",
-              fontSize: "clamp(22px, 4.5vw, 56px)",
-              textShadow: "0 4px 24px rgba(0,0,0,0.5)",
+              fontSize: "clamp(18px, 3.8vw, 52px)",
+              textShadow: "0 3px 20px rgba(0,0,0,0.55)",
             }}
           >
             {headlineParts[0]}
             <span
               style={{
                 color: slide.accent,
-                textShadow: `0 0 30px ${slide.accent}88`,
+                textShadow: `0 0 28px ${slide.accent}88`,
               }}
             >
               {slide.highlightWord}
@@ -579,26 +309,29 @@ const LandingBanner = () => {
 
           <p
             ref={subRef}
-            className="text-white/65 mb-3 sm:mb-6 leading-relaxed max-w-xs hidden sm:block"
-            style={{ fontSize: "clamp(11px, 1.4vw, 15px)" }}
+            className="text-white/70 mb-3 sm:mb-5 leading-relaxed hidden sm:block"
+            style={{
+              fontSize: "clamp(11px, 1.3vw, 14px)",
+              maxWidth: "32ch",
+            }}
           >
             {slide.sub}
           </p>
 
           <div
             ref={badgesRef}
-            className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-7 flex-wrap"
+            className="flex gap-1 sm:gap-1.5 mb-3 sm:mb-5 flex-wrap"
           >
             {slide.badges.map((b) => (
               <span
                 key={b}
-                className="font-bold rounded-full border"
+                className="font-semibold rounded-full border whitespace-nowrap"
                 style={{
                   borderColor: `${slide.accent}55`,
                   color: slide.accent,
                   background: `${slide.accent}14`,
-                  fontSize: "clamp(9px, 1.1vw, 12px)",
-                  padding: "2px 10px",
+                  fontSize: "clamp(8px, 1vw, 11px)",
+                  padding: "clamp(2px,0.3vw,4px) clamp(8px,1vw,12px)",
                 }}
               >
                 {b}
@@ -606,32 +339,32 @@ const LandingBanner = () => {
             ))}
           </div>
 
-          <button
-            ref={ctaRef}
-            className="inline-flex items-center gap-2 font-black rounded-full w-fit transition-all hover:scale-105 hover:brightness-110 active:scale-95"
+          <NavLink
+            to={slide.link}
+            className="inline-flex items-center gap-2 font-black rounded-full w-fit transition-all duration-200 hover:scale-105 hover:brightness-110 active:scale-95"
             style={{
               background: slide.accent,
               color: "#111",
-              boxShadow: `0 6px 28px ${slide.accent}66`,
-              fontSize: "clamp(10px, 1.4vw, 14px)",
-              padding: "clamp(8px, 1.2vw, 12px) clamp(14px, 2vw, 24px)",
+              boxShadow: `0 5px 24px ${slide.accent}55`,
+              fontSize: "clamp(9px, 1.3vw, 13px)",
+              padding: "clamp(7px,1vw,11px) clamp(12px,1.8vw,22px)",
             }}
           >
             {slide.cta}
             <span
-              className="inline-flex items-center justify-center rounded-full bg-black/20 font-black"
+              className="inline-flex items-center justify-center rounded-full bg-black/20 font-black leading-none"
               style={{
-                width: "clamp(18px,2vw,24px)",
-                height: "clamp(18px,2vw,24px)",
-                fontSize: "clamp(10px,1.2vw,13px)",
+                width: "clamp(16px,1.8vw,22px)",
+                height: "clamp(16px,1.8vw,22px)",
+                fontSize: "clamp(9px,1.1vw,12px)",
               }}
             >
               →
             </span>
-          </button>
+          </NavLink>
         </div>
 
-        <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-20">
+        <div className="absolute bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-20">
           {SLIDES.map((_, i) => (
             <button
               key={i}
@@ -644,11 +377,11 @@ const LandingBanner = () => {
               style={{
                 width:
                   i === current
-                    ? "clamp(20px, 3vw, 28px)"
-                    : "clamp(6px, 1vw, 8px)",
-                height: "clamp(6px, 1vw, 8px)",
+                    ? "clamp(18px, 2.5vw, 26px)"
+                    : "clamp(6px, 0.9vw, 8px)",
+                height: "clamp(5px, 0.85vw, 7px)",
                 background:
-                  i === current ? slide.accent : "rgba(255,255,255,0.25)",
+                  i === current ? slide.accent : "rgba(255,255,255,0.28)",
                 boxShadow: i === current ? `0 0 8px ${slide.accent}88` : "none",
               }}
             />
@@ -656,9 +389,9 @@ const LandingBanner = () => {
         </div>
 
         <div
-          className="absolute bottom-0 left-0 right-0 h-px opacity-30"
+          className="absolute bottom-0 left-0 right-0 h-px"
           style={{
-            background: `linear-gradient(90deg, transparent, ${slide.accent}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${slide.accent}66, transparent)`,
           }}
         />
       </div>
