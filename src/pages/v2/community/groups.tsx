@@ -5,7 +5,7 @@ import GroupPolls from "./groupPoll";
 import GroupTabs from "@/components/community/group/tabs";
 import { useEffect, useState } from "react";
 import GroupDescription from "@/components/community/group/description";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import {
@@ -38,6 +38,7 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
   } = useSelector((state: RootState) => state.groups);
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const navigate = useNavigate();
 
   const { socket, mongoUserId } = useSocket();
 
@@ -97,6 +98,13 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
     setActiveTab(tab);
   };
 
+  const handleMemberClick = (memberId: string) => {
+    if (memberId === mongoUserId) {
+      navigate("/adda/user-profile");
+    } else {
+      navigate(`/adda/user/${memberId}`);
+    }
+  };
 
   if (loading) {
     return (
@@ -169,6 +177,7 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
             members={groupMembers}
             mongoUserId={mongoUserId}
             friendRequests={friendRequests}
+            handleMemberClick={handleMemberClick}
           />
         )}
         {activeTab === "CHAT" && (
@@ -180,6 +189,7 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
             setNewMessage={setNewMessage}
             socket={socket}
             mongoUserId={mongoUserId}
+            handleMemberClick={handleMemberClick}
           />
         )}
         {activeTab === "POLLS" && <GroupPolls groupId={groupId} />}

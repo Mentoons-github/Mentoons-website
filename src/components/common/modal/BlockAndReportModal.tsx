@@ -16,6 +16,7 @@ interface ReportAbuseModalProps {
   contentId?: string;
   reportType?: string;
   onSuccess?: () => void;
+  messageType?: "conversation" | "groupMessage";
 }
 
 interface FormValues {
@@ -31,6 +32,7 @@ const ReportAbuseModal = ({
   contentId,
   reportType = "post",
   onSuccess,
+  messageType,
 }: ReportAbuseModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -108,7 +110,11 @@ const ReportAbuseModal = ({
         payload = {
           ...(type === "post"
             ? { postId: contentId }
-            : { conversationId: contentId }),
+            : {
+                contentId: contentId,
+                type: messageType,
+                reportedUser: userId,
+              }),
           reason:
             values.selectedReason === "other"
               ? values.customReason

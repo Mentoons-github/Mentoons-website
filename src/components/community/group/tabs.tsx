@@ -58,7 +58,7 @@ const GroupTabs: React.FC<GroupTabsProps> = ({ setActiveTab, activeTab }) => {
             transition: { duration: 0.1 },
           }}
           className={`
-            relative w-52 h-16 rounded-xl font-extrabold text-xl tracking-wide
+            relative w-52 h-12 md:h-16 rounded-xl font-extrabold md:text-xl tracking-wide
             transition-all duration-300 overflow-hidden group
             ${
               activeTab === text
@@ -89,16 +89,17 @@ const GroupTabs: React.FC<GroupTabsProps> = ({ setActiveTab, activeTab }) => {
             ${activeTab === text ? "opacity-30" : ""}
           `}
           />
-          <span className="relative z-10 flex items-center justify-center h-full px-6">
+          <span className="relative z-10 flex flex-col items-center justify-center h-full px-6">
             {text}
+
+            {activeTab === text && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="mt-1 w-8 h-1 bg-white rounded-full"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
           </span>
-          {activeTab === text && (
-            <motion.div
-              layoutId="activeIndicator"
-              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-          )}
         </motion.button>
       ))}
     </motion.div>

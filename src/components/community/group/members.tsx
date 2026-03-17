@@ -9,7 +9,6 @@ import { User } from "@/types/adda/notification";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -36,12 +35,13 @@ const GroupMembers = ({
   members,
   mongoUserId,
   friendRequests,
+  handleMemberClick,
 }: {
   members: { name: string; picture: string; _id: string }[];
   mongoUserId: string;
   friendRequests: FilteredFriendRequest[];
+  handleMemberClick: (memberId: string) => void;
 }) => {
-  const navigate = useNavigate();
   const [localStatus, setLocalStatus] = useState<Record<string, FollowStatus>>(
     {},
   );
@@ -142,14 +142,6 @@ const GroupMembers = ({
       }));
 
       setFollowStatusModalOpen(false);
-    }
-  };
-
-  const handleMemberClick = (memberId: string) => {
-    if (memberId === mongoUserId) {
-      navigate("/adda/user-profile");
-    } else {
-      navigate(`/adda/user/${memberId}`);
     }
   };
 
