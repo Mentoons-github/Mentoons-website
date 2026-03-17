@@ -32,7 +32,7 @@ export const LandingItems = [
   { title: "Products 20+", url: "/products?category=20%2B" },
   { title: "Audio Comics", url: "/mentoons-comics?option=audio+comic" },
   { title: "E-Comics", url: "/mentoons-comics?option=comic" },
-  { title: "Blogs", url: "/" },
+  { title: "Blogs", url: "/adda" },
 ];
 
 export const LandingIssues = [

@@ -19,4 +19,5 @@ export interface Slide {
   emoji: string;
   badges: string[];
   highlightWord: string;
+  link: string;
 }

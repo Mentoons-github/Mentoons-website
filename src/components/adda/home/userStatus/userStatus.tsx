@@ -22,12 +22,12 @@ import "swiper/swiper-bundle.css";
 import { gsap } from "gsap";
 
 const categories = [
-  {
-    name: "Fun & Entertainment",
-    path: "/fun-entertainment",
-    imageUrl: "/assets/adda/fun-Entertainement.jpg",
-    hover: "Try me",
-  },
+  // {
+  //   name: "Fun & Entertainment",
+  //   path: "/fun-entertainment",
+  //   imageUrl: "/assets/adda/fun-Entertainement.jpg",
+  //   hover: "Try me",
+  // },
   {
     name: "Free Downloads",
     path: "/free-download",

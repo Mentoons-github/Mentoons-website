@@ -224,7 +224,7 @@ const Header = () => {
   const handleLogout = async () => {
     setShowProfileDropdown(false);
     await signOut();
-    navigate("/adda");
+    navigate("/");
   };
 
   const handleProfileNavigation = () => {
@@ -365,7 +365,7 @@ const Header = () => {
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
           style={{ opacity: hasAnimated ? 1 : 0 }}
         >
-          <NavLink to="/adda">
+          <NavLink to="/">
             <img
               src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
               alt="Logo"
