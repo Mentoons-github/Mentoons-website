@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
-import { Send, Paperclip, Maximize2, Minimize2 } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { Send, Maximize2, Minimize2, Ellipsis } from "lucide-react";
 import { GroupMessage } from "@/types";
 import { Socket } from "socket.io-client";
+import { MdReport } from "react-icons/md";
+import ReportAbuseModal from "@/components/common/modal/BlockAndReportModal";
 
 interface GroupChatProps {
   groupId: string;
@@ -12,6 +14,7 @@ interface GroupChatProps {
   setNewMessage: React.Dispatch<React.SetStateAction<string>>;
   socket: Socket | null;
   mongoUserId: string;
+  handleMemberClick: (memberId: string) => void;
 }
 
 const GroupChat: React.FC<GroupChatProps> = ({
@@ -22,9 +25,35 @@ const GroupChat: React.FC<GroupChatProps> = ({
   setNewMessage,
   socket,
   mongoUserId,
+  handleMemberClick,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = React.useRef<HTMLDivElement | null>(null);
+  const [reportModal, setReportModal] = useState<boolean>(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedConversationId, setSelectedConversationId] =
+    useState<string>("");
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openDropdownId]);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -37,13 +66,8 @@ const GroupChat: React.FC<GroupChatProps> = ({
 
   useEffect(() => {
     if (!socket || !groupId) return;
-
-    console.log(socket, groupId, "llllll");
-
     socket.emit("join_group", groupId);
   }, [socket, groupId]);
-
-  /* ---------------- SEND MESSAGE ---------------- */
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !socket) return;
@@ -85,13 +109,25 @@ const GroupChat: React.FC<GroupChatProps> = ({
       minute: "2-digit",
     });
 
+  const handleReportAbuse = () => {
+    setReportModal(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleModal = (userId: string, messageId: string) => {
+    setSelectedConversationId(messageId);
+    setSelectedUserId(userId);
+
+    setOpenDropdownId((prev) => (prev === messageId ? null : messageId));
+  };
+
   return (
     <>
       <motion.div
         className={`bg-white rounded-2xl shadow-2xl overflow-hidden ${
           isFullscreen
-            ? "fixed inset-0 z-50 rounded-none"
-            : "max-w-6xl mx-auto mt-8"
+            ? "fixed inset-0 z-50 rounded-none "
+            : "max-w-6xl mx-2 md:mx-5 lg:mx-auto mt-8 "
         }`}
       >
         {/* HEADER */}
@@ -130,23 +166,51 @@ const GroupChat: React.FC<GroupChatProps> = ({
                   <div className="flex items-start gap-2 max-w-[70%]">
                     {!isOwn && (
                       <img
+                        onClick={() => handleMemberClick(msg.senderId._id)}
                         src={msg.senderId.picture}
                         alt="user"
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-8 h-8 rounded-full object-cover cursor-pointer"
                       />
                     )}
 
                     <div
-                      className={`px-4 py-2 rounded-xl w-fit max-w-full ${
+                      className={`px-4 py-2 rounded-xl w-fit max-w-full relative ${
                         isOwn
                           ? "bg-orange-500 text-white"
                           : "bg-white border text-gray-800"
                       }`}
                     >
                       {!isOwn && (
-                        <p className="text-xs font-semibold text-orange-500 mb-1">
-                          {msg.senderId?.name || "User"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-semibold text-orange-500 mb-1">
+                            {msg.senderId?.name || "User"}
+                          </p>
+                          <Ellipsis
+                            onClick={() =>
+                              handleModal(msg.senderId._id, msg._id)
+                            }
+                          />
+                        </div>
+                      )}
+                      {openDropdownId === msg._id && (
+                        <motion.div
+                          ref={dropdownRef}
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className="absolute right-0  z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
+                        >
+                          <>
+                            <button
+                              className="flex items-center w-full px-4 py-3 text-left text-orange-600 transition-colors hover:bg-gray-50"
+                              onClick={handleReportAbuse}
+                            >
+                              <MdReport className="w-5 h-5 mr-2" />
+                              Report Abuse
+                            </button>
+                          </>
+                        </motion.div>
                       )}
 
                       <p className="text-sm break-words">{msg.message}</p>
@@ -165,9 +229,9 @@ const GroupChat: React.FC<GroupChatProps> = ({
         {/* INPUT */}
 
         <div className="p-4 border-t bg-white flex items-center gap-3">
-          <button className="text-gray-500 hover:text-orange-500">
+          {/* <button className="text-gray-500 hover:text-orange-500">
             <Paperclip size={20} />
-          </button>
+          </button> */}
 
           <input
             type="text"
@@ -190,6 +254,15 @@ const GroupChat: React.FC<GroupChatProps> = ({
             <Send size={18} />
           </button>
         </div>
+        <ReportAbuseModal
+          isOpen={reportModal}
+          setIsOpen={setReportModal}
+          modalType="report"
+          userId={selectedUserId}
+          contentId={selectedConversationId}
+          reportType="conversation"
+          messageType="groupMessage"
+        />
       </motion.div>
     </>
   );

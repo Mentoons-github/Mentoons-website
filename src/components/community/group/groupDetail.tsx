@@ -1,6 +1,5 @@
 import { Group } from "@/types";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
 
 const GroupBanner = ({ group }: { group: Group }) => {
   const headingText = group.name.toUpperCase();
@@ -68,25 +67,25 @@ const GroupBanner = ({ group }: { group: Group }) => {
     },
   };
 
-  const videoContainerVariants = {
-    hidden: {
-      opacity: 0,
-      x: 100,
-      scale: 0.8,
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        damping: 20,
-        stiffness: 100,
-        delay: 2,
-        duration: 0.8,
-      },
-    },
-  };
+  // const videoContainerVariants = {
+  //   hidden: {
+  //     opacity: 0,
+  //     x: 100,
+  //     scale: 0.8,
+  //   },
+  //   visible: {
+  //     opacity: 1,
+  //     x: 0,
+  //     scale: 1,
+  //     transition: {
+  //       type: "spring",
+  //       damping: 20,
+  //       stiffness: 100,
+  //       delay: 2,
+  //       duration: 0.8,
+  //     },
+  //   },
+  // };
 
   return (
     <div className="relative flex items-center justify-between py-20 bg-orange-400 p-10 overflow-hidden">
@@ -143,14 +142,13 @@ const GroupBanner = ({ group }: { group: Group }) => {
       </div>
 
       {/* Right side - Video section */}
-      <motion.div
+      {/* <motion.div
         variants={videoContainerVariants}
         initial="hidden"
         animate="visible"
         className="hidden lg:block relative z-10 mr-16 flex-shrink-0"
       >
         <div className="relative w-96 h-64 bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20">
-          {/* Video element */}
           <video
             className="w-full h-full object-cover"
             controls
@@ -165,7 +163,6 @@ const GroupBanner = ({ group }: { group: Group }) => {
             </motion.button>
           </video>
 
-          {/* Video title overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4">
             <h3 className="text-white font-semibold text-lg">
               Understanding {group.name}
@@ -173,7 +170,7 @@ const GroupBanner = ({ group }: { group: Group }) => {
             <p className="text-white/80 text-sm">Watch our expert insights</p>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 };

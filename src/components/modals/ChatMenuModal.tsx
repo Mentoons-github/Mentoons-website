@@ -117,6 +117,7 @@ const ChatMenuModal: React.FC<ChatMenuModalProps> = ({
           contentId={conversationId}
           reportType="user"
           userId={userId}
+          messageType="conversation"
           onSuccess={() => {
             if (currentUserBlocked) {
               handleUnblockSuccess();
