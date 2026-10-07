@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useEffect } from "react";
@@ -94,6 +93,24 @@ const Meme = () => {
     };
   }, []);
 
+  const handleEmojiHoverEnter = () => {
+    gsap.to(emojiRef.current, {
+      scale: 1.2,
+      rotate: 10,
+      duration: 0.2,
+      ease: "back.out(2)",
+    });
+  };
+
+  const handleEmojiHoverLeave = () => {
+    gsap.to(emojiRef.current, {
+      scale: 1,
+      rotate: 0,
+      duration: 0.2,
+      ease: "power2.out",
+    });
+  };
+
   const handleImgHoverEnter = () => {
     gsap.to(imgWrapperRef.current, {
       scale: 1.03,
@@ -140,41 +157,86 @@ const Meme = () => {
   };
 
   return (
-    <motion.div
+    <div
       ref={containerRef}
-      className="flex flex-col items-center justify-center w-full p-4 bg-white border border-gray-100 shadow-lg rounded-xl dark:bg-gray-800 dark:border-gray-700"
+      className="meme-panel flex flex-col items-center justify-center w-full p-5"
     >
-      <div className="flex items-center justify-between w-full mb-3">
+      <style>{`
+        .meme-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+        .meme-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.03em;
+        }
+
+        .meme-panel {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.10) 1.5px, transparent 2px);
+          background-size: 16px 16px;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 14px;
+        }
+
+        .meme-header {
+          background: #fff;
+          border: 2px solid #000;
+          border-left-width: 8px;
+          border-left-color: #60a5fa;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 10px;
+        }
+
+        .meme-img {
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 10px;
+          background: #fff;
+          transition: box-shadow 0.1s ease;
+        }
+        .meme-img:hover { box-shadow: 4px 4px 0 #000; }
+        .meme-img:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+
+        .meme-chip {
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+        }
+
+        .meme-divider { border-top: 2px dashed #000; }
+      `}</style>
+
+      <div className="meme-header flex items-center justify-between w-full px-3 py-2 mb-4">
         <div className="flex items-center gap-2">
-          <motion.div
+          <div
             ref={emojiRef}
-            whileHover={{ scale: 1.2, rotate: 10 }}
             className="relative"
+            onMouseEnter={handleEmojiHoverEnter}
+            onMouseLeave={handleEmojiHoverLeave}
           >
             <img
               src="/assets/adda/sidebar/e62353b3daac244b2443ebe94d0d8343.png"
               alt="emoji"
               className="w-7 h-7"
             />
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="absolute w-3 h-3 border border-white rounded-full -top-1 -right-1 bg-mt-yellow"
-            />
-          </motion.div>
-          <h1 className="font-semibold text-md text-men-blue dark:text-white figtree whitespace-nowrap">
+          </div>
+          <h1 className="meme-font text-base text-black whitespace-nowrap">
             Mentoons Meme
           </h1>
         </div>
 
-        <motion.span
+        <span
           ref={badgeRef}
-          exit={{ opacity: 0, x: 20 }}
-          className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-mt-teal/20 text-mt-teal"
+          className="meme-chip meme-chip-font flex items-center gap-1 px-3 py-1 text-xs cursor-default"
+          style={{ background: "#bbf7d0" }}
           onMouseEnter={() =>
             gsap.to(badgeRef.current, {
-              scale: 1.1,
+              scale: 1.12,
               duration: 0.18,
               ease: "back.out(2)",
             })
@@ -189,33 +251,44 @@ const Meme = () => {
         >
           <Award size={12} />
           Fresh
-        </motion.span>
+        </span>
       </div>
 
-      <motion.div
+      <div
         ref={imgWrapperRef}
-        className="relative w-full mb-3 overflow-hidden rounded-xl group cursor-pointer"
+        role="link"
+        tabIndex={0}
+        aria-label="Open Mentoons Meme"
+        className="meme-img relative w-full mb-4 overflow-hidden cursor-pointer"
         onClick={handleImgClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleImgClick();
+          }
+        }}
         onMouseEnter={handleImgHoverEnter}
         onMouseLeave={handleImgHoverLeave}
       >
         <img
           src="/assets/adda/sidebar/WhatsApp Image 2025-02-17 at 15.56.48_ee80d5fb.jpg"
           alt="meme"
-          className="object-cover w-full h-auto transition-all rounded-xl"
+          className="object-cover w-full h-auto"
         />
-        <div className="absolute inset-0 transition-opacity opacity-0 bg-gradient-to-br from-mt-purple/20 via-transparent to-mt-yellow/20 group-hover:opacity-100 rounded-xl" />
-      </motion.div>
+      </div>
 
-      <motion.div
-        ref={tagRef}
-        className="px-2 py-1 text-xs font-medium rounded-full text-mt-orange dark:text-mt-yellow bg-mt-orange/10 dark:bg-mt-yellow/20 cursor-default"
-        onMouseEnter={handleTagHoverEnter}
-        onMouseLeave={handleTagHoverLeave}
-      >
-        #MemetoonsTuesday
-      </motion.div>
-    </motion.div>
+      <div className="meme-divider w-full pt-4 flex justify-center">
+        <div
+          ref={tagRef}
+          className="meme-chip meme-chip-font px-3 py-1 text-xs cursor-default"
+          style={{ background: "#fed7aa" }}
+          onMouseEnter={handleTagHoverEnter}
+          onMouseLeave={handleTagHoverLeave}
+        >
+          #MemetoonsTuesday
+        </div>
+      </div>
+    </div>
   );
 };
 

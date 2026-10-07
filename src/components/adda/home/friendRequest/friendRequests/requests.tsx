@@ -48,6 +48,9 @@ const FriendRequestsList = () => {
     };
   }, [dispatch, getToken]);
 
+  console.log("friendRequests available: ", requests);
+  console.log("follow the user back : ", followBackUsers);
+
   // Handle infinite scroll
   const lastRequestRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -78,7 +81,8 @@ const FriendRequestsList = () => {
     if (token) {
       const result = await dispatch(acceptFriendRequest({ requestId, token }));
       if (acceptFriendRequest.fulfilled.match(result)) {
-        // Notification updates are handled in the thunk
+        dispatch(resetFollowBackUsers());
+        dispatch(resetRequests());
         dispatch(fetchFriendRequests({ page: 1, limit: 10, token }));
         dispatch(fetchFollowBackUsers(token));
       } else if (acceptFriendRequest.rejected.match(result)) {

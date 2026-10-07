@@ -34,6 +34,8 @@ interface DynamicTableProps<T> {
   onBlock?: (item: T) => void;
   onAdd?: () => void;
   onView?: (row: any) => void;
+  onApprove?: (item: T) => void;
+  onReject?: (item: T) => void;
   searchTerm?: string;
   onSearch?: (term: string) => void;
   sortField?: string;
@@ -54,7 +56,9 @@ interface DynamicTableProps<T> {
     | "job"
     | "workshop"
     | "meetups"
-    | "bplVerification";
+    | "bplVerification"
+    | "communities"
+    | "badges";
   selectedItems?: Set<string>;
   onSelectItem?: (id: string, isSelected: boolean) => void;
   onSelectAll?: (isSelected: boolean) => void;
@@ -69,6 +73,8 @@ const DynamicTable = <T extends Record<string, any>>({
   onBlock,
   onAdd,
   onView,
+  onApprove,
+  onReject,
   searchTerm = "",
   onSearch,
   sortField,
@@ -217,7 +223,6 @@ const DynamicTable = <T extends Record<string, any>>({
           </>
         )}
 
-        {/* Enhanced Tooltip */}
         <span
           className="
             absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
@@ -281,6 +286,30 @@ const DynamicTable = <T extends Record<string, any>>({
             <Share className="w-4 h-4" />
           </button>
         )}
+        {onApprove && onReject && (
+          <>
+            {item.groupCreationStatus ? (
+              <span className="text-green-600 font-medium text-sm px-3 py-1">
+                {item.groupCreationStat}
+              </span>
+            ) : (
+              <>
+                <button
+                  onClick={() => onApprove(item)}
+                  className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => onReject(item)}
+                  className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
+                >
+                  Reject
+                </button>
+              </>
+            )}
+          </>
+        )}
         <BlockButton item={item} />
       </div>
     );
@@ -322,6 +351,30 @@ const DynamicTable = <T extends Record<string, any>>({
           >
             <Trash2 className="w-4 h-4" />
           </button>
+        )}
+        {onApprove && onReject && (
+          <>
+            {item.groupCreationStatus ? (
+              <span className="text-green-600 font-medium text-sm">
+                Approved
+              </span>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onApprove(item)}
+                  className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => onReject(item)}
+                  className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+          </>
         )}
         <BlockButton item={item} />
       </div>

@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { GAMES } from "@/constant/adda/game/game";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useProtectedAction } from "@/hooks/adda/useProtectedAction";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,6 +11,9 @@ const GameItems = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const titleRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const { run } = useProtectedAction();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -70,6 +75,16 @@ const GameItems = () => {
     return () => ctx.revert();
   }, []);
 
+  const handleClick = (link: string) => {
+    run(() => {
+      if (link.startsWith("http")) {
+        window.location.href = link;
+      } else {
+        navigate(link);
+      }
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto" ref={gridRef}>
       <div
@@ -105,14 +120,14 @@ const GameItems = () => {
                 </h3>
               </div>
 
-              <a
-                href={game.link}
+              <button
+                onClick={() => handleClick(game.link)}
                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 backdrop-blur-sm z-20"
               >
                 <span className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xl rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all">
                   Play
                 </span>
-              </a>
+              </button>
             </div>
           </div>
         ))}

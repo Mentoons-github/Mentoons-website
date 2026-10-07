@@ -1,14 +1,17 @@
 import LoginModal from "@/components/common/modal/loginModal";
 import AddToCartModal from "@/components/modals/AddToCartModal";
 import AgeButton from "@/components/products/ageButton";
-import ProductDetailCards from "@/components/products/cards";
+import ProductsByTitle, {
+  getBaseTitle,
+  POCKET_SERIES_LABEL,
+} from "@/components/products/productsByTitle";
 import ProductsBenefits from "@/components/products/productsBenefits";
 import ProductsSlider from "@/components/products/slider";
 import { FAQ_PRODUCT } from "@/constant/faq";
 import { useProductActions } from "@/hooks/useProductAction";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { ProductType } from "@/utils/enum";
+import { CardType, ProductType } from "@/utils/enum";
 import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaShoppingCart, FaTimes } from "react-icons/fa";
@@ -17,7 +20,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import FAQ from "../faq/faq";
 import MobileProductItem from "@/components/products/mobile/mobileView";
-import MobileProductList from "@/components/products/mobile/productList";
 import { debounce } from "@/utils/products/debounce";
 import ProductNav from "@/components/products/productNav";
 import {
@@ -34,6 +36,64 @@ interface FetchParams {
   ageCategory?: string;
 }
 
+interface CardFilterOption {
+  id: string;
+  label: string;
+  productType?: string;
+  cardType?: string;
+  isPocketSeries?: boolean;
+}
+
+const CARD_TYPE_FILTERS: CardFilterOption[] = [
+  {
+    id: "S_1",
+    label: "Conversation Starter Cards",
+    productType: ProductType.MENTOONS_CARDS,
+    cardType: CardType.CONVERSATION_STARTER_CARDS,
+  },
+  {
+    id: "S_2",
+    label: "Story Re-Teller Cards",
+    productType: ProductType.MENTOONS_CARDS,
+    cardType: CardType.STORY_RE_TELLER_CARD,
+  },
+  {
+    id: "S_3",
+    label: "Silent Stories",
+    productType: ProductType.MENTOONS_CARDS,
+    cardType: CardType.SILENT_STORIES,
+  },
+  {
+    id: "S_4",
+    label: "Conversataion Story Cards",
+    productType: ProductType.MENTOONS_CARDS,
+    cardType: CardType.CONVERSATION_STORY_CARDS,
+  },
+  {
+    id: "S_5",
+    label: "Coloring Books",
+    productType: ProductType.MENTOONS_COLORING_BOOKS,
+    cardType: undefined,
+  },
+];
+
+const POCKET_SERIES_FILTER: CardFilterOption = {
+  id: "S_pocket",
+  label: "Pocket Series",
+  isPocketSeries: true,
+};
+
+const ALL_OPTION_FILTER: CardFilterOption = {
+  id: "S_all",
+  label: "All",
+};
+
+const ALL_FILTERS: CardFilterOption[] = [
+  ALL_OPTION_FILTER,
+  ...CARD_TYPE_FILTERS,
+  POCKET_SERIES_FILTER,
+];
+
 const ProductsPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -41,10 +101,11 @@ const ProductsPage = () => {
   const productType = searchParams.get("productType") || undefined;
   const cardType = searchParams.get("cardType") || undefined;
   const urlSearch = searchParams.get("search") || "";
+  const filterParam = searchParams.get("filter") || undefined;
+  const pocketSeriesActive = filterParam === "pocket-series";
 
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [inputValue, setInputValue] = useState(urlSearch);
-  // const [isFilterOpen, setIsFilterOpen] = useState(false);
   const section20Ref = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
@@ -102,12 +163,11 @@ const ProductsPage = () => {
         setIsSearching(true);
         const token = await getToken();
 
-        console.log(productType);
         const fetchParams: FetchParams = {
           token: token ?? "",
           ...(search && { search: search.trim() }),
           ...(!search && category && { ageCategory: category }),
-          ...(productType && { type: productType }),
+          ...(productType && { productType: productType }),
           ...(cardType && { cardType }),
         };
 
@@ -115,7 +175,6 @@ const ProductsPage = () => {
         scrollToSection();
         setHasInitialLoad(true);
       } catch (error: unknown) {
-        console.log(error);
         console.error("Error fetching products:", error);
         setHasInitialLoad(true);
       } finally {
@@ -204,27 +263,74 @@ const ProductsPage = () => {
     }
   };
 
+  const handleCardTypeFilterClick = (filter: CardFilterOption) => {
+    setHasInitialLoad(false);
+    setSearchTerm("");
+    setInputValue("");
+
+    const params = new URLSearchParams();
+
+    if (filter.isPocketSeries) {
+      // Pocket Series items are all 6-12, identified by title rather than
+      // productType/cardType, so they get their own URL marker instead.
+      params.set("category", "6-12");
+      params.set("filter", "pocket-series");
+    } else if (filter === ALL_OPTION_FILTER) {
+      // Reset productType/cardType/pocket filter, keep age category.
+      if (category && category !== "all") {
+        params.set("category", category);
+      }
+    } else {
+      if (category && category !== "all") {
+        params.set("category", category);
+      }
+      params.set("productType", filter.productType ?? "");
+      if (filter.cardType) {
+        params.set("cardType", filter.cardType);
+      }
+    }
+
+    navigate({ search: params.toString(), hash: "product" });
+  };
+
+  const isCardTypeFilterActive = (filter: CardFilterOption) => {
+    if (filter.isPocketSeries) {
+      return pocketSeriesActive;
+    }
+    if (filter === ALL_OPTION_FILTER) {
+      return !pocketSeriesActive && !productType && !cardType;
+    }
+    return (
+      !pocketSeriesActive &&
+      productType === filter.productType &&
+      (filter.cardType ? cardType === filter.cardType : !cardType)
+    );
+  };
+
   const searchLower = searchTerm?.toLowerCase() || "";
 
   const filteredProducts = products.filter((product) => {
     const matchesType =
       product.type === ProductType.MENTOONS_CARDS ||
-      product.type === ProductType.MENTOONS_BOOKS;
+      product.type === ProductType.MENTOONS_BOOKS ||
+      product.type === ProductType.TOONLAND;
+
+    const ageCategory = product.ageCategory || "";
 
     const matchesCategory =
-      !category || searchLower ? true : product.ageCategory === category;
+      product.type === ProductType.TOONLAND || !category || searchLower
+        ? true
+        : ageCategory === category;
 
     const titleMatch = product.title.toLowerCase().includes(searchLower);
-    const categoryMatch = product.ageCategory
-      .toLowerCase()
-      .includes(searchLower);
+    const categoryMatch = ageCategory.toLowerCase().includes(searchLower);
 
     let ageMatch = false;
     const searchNumber = parseInt(searchLower);
-    if (!isNaN(searchNumber) && product.ageCategory.includes("-")) {
-      const [min, max] = product.ageCategory.split("-").map(Number);
+    if (!isNaN(searchNumber) && ageCategory.includes("-")) {
+      const [min, max] = ageCategory.split("-").map(Number);
       ageMatch = searchNumber >= min && searchNumber <= max;
-    } else if (!isNaN(searchNumber) && product.ageCategory === "20+") {
+    } else if (!isNaN(searchNumber) && ageCategory === "20+") {
       ageMatch = searchNumber >= 20;
     }
 
@@ -234,23 +340,27 @@ const ProductsPage = () => {
     return matchesType && matchesCategory && matchesSearch;
   });
 
-  const groupedProducts = filteredProducts
-    .filter((product) => product.ageCategory !== "20+")
-    .reduce((acc: Record<string, typeof products>, curr) => {
-      const key = curr.ageCategory || "unknown";
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(curr);
-      return acc;
-    }, {});
+  // Everything except 20+ goes through ProductsByTitle, which does its
+  // own internal grouping by base title — no need to pre-group by age
+  // category anymore.
+  const nonAdultFilteredProducts = filteredProducts.filter(
+    (product) => product.ageCategory !== "20+",
+  );
+
+  const pocketSeriesProducts = products.filter(
+    (product) =>
+      product.ageCategory === "6-12" &&
+      getBaseTitle(product.title) === POCKET_SERIES_LABEL,
+  );
 
   const products20Plus = products.filter((product) => {
+    const ageCategory = product.ageCategory || "";
+
     const titleMatch = product.title.toLowerCase().includes(searchLower);
-    const categoryMatch = product.ageCategory
-      .toLowerCase()
-      .includes(searchLower);
+    const categoryMatch = ageCategory.toLowerCase().includes(searchLower);
 
     const searchNumber = parseInt(searchLower);
-    const is20Plus = product.ageCategory === "20+";
+    const is20Plus = ageCategory === "20+";
     const ageMatch = !isNaN(searchNumber) && is20Plus && searchNumber >= 20;
 
     const matchesSearch =
@@ -262,9 +372,10 @@ const ProductsPage = () => {
   });
 
   const should20PlusBeShown =
-    category === "20+" ||
-    (!category && searchLower === "") ||
-    products20Plus.length > 0;
+    !pocketSeriesActive &&
+    (category === "20+" ||
+      (!category && searchLower === "") ||
+      products20Plus.length > 0);
 
   if (isSearching && searchTerm.trim()) {
     return <SearchingSkeleton searchTerm={searchTerm} />;
@@ -350,13 +461,6 @@ const ProductsPage = () => {
               <FaTimes />
             </button>
           )}
-          {/* <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 md:hidden text-gray-600 hover:text-blue-600"
-            aria-label="Toggle filters"
-          >
-            <FaFilter className="w-4 sm:w-5 h-4 sm:h-5" />
-          </button> */}
         </div>
 
         <div className="flex gap-4 sm:gap-6 w-full max-w-full overflow-hidden">
@@ -368,8 +472,27 @@ const ProductsPage = () => {
                   isInView={true}
                   selectedCategory={category}
                   setSelectedCategory={handleSelectedCategory}
-                  className="py-2 grid w-full grid-cols-5 gap-2 mx-auto mt-8 sm:mt-10  md:gap-8  lg:gap-16"
+                  className="py-2 md:grid w-full grid-cols-5 hidden gap-2 mx-auto mt-8 sm:mt-10  md:gap-8  lg:gap-16"
                 />
+
+                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center md:justify-start mt-4 sm:mt-6 px-2">
+                  {ALL_FILTERS.map((filter) => {
+                    const active = isCardTypeFilterActive(filter);
+                    return (
+                      <button
+                        key={filter.id}
+                        onClick={() => handleCardTypeFilterClick(filter)}
+                        className={`text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border transition whitespace-nowrap ${
+                          active
+                            ? "bg-[#ff9800] text-white border-[#ff9800]"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-[#ff9800] hover:text-[#ff9800]"
+                        }`}
+                      >
+                        {filter.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -400,43 +523,41 @@ const ProductsPage = () => {
               ref={sectionRef}
               id="product"
             >
-              {Object.keys(groupedProducts).length > 0 ? (
-                <>
-                  <div className="hidden md:block w-full max-w-full">
-                    {Object.entries(groupedProducts).map(([age, group]) => (
-                      <div
-                        className="flex justify-center w-full max-w-full overflow-hidden"
-                        id={`product-${age}`}
-                        key={age}
-                      >
-                        <div className="w-full max-w-full">
-                          <ProductDetailCards
-                            key={age}
-                            ageCategory={age}
-                            productDetails={group}
-                            handleAddToCart={handleAddToCart}
-                            handleBuyNow={handleBuyNow}
-                            isLoading={isLoading}
-                            searchQuery={searchTerm}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="block md:hidden w-full max-w-full overflow-hidden">
-                    {Object.entries(groupedProducts).map(([age, group]) => (
-                      <MobileProductList
-                        key={age}
-                        products={group}
-                        ageCategory={age}
-                        handleAddToCart={handleAddToCart}
-                        handleBuyNow={handleBuyNow}
-                        isLoading={isLoading}
+              {pocketSeriesActive ? (
+                pocketSeriesProducts.length > 0 ? (
+                  <ProductsByTitle
+                    products={pocketSeriesProducts}
+                    handleAddToCart={handleAddToCart}
+                    handleBuyNow={handleBuyNow}
+                    isLoading={isLoading}
+                  />
+                ) : (
+                  hasInitialLoad &&
+                  !loading &&
+                  !isSearching && (
+                    <div className="py-8 sm:py-12 text-center rounded-lg bg-gray-50 max-w-full">
+                      <img
+                        src="/assets/notFound/notFound.png"
+                        alt="No products found"
+                        className="w-32 sm:w-40 h-32 sm:h-40 mx-auto mb-4 opacity-60"
+                        loading="lazy"
                       />
-                    ))}
-                  </div>
-                </>
+                      <h3 className="text-lg sm:text-xl font-medium text-gray-600">
+                        No Pocket Series products found
+                      </h3>
+                      <p className="mt-2 text-sm sm:text-base text-gray-500 px-4">
+                        Check back later for new products.
+                      </p>
+                    </div>
+                  )
+                )
+              ) : nonAdultFilteredProducts.length > 0 ? (
+                <ProductsByTitle
+                  products={nonAdultFilteredProducts}
+                  handleAddToCart={handleAddToCart}
+                  handleBuyNow={handleBuyNow}
+                  isLoading={isLoading}
+                />
               ) : (
                 hasInitialLoad &&
                 !loading &&
@@ -445,7 +566,7 @@ const ProductsPage = () => {
                 products20Plus.length === 0 && (
                   <div className="py-8 sm:py-12 text-center rounded-lg bg-gray-50 max-w-full">
                     <img
-                      src="/assets/productv2/no-products.png"
+                      src="/assets/notFound/notFound.png"
                       alt="No products found"
                       className="w-32 sm:w-40 h-32 sm:h-40 mx-auto mb-4 opacity-60"
                       loading="lazy"

@@ -1,17 +1,20 @@
 import { motion } from "framer-motion";
 import "./banner.css";
-import { WorkshopCategory } from "@/types";
-import { WORKSHOP_TYPE_IMAGES } from "@/constant/workshops/colorTheme";
+// import { WorkshopCategory } from "@/types";
+// import { WORKSHOP_TYPE_IMAGES } from "@/constant/workshops/colorTheme";
 
-interface WorkshopBannerProps {
-  categories: WorkshopCategory[];
-  onWorkshopClick: (categoryIndex: number, workshopName: string) => void;
-}
+// interface WorkshopBannerProps {
+//   categories?: WorkshopCategory[];
+//   onWorkshopClick?: (categoryIndex: number, workshopName: string) => void;
+// }
 
-const WorkshopBanner = ({
-  categories,
-  onWorkshopClick,
-}: WorkshopBannerProps) => {
+
+// const WorkshopBanner = ({
+//   categories,
+//   onWorkshopClick,
+// }: WorkshopBannerProps) => {
+
+const WorkshopBanner = () => {
   return (
     <div
       className="relative bg-orange-400 min-h-[50vh] lg:min-h-[80vh] xl:min-h-[82vh] flex items-center justify-center overflow-hidden border-0 outline-none"
@@ -77,7 +80,7 @@ const WorkshopBanner = ({
         />
       </motion.div>
 
-      <div className="relative z-10 mt-8 xs:mt-10 sm:mt-12 md:mt-16 lg:mt-20 px-4 sm:px-6 md:px-8">
+      <div className="relative z-10 -mt-6 xs:-mt-8 sm:-mt-10 md:-mt-14 lg:-mt-16 px-4 sm:px-6 md:px-8">
         <motion.div
           className="absolute inset-0 text-[2rem] xs:text-[2.5rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] xl:text-[12rem] font-extrabold font-sans text-white/10 blur-sm flex items-center justify-center"
           initial={{ y: 10 }}
@@ -128,7 +131,7 @@ const WorkshopBanner = ({
           WORKSHOPS
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8 relative z-30 max-w-5xl mx-auto"
           initial="hidden"
           animate="visible"
@@ -197,7 +200,7 @@ const WorkshopBanner = ({
                 : ""}{" "}
               Available
             </motion.p>
-          )}
+          )} */}
       </div>
 
       <div className="custom-shape-divider-bottom-1756203234 absolute bottom-0 w-full">

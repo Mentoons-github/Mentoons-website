@@ -37,8 +37,19 @@ const AssessmentQuestions: React.FC = () => {
   const {
     questionGallery,
     assessment,
-  }: { questionGallery: QuestionGallery[]; assessment: string } =
-    location.state || { questionGallery: [], assessment: "" };
+    productId,
+    ageCategory,
+  }: {
+    questionGallery: QuestionGallery[];
+    assessment: string;
+    productId?: string;
+    ageCategory?: string;
+  } = location.state || {
+    questionGallery: [],
+    assessment: "",
+    productId: "",
+    ageCategory: "",
+  };
 
   const [isOpen, setIsOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
@@ -100,7 +111,50 @@ const AssessmentQuestions: React.FC = () => {
     navigate("/assessment-page");
   };
 
-  const handleSubmit = () => {
+  // Records the completed attempt in assessment history.
+  // Fails silently (toast + console) so a logging error never blocks
+  // the user from seeing their results / the payment modal.
+  const recordAssessmentHistory = async (results: ASSESSMENT_RESULTS) => {
+    try {
+      if (!productId) {
+        console.warn(
+          "recordAssessmentHistory: no productId in location.state, skipping history record",
+        );
+        return;
+      }
+
+      const token = await getToken();
+      if (!token) {
+        console.warn("recordAssessmentHistory: no auth token, skipping");
+        return;
+      }
+
+      await axios.post(
+        `${import.meta.env.VITE_PROD_URL}/assessment-history`,
+        {
+          productId,
+          assessmentTitle: results.assessmentName,
+          ageCategory,
+          score: results.score.correct,
+          totalQuestions: results.score.total,
+          status: "completed",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+    } catch (error: unknown) {
+      console.error("Failed to record assessment history:", error);
+      // Non-blocking: don't errorToast here so it doesn't interrupt the
+      // results modal / payment flow. Uncomment if you want it surfaced:
+      // errorToast("Couldn't save your assessment history.");
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!questionGallery) return;
 
     const correctAnswers = questionGallery.reduce((count, question, index) => {
@@ -128,10 +182,10 @@ const AssessmentQuestions: React.FC = () => {
         questionImage: questionGallery[parseInt(questionIndex)].imageUrl,
         isCorrect:
           answer === questionGallery[parseInt(questionIndex)].correctAnswer,
-      })
+      }),
     );
 
-    setAssessmentResults({
+    const results: ASSESSMENT_RESULTS = {
       responses: userResponses,
       score: {
         correct: correctAnswers,
@@ -140,7 +194,13 @@ const AssessmentQuestions: React.FC = () => {
         performance: performanceLevel,
       },
       assessmentName: assessment,
-    });
+    };
+
+    setAssessmentResults(results);
+
+    // Fire the history record now that the assessment is complete.
+    // Not awaited on purpose — don't make the user wait on a logging call.
+    recordAssessmentHistory(results);
   };
 
   const handleAssessmentPayment = async () => {
@@ -197,7 +257,7 @@ const AssessmentQuestions: React.FC = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const tempDiv = document.createElement("div");
@@ -215,7 +275,7 @@ const AssessmentQuestions: React.FC = () => {
       errorToast(
         error instanceof Error
           ? error.message
-          : "Failed to process assessment payment. Please try again later."
+          : "Failed to process assessment payment. Please try again later.",
       );
     } finally {
       setIsLoading(false);

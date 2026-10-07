@@ -1,3 +1,4 @@
+import axiosInstance from "../axios";
 import { BASE_URL } from "../game/postScore";
 import axios, { AxiosError } from "axios";
 
@@ -11,3 +12,5 @@ export const fetchWorkshopPlans = async () => {
     return error?.response?.data?.message;
   }
 };
+
+export const getAllWorkshops = () => axiosInstance.get(`/workshop/all`);

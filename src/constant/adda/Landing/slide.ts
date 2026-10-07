@@ -3,6 +3,7 @@ import { Slide } from "@/types";
 export const SLIDES: Slide[] = [
   {
     id: 1,
+    img: "/assets/home/newPage/bg/banner/plan banner.png",
     tag: "⚡ LIMITED OFFER",
     headline: "3 Day Trial",
     highlightWord: "Trial",
@@ -14,23 +15,54 @@ export const SLIDES: Slide[] = [
     emoji: "🎯",
     badges: ["✓ Full Access", "✓ Zero Risk"],
     link: "/membership",
+    items: [
+      {
+        name: "Explore Membership",
+        link: "/membership",
+        color: "#a8ff78",
+      },
+    ],
   },
-  {
-    id: 2,
-    tag: "🎓 WORKSHOPS",
-    headline: "Workshops",
-    highlightWord: "Workshops",
-    sub: "Workshops for ages 6–12 with hands-on play-based learning, and ages 13–19 with advanced, expert-led sessions.",
-    cta: "Explore Workshops",
-    accent: "#f9c74f",
-    bg: "from-[#0a0a1e] via-[#1a1a2e] to-[#16213e]",
-    shape: "triangle",
-    emoji: "🧠",
-    badges: ["Ages 6–12", "Ages 13–19", "Expert Led", "Live Sessions"],
-    link: "/mentoons-workshops",
-  },
+  // {
+  //   id: 2,
+  //   img: "/assets/home/newPage/bg/banner/workshop banner.png",
+  //   tag: "🎓 WORKSHOPS",
+  //   headline: "Workshops",
+  //   highlightWord: "Workshops",
+  //   sub: "Workshops for ages 6–12 with hands-on play-based learning, and ages 13–19 with advanced, expert-led sessions.",
+  //   cta: "Explore Workshops",
+  //   accent: "#f9c74f",
+  //   bg: "from-[#0a0a1e] via-[#1a1a2e] to-[#16213e]",
+  //   shape: "triangle",
+  //   emoji: "🧠",
+  //   badges: ["Ages 6–12", "Ages 13–19", "Expert Led", "Live Sessions"],
+  //   link: "/mentoons-workshops",
+  //   items: [
+  //     {
+  //       name: "Instant Buddy",
+  //       link: "/mentoons-workshops",
+  //       color: "#f9c74f",
+  //     },
+  //     {
+  //       name: "Quarter Buddy",
+  //       link: "/mentoons-workshops",
+  //       color: "#f4845f",
+  //     },
+  //     {
+  //       name: "Buddy 6",
+  //       link: "/mentoons-workshops",
+  //       color: "#43c59e",
+  //     },
+  //     {
+  //       name: "Buddy 12",
+  //       link: "/mentoons-workshops",
+  //       color: "#7b68ee",
+  //     },
+  //   ],
+  // },
   {
     id: 3,
+    img: "/assets/home/newPage/bg/banner/Products banner.png",
     tag: "🛍️ PRODUCTS",
     headline: "Products",
     highlightWord: "Products",
@@ -42,10 +74,43 @@ export const SLIDES: Slide[] = [
     emoji: "🚀",
     badges: ["Kids", "Teens", "Adults", "Parents"],
     link: "/products",
+    items: [
+      {
+        name: "Conversation Starter Cards",
+        link: "/products?productType=mentoons%20cards&cardType=conversation%20starter%20cards#product",
+        image: "/assets/home/newPage/csc.png",
+      },
+      {
+        name: "Story Re-Teller Cards",
+        link: "/products?productType=mentoons%20cards&cardType=story%20re-teller%20card#product",
+        image: "/assets/home/newPage/Src.png",
+      },
+      {
+        name: "Silent Stories",
+        link: "/products?productType=mentoons%20cards&cardType=silent%20stories#product",
+        image: "/assets/home/newPage/ST.png",
+      },
+      {
+        name: "Conversation Story Cards",
+        link: "/products?productType=mentoons%20cards&cardType=conversation%20story%20cards#products",
+        image:
+          "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/Conversation_Story_Cards_20%2B/Conversation+Story+Cards+20%2B.png",
+      },
+      {
+        name: "Coloring Books",
+        link: "/products?productType=mentoons_coloring_book#product",
+        image: "/assets/home/newPage/coloring book.png",
+      },
+      {
+        name: "Journals",
+        link: "/products",
+        image: "/assets/home/newPage/journals.png",
+      },
+    ],
   },
-
   {
     id: 4,
+    img: "/assets/home/newPage/bg/banner/podcast banner.png",
     tag: "🎧 PODCASTS",
     headline: "Podcasts",
     highlightWord: "Podcasts",
@@ -57,10 +122,27 @@ export const SLIDES: Slide[] = [
     emoji: "🎙️",
     badges: ["Storytelling", "Expert Talks", "Learning Audio"],
     link: "/mentoons-podcast",
+    items: [
+      {
+        name: "Mobile Addiction",
+        link: "/mentoons-podcast",
+        color: "#e040fb",
+      },
+      {
+        name: "Gaming Addiction",
+        link: "/mentoons-podcast",
+        color: "#ff6f00",
+      },
+      {
+        name: "Teen Emotions",
+        link: "/mentoons-podcast",
+        color: "#00e676",
+      },
+    ],
   },
-
   {
     id: 5,
+    img: "/assets/home/newPage/bg/banner/comic banner.png",
     tag: "📚 COMICS",
     headline: "Comics",
     highlightWord: "Comics",
@@ -72,23 +154,69 @@ export const SLIDES: Slide[] = [
     emoji: "💥",
     badges: ["Life Lessons", "Fun Stories", "Visual Learning"],
     link: "/mentoons-comics",
+    items: [
+      {
+        name: "E-Comics",
+        link: "/mentoons-comics?option=comic",
+        color: "#ff6b6b",
+      },
+      {
+        name: "Audio Comics",
+        link: "/mentoons-comics?option=comic",
+        color: "#ff8585",
+      },
+    ],
   },
   {
     id: 6,
+    img: "/assets/home/newPage/bg/banner/Games banner.png",
     tag: "🎮 GAMES",
     headline: "Games",
     highlightWord: "Games",
     sub: "Interactive games designed to boost creativity, thinking skills, and problem-solving while having fun.",
-    cta: "Play Games",
+    cta: "Play More Games",
     accent: "#8e7dff",
     bg: "from-[#0a061a] via-[#1b1433] to-[#2e1f55]",
     shape: "hexagon",
     emoji: "🕹️",
     badges: ["Brain Games", "Fun Learning", "Skill Building"],
     link: "/adda/game-lobby",
+    items: [
+      {
+        name: "Cartoonmoji",
+        link: "/adda/game-lobby/cartoonmoji",
+        image: "/assets/adda/gameLobby/cartoonmoji.png",
+      },
+      {
+        name: "Grid Flash",
+        link: "/adda/game-lobby/grid-flash",
+        image: "/assets/adda/gameLobby/gridFlash.png",
+      },
+      {
+        name: "Mind Stack",
+        link: "/adda/game-lobby/mind-stack",
+        image: "/assets/adda/gameLobby/mindStack.png",
+      },
+      {
+        name: "Flip and Match",
+        link: "/adda/game-lobby/flip-and-match",
+        image: "/assets/adda/gameLobby/flipAndMatch.png",
+      },
+      {
+        name: "Stick Master",
+        link: "/adda/game-lobby/stick-master",
+        image: "/assets/adda/gameLobby/stickMaster.png",
+      },
+      {
+        name: "ColorTube",
+        link: "/adda/game-lobby/color-tube",
+        image: "/assets/games/ColorTube/startBg2.jpg",
+      },
+    ],
   },
   {
     id: 7,
+    img: "/assets/home/newPage/bg/banner/Quiz banner.png",
     tag: "❓ QUIZ",
     headline: "Quiz",
     highlightWord: "Quiz",
@@ -100,5 +228,14 @@ export const SLIDES: Slide[] = [
     emoji: "🧩",
     badges: ["Knowledge Test", "Multiple Topics", "Challenge Yourself"],
     link: "/quiz",
+    items: [
+      { name: "Logo Quiz", link: "/quiz", color: "#FFF3E0" },
+      { name: "Music", link: "/quiz", color: "#FFE0B2" },
+      { name: "Mobile Addiction", link: "/quiz", color: "#FFCC80" },
+      { name: "Gaming Addiction", link: "/quiz", color: "#FFA726" },
+      { name: "Gambling Addiction", link: "/quiz", color: "#FFA726" },
+      { name: "Performance Addiction", link: "/quiz", color: "#FB8C00" },
+      { name: "Entertainment Addiction", link: "/quiz", color: "#E65100" },
+    ],
   },
 ];

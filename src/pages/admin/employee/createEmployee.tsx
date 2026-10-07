@@ -1,56 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
-import * as Yup from "yup";
 import { EmployeeInterface } from "@/types/employee";
-import { EmploymentType } from "@/types/employee/employee";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { useParams, useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-
-const validationSchema = Yup.object({
-  department: Yup.string().required("Department is required"),
-  employmentType: Yup.string()
-    .oneOf(["full-time", "part-time", "intern", "contract", "freelance"])
-    .required("Employment type is required"),
-  salary: Yup.number()
-    .typeError("Salary must be a number")
-    .positive("Salary must be positive")
-    .required("Salary is required"),
-  active: Yup.boolean(),
-  jobRole: Yup.string().required("Role is required"),
-  user: Yup.object({
-    name: Yup.string().required("Name is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    gender: Yup.string()
-      .oneOf(["male", "female", "other"])
-      .required("Gender is required"),
-    phoneNumber: Yup.string()
-      .required("Phone number is required")
-      .test("is-valid-phone", "Invalid phone number", (value) => {
-        if (!value) return false;
-        return /^\+?[1-9]\d{1,14}$/.test(value);
-      }),
-  }),
-});
-
-interface FormValues {
-  department: string;
-  employmentType: EmploymentType;
-  salary: string;
-  active: boolean;
-  jobRole: string;
-  user: {
-    name: string;
-    email: string;
-    role: string;
-    gender: string;
-    phoneNumber: string;
-  };
-}
+import { departmentOptions, employmentTypeOptions } from "@/constant/admin";
+import { EmployeeValidationSchema } from "@/validation/admin/employee/createorUpdate";
+import { FormValues } from "@/types/admin";
 
 const CreateEmployee: React.FC = () => {
   const { getToken } = useAuth();
@@ -83,7 +43,7 @@ const CreateEmployee: React.FC = () => {
             `${import.meta.env.VITE_PROD_URL}/employee/${id}`,
             {
               headers: { Authorization: `Bearer ${token}` },
-            }
+            },
           );
 
           const emp = response.data.data.fullDetails;
@@ -115,7 +75,7 @@ const CreateEmployee: React.FC = () => {
 
   const handleSubmit = async (
     values: FormValues,
-    { setSubmitting }: FormikHelpers<FormValues>
+    { setSubmitting }: FormikHelpers<FormValues>,
   ) => {
     showModal({
       isSubmitting: true,
@@ -167,7 +127,7 @@ const CreateEmployee: React.FC = () => {
 
       toast.success(
         response.data.message ||
-          (isEdit ? "Employee updated!" : "Employee created!")
+          (isEdit ? "Employee updated!" : "Employee created!"),
       );
 
       setTimeout(() => {
@@ -193,26 +153,6 @@ const CreateEmployee: React.FC = () => {
     }
   };
 
-  const departmentOptions = [
-    { value: "", label: "Select Your Department" },
-    { value: "developer", label: "Software Development" },
-    { value: "illustrator", label: "Illustration & Art" },
-    { value: "designer", label: "Design & Creativity" },
-    { value: "hr", label: "Human Resources (HR)" },
-    { value: "marketing", label: "Marketing & Branding" },
-    { value: "finance", label: "Finance & Accounts" },
-    { value: "sales", label: "Sales & Business Development" },
-    { value: "psychologist", label: "Mental Health" },
-  ];
-
-  const employmentTypeOptions = [
-    { value: "full-time", label: "Full-time" },
-    { value: "part-time", label: "Part-time" },
-    { value: "intern", label: "Intern" },
-    { value: "contract", label: "Contract" },
-    { value: "freelance", label: "Freelance" },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
       <div className="max-w-3xl mx-auto">
@@ -230,7 +170,7 @@ const CreateEmployee: React.FC = () => {
 
           <Formik
             initialValues={initialValues}
-            validationSchema={validationSchema}
+            validationSchema={EmployeeValidationSchema}
             enableReinitialize
             onSubmit={handleSubmit}
           >
@@ -452,8 +392,8 @@ const CreateEmployee: React.FC = () => {
                         ? "Updating Employee..."
                         : "Creating Employee..."
                       : isEdit
-                      ? "Update Employee"
-                      : "Create Employee"}
+                        ? "Update Employee"
+                        : "Create Employee"}
                   </button>
                 </div>
               </form>

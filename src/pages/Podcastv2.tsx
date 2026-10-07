@@ -1,8 +1,9 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
+import NewReleaseModal from "@/components/podcast/newReleaseModal";
 import PodcastCard from "@/components/podcast/card";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
-import { PODCAST_OFFERINGS, PODCAST_V2_CATEGORY } from "@/constant";
+import { PODCAST_V2_CATEGORY } from "@/constant";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { PodcastProduct, ProductBase } from "@/types/productTypes";
@@ -14,7 +15,6 @@ import axios from "axios";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { IoPlay } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
@@ -49,10 +49,6 @@ const Podcastv2 = () => {
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-
-  // Single source of truth: which podcast id is playing in the card carousel
-  // or "new-release". The featured <audio controls> player manages itself via
-  // the DOM — we only track it via currentAudioRef below.
   const [playingPodcastId, setPlayingPodcastId] = useState<string | null>(null);
 
   const [message, setMessage] = useState("");
@@ -66,6 +62,7 @@ const Podcastv2 = () => {
   const [filteredPodcast, setFilteredPodcast] = useState<ProductBase[]>([]);
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showNewReleaseModal, setShowNewReleaseModal] = useState(false);
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
   const [playbackTracking, setPlaybackTracking] =
     useState<PlaybackTrackingState | null>(null);
@@ -74,20 +71,9 @@ const Podcastv2 = () => {
     return sessionStorage.getItem("newReleaseAutoPlayed") === "true";
   });
 
-  // ── Global audio manager ─────────────────────────────────────────────────
-  //
-  // currentAudioRef  — the <audio> element that is currently playing
-  // isSwitchingRef   — true for ~100 ms during a player switch so that the
-  //                    outgoing player's onPause is not treated as a user pause
-  //
-  // switchTo(audio) — pauses the current player (with flag set), then marks
-  //                   the new audio as current. Does NOT call .play() — the
-  //                   caller or the browser does that.
-  //
-  // stopAll()        — pauses current player and clears state
-  //
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isSwitchingRef = useRef(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const switchTo = useCallback((incoming: HTMLAudioElement) => {
     const outgoing = currentAudioRef.current;
@@ -114,18 +100,11 @@ const Podcastv2 = () => {
     setPlayingPodcastId(null);
   }, []);
 
-  // Called by PodcastCard on mount so we always know every card's audio ref
   const registerCardAudio = useCallback((audio: HTMLAudioElement) => {
-    // Only update currentAudioRef when this card is actually the active one;
-    // for idle cards we just store a weak reference via the DOM.
-    // (The card's own useEffect calls play/pause imperatively.)
-    // We expose this so the featured player can pause it via switchTo().
     if (!audio.paused) {
       currentAudioRef.current = audio;
     }
   }, []);
-
-  // ─────────────────────────────────────────────────────────────────────────
 
   const { isSignedIn, user } = useUser();
   const { getToken } = useAuth();
@@ -153,6 +132,12 @@ const Podcastv2 = () => {
 
   const handleSelectedCategory = (category: string) => {
     setSelectedCategory(category);
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
   };
 
   const handleSubmit = async (
@@ -387,75 +372,6 @@ const Podcastv2 = () => {
       <HeroSectionPodcast />
       <div className="w-[90%] mx-auto mt-4 md:mt-16">
         <motion.div
-          className="items-start gap-8 lg:flex"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex-1">
-            <h1 className="py-4 md:py-8 text-3xl font-semibold text-primary md:text-6xl">
-              Trending Podcast
-            </h1>
-            <p className="md:text-xl font-semibold pb-8 md:w-[80%]">
-              Tune in to our educational and entertaining podcasts designed
-              specifically for young listeners. From fascinating facts to
-              thought-provoking discussions, our podcasts make learning fun and
-              accessible.
-            </p>
-            <div className="flex items-center justify-center">
-              <img
-                src="/assets/podcastv2/hero-image.png"
-                alt="Left side hero Image"
-                className="w-full"
-              />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h2 className="py-4 text-2xl md:text-4xl font-semibold text-center luckiest-guy-regular text-neutral-700">
-              PODCAST ONLY FOR YOU
-            </h2>
-            <img
-              src="/assets/podcastv2/hero-image-2.png"
-              alt="Right side hero image"
-              className="flex items-center justify-center w-full"
-            />
-          </div>
-        </motion.div>
-        <motion.div
-          className="flex flex-col py-6 md:py-12"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="pb-5 md:pb-8 lg:pb-12 text-3xl font-semibold text-center">
-            This is What You Get
-          </h2>
-          <div className=" gap-4 lg:gap-14 grid grid-cols-2 md:grid-cols-4">
-            {PODCAST_OFFERINGS.map((podcast) => (
-              <motion.div
-                key={podcast.label}
-                className="flex flex-col items-center  gap-4 border p-4 md:p-6 lg:p-10 rounded-xl  justify-center"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <img
-                  src={podcast.imgeUrl}
-                  alt={podcast.label}
-                  className="w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24"
-                />
-                <p
-                  style={{ color: podcast.accentColor }}
-                  className="text-lg font-bold text-center"
-                >
-                  {podcast.label}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-        <motion.div
           className="flex flex-col md:gap-12"
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -490,7 +406,8 @@ const Podcastv2 = () => {
             </div>
           </div>
           <motion.div
-            className="my-12 md:my-0"
+            ref={resultsRef}
+            className="my-12 md:my-0 scroll-mt-6"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -546,12 +463,6 @@ const Podcastv2 = () => {
                         </span>
                       </div>
                       <div className="p-4 border rounded-xl backdrop-blur-sm audio-player bg-white/10 border-white/20">
-                        {/*
-                          Featured <audio controls> — browser-native controls.
-                          On play: call switchTo() synchronously to pause any
-                          card/new-release audio via the DOM *before* React
-                          state updates, so this starts on the first click.
-                        */}
                         <audio
                           key={currentPodcastIndex}
                           className="w-full"
@@ -565,11 +476,8 @@ const Podcastv2 = () => {
                             )?.sampleUrl || "#"
                           }
                           onPlay={async (e) => {
-                            // 1. Synchronously pause any other audio via DOM
                             switchTo(e.currentTarget);
-                            // 2. Clear card / new-release React state
                             setPlayingPodcastId(null);
-                            // 3. Check access
                             const hasAccess =
                               await checkAccessAndControlPlayback(
                                 filteredPodcast[currentPodcastIndex],
@@ -695,11 +603,8 @@ const Podcastv2 = () => {
                 isPlaying={playingPodcastId === String(podcast._id)}
                 onPlayToggle={(podcastId) => {
                   if (playingPodcastId === podcastId) {
-                    // User paused this card
                     stopAll();
                   } else {
-                    // Stop featured / new-release audio synchronously via DOM,
-                    // then update state — card's useEffect will call .play()
                     stopAll();
                     setPlayingPodcastId(podcastId);
                   }
@@ -738,300 +643,45 @@ const Podcastv2 = () => {
             <IoIosArrowForward className="text-2xl text-orange-500" />
           </button>
         </motion.div>
-        <motion.div
-          className="relative lg:my-24 overflow-hidden shadow-2xl bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl"
-          initial={{ opacity: 0, y: 100 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="absolute w-40 h-40 bg-pink-200 rounded-full opacity-50 -top-20 right-20 blur-xl"></div>
-          <div className="absolute w-32 h-32 bg-orange-200 rounded-full left-10 bottom-40 opacity-40 blur-xl"></div>
-          <svg
-            className="absolute left-0 w-24 h-24 text-orange-300 top-10 opacity-20"
-            viewBox="0 0 100 100"
-            fill="none"
+
+        {filteredPodcast.length > 0 && (
+          <motion.button
+            type="button"
+            onClick={() => setShowNewReleaseModal(true)}
+            className="relative flex items-center w-full gap-6 p-6 my-10 overflow-hidden text-left text-white transition-transform shadow-2xl md:my-24 bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl hover:scale-[1.01]"
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              stroke="currentColor"
-              strokeWidth="8"
-              strokeDasharray="10 15"
-            >
-              <animate
-                attributeName="r"
-                from="40"
-                to="65"
-                dur="3s"
-                repeatCount="indefinite"
+            <div className="absolute w-40 h-40 bg-pink-200 rounded-full opacity-40 -top-16 right-10 blur-xl"></div>
+            <div className="relative z-10 flex-shrink-0 w-20 h-20 overflow-hidden shadow-lg rounded-2xl md:w-28 md:h-28">
+              <img
+                src={
+                  filteredPodcast[0]?.productImages?.[0].imageUrl ||
+                  "/assets/podcastv2/electronic-gadgets-and-kids-large.jpg"
+                }
+                alt={filteredPodcast[0]?.title || "New release thumbnail"}
+                className="object-cover w-full h-full"
               />
-              <animate
-                attributeName="opacity"
-                from="0.8"
-                to="0"
-                dur="3s"
-                repeatCount="indefinite"
-              />
-            </circle>
-          </svg>
-          <svg
-            className="absolute w-32 h-32 text-pink-400 right-10 bottom-10 opacity-20"
-            viewBox="0 0 100 100"
-            fill="none"
-          >
-            <path
-              d="M20,50 Q50,10 80,50 T20,50"
-              stroke="currentColor"
-              strokeWidth="8"
-              fill="none"
-            />
-          </svg>
-          <div className="flex flex-col-reverse lg:flex-row md:items-center md:gap-8 bg-gradient-to-br from-[#FF6D6D]/90 via-orange-300/80 to-yellow-400 rounded-3xl shadow-2xl overflow-hidden">
-            {filteredPodcast.length > 0 && (
-              <div className="relative z-10 flex-1 p-8 md:p-12">
-                <div className="w-full h-[350px] rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-                  <img
-                    src={
-                      filteredPodcast[0]?.productImages?.[0].imageUrl ||
-                      "/assets/podcastv2/electronic-gadgets-and-kids-large.jpg"
-                    }
-                    alt={filteredPodcast[0]?.title || "Podcast Thumbnail"}
-                    className="object-cover object-center w-full h-full"
-                  />
-                </div>
-                <div className="mt-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize text-green-600 bg-green-200 backdrop-blur-sm">
-                      NEW RELEASE
-                    </span>
-                    <div
-                      className={`py-[3px] px-[5px] text-xs font-semibold rounded shadow-md capitalize ${
-                        (
-                          filteredPodcast[0]
-                            .details as PodcastProduct["details"]
-                        )?.category === "mobile addiction"
-                          ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
-                          : (
-                                filteredPodcast[0]
-                                  .details as PodcastProduct["details"]
-                              )?.category === "electronic gadgets"
-                            ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white"
-                            : "bg-gradient-to-r from-purple-400 to-purple-500 text-white"
-                      }`}
-                    >
-                      {(filteredPodcast[0].details as PodcastProduct["details"])
-                        ?.category || "Category"}
-                    </div>
-                  </div>
-                  <h2
-                    className="mb-3 text-3xl font-bold text-white drop-shadow-sm md:text-4xl"
-                    data-badge={
-                      filteredPodcast[currentPodcastIndex].product_type ||
-                      undefined
-                    }
-                  >
-                    {filteredPodcast[currentPodcastIndex]?.title ||
-                      "Negative impact of Mobile phone"}
-                  </h2>
-                  <p className="mb-4 text-lg text-white/90 line-clamp-3">
-                    {filteredPodcast[0]?.description ||
-                      "Podcast on Electronic Gadgets and Kids examines the impact of digital devices on children's development and daily lives."}
-                  </p>
-                  <div className="flex items-center mb-6 text-sm text-white/80">
-                    <div className="flex items-center justify-center w-6 h-6 overflow-hidden bg-orange-200 rounded-full">
-                      <span className="text-sm font-semibold text-orange-500">
-                        {(
-                          filteredPodcast[0]
-                            .details as PodcastProduct["details"]
-                        )?.host?.charAt(0)}
-                      </span>
-                    </div>
-                    <span className="ml-2 text-sm font-bold">
-                      {(filteredPodcast[0].details as PodcastProduct["details"])
-                        ?.host || "Mentoons"}
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span className="text-sm font-bold">
-                      {(filteredPodcast[0].details as PodcastProduct["details"])
-                        ?.duration || "05 MIN"}{" "}
-                      minutes
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (playingPodcastId === "new-release") {
-                        stopAll();
-                      } else {
-                        // Stop anything currently playing via DOM first
-                        stopAll();
-                        setPlayingPodcastId("new-release");
-                      }
-                    }}
-                    className={`flex items-center gap-3 px-8 py-3 rounded-full transition-all duration-300 ${
-                      playingPodcastId === "new-release"
-                        ? "bg-white text-primary"
-                        : "bg-primary text-white hover:bg-primary/90 hover:scale-105"
-                    }`}
-                  >
-                    {playingPodcastId === "new-release" ? (
-                      <>
-                        <span className="font-semibold">Pause</span>
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="w-1 h-4 rounded-full animate-pulse bg-primary"></span>
-                          <span
-                            className="w-1 h-6 rounded-full animate-pulse bg-primary"
-                            style={{ animationDelay: "0.2s" }}
-                          ></span>
-                          <span
-                            className="w-1 h-3 rounded-full animate-pulse bg-primary"
-                            style={{ animationDelay: "0.4s" }}
-                          ></span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-semibold">Play</span>
-                        <IoPlay className="text-2xl" />
-                      </>
-                    )}
-                  </button>
-                  {playingPodcastId === "new-release" && (
-                    <audio
-                      src={
-                        (
-                          filteredPodcast[0]
-                            .details as PodcastProduct["details"]
-                        )?.sampleUrl || "#"
-                      }
-                      autoPlay
-                      ref={(el) => {
-                        if (el) switchTo(el);
-                      }}
-                      onPlay={async (e) => {
-                        setHasPlayedNewRelease(true);
-                        switchTo(e.currentTarget);
-                        const hasAccess = await checkAccessAndControlPlayback(
-                          filteredPodcast[0],
-                          e.currentTarget,
-                        );
-                        if (!hasAccess) {
-                          e.currentTarget.pause();
-                          setPlayingPodcastId(null);
-                        }
-                      }}
-                      onPause={() => {
-                        if (isSwitchingRef.current) return;
-                        if (
-                          playbackTracking &&
-                          playbackTracking.podcastId ===
-                            String(filteredPodcast[0]._id)
-                        ) {
-                          setPlaybackTracking((prev) =>
-                            prev ? { ...prev, paused: true } : null,
-                          );
-                        }
-                      }}
-                      onSeeked={() => {
-                        if (
-                          playbackTracking &&
-                          playbackTracking.podcastId ===
-                            String(filteredPodcast[0]._id)
-                        ) {
-                          setPlaybackTracking((prev) =>
-                            prev ? { ...prev, skipped: true } : null,
-                          );
-                        }
-                      }}
-                      onEnded={() => {
-                        setPlayingPodcastId(null);
-                        if (filteredPodcast[0]) {
-                          handlePodcastCompletion(
-                            String(filteredPodcast[0]._id),
-                            String(filteredPodcast[0].product_type || "free"),
-                          );
-                        }
-                      }}
-                      className="hidden"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-            <div className="relative flex-1 p-8 lg:p-12 ">
-              <h2 className=" text-3xl font-semibold text-center text-black drop-shadow-lg md:text-7xl luckiest-guy-regular">
-                CHECK OUT OUR
-                <span className="block py-2 mt-2 rounded-lg backdrop-blur-sm">
-                  NEW RELEASE
-                </span>
-              </h2>
-              <div className="relative flex items-center justify-center">
-                <div className="absolute w-48 h-48 rounded-full blur-xl bg-orange-400/30"></div>
-                <img
-                  src="/assets/podcastv2/new-headphones.png"
-                  alt="Headphone"
-                  className="relative z-10 w-[80%] max-w-[400px] animate-float drop-shadow-2xl"
-                />
-                <svg
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] -z-10 opacity-20"
-                  viewBox="0 0 100 100"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="0.5"
-                    strokeDasharray="1 3"
-                  >
-                    <animate
-                      attributeName="r"
-                      from="45"
-                      to="65"
-                      dur="3s"
-                      repeatCount="indefinite"
-                    />
-                    <animate
-                      attributeName="opacity"
-                      from="0.8"
-                      to="0"
-                      dur="3s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="35"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="0.5"
-                    strokeDasharray="1 3"
-                  >
-                    <animate
-                      attributeName="r"
-                      from="35"
-                      to="55"
-                      dur="3s"
-                      begin="0.5s"
-                      repeatCount="indefinite"
-                    />
-                    <animate
-                      attributeName="opacity"
-                      from="0.8"
-                      to="0"
-                      dur="3s"
-                      begin="0.5s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                </svg>
-              </div>
             </div>
-          </div>
-        </motion.div>
+            <div className="relative z-10 flex-1">
+              <span className="inline-block py-1 px-3 mb-2 text-xs font-semibold text-green-700 bg-green-200 rounded-full">
+                NEW RELEASE
+              </span>
+              <h3 className="text-xl font-bold md:text-3xl luckiest-guy-regular">
+                CHECK OUT OUR NEW RELEASE
+              </h3>
+              <p className="mt-1 text-sm text-white/90 line-clamp-1 md:text-base">
+                {filteredPodcast[0]?.title || "Negative impact of Mobile phone"}
+              </p>
+            </div>
+            <div className="relative z-10 flex-shrink-0 px-5 py-2 font-semibold rounded-full shadow bg-white text-primary md:px-6 md:py-3">
+              View
+            </div>
+          </motion.button>
+        )}
+
         <motion.div
           className="flex flex-col lg:flex-row items-start mt-10 gap-8 p-6 md:p-12 mb-16 text-white rounded-3xl bg-primary "
           initial={{ opacity: 0, scale: 0.9 }}
@@ -1118,7 +768,22 @@ const Podcastv2 = () => {
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
       )}
-    {/* <PlayPauseButton /> */}
+      <NewReleaseModal
+        isOpen={showNewReleaseModal}
+        onClose={() => setShowNewReleaseModal(false)}
+        filteredPodcast={filteredPodcast}
+        currentPodcastIndex={currentPodcastIndex}
+        playingPodcastId={playingPodcastId}
+        setPlayingPodcastId={setPlayingPodcastId}
+        stopAll={stopAll}
+        switchTo={switchTo}
+        checkAccessAndControlPlayback={checkAccessAndControlPlayback}
+        handlePodcastCompletion={handlePodcastCompletion}
+        playbackTracking={playbackTracking}
+        setPlaybackTracking={setPlaybackTracking}
+        isSwitchingRef={isSwitchingRef}
+        setHasPlayedNewRelease={setHasPlayedNewRelease}
+      />
     </>
   );
 };

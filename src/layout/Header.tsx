@@ -16,6 +16,13 @@ import ShareModal from "@/components/modals/ShareModal";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+const MENU_BASE_PATHS: Record<string, string> = {
+  games: "/mentoons-games",
+  products: "/products",
+  workshops: "/mentoons-workshops",
+  joinus: "/joinus",
+};
+
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -99,7 +106,7 @@ const Header = () => {
 
       gsap.set(headerLogo, { opacity: 0 });
 
-      const chars = text.querySelectorAll("span");
+      const chars = text.querySelectorAll("span > span");
 
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
@@ -189,8 +196,22 @@ const Header = () => {
   const filteredNav = COMMON_NAV.filter(
     (item) => item.label !== "Profile" || userId,
   );
-  const navLeft = filteredNav.slice(0, 5);
-  const navRight = filteredNav.slice(5);
+  const navLeft = filteredNav.slice(0, 6);
+  const navRight = filteredNav.slice(6);
+
+  const isPathActive = (url: string) =>
+    location.pathname === url || location.pathname.startsWith(`${url}/`);
+
+  const isMenuActive = (menuKey: string) => {
+    const base = MENU_BASE_PATHS[menuKey];
+    if (!base) return false;
+    return isPathActive(base);
+  };
+
+  const handleMenuClick = (menuKey: string) => {
+    const base = MENU_BASE_PATHS[menuKey];
+    if (base) navigate(base);
+  };
 
   const handleBrowsePlansClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -267,15 +288,160 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close the search overlay with Escape
+  useEffect(() => {
+    if (!showSearch) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowSearch(false);
+        setSearchQuery("");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showSearch]);
+
   const handleHover = (menu: string) =>
     setDropDown((prev) => ({ ...prev, [menu]: true }));
   const handleMouseLeave = (menu: string) =>
     setDropDown((prev) => ({ ...prev, [menu]: false }));
 
+  const linkClass = (active: boolean) =>
+    `hdr-link hdr-font ${active ? "hdr-link-active" : ""}`;
+
+  // Icons are hidden below 2xl so the full menu fits on laptop screens
+  const renderIcon = (Icon: any) =>
+    Icon && typeof Icon === "function" ? (
+      <Icon className="hidden w-5 h-5 2xl:block" />
+    ) : null;
+
   if (location.pathname.startsWith("/employee")) return null;
 
   return (
     <div ref={containerRef}>
+      <style>{`
+        .hdr-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .hdr-bar {
+          border-bottom: 3px solid #000;
+          box-shadow: 0 4px 0 #000;
+        }
+
+        .hdr-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+          color: #fff;
+          border: 2px solid transparent;
+          border-radius: 999px;
+          padding: 0.2rem 0.65rem;
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          cursor: pointer;
+          background: transparent;
+          transition: background-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease;
+        }
+        @media (min-width: 1536px) {
+          .hdr-link { font-size: 1rem; line-height: 1.5rem; padding: 0.25rem 0.9rem; }
+        }
+        .hdr-link:hover {
+          background: #fff;
+          color: #000;
+          border-color: #000;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .hdr-link-active {
+          background: #fde047;
+          color: #000;
+          border-color: #000;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .hdr-link:focus-visible,
+        .hdr-icon:focus-visible,
+        .hdr-menu-item:focus-visible {
+          outline: 3px solid #000;
+          outline-offset: 2px;
+        }
+
+        .hdr-icon {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.25rem;
+          height: 2.25rem;
+          background: #fff;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          cursor: pointer;
+          transition: background-color 0.1s ease, box-shadow 0.1s ease;
+        }
+        @media (min-width: 640px) {
+          .hdr-icon { width: 2.5rem; height: 2.5rem; }
+        }
+        .hdr-icon:hover { background: #fed7aa; box-shadow: 3px 3px 0 #000; }
+        .hdr-icon:active { box-shadow: 1px 1px 0 #000; }
+        .hdr-icon-active { background: #fde047; }
+
+        .hdr-badge {
+          position: absolute;
+          top: -0.5rem;
+          right: -0.5rem;
+          min-width: 1.25rem;
+          padding: 0 0.3rem;
+          text-align: center;
+          font-size: 0.7rem;
+          line-height: 1.1rem;
+          color: #fff;
+          background: #ef4444;
+          border: 2px solid #000;
+          border-radius: 999px;
+        }
+
+        .hdr-menu {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 12px;
+        }
+        .hdr-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          width: 100%;
+          padding: 0.6rem 1rem;
+          color: #000;
+          cursor: pointer;
+          background: transparent;
+          text-align: left;
+        }
+        .hdr-menu-item:hover { background: #fed7aa; }
+        .hdr-menu-item-danger:hover { background: #fecaca; }
+
+        .hdr-search {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.10) 1.5px, transparent 2px);
+          background-size: 16px 16px;
+          border: 3px solid #000;
+          box-shadow: 6px 6px 0 #000;
+          border-radius: 14px;
+        }
+        .hdr-search-input {
+          background: #fff;
+          border: 2px solid #000;
+          border-radius: 10px;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .hdr-search-input:focus-within { box-shadow: 3px 3px 0 #000; }
+      `}</style>
+
       <div
         ref={splashRef}
         className="fixed inset-0 bg-orange-500 z-[10000] pointer-events-none flex flex-col items-center justify-center overflow-hidden"
@@ -284,7 +450,7 @@ const Header = () => {
         <div ref={splashLogoRef}>
           <img
             src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
-            alt="Mentooons Logo"
+            alt="Mentoons Logo"
             className="w-64 sm:w-80 md:w-96 lg:w-[28rem]"
           />
         </div>
@@ -293,13 +459,21 @@ const Header = () => {
           ref={textRef}
           className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center px-6 mt-8"
         >
-          {"Welcome to Mentooons".split("").map((char, i) => (
+          {"Welcome to Mentoons".split(" ").map((word, wordIndex) => (
             <span
-              key={i}
-              className="inline-block"
-              style={{ display: "inline-block" }}
+              key={wordIndex}
+              className="inline-block whitespace-nowrap"
+              style={{ marginRight: "0.3em" }}
             >
-              {char === " " ? "\u00A0" : char}
+              {word.split("").map((char, charIndex) => (
+                <span
+                  key={charIndex}
+                  className="inline-block"
+                  style={{ display: "inline-block" }}
+                >
+                  {char}
+                </span>
+              ))}
             </span>
           ))}
         </div>
@@ -307,29 +481,29 @@ const Header = () => {
 
       <header
         className={`${
-          isScrolled ? "fixed top-0 left-0 w-full shadow-md" : "relative"
-        } flex justify-between items-center bg-primary h-16 px-4 sm:px-6 lg:px-10 transition-all duration-300 z-40 w-full font-akshar`}
+          isScrolled ? "fixed top-0 left-0 w-full" : "relative"
+        } hdr-bar flex justify-between items-center bg-primary h-16 px-3 sm:px-6 xl:px-6 2xl:px-10 transition-all duration-300 z-40 w-full`}
       >
-        <div className="flex items-center lg:w-1/3">
-          <nav className="hidden lg:flex gap-6 xl:gap-8">
+        {/* Left nav */}
+        <div className="flex items-center min-w-0 xl:w-[38%] 2xl:w-1/3">
+          <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2">
             {navLeft.map(({ id, label, url, icon: Icon, items }) =>
               label === "Browse Plans" ? (
                 <a
                   key={id}
                   href={url}
                   onClick={handleBrowsePlansClick}
-                  className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                  className={linkClass(isPathActive(url))}
                 >
-                  {Icon && typeof Icon === "function" && (
-                    <Icon className="w-5 h-5" />
-                  )}
+                  {renderIcon(Icon)}
                   {label}
-                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
                 </a>
               ) : items?.length ? (
                 <div key={id} className="relative">
                   <NavButton
                     label={label}
+                    active={isMenuActive(label.toLowerCase())}
+                    onClick={handleMenuClick}
                     onMouseEnter={() => handleHover(label.toLowerCase())}
                     onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
                   >
@@ -347,19 +521,17 @@ const Header = () => {
                 <NavLink
                   key={id}
                   to={url}
-                  className="group relative text-white flex items-center gap-2 text-sm lg:text-base font-semibold"
+                  className={({ isActive }) => linkClass(isActive)}
                 >
-                  {Icon && typeof Icon === "function" && (
-                    <Icon className="w-5 h-5" />
-                  )}
+                  {renderIcon(Icon)}
                   {label}
-                  <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
                 </NavLink>
               ),
             )}
           </nav>
         </div>
 
+        {/* Centre logo */}
         <div
           ref={headerLogoRef}
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
@@ -369,54 +541,66 @@ const Header = () => {
             <img
               src="/assets/common/logo/ec9141ccd046aff5a1ffb4fe60f79316.png"
               alt="Logo"
-              className="w-28 sm:w-32 lg:w-40"
+              className="w-24 sm:w-32 xl:w-28 2xl:w-40"
             />
           </NavLink>
         </div>
 
-        <div className="flex items-center gap-4 lg:hidden">
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <div
-              onClick={handleSearchToggle}
-              className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
-            >
-              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-          </motion.div>
+        {/* Mobile / tablet actions */}
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto xl:hidden">
+          <motion.button
+            type="button"
+            aria-label="Search"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSearchToggle}
+            className="hdr-icon"
+          >
+            <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+          </motion.button>
 
           <SignedIn>
-            <NavLink to="/cart" className="relative">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <NavLink
+              to="/cart"
+              aria-label="Cart"
+              className={({ isActive }) =>
+                `hdr-icon ${isActive ? "hdr-icon-active" : ""}`
+              }
+            >
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
               {(cart?.totalItemCount ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                <span className="hdr-badge hdr-font">
                   {cart.totalItemCount}
                 </span>
               )}
             </NavLink>
           </SignedIn>
 
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ rotate: 90, scale: 0.9 }}
+          <motion.button
+            type="button"
+            aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+            aria-expanded={sidebarOpen}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ rotate: 90, scale: 0.92 }}
             onClick={() => setSideBarOpen(!sidebarOpen)}
+            className="hdr-icon"
           >
-            {sidebarOpen ? (
-              <FaTimes size={24} className="text-white" />
-            ) : (
-              <FaBars size={24} className="text-white" />
-            )}
-          </motion.div>
+            {sidebarOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
+          </motion.button>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <div
-              onClick={handleSearchToggle}
-              className="p-2 rounded-full hover:bg-white/10 cursor-pointer"
-            >
-              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-          </motion.div>
+        {/* Right nav (desktop) */}
+        <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2">
+          <motion.button
+            type="button"
+            aria-label="Search"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSearchToggle}
+            className="hdr-icon mr-1"
+          >
+            <Search className="w-5 h-5" />
+          </motion.button>
 
           {navRight.map(({ id, label, url, icon: Icon, items }) => {
             if ((label === "Games" || label === "My Library") && !userId)
@@ -427,38 +611,40 @@ const Header = () => {
                 key={id}
                 href={url}
                 onClick={handleBrowsePlansClick}
-                className="group relative text-white flex items-center gap-2 text-base font-semibold"
+                className={linkClass(isPathActive(url))}
               >
-                {Icon && typeof Icon === "function" && (
-                  <Icon className="w-5 h-5" />
-                )}
+                {renderIcon(Icon)}
                 {label}
-                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </a>
             ) : label === "Share" ? (
-              <div
+              <button
                 key={id}
+                type="button"
                 onClick={() => setShowShareModal(true)}
-                className="group relative text-white flex items-center gap-2 text-base font-semibold cursor-pointer"
+                className={linkClass(false)}
               >
-                {Icon && typeof Icon === "function" && (
-                  <Icon className="w-5 h-5" />
-                )}
+                {renderIcon(Icon)}
                 {label}
-                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
-              </div>
+              </button>
             ) : label === "Profile" ? (
               <div key={id} className="relative" ref={profileDropdownRef}>
                 <div
                   onMouseEnter={handleProfileHover}
                   onMouseLeave={handleProfileLeave}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className="cursor-pointer"
+                  <motion.button
+                    type="button"
+                    aria-label="Profile menu"
+                    whileHover={{ scale: 1.08 }}
+                    onClick={() => setShowProfileDropdown((v) => !v)}
+                    className={`hdr-icon ${
+                      isPathActive("/adda/user-profile")
+                        ? "hdr-icon-active"
+                        : ""
+                    }`}
                   >
-                    <FaUserCircle className="w-7 h-7 text-white" />
-                  </motion.div>
+                    <FaUserCircle className="w-5 h-5" />
+                  </motion.button>
 
                   <AnimatePresence>
                     {showProfileDropdown && (
@@ -466,22 +652,25 @@ const Header = () => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl py-2 z-[10001] border"
+                        className="hdr-menu hdr-font absolute right-0 mt-2 w-48 py-1 z-[10001] overflow-hidden"
                       >
-                        <div
+                        <button
+                          type="button"
                           onClick={handleProfileNavigation}
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                          className="hdr-menu-item"
                         >
                           <User className="w-4 h-4" />
                           <span>Profile</span>
-                        </div>
-                        <div
+                        </button>
+                        <button
+                          type="button"
                           onClick={handleLogout}
-                          className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 cursor-pointer"
+                          className="hdr-menu-item hdr-menu-item-danger"
+                          style={{ color: "#b91c1c" }}
                         >
                           <LogOut className="w-4 h-4" />
                           <span>Logout</span>
-                        </div>
+                        </button>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -491,6 +680,8 @@ const Header = () => {
               <div key={id} className="relative">
                 <NavButton
                   label={label}
+                  active={isMenuActive(label.toLowerCase())}
+                  onClick={handleMenuClick}
                   onMouseEnter={() => handleHover(label.toLowerCase())}
                   onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
                 >
@@ -503,22 +694,25 @@ const Header = () => {
               <NavLink
                 key={id}
                 to={url}
-                className="group relative text-white flex items-center gap-2 text-base font-semibold"
+                className={({ isActive }) => linkClass(isActive)}
               >
-                {Icon && typeof Icon === "function" && (
-                  <Icon className="w-5 h-5" />
-                )}
+                {renderIcon(Icon)}
                 {label}
-                <span className="absolute bottom-[-4px] left-0 h-[2px] w-0 bg-white transition-all group-hover:w-full" />
               </NavLink>
             );
           })}
 
           <SignedIn>
-            <NavLink to="/cart" className="relative ml-6">
-              <ShoppingCart className="w-7 h-7 text-white" />
+            <NavLink
+              to="/cart"
+              aria-label="Cart"
+              className={({ isActive }) =>
+                `hdr-icon ml-2 ${isActive ? "hdr-icon-active" : ""}`
+              }
+            >
+              <ShoppingCart className="w-5 h-5" />
               {(cart?.totalItemCount ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                <span className="hdr-badge hdr-font">
                   {cart.totalItemCount}
                 </span>
               )}
@@ -526,42 +720,44 @@ const Header = () => {
           </SignedIn>
         </nav>
 
+        {/* Search overlay */}
         <AnimatePresence>
           {showSearch && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-24"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-start justify-center pt-16 sm:pt-24"
               onClick={handleSearchToggle}
             >
               <motion.div
                 initial={{ y: -50, opacity: 0, scale: 0.95 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 exit={{ y: -50, opacity: 0 }}
-                className="w-full max-w-2xl mx-4"
+                className="w-full max-w-2xl mx-3 sm:mx-4"
                 onClick={(e) => e.stopPropagation()}
               >
                 <form
                   onSubmit={handleSearchSubmit}
-                  className="bg-white rounded-2xl shadow-2xl overflow-hidden"
+                  className="hdr-search p-3 sm:p-5"
                 >
-                  <div className="flex items-center">
-                    <Search className="w-6 h-6 text-gray-400 ml-6" />
+                  <div className="hdr-search-input flex items-center">
+                    <Search className="w-5 h-5 sm:w-6 sm:h-6 text-black ml-3 sm:ml-4 flex-shrink-0" />
                     <input
                       ref={searchInputRef}
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search games, comics, podcasts..."
-                      className="flex-1 py-5 px-4 text-lg outline-none"
+                      className="hdr-font flex-1 min-w-0 py-3 sm:py-4 px-3 text-base sm:text-lg bg-transparent outline-none"
                     />
                     <button
                       type="button"
+                      aria-label="Close search"
                       onClick={handleSearchToggle}
-                      className="p-3 mr-4 hover:bg-gray-100 rounded-full"
+                      className="p-2 mr-2 rounded-full hover:bg-orange-100"
                     >
-                      <X className="w-5 h-5 text-gray-500" />
+                      <X className="w-5 h-5 text-black" />
                     </button>
                   </div>
                 </form>
@@ -573,9 +769,9 @@ const Header = () => {
         <Sidebar
           token={userId ?? null}
           isOpen={sidebarOpen}
-          dropdown={dropdown}
-          handleHover={handleHover}
-          handleMouseLeave={handleMouseLeave}
+          // dropdown={dropdown}
+          // handleHover={handleHover}
+          // handleMouseLeave={handleMouseLeave}
           setIsOpen={setSideBarOpen}
           handlePlans={handleBrowsePlansClick}
         />

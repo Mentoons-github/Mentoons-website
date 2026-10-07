@@ -15,6 +15,18 @@ import { AppDispatch, RootState } from "@/redux/store";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 
+type SessionDuration = "30min" | "1hr";
+
+const SESSION_OPTIONS: {
+  value: SessionDuration;
+  label: string;
+  price: number;
+  display: string;
+}[] = [
+  { value: "30min", label: "30 Minutes", price: 300, display: "Rs 300/30 min" },
+  { value: "1hr", label: "1 Hour", price: 499, display: "Rs 499/hr" },
+];
+
 const SessionBooking: React.FC = () => {
   const [bookedCalls, setBookedCalls] = useState<SessionDetails[]>([]);
   const [bookedDates, setBookedDates] = useState<string[]>([]);
@@ -26,13 +38,15 @@ const SessionBooking: React.FC = () => {
   const [bookingToPostpone, setBookingToPostpone] =
     useState<SessionDetails | null>(null);
   const [hiring, setHiring] = useState<Hiring[] | []>([]);
+  const [selectedDuration, setSelectedDuration] =
+    useState<SessionDuration>("1hr");
 
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
   const { error, loading, sessions } = useSelector(
-    (root: RootState) => root.session
+    (root: RootState) => root.session,
   );
 
   const { user } = useUser();
@@ -69,6 +83,10 @@ const SessionBooking: React.FC = () => {
     setErrorModalOpen(true);
   };
 
+  const activeOption = SESSION_OPTIONS.find(
+    (o) => o.value === selectedDuration,
+  )!;
+
   const handleSubmit = async (values: {
     name: string;
     email: string;
@@ -95,10 +113,12 @@ const SessionBooking: React.FC = () => {
         return;
       }
 
+      const { price, label: durationLabel } = activeOption;
+
       const paymentData = {
         orderId: `#ASM-${Date.now()}`,
-        totalAmount: 499,
-        amount: 499,
+        totalAmount: price,
+        amount: price,
         currency: "INR",
         productInfo: "Mentoons One-On-One Session",
         customerName: name,
@@ -110,10 +130,11 @@ const SessionBooking: React.FC = () => {
         items: [
           {
             productName: "One-On-One Session",
-            price: 1,
+            price,
             quantity: 1,
             date: selectedDate,
             time: selectedTime,
+            duration: durationLabel,
             description: description || "No additional details provided",
             state,
           },
@@ -129,6 +150,7 @@ const SessionBooking: React.FC = () => {
           phone,
           date: selectedDate,
           time: selectedTime,
+          duration: durationLabel,
           description: description || "No additional details provided",
           state,
         },
@@ -143,7 +165,7 @@ const SessionBooking: React.FC = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       console.log("response data :", response.data);
@@ -173,11 +195,11 @@ const SessionBooking: React.FC = () => {
         if (
           error.response.status === 400 &&
           error.response.data.message?.includes(
-            "psychologists are fully booked"
+            "psychologists are fully booked",
           )
         ) {
           showErrorModal(
-            "All psychologists are fully booked at the selected date and time. Please choose another slot."
+            "All psychologists are fully booked at the selected date and time. Please choose another slot.",
           );
         } else {
           showErrorModal(errorMessage);
@@ -186,7 +208,7 @@ const SessionBooking: React.FC = () => {
         showErrorModal(
           error instanceof Error
             ? error.message
-            : "Failed to process payment. Please try again later."
+            : "Failed to process payment. Please try again later.",
         );
       }
     }
@@ -244,9 +266,48 @@ const SessionBooking: React.FC = () => {
                 Book a one-on-one session now!
               </p>
 
-              <div className="flex items-center justify-center gap-2 text-xl font-semibold text-green-600 md:text-2xl">
-                <span>₹</span>
-                <span>Rs 499/hr</span>
+              <div className="mb-6">
+                <p className="mb-3 text-sm font-semibold text-center text-gray-500 uppercase tracking-wide">
+                  Choose Session Duration
+                </p>
+                <div className="flex gap-3 justify-center">
+                  {SESSION_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setSelectedDuration(option.value)}
+                      className={`flex-1 max-w-[180px] flex flex-col items-center gap-1 py-3 px-4 rounded-xl border-2 transition-all duration-200 ${
+                        selectedDuration === option.value
+                          ? "border-orange-500 bg-orange-50 shadow-md"
+                          : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/40"
+                      }`}
+                    >
+                      <span
+                        className={`text-sm font-semibold ${
+                          selectedDuration === option.value
+                            ? "text-orange-600"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                      <span
+                        className={`text-lg font-extrabold ${
+                          selectedDuration === option.value
+                            ? "text-orange-500"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        ₹{option.price}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-center gap-2 mt-4 text-xl font-semibold text-green-600 md:text-2xl">
+                  <span>₹</span>
+                  <span>{activeOption.display}</span>
+                </div>
               </div>
 
               <SessionBookingForm handleSubmit={handleSubmit} />

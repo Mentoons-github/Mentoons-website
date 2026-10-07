@@ -61,7 +61,6 @@ export const fetchProducts = createAsyncThunk<
 >(
   "products/fetchProducts",
   async ({ type, cardType, ageCategory, token }, thunkAPI) => {
-    
     const state = thunkAPI.getState().products;
     const { search, sortBy, order, page, limit } = state;
 
@@ -85,19 +84,19 @@ export const fetchProducts = createAsyncThunk<
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return { items: response.data.data, total: response.data.total };
     } catch (error: unknown) {
       console.log("error found while fetching : ", error);
       if (axios.isAxiosError(error)) {
         return thunkAPI.rejectWithValue(
-          error.response?.data?.message || error.message
+          error.response?.data?.message || error.message,
         );
       }
       return thunkAPI.rejectWithValue("An unknown error occurred");
     }
-  }
+  },
 );
 
 export const fetchAllProducts = createAsyncThunk<
@@ -112,13 +111,13 @@ export const fetchAllProducts = createAsyncThunk<
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
     return thunkAPI.rejectWithValue("An unknown error occurred");
@@ -133,14 +132,14 @@ export const fetchProductById = createAsyncThunk<
 >("products/fetchProductById", async (id, thunkAPI) => {
   try {
     const response = await axios.get(
-      `${import.meta.env.VITE_PROD_URL}/products/${id}`
+      `${import.meta.env.VITE_PROD_URL}/products/${id}`,
       // `http://localhost:4000/api/v1/products/${id}`
     );
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
     return thunkAPI.rejectWithValue("An unknown error occurred");
@@ -167,8 +166,7 @@ export const createProduct = createAsyncThunk<
     // Handle product images
     if ("productImages" in productData && productData.productImages) {
       const images = productData.productImages as (
-        | File
-        | { _id: string; imageUrl: string }
+        File | { _id: string; imageUrl: string }
       )[];
       images.forEach((image) => {
         if (image instanceof File) {
@@ -202,13 +200,13 @@ export const createProduct = createAsyncThunk<
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
     return thunkAPI.rejectWithValue("An unknown error occurred");
@@ -226,8 +224,7 @@ export const updateProduct = createAsyncThunk<
 
     if ("productImages" in updatedData && updatedData.productImages) {
       const images = updatedData.productImages as (
-        | File
-        | { _id: string; imageUrl: string }
+        File | { _id: string; imageUrl: string }
       )[];
       images.forEach((image) => {
         if (image instanceof File) {
@@ -261,13 +258,13 @@ export const updateProduct = createAsyncThunk<
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
     return thunkAPI.rejectWithValue("An unknown error occurred");
@@ -286,7 +283,7 @@ export const deleteProduct = createAsyncThunk<
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.message || error.message,
       );
     }
     return thunkAPI.rejectWithValue("An unknown error occurred");
@@ -303,7 +300,7 @@ const productSlice = createSlice({
     },
     setSort(
       state,
-      action: PayloadAction<{ sortBy: string; order: "asc" | "desc" }>
+      action: PayloadAction<{ sortBy: string; order: "asc" | "desc" }>,
     ) {
       state.sortBy = action.payload.sortBy;
       state.order = action.payload.order;
@@ -325,12 +322,12 @@ const productSlice = createSlice({
       fetchProducts.fulfilled,
       (
         state,
-        action: PayloadAction<{ items: ProductBase[]; total: number }>
+        action: PayloadAction<{ items: ProductBase[]; total: number }>,
       ) => {
         state.loading = false;
         state.items = action.payload.items;
         state.total = action.payload.total;
-      }
+      },
     );
     builder.addCase(fetchProducts.rejected, (state) => {
       state.loading = false;
@@ -350,13 +347,13 @@ const productSlice = createSlice({
           "_id" in p && "_id" in action.payload
             ? p._id === action.payload._id
             : "id" in p && "id" in action.payload
-            ? p.id === action.payload.id
-            : false
+              ? p.id === action.payload.id
+              : false,
         );
         if (index !== -1) {
           state.items[index] = action.payload as unknown as ProductBase;
         }
-      }
+      },
     );
     builder.addCase(fetchProductById.rejected, (state) => {
       state.loading = false;
@@ -373,7 +370,7 @@ const productSlice = createSlice({
       (state, action: PayloadAction<ProductBase[]>) => {
         state.loading = false;
         state.items = action.payload;
-      }
+      },
     );
     builder.addCase(fetchAllProducts.rejected, (state, action) => {
       state.loading = false;
@@ -391,7 +388,7 @@ const productSlice = createSlice({
         state.loading = false;
         state.items.unshift(action.payload as unknown as ProductBase); // Add new product to the beginning.
         state.total += 1;
-      }
+      },
     );
     builder.addCase(createProduct.rejected, (state) => {
       state.loading = false;
@@ -411,13 +408,13 @@ const productSlice = createSlice({
           "_id" in p && "_id" in action.payload
             ? p._id === action.payload._id
             : "id" in p && "id" in action.payload
-            ? p.id === action.payload.id
-            : false
+              ? p.id === action.payload.id
+              : false,
         );
         if (index !== -1) {
           state.items[index] = action.payload as unknown as ProductBase;
         }
-      }
+      },
     );
     builder.addCase(updateProduct.rejected, (state) => {
       state.loading = false;
@@ -437,10 +434,10 @@ const productSlice = createSlice({
         state.items = state.items.filter(
           (p) =>
             !("_id" in p && p._id === action.payload) &&
-            !("id" in p && p.id === action.payload)
+            !("id" in p && p.id === action.payload),
         );
         state.total -= 1;
-      }
+      },
     );
     builder.addCase(deleteProduct.rejected, (state) => {
       state.loading = false;

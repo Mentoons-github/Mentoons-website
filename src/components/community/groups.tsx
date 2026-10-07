@@ -55,7 +55,6 @@ const GroupsSection = ({
 
   return (
     <div className="my-12 space-y-16">
-      {/* ---------------- JOINED GROUPS ---------------- */}
       <h1 className="text-3xl font-bold mb-6">Your Groups</h1>
 
       {loading ? (
@@ -79,7 +78,7 @@ const GroupsSection = ({
             Retry
           </button>
         </div>
-      ) : groups.joinedGroups.length > 0 ? (
+      ) : groups?.joinedGroups?.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {groups.joinedGroups.map(({ _id, name, profileImage, members }) => (
             <NavLink
@@ -103,7 +102,6 @@ const GroupsSection = ({
         </div>
       )}
 
-      {/* ---------------- SUGGESTED GROUPS ---------------- */}
       <div>
         <h1 className="text-3xl font-bold mb-6">Suggested Groups</h1>
 

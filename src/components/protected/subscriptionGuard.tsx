@@ -20,14 +20,16 @@ const SubscriptionGuard = ({ children }: { children: React.ReactNode }) => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
-        const userData = res.data;
-        const isFree = userData.subscription?.plan === "free";
-        const trialEnd = new Date(
-          userData.subscriptionLimits?.freeTrialEndDate
-        );
+        const userData = res.data.data;
+        const isFree = userData?.subscription?.plan === "free";
+        const trialEndRaw = userData?.subscriptionLimits?.freeTrialEndDate;
+
+        if (!trialEndRaw) return;
+
+        const trialEnd = new Date(trialEndRaw);
         const now = new Date();
 
         if (isFree && trialEnd < now) {
@@ -49,16 +51,14 @@ const SubscriptionGuard = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      {showModal && (
-        <SubscriptionLimitModal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          title="Free Trial Expired"
-          message="Your 3-day trial has ended. Upgrade to continue enjoying the content."
-          planType="free"
-          productId=""
-        />
-      )}
+      <SubscriptionLimitModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Free Trial Expired"
+        message="Your 3-day trial has ended. Upgrade to continue enjoying the content."
+        planType="free"
+        productId=""
+      />
       {children}
     </>
   );

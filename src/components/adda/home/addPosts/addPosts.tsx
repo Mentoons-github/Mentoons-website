@@ -13,6 +13,7 @@ import { FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import PostUpload from "../modal/postUpload";
 import ErrorModal from "../../modal/error";
+import { useBadge } from "@/context/adda/badgeContext";
 
 interface PostData {
   _id: string;
@@ -61,6 +62,8 @@ interface AddPostsRef {
   setPendingPost?: (post: PostData) => void;
 }
 
+const chipColors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
+
 const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
   ({ setLatestPost, onPostCreated, setPendingPost }, ref) => {
     const { isSignedIn } = useUser();
@@ -85,9 +88,10 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
       actionText?: string;
       onAction?: () => void;
     }>({ error: "", action: "nav" });
+    const { showBadge } = useBadge();
+
     const navigate = useNavigate();
 
-    // Handle clipboard paste event
     useEffect(() => {
       const handlePaste = (event: ClipboardEvent) => {
         const items = event.clipboardData?.items;
@@ -188,6 +192,8 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
           },
         });
 
+        console.log("response data : ", response.data.badge);
+
         if (response.data.success) {
           setTextContent("");
           setIsTextInputActive(false);
@@ -202,6 +208,14 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
             typeof response.data.data === "object"
           ) {
             postData = response.data.data;
+          }
+
+          if (response.data.badge) {
+            showBadge(response.data.badge);
+          }
+
+          if (response.data.badges && Array.isArray(response.data.badges)) {
+            showBadge(response.data.badges);
           }
 
           const structuredPost: PostData = {
@@ -278,43 +292,164 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
 
     return (
       <>
-        <div className="relative flex flex-col w-full p-5 bg-white border border-orange-200 rounded-2xl shadow-md shadow-orange-100/70">
-          {/* Top Section: Avatar + Blog Input */}
+        <style>{`
+          @keyframes ap-pop {
+            0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+            70%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          }
+          @keyframes ap-slam {
+            0%   { transform: scale(1.8) rotate(-4deg); opacity: 0; }
+            60%  { transform: scale(0.97) rotate(0.5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          }
+          .ap-pop  { animation: ap-pop 0.4s cubic-bezier(.2,.9,.3,1.4) both; }
+          .ap-slam { animation: ap-slam 0.4s cubic-bezier(.2,.8,.3,1) both; }
+
+          .ap-font {
+            font-family: var(--font-comic) !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.05em;
+          }
+          .ap-chip-font {
+            font-family: var(--font-comic-chip, var(--font-comic)) !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.04em;
+          }
+
+          .ap-card {
+            background-color: #fffbeb;
+            background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+            background-size: 14px 14px;
+            border: 3px solid #000;
+            box-shadow: 6px 6px 0 #000;
+            border-radius: 14px;
+          }
+
+          .ap-avatar {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 999px;
+            transition: transform 0.15s cubic-bezier(.34,1.56,.64,1);
+          }
+          .ap-avatar:hover { transform: rotate(-6deg) scale(1.08); }
+
+          .ap-input {
+            background: #fff;
+            color: #000;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 10px;
+            outline: none;
+            transition: box-shadow 0.1s ease, transform 0.1s ease, background 0.1s ease;
+          }
+          .ap-input::placeholder { color: #6b7280; }
+          .ap-input:focus {
+            background: #fffef2;
+            box-shadow: 5px 5px 0 #f97316, 5px 5px 0 1px #000;
+            transform: translate(-2px, -2px);
+          }
+
+          .ap-tag {
+            background: #fde047;
+            color: #000;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 8px;
+            padding: 1px 10px;
+            transform: rotate(-2deg) skewX(-6deg);
+            display: inline-block;
+          }
+
+          .ap-cta {
+            background: #f97316;
+            color: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            border-radius: 10px;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            transform: rotate(-2deg);
+            transition: box-shadow 0.1s ease, background 0.1s ease, transform 0.1s ease;
+          }
+          .ap-cta:hover:not(:disabled) { background: #fb923c; transform: rotate(-2deg) scale(1.06); }
+          .ap-cta:active:not(:disabled) { box-shadow: 0 0 0 #000; transform: rotate(-2deg) translate(3px, 3px); }
+          .ap-cta:disabled { opacity: 0.6; cursor: not-allowed; }
+
+          .ap-divider {
+            border: 0;
+            border-top: 3px dashed #000;
+            opacity: 0.85;
+          }
+
+          .ap-action {
+            background: var(--chip);
+            color: #fff;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 8px;
+            transform: rotate(var(--rot, 0deg));
+            transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          }
+          .ap-action:hover {
+            transform: rotate(0deg) translate(-2px, -2px) scale(1.06);
+            box-shadow: 6px 6px 0 #000;
+          }
+          .ap-action:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0 0 0 #000;
+          }
+          .ap-action-icon {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 6px;
+            padding: 2px;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .ap-pop, .ap-slam { animation: none; }
+          }
+        `}</style>
+
+        <div className="ap-card relative flex flex-col w-full p-5">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0  w-12 h-12 overflow-hidden rounded-full ring-2 ring-orange-200">
-              {user?.imageUrl ? (
-                <img
-                  onClick={() => navigate("/adda/user-profile")}
-                  src={user?.imageUrl}
-                  alt={user?.fullName || "User"}
-                  className="object-cover w-full h-full cursor-pointer"
-                />
-              ) : (
-                <FiUser className="w-10 h-10 mx-auto my-auto text-gray-400" />
-              )}
+            <div className="ap-pop flex-shrink-0">
+              <div className="ap-avatar w-12 h-12 overflow-hidden flex items-center justify-center">
+                {user?.imageUrl ? (
+                  <img
+                    onClick={() => navigate("/adda/user-profile")}
+                    src={user?.imageUrl}
+                    alt={user?.fullName || "User"}
+                    className="object-cover w-full h-full cursor-pointer"
+                  />
+                ) : (
+                  <FiUser className="w-8 h-8 text-gray-500" />
+                )}
+              </div>
             </div>
 
             <div ref={textInputRef} className="flex flex-col w-full gap-3">
               {isTextInputActive ? (
-                <div>
+                <div className="ap-slam flex flex-col gap-3">
                   <textarea
                     rows={5}
                     placeholder="✍️ Share your thoughts or first blog as a parent..."
                     value={textContent}
                     onChange={(e) => setTextContent(e.target.value)}
                     autoFocus
-                    className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                    className="ap-input ap-font w-full resize-none px-4 py-3 text-base"
                   />
                   <div className="w-full">
-                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tags (seperate by coma)
+                    <label className="ap-tag ap-chip-font mb-2 text-sm">
+                      Tags (separate by comma)
                     </label>
                     <input
                       type="text"
                       value={tags}
                       onChange={(e) => setTags(e.target.value)}
                       name="tags"
-                      className="w-full resize-none px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                      className="ap-input ap-font w-full px-4 py-3 mt-2 text-base"
                       placeholder="tag1, tag2, tag3"
                     />
                   </div>
@@ -326,15 +461,15 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
                   value={textContent}
                   onChange={(e) => setTextContent(e.target.value)}
                   onFocus={() => setIsTextInputActive(true)}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-300 transition"
+                  className="ap-input ap-font w-full px-4 py-3 text-base"
                 />
               )}
               {textContent.trim() && (
-                <div className="flex justify-end">
+                <div className="ap-pop flex justify-end">
                   <button
                     onClick={handleTextSubmit}
                     disabled={isSubmitting}
-                    className="px-5 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className="ap-cta ap-font px-6 py-1.5 text-xl uppercase cursor-pointer"
                   >
                     {isSubmitting ? "Publishing..." : "Publish"}
                   </button>
@@ -343,35 +478,39 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
             </div>
           </div>
 
-          <hr className="w-full my-4 border-t border-orange-100" />
+          <hr className="ap-divider w-full my-4" />
 
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center justify-between gap-3">
             {PHOTO_POST.map(({ icon, purpose }, index) => (
               <button
                 key={index}
                 onClick={() =>
                   handlePost(
                     purpose.toLowerCase() as
-                      | "photo"
-                      | "video"
-                      | "event"
-                      | "article",
+                      "photo" | "video" | "event" | "article",
                   )
                 }
-                className="group relative flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 transition rounded-lg hover:bg-orange-50 hover:text-orange-600 flex-1"
+                aria-label={purpose}
+                className="ap-action ap-chip-font group relative flex items-center justify-center gap-2 px-3 py-2 text-sm flex-1 cursor-pointer"
+                style={
+                  {
+                    ["--chip" as string]: chipColors[index % chipColors.length],
+                    ["--rot" as string]: `${index % 2 === 0 ? -2 : 2}deg`,
+                  } as React.CSSProperties
+                }
               >
-                <img
-                  src={icon}
-                  alt={purpose}
-                  className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
-                />
-                {/* Text: visible on md+, hidden on small */}
-                <span className="figtree hidden sm:inline whitespace-nowrap">
+                <span className="ap-action-icon flex items-center justify-center shrink-0">
+                  <img
+                    src={icon}
+                    alt={purpose}
+                    className="w-5 h-5 sm:w-6 sm:h-6"
+                  />
+                </span>
+                <span className="hidden sm:inline whitespace-nowrap uppercase">
                   {purpose}
                 </span>
 
-                {/* Tooltip overlay: only shows on small screens on hover */}
-                <span className="sm:hidden absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                <span className="sm:hidden absolute -top-9 left-1/2 -translate-x-1/2 bg-yellow-300 text-black border-2 border-black text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                   {purpose}
                 </span>
               </button>
@@ -390,13 +529,9 @@ const AddPosts = forwardRef<AddPostsRef, AddPostsProps>(
         )}
 
         <ErrorModal
-          isOpen={isErrorModalOpen}
+          open={isErrorModalOpen}
+          message={errorModalProps.error}
           onClose={() => setIsErrorModalOpen(false)}
-          error={errorModalProps.error}
-          action={errorModalProps.action}
-          link={errorModalProps.link}
-          actionText={errorModalProps.actionText}
-          onAction={errorModalProps.onAction}
         />
       </>
     );

@@ -130,7 +130,7 @@ const CarouselHeader = ({
 
       {/* Decorative image – main parallax hero */}
       <motion.img
-        src="/assets/workshopv2/our-children.png"
+        src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1787297731778-f7efe25d-e02b-4bf0-b9d6-ed6458d8cf66.png"
         alt="Decorative growth sparkle"
         className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48 object-contain -mr-4 -mt-8 md:-mr-6 md:-mt-10 pointer-events-none"
         style={{

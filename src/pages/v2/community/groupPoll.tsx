@@ -16,9 +16,10 @@ const GroupPolls: React.FC<GroupPollsProps> = ({ groupId }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const { selectedGroup, loading, error } = useSelector(
-    (state: RootState) => state.groups
+    (state: RootState) => state.groups,
   );
   const polls = selectedGroup?.polls || [];
+  console.log("polls from backend:", polls);
   const [showCreatePoll, setShowCreatePoll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");

@@ -67,4 +67,6 @@ export type {
   Admin,
 };
 
+export * from "./employee";
+
 export { ProductType };

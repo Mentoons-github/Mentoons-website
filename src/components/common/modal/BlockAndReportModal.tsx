@@ -46,7 +46,7 @@ const ReportAbuseModal = ({
 
   const validationSchema =
     modalType === "unblock"
-      ? Yup.object({}) // 👈 no validation needed
+      ? Yup.object({})
       : Yup.object({
           selectedReason: Yup.string().required("Please select a reason"),
           customReason: Yup.string().when("selectedReason", {

@@ -21,6 +21,7 @@ import useSocket from "./hooks/adda/useSocket";
 import { Message } from "./types";
 import { SubmissionModalProvider } from "./context/adda/commonModalContext";
 import attachAuthInterceptor from "./api/axiosInstance/axiosInstance";
+import { BadgeProvider } from "./context/adda/badgeContext";
 
 const AppContent = () => {
   const { getToken, userId, signOut, isLoaded } = useAuth();
@@ -28,7 +29,7 @@ const AppContent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { socket, mongoUserId } = useSocket();
   const currentOpenConversationId = useSelector(
-    (state: RootState) => state.conversation.conversationId
+    (state: RootState) => state.conversation.conversationId,
   );
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const AppContent = () => {
           message: data.message,
           fileType: data.fileType,
           updatedAt: data.createdAt,
-        })
+        }),
       );
 
       if (data.conversationId === currentOpenConversationId) {
@@ -75,14 +76,14 @@ const AppContent = () => {
           resetUnreadCount({
             conversationId: data.conversationId,
             userId: mongoUserId,
-          })
+          }),
         );
       } else {
         dispatch(
           incrementUnreadCount({
             conversationId: data.conversationId,
             userId: mongoUserId,
-          })
+          }),
         );
       }
     });
@@ -106,13 +107,16 @@ const AppContent = () => {
 const App = () => {
   return (
     <Provider store={store}>
-      <SocketProvider>
-        <RewardsProvider>
-          <SubmissionModalProvider>
-            <AppContent />
-          </SubmissionModalProvider>
-        </RewardsProvider>
-      </SocketProvider>
+      <BadgeProvider>
+        {" "}
+        <SocketProvider>
+          <RewardsProvider>
+            <SubmissionModalProvider>
+              <AppContent />
+            </SubmissionModalProvider>
+          </RewardsProvider>
+        </SocketProvider>
+      </BadgeProvider>
     </Provider>
   );
 };

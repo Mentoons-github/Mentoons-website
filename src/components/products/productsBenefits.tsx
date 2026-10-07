@@ -8,10 +8,9 @@ const ProductsBenefits = () => {
   const [active, setActive] = useState<string[] | null>(
     Object.values(PRODUCTS_BENEFITS)[0] || null
   );
-  const listRef = useRef<HTMLUListElement | null>(null); // Ref for the <ul> element
+  const listRef = useRef<HTMLUListElement | null>(null);
 
-  // Define navigation bar height (adjust based on your actual nav height)
-  const NAV_HEIGHT = 80; // Example: 80px, adjust as needed
+  const NAV_HEIGHT = 80;
 
   const handleButtonClick = (values: string[]) => {
     setActive(values); // Update the active benefits
@@ -43,7 +42,7 @@ const ProductsBenefits = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => handleButtonClick(values)} // Updated to use handleButtonClick
+                onClick={() => handleButtonClick(values)}
                 className="w-full sm:w-2/5 md:w-1/3 lg:w-1/4 h-12 sm:h-16 text-md sm:text-sm md:text-[14px] lg:text-md xl:text-xl flex items-center justify-center rounded-full border border-black border-2 font-bold text-base transition-all montserrat text-[#0C0A09] whitespace-nowrap px-4"
                 style={{
                   backgroundColor: active === values ? "#FCE83E" : "#D9D9D9",
@@ -57,7 +56,7 @@ const ProductsBenefits = () => {
 
         <div className="flex justify-center items-center w-full my-2 sm:my-5">
           <ul
-            ref={listRef} // Attach ref to the <ul> element
+            ref={listRef}
             className="w-full sm:w-4/5 md:w-2/3 min-h-[200px] space-y-2 md:space-y-6 sm:space-y-10 p-3 sm:p-5 poppins"
           >
             {active &&

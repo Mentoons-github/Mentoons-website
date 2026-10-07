@@ -3,22 +3,27 @@ import {
   BackgroundIcons,
   containerVariants,
 } from "@/utils/assessment/quizAndAssessment";
-import { CircleHelp } from "lucide-react";
+import { CircleHelp, Check, X } from "lucide-react";
 
 interface Option {
   text: string;
   score: number;
+  isCorrect?: boolean;
 }
 
 interface Question {
   _id: string;
   question: string;
+  image?: string;
+  icon?: string;
+  answer?: string;
   options: Option[];
 }
 
 interface QuizData {
   _id: string;
   category: string;
+  quizType?: "score" | "knowledge";
   questions: Question[];
 }
 
@@ -34,8 +39,13 @@ interface QuizQuestionProps {
   }>;
   currentQuestion: number;
   answers: Record<number, number>;
+  selectedOptionIndex?: Record<number, number>;
   progress: number;
-  onAnswerSelect: (score: number) => void;
+  onAnswerSelect: (
+    score: number,
+    optionIndex: number,
+    isCorrect: boolean,
+  ) => void;
   onNext: () => void;
   onPaymentPrompt: () => void;
   hasPaid: boolean;
@@ -43,11 +53,20 @@ interface QuizQuestionProps {
   onClosePaymentModal?: () => void;
 }
 
+const isOptionCorrect = (option: Option, question: Question): boolean => {
+  if (option.isCorrect) return true;
+  if (!question.answer) return false;
+  return (
+    option.text.trim().toLowerCase() === question.answer.trim().toLowerCase()
+  );
+};
+
 const QuizQuestions: React.FC<QuizQuestionProps> = ({
   quiz,
   backgroundIcons,
   currentQuestion,
   answers,
+  selectedOptionIndex,
   progress,
   onAnswerSelect,
   onNext,
@@ -57,6 +76,8 @@ const QuizQuestions: React.FC<QuizQuestionProps> = ({
   onClosePaymentModal,
 }) => {
   const question = quiz.questions[currentQuestion];
+  const isKnowledge = quiz.quizType === "knowledge";
+
   if (!question) return null;
 
   const progressVariants = {
@@ -65,6 +86,15 @@ const QuizQuestions: React.FC<QuizQuestionProps> = ({
       width: `${progress}%`,
       transition: { type: "spring", stiffness: 100, damping: 15 },
     },
+  };
+
+  const hasAnswered = answers[currentQuestion] !== undefined;
+  const pickedIndex = selectedOptionIndex?.[currentQuestion];
+
+  const handleSelect = (option: Option, index: number) => {
+    if (hasAnswered) return;
+    const correct = isOptionCorrect(option, question);
+    onAnswerSelect(correct ? 1 : 0, index, correct);
   };
 
   return (
@@ -91,7 +121,15 @@ const QuizQuestions: React.FC<QuizQuestionProps> = ({
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <CircleHelp className="w-8 h-8 text-blue-600" />
+              {question.icon ? (
+                <img
+                  src={question.icon}
+                  alt="quiz icon"
+                  className="w-8 h-8 rounded-lg object-cover"
+                />
+              ) : (
+                <CircleHelp className="w-8 h-8 text-blue-600" />
+              )}
               <span className="font-semibold text-gray-800">
                 {quiz.category}
               </span>
@@ -112,45 +150,114 @@ const QuizQuestions: React.FC<QuizQuestionProps> = ({
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
+              {question.image && (
+                <div className="flex justify-center mb-6">
+                  <img
+                    src={question.image}
+                    alt="question visual"
+                    className="max-h-56 w-full max-w-md object-cover rounded-2xl shadow-md"
+                  />
+                </div>
+              )}
+
               <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
                 {question.question}
               </h2>
 
               <div className="grid grid-cols-1 gap-4 mb-8">
-                {question.options.map((option, index) => (
-                  <motion.button
-                    key={index}
-                    onClick={() => onAnswerSelect(option.score)}
-                    disabled={answers[currentQuestion] !== undefined}
-                    className={`p-6 text-left rounded-xl border-2 transition-all min-h-[80px] flex items-center ${
-                      answers[currentQuestion] === option.score
-                        ? "border-blue-500 bg-blue-50 shadow-lg"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
-                    } ${
-                      answers[currentQuestion] !== undefined
-                        ? "cursor-not-allowed"
-                        : ""
-                    }`}
-                    whileHover={
-                      answers[currentQuestion] !== undefined
-                        ? {}
-                        : { scale: 1.02 }
+                {question.options.map((option, index) => {
+                  if (isKnowledge) {
+                    const correct = isOptionCorrect(option, question);
+                    const isPicked = pickedIndex === index;
+                    let stateClasses =
+                      "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md";
+
+                    if (hasAnswered) {
+                      if (correct) {
+                        stateClasses =
+                          "border-emerald-400 bg-emerald-50 shadow-lg";
+                      } else if (isPicked) {
+                        stateClasses = "border-red-400 bg-red-50 shadow-lg";
+                      } else {
+                        stateClasses = "border-gray-200 opacity-60";
+                      }
                     }
-                    whileTap={
-                      answers[currentQuestion] !== undefined
-                        ? {}
-                        : { scale: 0.98 }
-                    }
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div className="font-medium text-gray-800">
-                      {option.text}
-                    </div>
-                  </motion.button>
-                ))}
+
+                    return (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleSelect(option, index)}
+                        disabled={hasAnswered}
+                        className={`p-6 text-left rounded-xl border-2 transition-all min-h-[80px] flex items-center justify-between ${stateClasses} ${
+                          hasAnswered ? "cursor-not-allowed" : ""
+                        }`}
+                        whileHover={hasAnswered ? {} : { scale: 1.02 }}
+                        whileTap={hasAnswered ? {} : { scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <div className="font-medium text-gray-800">
+                          {option.text}
+                        </div>
+                        {hasAnswered && correct && (
+                          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                            <Check className="w-4 h-4" />
+                          </span>
+                        )}
+                        {hasAnswered && !correct && isPicked && (
+                          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center">
+                            <X className="w-4 h-4" />
+                          </span>
+                        )}
+                      </motion.button>
+                    );
+                  }
+
+                  return (
+                    <motion.button
+                      key={index}
+                      onClick={() => onAnswerSelect(option.score, index, false)}
+                      disabled={answers[currentQuestion] !== undefined}
+                      className={`p-6 text-left rounded-xl border-2 transition-all min-h-[80px] flex items-center ${
+                        answers[currentQuestion] === option.score
+                          ? "border-blue-500 bg-blue-50 shadow-lg"
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
+                      } ${
+                        answers[currentQuestion] !== undefined
+                          ? "cursor-not-allowed"
+                          : ""
+                      }`}
+                      whileHover={
+                        answers[currentQuestion] !== undefined
+                          ? {}
+                          : { scale: 1.02 }
+                      }
+                      whileTap={
+                        answers[currentQuestion] !== undefined
+                          ? {}
+                          : { scale: 0.98 }
+                      }
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <div className="font-medium text-gray-800">
+                        {option.text}
+                      </div>
+                    </motion.button>
+                  );
+                })}
               </div>
+
+              {isKnowledge && hasAnswered && question.answer && (
+                <div className="mb-6 text-center text-sm text-gray-500">
+                  Correct answer:{" "}
+                  <span className="font-semibold text-gray-700">
+                    {question.answer}
+                  </span>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 

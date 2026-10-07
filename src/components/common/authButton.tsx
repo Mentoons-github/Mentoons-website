@@ -1,8 +1,15 @@
-import { FaUser, FaUserCircle } from "react-icons/fa";
-import { NavLink, useNavigate } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, ChevronDown, SquareUserRound } from "lucide-react";
+import {
+  User,
+  LogOut,
+  ChevronDown,
+  SquareUserRound,
+  LogIn,
+  UserPlus,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { FaBox } from "react-icons/fa6";
 import { MdPayment } from "react-icons/md";
@@ -13,8 +20,10 @@ const AuthButton = () => {
   const navigate = useNavigate();
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const accountDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleProfileClick = () => {
     setShowProfileDropdown(!showProfileDropdown);
@@ -26,6 +35,23 @@ const AuthButton = () => {
 
   const handleDropdownMouseLeave = () => {
     setShowProfileDropdown(false);
+  };
+
+  const handleAccountClick = () => {
+    setShowAccountDropdown(!showAccountDropdown);
+  };
+
+  const handleAccountDropdownMouseEnter = () => {
+    setShowAccountDropdown(true);
+  };
+
+  const handleAccountDropdownMouseLeave = () => {
+    setShowAccountDropdown(false);
+  };
+
+  const handleAccountNavigation = (page: "sign-in" | "sign-up") => {
+    setShowAccountDropdown(false);
+    navigate(`/${page}`, { state: { from: window.location.pathname } });
   };
 
   const handleLogout = async () => {
@@ -57,6 +83,12 @@ const AuthButton = () => {
         !profileDropdownRef.current.contains(event.target as Node)
       ) {
         setShowProfileDropdown(false);
+      }
+      if (
+        accountDropdownRef.current &&
+        !accountDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowAccountDropdown(false);
       }
     };
 
@@ -343,23 +375,61 @@ const AuthButton = () => {
       </SignedIn>
 
       <SignedOut>
-        {/* ... sign in button unchanged ... */}
-        <NavLink to="/sign-in" state={{ from: window.location.pathname }}>
-          <motion.div
+        <div
+          className="relative"
+          ref={accountDropdownRef}
+          onMouseEnter={handleAccountDropdownMouseEnter}
+          onMouseLeave={handleAccountDropdownMouseLeave}
+        >
+          <motion.button
             variants={buttonVariants}
             initial="idle"
             whileHover="hover"
             whileTap="tap"
-            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
+            onClick={handleAccountClick}
+            className="flex items-center gap-1.5 px-4 h-[38px] rounded-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
           >
-            <div className="w-8 h-8 bg-white/20 rounded-full flex-shrink-0 flex items-center justify-center">
-              <FaUser className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-semibold text-sm truncate">
-              Sign In / Sign Up
-            </span>
-          </motion.div>
-        </NavLink>
+            Account
+            <motion.span
+              animate={{ rotate: showAccountDropdown ? 180 : 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="flex items-center"
+            >
+              <ChevronDown className="w-4 h-4 text-white/80" />
+            </motion.span>
+          </motion.button>
+
+          <AnimatePresence>
+            {showAccountDropdown && (
+              <motion.div
+                variants={dropdownVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden z-[10001] p-1.5"
+              >
+                <motion.div
+                  variants={itemVariants}
+                  onClick={() => handleAccountNavigation("sign-in")}
+                  whileHover={{ x: 2 }}
+                  className="px-3 py-2 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-2 text-slate-700 text-sm"
+                >
+                  <LogIn className="w-4 h-4 text-slate-500" />
+                  Sign in
+                </motion.div>
+                <motion.div
+                  variants={itemVariants}
+                  onClick={() => handleAccountNavigation("sign-up")}
+                  whileHover={{ x: 2 }}
+                  className="px-3 py-2 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-2 text-slate-700 text-sm"
+                >
+                  <UserPlus className="w-4 h-4 text-slate-500" />
+                  Sign up
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </SignedOut>
     </motion.div>
   );

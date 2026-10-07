@@ -20,38 +20,51 @@ const AboutWorkshop = ({ categories }: AboutWorkshopProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Track whether we're on a mobile viewport. Below lg, we skip the
+  // scroll-linked fade/translate on the text block entirely, since on
+  // short mobile viewports the scroll range needed to reach opacity: 1
+  // often isn't fully traversed, leaving text stuck partially hidden.
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  const titleOpacity = useTransform(
+  const titleOpacityRaw = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
     [0, 1, 1, 1],
   );
-  const titleX = useTransform(scrollYProgress, [0, 0.3], [-100, 0]);
+  const titleXRaw = useTransform(scrollYProgress, [0, 0.3], [-100, 0]);
 
-  const rotateOpacity = useTransform(
+  const rotateOpacityRaw = useTransform(
     scrollYProgress,
     [0.1, 0.4, 0.7, 1],
     [0, 1, 1, 1],
   );
-  const rotateY = useTransform(scrollYProgress, [0.1, 0.4], [30, 0]);
+  const rotateYRaw = useTransform(scrollYProgress, [0.1, 0.4], [30, 0]);
 
-  const para1Opacity = useTransform(
+  const para1OpacityRaw = useTransform(
     scrollYProgress,
     [0.2, 0.5, 0.7, 1],
     [0, 1, 1, 1],
   );
-  const para1Y = useTransform(scrollYProgress, [0.2, 0.5], [40, 0]);
+  const para1YRaw = useTransform(scrollYProgress, [0.2, 0.5], [40, 0]);
 
-  const para2Opacity = useTransform(
+  const para2OpacityRaw = useTransform(
     scrollYProgress,
     [0.3, 0.6, 0.7, 1],
     [0, 1, 1, 1],
   );
-  const para2Y = useTransform(scrollYProgress, [0.3, 0.6], [40, 0]);
+  const para2YRaw = useTransform(scrollYProgress, [0.3, 0.6], [40, 0]);
 
   const imageOpacity = useTransform(
     scrollYProgress,
@@ -61,6 +74,17 @@ const AboutWorkshop = ({ categories }: AboutWorkshopProps) => {
   const imageX = useTransform(scrollYProgress, [0.2, 0.5], [200, 0]);
   const imageRotate = useTransform(scrollYProgress, [0.2, 0.5], [15, 0]);
   const imageScale = useTransform(scrollYProgress, [0.2, 0.5], [0.8, 1]);
+
+  // On mobile, force these to static "settled" values (fully visible,
+  // no offset) instead of the scroll-driven ones, so the text always shows.
+  const titleOpacity = isMobile ? 1 : titleOpacityRaw;
+  const titleX = isMobile ? 0 : titleXRaw;
+  const rotateOpacity = isMobile ? 1 : rotateOpacityRaw;
+  const rotateY = isMobile ? 0 : rotateYRaw;
+  const para1Opacity = isMobile ? 1 : para1OpacityRaw;
+  const para1Y = isMobile ? 0 : para1YRaw;
+  const para2Opacity = isMobile ? 1 : para2OpacityRaw;
+  const para2Y = isMobile ? 0 : para2YRaw;
 
   useEffect(() => {
     if (workshopImages.length <= 1) return;
@@ -128,35 +152,51 @@ const AboutWorkshop = ({ categories }: AboutWorkshopProps) => {
           rotate: imageRotate,
           scale: imageScale,
         }}
-        className="flex items-center justify-center w-full max-w-md md:max-w-lg flex-1 mt-6 md:mt-0 relative px-4"
+        className="flex flex-col items-center justify-center w-full max-w-md md:max-w-lg flex-1 mt-10 md:mt-0 relative px-4"
       >
+        {/* soft color blob behind the card */}
+        <div className="absolute w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 bg-orange-200/50 rounded-[40%] blur-2xl -z-10" />
+
         {workshopImages.length > 0 ? (
-          <motion.img
+          <motion.div
             key={currentIndex}
-            src={workshopImages[currentIndex]}
-            alt={`workshop-${currentIndex}`}
-            className="shadow-2xl object-cover h-64 w-64 sm:h-80 sm:w-80 md:h-96 md:w-96 rounded-full"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
+            animate={{ opacity: 1, scale: 1, rotate: -2 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
-          />
+            className="relative bg-white p-3 sm:p-4 pb-8 sm:pb-10 rounded-2xl shadow-2xl border border-gray-100 w-64 sm:w-80 md:w-96"
+          >
+            <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+              <img
+                src={workshopImages[currentIndex]}
+                alt={`workshop-${currentIndex}`}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rotate-2 bg-orange-500 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-md">
+              Workshop Moments
+            </span>
+          </motion.div>
         ) : (
-          <img
-            src="/assets/workshopv2/workshopNew.png"
-            alt="default-workshop"
-            className="rounded-2xl shadow-lg object-contain max-h-64 sm:max-h-80 md:max-h-96 w-full"
-          />
+          <div className="relative bg-white p-3 sm:p-4 rounded-2xl shadow-2xl border border-gray-100 w-64 sm:w-80 md:w-96">
+            <img
+              src="/assets/workshopv2/workshopNew.png"
+              alt="default-workshop"
+              className="rounded-xl object-contain w-full aspect-square"
+            />
+          </div>
         )}
 
         {workshopImages.length > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="mt-4 sm:mt-5 flex gap-2">
             {workshopImages.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className={`h-2 w-2 rounded-full transition-all ${
-                  i === currentIndex ? "bg-primary w-4" : "bg-gray-300"
+                className={`h-2 rounded-full transition-all ${
+                  i === currentIndex
+                    ? "bg-orange-500 w-5"
+                    : "bg-gray-300 w-2 hover:bg-gray-400"
                 }`}
               />
             ))}

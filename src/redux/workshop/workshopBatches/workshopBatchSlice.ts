@@ -12,7 +12,7 @@ import {
   WorkshopPagination,
 } from "@/types/workshopsV2/workshopBatchTypes";
 
-interface initialStateType {
+export interface InitialStateType {
   loading: boolean;
   error: string | null;
   message: string;
@@ -26,7 +26,7 @@ interface initialStateType {
   allPagination: WorkshopPagination | null;
 }
 
-const initialState: initialStateType = {
+const initialState: InitialStateType = {
   loading: false,
   message: "",
   error: null,
@@ -40,7 +40,8 @@ const initialState: initialStateType = {
   allPagination: null,
 };
 
-export const workshopBatchSlice = createSlice({
+
+const workshopBatchSlice = createSlice({
   name: "workshop_batch",
   initialState,
   reducers: {
@@ -55,34 +56,38 @@ export const workshopBatchSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      //get workshopbatches
+      // get workshop batches
       .addCase(getAllWorkshopBatchesThunk.pending, (state) => {
-        ((state.loading = true), (state.error = null));
+        state.loading = true;
+        state.error = null;
       })
       .addCase(getAllWorkshopBatchesThunk.fulfilled, (state, action) => {
-        ((state.loading = false),
-          (state.error = null),
-          (state.batches = action.payload.data),
-          (state.allPagination = action.payload.pagination));
+        state.loading = false;
+        state.error = null;
+        state.batches = action.payload.data;
+        state.allPagination = action.payload.pagination;
       })
       .addCase(getAllWorkshopBatchesThunk.rejected, (state, action) => {
-        ((state.loading = false), (state.error = action.payload as string));
+        state.loading = false;
+        state.error = action.payload as string;
       })
 
-      //get single workshopbatch
+      // get single workshop batch
       .addCase(getSingleWorkshopBatchThunk.pending, (state) => {
-        ((state.loading = true), (state.error = null));
+        state.loading = true;
+        state.error = null;
       })
       .addCase(getSingleWorkshopBatchThunk.fulfilled, (state, action) => {
-        ((state.loading = false),
-          (state.error = null),
-          (state.singleWorkshopBatch = action.payload));
+        state.loading = false;
+        state.error = null;
+        state.singleWorkshopBatch = action.payload;
       })
       .addCase(getSingleWorkshopBatchThunk.rejected, (state, action) => {
-        ((state.loading = false), (state.error = action.payload as string));
+        state.loading = false;
+        state.error = action.payload as string;
       })
 
-      //assign workshop batch
+      // assign workshop batch
       .addCase(assignWorkshopBatchThunk.pending, (state) => {
         state.assignLoading = true;
         state.error = null;
@@ -109,6 +114,7 @@ export const workshopBatchSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // get psychologist batches
       .addCase(getPsychologistWorkshopBatchesThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -130,7 +136,7 @@ export const workshopBatchSlice = createSlice({
         },
       )
 
-      //add scoring
+      // add scoring
       .addCase(addScoringWorkshopThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -157,7 +163,7 @@ export const workshopBatchSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // update
+      // update scoring
       .addCase(updateScoringWorkshopThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -180,7 +186,6 @@ export const workshopBatchSlice = createSlice({
 
         student.scoring.sessions = [...updatedStudent.scoring.sessions];
       })
-
       .addCase(updateScoringWorkshopThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;

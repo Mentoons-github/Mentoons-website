@@ -26,7 +26,7 @@ const BlockedPage = () => {
         </h1>
 
         <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-          Your account has been permanently blocked.
+          Your account has been temporarily blocked.
         </p>
 
         <div className="bg-red-50 border border-red-200 rounded-xl p-6">

@@ -114,7 +114,6 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
         "<+=0.4",
       );
 
-      // Fade-in for the two decorative images
       tl.fromTo(
         [decor1Ref.current, decor2Ref.current],
         { opacity: 0, y: 40, scale: 0.85 },
@@ -129,7 +128,6 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
         "-=1.2",
       );
 
-      // Gentle floating animation – left image
       gsap.to(decor1Ref.current, {
         y: "-=20",
         rotation: 3,
@@ -139,7 +137,6 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
         ease: "sine.inOut",
       });
 
-      // Gentle floating animation – right image
       gsap.to(decor2Ref.current, {
         y: "+=25",
         rotation: -4,
@@ -230,20 +227,22 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
   };
 
   return (
-    <div className="relative h-screen bg-gradient-to-br from-orange-500 via-orange-400 to-red-500 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-orange-500 via-orange-400 to-red-500 overflow-hidden">
       <img
         ref={decor1Ref}
         src="/assets/hiring/collaborate/collaborate1.png"
-        alt="decorative element left"
-        className="absolute top-[0%] left-[6%] w-32 sm:w-40 md:w-44 opacity-100 pointer-events-none select-none"
+        alt=""
+        aria-hidden="true"
+        className="hidden md:block absolute top-[0%] left-[6%] w-32 md:w-40 lg:w-44 pointer-events-none select-none"
       />
 
-      <img
+      {/* <img
         ref={decor2Ref}
         src="/assets/hiring/collaborate/collaborate.png"
-        alt="decorative element right"
-        className="absolute bottom-[12%] right-[0%] w-64 sm:w-80 md:w-[28rem] lg:w-[32rem] opacity-100 rounded-full pointer-events-none select-none"
-      />
+        alt=""
+        aria-hidden="true"
+        className="hidden md:block absolute bottom-[12%] right-[0%] w-56 md:w-72 lg:w-96 xl:w-[28rem] pointer-events-none select-none"
+      /> */}
 
       {onSearch && (
         <div className="custom-shape-divider-bottom-affiliate">
@@ -265,20 +264,21 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
       {setShowFAQ && <FaqButton setShowFAQ={setShowFAQ} />}
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-start h-full text-white text-center px-4 sm:px-6 md:px-8">
+      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen text-white text-center px-4 sm:px-6 md:px-8 pb-16">
         <h1
           id="title"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wider drop-shadow-lg mt-20 sm:mt-28 md:mt-36 lg:mt-44"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wider drop-shadow-lg mt-32 sm:mt-24 md:mt-32 lg:mt-40"
         >
           {title}
         </h1>
+
         <p
           id="subTitle"
-          className="mt-4 text-base sm:text-lg md:text-xl opacity-90 max-w-lg sm:max-w-xl md:max-w-2xl"
+          className="mt-4 text-base sm:text-lg md:text-xl opacity-90 max-w-sm sm:max-w-xl md:max-w-2xl"
         >
           {subTitle}
         </p>
@@ -287,22 +287,22 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
           <div
             id="search-input"
             ref={searchRef}
-            className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-3xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 backdrop-blur-lg shadow-xl transition-all duration-500"
+            className="mt-6 sm:mt-8 md:mt-10 w-full max-w-xs sm:max-w-md md:max-w-xl lg:max-w-2xl flex items-center bg-white/20 border border-white/40 rounded-full px-4 sm:px-6 py-3 sm:py-4 backdrop-blur-lg shadow-xl transition-all duration-500"
           >
             <input
               type="text"
               placeholder="Search affiliate positions..."
-              className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-lg sm:text-xl md:text-2xl caret-white"
+              className="flex-1 bg-transparent text-white placeholder-white/80 focus:outline-none text-base sm:text-lg md:text-xl caret-white"
               value={inputValue}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
             />
             <button
-              className="ml-2 sm:ml-3 md:ml-4 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
+              className="ml-2 sm:ml-3 p-2 sm:p-3 rounded-full bg-white/30 hover:bg-white/50 transition-colors duration-300"
               onClick={handleSearchClick}
               aria-label="Search"
             >
-              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </button>
             {inputValue && (
               <button
@@ -310,7 +310,7 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
                 onClick={handleClearClick}
                 aria-label="Clear search"
               >
-                <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </button>
             )}
           </div>
@@ -318,7 +318,7 @@ const JobHeroSection: React.FC<JobHeroSectionProps> = ({
           <button
             onClick={() => setShowApplication(true)}
             id="become-mentor"
-            className="px-10 py-3 rounded-2xl text-xl font-semibold mt-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-600/50 hover:-translate-y-2 active:scale-95 active:shadow-inner transition-all duration-400 ease-out [box-shadow:var(--glow,0_0_15px_rgba(255,255,255,0))_inset]"
+            className="px-8 sm:px-10 py-3 rounded-2xl text-lg sm:text-xl font-semibold mt-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-600/50 hover:-translate-y-2 active:scale-95 active:shadow-inner transition-all duration-400 ease-out [box-shadow:var(--glow,0_0_15px_rgba(255,255,255,0))_inset]"
           >
             Join as Mentor
           </button>

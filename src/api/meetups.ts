@@ -8,10 +8,15 @@ interface ApiResponse<T = any> {
 }
 
 export const fetchMeetups = async (
-  search: string = ""
+  search: string = "",
+  token?: string | null,
 ): Promise<ApiResponse> => {
   try {
-    const response = await api.get(`${BASE_URL}/meetup?search=${search}`);
+    const response = await api.get(`${BASE_URL}/meetup?search=${search}`, {
+      headers: {
+        Authorization: `${token ? token : ""}`,
+      },
+    });
     return {
       success: true,
       data: response.data.data,

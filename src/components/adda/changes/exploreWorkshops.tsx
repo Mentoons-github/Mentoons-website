@@ -1,8 +1,8 @@
 import { WorkshopFormValues } from "@/utils/formik/admin/addWorkshopForm";
-import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { getAllWorkshops } from "@/api/workshop/workshops";
+import { useAsyncEffect } from "@/hooks";
 
 const UNWANTED_IMAGE = [
   "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1759234938507-b72e75aa-f04d-495a-bdb8-23ee0223d299.png",
@@ -11,48 +11,33 @@ const UNWANTED_IMAGE = [
 ];
 
 const ExploreWorkshops = () => {
-  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [workshops, setWorkshops] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const fetchWorkshops = useCallback(async () => {
-    try {
-      const token = await getToken();
-      const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/workshop/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  useAsyncEffect(
+    async () => {
+      const response = await getAllWorkshops();
 
       const workshops = response.data.data.flatMap(
         (workshop: WorkshopFormValues) => {
           const allImages = workshop.workshops.flatMap((w) =>
-            w.ageGroups.map((g) => g.image)
+            w.ageGroups.map((g) => g.image),
           );
           const uniqueImages = [...new Set(allImages)];
 
-          const filteredImages = uniqueImages.filter(
-            (img) => !UNWANTED_IMAGE.includes(img as string)
+          return uniqueImages.filter(
+            (img) => !UNWANTED_IMAGE.includes(img as string),
           );
-          return filteredImages;
-        }
+        },
       );
 
       setWorkshops(workshops);
-    } catch (error) {
-      console.error("Error fetching workshops:", error);
-    }
-  }, [getToken]);
-
-  useEffect(() => {
-    fetchWorkshops();
-  }, [fetchWorkshops]);
-
+    },
+    [],
+    { errorMessage: "Error fetching workshops" },
+  );
   // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying || workshops.length === 0) return;

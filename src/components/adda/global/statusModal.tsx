@@ -31,7 +31,10 @@ const StatusModal = () => {
   return (
     <AnimatePresence>
       {status.open && (
-        <div className="fixed bottom-0 left-0 w-full flex justify-center items-center px-4 pb-4 z-50 pointer-events-none">
+        <div
+          key="status-props"
+          className="fixed bottom-0 left-0 w-full flex justify-center items-center px-4 pb-4 z-50 pointer-events-none"
+        >
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}

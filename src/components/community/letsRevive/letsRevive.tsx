@@ -35,7 +35,7 @@ const LetsRevive = () => {
             platform: active === "online" ? platform : undefined,
             isOnline: active === "online" ? "true" : "false",
           },
-        }
+        },
       );
 
       const { data, pagination: paginationData } = response.data;
@@ -46,7 +46,7 @@ const LetsRevive = () => {
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "Failed to fetch meetups. Please try again later."
+          "Failed to fetch meetups. Please try again later.",
       );
       setLoading(false);
     }

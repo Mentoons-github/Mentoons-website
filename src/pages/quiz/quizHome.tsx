@@ -1,5 +1,5 @@
 import QuizBanner from "@/components/assessment/quiz/quizBanner";
-import QuizTimelineSection from "@/components/assessment/quiz/quizTimeLineSection";
+// import QuizTimelineSection from "@/components/assessment/quiz/quizTimeLineSection";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
@@ -47,7 +47,7 @@ const QuizHome = () => {
     };
 
     fetchCategories();
-  }, [getToken, showStatus]);
+  }, [getToken, showStatus])
 
   if (loading) {
     return (
@@ -66,7 +66,7 @@ const QuizHome = () => {
   return (
     <>
       <QuizBanner categories={categories} />
-      <QuizTimelineSection categories={categories} />
+      {/* <QuizTimelineSection categories={categories} /> */}
     </>
   );
 };

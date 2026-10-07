@@ -1,7 +1,7 @@
 import { Color } from "../../types";
 
 export const ANIMATION_TEXTS_HOME: Color[] = [
-  { text: "Developed by Psychologists", color: "text-yellow-400" },
+  { text: "Carefully crafted by Psychologists", color: "text-yellow-400" },
   { text: "100% Safe for Kids", color: "text-orange-400" },
   // {
   //   text: "Social Media De-Addiction",

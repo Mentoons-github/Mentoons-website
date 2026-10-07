@@ -1,14 +1,16 @@
 export interface Option {
   text: string;
   score: number;
+  isCorrect?: boolean;
 }
-
 export interface Question {
   _id: string;
   question: string;
   options: Option[];
+  answer?: string;
+  image?: string;
+  icon?: string;
 }
-
 export interface ResultRange {
   minScore: number;
   maxScore: number;
@@ -18,6 +20,7 @@ export interface ResultRange {
 export interface QuizData {
   _id: string;
   category: string;
+  quizType?: "score" | "knowledge";
   questions: Question[];
   results: ResultRange[];
 }

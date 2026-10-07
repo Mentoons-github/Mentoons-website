@@ -56,7 +56,8 @@ const AllMeetups = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetchMeetups(searchTerm);
+      const token = await getToken();
+      const response = await fetchMeetups(searchTerm, token);
 
       if (!response.success) {
         throw new Error((response.data as string) || "Error fetching meetups");

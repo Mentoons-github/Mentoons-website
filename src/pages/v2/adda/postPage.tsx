@@ -86,13 +86,11 @@ const PostPage = () => {
         const initiatorId = state?.initiatorId;
         const referenceModel = state?.referenceModel;
 
-        // Fetch initiator details
         if (initiatorId) {
           const userData = await fetchUser(initiatorId);
           setInitiator(userData);
         }
 
-        // Handle comment notifications
         let targetId = postId;
         let contentType: "post" | "meme" = "post";
         if (referenceModel === "Comment" && postId) {
@@ -103,7 +101,6 @@ const PostPage = () => {
           contentType = state.postType === "meme" ? "meme" : "post";
         }
 
-        // Fetch post or meme
         if (targetId) {
           const postData = await fetchPostOrMeme(targetId, contentType);
           setPost({

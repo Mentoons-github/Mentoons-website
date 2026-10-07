@@ -77,30 +77,95 @@ const FriendRequest = () => {
 
   return (
     <div ref={containerRef} className="flex flex-col w-full box-border">
-      <div className="mb-1">
-        <h2
-          ref={titleRef}
-          className="text-lg font-semibold text-gray-800 sm:text-xl"
-        >
-          {activeRequestTab === "receive"
-            ? "Friend Requests"
-            : activeRequestTab === "send"
-              ? "Friend Suggestions"
-              : "My Friends"}
+      <style>{`
+        .fr-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .fr-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .fr-title {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 8px;
+          padding: 0 10px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+
+        .fr-tabs {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          padding: 4px;
+        }
+        .fr-tab {
+          background: #fff;
+          color: #000;
+          border: 3px solid transparent;
+          border-radius: 999px;
+          cursor: pointer;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .fr-tab:hover { background: #fef9c3; }
+        .fr-tab-on {
+          background: #fde047;
+          border-color: #000;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .fr-tab-on:hover { background: #facc15; }
+        .fr-tab:active { box-shadow: 0 0 0 #000; }
+
+        .fr-content {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+          background-size: 14px 14px;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 12px;
+        }
+        .fr-scroll::-webkit-scrollbar { width: 10px; }
+        .fr-scroll::-webkit-scrollbar-track {
+          background: #fff;
+          border: 2px solid #000;
+          border-radius: 999px;
+        }
+        .fr-scroll::-webkit-scrollbar-thumb {
+          background: #fde047;
+          border: 2px solid #000;
+          border-radius: 999px;
+        }
+      `}</style>
+
+      <div className="mb-3 p-1">
+        <h2 ref={titleRef} className="text-lg sm:text-xl">
+          <span className="fr-title fr-font pr-1">
+            {activeRequestTab === "receive"
+              ? "Friend Requests"
+              : activeRequestTab === "send"
+                ? "Friend Suggestions"
+                : "My Friends"}
+          </span>
         </h2>
       </div>
       <div
         ref={tabsRef}
-        className="sticky top-0 z-10 flex gap-2 mb-1 border-b border-gray-200 bg-white"
+        className="fr-tabs sticky top-0 z-10 flex gap-1 mb-3 mx-1"
       >
         {tabs.map((tab, i) => (
           <button
             key={tab.value}
             ref={(el) => (tabButtonRefs.current[i] = el)}
-            className={`flex-1 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-200 ${
-              activeRequestTab === tab.value
-                ? "text-orange-500 border-b-2 border-orange-500"
-                : "hover:text-orange-500"
+            className={`fr-tab fr-chip-font flex-1 py-1.5 text-sm ${
+              activeRequestTab === tab.value ? "fr-tab-on" : ""
             }`}
             onClick={() => handleTabChange(tab.value)}
             onMouseEnter={() => handleTabHoverEnter(tabButtonRefs.current[i])}
@@ -112,7 +177,7 @@ const FriendRequest = () => {
       </div>
       <div
         ref={contentRef}
-        className="flex-1 overflow-y-auto p-1 max-h-[400px]"
+        className="fr-content fr-scroll flex-1 overflow-y-auto p-2 mx-1 mb-1 max-h-[400px]"
       >
         {activeRequestTab === "receive" ? (
           <FriendRequestsList />

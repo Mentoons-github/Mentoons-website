@@ -7,6 +7,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Smile,
+  CheckCheck,
 } from "lucide-react";
 import { useFormik } from "formik";
 import { api } from "@/api/axiosInstance/axiosInstance";
@@ -14,6 +15,7 @@ import {
   Quiz,
   quizInitialValues,
   quizValidationSchema,
+  isKnowledgeCategory,
 } from "@/utils/formik/quiz";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +26,7 @@ const CATEGORY_OPTIONS = [
   "Gaming addiction",
   "Performance addiction",
   "Entertainment addiction",
+  "Inventors and Inventions",
   "sample",
 ] as const;
 
@@ -33,6 +36,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "Gaming addiction": "🎮",
   "Performance addiction": "🏆",
   "Entertainment addiction": "🎬",
+  "Inventors and Inventions": "💡",
   sample: "✨",
 };
 
@@ -94,6 +98,8 @@ const RANGE_THEMES = [
   },
 ];
 
+const IMAGE_CATEGORY = "Inventors and Inventions";
+
 const AddQuiz = () => {
   const { showModal } = useSubmissionModal();
   const navigate = useNavigate();
@@ -108,24 +114,53 @@ const AddQuiz = () => {
           currentStep: "uploading",
           message: "Preparing quiz data...",
         });
-        const questionsAndOptions = values.questions.map((q) => ({
-          question: q.question,
-          options: q.options.map((o) => ({
-            text: o.text,
-            score: Number(o.score),
-          })),
-        }));
-        const payload = {
-          category: values.category,
-          questionsAndOptions,
-          results: values.results,
-        };
+
+        const knowledge = isKnowledgeCategory(values.category);
+
+        const questionsAndOptions = values.questions.map((q) => {
+          if (knowledge) {
+            const correctOption = q.options.find((o) => o.isCorrect);
+            return {
+              question: q.question,
+              answer: correctOption ? correctOption.text : "",
+              options: q.options.map((o) => ({ text: o.text })),
+            };
+          }
+          return {
+            question: q.question,
+            options: q.options.map((o) => ({
+              text: o.text,
+              score: Number(o.score),
+            })),
+          };
+        });
+
+        const formData = new FormData();
+        formData.append("category", values.category);
+        formData.append("quizType", knowledge ? "knowledge" : "score");
+        formData.append(
+          "questionsAndOptions",
+          JSON.stringify(questionsAndOptions),
+        );
+        formData.append("results", JSON.stringify(values.results || []));
+
+        if (values.category === IMAGE_CATEGORY) {
+          values.questions.forEach((q) => {
+            if (q.image) formData.append("images", q.image);
+            if (q.icon) formData.append("icons", q.icon);
+          });
+        }
+
         showModal({
           isSubmitting: true,
           currentStep: "saving",
           message: "Saving quiz to server...",
         });
-        const response = await api.post("/quiz/add", payload);
+
+        const response = await api.post("/quiz/add", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
         showModal({
           isSubmitting: false,
           currentStep: "success",
@@ -145,16 +180,21 @@ const AddQuiz = () => {
     },
   });
 
+  const isKnowledgeQuiz = isKnowledgeCategory(formik.values.category);
+
   const addQuestion = () => {
     formik.setFieldValue("questions", [
       ...formik.values.questions,
       {
         question: "",
         options: [
-          { text: "", score: 0 },
-          { text: "", score: 0 },
-          { text: "", score: 0 },
+          { text: "", score: 0, isCorrect: false },
+          { text: "", score: 0, isCorrect: false },
+          { text: "", score: 0, isCorrect: false },
         ],
+        image: null,
+        icon: null,
+        answer: "",
       },
     ]);
   };
@@ -169,6 +209,12 @@ const AddQuiz = () => {
   const updateQuestion = (qIdx: number, val: string) =>
     formik.setFieldValue(`questions[${qIdx}].question`, val);
 
+  const updateQuestionImage = (qIdx: number, file: File | null) =>
+    formik.setFieldValue(`questions[${qIdx}].image`, file);
+
+  const updateQuestionIcon = (qIdx: number, file: File | null) =>
+    formik.setFieldValue(`questions[${qIdx}].icon`, file);
+
   const updateOption = (
     qIdx: number,
     oIdx: number,
@@ -179,6 +225,40 @@ const AddQuiz = () => {
       `questions[${qIdx}].options[${oIdx}].${field}`,
       field === "score" ? Number(val) || 0 : val,
     );
+
+  const setCorrectOption = (qIdx: number, oIdx: number) => {
+    const updatedQuestions = [...formik.values.questions];
+    const updatedOptions = updatedQuestions[qIdx].options.map((o, i) => ({
+      ...o,
+      isCorrect: i === oIdx,
+    }));
+    updatedQuestions[qIdx] = {
+      ...updatedQuestions[qIdx],
+      options: updatedOptions,
+    };
+    formik.setFieldValue("questions", updatedQuestions);
+  };
+
+  const addOption = (qIdx: number) => {
+    const updatedQuestions = [...formik.values.questions];
+    updatedQuestions[qIdx] = {
+      ...updatedQuestions[qIdx],
+      options: [
+        ...updatedQuestions[qIdx].options,
+        { text: "", score: 0, isCorrect: false },
+      ],
+    };
+    formik.setFieldValue("questions", updatedQuestions);
+  };
+
+  const removeOption = (qIdx: number, oIdx: number) => {
+    const updatedQuestions = [...formik.values.questions];
+    updatedQuestions[qIdx] = {
+      ...updatedQuestions[qIdx],
+      options: updatedQuestions[qIdx].options.filter((_, i) => i !== oIdx),
+    };
+    formik.setFieldValue("questions", updatedQuestions);
+  };
 
   const getQuestionError = (qIdx: number) => {
     const err = formik.errors.questions?.[qIdx];
@@ -286,11 +366,17 @@ const AddQuiz = () => {
                     label: `${formik.values.questions.length} Questions`,
                     bg: "bg-blue-100 border-blue-300 text-blue-700",
                   },
-                  {
-                    icon: "⭐",
-                    label: `${totalPossibleScore} pts`,
-                    bg: "bg-yellow-100 border-yellow-300 text-yellow-700",
-                  },
+                  isKnowledgeQuiz
+                    ? {
+                        icon: "✅",
+                        label: "Answer-based",
+                        bg: "bg-emerald-100 border-emerald-300 text-emerald-700",
+                      }
+                    : {
+                        icon: "⭐",
+                        label: `${totalPossibleScore} pts`,
+                        bg: "bg-yellow-100 border-yellow-300 text-yellow-700",
+                      },
                   {
                     icon: "🏅",
                     label: `${formik.values.results?.length || 0} Outcomes`,
@@ -369,6 +455,28 @@ const AddQuiz = () => {
                       {formik.errors.category}
                     </p>
                   )}
+                  {formik.values.category && (
+                    <div
+                      className={`mt-3 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border-2 ${
+                        isKnowledgeQuiz
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      }`}
+                    >
+                      {isKnowledgeQuiz ? (
+                        <>
+                          <CheckCheck className="w-4 h-4 flex-shrink-0" />{" "}
+                          Answer-based quiz — pick one correct option per
+                          question, no points
+                        </>
+                      ) : (
+                        <>
+                          <Star className="w-4 h-4 flex-shrink-0" /> Score-based
+                          quiz — each option carries points toward an outcome
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-5">
@@ -393,6 +501,7 @@ const AddQuiz = () => {
                       (s, o) => s + (o.score || 0),
                       0,
                     );
+                    const correctOption = q.options.find((o) => o.isCorrect);
                     const headerGrad = Q_HEADERS[qIdx % Q_HEADERS.length];
                     return (
                       <div
@@ -415,10 +524,23 @@ const AddQuiz = () => {
                                 Question {qIdx + 1}
                               </span>
                               <div className="flex items-center gap-1 mt-0.5">
-                                <Star className="w-3 h-3 text-yellow-200 fill-yellow-200" />
-                                <span className="text-white/80 text-xs font-bold">
-                                  {qScore} pts
-                                </span>
+                                {isKnowledgeQuiz ? (
+                                  <>
+                                    <CheckCheck className="w-3 h-3 text-white" />
+                                    <span className="text-white/80 text-xs font-bold">
+                                      {correctOption
+                                        ? "Answer set"
+                                        : "No answer set"}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Star className="w-3 h-3 text-yellow-200 fill-yellow-200" />
+                                    <span className="text-white/80 text-xs font-bold">
+                                      {qScore} pts
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -465,9 +587,63 @@ const AddQuiz = () => {
                               )}
                           </div>
 
+                          {formik.values.category === IMAGE_CATEGORY && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-black text-slate-700 mb-2">
+                                  🖼️ Question Image
+                                </label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    updateQuestionImage(
+                                      qIdx,
+                                      e.target.files?.[0] || null,
+                                    )
+                                  }
+                                  className="w-full text-sm font-medium text-slate-600"
+                                />
+                                {q.image && (
+                                  <img
+                                    src={URL.createObjectURL(q.image)}
+                                    alt="question preview"
+                                    className="mt-2 w-24 h-24 object-cover rounded-xl border-2 border-slate-200"
+                                  />
+                                )}
+                              </div>
+                              <div>
+                                <label className="block text-sm font-black text-slate-700 mb-2">
+                                  ✨ Question Icon
+                                </label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    updateQuestionIcon(
+                                      qIdx,
+                                      e.target.files?.[0] || null,
+                                    )
+                                  }
+                                  className="w-full text-sm font-medium text-slate-600"
+                                />
+                                {q.icon && (
+                                  <img
+                                    src={URL.createObjectURL(q.icon)}
+                                    alt="icon preview"
+                                    className="mt-2 w-16 h-16 object-cover rounded-xl border-2 border-slate-200"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           <div>
                             <label className="block text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
-                              <span>🔤</span> Answer choices & star points
+                              <span>🔤</span>{" "}
+                              {isKnowledgeQuiz
+                                ? "Answer choices — tap the correct one"
+                                : "Answer choices & star points"}
                             </label>
                             <div className="space-y-2.5">
                               {q.options.map((opt, oIdx) => {
@@ -518,45 +694,98 @@ const AddQuiz = () => {
                                             </p>
                                           )}
                                       </div>
-                                      <div className="w-full sm:w-28 flex-shrink-0">
-                                        <div className="flex items-center gap-1.5 bg-white/70 border-2 border-white rounded-xl px-2 py-2 focus-within:bg-white transition-all">
-                                          <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-400 flex-shrink-0" />
-                                          <input
-                                            type="number"
-                                            value={opt.score}
-                                            onChange={(e) =>
-                                              updateOption(
-                                                qIdx,
-                                                oIdx,
-                                                "score",
-                                                e.target.value,
-                                              )
-                                            }
-                                            onBlur={formik.handleBlur}
-                                            className="w-full bg-transparent text-sm font-black text-slate-700 focus:outline-none text-center"
-                                            placeholder="0"
-                                          />
-                                          <span className="text-xs text-slate-400 font-bold flex-shrink-0">
-                                            pts
-                                          </span>
+                                      {isKnowledgeQuiz ? (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setCorrectOption(qIdx, oIdx)
+                                          }
+                                          className={`w-full sm:w-36 flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all ${
+                                            opt.isCorrect
+                                              ? "bg-emerald-500 text-white shadow-md"
+                                              : "bg-white/70 text-slate-500 hover:bg-white"
+                                          }`}
+                                        >
+                                          <CheckCheck className="w-3.5 h-3.5" />
+                                          {opt.isCorrect
+                                            ? "Correct Answer"
+                                            : "Mark Correct"}
+                                        </button>
+                                      ) : (
+                                        <div className="w-full sm:w-28 flex-shrink-0">
+                                          <div className="flex items-center gap-1.5 bg-white/70 border-2 border-white rounded-xl px-2 py-2 focus-within:bg-white transition-all">
+                                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-400 flex-shrink-0" />
+                                            <input
+                                              type="number"
+                                              value={opt.score}
+                                              onChange={(e) =>
+                                                updateOption(
+                                                  qIdx,
+                                                  oIdx,
+                                                  "score",
+                                                  e.target.value,
+                                                )
+                                              }
+                                              onBlur={formik.handleBlur}
+                                              className="w-full bg-transparent text-sm font-black text-slate-700 focus:outline-none text-center"
+                                              placeholder="0"
+                                            />
+                                            <span className="text-xs text-slate-400 font-bold flex-shrink-0">
+                                              pts
+                                            </span>
+                                          </div>
+                                          {formik.touched.questions?.[qIdx]
+                                            ?.options?.[oIdx]?.score &&
+                                            scrErr && (
+                                              <p className="mt-1 text-xs text-red-600 font-bold">
+                                                {scrErr}
+                                              </p>
+                                            )}
                                         </div>
-                                        {formik.touched.questions?.[qIdx]
-                                          ?.options?.[oIdx]?.score &&
-                                          scrErr && (
-                                            <p className="mt-1 text-xs text-red-600 font-bold">
-                                              {scrErr}
-                                            </p>
-                                          )}
-                                      </div>
+                                      )}
                                     </div>
+                                    {q.options.length > 2 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => removeOption(qIdx, oIdx)}
+                                        className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-xl bg-white/70 hover:bg-red-100 text-slate-500 hover:text-red-600 flex items-center justify-center transition-all"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
                                   </div>
                                 );
                               })}
                             </div>
-                            <div className="mt-3 flex items-center justify-end gap-2 text-sm font-black text-amber-700 bg-amber-50 rounded-2xl px-4 py-2.5 border-2 border-amber-200">
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                              This question is worth {qScore} points!
-                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => addOption(qIdx)}
+                              className="mt-3 w-full py-2.5 rounded-xl font-black text-sm text-purple-700 bg-purple-50 hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                              style={{ border: "2px dashed #d8b4fe" }}
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Add Option
+                            </button>
+
+                            {isKnowledgeQuiz ? (
+                              <div
+                                className={`mt-3 flex items-center justify-end gap-2 text-sm font-black rounded-2xl px-4 py-2.5 border-2 ${
+                                  correctOption
+                                    ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                    : "text-amber-700 bg-amber-50 border-amber-200"
+                                }`}
+                              >
+                                <CheckCheck className="w-4 h-4" />
+                                {correctOption
+                                  ? `Correct answer: ${correctOption.text}`
+                                  : "Pick the correct option above"}
+                              </div>
+                            ) : (
+                              <div className="mt-3 flex items-center justify-end gap-2 text-sm font-black text-amber-700 bg-amber-50 rounded-2xl px-4 py-2.5 border-2 border-amber-200">
+                                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                This question is worth {qScore} points!
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -611,12 +840,19 @@ const AddQuiz = () => {
                         value: String(formik.values.questions.length),
                         bg: "bg-blue-50 border-blue-200",
                       },
-                      {
-                        emoji: "⭐",
-                        label: "Max Score",
-                        value: String(totalPossibleScore),
-                        bg: "bg-purple-50 border-purple-200",
-                      },
+                      isKnowledgeQuiz
+                        ? {
+                            emoji: "✅",
+                            label: "Mode",
+                            value: "Answer-based",
+                            bg: "bg-emerald-50 border-emerald-200",
+                          }
+                        : {
+                            emoji: "⭐",
+                            label: "Max Score",
+                            value: String(totalPossibleScore),
+                            bg: "bg-purple-50 border-purple-200",
+                          },
                       {
                         emoji: "🏅",
                         label: "Outcomes",
@@ -717,6 +953,18 @@ const AddQuiz = () => {
                     </div>
 
                     <div className="p-4">
+                      {isKnowledgeQuiz && (
+                        <div className="bg-emerald-50 rounded-2xl px-4 py-3 mb-4 border-2 border-emerald-100">
+                          <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 mb-1">
+                            <CheckCheck className="w-3.5 h-3.5" /> Heads up
+                          </p>
+                          <p className="text-xs text-emerald-600">
+                            This is an answer-based quiz, so outcomes are
+                            optional — you can skip score ranges entirely.
+                          </p>
+                        </div>
+                      )}
+
                       <div className="bg-pink-50 rounded-2xl px-4 py-3 mb-4 border-2 border-pink-100">
                         <p className="text-xs font-bold text-pink-700 flex items-center gap-1.5 mb-1">
                           <Sparkles className="w-3.5 h-3.5" /> Quick Tip
@@ -908,4 +1156,3 @@ const AddQuiz = () => {
 };
 
 export default AddQuiz;
-``

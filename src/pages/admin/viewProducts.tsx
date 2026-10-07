@@ -63,7 +63,7 @@ const ViewProduct: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "media" | "pricing">(
-    "details"
+    "details",
   );
   const { getToken } = useAuth();
 
@@ -79,7 +79,7 @@ const ViewProduct: React.FC = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         if (!response.data) {
           throw new Error("Failed to fetch product");
@@ -404,7 +404,7 @@ const ViewProduct: React.FC = () => {
                 icon={<FaCalendarAlt />}
                 label="Release Date"
                 value={new Date(
-                  audioComicDetails.releaseDate
+                  audioComicDetails.releaseDate,
                 ).toLocaleDateString()}
               />
             )}
@@ -467,7 +467,7 @@ const ViewProduct: React.FC = () => {
                 icon={<FaCalendarAlt />}
                 label="Release Date"
                 value={new Date(
-                  podcastDetails.releaseDate
+                  podcastDetails.releaseDate,
                 ).toLocaleDateString()}
               />
             )}
@@ -1090,11 +1090,26 @@ const ViewProduct: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-4 mb-6"
+              className="flex items-center gap-3 mt-4 mb-6"
             >
               <span className="text-2xl font-bold text-gray-900">
                 ₹{product.price}
               </span>
+              {product?.mrp && Number(product.mrp) > Number(product.price) && (
+                <>
+                  <span className="text-lg text-gray-400 line-through">
+                    ₹{product.mrp}
+                  </span>
+                  <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                    {Math.round(
+                      ((Number(product.mrp) - Number(product.price)) /
+                        Number(product.mrp)) *
+                        100,
+                    )}
+                    % off
+                  </span>
+                </>
+              )}
             </motion.div>
 
             {/* Description */}
@@ -1283,7 +1298,19 @@ const ViewProduct: React.FC = () => {
                           <FaDollarSign className="mr-2 text-blue-500" />
                           <h3 className="text-lg font-semibold">Pricing</h3>
                         </div>
-                        <p className="text-3xl font-bold">₹{product.price}</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-3xl font-bold">₹{product.price}</p>
+                          {product?.mrp && (
+                            <p className="text-lg text-gray-400 line-through">
+                              ₹{product.mrp}
+                            </p>
+                          )}
+                        </div>
+                        {product?.mrp && (
+                          <p className="mt-1 text-sm text-gray-500">
+                            MRP: ₹{product.mrp}
+                          </p>
+                        )}
                         {product.product_type && (
                           <p className="mt-2 text-gray-600">
                             Tier: {product.product_type}

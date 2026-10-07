@@ -11,19 +11,25 @@ import {
   Star,
   Trophy,
   Zap,
+  CheckCheck,
+  ImageIcon,
 } from "lucide-react";
 import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import DeleteConfirmationModal from "@/components/admin/modal/deleteConfirmation";
 
 interface Option {
   text: string;
-  score: number;
+  score?: number;
+  isCorrect?: boolean;
   _id?: string;
 }
 
 interface Question {
   _id: string;
   question: string;
+  image?: string;
+  icon?: string;
+  answer?: string;
   options: Option[];
 }
 
@@ -37,6 +43,7 @@ interface Result {
 interface Quiz {
   _id: string;
   category: string;
+  quizType?: string;
   questions: Question[];
   results: Result[];
 }
@@ -116,6 +123,14 @@ const CARD_COLORS = [
 
 const EMOJIS = ["🦁", "🐶", "🦊", "🐸", "🦋", "🐙", "🦄", "🐬", "🦉", "🐼"];
 const OPTION_EMOJIS = ["🌟", "🎯", "🚀", "🎨", "🎵", "🍀"];
+
+const isOptionCorrect = (option: Option, question: Question): boolean => {
+  if (option.isCorrect) return true;
+  if (!question.answer) return false;
+  return (
+    option.text.trim().toLowerCase() === question.answer.trim().toLowerCase()
+  );
+};
 
 const QuizTable: React.FC = () => {
   const { showModal: showSubmissionModal } = useSubmissionModal();
@@ -458,11 +473,19 @@ const QuizTable: React.FC = () => {
                                 >
                                   <div className="flex justify-between items-start mb-3 gap-3">
                                     <div className="flex items-start gap-3">
-                                      <span
-                                        className={`flex-shrink-0 w-8 h-8 rounded-full ${color.accent} text-white flex items-center justify-center font-black text-sm`}
-                                      >
-                                        {idx + 1}
-                                      </span>
+                                      {question.icon ? (
+                                        <img
+                                          src={question.icon}
+                                          alt="icon"
+                                          className="flex-shrink-0 w-8 h-8 rounded-full object-cover shadow"
+                                        />
+                                      ) : (
+                                        <span
+                                          className={`flex-shrink-0 w-8 h-8 rounded-full ${color.accent} text-white flex items-center justify-center font-black text-sm`}
+                                        >
+                                          {idx + 1}
+                                        </span>
+                                      )}
                                       <p className="font-bold text-gray-800 text-base">
                                         {question.question}
                                       </p>
@@ -479,29 +502,60 @@ const QuizTable: React.FC = () => {
                                       <Trash2 className="w-4 h-4" />
                                     </button>
                                   </div>
+
+                                  {question.image && (
+                                    <img
+                                      src={question.image}
+                                      alt="question visual"
+                                      className="w-full max-h-48 object-cover rounded-xl mb-3 border-2 border-gray-100"
+                                    />
+                                  )}
+
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-                                    {question.options.map((option, optIdx) => (
-                                      <div
-                                        key={optIdx}
-                                        className={`${color.bg} rounded-xl p-3 flex justify-between items-center border-2 ${color.border}`}
-                                      >
-                                        <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
-                                          <span>
-                                            {
-                                              OPTION_EMOJIS[
-                                                optIdx % OPTION_EMOJIS.length
-                                              ]
-                                            }
-                                          </span>
-                                          {option.text}
-                                        </span>
-                                        <span
-                                          className={`ml-2 px-2 py-1 text-xs font-black ${color.accent} text-white rounded-full flex-shrink-0`}
+                                    {question.options.map((option, optIdx) => {
+                                      const correct = isOptionCorrect(
+                                        option,
+                                        question,
+                                      );
+                                      return (
+                                        <div
+                                          key={optIdx}
+                                          className={`${
+                                            correct
+                                              ? "bg-emerald-100 border-emerald-300"
+                                              : color.bg
+                                          } rounded-xl p-3 flex justify-between items-center border-2 ${
+                                            correct
+                                              ? "border-emerald-300"
+                                              : color.border
+                                          }`}
                                         >
-                                          +{option.score}
-                                        </span>
-                                      </div>
-                                    ))}
+                                          <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
+                                            <span>
+                                              {
+                                                OPTION_EMOJIS[
+                                                  optIdx % OPTION_EMOJIS.length
+                                                ]
+                                              }
+                                            </span>
+                                            {option.text}
+                                          </span>
+                                          {correct ? (
+                                            <span className="ml-2 px-2 py-1 text-xs font-black bg-emerald-500 text-white rounded-full flex-shrink-0 flex items-center gap-1">
+                                              <CheckCheck className="w-3 h-3" />
+                                              Correct
+                                            </span>
+                                          ) : option.score !== undefined &&
+                                            option.score > 0 ? (
+                                            <span
+                                              className={`ml-2 px-2 py-1 text-xs font-black ${color.accent} text-white rounded-full flex-shrink-0`}
+                                            >
+                                              +{option.score}
+                                            </span>
+                                          ) : null}
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               ))}
@@ -623,9 +677,17 @@ const QuizTable: React.FC = () => {
                   >
                     <div className="flex justify-between items-start gap-3 mb-3">
                       <div className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-9 h-9 rounded-full bg-red-500 text-white flex items-center justify-center font-black">
-                          {idx + 1}
-                        </span>
+                        {question.icon ? (
+                          <img
+                            src={question.icon}
+                            alt="icon"
+                            className="flex-shrink-0 w-9 h-9 rounded-full object-cover shadow"
+                          />
+                        ) : (
+                          <span className="flex-shrink-0 w-9 h-9 rounded-full bg-red-500 text-white flex items-center justify-center font-black">
+                            {idx + 1}
+                          </span>
+                        )}
                         <p className="font-black text-gray-800 text-base">
                           {question.question}
                         </p>
@@ -639,23 +701,58 @@ const QuizTable: React.FC = () => {
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
+
+                    {question.image && (
+                      <img
+                        src={question.image}
+                        alt="question visual"
+                        className="w-full max-h-56 object-cover rounded-xl mb-3 border-2 border-red-200"
+                      />
+                    )}
+
+                    {!question.image && question.icon && (
+                      <div className="flex items-center gap-1 text-xs font-bold text-red-400 mb-2">
+                        <ImageIcon className="w-3.5 h-3.5" /> Icon set, no cover
+                        image
+                      </div>
+                    )}
+
                     <div className="space-y-2">
-                      {question.options.map((option, optIdx) => (
-                        <div
-                          key={optIdx}
-                          className="flex justify-between items-center gap-2 p-3 bg-white rounded-xl border-2 border-red-200"
-                        >
-                          <span className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                            <span>
-                              {OPTION_EMOJIS[optIdx % OPTION_EMOJIS.length]}
+                      {question.options.map((option, optIdx) => {
+                        const correct = isOptionCorrect(option, question);
+                        return (
+                          <div
+                            key={optIdx}
+                            className={`flex justify-between items-center gap-2 p-3 rounded-xl border-2 ${
+                              correct
+                                ? "bg-emerald-50 border-emerald-300"
+                                : "bg-white border-red-200"
+                            }`}
+                          >
+                            <span
+                              className={`text-sm font-bold flex items-center gap-2 ${
+                                correct ? "text-emerald-700" : "text-gray-700"
+                              }`}
+                            >
+                              <span>
+                                {OPTION_EMOJIS[optIdx % OPTION_EMOJIS.length]}
+                              </span>
+                              {option.text}
                             </span>
-                            {option.text}
-                          </span>
-                          <span className="px-3 py-1 text-xs font-black bg-red-500 text-white rounded-full flex-shrink-0">
-                            +{option.score}
-                          </span>
-                        </div>
-                      ))}
+                            {correct ? (
+                              <span className="px-3 py-1 text-xs font-black bg-emerald-500 text-white rounded-full flex-shrink-0 flex items-center gap-1">
+                                <CheckCheck className="w-3.5 h-3.5" />
+                                Correct
+                              </span>
+                            ) : option.score !== undefined &&
+                              option.score > 0 ? (
+                              <span className="px-3 py-1 text-xs font-black bg-red-500 text-white rounded-full flex-shrink-0">
+                                +{option.score}
+                              </span>
+                            ) : null}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

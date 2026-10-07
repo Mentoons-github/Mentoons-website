@@ -43,7 +43,6 @@ const groupSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // -------------------- FETCH GROUPS --------------------
     builder.addCase(fetchGroups.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -240,7 +239,7 @@ const groupSlice = createSlice({
               groupId: string;
               pollId: string;
               voterId: string;
-              optionIndex: number;
+              optionIndex?: number;
             };
           }
         >,

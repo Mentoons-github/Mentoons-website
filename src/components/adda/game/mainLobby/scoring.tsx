@@ -136,7 +136,7 @@ const ScoringDashboard = ({
                 <h3 className="text-xl font-semibold text-white">Your Rank</h3>
               </div>
               <p className="text-4xl font-bold text-cyan-400">
-                {currentUser ? `#${currentUser.rank}` : "N/A"}
+                {currentUser ? `#${currentUser.rank}` : "0"}
               </p>
             </div>
 
@@ -177,12 +177,12 @@ const ScoringDashboard = ({
             <h3 className="text-xl font-semibold text-white mb-4">
               Top 3 Players
             </h3>
-            <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {leaderboard.slice(0, 3).map((player, i) => (
                 <div
                   key={player.playerId}
                   ref={(el) => (playerRefs.current[i] = el)}
-                  className="flex items-center gap-4 bg-gray-800/50 rounded-lg p-4 border border-gray-700"
+                  className="flex-1 flex items-center sm:flex-col sm:text-center gap-4 sm:gap-3 bg-gray-800/50 rounded-lg p-4 border border-gray-700"
                 >
                   <div
                     className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold ${
@@ -208,7 +208,7 @@ const ScoringDashboard = ({
                     </div>
                   )}
 
-                  <div className="flex-1">
+                  <div className="flex-1 sm:flex-initial">
                     <p className="text-white font-semibold">
                       {player.userName}
                     </p>

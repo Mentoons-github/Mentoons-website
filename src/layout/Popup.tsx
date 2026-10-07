@@ -1,4 +1,4 @@
-import axiosInstance from "@/api/axios";
+import { api } from "@/api/axiosInstance/axiosInstance";
 import { useUser } from "@clerk/clerk-react";
 import { easeInOut, motion } from "framer-motion";
 import React from "react";
@@ -26,7 +26,7 @@ const Popup: React.FC<PopupProps> = ({ handlePopUp, item }) => {
       }
 
       // Send comic to user's email
-      const response = await axiosInstance.post("/email/sendEmail", {
+      const response = await api.post("/email/sendEmail", {
         email: userEmail,
         data: {
           pdf: "https://mentoons-comics.s3.ap-northeast-1.amazonaws.com/Comics-Pdf/Book+2+-+Electronic+gadgets+and+kids.pdf",

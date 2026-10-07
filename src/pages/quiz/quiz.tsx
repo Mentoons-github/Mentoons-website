@@ -19,19 +19,24 @@ const QuizPage: React.FC = () => {
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
   const { user } = useUser();
-  console.log(hasQuizParam);
 
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(!hasQuizParam);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [correctness, setCorrectness] = useState<Record<number, boolean>>({});
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<
+    Record<number, number>
+  >({});
   const [showResults, setShowResults] = useState(false);
   const [progress, setProgress] = useState(0);
   const [backgroundIcons] = useState(() => generateIconPositions(15));
   const [hasPaid, setHasPaid] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
-  
+
+  const isKnowledge = quiz?.quizType === "knowledge";
+
   useEffect(() => {
     if (hasQuizParam) {
       setLoading(false);
@@ -47,7 +52,7 @@ const QuizPage: React.FC = () => {
           `${import.meta.env.VITE_PROD_URL}/quiz/${categoryId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setQuiz(response.data.data);
         setHasPaid(false);
@@ -66,10 +71,18 @@ const QuizPage: React.FC = () => {
     const key = STORAGE_KEY(categoryId);
     const raw = localStorage.getItem(key);
     if (raw) {
-      const { answers: a, currentQuestion: q, hasPaid: p } = JSON.parse(raw);
+      const {
+        answers: a,
+        currentQuestion: q,
+        hasPaid: p,
+        correctness: c,
+        selectedOptionIndex: s,
+      } = JSON.parse(raw);
       setAnswers(a ?? {});
       setCurrentQuestion(q ?? 0);
       setHasPaid(p ?? false);
+      setCorrectness(c ?? {});
+      setSelectedOptionIndex(s ?? {});
     }
   }, [categoryId, quiz, hasQuizParam]);
 
@@ -78,9 +91,23 @@ const QuizPage: React.FC = () => {
     const key = STORAGE_KEY(categoryId);
     localStorage.setItem(
       key,
-      JSON.stringify({ answers, currentQuestion, hasPaid })
+      JSON.stringify({
+        answers,
+        currentQuestion,
+        hasPaid,
+        correctness,
+        selectedOptionIndex,
+      }),
     );
-  }, [answers, currentQuestion, hasPaid, categoryId, hasQuizParam]);
+  }, [
+    answers,
+    currentQuestion,
+    hasPaid,
+    correctness,
+    selectedOptionIndex,
+    categoryId,
+    hasQuizParam,
+  ]);
 
   useEffect(() => {
     if (!quiz || hasQuizParam) return;
@@ -89,7 +116,7 @@ const QuizPage: React.FC = () => {
     setProgress(
       ((currentQuestion + 1) /
         (hasPaid ? TOTAL_QUESTIONS : FREE_QUESTION_LIMIT)) *
-        100
+        100,
     );
   }, [currentQuestion, quiz, hasPaid, hasQuizParam]);
 
@@ -123,11 +150,25 @@ const QuizPage: React.FC = () => {
   const TOTAL_QUESTIONS = quiz.questions.length;
   const FREE_QUESTION_LIMIT = 5;
 
-  const handleAnswerSelect = (score: number) => {
+  const handleAnswerSelect = (
+    score: number,
+    optionIndex: number,
+    isCorrect: boolean,
+  ) => {
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion]: score,
     }));
+    setSelectedOptionIndex((prev) => ({
+      ...prev,
+      [currentQuestion]: optionIndex,
+    }));
+    if (isKnowledge) {
+      setCorrectness((prev) => ({
+        ...prev,
+        [currentQuestion]: isCorrect,
+      }));
+    }
 
     if (currentQuestion === FREE_QUESTION_LIMIT - 1 && !hasPaid) {
       setShowPaymentModal(true);
@@ -153,17 +194,28 @@ const QuizPage: React.FC = () => {
     }
   };
 
-
-
-
+  const calculateKnowledgePercentage = () => {
+    const total = quiz.questions.length;
+    if (total === 0) return 0;
+    const correctCount = Object.values(correctness).filter(Boolean).length;
+    return Math.round((correctCount / total) * 100);
+  };
 
   const calculateResult = () => {
+    if (isKnowledge) {
+      const percentage = calculateKnowledgePercentage();
+      const result = quiz?.results?.find(
+        (r) => percentage >= r.minScore && percentage <= r.maxScore,
+      );
+      return result?.message || "No result found";
+    }
+
     const totalScore = Object.values(answers).reduce(
       (sum, score) => sum + score,
-      0
+      0,
     );
     const result = quiz?.results?.find(
-      (r) => totalScore >= r.minScore && totalScore <= r.maxScore
+      (r) => totalScore >= r.minScore && totalScore <= r.maxScore,
     );
     return result?.message || "No result found";
   };
@@ -172,6 +224,8 @@ const QuizPage: React.FC = () => {
     setShowResults(false);
     setCurrentQuestion(0);
     setAnswers({});
+    setCorrectness({});
+    setSelectedOptionIndex({});
     setProgress(0);
     setHasPaid(false);
     setShowPaymentModal(false);
@@ -218,7 +272,7 @@ const QuizPage: React.FC = () => {
         rewardPurchaseProduct,
         { questionsByDifficulty: { dynamic: quiz.questions } },
         "dynamic",
-        orderType
+        orderType,
       );
       await proceedToPay({
         preventDefault: () => {},
@@ -240,6 +294,7 @@ const QuizPage: React.FC = () => {
       <QuizResult
         quiz={quiz as QuizData}
         answers={answers}
+        correctness={correctness}
         result={calculateResult()}
         backgroundIcons={backgroundIcons}
         onRetake={handleRetake}
@@ -255,6 +310,7 @@ const QuizPage: React.FC = () => {
           backgroundIcons={backgroundIcons}
           currentQuestion={currentQuestion}
           answers={answers}
+          selectedOptionIndex={selectedOptionIndex}
           progress={progress}
           onAnswerSelect={handleAnswerSelect}
           onNext={handleNext}
@@ -264,8 +320,6 @@ const QuizPage: React.FC = () => {
           onClosePaymentModal={handleCancelPayment}
         />
       )}
-
-     
 
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -301,8 +355,7 @@ const QuizPage: React.FC = () => {
               <>
                 <p className="text-gray-600 mb-6">
                   You've answered {FREE_QUESTION_LIMIT} free questions. Pay ₹9
-                  to unlock all {quiz?.questions.length} questions and
-                  continue!
+                  to unlock all {quiz?.questions.length} questions and continue!
                 </p>
                 <div className="flex justify-center gap-4">
                   <button

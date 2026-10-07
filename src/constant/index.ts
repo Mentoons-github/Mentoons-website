@@ -746,31 +746,26 @@ export const FOOTER_PAGELINKS = [
       },
       {
         id: "AB_2",
-        label: "Free Downloads",
-        url: "/free-download",
-      },
-      {
-        id: "AB_3",
         label: "Help & FAQ's",
         url: "/faq",
       },
       {
-        id: "AB_5",
+        id: "AB_3",
         label: "Mentoons Privacy Policy",
         url: "/mentoons-privacy-policy",
       },
       {
-        id: "AB_6",
+        id: "AB_4",
         label: "Hiring",
         url: "/joinus/careers",
       },
       {
-        id: "AB_7",
+        id: "AB_5",
         label: "Explore",
         url: "/joinus/explore",
       },
       {
-        id: "AB_8",
+        id: "AB_6",
         label: "Feedback",
         url: "/feedback",
       },
@@ -798,13 +793,18 @@ export const FOOTER_PAGELINKS = [
       },
       {
         id: "S_4",
-        label: "Conversataion Story Cards",
+        label: "Conversation Story Cards",
         url: `/products?productType=${ProductType.MENTOONS_CARDS}&cardType=${CardType.CONVERSATION_STORY_CARDS}#product`,
       },
       {
         id: "S_5",
         label: "Coloring Books",
         url: `/products?productType=${ProductType.MENTOONS_COLORING_BOOKS}#product`,
+      },
+      {
+        id: "S_6",
+        label: "Free Downloads",
+        url: "/free-download",
       },
     ],
   },
@@ -972,18 +972,18 @@ export const EMPLOYEES = [
     designation: "Founder & CEO",
     imageUrl: "/assets/images/mahesh-sir.jpg",
   },
-  {
-    id: "EMP_2",
-    name: "Mahetalat",
-    designation: "Content Writer & Illustrator",
-    imageUrl: "/assets/images/mahetalat.jpg",
-  },
-  {
-    id: "EMP_3",
-    name: "Nupur",
-    designation: "UI/UX Designer",
-    imageUrl: "/assets/images/nupur.png",
-  },
+  // {
+  //   id: "EMP_2",
+  //   name: "Mahetalat",
+  //   designation: "Content Writer & Illustrator",
+  //   imageUrl: "/assets/images/mahetalat.jpg",
+  // },
+  // {
+  //   id: "EMP_3",
+  //   name: "Nupur",
+  //   designation: "UI/UX Designer",
+  //   imageUrl: "/assets/images/nupur.png",
+  // },
 
   {
     id: "EMP_4",
@@ -1201,7 +1201,7 @@ export const COMMON_NAV: NavLink[] = [
     id: "NL_03",
     label: "Products",
     // icon: FaShoppingCart,
-    url: "/mentoons-store",
+    url: "/products",
     items: [
       {
         id: "AC_01",
@@ -1259,10 +1259,15 @@ export const COMMON_NAV: NavLink[] = [
       },
       {
         id: "WK_04",
-        label: "Music Therapy",
+        label: "Swar",
         url: "/workshop",
       },
     ],
+  },
+  {
+    id: "NL_012",
+    label: "Meetups",
+    url: "/meetups",
   },
   {
     id: "NL_07",
@@ -1278,29 +1283,7 @@ export const COMMON_NAV: NavLink[] = [
     id: "NL_09",
     label: "Join Us",
     icon: "group",
-    url: "/hiring",
-    items: [
-      {
-        id: "JS_01",
-        label: "Careers",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_02",
-        label: "Affiliate",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_03",
-        label: "Collaborate",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_04",
-        label: "Join as mentor",
-        url: "/joinus/hiring",
-      },
-    ],
+    url: "/join-us",
   },
   {
     id: "NL_10",
@@ -2209,12 +2192,16 @@ export const PRODUCT_TYPE = [
     value: ProductType.PODCAST,
   },
   {
-    id: "PT_05",
+    id: "PT_06",
     label: "Assessments",
     value: ProductType.ASSESSMENT,
   },
+  {
+    id: "PT_07",
+    label: "Toonland",
+    value: ProductType.TOONLAND,
+  },
 ];
-
 export const MYTHOS_FAQ = [
   {
     id: "MY_01",

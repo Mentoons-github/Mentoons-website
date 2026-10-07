@@ -21,13 +21,10 @@ import DosAndDonts from "../../status/dosAndDonts";
 import "swiper/swiper-bundle.css";
 import { gsap } from "gsap";
 
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+
 const categories = [
-  // {
-  //   name: "Fun & Entertainment",
-  //   path: "/fun-entertainment",
-  //   imageUrl: "/assets/adda/fun-Entertainement.jpg",
-  //   hover: "Try me",
-  // },
   {
     name: "Free Downloads",
     path: "/free-download",
@@ -80,7 +77,6 @@ const UserStatus = () => {
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
     tl.fromTo(sectionRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 })
       .fromTo(
         guidelinesLinkRef.current,
@@ -224,26 +220,40 @@ const UserStatus = () => {
       openAuthModal("sign-in");
       return;
     }
+
     const file = event.target.files && event.target.files[0];
+
     if (file) {
-      const validTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-        "video/mp4",
-        "video/webm",
-      ];
+      const imageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      const videoTypes = ["video/mp4", "video/webm"];
+      const validTypes = [...imageTypes, ...videoTypes];
+
       if (!validTypes.includes(file.type)) {
-        toast.error("Invalid file type. Please upload an image or video.");
+        toast.error(
+          "Invalid file type. Please upload a JPG, PNG, WEBP image or MP4/WEBM video.",
+        );
+        if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("File is too large. Maximum size is 10MB.");
+
+      const isImage = imageTypes.includes(file.type);
+      const isVideo = videoTypes.includes(file.type);
+
+      if (isImage && file.size > IMAGE_MAX_BYTES) {
+        toast.error("Image is too large. Maximum size for images is 5MB.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
+
+      if (isVideo && file.size > VIDEO_MAX_BYTES) {
+        toast.error("Video is too large. Maximum size for videos is 10MB.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+
       setSelectedFile(file);
     }
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -269,22 +279,19 @@ const UserStatus = () => {
             })
           : selectedFile;
       await dispatch(
-        createStatus({
-          file: fileToUpload,
-          caption,
-          token,
-        }),
+        createStatus({ file: fileToUpload, caption, token }),
       ).unwrap();
       toast.success("Status uploaded successfully!");
       setIsSuccess(false);
       setLoading(false);
       setSelectedFile(null);
     } catch (error) {
-      console.error("Error uploading status:", error);
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to upload status. Please try again.",
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+            ? error.message
+            : "Failed to upload status. Please try again.",
       );
     } finally {
       setIsUploading(false);
@@ -298,29 +305,138 @@ const UserStatus = () => {
       toast.success("Status deleted successfully!");
       setSelectedStatusGroup(null);
     } catch (error) {
-      console.error("Error deleting status:", error);
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete status. Please try again.",
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+            ? error.message
+            : "Failed to delete status. Please try again.",
       );
     }
   };
 
   return (
     <section ref={sectionRef} className="w-full">
-      <div className="flex items-end justify-start gap-1 md:gap-4 md:px-2 sm:flex-row sm:gap-10 sm:px-4 ">
-        <div className="flex flex-col items-center justify-center flex-shrink-0 gap-1">
+      <style>{`
+        .us-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .us-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .us-guidelines {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          padding: 0 8px;
+          transform: rotate(-2deg) skewX(-6deg);
+          cursor: pointer;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .us-guidelines:hover { background: #facc15; box-shadow: 3px 3px 0 #000; }
+        .us-guidelines:active { box-shadow: 0 0 0 #000; }
+
+        .us-upload {
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 999px;
+          cursor: pointer;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .us-upload:hover { background: #facc15; box-shadow: 6px 6px 0 #000; }
+        .us-upload:active { box-shadow: 1px 1px 0 #000; }
+        .us-plus {
+          color: #000;
+          background: #fff;
+          border: 3px solid #000;
+          border-radius: 999px;
+          box-shadow: 2px 2px 0 #000;
+        }
+
+        .us-tag {
+          background: #fff;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          padding: 0 6px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+        .us-tag-hot { background: #fde047; }
+
+        .us-avatar {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          cursor: pointer;
+        }
+        .us-avatar-unread {
+          outline: 3px solid #f97316;
+          outline-offset: 2px;
+        }
+        .us-avatar-read {
+          outline: 3px dashed #9ca3af;
+          outline-offset: 2px;
+        }
+        .us-avatar-img {
+          border-radius: 999px;
+        }
+
+        .us-cat {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          transition: box-shadow 0.1s ease;
+        }
+        .us-cat:hover { box-shadow: 5px 5px 0 #000; }
+        .us-cat-active {
+          outline: 3px solid #f97316;
+          outline-offset: 2px;
+        }
+        .us-cat-overlay {
+          background-color: #fde047;
+          background-image: radial-gradient(rgba(249,115,22,0.35) 1.5px, transparent 2px);
+          background-size: 10px 10px;
+          color: #000;
+          line-height: 1.1;
+        }
+
+        .us-scroll::-webkit-scrollbar { height: 10px; }
+        .us-scroll::-webkit-scrollbar-track {
+          background: #fff;
+          border: 2px solid #000;
+          border-radius: 999px;
+        }
+        .us-scroll::-webkit-scrollbar-thumb {
+          background: #fde047;
+          border: 2px solid #000;
+          border-radius: 999px;
+        }
+      `}</style>
+
+      <div className="flex items-end justify-start gap-1 md:gap-4 md:px-2 sm:flex-row sm:gap-10 sm:px-4">
+        <div className="flex flex-col items-center justify-center flex-shrink-0 gap-2 p-1">
           <button
             ref={guidelinesLinkRef}
             onClick={() => setIsGuidelinesOpen(true)}
-            className="text-[#EC9600] text-xs"
+            className="us-guidelines us-chip-font text-xs"
           >
             View Guidelines
           </button>
           <label
             htmlFor="upload"
-            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 relative bg-[#FFDC9F] outline-[#EC9600] outline-dashed outline-offset-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-[#FFE5B2] transition-all duration-200"
+            className="us-upload w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 relative flex justify-center items-center"
           >
             <div
               ref={uploadButtonRef}
@@ -328,7 +444,7 @@ const UserStatus = () => {
               onMouseEnter={handleUploadButtonHoverEnter}
               onMouseLeave={handleUploadButtonHoverLeave}
             >
-              <FaPlus className="absolute text-[#EC9600] text-2xl sm:text-3xl p-1 border-2 sm:border-3 border-[#EC9600] rounded-full" />
+              <FaPlus className="us-plus absolute text-2xl sm:text-3xl p-1" />
             </div>
             <input
               type="file"
@@ -336,22 +452,24 @@ const UserStatus = () => {
               ref={fileInputRef}
               hidden
               onChange={handleFileChange}
-              accept="image/jpeg, image/jpg, image/png, image/webp, video/mp4, video/webm"
+              accept="image/jpeg,image/jpg,image/png,image/webp,video/mp4,video/webm"
               disabled={isUploading}
             />
           </label>
-          <span className="text-xs text-center sm:text-sm">Share Story</span>
+          <span className="us-tag us-tag-hot us-chip-font text-xs text-center sm:text-sm">
+            Share Story
+          </span>
         </div>
 
         <div
           ref={swiperWrapperRef}
-          className="flex-grow w-full mt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-[#EC9600] scrollbar-track-gray-100 sm:mt-0 "
+          className="us-scroll flex-grow w-full mt-2 overflow-x-auto sm:mt-0"
         >
           <Swiper
             spaceBetween={8}
             freeMode={true}
             modules={[FreeMode]}
-            className="w-full pt-1 pl-1"
+            className="w-full p-2"
             slidesPerView="auto"
             breakpoints={{
               320: { slidesPerView: 3.5, spaceBetween: 5 },
@@ -365,15 +483,15 @@ const UserStatus = () => {
             {statusGroups.map((statusGroup, i) => (
               <SwiperSlide
                 key={statusGroup.user._id}
-                className="!w-[70px] md:!w-[90px]  flex flex-col items-center gap-1"
+                className="!w-[70px] md:!w-[90px] flex flex-col items-center gap-2"
                 style={{ justifyItems: "center" }}
               >
                 <div
                   ref={(el) => (avatarRefs.current[i] = el)}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full ${
+                  className={`us-avatar w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 ${
                     !statusGroup.isRead && !statusGroup.isOwner
-                      ? "outline outline-[#EC9600]"
-                      : "outline outline-gray-300"
+                      ? "us-avatar-unread"
+                      : "us-avatar-read"
                   } flex justify-center items-center`}
                   onMouseEnter={() =>
                     handleAvatarHoverEnter(avatarRefs.current[i])
@@ -385,18 +503,18 @@ const UserStatus = () => {
                   <img
                     src={statusGroup.user.picture}
                     alt={statusGroup.user.name}
-                    className="object-cover w-full h-full rounded-full cursor-pointer"
+                    className="us-avatar-img object-cover w-full h-full"
                     onClick={() => handleStatus(statusGroup)}
                   />
                 </div>
                 {statusGroup.isOwner ? (
-                  <span className="text-xs sm:text-sm text-center truncate max-w-[80px]">
+                  <span className="us-tag us-tag-hot us-chip-font text-xs sm:text-sm text-center truncate max-w-[80px]">
                     Your Story
                   </span>
                 ) : (
                   <NavLink
                     to={`/adda/user/${statusGroup.user._id}`}
-                    className="text-xs sm:text-sm text-center truncate max-w-[80px]"
+                    className="us-tag us-chip-font text-xs sm:text-sm text-center truncate max-w-[80px]"
                   >
                     {statusGroup.user.name}
                   </NavLink>
@@ -407,16 +525,14 @@ const UserStatus = () => {
             {categories.map((category, i) => (
               <SwiperSlide
                 key={category.path}
-                className="!w-[70px] md:!w-[90px]  flex flex-col items-center gap-1"
+                className="!w-[70px] md:!w-[90px] flex flex-col items-center gap-2"
                 style={{ justifyItems: "center" }}
               >
                 <NavLink
                   to={category.path}
                   className={({ isActive }) =>
-                    `relative group w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex justify-center items-center cursor-pointer transition-all duration-200 overflow-hidden ${
-                      isActive
-                        ? "ring-2 ring-offset-2 ring-[#EC9600]"
-                        : "outline outline-[#EC9600]"
+                    `us-cat relative group w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex justify-center items-center cursor-pointer overflow-hidden ${
+                      isActive ? "us-cat-active" : ""
                     }`
                   }
                   ref={(el) => {
@@ -445,11 +561,11 @@ const UserStatus = () => {
                     alt={category.name}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 text-center text-lg font-semibold opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full bg-orange-400/90 text-white transition-opacity ease-in">
+                  <div className="us-cat-overlay us-font absolute inset-0 text-center text-sm sm:text-base opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full px-1 transition-opacity ease-in">
                     {category.hover}
                   </div>
                 </NavLink>
-                <span className="text-xs sm:text-sm text-center truncate max-w-[70px] md:max-w-[80px]">
+                <span className="us-tag us-chip-font text-xs sm:text-sm text-center truncate max-w-[70px] md:max-w-[80px]">
                   {category.name}
                 </span>
               </SwiperSlide>

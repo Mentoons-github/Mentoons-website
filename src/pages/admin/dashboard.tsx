@@ -574,7 +574,7 @@ const DashboardAnalytics: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChart, setSelectedChart] = useState<"area" | "line" | "bar">(
-    "area"
+    "area",
   );
   const [revenueCategory, setRevenueCategory] = useState<
     "workshops" | "services" | "products"
@@ -604,7 +604,7 @@ const DashboardAnalytics: React.FC = () => {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -1041,7 +1041,7 @@ const DashboardAnalytics: React.FC = () => {
                       "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                     backdropFilter: "blur(10px)",
                   }}
-                  formatter={(value: number) => [`₹${value}`, "Revenue"]}
+                  formatter={(value) => [`₹${Number(value ?? 0)}`, "Revenue"]}
                 />
                 <Area
                   type="monotone"

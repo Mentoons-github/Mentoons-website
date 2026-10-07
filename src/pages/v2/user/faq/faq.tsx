@@ -59,7 +59,7 @@ const FAQ = ({ data }: { data: object }) => {
           name: name,
           email: email,
           queryType: finalQueryType,
-        }
+        },
       );
       if (queryResponse.status === 201) {
         setMessage("");
@@ -69,7 +69,7 @@ const FAQ = ({ data }: { data: object }) => {
       setMessage("");
       setShowErrorModal(true);
       setShowErrorMessage(
-        error?.response?.data?.message || "Failed to submit message"
+        error?.response?.data?.message || "Failed to submit message",
       );
     }
   };
@@ -87,7 +87,7 @@ const FAQ = ({ data }: { data: object }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status !== 200) {
         throw new Error("Failed to fetch user details");
@@ -116,7 +116,7 @@ const FAQ = ({ data }: { data: object }) => {
         initial={{ opacity: 0, x: -30 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="text-start font-medium text-2xl sm:text-3xl md:text-4xl tracking-[-1px]"
+        className="text-start font-medium text-2xl sm:text-3xl md:text-3xl tracking-[-1px]"
       >
         Frequently Asked Questions
       </motion.h1>
@@ -152,7 +152,7 @@ const FAQ = ({ data }: { data: object }) => {
                     : { opacity: 0, height: 0 }
                 }
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="px-3 sm:px-4 pb-3 sm:pb-4 font-medium text-[11px] sm:text-lg md:text-[20px]"
+                className="px-3 sm:px-4 pb-3 sm:pb-4 font-medium text-[11px] sm:text-lg md:text-[16px]"
               >
                 {answer}
               </motion.p>
@@ -239,14 +239,11 @@ const FAQ = ({ data }: { data: object }) => {
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
       )}
-      {showErrorModal && (
-        <ErrorModal
-          heading="Faild to submit query"
-          error={showErrorMessage}
-          isOpen={showErrorModal}
-          onClose={() => setShowErrorModal(false)}
-        />
-      )}
+      <ErrorModal
+        open={showErrorModal}
+        message={showErrorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </motion.section>
   );
 };

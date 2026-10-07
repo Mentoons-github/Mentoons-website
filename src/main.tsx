@@ -7,13 +7,27 @@ import "./index.css";
 import { store } from "./redux/store.ts";
 import { AuthModalProvider } from "./context/adda/authModalContext.tsx";
 import { StatusModalProvider } from "./context/adda/statusModalContext.tsx";
-import CustomCursor from "./components/common/customCursor/customCursor.tsx";
+// import CustomCursor from "./components/common/customCursor/customCursor.tsx";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 import { gsap } from "gsap";
 import { Flip, ScrollTrigger, SplitText } from "gsap/all";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP, Flip, ScrollTrigger, SplitText);
+
+import { ReactNode, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { setGetToken } from "./api/axios.ts";
+
+const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setGetToken(getToken);
+  }, [getToken]);
+
+  return children;
+};
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
@@ -52,8 +66,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Provider store={store}>
         <AuthModalProvider>
           <StatusModalProvider>
-            <App />
-            <CustomCursor />
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+            {/* <CustomCursor /> */}
           </StatusModalProvider>
         </AuthModalProvider>
       </Provider>

@@ -1,6 +1,4 @@
-// friendRequestSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "@/api/axios";
 import {
   RequestSender,
   FollowBackUser,
@@ -10,7 +8,8 @@ import {
   updateNotification,
   deleteNotification,
   fetchNotifications,
-} from "@/redux/adda/notificationSlice"; // Import notification actions
+} from "@/redux/adda/notificationSlice";
+import axios from "axios";
 
 interface FriendRequestsState {
   requests: RequestSender[] | null;
@@ -38,6 +37,8 @@ const initialState: FriendRequestsState = {
   success: false,
 };
 
+const BASE_URL = import.meta.env.VITE_PROD_URL;
+
 export const fetchFriendRequests = createAsyncThunk<
   { pendingReceived: RequestSender[]; totalPages: number },
   { page: number; limit: number; token: string },
@@ -46,12 +47,13 @@ export const fetchFriendRequests = createAsyncThunk<
   "friendRequests/fetchFriendRequests",
   async ({ page, limit, token }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(
-        `/adda/getMyFriendRequests?page=${page}&limit=${limit}`,
+      const response = await axios.get(
+        `${BASE_URL}/adda/getMyFriendRequests?page=${page}&limit=${limit}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
+
       const { pendingReceived, totalPages } = response.data.data;
       const transformedRequests = pendingReceived.map((data: any) => ({
         requestId: data._id,
@@ -79,7 +81,7 @@ export const fetchFollowBackUsers = createAsyncThunk<
   { rejectValue: AccessCheckResponse }
 >("friendRequests/fetchFollowBackUsers", async (token, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.get("/adda/getFollowBackUsers", {
+    const response = await axios.get(`${BASE_URL}/adda/getFollowBackUsers`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (response.data.success && response.data.data) {
@@ -107,14 +109,13 @@ export const acceptFriendRequest = createAsyncThunk<
   "friendRequests/acceptFriendRequest",
   async ({ requestId, token }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axiosInstance.patch(
-        `/adda/acceptRequest/${requestId}`,
+      const response = await axios.patch(
+        `${BASE_URL}/adda/acceptRequest/${requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
       const { notification } = response.data;
 
-      // Update notification if it exists
       if (notification?.id) {
         dispatch(
           updateNotification({
@@ -128,7 +129,6 @@ export const acceptFriendRequest = createAsyncThunk<
         );
       }
 
-      // Re-fetch notifications to ensure sync
       dispatch(fetchNotifications({ token, page: 1 }));
 
       return { requestId, notification };
@@ -150,21 +150,19 @@ export const declineFriendRequest = createAsyncThunk<
   "friendRequests/declineFriendRequest",
   async ({ requestId, token }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axiosInstance.patch(
-        `/adda/rejectRequest/${requestId}`,
+      const response = await axios.patch(
+        `${BASE_URL}/adda/rejectRequest/${requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
       const { notification } = response.data;
 
-      // Delete notification if it exists
       if (notification?.id) {
         dispatch(
           deleteNotification({ notificationId: notification.id, token }),
         );
       }
 
-      // Re-fetch notifications to ensure sync
       dispatch(fetchNotifications({ token, page: 1 }));
 
       return { requestId, notification };
@@ -186,8 +184,8 @@ export const sendFollowBackRequest = createAsyncThunk<
   "friendRequests/sendFollowBackRequest",
   async ({ userId, token }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        `/adda/request/${userId}`,
+      const response = await axios.post(
+        `${BASE_URL}/adda/followBack/${userId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -208,8 +206,8 @@ export const unfollowUserThunk = createAsyncThunk<
   { rejectValue: AccessCheckResponse }
 >("friendRequests/unfollow", async ({ userId, token }, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.post(
-      `/adda/unfriend/${userId}`,
+    const response = await axios.post(
+      `${BASE_URL}/adda/unfriend/${userId}`,
       {},
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -221,7 +219,7 @@ export const unfollowUserThunk = createAsyncThunk<
   } catch (error: any) {
     return rejectWithValue(
       error.response?.data?.error || {
-        message: "Failed to decline follow back request",
+        message: "Failed to unfriend user",
       },
     );
   }
@@ -235,8 +233,8 @@ export const cancelFriendRequestThunk = createAsyncThunk<
   "friendRequests/cancelRequest",
   async ({ userId, token }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        `/adda/cancelRequest/${userId}`,
+      const response = await axios.post(
+        `${BASE_URL}/adda/cancelRequest/${userId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -248,7 +246,7 @@ export const cancelFriendRequestThunk = createAsyncThunk<
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || {
-          message: "Failed to decline follow back request",
+          message: "Failed to cancel friend request",
         },
       );
     }
@@ -263,8 +261,8 @@ export const declineFollowBackRequest = createAsyncThunk<
   "friendRequests/declineFollowBackRequest",
   async ({ userId, token }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/adda/decline-follow-back",
+      const response = await axios.post(
+        `${BASE_URL}/adda/declineFollowBack`,
         { targetUserId: userId },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -315,11 +313,9 @@ const friendRequestSlice = createSlice({
           state.requests = incoming;
         } else {
           const existingIds = new Set(state.requests.map((r) => r.requestId));
-
           const uniqueIncoming = incoming.filter(
             (r) => !existingIds.has(r.requestId),
           );
-
           state.requests.push(...uniqueIncoming);
         }
         state.hasMore = state.page < action.payload.totalPages;
@@ -330,8 +326,10 @@ const friendRequestSlice = createSlice({
           action.payload?.message || "Failed to fetch friend requests";
         state.accessCheck = action.payload || null;
       })
+
       .addCase(fetchFollowBackUsers.pending, (state) => {
         state.followBackLoading = true;
+        state.followBackUsers = null;
         state.error = null;
       })
       .addCase(fetchFollowBackUsers.fulfilled, (state, action) => {
@@ -374,6 +372,7 @@ const friendRequestSlice = createSlice({
           action.payload?.message || "Failed to accept friend request";
         state.accessCheck = action.payload || null;
       })
+
       .addCase(declineFriendRequest.pending, (state, action) => {
         if (state.requests) {
           state.requests = state.requests.map((request) =>
@@ -402,6 +401,7 @@ const friendRequestSlice = createSlice({
           action.payload?.message || "Failed to decline friend request";
         state.accessCheck = action.payload || null;
       })
+
       .addCase(sendFollowBackRequest.pending, (state, action) => {
         if (state.followBackUsers) {
           state.followBackUsers = state.followBackUsers.map((user) =>
@@ -430,6 +430,7 @@ const friendRequestSlice = createSlice({
           action.payload?.message || "Failed to send follow back request";
         state.accessCheck = action.payload || null;
       })
+
       .addCase(declineFollowBackRequest.pending, (state, action) => {
         if (state.followBackUsers) {
           state.followBackUsers = state.followBackUsers.map((user) =>
@@ -459,7 +460,6 @@ const friendRequestSlice = createSlice({
         state.accessCheck = action.payload || null;
       })
 
-      //unfollow user
       .addCase(unfollowUserThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -471,12 +471,10 @@ const friendRequestSlice = createSlice({
       })
       .addCase(unfollowUserThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to accept friend request";
+        state.error = action.payload?.message || "Failed to unfriend user";
         state.accessCheck = action.payload || null;
       })
 
-      //unfollow user
       .addCase(cancelFriendRequestThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -489,7 +487,7 @@ const friendRequestSlice = createSlice({
       .addCase(cancelFriendRequestThunk.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.payload?.message || "Failed to accept friend request";
+          action.payload?.message || "Failed to cancel friend request";
         state.accessCheck = action.payload || null;
       });
   },

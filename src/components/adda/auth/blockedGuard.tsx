@@ -1,45 +1,31 @@
 import Loader from "@/components/common/Loader";
 import { useClerk, useUser } from "@clerk/clerk-react";
-import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-interface BlockedGuardProps {
-  children: React.ReactNode;
-}
-
-const BlockedGuard = ({ children }: BlockedGuardProps) => {
+const BlockedGuard = ({ children }: { children: React.ReactNode }) => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
-  const navigate = useNavigate();
-  const location = useLocation();
+
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
+    if (!isLoaded || !isSignedIn || !user) return;
 
-    const isBlocked = user?.publicMetadata?.blocked;
-    // const role = user?.publicMetadata?.role as string;
+    const isBlocked = user.publicMetadata?.blocked === true;
 
     if (isBlocked) {
-      signOut({ redirectUrl: `/blocked` });
-      return;
+      setShouldRedirect(true);
+      signOut({ redirectUrl: "/blocked" }).catch(console.error);
     }
-
-    // if (role === "ADMIN" && !location.pathname.startsWith("/admin")) {
-    //   navigate("/admin", { replace: true });
-    //   return;
-    // }
-
-    // if (role === "EMPLOYEE" && !location.pathname.startsWith("/employee")) {
-    //   navigate("/employee", { replace: true });
-    //   return;
-    // }
-  }, [isLoaded, isSignedIn, user, signOut, navigate, location]);
+  }, [isLoaded, isSignedIn, user, signOut]);
 
   if (!isLoaded) return <Loader />;
 
   if (!isSignedIn) return <>{children}</>;
 
-  if (user?.publicMetadata?.blocked) return null;
+  if (user?.publicMetadata?.blocked === true || shouldRedirect) {
+    return null;
+  }
 
   return <>{children}</>;
 };

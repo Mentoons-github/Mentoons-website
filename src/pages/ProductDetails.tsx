@@ -16,7 +16,7 @@ import {
 } from "@/types/productTypes";
 import { RewardEventType } from "@/types/rewards";
 import { ModalMessage } from "@/utils/enum";
-import { formatDateString } from "@/utils/formateDate";
+// import { formatDateString } from "@/utils/formateDate";
 import { triggerReward } from "@/utils/rewardMiddleware";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
@@ -40,6 +40,8 @@ import {
 } from "react-share";
 import { toast } from "sonner";
 
+type MediaItem = { type: "video" | "image"; url: string };
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const [quantity, setQuantity] = useState(1);
@@ -53,7 +55,6 @@ const ProductDetails = () => {
   const [message, setMessage] = useState<string>("");
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // New state for image viewer
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
@@ -82,27 +83,26 @@ const ProductDetails = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      console.log("fetching product");
       try {
         if (!productId) {
           toast.error("Product ID is missing");
           return;
         }
         const productResponse = await dispatch(fetchProductById(productId));
+        console.log("product response :", productResponse);
+
         if (
           typeof productResponse.payload === "object" &&
           productResponse.payload !== null
         ) {
+          console.log(productResponse.payload);
           setProduct(productResponse.payload as ProductBase);
           setRecommendationFilter(productResponse.payload?.type);
         } else {
-          console.error(
-            "Invalid product data received",
-            productResponse.payload
-          );
           toast.error("Failed to fetch product details");
         }
       } catch (error) {
-        console.error("Error fetching product details", error);
         toast.error("Failed to fetch product details");
       }
     };
@@ -120,7 +120,6 @@ const ProductDetails = () => {
       try {
         await dispatch(fetchProducts({}));
       } catch (error) {
-        console.error("Error fetching recommended products", error);
         toast.error("Failed to fetch recommended products");
       }
     };
@@ -131,8 +130,9 @@ const ProductDetails = () => {
     const newQuantity = flag === "+" ? quantity + 1 : Math.max(1, quantity - 1);
     setQuantity(newQuantity);
   };
+
   const handleAddtoCart = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
 
@@ -161,7 +161,7 @@ const ProductDetails = () => {
             ageCategory: product.ageCategory,
             productImage: product.productImages?.[0].imageUrl,
             productDetails: product.details,
-          })
+          }),
         );
         if (response.payload) {
           setShowAddToCartModal(true);
@@ -172,7 +172,6 @@ const ProductDetails = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error while adding to cart", error);
       toast.error("Error while adding to cart");
       setIsLoading(false);
     }
@@ -185,7 +184,6 @@ const ProductDetails = () => {
       setIsLoading(false);
       return;
     }
-    // handleAddtoCart(event)
     navigate(`/order-summary?productId=${product._id}`);
   };
 
@@ -193,24 +191,22 @@ const ProductDetails = () => {
     setShowShareModal(!showShareModal);
   };
 
-  // Function to handle when a share action is completed
   const handleShareCompleted = (platform: string) => {
     if (product?._id) {
-      // Trigger the reward middleware to give points for sharing a product
       triggerReward(RewardEventType.SHARE_PRODUCT, product._id);
       toast.success(`Shared on ${platform}! You earned reward points.`);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const queryResponse = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/query`, // Fixed the endpoint URL
+        `${import.meta.env.VITE_PROD_URL}/query`,
         {
           message: message,
-        }
+        },
       );
-      console.log(queryResponse);
       if (queryResponse.status === 201) {
         setShowEnquiryModal(true);
       }
@@ -219,7 +215,6 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle mouse movement for zoom effect
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageContainerRef.current || !isZoomed) return;
 
@@ -231,22 +226,38 @@ const ProductDetails = () => {
     setZoomPosition({ x, y });
   };
 
-  // Function to handle thumbnail click
   const handleThumbnailClick = (index: number) => {
     setSelectedImage(index);
   };
 
-  // Function to navigate to the next/previous image
-  const navigateImage = (direction: "next" | "prev") => {
-    if (!product || !product.productImages) return;
+  const media: MediaItem[] = [
+    ...(product?.productVideos?.[0]?.videoUrl
+      ? [{ type: "video" as const, url: product.productVideos[0].videoUrl }]
+      : []),
+    ...(product?.productImages?.map((img) => ({
+      type: "image" as const,
+      url: img.imageUrl,
+    })) ?? []),
+  ];
 
-    const imagesLength = product.productImages.length;
+  const navigateImage = (direction: "next" | "prev") => {
+    if (!media.length) return;
+
     if (direction === "next") {
-      setSelectedImage((prev) => (prev + 1) % imagesLength);
+      setSelectedImage((prev) => (prev + 1) % media.length);
     } else {
-      setSelectedImage((prev) => (prev - 1 + imagesLength) % imagesLength);
+      setSelectedImage((prev) => (prev - 1 + media.length) % media.length);
     }
   };
+
+  const hasDiscount =
+    product?.mrp !== undefined &&
+    product?.mrp !== null &&
+    product.mrp > product.price;
+  const discountPercent =
+    hasDiscount && product?.mrp
+      ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+      : 0;
 
   if (loading || !product) {
     return (
@@ -323,14 +334,35 @@ const ProductDetails = () => {
             <span className="font-semibold text-gray-500">Mentoons</span>
 
             <Rating ratings={Number(product?.rating)} />
-            <p className={`my-2 text-lg font-semibold text-neutral-800 `}>
-              {" "}
+
+            <div className="my-2">
               {product?.price === 0 ? (
                 <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
                   Free
                 </span>
               ) : (
-                `₹ ${product?.price}`
+                <div>
+                  {hasDiscount && (
+                    <span className="block text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
+                      Introductory Price
+                    </span>
+                  )}
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    {hasDiscount && (
+                      <span className="text-lg text-gray-400 line-through">
+                        ₹ {product?.mrp}
+                      </span>
+                    )}
+                    <span className="text-2xl font-semibold text-neutral-800">
+                      ₹ {product?.price}
+                    </span>
+                    {hasDiscount && (
+                      <span className="text-sm font-bold text-green-600">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
               {(product?.title === "Conversation Starter Cards (6-12) years" ||
                 product?.title === "Silent Stories (6-12) years") &&
@@ -343,15 +375,13 @@ const ProductDetails = () => {
                         : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
                     }`}
                     download
-                    className="px-4 py-3 ml-4 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
+                    className="inline-block mt-3 px-4 py-3 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
                   >
                     Download Free Sample
                   </a>
                 )}
-            </p>
+            </div>
           </div>
-
-          {/* Quantitu */}
 
           <div className="flex items-center justify-between gap-2 pb-4">
             <div className="flex items-center justify-between mt-4">
@@ -379,7 +409,6 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* Buy Now Button */}
           {product?.price === 0 ? (
             <div className="flex flex-col w-full gap-4 mt-4">
               <div className="flex gap-2">
@@ -388,19 +417,19 @@ const ProductDetails = () => {
                     if (product?.type === ProductType.COMIC) {
                       window.open(
                         (product.details as ComicProduct["details"]).sampleUrl,
-                        "_blank"
+                        "_blank",
                       );
                     } else if (product?.type === ProductType.AUDIO_COMIC) {
                       window.open(
                         (product.details as AudioComicProduct["details"])
                           .sampleUrl,
-                        "_blank"
+                        "_blank",
                       );
                     } else if (product?.type === ProductType.PODCAST) {
                       window.open(
                         (product.details as PodcastProduct["details"])
                           .sampleUrl,
-                        "_blank"
+                        "_blank",
                       );
                     }
                   }}
@@ -450,9 +479,7 @@ const ProductDetails = () => {
           )}
         </div>
 
-        {/* Product Image Viewer - Amazon Style */}
         <div className="flex flex-col flex-1 w-full border-[0.5px] border-primary rounded-lg shadow-lg shadow-orange-600/15">
-          {/* Main Image Container */}
           <div
             ref={imageContainerRef}
             className="relative w-full h-[300px] md:h-[500px] overflow-hidden  rounded-lg cursor-zoom-in"
@@ -461,8 +488,7 @@ const ProductDetails = () => {
             onMouseMove={handleMouseMove}
             onClick={() => setIsZoomed(!isZoomed)}
           >
-            {/* Navigation buttons */}
-            {product?.productImages && product.productImages.length > 1 && (
+            {media.length > 1 && (
               <>
                 <button
                   className="absolute z-10 p-2 transform -translate-y-1/2 bg-white rounded-full shadow-md opacity-80 hover:opacity-100 left-2 top-1/2"
@@ -485,60 +511,75 @@ const ProductDetails = () => {
               </>
             )}
 
-            {/* Zoom indicator */}
-            <div className="absolute z-10 p-1 bg-white rounded-full shadow-md opacity-80 top-2 right-2">
-              <ZoomIn className="w-4 h-4" />
-            </div>
-
-            {/* Main image */}
-            <img
-              src={product?.productImages?.[selectedImage]?.imageUrl}
-              alt={product?.title || "Product image"}
-              className={`object-contain w-full h-full transition-transform duration-200 ${
-                isZoomed ? "scale-150" : ""
-              }`}
-              style={
-                isZoomed
-                  ? {
-                      transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                    }
-                  : {}
-              }
-            />
-          </div>
-
-          {/* Thumbnails */}
-          {product &&
-            product.productImages &&
-            product.productImages.length > 0 && (
-              <div className="flex justify-center mt-4 space-x-2 overflow-x-auto">
-                {product.productImages.map((image, index) => (
-                  <div
-                    key={`thumb-${index}`}
-                    className={`w-16 h-16 border-2 rounded cursor-pointer ${
-                      selectedImage === index
-                        ? "border-primary"
-                        : "border-transparent"
-                    } hover:border-primary transition-all`}
-                    onClick={() => handleThumbnailClick(index)}
-                  >
-                    <img
-                      src={image.imageUrl}
-                      alt={`${product.title} thumbnail ${index + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                ))}
+            {media[selectedImage]?.type !== "video" && (
+              <div className="absolute z-10 p-1 bg-white rounded-full shadow-md opacity-80 top-2 right-2">
+                <ZoomIn className="w-4 h-4" />
               </div>
             )}
+
+            {media[selectedImage]?.type === "video" ? (
+              <video
+                src={media[selectedImage].url}
+                controls
+                autoPlay
+                muted
+                playsInline
+                className="object-contain w-full h-full"
+              />
+            ) : (
+              <img
+                src={media[selectedImage]?.url}
+                alt={product?.title || "Product image"}
+                className={`object-contain w-full h-full transition-transform duration-200 ${
+                  isZoomed ? "scale-150" : ""
+                }`}
+                style={
+                  isZoomed
+                    ? {
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }
+                    : {}
+                }
+              />
+            )}
+          </div>
+
+          {media.length > 0 && (
+            <div className="flex justify-center mt-4 space-x-2 overflow-x-auto">
+              {media.map((item, index) => (
+                <div
+                  key={`thumb-${index}`}
+                  className={`w-16 h-16 border-2 rounded cursor-pointer ${
+                    selectedImage === index
+                      ? "border-primary"
+                      : "border-transparent"
+                  } hover:border-primary transition-all`}
+                  onClick={() => handleThumbnailClick(index)}
+                >
+                  {item.type === "video" ? (
+                    <video
+                      src={item.url}
+                      muted
+                      playsInline
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={`${product?.title} thumbnail ${index + 1}`}
+                      className="object-cover w-full h-full"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="border-red-500 ">
-        {/* Separator */}
         <div className="w-full h-[.5px] my-12 mb-8 bg-primary" />
 
-        {/* Product description */}
         <div className="text-lg font-medium text-neutral-800">
           <h2 className="pb-4 text-2xl font-semibold">Product Details</h2>
           {product &&
@@ -546,44 +587,43 @@ const ProductDetails = () => {
               {
                 label: "Language",
                 value:
-                  product.type === ProductType.COMIC ||
-                  product.type === ProductType.AUDIO_COMIC ||
-                  product.type === ProductType.PODCAST ||
-                  product.type === ProductType.MENTOONS_BOOKS
-                    ? "language" in product.details
-                      ? product.details.language === "en"
-                        ? "English"
-                        : product.details.language || "Not Available"
-                      : "Not Available"
-                    : "Not Applicable",
+                  "language" in product.details && product.details.language
+                    ? product.details.language === "en"
+                      ? "English"
+                      : product.details.language
+                    : "Not Available",
               },
               {
                 label: "Print Length",
                 value:
-                  product.type === ProductType.COMIC ||
-                  product.type === ProductType.MENTOONS_BOOKS
-                    ? "pages" in product.details
-                      ? `${product.details.pages || "Not Available"} pages`
-                      : "Not Available"
-                    : "Not Available",
+                  product.type === ProductType.MENTOONS_CARDS
+                    ? "printLength" in product.details
+                      ? `${product.details.printLength} cards`
+                      : "pages" in product.details
+                        ? `${product.details.pages} cards`
+                        : "Not Available"
+                    : "pages" in product.details && product.details.pages
+                      ? `${product.details.pages} pages`
+                      : "Not Available",
               },
-              {
-                label: "Launch Date",
-                value:
-                  product.type === ProductType.COMIC ||
-                  product.type === ProductType.AUDIO_COMIC ||
-                  product.type === ProductType.PODCAST ||
-                  product.type === ProductType.MENTOONS_BOOKS
-                    ? "releaseDate" in product.details &&
-                      product.details.releaseDate
-                      ? formatDateString(product.details.releaseDate)
-                      : "Not Available"
-                    : product.type === ProductType.WORKSHOP
-                    ? "schedule" in product.details && product.details.schedule
-                      ? formatDateString(product.details.schedule)
-                      : "Not Available"
-                    : "Not Available",
-              },
+              // {
+              //   label: "Launch Date",
+              //   value:
+              //     product.type === ProductType.COMIC ||
+              //     product.type === ProductType.AUDIO_COMIC ||
+              //     product.type === ProductType.PODCAST ||
+              //     product.type === ProductType.MENTOONS_BOOKS
+              //       ? "releaseDate" in product.details &&
+              //         product.details.releaseDate
+              //         ? formatDateString(product.details.releaseDate)
+              //         : "Not Available"
+              //       : product.type === ProductType.WORKSHOP
+              //         ? "schedule" in product.details &&
+              //           product.details.schedule
+              //           ? formatDateString(product.details.schedule)
+              //           : "Not Available"
+              //         : "Not Available",
+              // },
               {
                 label: "Reading Age",
                 value: product.ageCategory || "Not Specified",
@@ -595,8 +635,6 @@ const ProductDetails = () => {
               </div>
             ))}
         </div>
-
-        {/* You may also like this section */}
 
         <div className="w-full p-4 mt-4 ">
           <div>
@@ -610,7 +648,7 @@ const ProductDetails = () => {
                   type.value !== "podcast" &&
                   type.value !== "workshop" &&
                   type.value !== "assessment" &&
-                  type.value !== "comic"
+                  type.value !== "comic",
               ).map((type) => (
                 <button
                   key={type.id}
@@ -707,7 +745,6 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Frequently asked questions */}
         <div className="pt-10 ">
           <h2 className="pb-6 text-2xl font-semibold md:text-4xl ">
             Frequently asked questions
@@ -729,16 +766,10 @@ const ProductDetails = () => {
             <div className="flex flex-col flex-1 gap-4 p-4 text-center border-2 md:mb-8 rounded-xl">
               <div className="w-[80%] mx-auto ">
                 <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
-                  <BiSolidMessage
-                    className="text-5xl "
-                    // style={{ color: workshop.registerFormbgColor }}
-                  />
+                  <BiSolidMessage className="text-5xl " />
                 </div>
                 <div>
-                  <h3
-                    className="text-xl font-bold md:text-3xl md:pb-4"
-                    // style={{ color: workshop.registerFormbgColor }}
-                  >
+                  <h3 className="text-xl font-bold md:text-3xl md:pb-4">
                     Have Doubts? We are here to help you!
                   </h3>
                   <p className="pt-2 pb-4 text-gray-600 md:text-xl md:pb-6">
@@ -758,16 +789,10 @@ const ProductDetails = () => {
                       className="box-border w-full p-3 rounded-lg shadow-xl border-2 border-[#60C6E6]"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      // style={{
-                      //   border: `2px solid ${workshop.registerFormbgColor}`,
-                      // }}
                     ></textarea>
 
                     <button
                       className="w-full py-3 mt-4 text-xl font-semibold text-white transition-all duration-200 rounded-lg shadow-lg text- text-ellipsist-white bg-primary "
-                      // style={{
-                      //   backgroundColor: workshop.registerFormbgColor,
-                      // }}
                       type="submit"
                     >
                       Submit
@@ -794,7 +819,6 @@ const ProductDetails = () => {
         />
       )}
 
-      {/* Share Modal - Positioned fixed so it doesn't get affected by scrolling */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl">
@@ -811,7 +835,7 @@ const ProductDetails = () => {
               <FacebookShareButton
                 url={window.location.href}
                 hashtag="#Mentoons"
-                onClick={() => handleShareCompleted("Facebook")}
+                onShareWindowClose={() => handleShareCompleted("Facebook")}
               >
                 <FacebookIcon size={50} round />
                 <p className="mt-1 text-xs text-center">Facebook</p>
@@ -820,7 +844,7 @@ const ProductDetails = () => {
               <TwitterShareButton
                 url={window.location.href}
                 title={`Check out ${product.title} on Mentoons!`}
-                onClick={() => handleShareCompleted("Twitter")}
+                onShareWindowClose={() => handleShareCompleted("Twitter")}
               >
                 <TwitterIcon size={50} round />
                 <p className="mt-1 text-xs text-center">Twitter</p>
@@ -829,7 +853,7 @@ const ProductDetails = () => {
               <WhatsappShareButton
                 url={window.location.href}
                 title={`Check out ${product.title} on Mentoons!`}
-                onClick={() => handleShareCompleted("WhatsApp")}
+                onShareWindowClose={() => handleShareCompleted("WhatsApp")}
               >
                 <WhatsappIcon size={50} round />
                 <p className="mt-1 text-xs text-center">WhatsApp</p>
@@ -839,7 +863,7 @@ const ProductDetails = () => {
                 url={window.location.href}
                 subject={`Check out ${product.title} on Mentoons!`}
                 body={`I thought you might be interested in this product: ${product.title}\n\n${product.description}\n\nCheck it out here: ${window.location.href}`}
-                onClick={() => handleShareCompleted("Email")}
+                onShareWindowClose={() => handleShareCompleted("Email")}
               >
                 <EmailIcon size={50} round />
                 <p className="mt-1 text-xs text-center">Email</p>
@@ -881,14 +905,13 @@ const Rating = ({ ratings }: { ratings: number }) => {
     <div className="flex items-center gap-4 mt-2">
       <div className="flex">
         {[1, 2, 3, 4, 5].map((star) => {
-          const rating = ratings; // This can be passed as a prop
+          const rating = ratings;
           const filled = star <= Math.floor(rating);
           const partial = !filled && star <= Math.ceil(rating);
           const percentage = partial ? (rating % 1) * 100 : 0;
 
           return (
             <div key={star} className="relative">
-              {/* Empty star (background) */}
               <svg
                 className="w-8 h-8 text-gray-300"
                 fill="currentColor"
@@ -898,7 +921,6 @@ const Rating = ({ ratings }: { ratings: number }) => {
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
 
-              {/* Filled star (overlay) */}
               <div
                 className="absolute top-0 left-0 overflow-hidden"
                 style={{ width: filled ? "100%" : `${percentage}%` }}

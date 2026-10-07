@@ -6,7 +6,6 @@ import { PiPhoneCallFill } from "react-icons/pi";
 import {
   SiFacebook,
   SiInstagram,
-  SiLinkedin,
   SiWhatsapp,
   SiYoutube,
 } from "react-icons/si";
@@ -20,6 +19,7 @@ import * as Yup from "yup";
 import NewsletterModal from "../modals/NewsletterModal";
 // import MapComponent from "./MapComponent";
 import { AxiosError } from "axios";
+import { TiSocialLinkedin } from "react-icons/ti";
 
 interface ApiResponse {
   success: boolean;
@@ -80,19 +80,16 @@ const Footer = () => {
   const handleLinkClick = (linkItem: LinkItem) => {
     const { label, url } = linkItem;
 
-    // Handle email links
     if (label.includes("@")) {
       window.open(`mailto:${label}`, "_blank");
       return;
     }
 
-    // Handle phone links
     if (/^[\d\s+()-]+$/.test(label)) {
       window.location.href = `tel:${label}`;
       return;
     }
 
-    // Handle navigation with hash fragments
     if (url.includes("#")) {
       const hashIndex = url.indexOf("#");
       const path = url.substring(0, hashIndex);
@@ -101,13 +98,10 @@ const Footer = () => {
       console.log("Navigating to path:", path);
       console.log("Scrolling to section:", section);
 
-      // Check if we're on a different path
       const currentPath = location.pathname + location.search;
       if (currentPath !== path) {
-        // Navigate to the new path with hash
         navigate(path + "#" + section);
       } else {
-        // Same path, just scroll to the section
         setTimeout(() => {
           const element = document.getElementById(section);
           if (element) {
@@ -126,11 +120,38 @@ const Footer = () => {
       return;
     }
 
-    // Handle regular navigation
     if (location.pathname !== url) {
       navigate(url);
     }
   };
+
+  const renderSocialIcons = (iconSize: "sm" | "lg") => (
+    <div
+      className={`flex items-center justify-center gap-[8px] relative ${
+        iconSize === "lg" ? "my-4" : "my-1 w-full"
+      }`}
+    >
+      {SOCIAL_LINKS.map((socialItem) => (
+        <Link
+          key={socialItem.id}
+          to={socialItem.link}
+          className="p-3 text-xl bg-white rounded-full cursor-pointer"
+        >
+          {socialItem.icon === "linkedin" ? (
+            <TiSocialLinkedin className="transition-all duration-300 hover:scale-110" />
+          ) : socialItem.icon === "facebook" ? (
+            <SiFacebook className="transition-all duration-300 hover:scale-110" />
+          ) : socialItem.icon === "instagram" ? (
+            <SiInstagram className="transition-all duration-300 hover:scale-110" />
+          ) : socialItem.icon === "youtube" ? (
+            <SiYoutube className="transition-all duration-300 hover:scale-110" />
+          ) : socialItem.icon === "whatsapp" ? (
+            <SiWhatsapp className="transition-all duration-300 hover:scale-110" />
+          ) : null}
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <footer className="bg-[#FF942E] relative ">
@@ -149,30 +170,6 @@ const Footer = () => {
             className="object-cover h-24"
           />
         </div>
-
-        {!isMobile && (
-          <div className="flex items-center justify-center gap-[8px] my-4 relative ">
-            {SOCIAL_LINKS.map((socialItem) => (
-              <Link
-                key={socialItem.id}
-                to={socialItem.link}
-                className="p-3 text-xl bg-white rounded-full cursor-pointer"
-              >
-                {socialItem.icon === "linkedin" ? (
-                  <SiLinkedin className="transition-all duration-300 hover:scale-110" />
-                ) : socialItem.icon === "facebook" ? (
-                  <SiFacebook className="transition-all duration-300 hover:scale-110" />
-                ) : socialItem.icon === "instagram" ? (
-                  <SiInstagram className="transition-all duration-300 hover:scale-110" />
-                ) : socialItem.icon === "youtube" ? (
-                  <SiYoutube className="transition-all duration-300 hover:scale-110" />
-                ) : socialItem.icon === "whatsapp" ? (
-                  <SiWhatsapp className="transition-all duration-300 hover:scale-110" />
-                ) : null}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
       <div className="relative gap-10 px-16 lg:flex">
         <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-10 lg:justify-end   ">
@@ -316,7 +313,7 @@ const Footer = () => {
                       </>
                     ) : (
                       <>
-                        Be the First to Get Notified
+                        Get Notified
                         <svg
                           className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                           fill="none"
@@ -337,29 +334,6 @@ const Footer = () => {
               </Form>
             )}
           </Formik>
-          {isMobile && (
-            <div className="flex items-center justify-center gap-[8px]  relative  my-1  w-full">
-              {SOCIAL_LINKS.map((socialItem) => (
-                <Link
-                  key={socialItem.id}
-                  to={socialItem.link}
-                  className="p-3 text-xl bg-white rounded-full cursor-pointer"
-                >
-                  {socialItem.icon === "linkedin" ? (
-                    <SiLinkedin className="transition-all duration-200 hover:scale-110" />
-                  ) : socialItem.icon === "facebook" ? (
-                    <SiFacebook className="transition-all duration-200 hover:scale-110" />
-                  ) : socialItem.icon === "instagram" ? (
-                    <SiInstagram className="transition-all duration-200 hover:scale-110" />
-                  ) : socialItem.icon === "youtube" ? (
-                    <SiYoutube className="transition-all duration-200 hover:scale-110" />
-                  ) : socialItem.icon === "whatsapp" ? (
-                    <SiWhatsapp className="transition-all duration-200 hover:scale-110" />
-                  ) : null}
-                </Link>
-              ))}
-            </div>
-          )}
           <div className="w-full space-y-2">
             {/* <MapComponent />{" "} */}
             <div className="flex items-center justify-start w-full text-lg font-medium tracking-wide">
@@ -369,6 +343,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {isMobile ? renderSocialIcons("sm") : renderSocialIcons("lg")}
 
       <div className="relative flex flex-wrap items-center justify-center gap-8 mt-16">
         {companyImg.map((item) => (

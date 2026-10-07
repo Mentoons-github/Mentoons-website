@@ -100,20 +100,23 @@ const BecomeMentor = () => {
       <img
         ref={img1Ref}
         src="/assets/hiring/mentor-bg.png"
-        alt="mentor-with-kids"
-        className="absolute left-10 top-5 w-32 h-44 z-20 pointer-events-none"
+        alt=""
+        aria-hidden="true"
+        className="hidden sm:block absolute left-10 top-5 w-24 h-36 sm:w-28 sm:h-40 md:w-32 md:h-44 z-20 pointer-events-none"
       />
       <img
         ref={img2Ref}
         src="/assets/hiring/mentor-bg1.png"
-        alt="mentor-with-kids"
-        className="absolute right-10 bottom-1/4 w-64 h-96 z-20 pointer-events-none"
+        alt=""
+        aria-hidden="true"
+        className="hidden md:block absolute right-10 bottom-1/4 w-40 h-60 md:w-52 md:h-80 lg:w-64 lg:h-96 z-20 pointer-events-none"
       />
       <img
         ref={img3Ref}
         src="/assets/hiring/mentor-bg2.png"
-        alt="mentor-with-kids"
-        className="absolute left-1/5 bottom-20 w-80 z-20 pointer-events-none"
+        alt=""
+        aria-hidden="true"
+        className="hidden md:block absolute left-[20%] bottom-20 w-52 md:w-64 lg:w-80 z-20 pointer-events-none"
       />
 
       <JobHeroSection

@@ -48,7 +48,6 @@ const Users = () => {
           },
         },
       );
-      console.log(data);
 
       if (data.success && Array.isArray(data.data.users)) {
         setUsers(data.data.users);

@@ -34,7 +34,9 @@ interface DetailsModalProps {
     | "job"
     | "workshop"
     | "meetups"
-    | "bplVerification";
+    | "bplVerification"
+    | "communities"
+    | "badges";
   onClose: () => void;
   sortOrder?: string;
   searchTerm?: string;

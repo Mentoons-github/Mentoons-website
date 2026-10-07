@@ -21,6 +21,7 @@ const departmentOptions: Options[] = [
   { value: "finance", label: "Finance & Accounts" },
   { value: "sales", label: "Sales & Business Development" },
   { value: "psychologist", label: "Mental Health" },
+  { value: "mentor", label: "Educator / Mentor" },
 ];
 
 const employmentTypeOptions: Options[] = [
@@ -65,7 +66,7 @@ const EmployeeLogin = () => {
           { jobRole, jobType },
           {
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         const employeeData = response.data;
@@ -90,7 +91,7 @@ const EmployeeLogin = () => {
           navigate("/employee/dashboard");
         } else {
           setError(
-            "Login incomplete. Please check your details or contact support."
+            "Login incomplete. Please check your details or contact support.",
           );
         }
       } catch (error: unknown) {
@@ -119,7 +120,7 @@ const EmployeeLogin = () => {
 
   const contactSupport = () => {
     alert(
-      "IT Support Contact:\n\nEmail: itsupport@company.com\nPhone: +1 (555) 123-4567\nExt: 1234\n\nSupport Hours:\nMon-Fri: 8:00 AM - 6:00 PM\nSat: 9:00 AM - 2:00 PM"
+      "IT Support Contact:\n\nEmail: itsupport@company.com\nPhone: +1 (555) 123-4567\nExt: 1234\n\nSupport Hours:\nMon-Fri: 8:00 AM - 6:00 PM\nSat: 9:00 AM - 2:00 PM",
     );
   };
 
@@ -149,7 +150,7 @@ const EmployeeLogin = () => {
           departmentOptions={departmentOptions}
           employmentTypeOptions={employmentTypeOptions}
           jobRole={jobRole}
-          jobType={jobRole}
+          jobType={jobType}
           setJobRole={setJobRole}
           setJobType={setJobType}
           setTab={setTab}

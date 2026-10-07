@@ -18,6 +18,10 @@ import { BASE_URL } from "@/api/game/postScore";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import ShareModal from "@/components/admin/modal/shareModal";
 import SortDropdown from "@/components/admin/job/sortDropDown";
+import { Send, Users, Loader2 } from "lucide-react";
+import SendEmailModal, {
+  EmailRecipient,
+} from "@/components/admin/candidate/sendCandidateModal";
 
 const ViewApplications = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -52,6 +56,10 @@ const ViewApplications = () => {
     success: boolean;
     message: string;
   } | null>(null);
+
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailRecipients, setEmailRecipients] = useState<EmailRecipient[]>([]);
+  const [isFetchingAllForEmail, setIsFetchingAllForEmail] = useState(false);
 
   const { showStatus } = useStatusModal();
 
@@ -264,6 +272,49 @@ const ViewApplications = () => {
     setIsModalOpen(true);
   };
 
+  const openEmailModalForSelected = () => {
+    if (selectedApplications.size === 0) {
+      alert("No applications selected.");
+      return;
+    }
+    if (!data?.data?.jobs) return;
+
+    const selected = data.data.jobs.filter((job: JobApplication) =>
+      selectedApplications.has(job._id),
+    );
+    setEmailRecipients(
+      selected.map((job: JobApplication) => ({
+        id: job._id,
+        name: job.name,
+        email: job.email,
+      })),
+    );
+    setIsEmailModalOpen(true);
+  };
+
+  const openEmailModalForAll = async () => {
+    setIsFetchingAllForEmail(true);
+    try {
+      const allJobs = await fetchAllApplications();
+
+      if (allJobs.length === 0) {
+        alert("No job applications available to email.");
+        return;
+      }
+
+      setEmailRecipients(
+        allJobs.map((job: JobApplication) => ({
+          id: job._id,
+          name: job.name,
+          email: job.email,
+        })),
+      );
+      setIsEmailModalOpen(true);
+    } finally {
+      setIsFetchingAllForEmail(false);
+    }
+  };
+
   const debouncedSearch = useCallback(
     debounce((value: string) => {
       setDebouncedSearchTerm(value);
@@ -372,9 +423,11 @@ const ViewApplications = () => {
 
   return (
     <div className="w-full max-w-full p-5">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">View All Job Applications</h1>
-        <div className="flex gap-3">
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold">
+          View All Job Applications
+        </h1>
+        <div className="flex flex-wrap items-center gap-2">
           <SortDropdown
             sortField={sortField}
             sortOrder={sortOrder}
@@ -386,12 +439,39 @@ const ViewApplications = () => {
             options={sortOptions}
           />
 
+          {selectedApplications.size > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={openEmailModalForSelected}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-orange-500 text-white rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-orange-600 whitespace-nowrap"
+            >
+              <Send size={16} />
+              Email Selected ({selectedApplications.size})
+            </motion.button>
+          )}
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={openEmailModalForAll}
+            disabled={isFetchingAllForEmail || totalJobs === 0}
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-900 text-white rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            {isFetchingAllForEmail ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Users size={16} />
+            )}
+            Email All
+          </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={exportAllToExcel}
             disabled={isExporting}
-            className={`px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 ${
+            className={`px-3 py-1.5 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
               isExporting
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-green-700"
@@ -403,7 +483,7 @@ const ViewApplications = () => {
               <>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -415,7 +495,8 @@ const ViewApplications = () => {
                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                Download All as Excel
+                <span className="hidden sm:inline">Download All as Excel</span>
+                <span className="sm:hidden">Download All</span>
               </>
             )}
           </motion.button>
@@ -424,11 +505,11 @@ const ViewApplications = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={exportSelectedToExcel}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-green-700"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-green-700 whitespace-nowrap"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-4 w-4 sm:h-5 sm:w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -440,7 +521,8 @@ const ViewApplications = () => {
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            Export Selected to Excel
+            <span className="hidden sm:inline">Export Selected to Excel</span>
+            <span className="sm:hidden">Export Selected</span>
           </motion.button>
         </div>
       </div>
@@ -509,6 +591,16 @@ const ViewApplications = () => {
           onShare={onShare}
         />
       )}
+
+      <SendEmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        recipients={emailRecipients}
+        recipientType="jobApplication"
+        onSent={() => {
+          setSelectedApplications(new Set());
+        }}
+      />
     </div>
   );
 };

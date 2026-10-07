@@ -55,6 +55,8 @@ const Feed = ({ latestPost, onFetchComplete }: FeedProps) => {
           },
         );
 
+        console.log(data);
+
         if (!data.success) throw new Error("Failed to fetch feeds");
 
         const newPosts: PostData[] = data.data;

@@ -95,7 +95,7 @@ const AddaRouter = () => {
         </Route>
         <Route path="game-lobby" element={<GameLobby />} />
         <Route path="user-profile" element={<Profile />} />
-        <Route path="game" element={<></>} />
+        {/* <Route path="game" element={<></>} /> */}
         <Route path="game-lobby/inventors" element={<Inventors />} />
         <Route path="game-lobby/instruments" element={<Instruments />} />
         <Route path="game-lobby/color-tube" element={<ColorTubeGame />} />

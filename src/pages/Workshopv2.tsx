@@ -11,7 +11,7 @@ import FAQCard from "@/components/shared/FAQSection/FAQCard";
 import WorkshopActivities from "@/components/Workshop/activities";
 import WorkshopBanner from "@/components/Workshop/banner/banner";
 import WorkshopInfoCarousel from "@/components/Workshop/carousal";
-import WorkShopChallenges from "@/components/Workshop/challenges/challenges";
+// import WorkShopChallenges from "@/components/Workshop/challenges/challenges";
 import { WORKSHOP_FAQ } from "@/constant";
 import { WorkshopCategory } from "@/types";
 import { ModalMessage } from "@/utils/enum";
@@ -53,6 +53,8 @@ const Workshopv2 = () => {
     ageCategory: "",
     doubt: "",
   });
+
+  console.log(currentSlide);
 
   useEffect(() => {
     setEnquiryEmail(user?.email || "");
@@ -242,22 +244,22 @@ const Workshopv2 = () => {
     }));
   };
 
-  const handleWorkshopButtonClick = (
-    categoryIndex: number,
-    // workshopIndex: number
-    workshopName: string,
-  ) => {
-    // const workshopName =
-    //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
-    setSelectedCategory(workshopName);
-    setSelectedCategoryIndex(categoryIndex);
-    // setSelectedWorkshopIndex(workshopIndex);
-    setCurrentSlide(categoryIndex);
-    setDirection(categoryIndex > currentSlide ? 1 : -1);
-    if (carouselRef.current) {
-      carouselRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  // const handleWorkshopButtonClick = (
+  //   categoryIndex: number,
+  //   // workshopIndex: number
+  //   workshopName: string,
+  // ) => {
+  //   // const workshopName =
+  //   //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
+  //   setSelectedCategory(workshopName);
+  //   setSelectedCategoryIndex(categoryIndex);
+  //   // setSelectedWorkshopIndex(workshopIndex);
+  //   setCurrentSlide(categoryIndex);
+  //   setDirection(categoryIndex > currentSlide ? 1 : -1);
+  //   if (carouselRef.current) {
+  //     carouselRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // };
 
   const handleRegisterationForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -426,8 +428,8 @@ const Workshopv2 = () => {
     <>
       {/* Banner */}
       <WorkshopBanner
-        categories={categories}
-        onWorkshopClick={handleWorkshopButtonClick}
+      // categories={categories}
+      // onWorkshopClick={handleWorkshopButtonClick}
       />
       <div className="">
         <AboutWorkshop categories={categories} />
@@ -445,13 +447,6 @@ const Workshopv2 = () => {
           />
         </div>
         <WorkshopPlans />
-
-        {/* Challenges */}
-        <WorkShopChallenges />
-
-        {/* Activities */}
-        <WorkshopActivities />
-
         <motion.div
           ref={registerRef}
           initial="hidden"
@@ -652,6 +647,12 @@ const Workshopv2 = () => {
           </motion.div>
         </motion.div>
 
+        {/* Challenges */}
+        {/* <WorkShopChallenges /> */}
+
+        {/* Activities */}
+        <WorkshopActivities />
+
         <motion.div
           ref={faqRef}
           initial="hidden"
@@ -797,14 +798,11 @@ const Workshopv2 = () => {
         />
       )}
 
-      {showErrorModal && (
-        <ErrorModal
-          heading="Faild to submit query"
-          error={showErrorMessage}
-          isOpen={showErrorModal}
-          onClose={() => setShowErrorModal(false)}
-        />
-      )}
+      <ErrorModal
+        open={showErrorModal}
+        message={showErrorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </>
   );
 };

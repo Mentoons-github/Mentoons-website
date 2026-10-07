@@ -79,9 +79,6 @@ export const joinGroupThunk = createAsyncThunk<
   }
 });
 
-// -------------------- POLL ASYNC THUNKS --------------------
-
-// Fetch polls for a group
 export const fetchPolls = createAsyncThunk<Poll[], string>(
   "group/fetchPolls",
   async (groupId, { rejectWithValue }) => {
@@ -110,14 +107,14 @@ export const createPoll = createAsyncThunk<
 // Vote for a poll
 export const votePoll = createAsyncThunk<
   Poll,
-  { groupId: string; pollId: string; voterId: string; optionIndex: number }
+  { groupId: string; pollId: string; voterId: string; optionId: string }
 >(
   "group/votePoll",
-  async ({ groupId, pollId, voterId, optionIndex }, { rejectWithValue }) => {
+  async ({ groupId, pollId, voterId, optionId }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(
         `${BASE_URL}/${groupId}/polls/${pollId}/vote`,
-        { voterId, optionIndex },
+        { voterId, optionId },
       );
       return data.poll as Poll;
     } catch (err: any) {

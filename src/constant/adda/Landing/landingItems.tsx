@@ -7,7 +7,7 @@ import {
   FaSmile,
   FaUserFriends,
 } from "react-icons/fa";
-import { FaBook, FaBrain, FaComments, FaHeart, FaUsers } from "react-icons/fa6";
+import { FaBook, FaBrain, FaComments, FaGamepad, FaHeart, FaUsers } from "react-icons/fa6";
 
 export const LandingColors = [
   "#22C55E", // green
@@ -152,6 +152,27 @@ export const LandingParentPoints = [
     icon: <FaUsers />,
     color: "bg-teal-100 text-teal-600",
     text: "Our team & psychologists are dedicated to helping you and your child succeed.",
+  },
+];
+
+export const LandingChildrenPoints = [
+  {
+    title: "Fun & Engaging Learning",
+    icon: <FaGamepad />,
+    color: "bg-orange-100 text-orange-600",
+    text: "Comics, podcasts and games designed to make learning about emotions and real-life skills genuinely fun for kids.",
+  },
+  {
+    title: "Emotional Growth",
+    icon: <FaSmile />,
+    color: "bg-yellow-100 text-yellow-600",
+    text: "Age-appropriate content that helps children recognise, understand and express their feelings in healthy ways.",
+  },
+  {
+    title: "Real-Life Skills",
+    icon: <FaBook />,
+    color: "bg-purple-100 text-purple-600",
+    text: "Workshops and stories that build confidence, friendship skills and independence away from the screen.",
   },
 ];
 

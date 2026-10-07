@@ -1,13 +1,16 @@
 import LeftSection from "@/components/adda/userProfile/profile/leftSection";
-import ProfileFormModal from "./adda/userProfile/profieForm";
 import CompleteProfileModal from "@/components/adda/userProfile/CompleteProfileModal";
 import UserListModal from "@/components/common/modal/userList";
-import { Camera, Ellipsis, X } from "lucide-react";
+import { Ellipsis, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Confetti from "react-confetti";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { ProfileUserDetails, ProfilePost } from "@/types/adda/userProfile";
+import {
+  ProfileUserDetails,
+  ProfilePost,
+  Badge,
+} from "@/types/adda/userProfile";
 import ProfileTabContent from "@/components/adda/userProfile/profile/tabContent";
 import LoadingSpinner from "@/components/adda/userProfile/loader/spinner";
 import ProfileCompletionWidget from "@/components/adda/cards/profileCompletion";
@@ -15,6 +18,8 @@ import { useSubmissionModal } from "@/context/adda/commonModalContext";
 import Croppr from "croppr";
 import "croppr/dist/croppr.css";
 import UserProfileMoreModal from "@/components/common/modal/userProfile.tsx/UserProfileMoreModal";
+import CoverPicture from "@/components/adda/profile/coverPicture";
+import ProfileFormModal from "./adda/userProfile/profieForm";
 
 interface FollowType {
   _id: string;
@@ -24,7 +29,9 @@ interface FollowType {
 }
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("Posts");
+  const [activeTab, setActiveTab] = useState<
+    "Posts" | "Rewards" | "Saved" | "Details" | "Badges"
+  >("Posts");
   const [showCompletionForm, setShowCompletionForm] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -37,38 +44,29 @@ const Profile = () => {
   const [totalFollowing, setTotalFollowing] = useState<string[]>([]);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [isFetchingUserData, setIsFetchingUserData] = useState(false);
+  const [moreModal, setMoreModal] = useState(false);
+
   const { showModal, hideModal } = useSubmissionModal();
   const { getToken } = useAuth();
   const { user } = useUser();
+
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
   const coverImgRef = useRef<HTMLImageElement>(null);
   const profileImgRef = useRef<HTMLImageElement>(null);
+
   const coverCropInstance = useRef<any>(null);
   const profileCropInstance = useRef<any>(null);
+
   const [showCoverCropper, setShowCoverCropper] = useState(false);
   const [showProfileCropper, setShowProfileCropper] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const [profileImageLoaded, setProfileImageLoaded] = useState(false);
-  const [userId, setUserId] = useState<string>("");
-  const [moreModal, setMoreModal] = useState<boolean>(false);
+  const [badges, setBadges] = useState<Badge[]>([]);
 
-  const profileFields = [
-    { field: "name", label: "Name", required: true },
-    { field: "picture", label: "Profile Picture" },
-    { field: "email", label: "Email", required: true },
-    { field: "phoneNumber", label: "Phone Number" },
-    { field: "location", label: "Location" },
-    { field: "bio", label: "Bio", minLength: 10 },
-    { field: "education", label: "Education" },
-    { field: "occupation", label: "Occupation" },
-    { field: "interests", label: "Interests", minLength: 3 },
-    { field: "dateOfBirth", label: "Date of Birth" },
-    { field: "gender", label: "Gender" },
-    { field: "socialLinks", label: "Social Links" },
-  ];
+  const [userId, setUserId] = useState<string>("");
 
   const [userDetails, setUserDetails] = useState<ProfileUserDetails>({
     _id: "",
@@ -88,11 +86,33 @@ const Profile = () => {
     joinedDate: "",
   });
 
+  // Level Tracker State
+  // const [currentLevel, setCurrentLevel] = useState(7);
+  // const [currentXP, setCurrentXP] = useState(1850);
+  // const [xpToNextLevel, setXpToNextLevel] = useState(2400);
+
+  const profileFields = [
+    { field: "name", label: "Name", required: true },
+    { field: "picture", label: "Profile Picture" },
+    { field: "email", label: "Email", required: true },
+    { field: "phoneNumber", label: "Phone Number" },
+    { field: "location", label: "Location" },
+    { field: "bio", label: "Bio", minLength: 10 },
+    { field: "education", label: "Education" },
+    { field: "occupation", label: "Occupation" },
+    { field: "interests", label: "Interests", minLength: 3 },
+    { field: "dateOfBirth", label: "Date of Birth" },
+    { field: "gender", label: "Gender" },
+    { field: "socialLinks", label: "Social Links" },
+  ];
+
   const getProfileCompletion = () => {
-    let completedFields = 0;
     if (!userDetails) return 0;
+    let completedFields = 0;
+
     profileFields.forEach((field) => {
       const value = userDetails[field.field as keyof ProfileUserDetails];
+
       if (field.field === "interests") {
         if ((value as string[])?.length >= (field.minLength || 1))
           completedFields++;
@@ -104,17 +124,22 @@ const Profile = () => {
           completedFields++;
       } else if (field.field === "picture") {
         if (value || user?.imageUrl) completedFields++;
-      } else if (value && String(value).trim() !== "") completedFields++;
+      } else if (value && String(value).trim() !== "") {
+        completedFields++;
+      }
     });
+
     return Math.round((completedFields / profileFields.length) * 100);
   };
 
   const getIncompleteFields = () => {
     const incompleteFields: string[] = [];
     if (!userDetails) return profileFields.map((f) => f.label);
+
     profileFields.forEach((field) => {
       if (field.required) return;
       const value = userDetails[field.field as keyof ProfileUserDetails];
+
       if (field.field === "interests") {
         if (
           !(value as string[])?.length ||
@@ -132,15 +157,19 @@ const Profile = () => {
           incompleteFields.push(field.label);
       } else if (field.field === "picture") {
         if (!value && !user?.imageUrl) incompleteFields.push(field.label);
-      } else if (!value || String(value).trim() === "")
+      } else if (!value || String(value).trim() === "") {
         incompleteFields.push(field.label);
+      }
     });
+
     return incompleteFields;
   };
 
   const profileCompletionPercentage = getProfileCompletion();
   const isProfileComplete = profileCompletionPercentage === 100;
   const incompleteFields = getIncompleteFields();
+
+  // const progressPercentage = Math.round((currentXP / xpToNextLevel) * 100);
 
   const fetchUserData = async () => {
     setIsFetchingUserData(true);
@@ -149,50 +178,57 @@ const Profile = () => {
       setIsFetchingUserData(false);
       return;
     }
+
     try {
-      const [userResponse, postsResponse, savedPostsResponse] =
+      const [userResponse, postsResponse, savedPostsResponse, badgeResponse] =
         await Promise.all([
           axios.get(`${import.meta.env.VITE_PROD_URL}/user/user`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           axios.get(
-            `${import.meta.env.VITE_PROD_URL}/posts/user/${
-              user?.id
-            }?currentUser=${user?.id}`,
-            { headers: { Authorization: `Bearer ${token}` } },
+            `${import.meta.env.VITE_PROD_URL}/posts/user/${user?.id}?currentUser=${user?.id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
           ),
           axios.get(`${import.meta.env.VITE_PROD_URL}/feeds/saved`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
+          axios.get(`${import.meta.env.VITE_PROD_URL}/badge`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
-      setUserDetails(userResponse.data.data);
-      setUserId(userResponse.data.data._id);
+
+      const userData = userResponse.data.data;
+      setUserDetails(userData);
+      setUserId(userData._id);
+      console.log(badgeResponse.data.badges);
+      setBadges(badgeResponse.data.badges || []);
+
       setTotalFollowers(
-        userResponse.data.data.followers.map((ele: FollowType) => ele._id) ||
-          [],
+        userData.followers?.map((ele: FollowType) => ele._id) || [],
       );
       setTotalFollowing(
-        userResponse.data.data.following.map((ele: FollowType) => ele._id) ||
-          [],
+        userData.following?.map((ele: FollowType) => ele._id) || [],
       );
-      setBlockedUsers(
-        userResponse.data.data.blockedUsers.map((ele: string) => ele) || [],
-      );
+      setBlockedUsers(userData.blockedUsers || []);
+
       setUserPosts(
         postsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
           postType: post.postType || "text",
           user: post.user || {
             _id: user?.id || "",
-            name: userDetails.name || "",
-            picture: userDetails.picture || "",
-            email: userDetails.email || "",
+            name: userData.name || "",
+            picture: userData.picture || "",
+            email: userData.email || "",
           },
           shares: post.shares || [],
           saves: post.saves || 0,
           visibility: post.visibility || "public",
         })),
       );
+
       setUserSavedPosts(
         savedPostsResponse.data.data.map((post: ProfilePost) => ({
           ...post,
@@ -223,11 +259,13 @@ const Profile = () => {
 
   useEffect(() => {
     if (user?.id) fetchUserData();
-  }, [user?.id, getToken]);
+  }, [user?.id]);
 
   useEffect(() => {
     const isModalShown = sessionStorage.getItem("modalShown");
-    if (!isModalShown) setShowProfileModal(true);
+    if (!isModalShown && !isProfileComplete) {
+      setShowProfileModal(true);
+    }
   }, [isProfileComplete]);
 
   useEffect(() => {
@@ -240,17 +278,8 @@ const Profile = () => {
       return;
 
     const timer = setTimeout(() => {
-      if (
-        coverImgRef.current &&
-        coverImgRef.current.offsetWidth > 0 &&
-        coverImgRef.current.offsetHeight > 0
-      ) {
-        if (coverCropInstance.current) {
-          try {
-            coverCropInstance.current.destroy();
-          } catch {}
-          coverCropInstance.current = null;
-        }
+      if (coverImgRef.current && coverImgRef.current.offsetWidth > 0) {
+        if (coverCropInstance.current) coverCropInstance.current.destroy();
         coverCropInstance.current = new Croppr(coverImgRef.current, {
           aspectRatio: 3 / 1,
           startSize: [90, 50, "%"],
@@ -261,9 +290,7 @@ const Profile = () => {
     return () => {
       clearTimeout(timer);
       if (coverCropInstance.current) {
-        try {
-          coverCropInstance.current.destroy();
-        } catch {}
+        coverCropInstance.current.destroy();
         coverCropInstance.current = null;
       }
     };
@@ -279,17 +306,8 @@ const Profile = () => {
       return;
 
     const timer = setTimeout(() => {
-      if (
-        profileImgRef.current &&
-        profileImgRef.current.offsetWidth > 0 &&
-        profileImgRef.current.offsetHeight > 0
-      ) {
-        if (profileCropInstance.current) {
-          try {
-            profileCropInstance.current.destroy();
-          } catch {}
-          profileCropInstance.current = null;
-        }
+      if (profileImgRef.current && profileImgRef.current.offsetWidth > 0) {
+        if (profileCropInstance.current) profileCropInstance.current.destroy();
         profileCropInstance.current = new Croppr(profileImgRef.current, {
           aspectRatio: 1,
           startSize: [70, 70, "%"],
@@ -300,9 +318,7 @@ const Profile = () => {
     return () => {
       clearTimeout(timer);
       if (profileCropInstance.current) {
-        try {
-          profileCropInstance.current.destroy();
-        } catch {}
+        profileCropInstance.current.destroy();
         profileCropInstance.current = null;
       }
     };
@@ -313,7 +329,7 @@ const Profile = () => {
       if (coverImageUrl) URL.revokeObjectURL(coverImageUrl);
       if (profileImageUrl) URL.revokeObjectURL(profileImageUrl);
     };
-  }, []);
+  }, [coverImageUrl, profileImageUrl]);
 
   const applyCrop = async (type: "cover" | "profile") => {
     const instance =
@@ -349,6 +365,7 @@ const Profile = () => {
             type: "image/jpeg",
           },
         );
+
         if (type === "cover") await handleCoverPhotoChange(croppedFile);
         else await handleProfilePhotoChange(croppedFile);
 
@@ -359,9 +376,7 @@ const Profile = () => {
           if (imgUrl) URL.revokeObjectURL(imgUrl);
         }, 300);
 
-        try {
-          instance.destroy();
-        } catch {}
+        if (instance) instance.destroy();
         if (type === "cover") coverCropInstance.current = null;
         else profileCropInstance.current = null;
       }
@@ -380,18 +395,15 @@ const Profile = () => {
     const setLoaded =
       type === "cover" ? setCoverImageLoaded : setProfileImageLoaded;
 
-    if (instance) {
-      try {
-        instance.destroy();
-      } catch {}
-    }
-    if (type === "cover") coverCropInstance.current = null;
-    else profileCropInstance.current = null;
+    if (instance) instance.destroy();
 
     setShow(false);
     setLoaded(false);
     setUrl(null);
     if (url) setTimeout(() => URL.revokeObjectURL(url), 300);
+
+    if (type === "cover") coverCropInstance.current = null;
+    else profileCropInstance.current = null;
   };
 
   const handleFileSelect = (file: File, type: "cover" | "profile") => {
@@ -403,6 +415,7 @@ const Profile = () => {
       });
       return;
     }
+
     const url = URL.createObjectURL(file);
     if (type === "cover") {
       setCoverImageUrl(url);
@@ -422,17 +435,12 @@ const Profile = () => {
       message: "Uploading cover photo...",
     });
     const token = await getToken();
-    if (!token) {
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Authentication required",
-      });
-      return;
-    }
+    if (!token) return;
+
     try {
       const formData = new FormData();
       formData.append("file", file);
+
       const uploadResponse = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
@@ -443,6 +451,7 @@ const Profile = () => {
           },
         },
       );
+
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) throw new Error("Upload failed");
 
@@ -452,19 +461,21 @@ const Profile = () => {
         { coverImage: fileUrl },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+
       setUserDetails((prev) => ({ ...prev, coverImage: fileUrl }));
       showModal({
         isSubmitting: false,
         currentStep: "success",
         message: "Cover photo updated!",
       });
-      setTimeout(hideModal, 2000);
     } catch (error) {
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to upload cover photo",
       });
+    } finally {
+      setTimeout(hideModal, 2000);
     }
   };
 
@@ -475,18 +486,14 @@ const Profile = () => {
       message: "Uploading profile photo...",
     });
     const token = await getToken();
-    if (!token) {
-      showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Authentication required",
-      });
-      return;
-    }
+    if (!token) return;
+
     try {
       await user?.setProfileImage({ file });
+
       const formData = new FormData();
       formData.append("file", file);
+
       const uploadResponse = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/upload/file`,
         formData,
@@ -497,6 +504,7 @@ const Profile = () => {
           },
         },
       );
+
       const fileUrl = uploadResponse.data?.data?.fileDetails?.url;
       if (!fileUrl) throw new Error("Upload failed");
 
@@ -505,19 +513,21 @@ const Profile = () => {
         { picture: fileUrl },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+
       setUserDetails((prev) => ({ ...prev, picture: fileUrl }));
       showModal({
         isSubmitting: false,
         currentStep: "success",
         message: "Profile photo updated!",
       });
-      setTimeout(hideModal, 2000);
     } catch (error) {
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to upload profile photo",
       });
+    } finally {
+      setTimeout(hideModal, 2000);
     }
   };
 
@@ -528,6 +538,7 @@ const Profile = () => {
       currentStep: "saving",
       message: "Updating profile...",
     });
+
     const profileData = {
       name: userDetails.name || user?.fullName || "",
       email: userDetails.email || user?.primaryEmailAddress?.emailAddress || "",
@@ -543,23 +554,30 @@ const Profile = () => {
       picture: userDetails.picture || user?.imageUrl || "",
       coverImage: userDetails.coverImage || "",
     };
+
     const token = await getToken();
-    if (!token)
-      return showModal({
+    if (!token) {
+      showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Authentication required",
       });
+      return;
+    }
 
     try {
       await axios.put(
         `${import.meta.env.VITE_PROD_URL}/user/profile`,
         profileData,
-        { headers: { Authorization: `Bearer ${token}` } },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
+
       setUserDetails((prev) => ({ ...prev, ...profileData }));
       setShowCompletionForm(false);
       setShowConfetti(true);
+
       showModal({
         isSubmitting: false,
         currentStep: "success",
@@ -592,12 +610,7 @@ const Profile = () => {
       message: "Updating interests...",
     });
     const token = await getToken();
-    if (!token)
-      return showModal({
-        isSubmitting: false,
-        currentStep: "error",
-        message: "Authentication required",
-      });
+    if (!token) return;
 
     try {
       await axios.put(
@@ -610,19 +623,33 @@ const Profile = () => {
         currentStep: "success",
         message: "Interests updated!",
       });
-      setTimeout(hideModal, 2000);
     } catch (error) {
       showModal({
         isSubmitting: false,
         currentStep: "error",
         message: "Failed to update interests",
       });
+    } finally {
+      setTimeout(hideModal, 2000);
     }
   };
 
   const handleCompleteProfile = () => {
     setShowProfileModal(false);
     setShowCompletionForm(true);
+  };
+
+  const handleCloseInitialModal = () => {
+    setShowProfileModal(false);
+    sessionStorage.setItem("modalShown", "true");
+  };
+
+  const onUnblockSuccess = (blockedUserId: string) => {
+    setBlockedUsers((prev) => prev.filter((id) => id !== blockedUserId));
+  };
+
+  const reduceFollower = (id: string) => {
+    setTotalFollowers((prev) => prev.filter((_id) => _id !== id));
   };
 
   if (isFetchingUserData) {
@@ -633,22 +660,6 @@ const Profile = () => {
     );
   }
 
-  const reduceFollower = (id: string) => {
-    setTotalFollowers((prev) => prev.filter((_id) => _id !== id));
-  };
-  // const addFollowing = (id: string) => {
-  //   setTotalFollowing((prev) => [...prev, id]);
-  // };
-
-  const handleCloseInitialModal = () => {
-    setShowProfileModal(false);
-    sessionStorage.setItem("modalShown", "true");
-  };
-
-  const onUnblockSuccess = (userId: string) => {
-    setBlockedUsers((prev) => prev.filter((id) => id !== userId));
-  };
-
   return (
     <>
       {showConfetti && (
@@ -658,44 +669,22 @@ const Profile = () => {
           className="fixed top-0 left-0 z-50 w-full h-full"
         />
       )}
+
       <CompleteProfileModal
         isOpen={showProfileModal}
         onClose={handleCloseInitialModal}
         onCompleteProfile={handleCompleteProfile}
       />
+
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative mb-6 sm:mb-8">
-            <div
-              className={`w-full h-48 sm:h-64 lg:h-80 rounded-t-2xl bg-cover bg-center ${
-                userDetails.coverImage
-                  ? ""
-                  : "bg-gradient-to-r from-orange-300 to-green-400"
-              }`}
-              style={
-                userDetails.coverImage
-                  ? { backgroundImage: `url(${userDetails.coverImage})` }
-                  : {}
-              }
-            >
-              <div
-                className="absolute bottom-2 right-2 p-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                onClick={() => coverPhotoInputRef.current?.click()}
-              >
-                <Camera className="w-5 h-5 text-white" />
-              </div>
-              <input
-                type="file"
-                ref={coverPhotoInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) =>
-                  e.target.files?.[0] &&
-                  handleFileSelect(e.target.files[0], "cover")
-                }
-              />
-            </div>
-          </div>
+        <div className="w-full mx-auto">
+          <CoverPicture
+            coverPhotoInputRef={coverPhotoInputRef}
+            profilePhotoInputRef={profilePhotoInputRef}
+            userDetails={userDetails}
+            onCoverPhotoSelect={(file) => handleFileSelect(file, "cover")}
+            onProfilePhotoSelect={(file) => handleFileSelect(file, "profile")}
+          />
 
           {!isProfileComplete && !showCompletionForm && (
             <ProfileCompletionWidget
@@ -720,6 +709,54 @@ const Profile = () => {
             </div>
           )}
 
+          {/* Improved Level Tracker - Above Tabs
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            <div className="px-6 pt-6 pb-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                    <Flame className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      Level {currentLevel}
+                    </p>
+                    <p className="text-sm text-gray-500 -mt-1">
+                      Community Explorer
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="flex items-baseline justify-end gap-1">
+                    <span className="text-2xl font-semibold text-gray-800">
+                      {currentXP}
+                    </span>
+                    <span className="text-gray-400 text-sm">XP</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {xpToNextLevel - currentXP} XP to Level {currentLevel + 1}
+                  </p>
+                </div>
+              </div> */}
+
+          {/* Progress Bar */}
+          {/* <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="absolute h-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 rounded-full transition-all duration-700"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+                <div
+                  className="absolute h-full w-12 bg-white/30 animate-shimmer"
+                  style={{
+                    left: `${progressPercentage - 8}%`,
+                    opacity: progressPercentage > 5 ? 1 : 0,
+                  }}
+                />
+              </div>
+            </div>
+          </div> */}
+
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
             <div className="w-full lg:w-1/3">
               <LeftSection
@@ -728,48 +765,49 @@ const Profile = () => {
                 handleProfileSubmit={handleProfileSubmit}
                 removeInterest={removeInterest}
                 updateInterests={updateInterests}
-                profilePhotoInputRef={profilePhotoInputRef}
-                handleProfilePhotoChange={handleProfilePhotoChange}
                 totalFollowers={totalFollowers}
                 totalFollowing={totalFollowing}
                 setModalType={setModalType}
-                onProfilePhotoSelect={(file) =>
-                  handleFileSelect(file, "profile")
-                }
               />
             </div>
 
             <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
                 <div className="flex flex-wrap gap-2 sm:gap-3 bg-white rounded-xl p-1 w-fit shadow-sm">
-                  {["Posts", "Rewards", "Saved", "Details"].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-2 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 relative ${
-                        activeTab === tab
-                          ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
-                    >
-                      {tab}
-                      {activeTab === tab && (
-                        <span className="ml-2 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
-                          {tab === "Posts"
-                            ? userPosts.length
-                            : tab === "Rewards"
-                              ? 8
-                              : tab === "Saved"
-                                ? userSavedPosts.length
-                                : "1"}
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                  {["Posts", "Rewards", "Saved", "Details", "Badges"].map(
+                    (tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab as any)}
+                        className={`px-2 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 relative ${
+                          activeTab === tab
+                            ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        {tab}
+                        {activeTab === tab && (
+                          <span className="ml-2 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
+                            {tab === "Posts"
+                              ? userPosts.length
+                              : tab === "Rewards"
+                                ? 8
+                                : tab === "Saved"
+                                  ? userSavedPosts.length
+                                  : "0"}
+                          </span>
+                        )}
+                      </button>
+                    ),
+                  )}
                 </div>
+
                 <div className="relative">
-                  <div onClick={() => setMoreModal((prev) => !prev)}>
-                    {moreModal ? <X /> : <Ellipsis />}
+                  <div
+                    onClick={() => setMoreModal((prev) => !prev)}
+                    className="cursor-pointer"
+                  >
+                    {moreModal ? <X size={20} /> : <Ellipsis size={20} />}
                   </div>
                   {moreModal && (
                     <UserProfileMoreModal
@@ -782,6 +820,7 @@ const Profile = () => {
 
               <div className="p-4 sm:p-6 lg:p-8">
                 <ProfileTabContent
+                  badges={badges}
                   activeTab={activeTab}
                   userPosts={userPosts}
                   userSavedPosts={userSavedPosts}
@@ -792,10 +831,6 @@ const Profile = () => {
               </div>
             </div>
           </div>
-
-          {/* <div className="mt-4 sm:mt-6 lg:mt-8">
-            <PhotosCard userPosts={userPosts} />
-          </div> */}
         </div>
       </div>
 
@@ -818,10 +853,7 @@ const Profile = () => {
           setShowModal={() => setModalType(null)}
           currentUserId={userId}
           reduceFollower={reduceFollower}
-          onUnblockedUser={(blockedUserId: string) =>
-            onUnblockSuccess(blockedUserId)
-          }
-          // addFollowing={addFollowing}
+          onUnblockedUser={onUnblockSuccess}
         />
       )}
 
@@ -846,9 +878,7 @@ const Profile = () => {
                 src={coverImageUrl}
                 alt="Crop cover"
                 onLoad={() => setCoverImageLoaded(true)}
-                className={`w-full transition-opacity duration-200 ${
-                  !coverImageLoaded ? "opacity-0" : "opacity-100"
-                }`}
+                className={`w-full transition-opacity duration-200 ${!coverImageLoaded ? "opacity-0" : "opacity-100"}`}
               />
             </div>
             <div className="flex justify-end gap-4 mt-6">
@@ -891,9 +921,7 @@ const Profile = () => {
                 src={profileImageUrl}
                 alt="Crop profile"
                 onLoad={() => setProfileImageLoaded(true)}
-                className={`w-full transition-opacity duration-200 ${
-                  !profileImageLoaded ? "opacity-0" : "opacity-100"
-                }`}
+                className={`w-full transition-opacity duration-200 ${!profileImageLoaded ? "opacity-0" : "opacity-100"}`}
               />
             </div>
             <div className="flex justify-end gap-4 mt-6">

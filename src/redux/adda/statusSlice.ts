@@ -14,6 +14,9 @@ import { triggerReward } from "@/utils/rewardMiddleware";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+
 const initialState: StatusState = {
   statusGroups: [],
   status: "idle",
@@ -30,17 +33,14 @@ export const fetchStatus = createAsyncThunk<
     const response = await axiosInstance.get<StatusApiResponse>(
       "/adda/status",
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
-
     return response.data.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       return rejectWithValue(
-        error.response.data.message || "Failed to fetch statuses"
+        error.response.data.message || "Failed to fetch statuses",
       );
     }
     return rejectWithValue("Failed to fetch statuses");
@@ -58,11 +58,7 @@ export const sendWatchedStatus = createAsyncThunk<
       const response = await axiosInstance.patch(
         `/adda/watchStatus/${statusId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       console.log("Status marked as watched:", response.data);
       dispatch(fetchStatus(token));
@@ -70,12 +66,12 @@ export const sendWatchedStatus = createAsyncThunk<
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         return rejectWithValue(
-          error.response.data.message || "Failed to mark status as watched"
+          error.response.data.message || "Failed to mark status as watched",
         );
       }
       return rejectWithValue("Failed to mark status as watched");
     }
-  }
+  },
 );
 
 export const createStatus = createAsyncThunk<
@@ -85,26 +81,32 @@ export const createStatus = createAsyncThunk<
 >(
   "status/createStatus",
   async ({ file, caption, token }, { dispatch, rejectWithValue }) => {
+    const imageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const videoTypes = ["video/mp4", "video/webm"];
+    const validTypes = [...imageTypes, ...videoTypes];
+
+    if (!validTypes.includes(file.type)) {
+      return rejectWithValue(
+        "Invalid file type. Please upload a JPG, PNG, WEBP image or MP4/WEBM video.",
+      );
+    }
+
+    const isImage = imageTypes.includes(file.type);
+    const isVideo = videoTypes.includes(file.type);
+
+    if (isImage && file.size > IMAGE_MAX_BYTES) {
+      return rejectWithValue(
+        "Image is too large. Maximum size for images is 5MB.",
+      );
+    }
+
+    if (isVideo && file.size > VIDEO_MAX_BYTES) {
+      return rejectWithValue(
+        "Video is too large. Maximum size for videos is 10MB.",
+      );
+    }
+
     try {
-      const validTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-        "video/mp4",
-        "video/webm",
-      ];
-
-      if (!validTypes.includes(file.type)) {
-        return rejectWithValue(
-          "Invalid file type. Please upload an image or video."
-        );
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        return rejectWithValue("File is too large. Maximum size is 10MB.");
-      }
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -116,11 +118,10 @@ export const createStatus = createAsyncThunk<
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const fileUrl = uploadResponse.data.data.fileDetails.url;
-      console.log("Uploaded file URL:", fileUrl);
 
       const data = {
         content: fileUrl,
@@ -131,16 +132,12 @@ export const createStatus = createAsyncThunk<
       const statusResponse = await axiosInstance.post<SingleStatusApiResponse>(
         "/adda/addStatus",
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       triggerReward(
         RewardEventType.CREATE_STATUS,
-        statusResponse.data.data._id
+        statusResponse.data.data._id,
       );
 
       dispatch(fetchStatus(token));
@@ -149,12 +146,12 @@ export const createStatus = createAsyncThunk<
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         return rejectWithValue(
-          error.response.data.message || "Failed to create status"
+          error.response.data.message || "Failed to create status",
         );
       }
       return rejectWithValue("Failed to create status");
     }
-  }
+  },
 );
 
 export const deleteStatus = createAsyncThunk<
@@ -168,13 +165,10 @@ export const deleteStatus = createAsyncThunk<
       dispatch(statusSlice.actions.setDeletingStatus(statusId));
 
       await axiosInstance.delete(`/adda/deleteStatus/${statusId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       dispatch(statusSlice.actions.removeDeletedStatus(statusId));
-
       dispatch(fetchStatus(token));
 
       return statusId;
@@ -183,12 +177,12 @@ export const deleteStatus = createAsyncThunk<
 
       if (error instanceof AxiosError && error.response) {
         return rejectWithValue(
-          error.response.data.message || "Failed to delete status"
+          error.response.data.message || "Failed to delete status",
         );
       }
       return rejectWithValue("Failed to delete status");
     }
-  }
+  },
 );
 
 const statusSlice = createSlice({
@@ -200,26 +194,22 @@ const statusSlice = createSlice({
     },
     clearDeletingStatus: (state, action) => {
       state.deletingStatusIds = state.deletingStatusIds.filter(
-        (id) => id !== action.payload
+        (id) => id !== action.payload,
       );
     },
     removeDeletedStatus: (state, action) => {
       const statusIdToRemove = action.payload;
       state.statusGroups = state.statusGroups
-        .map((group) => {
-          const updatedStatuses = group.statuses.filter(
-            (status) => status._id !== statusIdToRemove
-          );
-
-          return {
-            ...group,
-            statuses: updatedStatuses,
-          };
-        })
+        .map((group) => ({
+          ...group,
+          statuses: group.statuses.filter(
+            (status) => status._id !== statusIdToRemove,
+          ),
+        }))
         .filter((group) => group.statuses.length > 0);
 
       state.deletingStatusIds = state.deletingStatusIds.filter(
-        (id) => id !== statusIdToRemove
+        (id) => id !== statusIdToRemove,
       );
     },
   },
@@ -234,7 +224,7 @@ const statusSlice = createSlice({
             .map((group) => ({
               ...group,
               statuses: group.statuses.filter(
-                (status) => !state.deletingStatusIds.includes(status._id)
+                (status) => !state.deletingStatusIds.includes(status._id),
               ),
             }))
             .filter((group) => group.statuses.length > 0);

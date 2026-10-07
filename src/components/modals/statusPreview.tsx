@@ -6,6 +6,9 @@ import { FiCheck } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+
 interface MediaPreviewModalProps {
   isSuccess: boolean;
   isLoading: boolean;
@@ -30,6 +33,7 @@ const MediaPreviewModal = ({
   const [isEditing, setIsEditing] = useState(false);
   const [textPosition, setTextPosition] = useState({ x: 50, y: 90 });
   const [isDragging, setIsDragging] = useState(false);
+  const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [textStyle, setTextStyle] = useState({
     fontSize: 24,
     color: "#ffffff",
@@ -45,21 +49,31 @@ const MediaPreviewModal = ({
 
   useEffect(() => {
     const header = document.querySelector("header");
-    if (header) {
-      header.style.display = "none";
-    }
+    if (header) header.style.display = "none";
     return () => {
-      if (header) {
-        header.style.display = "flex";
-      }
+      if (header) header.style.display = "flex";
     };
   }, []);
 
   useEffect(() => {
     if (file) {
+      const fileIsVideo = file.type.startsWith("video/");
+      setIsVideo(fileIsVideo);
+      setFileSizeError(null);
+
+      if (!fileIsVideo && file.size > IMAGE_MAX_BYTES) {
+        setFileSizeError("Image exceeds the 5MB limit and cannot be uploaded.");
+        return;
+      }
+      if (fileIsVideo && file.size > VIDEO_MAX_BYTES) {
+        setFileSizeError(
+          "Video exceeds the 10MB limit and cannot be uploaded.",
+        );
+        return;
+      }
+
       const url = URL.createObjectURL(file);
       setMediaUrl(url);
-      setIsVideo(file.type.startsWith("video/"));
       return () => {
         URL.revokeObjectURL(url);
       };
@@ -68,11 +82,8 @@ const MediaPreviewModal = ({
 
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
-
     document.addEventListener("keydown", handleEscKey);
     document.body.style.overflow = "hidden";
     return () => {
@@ -82,6 +93,7 @@ const MediaPreviewModal = ({
   }, [onClose]);
 
   const handleSubmit = () => {
+    if (fileSizeError) return;
     setIsLoading(true);
 
     if (!isVideo && mediaUrl && caption) {
@@ -105,7 +117,7 @@ const MediaPreviewModal = ({
               xPos - textWidth / 2 - 4,
               yPos - textHeight + 4,
               textWidth + 8,
-              textHeight + 8
+              textHeight + 8,
             );
             ctx.fillStyle = textStyle.color;
             ctx.textAlign = "center";
@@ -131,13 +143,8 @@ const MediaPreviewModal = ({
     }
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
-  };
+  const toggleFullscreen = () => setIsFullscreen(!isFullscreen);
+  const toggleEdit = () => setIsEditing(!isEditing);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!caption || isVideo) return;
@@ -160,11 +167,12 @@ const MediaPreviewModal = ({
     setTextPosition({ x: boundedX, y: boundedY });
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseUp = () => setIsDragging(false);
 
-  if (!file || !mediaUrl) return null;
+  const fileSizeMB = file ? (file.size / (1024 * 1024)).toFixed(2) : "0";
+  const limitMB = file ? (file.type.startsWith("video/") ? "10MB" : "5MB") : "";
+
+  if (!file) return null;
 
   return createPortal(
     <div
@@ -179,16 +187,27 @@ const MediaPreviewModal = ({
     >
       <div
         ref={modalRef}
-        className={`relative bg-gray-900 text-white rounded-lg overflow-hidden flex flex-col transition-all duration-300 
-          ${
-            isFullscreen
-              ? "w-full h-full"
-              : "w-11/12 max-w-3xl mx-auto md:h-auto md:max-h-[80vh]"
-          }`}
+        className={`relative bg-gray-900 text-white rounded-lg overflow-hidden flex flex-col transition-all duration-300 ${
+          isFullscreen
+            ? "w-full h-full"
+            : "w-11/12 max-w-3xl mx-auto md:h-auto md:max-h-[80vh]"
+        }`}
       >
         <canvas ref={canvasRef} className="hidden" />
+
         <div className="flex items-center justify-between p-3 bg-gray-800">
-          <h3 className="text-lg font-medium">Preview Status</h3>
+          <div className="flex flex-col">
+            <h3 className="text-lg font-medium">Preview Status</h3>
+            <span className="text-xs text-gray-400">
+              {fileSizeError ? (
+                <span className="text-red-400">{fileSizeError}</span>
+              ) : (
+                <span>
+                  {fileSizeMB}MB &nbsp;/&nbsp; {limitMB} max
+                </span>
+              )}
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={toggleFullscreen}
@@ -226,224 +245,270 @@ const MediaPreviewModal = ({
             </button>
           </div>
         </div>
-        <div
-          ref={imageContainerRef}
-          className={`flex-grow overflow-hidden relative ${
-            isFullscreen ? "flex items-center justify-center" : ""
-          }`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          {isVideo ? (
-            <video
-              ref={videoRef}
-              src={mediaUrl}
-              className={`mx-auto ${
-                isFullscreen
-                  ? "max-h-full max-w-full"
-                  : "max-h-[60vh] max-w-full"
+
+        {fileSizeError ? (
+          <div className="flex flex-col items-center justify-center flex-grow gap-4 p-8 text-center">
+            <div className="flex items-center justify-center w-16 h-16 bg-red-500 bg-opacity-20 rounded-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z"
+                />
+              </svg>
+            </div>
+            <p className="text-red-400 font-medium">{fileSizeError}</p>
+            <p className="text-gray-400 text-sm">
+              Your file is {fileSizeMB}MB. Please choose a smaller file.
+            </p>
+            <div className="flex gap-3 text-sm text-gray-300 bg-gray-800 rounded-lg px-4 py-3">
+              <span>Images: up to 5MB</span>
+              <span className="text-gray-600">|</span>
+              <span>Videos: up to 10MB</span>
+            </div>
+            <button
+              onClick={onClose}
+              className="mt-2 px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm font-medium transition-colors"
+            >
+              Choose a different file
+            </button>
+          </div>
+        ) : (
+          <>
+            <div
+              ref={imageContainerRef}
+              className={`flex-grow overflow-hidden relative ${
+                isFullscreen ? "flex items-center justify-center" : ""
               }`}
-              controls
-              autoPlay
-              loop
-            />
-          ) : (
-            <>
-              <img
-                src={mediaUrl}
-                alt="Status preview"
-                className={`mx-auto ${
-                  isFullscreen
-                    ? "max-h-full max-w-full object-contain"
-                    : "max-h-[60vh] max-w-full object-contain"
-                }`}
-              />
-              {caption && (
-                <div
-                  className="absolute transform -translate-x-1/2 cursor-move select-none"
-                  style={{
-                    left: `${textPosition.x}%`,
-                    top: `${textPosition.y}%`,
-                    fontSize: `${textStyle.fontSize}px`,
-                    color: textStyle.color,
-                    backgroundColor: textStyle.backgroundColor,
-                    padding: textStyle.padding,
-                    borderRadius: textStyle.borderRadius,
-                  }}
-                >
-                  {caption}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {isVideo ? (
+                <video
+                  ref={videoRef}
+                  src={mediaUrl!}
+                  className={`mx-auto ${
+                    isFullscreen
+                      ? "max-h-full max-w-full"
+                      : "max-h-[60vh] max-w-full"
+                  }`}
+                  controls
+                  autoPlay
+                  loop
+                />
+              ) : (
+                <>
+                  <img
+                    src={mediaUrl!}
+                    alt="Status preview"
+                    className={`mx-auto ${
+                      isFullscreen
+                        ? "max-h-full max-w-full object-contain"
+                        : "max-h-[60vh] max-w-full object-contain"
+                    }`}
+                  />
+                  {caption && (
+                    <div
+                      className="absolute transform -translate-x-1/2 cursor-move select-none"
+                      style={{
+                        left: `${textPosition.x}%`,
+                        top: `${textPosition.y}%`,
+                        fontSize: `${textStyle.fontSize}px`,
+                        color: textStyle.color,
+                        backgroundColor: textStyle.backgroundColor,
+                        padding: textStyle.padding,
+                        borderRadius: textStyle.borderRadius,
+                      }}
+                    >
+                      {caption}
+                    </div>
+                  )}
+                </>
+              )}
+              {!isVideo && caption && (
+                <div className="absolute px-2 py-1 text-sm text-white bg-gray-800 bg-opacity-75 rounded bottom-4 left-4">
+                  Click anywhere on the image to position your caption
                 </div>
               )}
-            </>
-          )}
-          {!isVideo && caption && (
-            <div className="absolute px-2 py-1 text-sm text-white bg-gray-800 bg-opacity-75 rounded bottom-4 left-4">
-              Click anywhere on the image to position your caption
             </div>
-          )}
-        </div>
-        <div className="p-4 bg-gray-800">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Add a caption..."
-                className="w-full px-4 py-2 text-gray-800 bg-white border-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                autoFocus
-              />
-              <button
-                onClick={toggleEdit}
-                className="p-3 text-white rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
+
+            <div className="p-4 bg-gray-800">
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="Add a caption..."
+                    className="w-full px-4 py-2 text-gray-800 bg-white border-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    autoFocus
                   />
-                </svg>
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center px-4 py-2 text-sm text-gray-300 bg-gray-700 rounded-full">
-                  {caption ? caption : "Add a caption..."}
-                </div>
-                <button
-                  onClick={toggleEdit}
-                  className="p-2 text-gray-300 rounded-full hover:bg-gray-700"
-                >
-                  <MdOutlineEdit className="w-5 h-5" />
-                </button>
-              </div>
-              <button
-                onClick={handleSubmit}
-                disabled={!mediaUrl || isLoading}
-                className="relative flex items-center gap-2 px-5 py-2 overflow-hidden text-white rounded-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <AnimatePresence mode="wait">
-                  {isLoading ? (
-                    isSuccess ? (
-                      <motion.div
-                        key="success"
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.5, opacity: 0 }}
-                        className="flex items-center gap-2"
-                      >
-                        <span>Success</span>
-                        <FiCheck className="w-5 h-5" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="loading"
-                        className="flex items-center gap-2"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <span>Sharing</span>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white rounded-full border-t-transparent"
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        />
-                      </motion.div>
-                    )
-                  ) : (
-                    <motion.div
-                      key="share"
-                      className="flex items-center gap-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                  <button
+                    onClick={toggleEdit}
+                    className="p-3 text-white rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <span>Share</span>
-                      <FaPaperPlane />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center px-4 py-2 text-sm text-gray-300 bg-gray-700 rounded-full">
+                      {caption ? caption : "Add a caption..."}
+                    </div>
+                    <button
+                      onClick={toggleEdit}
+                      className="p-2 text-gray-300 rounded-full hover:bg-gray-700"
+                    >
+                      <MdOutlineEdit className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!mediaUrl || isLoading || !!fileSizeError}
+                      className="relative flex items-center gap-2 px-5 py-2 overflow-hidden text-white rounded-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <AnimatePresence mode="wait">
+                        {isLoading ? (
+                          isSuccess ? (
+                            <motion.div
+                              key="success"
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.5, opacity: 0 }}
+                              className="flex items-center gap-2"
+                            >
+                              <span>Success</span>
+                              <FiCheck className="w-5 h-5" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="loading"
+                              className="flex items-center gap-2"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                            >
+                              <span>Sharing</span>
+                              <motion.div
+                                className="w-5 h-5 border-2 border-white rounded-full border-t-transparent"
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                  duration: 1,
+                                  repeat: Infinity,
+                                  ease: "linear",
+                                }}
+                              />
+                            </motion.div>
+                          )
+                        ) : (
+                          <motion.div
+                            key="share"
+                            className="flex items-center gap-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            <span>Share</span>
+                            <FaPaperPlane />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </button>
+                    <span className="text-[10px] text-gray-500 pr-1">
+                      {isVideo ? "Max 10MB for videos" : "Max 5MB for images"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {!isVideo && caption && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-300">Font Size:</label>
+                    <select
+                      value={textStyle.fontSize}
+                      onChange={(e) =>
+                        setTextStyle({
+                          ...textStyle,
+                          fontSize: parseInt(e.target.value),
+                        })
+                      }
+                      className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
+                    >
+                      <option value="16">Small</option>
+                      <option value="24">Medium</option>
+                      <option value="32">Large</option>
+                      <option value="40">XL</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-300">Color:</label>
+                    <select
+                      value={textStyle.color}
+                      onChange={(e) =>
+                        setTextStyle({ ...textStyle, color: e.target.value })
+                      }
+                      className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
+                    >
+                      <option value="#ffffff">White</option>
+                      <option value="#000000">Black</option>
+                      <option value="#ff5722">Orange</option>
+                      <option value="#2196f3">Blue</option>
+                      <option value="#4caf50">Green</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-300">Background:</label>
+                    <select
+                      value={textStyle.backgroundColor}
+                      onChange={(e) =>
+                        setTextStyle({
+                          ...textStyle,
+                          backgroundColor: e.target.value,
+                        })
+                      }
+                      className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
+                    >
+                      <option value="rgba(0,0,0,0.5)">
+                        Semi-transparent black
+                      </option>
+                      <option value="rgba(0,0,0,0)">Transparent</option>
+                      <option value="rgba(255,255,255,0.5)">
+                        Semi-transparent white
+                      </option>
+                      <option value="#000000">Solid black</option>
+                      <option value="#ffffff">Solid white</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-          {!isVideo && caption && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-300">Font Size:</label>
-                <select
-                  value={textStyle.fontSize}
-                  onChange={(e) =>
-                    setTextStyle({
-                      ...textStyle,
-                      fontSize: parseInt(e.target.value),
-                    })
-                  }
-                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
-                >
-                  <option value="16">Small</option>
-                  <option value="24">Medium</option>
-                  <option value="32">Large</option>
-                  <option value="40">XL</option>
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-300">Color:</label>
-                <select
-                  value={textStyle.color}
-                  onChange={(e) =>
-                    setTextStyle({ ...textStyle, color: e.target.value })
-                  }
-                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
-                >
-                  <option value="#ffffff">White</option>
-                  <option value="#000000">Black</option>
-                  <option value="#ff5722">Orange</option>
-                  <option value="#2196f3">Blue</option>
-                  <option value="#4caf50">Green</option>
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-300">Background:</label>
-                <select
-                  value={textStyle.backgroundColor}
-                  onChange={(e) =>
-                    setTextStyle({
-                      ...textStyle,
-                      backgroundColor: e.target.value,
-                    })
-                  }
-                  className="px-2 py-1 text-sm text-white bg-gray-700 rounded"
-                >
-                  <option value="rgba(0,0,0,0.5)">
-                    Semi-transparent black
-                  </option>
-                  <option value="rgba(0,0,0,0)">Transparent</option>
-                  <option value="rgba(255,255,255,0.5)">
-                    Semi-transparent white
-                  </option>
-                  <option value="#000000">Solid black</option>
-                  <option value="#ffffff">Solid white</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
+          </>
+        )}
 
         <AnimatePresence>
           {isLoading && (
@@ -458,21 +523,13 @@ const MediaPreviewModal = ({
                 <motion.div
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 10,
-                  }}
+                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
                   className="flex flex-col items-center"
                 >
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{
-                      delay: 0.2,
-                      type: "spring",
-                      stiffness: 200,
-                    }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                     className="flex items-center justify-center w-20 h-20 mb-4 text-white bg-green-500 rounded-full"
                   >
                     <FiCheck className="w-10 h-10" />
@@ -557,7 +614,7 @@ const MediaPreviewModal = ({
         </AnimatePresence>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

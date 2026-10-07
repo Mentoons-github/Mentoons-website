@@ -28,14 +28,16 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
   const { openAuthModal } = useAuthModal();
   const { id: groupId } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
+
   const {
     selectedGroup,
     error,
     loading,
     groupMessages,
-    groupMembers,
-    friendRequests,
+    groupMembers = [],
+    friendRequests = [],
   } = useSelector((state: RootState) => state.groups);
+
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const navigate = useNavigate();
@@ -47,10 +49,7 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
   }, [groupMessages]);
 
   const fetchMessages = async () => {
-    if (!groupId) {
-      console.warn("No groupId provided in URL params!");
-      return;
-    }
+    if (!groupId) return;
     const token = await getToken();
     if (!token) {
       openAuthModal("sign-in");
@@ -60,10 +59,7 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
   };
 
   const fetchGroupMembers = async () => {
-    if (!groupId) {
-      console.warn("No groupId provided in URL params!");
-      return;
-    }
+    if (!groupId) return;
     const token = await getToken();
     if (!token) {
       openAuthModal("sign-in");
@@ -79,16 +75,12 @@ const CommunityGroups: React.FC<CommunityGroupsProps> = () => {
 
   useEffect(() => {
     const fetchGroup = async () => {
-      if (!groupId) {
-        console.warn("No groupId provided in URL params!");
-        return;
-      }
+      if (!groupId) return;
       const token = await getToken();
       if (!token) {
         openAuthModal("sign-in");
         return;
       }
-      console.log("Dispatching fetchGroupById for:", groupId);
       await dispatch(fetchGroupById({ groupId, token }));
     };
     fetchGroup();

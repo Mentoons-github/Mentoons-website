@@ -12,7 +12,9 @@ import {
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaPhone } from "react-icons/fa6";
+import { FaIdBadge, FaPhone } from "react-icons/fa6";
+import { MdGroups } from "react-icons/md";
+import { SECTIONS } from "@/constant/admin/sidebar";
 
 interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -33,7 +35,6 @@ const AdminSidebar = ({
   const location = useLocation();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  /* ---------- Auto-collapse on mobile resize ---------- */
   useEffect(() => {
     const handleResize = () => {
       if (isMobile && onToggle) onToggle(true);
@@ -43,60 +44,8 @@ const AdminSidebar = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [isMobile, onToggle]);
 
-  /* ---------- Keep active section expanded (desktop) ---------- */
   useEffect(() => {
-    const sections = [
-      { title: "Users", paths: ["/admin/users", "/admin/allotted-calls"] },
-      {
-        title: "Products",
-        paths: ["/admin/product-table", "/admin/add-products"],
-      },
-      {
-        title: "Workshops",
-        paths: [
-          "/admin/workshops",
-          "/admin/add-workshop",
-          "/admin/workshop-enquiries",
-          "/admin/workshop-sessions",
-          "/admin/bpl-verification"
-        ],
-      },
-      {
-        title: "Career Corner",
-        paths: [
-          "/admin/all-jobs",
-          "/admin/hiring-form",
-          "/admin/view-applications",
-        ],
-      },
-      {
-        title: "Queries & Feedback",
-        paths: ["/admin/general-queries", "/admin/feedback"],
-      },
-      { title: "Newsletter", paths: ["/admin/newsletter"] },
-      {
-        title: "Employees",
-        paths: [
-          "/admin/employee-table",
-          "/admin/employee/add",
-          "/admin/task-submissions",
-          "/admin/employee-attendance",
-          "/admin/leave-management",
-        ],
-      },
-      { title: "Session Call", paths: ["/admin/session-enquiry"] },
-      { title: "Meetup", paths: ["/admin/meetups", "/admin/add-meetup"] },
-      {
-        title: "Professional Records",
-        paths: ["/admin/psychologists", "/admin/freelancers"],
-      },
-      {
-        title: "Quiz",
-        paths: ["/admin/add-quiz", "/admin/quiz"],
-      },
-    ];
-
-    const active = sections.find((s) =>
+    const active = SECTIONS.find((s) =>
       s.paths.some((p) => location.pathname.startsWith(p)),
     );
 
@@ -229,18 +178,43 @@ const AdminSidebar = ({
           toggleSection={() => toggleSection("Workshops")}
           onItemClick={handleLinkClick}
         />
+        <SidebarSection
+          icon={<MdGroups size={collapsed ? 20 : 16} />}
+          title="Community"
+          items={[
+            { href: "/admin/community", label: "Manage Community" },
+            { href: "/admin/add-community", label: "Add Community" },
+          ]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "community"}
+          toggleSection={() => toggleSection("community")}
+          onItemClick={handleLinkClick}
+        />
 
         <SidebarSection
           icon={<FaBriefcase size={collapsed ? 20 : 16} />}
-          title="Career Corner"
+          title="Career"
           items={[
             { href: "/admin/all-jobs", label: "All Jobs" },
             { href: "/admin/hiring-form", label: "Add Job" },
             { href: "/admin/view-applications", label: "View Applications" },
           ]}
           isCollapsed={collapsed}
-          isExpanded={expandedSection === "Career Corner"}
-          toggleSection={() => toggleSection("Career Corner")}
+          isExpanded={expandedSection === "Career"}
+          toggleSection={() => toggleSection("Career")}
+          onItemClick={handleLinkClick}
+        />
+
+        <SidebarSection
+          icon={<FaIdBadge size={collapsed ? 20 : 16} />}
+          title="Badges"
+          items={[
+            { href: "/admin/badge", label: "All Badges" },
+            { href: "/admin/add-badge", label: "Add Badge" },
+          ]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Badges"}
+          toggleSection={() => toggleSection("Badges")}
           onItemClick={handleLinkClick}
         />
 
@@ -331,6 +305,15 @@ const AdminSidebar = ({
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Quiz"}
           toggleSection={() => toggleSection("Quiz")}
+          onItemClick={handleLinkClick}
+        />
+        <SidebarSection
+          icon={<FaBriefcase size={collapsed ? 20 : 16} />}
+          title="Applicants"
+          items={[{ href: "/admin/applicants", label: "Manage Applicants" }]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Applicants"}
+          toggleSection={() => toggleSection("Applicants")}
           onItemClick={handleLinkClick}
         />
       </nav>

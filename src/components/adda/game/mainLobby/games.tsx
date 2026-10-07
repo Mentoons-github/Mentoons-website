@@ -40,7 +40,7 @@ const GameLobby = () => {
   const fetchLeaderboard = async () => {
     try {
       const response = await axios.get<ApiResponseLeaderBoard>(
-        `${import.meta.env.VITE_PROD_URL}/game/leaderboard`
+        `${import.meta.env.VITE_PROD_URL}/game/leaderboard`,
       );
       const data = response.data;
 
@@ -49,7 +49,7 @@ const GameLobby = () => {
         const userId = user?.id;
         if (userId) {
           const foundUser = data.data.find(
-            (entry) => entry.playerClerkId === userId
+            (entry) => entry.playerClerkId === userId,
           );
           setCurrentUser(foundUser || null);
         }
@@ -66,13 +66,10 @@ const GameLobby = () => {
       const token = await getToken();
       const response = await fetchCandyCoin(token!);
       setCoins(response.candyCoins);
-    } catch (error) {
+    } catch (error: any) {
+      setCoins(null);
       console.log(error);
-      showStatus(
-        "error",
-        (error as string) ||
-          "Error takin coins, Please try again after sometimes"
-      );
+      showStatus("error", "Sign in to access your Candy Coins balance.");
     }
   };
 

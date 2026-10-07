@@ -17,13 +17,20 @@ export interface PollOption {
   text: string;
   votes: number;
   voters: string[];
+  _id?: string;
 }
 
 export interface Poll {
   title: string;
   description: string;
   options: PollOption[];
-  createdBy: string;
+  createdBy:
+    | {
+        _id: string;
+        name: string;
+        picture?: string;
+      }
+    | string;
   expiresAt: string;
   isActive: boolean;
   category?: string;
@@ -64,5 +71,5 @@ export interface GroupState {
   joinSuccess: boolean;
   groupMessages: GroupMessage[];
   groupMembers: User[];
-  friendRequests:FilteredFriendRequest[]
+  friendRequests: FilteredFriendRequest[];
 }

@@ -73,6 +73,7 @@ export interface ProductBase {
   title: string;
   description?: string;
   price: number;
+  mrp?: number;
   orignalProductSrc?: string;
   ageCategory: AgeCategory;
   type: ProductType;

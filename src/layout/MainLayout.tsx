@@ -35,7 +35,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <NotificationProvider>
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen overflow-hidden">
         <GlobalProgressBar />
         <div className="absolute top-0 left-0 right-0 z-[99999]">
           <NotificationPopup />

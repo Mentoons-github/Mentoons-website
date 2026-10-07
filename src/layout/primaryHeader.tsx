@@ -10,13 +10,11 @@ import { NotificationInterface } from "@/types";
 import { SignedIn, useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { FaClock, FaMessage, FaPhone } from "react-icons/fa6";
+import { FaMessage } from "react-icons/fa6";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axiosInstance from "@/api/axios";
-import PlatinumMembershipModal from "@/components/common/modal/platinumSubscriptionModal";
-import { CiMail } from "react-icons/ci";
-
+import PlatinumMembershipModal from "@/components/common/modal/platinumSubscriptionModal"
 const PrimaryHeader = () => {
   const { socket } = useSocket();
   const location = useLocation();
@@ -95,7 +93,7 @@ const PrimaryHeader = () => {
   return (
     <div className="z-50 flex items-center justify-between md:justify-around w-full px-1 md:px-5 font-light text-white bg-gray-600 font-akshar">
       <div className="flex justify-start w-auto gap-5 py-2 md:gap-15 md:w-1/3 lg:w-1/2">
-        <div className="hidden md:inline-flex items-center whitespace-nowrap gap-0 sm:gap-2 text-[10px] md:text-xs lg:text-sm xl:text-base">
+        {/* <div className="hidden md:inline-flex items-center whitespace-nowrap gap-0 sm:gap-2 text-[10px] md:text-xs lg:text-sm xl:text-base">
           <FaClock className="hidden sm:block" />
           <h3>Monday - Saturday</h3>
           <span>10:00 AM - 8:00 PM</span>
@@ -108,9 +106,9 @@ const PrimaryHeader = () => {
             <FaPhone className="flex-shrink-0" />{" "}
             <span className="flex-shrink-0">+91 7892858593</span>
           </div>
-        </a>
+        </a> */}
 
-        <a
+        {/* <a
           href="mailto:info@mentoons.com"
           className=" text-white hidden xl:block"
         >
@@ -118,8 +116,7 @@ const PrimaryHeader = () => {
             <CiMail className="flex-shrink-0" />{" "}
             <span className="flex-shrink-0">info@mentoons.com</span>
           </div>
-          
-        </a>
+        </a> */}
       </div>
 
       <div className="flex items-center justify-center w-2/5 py-2 overflow-hidden md:w-1/4">

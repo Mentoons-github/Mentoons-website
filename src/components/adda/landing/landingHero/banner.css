@@ -1,0 +1,101 @@
+/* ── Cloud background slow drift ── */
+@keyframes cloudBgDrift {
+  0% {
+    transform: translateX(0px) scale(1.02);
+  }
+  50% {
+    transform: translateX(-18px) scale(1.02);
+  }
+  100% {
+    transform: translateX(0px) scale(1.02);
+  }
+}
+
+.cloud-bg-drift {
+  animation: cloudBgDrift 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Slide enter animations (new content drifting in) ── */
+@keyframes cloudEnterFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(120px);
+    filter: blur(4px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes cloudEnterFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-120px);
+    filter: blur(4px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+/* ── Slide exit animations (old content drifting away) ── */
+@keyframes cloudExitToLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+  40% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-120px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes cloudExitToRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+  40% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120px);
+    filter: blur(4px);
+  }
+}
+
+.cloud-enter-right {
+  animation: cloudEnterFromRight 0.55s cubic-bezier(0.22, 0.8, 0.4, 1) both;
+}
+
+.cloud-enter-left {
+  animation: cloudEnterFromLeft 0.55s cubic-bezier(0.22, 0.8, 0.4, 1) both;
+}
+
+.cloud-exit-left {
+  animation: cloudExitToLeft 0.45s ease-in both;
+  pointer-events: none;
+}
+
+.cloud-exit-right {
+  animation: cloudExitToRight 0.45s ease-in both;
+  pointer-events: none;
+}

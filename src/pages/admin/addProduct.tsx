@@ -13,12 +13,20 @@ import PDFUpload from "@/components/admin/product/pdfUpload";
 const AddProduct = () => {
   const [products, setProducts] = useState<ProductBase[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<ProductBase | null>(
-    null
+    null,
   );
   const [isEditing, setIsEditing] = useState(false);
   const location = useLocation();
   const { state } = location;
-  const { register, handleSubmit, reset, setValue, watch } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    trigger,
+    formState: { errors },
+  } = useForm({ mode: "onChange" });
   const productType = watch("type");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +41,7 @@ const AddProduct = () => {
           `${import.meta.env.VITE_PROD_URL}/products`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const data = response.data;
@@ -77,7 +85,7 @@ const AddProduct = () => {
         const response = await axios.put(
           `${import.meta.env.VITE_PROD_URL}/products/${selectedProduct._id}`,
           data,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.status === 200)
           successToast("Product updated successfully");
@@ -85,7 +93,7 @@ const AddProduct = () => {
         const response = await axios.post(
           `${import.meta.env.VITE_PROD_URL}/products`,
           data,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.status === 201)
           successToast("Product created successfully");
@@ -136,7 +144,7 @@ const AddProduct = () => {
     if (videos.length) {
       setValue(
         "productVideos",
-        videos.map((v) => v.videoUrl)
+        videos.map((v) => v.videoUrl),
       );
     }
   };
@@ -156,7 +164,7 @@ const AddProduct = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           data: { productId: selectedProduct?._id },
-        }
+        },
       );
       setValue("orignalProductSrc", "");
       successToast("PDF removed successfully");
@@ -184,6 +192,12 @@ const AddProduct = () => {
     return watchedVideos.map((url: string) => ({ videoUrl: url }));
   }, [watchedVideos]);
 
+  const mrpValue = watch("mrp");
+
+  useEffect(() => {
+    trigger("price");
+  }, [mrpValue, trigger]);
+
   return (
     <div className="container p-4 mx-auto">
       <h1 className="mb-4 text-2xl font-bold">Product Management</h1>
@@ -202,15 +216,43 @@ const AddProduct = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
+          <div>
+            <label className="block mb-1">MRP</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("mrp", { required: true, min: 0 })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.mrp && (
+              <p className="mt-1 text-sm text-red-600">MRP is required</p>
+            )}
+          </div>
+
           <div>
             <label className="block mb-1">Price</label>
             <input
               type="number"
               min="0"
               step="0.01"
-              {...register("price", { required: true, min: 0 })}
+              {...register("price", {
+                required: true,
+                min: 0,
+                validate: (value) => {
+                  const mrp = Number(mrpValue);
+                  if (!mrp) return true;
+                  return Number(value) <= mrp || "Price cannot exceed MRP";
+                },
+              })}
               className="w-full p-2 border rounded"
             />
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.price.message?.toString() || "Price is required"}
+              </p>
+            )}
           </div>
 
           <div className="col-span-2">

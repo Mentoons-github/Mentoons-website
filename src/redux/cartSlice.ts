@@ -52,55 +52,60 @@ const initialState: {
 
 export const getCart = createAsyncThunk(
   "cart/getCart",
-  async ({ token, userId }: { token: string; userId: string }) => {
+  async (
+    { token, userId }: { token: string; userId: string },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/cart/${userId}`,
-
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to fetch the Cart");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch the Cart",
+      );
     }
-  }
+  },
 );
 
 export const addItemCart = createAsyncThunk(
   "cart/addToCart",
-  async ({
-    token,
-    userId,
-    productId,
-    productType,
-    title,
-    quantity,
-    price,
-    ageCategory,
-    productImage,
-    productDetails,
-  }: {
-    token: string;
-    userId: string;
-    productId: string;
-    productType: string;
-    title: string;
-    quantity: number;
-    price: number;
-    ageCategory?: string;
-    productImage?: string;
-    productDetails?: any;
-  }) => {
+  async (
+    {
+      token,
+      userId,
+      productId,
+      productType,
+      title,
+      quantity,
+      price,
+      ageCategory,
+      productImage,
+      productDetails,
+    }: {
+      token: string;
+      userId: string;
+      productId: string;
+      productType: string;
+      title: string;
+      quantity: number;
+      price: number;
+      ageCategory?: string;
+      productImage?: string;
+      productDetails?: any;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/cart/add`,
-        // "http://localhost:4000/api/v1/cart/add",
-
         {
           userId,
           productId,
@@ -117,26 +122,32 @@ export const addItemCart = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to add the product to the Cart");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to add the product to the Cart",
+      );
     }
-  }
+  },
 );
 
 export const removeItemFromCart = createAsyncThunk(
   "cart/removeFromCart",
-  async ({
-    token,
-    userId,
-    productId,
-  }: {
-    token: string;
-    userId: string;
-    productId: string;
-  }) => {
+  async (
+    {
+      token,
+      userId,
+      productId,
+    }: {
+      token: string;
+      userId: string;
+      productId: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.delete(
         `${import.meta.env.VITE_PROD_URL}/cart/remove`,
@@ -149,31 +160,36 @@ export const removeItemFromCart = createAsyncThunk(
             userId,
             productId,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to remove the product from the Cart");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to remove the product from the Cart",
+      );
     }
-  }
+  },
 );
 
 export const updateItemQuantity = createAsyncThunk(
   "cart/updateQuantity",
-  async ({
-    token,
-    userId,
-    productId,
-    quantity,
-  }: {
-    token: string;
-    userId: string;
-    productId: string;
-    quantity: number;
-  }) => {
+  async (
+    {
+      token,
+      userId,
+      productId,
+      quantity,
+    }: {
+      token: string;
+      userId: string;
+      productId: string;
+      quantity: number;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.patch(
-        // `https://mentoons-backend-zlx3.onrender.com/api/v1/cart/update-quantity`,
         `${import.meta.env.VITE_PROD_URL}/cart/update-quantity`,
         {
           userId,
@@ -185,31 +201,35 @@ export const updateItemQuantity = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to update item quantity in the Cart");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to update item quantity in the Cart",
+      );
     }
-  }
+  },
 );
 
-// New thunk for applying a coupon
 export const applyCoupon = createAsyncThunk(
   "cart/applyCoupon",
-  async ({
-    token,
-    userId,
-    couponCode,
-  }: {
-    token: string;
-    userId: string;
-    couponCode: string;
-  }) => {
+  async (
+    {
+      token,
+      userId,
+      couponCode,
+    }: {
+      token: string;
+      userId: string;
+      couponCode: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/cart/apply-coupon`, // Restore the API endpoint
-
+        `${import.meta.env.VITE_PROD_URL}/cart/apply-coupon`,
         {
           userId,
           couponCode,
@@ -219,19 +239,23 @@ export const applyCoupon = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to apply coupon");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to apply coupon",
+      );
     }
-  }
+  },
 );
 
-// New thunk for removing a coupon
 export const removeCoupon = createAsyncThunk(
   "cart/removeCoupon",
-  async ({ token, userId }: { token: string; userId: string }) => {
+  async (
+    { token, userId }: { token: string; userId: string },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_PROD_URL}/cart/remove-coupon`,
@@ -243,13 +267,15 @@ export const removeCoupon = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return response.data;
-    } catch (error) {
-      throw new Error("Failed to remove coupon");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to remove coupon",
+      );
     }
-  }
+  },
 );
 
 export const cartSlice = createSlice({
@@ -294,7 +320,7 @@ export const cartSlice = createSlice({
 
     builder.addCase(getCart.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error.message || "Failed to fetch the Cart";
+      state.error = (action.payload as string) || "Failed to fetch the Cart";
       state.success = false;
       state.apiStatus = "failed";
     });
@@ -322,12 +348,11 @@ export const cartSlice = createSlice({
     builder.addCase(addItemCart.rejected, (state, action) => {
       state.loading = false;
       state.error =
-        action.error.message || "Failed to add the product to the Cart";
+        (action.payload as string) || "Failed to add the product to the Cart";
       state.success = false;
       state.apiStatus = "failed";
     });
 
-    // Handle applyCoupon
     builder.addCase(applyCoupon.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -345,12 +370,11 @@ export const cartSlice = createSlice({
 
     builder.addCase(applyCoupon.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error.message || "Failed to apply coupon";
+      state.error = (action.payload as string) || "Failed to apply coupon";
       state.success = false;
       state.apiStatus = "failed";
     });
 
-    // Handle removeCoupon
     builder.addCase(removeCoupon.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -368,13 +392,11 @@ export const cartSlice = createSlice({
 
     builder.addCase(removeCoupon.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error.message || "Failed to remove coupon";
+      state.error = (action.payload as string) || "Failed to remove coupon";
       state.success = false;
       state.apiStatus = "failed";
     });
 
-    // Additional handlers for other actions (removeItemFromCart, updateItemQuantity)
-    // Handle removeItemFromCart
     builder.addCase(removeItemFromCart.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -398,12 +420,12 @@ export const cartSlice = createSlice({
     builder.addCase(removeItemFromCart.rejected, (state, action) => {
       state.loading = false;
       state.error =
-        action.error.message || "Failed to remove the product from the Cart";
+        (action.payload as string) ||
+        "Failed to remove the product from the Cart";
       state.success = false;
       state.apiStatus = "failed";
     });
 
-    // Handle updateItemQuantity
     builder.addCase(updateItemQuantity.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -427,12 +449,11 @@ export const cartSlice = createSlice({
     builder.addCase(updateItemQuantity.rejected, (state, action) => {
       state.loading = false;
       state.error =
-        action.error.message || "Failed to update item quantity in the Cart";
+        (action.payload as string) ||
+        "Failed to update item quantity in the Cart";
       state.success = false;
       state.apiStatus = "failed";
     });
-
-    // would follow the same pattern, updating all cart fields from the response
   },
 });
 

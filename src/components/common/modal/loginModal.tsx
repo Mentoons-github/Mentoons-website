@@ -57,7 +57,7 @@ const LoginModal = ({
 
   const handleClick = (
     e: React.MouseEvent<HTMLButtonElement>,
-    path: string
+    path: string,
   ) => {
     e.stopPropagation();
     onClose();
@@ -72,7 +72,10 @@ const LoginModal = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div
+          key="login-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+        >
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-50"
             variants={overlayVariants}
