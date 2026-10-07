@@ -239,14 +239,11 @@ const FAQ = ({ data }: { data: object }) => {
           message={ModalMessage.ENQUIRY_MESSAGE}
         />
       )}
-      {showErrorModal && (
-        <ErrorModal
-          heading="Faild to submit query"
-          error={showErrorMessage}
-          isOpen={showErrorModal}
-          onClose={() => setShowErrorModal(false)}
-        />
-      )}
+      <ErrorModal
+        open={showErrorModal}
+        message={showErrorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </motion.section>
   );
 };

@@ -119,25 +119,72 @@ const Influencer = () => {
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className="flex flex-col p-6 border border-orange-100 shadow-sm bg-gradient-to-r from-orange-50 to-orange-50 rounded-xl"
-      >
-        <h1
-          ref={titleRef}
-          className="mb-3 text-xl font-bold text-orange-800 md:text-2xl figtree"
-        >
-          Become a Mentoons Influencer
-        </h1>
+      <style>{`
+        .inf-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
 
-        <p ref={descRef} className="mb-4 text-sm text-gray-600 md:text-base">
-          Join our community of influencers and make a positive impact on young
-          minds.
-        </p>
+        .inf-panel {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.10) 1.5px, transparent 2px);
+          background-size: 16px 16px;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 14px;
+        }
+
+        .inf-card {
+          background: #fff;
+          border: 2px solid #000;
+          border-left-width: 8px;
+          border-left-color: #fb923c;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 10px;
+        }
+
+        .inf-img {
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 10px;
+          background: #fff;
+        }
+
+        .inf-btn {
+          background: #fb923c;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          transition: box-shadow 0.1s ease, background-color 0.1s ease;
+        }
+        .inf-btn:hover { background: #fdba74; box-shadow: 4px 4px 0 #000; }
+        .inf-btn:active { box-shadow: 1px 1px 0 #000; }
+        .inf-btn:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+      `}</style>
+
+      <div ref={containerRef} className="inf-panel flex flex-col p-6">
+        <div className="inf-card p-4 mb-4">
+          <h1
+            ref={titleRef}
+            className="inf-font mb-2 text-xl text-black md:text-2xl"
+          >
+            🎤 Become a Mentoons Influencer
+          </h1>
+
+          <p
+            ref={descRef}
+            className="text-sm text-gray-700 leading-relaxed md:text-base"
+          >
+            Join our community of influencers and make a positive impact on
+            young minds.
+          </p>
+        </div>
 
         <div
           ref={imgRef}
-          className="w-full h-auto mb-4 overflow-hidden rounded-lg"
+          className="inf-img w-full h-auto mb-4 overflow-hidden"
           onMouseEnter={() => {
             const img = imgRef.current?.querySelector("img");
             if (img)
@@ -152,13 +199,13 @@ const Influencer = () => {
           <img
             src="/assets/adda/sidebar/Become influencer.png"
             alt="influencer"
-            className="object-cover w-full transition-transform duration-300 hover:scale-105"
+            className="object-cover w-full"
           />
         </div>
 
         <button
           ref={applyBtnRef}
-          className="self-start px-4 py-2 mt-2 font-medium text-white transition-colors duration-300 bg-orange-600 rounded-lg hover:bg-orange-700"
+          className="inf-btn inf-font self-start px-5 py-2 text-base"
           onMouseEnter={handleApplyHoverEnter}
           onMouseLeave={handleApplyHoverLeave}
           onClick={handleApplyClick}

@@ -1283,29 +1283,7 @@ export const COMMON_NAV: NavLink[] = [
     id: "NL_09",
     label: "Join Us",
     icon: "group",
-    url: "/hiring",
-    items: [
-      {
-        id: "JS_01",
-        label: "Careers",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_02",
-        label: "Affiliate",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_03",
-        label: "Collaborate",
-        url: "/joinus/hiring",
-      },
-      {
-        id: "JS_04",
-        label: "Join as mentor",
-        url: "/joinus/hiring",
-      },
-    ],
+    url: "/join-us",
   },
   {
     id: "NL_10",

@@ -17,6 +17,13 @@ interface ProductScrollNavProps {
   currentPage: number;
 }
 
+// Pattern: 3 pills with "#", then 3 without, then repeat
+const GROUP_SIZE = 3;
+const hasHashtag = (index: number) => Math.floor(index / GROUP_SIZE) % 2 === 0;
+
+// Fill colours for the hashtag pills (plain pills stay white)
+const HASH_COLORS = ["#fde68a", "#fdba74", "#a5f3fc"];
+
 const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
   productsData,
   loading,
@@ -110,7 +117,11 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
 
   const manualScroll = (direction: "left" | "right") => {
     if (!scrollContainerRef.current) return;
-    const amount = 300;
+    // Scroll roughly 70% of the visible width so it feels right on phones too
+    const amount = Math.max(
+      160,
+      Math.round(scrollContainerRef.current.clientWidth * 0.7),
+    );
     const target =
       direction === "left"
         ? scrollContainerRef.current.scrollLeft - amount
@@ -189,35 +200,39 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
   return (
     <div
       ref={wrapperRef}
-      className="relative flex items-center w-full group overflow-hidden "
+      className="relative flex items-center w-full overflow-hidden"
     >
-      {showLeftArrow && (
-        <button
-          ref={leftArrowRef}
-          onClick={() => handleArrowClick("left")}
-          onMouseEnter={() =>
-            gsap.to(leftArrowRef.current, {
-              scale: 1.15,
-              duration: 0.18,
-              ease: "power2.out",
-            })
-          }
-          onMouseLeave={() =>
-            gsap.to(leftArrowRef.current, {
-              scale: 1,
-              duration: 0.18,
-              ease: "power2.out",
-            })
-          }
-          className="absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border border-gray-300 rounded-full shadow-lg top-1/2 hover:bg-gray-50 hover:scale-110"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-700" />
-        </button>
-      )}
+      <div className="flex items-center justify-center flex-shrink-0 w-9 md:w-11">
+        {showLeftArrow && (
+          <button
+            ref={leftArrowRef}
+            type="button"
+            aria-label="Scroll left"
+            onClick={() => handleArrowClick("left")}
+            onMouseEnter={() =>
+              gsap.to(leftArrowRef.current, {
+                scale: 1.15,
+                duration: 0.18,
+                ease: "power2.out",
+              })
+            }
+            onMouseLeave={() =>
+              gsap.to(leftArrowRef.current, {
+                scale: 1,
+                duration: 0.18,
+                ease: "power2.out",
+              })
+            }
+            className="psn-arrow flex items-center justify-center w-7 h-7 md:w-8 md:h-8"
+          >
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-white" />
+          </button>
+        )}
+      </div>
 
       <div
         ref={scrollContainerRef}
-        className="flex w-full px-2 md:px-10 gap-5 overflow-x-auto scrollbar-hide scroll-smooth md:pt-3"
+        className="psn-scroll flex flex-1 min-w-0 items-center gap-2 md:gap-4 px-2 py-3 overflow-x-auto scroll-smooth"
       >
         {productsData.map((p, i) => (
           <a
@@ -226,55 +241,96 @@ const ProductScrollNav: React.FC<ProductScrollNavProps> = ({
             href={`/mentoons-store/product/${p.id}`}
             onMouseEnter={() => handlePillHoverEnter(pillRefs.current[i])}
             onMouseLeave={() => handlePillHoverLeave(pillRefs.current[i])}
-            className="flex-shrink-0 px-3 md:px-5 py-2 text-xs md:text-sm font-medium text-blue-700 transition-all duration-200 border border-blue-600 rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-md whitespace-nowrap"
+            className="psn-pill psn-chip-font flex-shrink-0 px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm whitespace-nowrap"
+            style={
+              hasHashtag(i)
+                ? { background: HASH_COLORS[i % HASH_COLORS.length] }
+                : { background: "#fff" }
+            }
           >
-            {p.title}
+            {hasHashtag(i) ? `#${p.title}` : p.title}
           </a>
         ))}
         {isLoadingMore && (
-          <div className="flex items-center justify-center flex-shrink-0 w-20">
-            <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+          <div className="flex items-center justify-center flex-shrink-0 w-12 md:w-20">
+            <Loader2 className="w-5 h-5 animate-spin text-black" />
           </div>
         )}
       </div>
 
-      {showRightArrow && (
-        <button
-          ref={rightArrowRef}
-          onClick={() => {
-            handleArrowClick("right");
-            if (!loading && !isLoadingMore) {
-              void loadMore();
+      <div className="flex items-center justify-center flex-shrink-0 w-9 md:w-11">
+        {showRightArrow && (
+          <button
+            ref={rightArrowRef}
+            type="button"
+            aria-label="Scroll right"
+            onClick={() => {
+              handleArrowClick("right");
+              if (!loading && !isLoadingMore) {
+                void loadMore();
+              }
+            }}
+            onMouseEnter={() =>
+              gsap.to(rightArrowRef.current, {
+                scale: 1.15,
+                duration: 0.18,
+                ease: "power2.out",
+              })
             }
-          }}
-          onMouseEnter={() =>
-            gsap.to(rightArrowRef.current, {
-              scale: 1.15,
-              duration: 0.18,
-              ease: "power2.out",
-            })
-          }
-          onMouseLeave={() =>
-            gsap.to(rightArrowRef.current, {
-              scale: 1,
-              duration: 0.18,
-              ease: "power2.out",
-            })
-          }
-          disabled={loading || isLoadingMore}
-          className="absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border border-gray-300 rounded-full shadow-lg top-1/2 hover:bg-gray-50 hover:scale-110 disabled:opacity-50"
-        >
-          {isLoadingMore ? (
-            <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
-          ) : (
-            <ChevronRight className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
-      )}
+            onMouseLeave={() =>
+              gsap.to(rightArrowRef.current, {
+                scale: 1,
+                duration: 0.18,
+                ease: "power2.out",
+              })
+            }
+            disabled={loading || isLoadingMore}
+            className="psn-arrow flex items-center justify-center w-7 h-7 md:w-8 md:h-8 disabled:opacity-50"
+          >
+            {isLoadingMore ? (
+              <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-white" />
+            ) : (
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-white" />
+            )}
+          </button>
+        )}
+      </div>
 
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display:none; }
-        .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+        .psn-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.03em;
+        }
+
+        .psn-scroll {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x proximity;
+        }
+        .psn-scroll::-webkit-scrollbar { display: none; }
+
+        .psn-pill {
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          scroll-snap-align: start;
+          transition: box-shadow 0.1s ease;
+        }
+        .psn-pill:hover { box-shadow: 3px 3px 0 #000; }
+        .psn-pill:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+
+        .psn-arrow {
+          background: #000;
+          border: 2px solid #000;
+          border-radius: 999px;
+          transition: background-color 0.15s ease;
+        }
+        .psn-arrow svg { color: #fff !important; }
+        .psn-arrow:hover { background: #ea580c; }
+        .psn-arrow:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
       `}</style>
     </div>
   );

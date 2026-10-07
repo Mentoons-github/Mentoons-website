@@ -85,18 +85,7 @@ const Sidebar = ({
         let basePath = "";
         if (labelType === "products") basePath = "/products";
         else if (labelType === "workshops") basePath = "/mentoons-workshops";
-        else if (labelType === "joinus") basePath = "/joinus";
         else basePath = "/mentoons-games";
-        console.log("labelType: ", labelType);
-        if (labelType.replace(/\s/g, "") === "joinus") {
-          basePath = "/joinus";
-          if (category === "Join as mentor") {
-            navigate(`${basePath}/become-mentor`);
-            return;
-          }
-          navigate(`${basePath}/${category.toLowerCase()}`);
-          return;
-        }
 
         navigate(`${basePath}?category=${encodeURIComponent(category)}`);
       }, 120);

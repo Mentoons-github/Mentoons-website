@@ -20,12 +20,7 @@ import PostContent from "./renderPostContent";
 import axiosInstance from "@/api/axios";
 
 export type PostType =
-  | "text"
-  | "photo"
-  | "video"
-  | "article"
-  | "event"
-  | "mixed";
+  "text" | "photo" | "video" | "article" | "event" | "mixed";
 
 export interface PostData {
   _id: string;
@@ -360,22 +355,180 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-start w-full gap-5 p-5 border border-orange-200 rounded-xl min-h-fit">
+      <style>{`
+        @keyframes pc-pop {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          70%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes pc-slam {
+          0%   { transform: scale(1.6) rotate(-3deg); opacity: 0; }
+          60%  { transform: scale(0.97) rotate(0.5deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .pc-pop  { animation: pc-pop 0.4s cubic-bezier(.2,.9,.3,1.4) both; }
+        .pc-slam { animation: pc-slam 0.35s cubic-bezier(.2,.8,.3,1) both; }
+
+        .pc-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .pc-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .pc-card {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 6px 6px 0 #000;
+          border-radius: 14px;
+        }
+
+        .pc-avatar {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1);
+        }
+        .pc-user:hover .pc-avatar { transform: rotate(-6deg) scale(1.08); }
+
+        .pc-date {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          padding: 0 8px;
+          font-size: 11px;
+          line-height: 1.5;
+          transform: rotate(-1.5deg) skewX(-6deg);
+          display: inline-block;
+        }
+
+        .pc-round {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .pc-round:hover { background: #fde047; transform: translate(-2px, -2px) rotate(-4deg); box-shadow: 5px 5px 0 #000; }
+        .pc-round:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+        .pc-round-on { background: #fde047; }
+
+        .pc-count {
+          background: #fff;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          min-width: 26px;
+          padding: 0 6px;
+          text-align: center;
+          transform: rotate(2deg) skewX(-6deg);
+          display: inline-block;
+        }
+
+        .pc-menu {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 10px;
+        }
+        .pc-menu-item { transition: background 0.1s ease; }
+        .pc-menu-item:hover { background: #fde047; }
+        .pc-menu-item + .pc-menu-item { border-top: 3px dashed #000; }
+
+        .pc-divider { border: 0; border-top: 3px dashed #000; opacity: 0.85; }
+
+        .pc-comments {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+          background-size: 14px 14px;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 12px;
+        }
+        .pc-title {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 8px;
+          padding: 0 12px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+        .pc-bubble {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 12px;
+        }
+        .pc-bubble-img {
+          border: 3px solid #000;
+          border-radius: 999px;
+          box-shadow: 2px 2px 0 #000;
+        }
+
+        .pc-input {
+          background: #fff;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 10px;
+          outline: none;
+          transition: box-shadow 0.1s ease, transform 0.1s ease, background 0.1s ease;
+        }
+        .pc-input::placeholder { color: #6b7280; }
+        .pc-input:focus {
+          background: #fffef2;
+          box-shadow: 5px 5px 0 #f97316, 5px 5px 0 1px #000;
+          transform: translate(-2px, -2px);
+        }
+
+        .pc-cta {
+          background: #f97316;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 10px;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transform: rotate(-2deg);
+          transition: box-shadow 0.1s ease, background 0.1s ease, transform 0.1s ease;
+        }
+        .pc-cta:hover { background: #fb923c; transform: rotate(-2deg) scale(1.06); }
+        .pc-cta:active { box-shadow: 0 0 0 #000; transform: rotate(-2deg) translate(3px, 3px); }
+
+        @media (prefers-reduced-motion: reduce) {
+          .pc-pop, .pc-slam { animation: none; }
+        }
+      `}</style>
+
+      <div className="pc-card flex flex-col items-center justify-start w-full gap-5 p-5 min-h-fit">
         <div className="flex items-center justify-between w-full">
           <div
             onClick={(e) => handleClick(e)}
-            className="flex items-center justify-start gap-3 cursor-pointer"
+            className="pc-user flex items-center justify-start gap-3 cursor-pointer"
           >
-            <div className="overflow-hidden rounded-full w-14 h-14">
-              <img
-                src={post?.user?.picture}
-                alt={`${post?.user?.name}-profile`}
-                className="object-cover w-full h-full rounded-full"
-              />
+            <div className="pc-pop">
+              <div className="pc-avatar overflow-hidden w-14 h-14">
+                <img
+                  src={post?.user?.picture}
+                  alt={`${post?.user?.name}-profile`}
+                  className="object-cover w-full h-full rounded-full"
+                />
+              </div>
             </div>
-            <div className="flex flex-col figtree">
-              <span className="Futura Std">{post.user.name}</span>
-              <span className="figtree text-[12px] text-[#807E7E]">
+            <div className="flex flex-col items-start gap-1">
+              <span className="pc-font text-lg leading-none">
+                {post.user.name}
+              </span>
+              <span className="pc-chip-font pc-date">
                 {formatDate(post.createdAt)}
               </span>
             </div>
@@ -385,7 +538,8 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 text-gray-500 transition-colors rounded-full hover:bg-orange-100"
+              aria-label="Post options"
+              className="pc-round flex items-center justify-center w-10 h-10 text-black cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDropdown((prev) => !prev);
@@ -396,15 +550,15 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
 
             {showDropdown && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute right-0 z-50 w-48 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl"
+                className="pc-menu absolute right-0 z-50 w-52 mt-2 overflow-hidden"
               >
                 {userId === post.user._id ? (
                   <button
-                    className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                    className="pc-menu-item pc-font flex items-center w-full px-4 py-3 text-left text-red-600 cursor-pointer"
                     onClick={handleDeletePost}
                   >
                     <RiDeleteBin6Line className="w-5 h-5 mr-2" />
@@ -413,14 +567,14 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
                 ) : (
                   <>
                     <button
-                      className="flex items-center w-full px-4 py-3 text-left text-orange-600 transition-colors hover:bg-gray-50"
+                      className="pc-menu-item pc-font flex items-center w-full px-4 py-3 text-left text-orange-600 cursor-pointer"
                       onClick={handleReportAbuse}
                     >
                       <MdReport className="w-5 h-5 mr-2" />
                       Report Abuse
                     </button>
                     <button
-                      className="flex items-center w-full px-4 py-3 text-left text-red-600 transition-colors hover:bg-gray-50"
+                      className="pc-menu-item pc-font flex items-center w-full px-4 py-3 text-left text-red-600 cursor-pointer"
                       onClick={
                         isUserBlocked ? handleUnblockUser : handleBlockUser
                       }
@@ -446,6 +600,8 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
 
         <PostContent post={post} handlePostClick={handlePostClick} />
 
+        <hr className="pc-divider w-full" />
+
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start gap-3 sm:gap-4">
             <Reactions
@@ -466,19 +622,18 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
             <div className="flex items-center gap-2 sm:gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                whileHover={{
-                  scale: 1.1,
-                  boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
-                }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="flex items-center justify-center w-10 h-10 border border-red-400 rounded-full sm:w-12 sm:h-12 shrink-0"
+                aria-label="Toggle comments"
+                className={`pc-round flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 shrink-0 cursor-pointer ${
+                  showComments ? "pc-round-on" : ""
+                }`}
                 onClick={() => setShowComments(!showComments)}
               >
                 <BiComment className="w-5 h-5 text-orange-500 sm:w-6 sm:h-6 shrink-0" />
               </motion.button>
-              <div className="text-[#605F5F] text-sm sm:text-base figtree">
+              <span className="pc-count pc-chip-font text-sm sm:text-base">
                 {commentCount}
-              </div>
+              </span>
             </div>
             <Share
               type="post"
@@ -489,7 +644,10 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              className="flex items-center justify-center p-2 rounded-full sm:w-10 sm:h-10"
+              aria-label={isSavedPost ? "Unsave post" : "Save post"}
+              className={`pc-round flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 cursor-pointer ${
+                isSavedPost ? "pc-round-on" : ""
+              }`}
               onClick={handleSavePost}
             >
               {isSavedPost ? (
@@ -507,47 +665,49 @@ const PostCard = ({ post, onDelete, onUserBlocked }: PostCardProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full p-4 bg-gray-100 rounded-lg"
+            className="pc-comments w-full p-4"
           >
-            <h3 className="text-lg font-semibold text-gray-700">Comments</h3>
-            <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 p-2">
+            <h3 className="pc-title pc-font text-xl mb-2">Comments</h3>
+            <div className="flex flex-col gap-3 w-full max-h-[300px] overflow-y-auto p-2">
               {comments?.length > 0 ? (
                 comments.map((comment: Comment) => (
                   <div
                     key={comment._id}
-                    className="flex items-start w-full gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-md"
+                    className="pc-bubble pc-slam flex items-start w-full gap-3 p-3"
                   >
                     <img
                       src={comment.user.picture}
                       alt="profile-picture"
-                      className="object-cover w-10 h-10 border border-gray-300 rounded-full shrink-0"
+                      className="pc-bubble-img object-cover w-10 h-10 shrink-0"
                     />
-                    <div className="flex flex-col flex-1 min-w-0 p-3 bg-gray-100 rounded-md overflow-hidden">
-                      <span className="font-semibold text-gray-800 truncate">
+                    <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                      <span className="pc-font text-black truncate">
                         {comment.user.name}
                       </span>
-                      <p className="w-full text-gray-600 break-words text-sm">
+                      <p className="w-full text-gray-700 break-words text-sm">
                         {comment.content}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500">No comments yet.</p>
+                <p className="pc-font text-center text-gray-600">
+                  No comments yet. Be the first!
+                </p>
               )}
             </div>
-            <div className="flex items-center w-full gap-2 pt-3">
+            <div className="flex items-center w-full gap-3 pt-3">
               <input
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 min-w-0 p-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                className="pc-input pc-font flex-1 min-w-0 px-3 py-2 text-base"
                 placeholder="Write a comment..."
               />
               <button
                 onClick={handleCommentSubmit}
-                className="px-3 py-2 text-white text-sm transition bg-orange-500 rounded-lg hover:bg-orange-600 shrink-0"
+                className="pc-cta pc-font px-4 py-1.5 text-lg uppercase shrink-0 cursor-pointer"
               >
                 Send
               </button>

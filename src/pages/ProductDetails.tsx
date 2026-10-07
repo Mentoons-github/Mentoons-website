@@ -587,32 +587,23 @@ const ProductDetails = () => {
               {
                 label: "Language",
                 value:
-                  product.type === ProductType.COMIC ||
-                  product.type === ProductType.AUDIO_COMIC ||
-                  product.type === ProductType.PODCAST ||
-                  product.type === ProductType.MENTOONS_BOOKS ||
-                  product.type === ProductType.MENTOONS_CARDS
-                    ? "language" in product.details
-                      ? product.details.language === "en"
-                        ? "English"
-                        : product.details.language || "Not Available"
-                      : "Not Available"
-                    : "Not Applicable",
+                  "language" in product.details && product.details.language
+                    ? product.details.language === "en"
+                      ? "English"
+                      : product.details.language
+                    : "Not Available",
               },
               {
                 label: "Print Length",
                 value:
-                  product.type === ProductType.COMIC ||
-                  product.type === ProductType.MENTOONS_BOOKS
-                    ? "pages" in product.details
-                      ? `${product.details.pages || "Not Available"} pages`
-                      : "Not Available"
-                    : product.type === ProductType.MENTOONS_CARDS
-                      ? "printLength" in product.details
-                        ? `${product.details.printLength} cards`
-                        : "pages" in product.details
-                          ? `${product.details.pages} cards`
-                          : "Not Available"
+                  product.type === ProductType.MENTOONS_CARDS
+                    ? "printLength" in product.details
+                      ? `${product.details.printLength} cards`
+                      : "pages" in product.details
+                        ? `${product.details.pages} cards`
+                        : "Not Available"
+                    : "pages" in product.details && product.details.pages
+                      ? `${product.details.pages} pages`
                       : "Not Available",
               },
               // {

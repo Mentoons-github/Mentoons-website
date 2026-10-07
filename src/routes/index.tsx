@@ -3,7 +3,7 @@ import OrderSummary from "@/components/OrderSummary";
 import Membership from "../components/LandingPage/membership/membership.tsx";
 import LogIn from "../pages/Auth/LogIn";
 import Register from "../pages/Auth/Register";
-import CareerPage from "../pages/CareerPage";
+// import CareerPage from "../pages/CareerPage";
 import MentoonsStore from "../pages/MentoonsStore";
 import PaymentStatusPage from "../pages/PaymentStatusPage";
 import PolicyPage from "../pages/PolicyPage";
@@ -13,9 +13,9 @@ import AssessmentQuestions from "../pages/AssessmentQuestions.tsx";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import SearchResultsPage from "../pages/v2/adda/globalSearch.tsx";
 import OrderHistory from "../pages/v2/orderHistory.tsx";
-import Assessment from "../pages/v2/user/assessment.tsx";
-import ProductsPage from "../pages/v2/user/products/products.tsx";
-import AdvancedBookingSystem from "../pages/v2/user/sessionBooking/sessionBooking.tsx";
+// import Assessment from "../pages/v2/user/assessment.tsx";
+// import ProductsPage from "../pages/v2/user/products/products.tsx";
+// import AdvancedBookingSystem from "../pages/v2/user/sessionBooking/sessionBooking.tsx";
 import AddaRouter from "./addaRouter.tsx";
 import ProtectedRoute from "../utils/ProtectedRoute";
 import SubscriptionGuard from "../components/protected/subscriptionGuard.tsx";
@@ -33,20 +33,25 @@ import ImageUploadFormSubmit from "../pages/v2/adda/ImageUploadFormSubmit.tsx";
 import Explore from "../pages/v2/chnages.tsx";
 import PaymentDetailPage from "../pages/v2/workshop/paymentDetails.tsx";
 import Emi from "../pages/v2/workshop/emi.tsx";
-import CareerCorner from "../pages/CareerCorner.tsx";
-import AffiliatePage from "../pages/v2/joinus/affiliate/affiliate.tsx";
+// import CareerCorner from "../pages/CareerCorner.tsx";
+// import AffiliatePage from "../pages/v2/joinus/affiliate/affiliate.tsx";
 import Feedback from "../pages/v2/feedback/feedback.tsx";
-import Collaborate from "../pages/v2/joinus/collaborate/collaborate.tsx";
-import BecomeMentor from "../pages/v2/joinus/becomeMentor.tsx";
+// import Collaborate from "../pages/v2/joinus/collaborate/collaborate.tsx";
+// import BecomeMentor from "../pages/v2/joinus/becomeMentor.tsx";
 import MessageFromFounder from "../pages/v2/MessageFromFounder.tsx";
 import NewLandingPage from "../pages/v2/newLandingPage.tsx";
 import DailyReport from "../components/employee/report/dailyReport.tsx";
 import OtherProduct from "../pages/otherProducts/OtherProduct";
 import ToonlandProductPage from "../pages/v2/user/products/toonlandProduct.tsx";
 import LetsRevive from "../components/community/letsRevive/letsRevive.tsx";
-import NewHomePage from "@/pages/NewHome.tsx";
+// import NewHomePage from "@/pages/NewHome.tsx";
 import MentoonsAboutPage from "@/pages/v2/about.tsx";
+// import Meetups from "@/pages/v3/meetups.tsx";
+import JoinOurTeam from "@/pages/v3/joinOurTeam.tsx";
+import OneOnOneSessionPage from "@/pages/v3/oneOnOneSession.tsx";
+import AssessmentsPage from "@/pages/v3/assessment.tsx";
 import ProductPageV3 from "@/pages/v3/productPageV3.tsx";
+// import ProductPageV3 from "@/pages/v3/productPageV3.tsx";
 
 const Cart = lazy(() => import("../pages/Cart"));
 const ComicsPageV2 = lazy(() => import("../pages/ComicsPageV2"));
@@ -77,7 +82,7 @@ export const routes = [
   { path: "/sign-in", element: <LogIn /> },
   { path: "/about-mentoons", element: <MentoonsAboutPage /> },
   { path: "/mentoons-works", element: <HowMentoonsWork /> },
-  { path: "/products", element: <ProductsPage /> },
+  { path: "/products", element: <ProductPageV3 /> },
   {
     path: "/cart",
     element: (
@@ -114,22 +119,22 @@ export const routes = [
   },
   { path: "/mentoons-privacy-policy", element: <PolicyPage /> },
   { path: "/mentoons-term-conditions", element: <TermsAndConditions /> },
-  { path: "/join-us/careers", element: <CareerPage /> },
-  { path: "/join-us/explore", element: <Explore /> },
-  { path: "/career-corner", element: <CareerCorner /> },
-  { path: "/joinus/careers", element: <CareerPage /> },
-  { path: "/joinus/careers/:slug", element: <CareerPage /> },
-  { path: "/joinus/affiliate", element: <AffiliatePage /> },
-  { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
-  { path: "/joinus/collaborate", element: <Collaborate /> },
-  { path: "/joinus/collaborate/:slug", element: <Collaborate /> },
-  { path: "/joinus/become-mentor", element: <BecomeMentor /> },
+  // { path: "/join-us/careers", element: <CareerPage /> },
+  // { path: "/join-us/explore", element: <Explore /> },
+  // { path: "/career-corner", element: <CareerCorner /> },
+  // { path: "/joinus/careers", element: <CareerPage /> },
+  // { path: "/joinus/careers/:slug", element: <CareerPage /> },
+  // { path: "/joinus/affiliate", element: <AffiliatePage /> },
+  // { path: "/joinus/affiliate/:slug", element: <AffiliatePage /> },
+  // { path: "/joinus/collaborate", element: <Collaborate /> },
+  // { path: "/joinus/collaborate/:slug", element: <Collaborate /> },
+  // { path: "/joinus/become-mentor", element: <BecomeMentor /> },
   { path: "/joinus/explore", element: <Explore /> },
   {
     path: "/assessment-page",
     element: (
       <SubscriptionGuard>
-        <Assessment />
+        <AssessmentsPage />
       </SubscriptionGuard>
     ),
   },
@@ -137,7 +142,7 @@ export const routes = [
   { path: "/order-summary", element: <OrderSummary /> },
   { path: "/payment-status", element: <PaymentStatusPage /> },
   { path: "/adda/*", element: <AddaRouter /> },
-  { path: "/bookings", element: <AdvancedBookingSystem /> },
+  // { path: "/bookings", element: <AdvancedBookingSystem /> },
   { path: "/search", element: <SearchResultsPage /> },
   { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
@@ -164,8 +169,12 @@ export const routes = [
   { path: "/report", element: <DailyReport /> },
   { path: "/other-product/:productId", element: <OtherProduct /> },
   { path: "/meetups", element: <LetsRevive /> },
-  { path: "/new-home", element: <NewHomePage /> },
-  { path: "sample", element: <ProductPageV3 /> },
+  // { path: "/new-home", element: <NewHomePage /> },
+  { path: "/sample", element: <ProductPageV3 /> },
+  // { path: "/new-meetups", element: <Meetups /> },
+  { path: "/join-us", element: <JoinOurTeam /> },
+  { path: "/bookings", element: <OneOnOneSessionPage /> },
+  // { path: "/new-assessment", element: <AssessmentsPage /> },
 ];
 
 export const NotFoundPage = NotFound;

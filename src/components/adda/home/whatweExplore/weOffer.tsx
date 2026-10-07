@@ -105,33 +105,124 @@ const WhatWeOffer = ({
   };
 
   return (
-    <div ref={containerRef} className="p-5 font-inter bg-[#FFEDD5] rounded-xl">
+    <div ref={containerRef} className="wo-panel p-5">
+      <style>{`
+        .wo-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .wo-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .wo-panel {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+          background-size: 14px 14px;
+          border: 4px solid #000;
+          box-shadow: 6px 6px 0 #000;
+          border-radius: 16px;
+        }
+
+        .wo-title {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 10px;
+          padding: 0 12px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .wo-title-btn:hover .wo-title { background: #facc15; box-shadow: 5px 5px 0 #000; }
+        .wo-title-btn:active .wo-title { box-shadow: 0 0 0 #000; }
+
+        .wo-chevron {
+          background: #fff;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+        }
+
+        .wo-action {
+          background: #fb923c;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 999px;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .wo-action:hover { background: #fdba74; box-shadow: 6px 6px 0 #000; }
+        .wo-action:active { box-shadow: 1px 1px 0 #000; }
+
+        .wo-item {
+          background: #fff;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 12px;
+          transition: box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .wo-item:hover { background: #fef9c3; box-shadow: 5px 5px 0 #000; }
+        .wo-item:active { box-shadow: 1px 1px 0 #000; }
+
+        .wo-arrow {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+        }
+
+        .wo-tag {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          padding: 0 8px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+          margin-right: 4px;
+        }
+      `}</style>
+
       <div className="flex items-center justify-between gap-4 mb-4">
         <button
           ref={titleRef}
           onClick={toggleDetails}
-          className="flex items-center gap-2 text-[#F97316] text-3xl font-bold whitespace-nowrap focus:outline-none focus:ring-0 active:outline-none active:ring-0"
+          className="wo-title-btn flex items-center gap-3 whitespace-nowrap focus:outline-none focus:ring-0 active:outline-none active:ring-0"
           aria-expanded={isOpen}
           aria-controls="details-section"
         >
-          What We Offer
-          <motion.svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-orange-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          <span className="wo-title wo-font text-2xl sm:text-3xl pr-1">
+            What We Offer
+          </span>
+          <motion.span
+            className="wo-chevron flex items-center justify-center w-8 h-8 shrink-0"
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </motion.svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </motion.span>
         </button>
 
         <motion.button
@@ -147,7 +238,7 @@ const WhatWeOffer = ({
             repeatType: "loop",
             ease: "easeInOut",
           }}
-          className="flex items-center justify-center bg-orange-400 rounded-full shadow-lg hover:scale-105 transition-transform z-10 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 focus:outline-none focus:ring-0 active:outline-none active:ring-0"
+          className="wo-action flex items-center justify-center z-10 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 focus:outline-none focus:ring-0 active:outline-none active:ring-0"
           aria-label="Create new post"
         >
           <img
@@ -166,13 +257,13 @@ const WhatWeOffer = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="mx-auto space-y-4 mt-6 overflow-hidden"
+            className="mx-auto space-y-4 mt-4 overflow-hidden p-2"
           >
             {Object.entries(details).map(([key, value], index) => (
               <li key={index} ref={(el) => (listItemRefs.current[index] = el)}>
                 <NavLink
                   to={value.link}
-                  className="w-full text-left flex items-start gap-2 md:gap-5 bg-white hover:bg-orange-100 text-gray-700 p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="wo-item w-full text-left flex items-start gap-2 md:gap-4 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
                   aria-label={`Learn more about ${key}`}
                   onMouseEnter={(e) =>
                     gsap.to(e.currentTarget, {
@@ -189,22 +280,24 @@ const WhatWeOffer = ({
                     })
                   }
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="text-orange-500 h-5 w-5 md:h-6 md:w-6 flex-shrink-0 mt-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                  <div>
-                    <span className="text-orange-500 font-bold">{key}</span>:{" "}
+                  <span className="wo-arrow flex items-center justify-center w-7 h-7 md:w-8 md:h-8 flex-shrink-0 mt-0.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 md:h-5 md:w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeWidth={3}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </span>
+                  <div className="wo-chip-font text-sm md:text-base leading-relaxed">
+                    <span className="wo-tag wo-font">{key}</span>{" "}
                     {value.description}
                   </div>
                 </NavLink>

@@ -133,9 +133,8 @@ const ContactSupportSection = () => {
 
       {showErrorModal && (
         <ErrorModal
-          heading="Failed to submit query"
-          error={showErrorMessage}
-          isOpen={showErrorModal}
+          open={showErrorModal}
+          message={showErrorMessage}
           onClose={() => setShowErrorModal(false)}
         />
       )}

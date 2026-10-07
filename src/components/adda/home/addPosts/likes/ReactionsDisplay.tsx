@@ -222,13 +222,124 @@ const ReactionsDisplay = ({
 
   return (
     <div className="relative flex items-center gap-2">
+      <style>{`
+        @keyframes rd-pop {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          70%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes rd-spin { to { transform: rotate(360deg); } }
+        .rd-pop { animation: rd-pop 0.4s cubic-bezier(.2,.9,.3,1.4) both; }
+
+        .rd-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .rd-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .rd-icon {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1);
+        }
+        .rd-icons:hover .rd-icon { transform: translateY(-2px) rotate(-6deg); }
+
+        .rd-count {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          min-width: 26px;
+          padding: 0 6px;
+          text-align: center;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+          cursor: pointer;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), box-shadow 0.1s ease;
+        }
+        .rd-count:hover { transform: rotate(0deg) scale(1.1); box-shadow: 3px 3px 0 #000; }
+        .rd-count:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+
+        .rd-panel {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+          background-size: 14px 14px;
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 12px;
+        }
+        .rd-title {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 8px;
+          padding: 0 10px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+        .rd-pill {
+          background: #fff;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transform: rotate(var(--rot, 0deg));
+        }
+        .rd-row {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 10px;
+          transition: transform 0.15s ease, background 0.1s ease;
+        }
+        .rd-row:hover { background: #fef9c3; transform: translate(-1px, -1px); }
+        .rd-avatar {
+          border: 3px solid #000;
+          border-radius: 999px;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .rd-close {
+          background: #ef4444;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transition: box-shadow 0.1s ease, transform 0.1s ease;
+        }
+        .rd-close:hover { background: #f87171; }
+        .rd-close:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+        .rd-spinner {
+          width: 2rem;
+          height: 2rem;
+          border: 4px solid #000;
+          border-top-color: #f97316;
+          border-radius: 999px;
+          animation: rd-spin 0.7s steps(8) infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .rd-pop, .rd-spinner { animation: none; }
+        }
+      `}</style>
+
       {/* Reaction icons */}
-      <div className="flex -space-x-1">
+      <div className="rd-icons flex -space-x-2">
         {topReactions.map(([reactionType], index) => (
           <span
             key={reactionType}
-            className="flex items-center justify-center w-8 h-8 p-1 bg-white border border-orange-200 rounded-full"
-            style={{ zIndex: topReactions.length - index }}
+            className="rd-icon rd-pop flex items-center justify-center w-8 h-8 p-1"
+            style={{
+              zIndex: topReactions.length - index,
+              animationDelay: `${index * 0.08}s`,
+            }}
           >
             {reactionData[reactionType as ReactionType].activeIcon}
           </span>
@@ -237,8 +348,17 @@ const ReactionsDisplay = ({
 
       {/* Reaction count - clickable */}
       <span
-        className="text-sm text-gray-600 transition-colors cursor-pointer hover:text-gray-800"
+        role="button"
+        tabIndex={0}
+        aria-label="Show who reacted"
+        className="rd-count rd-chip-font text-sm"
         onClick={() => setShowReactionListDropdown(!showReactionListDropdown)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setShowReactionListDropdown(!showReactionListDropdown);
+          }
+        }}
       >
         {totalReactions}
       </span>
@@ -252,29 +372,33 @@ const ReactionsDisplay = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute left-0 z-50 p-3 bg-white border border-orange-200 shadow-lg rounded-xl shadow-orange-100"
+            className="rd-panel absolute left-0 z-50 p-3"
             style={{
-              boxShadow: "0px 4px 16px rgba(255, 120, 0, 0.2)",
               top: "calc(100% + 10px)",
-              minWidth: "250px",
+              minWidth: "270px",
             }}
           >
-            <h3 className="mb-3 text-sm font-semibold text-gray-700">
+            <h3 className="rd-title rd-font mb-3 pr-1 text-base">
               Who reacted to this post
             </h3>
             <div className="flex flex-wrap gap-2 mb-3">
               {Object.entries(reactionCounts)
                 .filter(([, count]) => count > 0)
-                .map(([type, count]) => (
+                .map(([type, count], i) => (
                   <div
                     key={type}
-                    className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full"
+                    className="rd-pill flex items-center gap-1 px-2 py-0.5"
+                    style={
+                      {
+                        ["--rot" as string]: `${i % 2 === 0 ? -2 : 2}deg`,
+                      } as React.CSSProperties
+                    }
                   >
                     <span className="flex items-center justify-center w-5 h-5">
                       {reactionData[type as ReactionType].activeIcon}
                     </span>
                     <span
-                      className={`text-xs ${
+                      className={`rd-chip-font text-sm ${
                         reactionData[type as ReactionType].color
                       }`}
                     >
@@ -284,10 +408,10 @@ const ReactionsDisplay = ({
                 ))}
             </div>
 
-            <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto p-1">
               {isLoadingReactions ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="w-8 h-8 border-t-4 border-orange-500 border-solid rounded-full animate-spin"></div>
+                  <div className="rd-spinner"></div>
                 </div>
               ) : reactionsList && reactionsList.length > 0 ? (
                 reactionsList.map((reaction, index) => (
@@ -296,25 +420,25 @@ const ReactionsDisplay = ({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-2 mb-2 transition-colors border border-orange-100 rounded-lg hover:bg-orange-100/50"
+                    className="rd-row flex items-center justify-between p-2"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <img
                         src={reaction?.user?.picture}
                         alt=""
-                        className="w-8 h-8 rounded-full"
+                        className="rd-avatar w-8 h-8 shrink-0 object-cover"
                       />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="rd-font text-sm text-black truncate">
                         {reaction?.user?.name}
                       </span>
                     </div>
-                    <div className="flex items-center justify-center w-6 h-6 ">
+                    <div className="flex items-center justify-center w-6 h-6 shrink-0">
                       {reactionData[reaction?.reactionType]?.activeIcon}
                     </div>
                   </motion.div>
                 ))
               ) : (
-                <div className="text-center text-orange-500">
+                <div className="rd-font text-center text-orange-600">
                   No reactions yet
                 </div>
               )}
@@ -323,7 +447,8 @@ const ReactionsDisplay = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute flex items-center justify-center text-gray-500 bg-orange-100 rounded-full top-3 right-3 w-7 h-7 hover:text-orange-700"
+              aria-label="Close reactions list"
+              className="rd-close absolute flex items-center justify-center top-2 right-2 w-7 h-7 cursor-pointer"
               onClick={() => setShowReactionListDropdown(false)}
             >
               <svg
@@ -336,7 +461,7 @@ const ReactionsDisplay = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>

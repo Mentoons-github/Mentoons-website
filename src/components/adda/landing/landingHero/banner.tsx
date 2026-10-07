@@ -4,6 +4,85 @@ import { SLIDES as IMPORTED_SLIDES } from "@/constant/adda/Landing/slide";
 import { useState } from "react";
 import NewBanner from "@/pages/NewBanner";
 
+const chipColors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
+
+const bgStars = [
+  { top: "8%", left: "6%", size: 18, fill: "#fde047", duration: 1.3, delay: 0 },
+  {
+    top: "14%",
+    left: "44%",
+    size: 14,
+    fill: "#ffffff",
+    duration: 1.6,
+    delay: 0.4,
+  },
+  {
+    top: "6%",
+    left: "70%",
+    size: 20,
+    fill: "#fde047",
+    duration: 1.2,
+    delay: 0.8,
+  },
+  {
+    top: "22%",
+    left: "90%",
+    size: 14,
+    fill: "#ffffff",
+    duration: 1.5,
+    delay: 0.2,
+  },
+  {
+    top: "70%",
+    left: "4%",
+    size: 16,
+    fill: "#ffffff",
+    duration: 1.4,
+    delay: 1,
+  },
+  {
+    top: "80%",
+    left: "38%",
+    size: 18,
+    fill: "#fde047",
+    duration: 1.7,
+    delay: 0.6,
+  },
+  {
+    top: "64%",
+    left: "92%",
+    size: 16,
+    fill: "#fde047",
+    duration: 1.3,
+    delay: 1.2,
+  },
+  {
+    top: "40%",
+    left: "50%",
+    size: 12,
+    fill: "#ffffff",
+    duration: 1.5,
+    delay: 0.3,
+  },
+];
+
+const ComicStar = ({ size, fill }: { size: number; fill: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    style={{ overflow: "visible" }}
+  >
+    <polygon
+      points="12,1 15,9 23,9 17,14 19,22 12,17 5,22 7,14 1,9 9,9"
+      fill={fill}
+      stroke="#000"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const LandingBanner = () => {
   const OUR_CORE_SLIDE = {
     id: 99,
@@ -97,20 +176,197 @@ const LandingBanner = () => {
 
   return (
     <section
-      className={`relative overflow-hidden ${
-        isFirstSlide ? "min-h-[85vh] h-auto bg-white" : "h-[85vh] bg-blue-300"
+      className={`relative overflow-hidden landing-section ${
+        isFirstSlide
+          ? "min-h-[calc(100vh-165px)] h-auto bg-white"
+          : "h-[calc(100vh-165px)] min-h-[560px] bg-sky-300"
       }`}
     >
       <style>{`
         @keyframes cloud-drift-lr {
-          0%   { transform: translateX(-160px); }
+          0%   { transform: translateX(-200px); }
           100% { transform: translateX(110vw); }
+        }
+        @keyframes pop-star {
+          0%   { transform: scale(0.6) rotate(-14deg); opacity: 0.5; }
+          50%  { transform: scale(1.25) rotate(14deg); opacity: 1; }
+          100% { transform: scale(0.6) rotate(-14deg); opacity: 0.5; }
+        }
+        @keyframes comic-slam {
+          0%   { transform: scale(2.6) rotate(-8deg); opacity: 0; }
+          55%  { transform: scale(0.92) rotate(1deg); opacity: 1; }
+          78%  { transform: scale(1.06) rotate(0deg); }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes comic-pop {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          70%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes comic-shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-7px); }
+          40% { transform: translateX(7px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+        }
+        @keyframes comic-wiggle {
+          0%, 84%, 100% { transform: scale(1) rotate(0deg); }
+          88% { transform: scale(1.1) rotate(-5deg); }
+          92% { transform: scale(1.1) rotate(4deg); }
+          96% { transform: scale(1.05) rotate(-3deg); }
+        }
+        @keyframes comic-bob {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(2deg); }
         }
         .cloud-drift-lr {
           position: absolute;
           pointer-events: none;
           animation: cloud-drift-lr linear infinite;
           will-change: transform;
+          overflow: visible;
+          filter: drop-shadow(4px 4px 0 #000);
+        }
+        .anim-slam { animation: comic-slam 0.45s cubic-bezier(.2,.8,.3,1) both; }
+        .anim-slam-shake {
+          animation: comic-slam 0.45s cubic-bezier(.2,.8,.3,1) both, comic-shake 0.3s linear 0.5s both;
+        }
+        .anim-pop { animation: comic-pop 0.45s cubic-bezier(.2,.9,.3,1.4) both; }
+        .anim-wiggle { animation: comic-wiggle 3s ease-in-out 1.2s infinite; }
+        .anim-bob { animation: comic-bob 1.4s steps(4) infinite; }
+
+        .comic-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.06em;
+        }
+        .comic-chip-font {
+          font-family: var(--font-comic-chip) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+        .comic-heading {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          line-height: 0.95;
+          letter-spacing: 0.05em;
+          color: #fff;
+          -webkit-text-stroke: 3px #000;
+          paint-order: stroke fill;
+          text-shadow: 4px 4px 0 #000;
+        }
+        .comic-heading *, .comic-welcome * {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+        }
+        .comic-heading .hl { color: #f97316; }
+        .comic-welcome {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.06em;
+          color: #fff;
+          -webkit-text-stroke: 2px #000;
+          paint-order: stroke fill;
+          text-shadow: 3px 3px 0 #000;
+        }
+        .comic-welcome .hl { color: #fde047; }
+        .comic-tag {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 8px;
+          padding: 2px 12px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+        .comic-sticker {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .comic-narration {
+          background: #fff;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 12px;
+          padding: 8px 14px;
+          transform: rotate(1deg);
+          letter-spacing: 0.05em;
+          line-height: 1.25;
+        }
+        .comic-chip {
+          background: var(--chip);
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 6px;
+          padding: 1px 10px;
+          line-height: 1.2;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transform: rotate(var(--rot, 0deg)) skewX(-8deg);
+          display: inline-block;
+        }
+        .comic-cta {
+          background: #f97316;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 10px;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transition: box-shadow 0.1s ease, background 0.1s ease, transform 0.1s ease;
+          transform: rotate(-2deg);
+        }
+        .comic-cta:hover { background: #fb923c; transform: rotate(-2deg) scale(1.06); }
+        .comic-cta:active { box-shadow: 0 0 0 #000; transform: rotate(-2deg) translate(3px, 3px); }
+        .comic-tile {
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 8px;
+          transform: rotate(var(--tilt, 0deg));
+          transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+        }
+        .group:hover .comic-tile {
+          transform: rotate(0deg) translate(-3px, -3px) scale(1.06);
+          box-shadow: 9px 9px 0 #000;
+        }
+        .comic-bar {
+          transition: opacity 0.15s ease;
+        }
+        .landing-section:has(.comic-card:hover) .comic-bar,
+        .landing-section:has(.comic-card:focus-within) .comic-bar {
+          opacity: 0;
+          pointer-events: none;
+        }
+        .comic-bar {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+        }
+        .comic-arrow {
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .comic-arrow:hover { background: #facc15; }
+        .comic-arrow:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+        .sky-halftone {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: radial-gradient(rgba(255,255,255,0.45) 2px, transparent 2.5px);
+          background-size: 14px 14px;
+          -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+          mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
         }
 
         @media (max-width: 1024px) and (min-width: 769px) {
@@ -132,7 +388,7 @@ const LandingBanner = () => {
           .banner-center-grid { display: none !important; }
           .banner-left { margin-left: 1rem !important; width: 90% !important; }
           .banner-headline { font-size: 2.8rem !important; }
-          .banner-sub { font-size: 0.75rem !important; }
+          .banner-sub { font-size: 0.85rem !important; }
         }
 
         @media (max-width: 480px) {
@@ -141,29 +397,40 @@ const LandingBanner = () => {
         }
       `}</style>
 
-      {/* Only show the ambient sky background/clouds behind the generic slides —
-          NewBanner has its own self-contained background. */}
       {!isFirstSlide && (
         <>
+          <div className="sky-halftone" style={{ zIndex: 0 }} />
+
           {driftingClouds.map((c, i) => (
             <svg
               key={i}
               className="cloud-drift-lr"
               style={{
                 top: `${c.top}%`,
-                width: `${c.width}px`,
-                height: `${Math.round(c.width * 0.6)}px`,
+                width: `${Math.round(c.width * 1.5)}px`,
+                height: `${Math.round(c.width * 0.75)}px`,
                 animationDuration: `${c.duration}s`,
                 animationDelay: `-${c.delay}s`,
-                opacity: c.opacity,
+                opacity: Math.min(1, c.opacity + 0.5),
                 zIndex: 0,
               }}
-              viewBox="0 0 100 60"
+              viewBox="0 0 160 80"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M 20 48 Q 4 48 4 35 Q 4 27 14 25 Q 14 14 28 14 Q 36 8 46 11 Q 56 7 66 12 Q 78 10 82 20 Q 94 20 96 30 Q 100 32 100 39 Q 100 48 88 48 Z"
-                fill="white"
+                d="M40 70 C18 70 8 54 22 44 C16 28 38 20 50 30 C56 10 88 8 98 28 C112 16 140 26 134 46 C152 50 148 70 128 70 Z"
+                fill="#ffffff"
+                stroke="#000"
+                strokeWidth="4"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M44 58 C54 63 72 63 86 58"
+                fill="none"
+                stroke="#000"
+                strokeWidth="3"
+                strokeLinecap="round"
+                opacity="0.22"
               />
             </svg>
           ))}
@@ -174,6 +441,22 @@ const LandingBanner = () => {
             src="/assets/home/newPage/bg/landing-bg.png"
             alt="hero-bg"
           />
+
+          {bgStars.map((s, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute pointer-events-none"
+              style={{
+                top: s.top,
+                left: s.left,
+                zIndex: 1,
+                animation: `pop-star ${s.duration}s steps(3) infinite`,
+                animationDelay: `${s.delay}s`,
+              }}
+            >
+              <ComicStar size={s.size} fill={s.fill} />
+            </div>
+          ))}
         </>
       )}
 
@@ -182,8 +465,8 @@ const LandingBanner = () => {
         style={{ position: "relative", zIndex: 2 }}
         className={`${
           isFirstSlide
-            ? "min-h-[85vh]"
-            : "flex items-center justify-center gap-5 h-full"
+            ? "min-h-[calc(100vh-165px)]"
+            : "flex items-center justify-center gap-5 h-full pb-16"
         } ${
           animating
             ? direction === "next"
@@ -198,165 +481,157 @@ const LandingBanner = () => {
           <NewBanner />
         ) : (
           <>
-            <div className="banner-left font-futura flex flex-col items-start justify-start ml-20 w-1/2 h-1/3 mb-10">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{slide!.emoji}</span>
-                <span
-                  className="text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full"
-                  style={{
-                    backgroundColor: "rgba(0,0,0,0.12)",
-                    color: "#1a1a2e",
-                    border: "1px solid rgba(0,0,0,0.2)",
-                  }}
-                >
-                  {slide!.tag}
-                </span>
+            <div className="banner-left flex flex-col items-start justify-start ml-20 w-1/2">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="anim-pop">
+                  <div className="comic-sticker text-2xl">{slide!.emoji}</div>
+                </div>
+                <div className="anim-pop" style={{ animationDelay: "0.1s" }}>
+                  <span className="comic-tag comic-font text-lg uppercase">
+                    {slide!.tag}
+                  </span>
+                </div>
               </div>
 
-              <h1 className="text-xl font-semibold text-gray-900 [text-shadow:0_2px_6px_rgba(0,0,0,0.1)]">
-                Welcome to <span className="text-[#4A1B0C]">Mentoons</span>
-              </h1>
+              <div className="anim-slam" style={{ animationDelay: "0.15s" }}>
+                <h1 className="comic-welcome text-3xl">
+                  Welcome to <span className="hl">Mentoons</span>
+                </h1>
+              </div>
 
-              <h1 className="banner-headline text-7xl font-semibold leading-tight text-gray-900">
-                {slide!.headline.split(" ").map((word, i) =>
-                  word === slide!.highlightWord ? (
-                    <span key={i} className="text-[#e85d04]">
-                      {word}{" "}
-                    </span>
-                  ) : (
-                    <span key={i}>{word} </span>
-                  ),
-                )}
-              </h1>
+              <div
+                className="anim-slam-shake"
+                style={{ animationDelay: "0.25s" }}
+              >
+                <h1 className="banner-headline comic-heading text-6xl xl:text-7xl mt-1">
+                  {slide!.headline.split(" ").map((word, i) =>
+                    word === slide!.highlightWord ? (
+                      <span key={i} className="hl">
+                        {word}{" "}
+                      </span>
+                    ) : (
+                      <span key={i}>{word} </span>
+                    ),
+                  )}
+                </h1>
+              </div>
 
-              <p className="banner-sub mt-2 font-medium tracking-wider text-gray-700 max-w-sm text-sm">
-                {slide!.sub}
-              </p>
+              <div
+                className="anim-slam mt-4 max-w-sm"
+                style={{ animationDelay: "0.55s" }}
+              >
+                <p className="banner-sub comic-narration comic-font text-lg">
+                  {slide!.sub}
+                </p>
+              </div>
 
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-3 mt-4">
                 {slide!.badges?.map((badge, i) => (
-                  <span
+                  <div
                     key={i}
-                    className="text-xs px-2 py-0.5 rounded-full font-semibold text-white"
-                    style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+                    className="anim-pop"
+                    style={{ animationDelay: `${0.7 + i * 0.1}s` }}
                   >
-                    {badge}
-                  </span>
+                    <span
+                      className="comic-chip comic-chip-font text-sm uppercase"
+                      style={
+                        {
+                          ["--chip" as string]:
+                            chipColors[i % chipColors.length],
+                          ["--rot" as string]: `${i % 2 === 0 ? -3 : 2}deg`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {badge}
+                    </span>
+                  </div>
                 ))}
               </div>
 
-              <a href={slide!.link}>
-                <button className="relative bg-transparent border-none cursor-pointer p-0 outline-none transition-transform duration-150 hover:scale-105 active:scale-95">
-                  <svg
-                    width="190"
-                    height="100"
-                    viewBox="0 0 180 100"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <linearGradient
-                        id="cloudGrad"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop offset="0%" stopColor="#ffffff" />
-                        <stop offset="100%" stopColor="#dbeeff" />
-                      </linearGradient>
-                      <clipPath id="cloudClip">
-                        <path d="M 48 72 Q 22 72 22 52 Q 22 42 38 40 Q 38 28 58 28 Q 68 20 82 23 Q 94 18 108 24 Q 124 22 130 34 Q 148 34 152 48 Q 162 50 162 60 Q 162 72 144 72 Z" />
-                      </clipPath>
-                    </defs>
-                    <rect
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="100"
-                      fill="url(#cloudGrad)"
-                      clipPath="url(#cloudClip)"
-                    />
-                    <path
-                      d="M 48 72 Q 22 72 22 52 Q 22 42 38 40 Q 38 28 58 28 Q 68 20 82 23 Q 94 18 108 24 Q 124 22 130 34 Q 148 34 152 48 Q 162 50 162 60 Q 162 72 144 72 Z"
-                      fill="none"
-                      stroke="#bdd9f0"
-                      strokeWidth="1.5"
-                    />
-                    <text
-                      x="92"
-                      y="54"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#3a7ab8"
-                      fontSize="15"
-                      fontWeight="500"
-                      fontFamily="system-ui, sans-serif"
-                    >
+              <div className="anim-pop mt-5" style={{ animationDelay: "1s" }}>
+                <div className="anim-wiggle">
+                  <a href={slide!.link}>
+                    <button className="comic-cta comic-font px-6 py-2 text-2xl uppercase cursor-pointer">
                       {slide!.cta}
-                    </text>
-                  </svg>
-                </button>
-              </a>
+                    </button>
+                  </a>
+                </div>
+              </div>
             </div>
 
             <div className="banner-center-grid grid grid-cols-2 place-items-center gap-10 p-6">
               {slide!.items?.slice(0, 4).map((item, index) => (
-                <a
+                <div
                   key={index}
-                  href={item.link}
-                  className="group block transition-transform duration-200 hover:scale-105"
+                  className="anim-slam"
+                  style={{ animationDelay: `${0.3 + index * 0.12}s` }}
                 >
-                  {"image" in item && item.image ? (
-                    <div className="banner-grid-item w-28 h-28 rounded-2xl overflow-hidden shadow-lg border-2 border-white/30 bg-white/10 backdrop-blur-sm">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <span className="sr-only">{item.name}</span>
-                    </div>
-                  ) : (
-                    <div
-                      className="banner-grid-item w-28 h-28 rounded-2xl flex items-center justify-center shadow-lg border border-white/30 backdrop-blur-sm p-3 text-center"
-                      style={{
-                        backgroundColor:
-                          "color" in item
-                            ? `${item.color}`
-                            : `${slide!.accent}22`,
-                        borderColor:
-                          "color" in item ? item.color : slide!.accent,
-                      }}
-                    >
-                      <span
-                        className="text-xs font-semibold leading-tight font-fredoka"
-                        style={{ color: "#000000" }}
+                  <a href={item.link} className="group block">
+                    {"image" in item && item.image ? (
+                      <div
+                        className="comic-tile banner-grid-item w-28 h-28 overflow-hidden bg-white"
+                        style={
+                          {
+                            ["--tilt" as string]: `${index % 2 === 0 ? -3 : 3}deg`,
+                          } as React.CSSProperties
+                        }
                       >
-                        {item.name}
-                      </span>
-                    </div>
-                  )}
-                </a>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <span className="sr-only">{item.name}</span>
+                      </div>
+                    ) : (
+                      <div
+                        className="comic-tile banner-grid-item w-28 h-28 flex items-center justify-center p-3 text-center"
+                        style={
+                          {
+                            ["--tilt" as string]: `${index % 2 === 0 ? -3 : 3}deg`,
+                            backgroundColor:
+                              "color" in item ? `${item.color}` : slide!.accent,
+                          } as React.CSSProperties
+                        }
+                      >
+                        <span
+                          className="comic-font text-base leading-tight"
+                          style={{ color: "#000000" }}
+                        >
+                          {item.name}
+                        </span>
+                      </div>
+                    )}
+                  </a>
+                </div>
               ))}
             </div>
 
             <div className="banner-right-img w-1/2 flex items-center justify-center">
-              <img src={slide!.img} className="w-full" alt="right-content" />
+              <div
+                className="anim-slam w-full"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <div className="anim-bob">
+                  <img
+                    src={slide!.img}
+                    className="w-full"
+                    alt="right-content"
+                  />
+                </div>
+              </div>
             </div>
           </>
         )}
       </div>
 
-      {/* Bottom control bar — arrows flank the dots, all floating together
-          at the bottom instead of overlapping the slide's text content */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-3 py-2 rounded-full bg-black/20 backdrop-blur-sm">
+      <div className="comic-bar absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-3 py-2 rounded-full">
         <button
           onClick={handlePrev}
-          className="w-9 h-9 md:w-10 md:h-10 p-1 bg-gray-600/70 hover:bg-gray-700/85 rounded-full overflow-hidden transition-colors duration-200 flex-shrink-0"
+          className="comic-arrow w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
           aria-label="Previous slide"
         >
-          <div className="border-2 border-gray-300/75 rounded-full w-full h-full flex items-center justify-center">
-            <FaChevronLeft className="text-white text-sm" />
-          </div>
+          <FaChevronLeft className="text-black text-sm" />
         </button>
 
         <div className="flex items-center gap-2">
@@ -365,10 +640,10 @@ const LandingBanner = () => {
               key={index}
               onClick={() => goToSlide(index)}
               aria-label={`Go to slide ${index + 1}`}
-              className={`rounded-full transition-all duration-300 ${
+              className={`rounded-full border-2 border-black transition-all duration-300 ${
                 index === displaySlide
-                  ? "w-6 h-2.5 bg-white"
-                  : "w-2.5 h-2.5 bg-white/50 hover:bg-white/75"
+                  ? "w-7 h-3 bg-orange-500"
+                  : "w-3 h-3 bg-white hover:bg-yellow-200"
               }`}
             />
           ))}
@@ -376,12 +651,10 @@ const LandingBanner = () => {
 
         <button
           onClick={handleNext}
-          className="w-9 h-9 md:w-10 md:h-10 p-1 bg-gray-600/70 hover:bg-gray-700/85 rounded-full overflow-hidden transition-colors duration-200 flex-shrink-0"
+          className="comic-arrow w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
           aria-label="Next slide"
         >
-          <div className="border-2 border-gray-300/75 rounded-full w-full h-full flex items-center justify-center">
-            <FaChevronRight className="text-white text-sm" />
-          </div>
+          <FaChevronRight className="text-black text-sm" />
         </button>
       </div>
     </section>

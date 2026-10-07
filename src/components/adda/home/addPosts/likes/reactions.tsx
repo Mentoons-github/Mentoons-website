@@ -31,8 +31,8 @@ const reactionData: Record<
   }
 > = {
   like: {
-    activeIcon: <FaThumbsUp className="w-8 text-blue-500 m:w-12 sm:h-12" />,
-    inactiveIcon: <FaThumbsUp className="w-8 text-gray-400 sm:w-6 sm:h-6" />,
+    activeIcon: <FaThumbsUp className="w-4 text-blue-500 sm:w-6 sm:h-6" />,
+    inactiveIcon: <FaThumbsUp className="w-4 text-gray-500 sm:w-6 sm:h-6" />,
     label: "Like",
     color: "text-blue-500",
   },
@@ -48,26 +48,26 @@ const reactionData: Record<
       <FaFaceLaughSquint className="w-4 text-yellow-500 sm:w-6 sm:h-6" />
     ),
     inactiveIcon: (
-      <FaFaceLaughSquint className="w-4 text-gray-400 sm:w-6 sm:h-6" />
+      <FaFaceLaughSquint className="w-4 text-gray-500 sm:w-6 sm:h-6" />
     ),
     label: "Laugh",
     color: "text-yellow-500",
   },
   angry: {
     activeIcon: <FaFaceAngry className="w-4 text-red-600 sm:w-6 sm:h-6" />,
-    inactiveIcon: <FaFaceAngry className="w-4 text-gray-400 sm:w-6 sm:h-6" />,
+    inactiveIcon: <FaFaceAngry className="w-4 text-gray-500 sm:w-6 sm:h-6" />,
     label: "Angry",
     color: "text-red-600",
   },
   sad: {
     activeIcon: <FaFaceSadTear className="w-4 text-blue-500 sm:w-6 sm:h-6" />,
-    inactiveIcon: <FaFaceSadTear className="w-4 text-gray-400 sm:w-6 sm:h-6" />,
+    inactiveIcon: <FaFaceSadTear className="w-4 text-gray-500 sm:w-6 sm:h-6" />,
     label: "Sad",
     color: "text-blue-500",
   },
   fire: {
     activeIcon: <FaFire className="w-4 text-orange-600 sm:w-6 sm:h-6" />,
-    inactiveIcon: <FaFire className="w-4 text-gray-400 sm:w-6 sm:h-6" />,
+    inactiveIcon: <FaFire className="w-4 text-gray-500 sm:w-6 sm:h-6" />,
     label: "Fire",
     color: "text-orange-600",
   },
@@ -210,7 +210,7 @@ const Reactions = ({
         // Emit event with server-confirmed data
         reactionEventEmitter.emitReactionUpdate(
           id,
-          response.data.reactionCounts
+          response.data.reactionCounts,
         );
         // Call callback if provided
         onReactionUpdate?.(response.data.reactionCounts);
@@ -275,10 +275,10 @@ const Reactions = ({
             // it means we have an optimistic update in progress
             const prevTotal = Object.values(prev).reduce(
               (sum, count) => sum + count,
-              0
+              0,
             );
             const serverTotal = Object.values(
-              response.data.reactionCounts as Record<string, number>
+              response.data.reactionCounts as Record<string, number>,
             ).reduce((sum: number, count: number) => sum + count, 0);
 
             // If counts match or this is initial load (prevTotal was from initial state), use server data
@@ -366,21 +366,152 @@ const Reactions = ({
       ref={containerRef}
       className="relative flex items-center justify-center gap-3 "
     >
+      <style>{`
+        @keyframes rx-pop {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          70%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes rx-spin { to { transform: rotate(360deg); } }
+        .rx-pop { animation: rx-pop 0.4s cubic-bezier(.2,.9,.3,1.4) both; }
+
+        .rx-font {
+          font-family: var(--font-comic) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em;
+        }
+        .rx-chip-font {
+          font-family: var(--font-comic-chip, var(--font-comic)) !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.04em;
+        }
+
+        .rx-main {
+          background: #fff;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 999px;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .rx-main:hover { background: #fef9c3; transform: translate(-2px, -2px) rotate(-2deg); box-shadow: 5px 5px 0 #000; }
+        .rx-main:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+        .rx-main-on { background: #fde047; }
+        .rx-main-on:hover { background: #facc15; }
+
+        .rx-count {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          min-width: 26px;
+          padding: 0 6px;
+          text-align: center;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+          cursor: pointer;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), box-shadow 0.1s ease;
+        }
+        .rx-count:hover { transform: rotate(0deg) scale(1.1); box-shadow: 3px 3px 0 #000; }
+        .rx-count:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+
+        .rx-selector {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 999px;
+        }
+        .rx-option {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), background 0.1s ease;
+        }
+        .rx-option:hover { background: #fde047; transform: translateY(-4px) rotate(-6deg) scale(1.12); }
+        .rx-option-on { background: #fde047; }
+        .rx-label {
+          background: #fde047;
+          color: #000;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 6px;
+          padding: 0 6px;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+
+        .rx-panel {
+          background-color: #fffbeb;
+          background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+          background-size: 14px 14px;
+          border: 3px solid #000;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 12px;
+        }
+        .rx-title {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 8px;
+          padding: 0 10px;
+          transform: rotate(-2deg) skewX(-6deg);
+          display: inline-block;
+        }
+        .rx-pill {
+          background: #fff;
+          border: 2px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transform: rotate(var(--rot, 0deg));
+        }
+        .rx-row {
+          background: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          border-radius: 10px;
+          transition: transform 0.15s ease, background 0.1s ease;
+        }
+        .rx-row:hover { background: #fef9c3; transform: translate(-1px, -1px); }
+        .rx-avatar {
+          border: 3px solid #000;
+          border-radius: 999px;
+          box-shadow: 2px 2px 0 #000;
+        }
+        .rx-close {
+          background: #ef4444;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          border-radius: 999px;
+          transition: box-shadow 0.1s ease, transform 0.1s ease;
+        }
+        .rx-close:hover { background: #f87171; }
+        .rx-close:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+        .rx-spinner {
+          width: 2rem;
+          height: 2rem;
+          border: 4px solid #000;
+          border-top-color: #f97316;
+          border-radius: 999px;
+          animation: rx-spin 0.7s steps(8) infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .rx-pop, .rx-spinner { animation: none; }
+        }
+      `}</style>
+
       {/* Main reaction button */}
       <motion.button
-        className={`flex items-center justify-center gap-2 px-4 py-2 bg-white ${
-          toggleBorder
-            ? userReaction
-              ? "border border-orange-500"
-              : "border border-orange-400"
-            : ""
-        } rounded-full transition-colors`}
+        aria-label={getReactionLabel()}
+        className={`rx-main flex items-center justify-center gap-2 px-4 py-2 cursor-pointer ${
+          toggleBorder && userReaction ? "rx-main-on" : ""
+        }`}
         onClick={toggleReaction ? toggleReactionSelector : undefined}
-        whileTap={{ scale: 0.9 }}
-        whileHover={{
-          scale: 1.1,
-          boxShadow: "0px 4px 10px rgba(255,110,0,0.30)",
-        }}
+        whileTap={{ scale: 0.92 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
         {!showLikeCount && (
@@ -390,7 +521,7 @@ const Reactions = ({
         )}
 
         {!showLikeCount && (
-          <span className="flex items-center justify-center w-5 h-5 mr-1 text-xs text-gray-500">
+          <span className="rx-chip-font flex items-center justify-center mr-1 text-sm uppercase">
             {getReactionLabel()}
           </span>
         )}
@@ -434,10 +565,19 @@ const Reactions = ({
       {showLikeCount && (
         <div className="flex items-center gap-1">
           <span
-            className="text-[#605F5F] figtree text-sm"
+            role="button"
+            tabIndex={0}
+            aria-label="Show who reacted"
+            className="rx-count rx-chip-font text-sm"
             onClick={() =>
               setShowReactionListDropdown(!showReactionListDropdown)
             }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setShowReactionListDropdown(!showReactionListDropdown);
+              }
+            }}
           >
             {getTotalReactions()}
           </span>
@@ -452,22 +592,34 @@ const Reactions = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 z-50 flex items-center p-2 mb-2 bg-white border border-gray-200 shadow-lg bottom-full rounded-xl"
-            style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.15)" }}
+            className="rx-selector absolute left-0 z-50 flex items-center gap-2 px-3 py-2 mb-3 bottom-full"
           >
-            {enabledReactions.map((reactionType) => (
+            {enabledReactions.map((reactionType, i) => (
               <motion.div
                 key={reactionType}
-                className="relative p-1 mx-1 group"
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.95 }}
+                className="relative group"
+                whileTap={{ scale: 0.92 }}
                 onClick={() => handleReaction(reactionType)}
               >
-                <div className="flex items-center justify-center w-8 h-8 cursor-pointer">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={reactionData[reactionType].label}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleReaction(reactionType);
+                    }
+                  }}
+                  className={`rx-option rx-pop flex items-center justify-center w-10 h-10 cursor-pointer ${
+                    userReaction === reactionType ? "rx-option-on" : ""
+                  }`}
+                  style={{ animationDelay: `${i * 0.04}s` }}
+                >
                   {reactionData[reactionType].activeIcon}
                 </div>
                 {/* Mini label */}
-                <div className="absolute text-xs font-medium transition-opacity transform -translate-x-1/2 opacity-0 -bottom-6 left-1/2 group-hover:opacity-100">
+                <div className="rx-label rx-chip-font absolute text-xs transition-opacity transform -translate-x-1/2 opacity-0 -bottom-8 left-1/2 group-hover:opacity-100 z-10">
                   {reactionData[reactionType].label}
                 </div>
               </motion.div>
@@ -484,29 +636,33 @@ const Reactions = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute left-0 z-50 p-3 bg-white border border-orange-200 shadow-lg rounded-xl shadow-orange-100"
+            className="rx-panel absolute left-0 z-50 p-3"
             style={{
-              boxShadow: "0px 4px 16px rgba(255, 120, 0, 0.2)",
               top: "calc(100% + 10px)",
-              minWidth: "250px",
+              minWidth: "270px",
             }}
           >
-            <h3 className="mb-3 text-sm font-semibold text-gray-700">
+            <h3 className="rx-title rx-font mb-3 pr-1 text-base">
               Who reacted to this post
             </h3>
             <div className="flex flex-wrap gap-2 mb-3">
               {Object.entries(reactionCounts)
                 .filter(([, count]) => count > 0)
-                .map(([type, count]) => (
+                .map(([type, count], i) => (
                   <div
                     key={type}
-                    className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full"
+                    className="rx-pill flex items-center gap-1 px-2 py-0.5"
+                    style={
+                      {
+                        ["--rot" as string]: `${i % 2 === 0 ? -2 : 2}deg`,
+                      } as React.CSSProperties
+                    }
                   >
                     <span className="flex items-center justify-center w-5 h-5">
                       {reactionData[type as ReactionType].activeIcon}
                     </span>
                     <span
-                      className={`text-xs ${
+                      className={`rx-chip-font text-sm ${
                         reactionData[type as ReactionType].color
                       }`}
                     >
@@ -516,10 +672,10 @@ const Reactions = ({
                 ))}
             </div>
 
-            <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto p-1">
               {isLoadingReactions ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="w-8 h-8 border-t-4 border-orange-500 border-solid rounded-full animate-spin"></div>
+                  <div className="rx-spinner"></div>
                 </div>
               ) : reactionsList && reactionsList.length > 0 ? (
                 reactionsList.map((reaction, index) => (
@@ -528,25 +684,25 @@ const Reactions = ({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-2 mb-2 transition-colors border border-orange-100 rounded-lg hover:bg-orange-100/50"
+                    className="rx-row flex items-center justify-between p-2"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <img
                         src={reaction?.user?.picture}
                         alt=""
-                        className="w-8 h-8 rounded-full"
+                        className="rx-avatar w-8 h-8 shrink-0 object-cover"
                       />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="rx-font text-sm text-black truncate">
                         {reaction?.user?.name}
                       </span>
                     </div>
-                    <div className="flex items-center justify-center w-6 h-6 ">
+                    <div className="flex items-center justify-center w-6 h-6 shrink-0">
                       {reactionData[reaction?.reactionType]?.activeIcon}
                     </div>
                   </motion.div>
                 ))
               ) : (
-                <div className="text-center text-orange-500">
+                <div className="rx-font text-center text-orange-600">
                   No reactions yet
                 </div>
               )}
@@ -555,7 +711,8 @@ const Reactions = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute flex items-center justify-center text-gray-500 bg-orange-100 rounded-full top-3 right-3 w-7 h-7 hover:text-orange-700"
+              aria-label="Close reactions list"
+              className="rx-close absolute flex items-center justify-center top-2 right-2 w-7 h-7 cursor-pointer"
               onClick={() => setShowReactionListDropdown(false)}
             >
               <svg
@@ -568,7 +725,7 @@ const Reactions = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
