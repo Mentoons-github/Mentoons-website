@@ -39,7 +39,7 @@ import Feedback from "../pages/v2/feedback/feedback.tsx";
 // import Collaborate from "../pages/v2/joinus/collaborate/collaborate.tsx";
 // import BecomeMentor from "../pages/v2/joinus/becomeMentor.tsx";
 import MessageFromFounder from "../pages/v2/MessageFromFounder.tsx";
-import NewLandingPage from "../pages/v2/newLandingPage.tsx";
+import NewLandingPage from "../pages/v2/NewLandingPage.tsx";
 import DailyReport from "../components/employee/report/dailyReport.tsx";
 import OtherProduct from "../pages/otherProducts/OtherProduct";
 import ToonlandProductPage from "../pages/v2/user/products/toonlandProduct.tsx";
