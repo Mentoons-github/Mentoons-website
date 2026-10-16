@@ -42,6 +42,18 @@ import { toast } from "sonner";
 
 type MediaItem = { type: "video" | "image"; url: string };
 
+const COMIC_BTN =
+  "border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] transition active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-[3px_3px_0_0_#111827]";
+
+const COMIC_CARD =
+  "border-2 border-gray-900 bg-white shadow-[5px_5px_0_0_#111827]";
+
+const HALFTONE_BG = {
+  backgroundColor: "#F5F5F4",
+  backgroundImage: "radial-gradient(#d6d3d1 1.2px, transparent 1.2px)",
+  backgroundSize: "16px 16px",
+};
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const [quantity, setQuantity] = useState(1);
@@ -261,37 +273,45 @@ const ProductDetails = () => {
 
   if (loading || !product) {
     return (
-      <div className="w-[90%] mx-auto my-20 animate-pulse">
-        <div className="flex flex-col md:flex-row h-auto md:h-[600px] gap-4 md:gap-8">
-          <div className="flex flex-col flex-1 pb-3">
-            <div className="w-32 h-8 mb-2 bg-gray-200 rounded-full"></div>
-            <div className="h-16 mb-4 bg-gray-200 rounded-lg"></div>
-            <div className="h-20 w-[90%] bg-gray-200 rounded-lg"></div>
+      <div style={HALFTONE_BG} className="min-h-screen">
+        <div className="w-[90%] mx-auto py-20 animate-pulse">
+          <div className="flex flex-col md:flex-row h-auto md:min-h-[600px] gap-4 md:gap-8">
+            <div className="flex flex-col flex-1 pb-3">
+              <div className="w-32 h-8 mb-2 bg-gray-300 border-2 border-gray-900 rounded-full"></div>
+              <div className="h-16 mb-4 bg-gray-300 border-2 border-gray-900 rounded-lg"></div>
+              <div className="h-20 w-[90%] bg-gray-300 border-2 border-gray-900 rounded-lg"></div>
+            </div>
+            <div className="flex-1 h-[300px] bg-gray-300 border-2 border-gray-900 rounded-2xl shadow-[6px_6px_0_0_#111827]"></div>
           </div>
-          <div className="flex-1 h-[300px] bg-gray-200 rounded-lg"></div>
-        </div>
 
-        <div className="mt-8">
-          <div className="w-24 h-6 mb-4 bg-gray-200 rounded"></div>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex gap-1">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="w-8 h-8 bg-gray-200 rounded-full"></div>
+          <div className="mt-8">
+            <div className="w-24 h-6 mb-4 bg-gray-300 rounded"></div>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 bg-gray-300 rounded-full"
+                  ></div>
+                ))}
+              </div>
+              <div className="w-12 h-6 bg-gray-300 rounded"></div>
+            </div>
+            <div className="w-24 h-8 mb-8 bg-gray-300 rounded"></div>
+
+            <div className="flex gap-4 mb-8">
+              <div className="flex-1 h-12 bg-gray-300 border-2 border-gray-900 rounded-full"></div>
+              <div className="flex-1 h-12 bg-gray-300 border-2 border-gray-900 rounded-full"></div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-64 bg-gray-300 border-2 border-gray-900 rounded-2xl"
+                ></div>
               ))}
             </div>
-            <div className="w-12 h-6 bg-gray-200 rounded"></div>
-          </div>
-          <div className="w-24 h-8 mb-8 bg-gray-200 rounded"></div>
-
-          <div className="flex gap-4 mb-8">
-            <div className="flex-1 h-12 bg-gray-200 rounded"></div>
-            <div className="flex-1 h-12 bg-gray-200 rounded"></div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-            ))}
           </div>
         </div>
       </div>
@@ -300,431 +320,404 @@ const ProductDetails = () => {
 
   if (error) {
     return (
-      <div className="w-[90%] mx-auto my-20 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold text-red-600">
-            Error Loading Product
-          </h2>
-          <p className="text-gray-600">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 text-white rounded-lg bg-primary hover:bg-primary-dark"
+      <div style={HALFTONE_BG} className="min-h-screen">
+        <div className="w-[90%] mx-auto py-20 text-center">
+          <div
+            className={`flex flex-col items-center gap-4 p-8 mx-auto max-w-lg rounded-2xl ${COMIC_CARD}`}
           >
-            Try Again
-          </button>
+            <h2 className="font-comic text-4xl tracking-wide text-red-600">
+              Oops! Error Loading Product
+            </h2>
+            <p className="text-gray-700">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className={`font-comic rounded-full bg-[#ff9800] px-6 py-2 text-xl tracking-wide text-white hover:bg-[#e68900] ${COMIC_BTN}`}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-[90%] mx-auto my-20 mt-10">
-      <div className="flex flex-col-reverse justify-between md:flex-row h-auto md:h-[600px]   rounded-2xl gap-4 md:gap-8 ">
-        <div className="flex flex-col flex-1 justify-between">
-          <span className="px-4 py-1 mb-2 text-sm font-bold text-white rounded-full sm:px-6 sm:py-2 sm:text-lg md:text-2xl bg-primary w-fit">
-            For {product?.ageCategory}
-          </span>
-          <h1 className="pb-2 text-2xl font-bold leading-tight sm:text-3xl md:text-5xl lg:text-6xl">
-            {product?.title}
-          </h1>
-          <p className="pb-4 text-xs sm:text-sm md:text-base lg:text-lg w-full md:w-[90%]">
-            {product?.description}
-          </p>
-          <div>
-            <span className="font-semibold text-gray-500">Mentoons</span>
+    <div style={HALFTONE_BG}>
+      <div className="w-[90%] mx-auto py-14 md:py-20">
+        <div className="flex flex-col-reverse justify-between md:flex-row h-auto md:min-h-[600px] rounded-2xl gap-6 md:gap-10">
+          <div className="flex flex-col flex-1 justify-between gap-4">
+            <span
+              className={`font-comic w-fit -rotate-2 rounded-full bg-[#ff9800] px-4 py-1 mb-2 text-lg tracking-wide text-white sm:px-6 sm:py-2 sm:text-2xl ${"border-2 border-gray-900 shadow-[3px_3px_0_0_#111827]"}`}
+            >
+              For {product?.ageCategory}
+            </span>
+            <h1 className="font-comic pb-2 text-4xl leading-tight tracking-wide text-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
+              {product?.title}
+            </h1>
+            <p className="pb-4 text-xs text-gray-800 sm:text-sm md:text-base lg:text-lg w-full md:w-[90%]">
+              {product?.description}
+            </p>
+            <div>
+              <span className="font-comic text-xl tracking-wide text-gray-600">
+                Mentoons
+              </span>
 
-            <Rating ratings={Number(product?.rating)} />
+              <Rating ratings={Number(product?.rating)} />
 
-            <div className="my-2">
-              {product?.price === 0 ? (
-                <span className="p-1 px-2 text-green-600 bg-green-200 rounded-sm shadow-lg">
-                  Free
-                </span>
-              ) : (
-                <div>
-                  {hasDiscount && (
-                    <span className="block text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
-                      Introductory Price
-                    </span>
-                  )}
-                  <div className="flex items-baseline gap-2 flex-wrap">
+              <div className="my-2">
+                {product?.price === 0 ? (
+                  <span className="font-comic inline-block rounded-md border-2 border-gray-900 bg-green-300 px-3 py-1 text-2xl tracking-wide text-gray-900 shadow-[3px_3px_0_0_#111827]">
+                    Free
+                  </span>
+                ) : (
+                  <div>
                     {hasDiscount && (
-                      <span className="text-lg text-gray-400 line-through">
-                        ₹ {product?.mrp}
+                      <span className="font-comic mb-1 inline-block rotate-1 rounded-md border-2 border-gray-900 bg-[#FFD93D] px-2 text-base uppercase tracking-wide text-gray-900">
+                        Introductory Price
                       </span>
                     )}
-                    <span className="text-2xl font-semibold text-neutral-800">
-                      ₹ {product?.price}
-                    </span>
-                    {hasDiscount && (
-                      <span className="text-sm font-bold text-green-600">
-                        {discountPercent}% OFF
+                    <div className="flex flex-wrap items-baseline gap-3">
+                      {hasDiscount && (
+                        <span className="font-comic text-2xl tracking-wide text-gray-400 line-through">
+                          ₹ {product?.mrp}
+                        </span>
+                      )}
+                      <span className="font-comic text-4xl tracking-wide text-gray-900">
+                        ₹ {product?.price}
                       </span>
-                    )}
+                      {hasDiscount && (
+                        <span className="font-comic -rotate-3 rounded-full border-2 border-gray-900 bg-green-400 px-3 py-0.5 text-xl tracking-wide text-gray-900 shadow-[2px_2px_0_0_#111827]">
+                          {discountPercent}% OFF
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              {(product?.title === "Conversation Starter Cards (6-12) years" ||
-                product?.title === "Silent Stories (6-12) years") &&
-                product?.ageCategory === "6-12" && (
-                  <a
-                    href={`${
-                      product?.title ===
-                      "Conversation Starter Cards (6-12) years"
-                        ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
-                        : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
-                    }`}
-                    download
-                    className="inline-block mt-3 px-4 py-3 text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-                  >
-                    Download Free Sample
-                  </a>
                 )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-2 pb-4">
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center space-x-2">
-                <button
-                  disabled={quantity === 1}
-                  onClick={() => handleUpdateQuantity("-")}
-                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50 "
-                >
-                  <Minus
-                    className={`w-4 h-4  font-bold flex ${
-                      quantity === 1 ? "text-gray-400" : ""
-                    } `}
-                  />
-                </button>
-                <span className="w-8 font-bold text-center">{quantity}</span>
-                <button
-                  onClick={() => handleUpdateQuantity("+")}
-                  disabled={product?.price === 0}
-                  className="p-2 transition duration-300 border rounded-full hover:bg-black hover:text-white all disabled:opacity-50"
-                >
-                  <Plus className="w-4 h-4 font-bold" />
-                </button>
+                {(product?.title ===
+                  "Conversation Starter Cards (6-12) years" ||
+                  product?.title === "Silent Stories (6-12) years") &&
+                  product?.ageCategory === "6-12" && (
+                    <a
+                      href={`${
+                        product?.title ===
+                        "Conversation Starter Cards (6-12) years"
+                          ? "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Coversation+starter+cards+6-12+free.pdf"
+                          : "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/Products/freeDownloads/Silent+story+6-12+free.pdf"
+                      }`}
+                      download
+                      className={`font-comic mt-3 inline-block rounded-full bg-green-400 px-5 py-2 text-xl tracking-wide text-gray-900 hover:bg-green-300 ${COMIC_BTN}`}
+                    >
+                      Download Free Sample
+                    </a>
+                  )}
               </div>
             </div>
-          </div>
 
-          {product?.price === 0 ? (
-            <div className="flex flex-col w-full gap-4 mt-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    if (product?.type === ProductType.COMIC) {
-                      window.open(
-                        (product.details as ComicProduct["details"]).sampleUrl,
-                        "_blank",
-                      );
-                    } else if (product?.type === ProductType.AUDIO_COMIC) {
-                      window.open(
-                        (product.details as AudioComicProduct["details"])
-                          .sampleUrl,
-                        "_blank",
-                      );
-                    } else if (product?.type === ProductType.PODCAST) {
-                      window.open(
-                        (product.details as PodcastProduct["details"])
-                          .sampleUrl,
-                        "_blank",
-                      );
-                    }
-                  }}
-                  className="flex-1 px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-                >
-                  Download For Free
-                </button>
-
-                <button
-                  className="px-4 py-3 font-bold tracking-wide text-white transition-all duration-200 bg-green-500 rounded-full hover:opacity-55"
-                  onClick={handleShare}
-                  title="Share this product"
-                >
-                  <FiShare2 className="w-5 h-5" />
-                </button>
+            <div className="flex items-center justify-between gap-2 pb-2">
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center space-x-3">
+                  <button
+                    disabled={quantity === 1}
+                    onClick={() => handleUpdateQuantity("-")}
+                    className={`rounded-full bg-white p-2 text-gray-900 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                  >
+                    <Minus
+                      className={`w-4 h-4 flex ${
+                        quantity === 1 ? "text-gray-400" : ""
+                      } `}
+                    />
+                  </button>
+                  <span className="font-comic w-8 text-center text-3xl text-gray-900">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => handleUpdateQuantity("+")}
+                    disabled={product?.price === 0}
+                    className={`rounded-full bg-white p-2 text-gray-900 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="flex flex-col w-full gap-4 mt-4">
-              <div className="flex gap-2">
+
+            {product?.price === 0 ? (
+              <div className="flex flex-col w-full gap-4 mt-2">
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      if (product?.type === ProductType.COMIC) {
+                        window.open(
+                          (product.details as ComicProduct["details"])
+                            .sampleUrl,
+                          "_blank",
+                        );
+                      } else if (product?.type === ProductType.AUDIO_COMIC) {
+                        window.open(
+                          (product.details as AudioComicProduct["details"])
+                            .sampleUrl,
+                          "_blank",
+                        );
+                      } else if (product?.type === ProductType.PODCAST) {
+                        window.open(
+                          (product.details as PodcastProduct["details"])
+                            .sampleUrl,
+                          "_blank",
+                        );
+                      }
+                    }}
+                    className={`font-comic flex-1 rounded-full bg-green-400 px-4 py-3 text-2xl tracking-wide text-gray-900 hover:bg-green-300 ${COMIC_BTN}`}
+                  >
+                    Download For Free
+                  </button>
+
+                  <button
+                    className={`rounded-full bg-[#FFD93D] px-4 py-3 text-gray-900 hover:bg-yellow-300 ${COMIC_BTN}`}
+                    onClick={handleShare}
+                    title="Share this product"
+                  >
+                    <FiShare2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col w-full gap-4 mt-2">
+                <div className="flex gap-3">
+                  <button
+                    className={`font-comic flex flex-1 items-center justify-center rounded-full bg-white px-4 py-2 text-xl tracking-wide text-gray-900 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                    onClick={(e) => handleAddtoCart(e)}
+                    disabled={isLoading}
+                  >
+                    <IoIosCart className="w-6 h-6 mr-2" />
+                    {isLoading ? "Adding..." : "Add to Cart"}
+                  </button>
+
+                  <button
+                    className={`flex items-center justify-center rounded-full bg-[#FFD93D] px-4 py-2 text-gray-900 hover:bg-yellow-300 ${COMIC_BTN}`}
+                    onClick={handleShare}
+                    title="Share this product"
+                  >
+                    <FiShare2 className="w-5 h-5" />
+                  </button>
+                </div>
+
                 <button
-                  className="flex items-center justify-center flex-1 px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-                  onClick={(e) => handleAddtoCart(e)}
+                  className={`font-comic flex w-full items-center justify-center rounded-full bg-[#ff9800] px-4 py-3 text-2xl tracking-wide text-white hover:bg-[#e68900] ${COMIC_BTN}`}
+                  onClick={() => handleBuyNow(product)}
                   disabled={isLoading}
                 >
-                  <IoIosCart className="w-5 h-5 mr-2" />
-                  {isLoading ? "Adding..." : "Add to Cart"}
-                </button>
-
-                <button
-                  className="flex items-center justify-center px-4 py-2 font-medium transition-colors border rounded text-primary border-primary hover:bg-primary/10"
-                  onClick={handleShare}
-                  title="Share this product"
-                >
-                  <FiShare2 className="w-5 h-5" />
+                  Buy Now
                 </button>
               </div>
+            )}
+          </div>
 
-              <button
-                className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors rounded bg-primary hover:bg-primary-dark"
-                onClick={() => handleBuyNow(product)}
-                disabled={isLoading}
-              >
-                Buy Now
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col flex-1 w-full border-[0.5px] border-primary rounded-lg shadow-lg shadow-orange-600/15">
           <div
-            ref={imageContainerRef}
-            className="relative w-full h-[300px] md:h-[500px] overflow-hidden  rounded-lg cursor-zoom-in"
-            onMouseEnter={() => setIsZoomed(true)}
-            onMouseLeave={() => setIsZoomed(false)}
-            onMouseMove={handleMouseMove}
-            onClick={() => setIsZoomed(!isZoomed)}
+            className={`flex flex-col flex-1 w-full self-start rounded-2xl p-3 shadow-[6px_6px_0_0_#111827] border-2 border-gray-900 bg-white`}
           >
-            {media.length > 1 && (
-              <>
-                <button
-                  className="absolute z-10 p-2 transform -translate-y-1/2 bg-white rounded-full shadow-md opacity-80 hover:opacity-100 left-2 top-1/2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateImage("prev");
-                  }}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  className="absolute z-10 p-2 transform -translate-y-1/2 bg-white rounded-full shadow-md opacity-80 hover:opacity-100 right-2 top-1/2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateImage("next");
-                  }}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </>
-            )}
-
-            {media[selectedImage]?.type !== "video" && (
-              <div className="absolute z-10 p-1 bg-white rounded-full shadow-md opacity-80 top-2 right-2">
-                <ZoomIn className="w-4 h-4" />
-              </div>
-            )}
-
-            {media[selectedImage]?.type === "video" ? (
-              <video
-                src={media[selectedImage].url}
-                controls
-                autoPlay
-                muted
-                playsInline
-                className="object-contain w-full h-full"
-              />
-            ) : (
-              <img
-                src={media[selectedImage]?.url}
-                alt={product?.title || "Product image"}
-                className={`object-contain w-full h-full transition-transform duration-200 ${
-                  isZoomed ? "scale-150" : ""
-                }`}
-                style={
-                  isZoomed
-                    ? {
-                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                      }
-                    : {}
-                }
-              />
-            )}
-          </div>
-
-          {media.length > 0 && (
-            <div className="flex justify-center mt-4 space-x-2 overflow-x-auto">
-              {media.map((item, index) => (
-                <div
-                  key={`thumb-${index}`}
-                  className={`w-16 h-16 border-2 rounded cursor-pointer ${
-                    selectedImage === index
-                      ? "border-primary"
-                      : "border-transparent"
-                  } hover:border-primary transition-all`}
-                  onClick={() => handleThumbnailClick(index)}
-                >
-                  {item.type === "video" ? (
-                    <video
-                      src={item.url}
-                      muted
-                      playsInline
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <img
-                      src={item.url}
-                      alt={`${product?.title} thumbnail ${index + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="border-red-500 ">
-        <div className="w-full h-[.5px] my-12 mb-8 bg-primary" />
-
-        <div className="text-lg font-medium text-neutral-800">
-          <h2 className="pb-4 text-2xl font-semibold">Product Details</h2>
-          {product &&
-            [
-              {
-                label: "Language",
-                value:
-                  "language" in product.details && product.details.language
-                    ? product.details.language === "en"
-                      ? "English"
-                      : product.details.language
-                    : "Not Available",
-              },
-              {
-                label: "Print Length",
-                value:
-                  product.type === ProductType.MENTOONS_CARDS
-                    ? "printLength" in product.details
-                      ? `${product.details.printLength} cards`
-                      : "pages" in product.details
-                        ? `${product.details.pages} cards`
-                        : "Not Available"
-                    : "pages" in product.details && product.details.pages
-                      ? `${product.details.pages} pages`
-                      : "Not Available",
-              },
-              // {
-              //   label: "Launch Date",
-              //   value:
-              //     product.type === ProductType.COMIC ||
-              //     product.type === ProductType.AUDIO_COMIC ||
-              //     product.type === ProductType.PODCAST ||
-              //     product.type === ProductType.MENTOONS_BOOKS
-              //       ? "releaseDate" in product.details &&
-              //         product.details.releaseDate
-              //         ? formatDateString(product.details.releaseDate)
-              //         : "Not Available"
-              //       : product.type === ProductType.WORKSHOP
-              //         ? "schedule" in product.details &&
-              //           product.details.schedule
-              //           ? formatDateString(product.details.schedule)
-              //           : "Not Available"
-              //         : "Not Available",
-              // },
-              {
-                label: "Reading Age",
-                value: product.ageCategory || "Not Specified",
-              },
-            ].map((item, index) => (
-              <div key={index} className="flex py-2">
-                <div className="flex-1 font-semibold">{item.label}:</div>
-                <div className="flex-1">{item.value}</div>
-              </div>
-            ))}
-        </div>
-
-        <div className="w-full p-4 mt-4 ">
-          <div>
-            <h2 className="mb-8 text-4xl font-semibold">
-              You will also like this -
-            </h2>
-            <div className="flex flex-wrap items-center justify-start gap-6 mb-8 rounded-sm">
-              {PRODUCT_TYPE.filter(
-                (type) =>
-                  type.value !== "audio comic" &&
-                  type.value !== "podcast" &&
-                  type.value !== "workshop" &&
-                  type.value !== "assessment" &&
-                  type.value !== "comic",
-              ).map((type) => (
-                <button
-                  key={type.id}
-                  className={`border border-primary text-primary
-                          w-fit leading-none py-3 px-7 rounded  ${
-                            recommendationsFilter === type.value &&
-                            "bg-primary text-white shadow-sm shadow-primary/50"
-                          }`}
-                  onClick={() => setRecommendationFilter(type.value)}
-                >
-                  {type.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            {scrollPosition > 0 && (
-              <button
-                onClick={() => handleScroll("left")}
-                className="absolute left-0 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 hover:bg-gray-100"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-            )}
-
             <div
-              ref={scrollContainerRef}
-              onScroll={checkScrollPosition}
-              className="flex py-16 overflow-x-scroll scrollbar-hide"
+              ref={imageContainerRef}
+              className="relative w-full h-[300px] md:h-[500px] overflow-hidden rounded-xl border-2 border-gray-900 bg-[#FFFBEB] cursor-zoom-in"
+              onMouseEnter={() => setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onMouseMove={handleMouseMove}
+              onClick={() => setIsZoomed(!isZoomed)}
             >
-              {recommendedProducts?.length > 0 ? (
-                recommendedProducts
-                  .filter((item) => item.type === recommendationsFilter)
-                  .map((product) => {
-                    return (
-                      <div
-                        className="min-w-[400px] flex justify-center"
-                        key={product._id}
-                      >
-                        <ProductCard productDetails={product} />
-                      </div>
-                    );
-                  })
-              ) : (
-                <div className="w-full p-8 text-center border border-gray-200 rounded-lg bg-gray-50">
-                  <p className="text-lg font-medium text-gray-600">
-                    No products found in this category
-                  </p>
-                  <p className="mt-2 text-sm text-gray-400">
-                    Try selecting a different category
-                  </p>
+              {media.length > 1 && (
+                <>
+                  <button
+                    className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white p-2 text-gray-900 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateImage("prev");
+                    }}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white p-2 text-gray-900 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateImage("next");
+                    }}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+
+              {media[selectedImage]?.type !== "video" && (
+                <div className="absolute z-10 p-1 bg-[#FFD93D] border-2 border-gray-900 rounded-full top-2 right-2">
+                  <ZoomIn className="w-4 h-4" />
                 </div>
+              )}
+
+              {media[selectedImage]?.type === "video" ? (
+                <video
+                  src={media[selectedImage].url}
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  className="object-contain w-full h-full"
+                />
+              ) : (
+                <img
+                  src={media[selectedImage]?.url}
+                  alt={product?.title || "Product image"}
+                  className={`object-contain w-full h-full transition-transform duration-200 ${
+                    isZoomed ? "scale-150" : ""
+                  }`}
+                  style={
+                    isZoomed
+                      ? {
+                          transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                        }
+                      : {}
+                  }
+                />
               )}
             </div>
 
-            {scrollContainerRef.current &&
-              scrollPosition <
-                scrollContainerRef.current.scrollWidth -
-                  scrollContainerRef.current.clientWidth && (
+            {media.length > 0 && (
+              <div className="flex justify-center py-3 space-x-3 overflow-x-auto">
+                {media.map((item, index) => (
+                  <div
+                    key={`thumb-${index}`}
+                    className={`h-16 w-16 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 border-gray-900 transition-all ${
+                      selectedImage === index
+                        ? "bg-[#FFD93D] shadow-[3px_3px_0_0_#111827] -translate-y-0.5"
+                        : "bg-white hover:bg-[#FFD93D]"
+                    }`}
+                    onClick={() => handleThumbnailClick(index)}
+                  >
+                    {item.type === "video" ? (
+                      <video
+                        src={item.url}
+                        muted
+                        playsInline
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <img
+                        src={item.url}
+                        alt={`${product?.title} thumbnail ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <div className="w-full mt-16 mb-10 border-t-4 border-dashed border-gray-900" />
+
+          <div className="text-lg font-medium text-neutral-800">
+            <h2 className="font-comic pb-4 text-4xl tracking-wide text-gray-900">
+              Product Details
+            </h2>
+            <div className={`rounded-2xl px-5 py-3 ${COMIC_CARD}`}>
+              {product &&
+                [
+                  {
+                    label: "Language",
+                    value:
+                      "language" in product.details && product.details.language
+                        ? product.details.language === "en"
+                          ? "English"
+                          : product.details.language
+                        : "Not Available",
+                  },
+                  {
+                    label: "Print Length",
+                    value:
+                      product.type === ProductType.MENTOONS_CARDS
+                        ? "printLength" in product.details
+                          ? `${product.details.printLength} cards`
+                          : "pages" in product.details
+                            ? `${product.details.pages} cards`
+                            : "Not Available"
+                        : "pages" in product.details && product.details.pages
+                          ? `${product.details.pages} pages`
+                          : "Not Available",
+                  },
+                  // {
+                  //   label: "Launch Date",
+                  //   value:
+                  //     product.type === ProductType.COMIC ||
+                  //     product.type === ProductType.AUDIO_COMIC ||
+                  //     product.type === ProductType.PODCAST ||
+                  //     product.type === ProductType.MENTOONS_BOOKS
+                  //       ? "releaseDate" in product.details &&
+                  //         product.details.releaseDate
+                  //         ? formatDateString(product.details.releaseDate)
+                  //         : "Not Available"
+                  //       : product.type === ProductType.WORKSHOP
+                  //         ? "schedule" in product.details &&
+                  //           product.details.schedule
+                  //           ? formatDateString(product.details.schedule)
+                  //           : "Not Available"
+                  //         : "Not Available",
+                  // },
+                  {
+                    label: "Reading Age",
+                    value: product.ageCategory || "Not Specified",
+                  },
+                ].map((item, index, arr) => (
+                  <div
+                    key={index}
+                    className={`flex items-center py-3 ${
+                      index !== arr.length - 1
+                        ? "border-b-2 border-dashed border-gray-900/30"
+                        : ""
+                    }`}
+                  >
+                    <div className="font-comic flex-1 text-2xl tracking-wide text-gray-900">
+                      {item.label}:
+                    </div>
+                    <div className="flex-1">{item.value}</div>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          <div className="w-full py-4 mt-6">
+            <div>
+              <h2 className="font-comic mb-8 text-4xl tracking-wide text-gray-900 md:text-5xl">
+                You will also like this -
+              </h2>
+              <div className="flex flex-wrap items-center justify-start gap-4 mb-8 rounded-sm">
+                {PRODUCT_TYPE.filter(
+                  (type) =>
+                    type.value !== "audio comic" &&
+                    type.value !== "podcast" &&
+                    type.value !== "workshop" &&
+                    type.value !== "assessment" &&
+                    type.value !== "comic",
+                ).map((type) => (
+                  <button
+                    key={type.id}
+                    className={`font-comic w-fit rounded-full px-6 py-2 text-xl leading-none tracking-wide ${COMIC_BTN} ${
+                      recommendationsFilter === type.value
+                        ? "bg-[#ff9800] text-white"
+                        : "bg-white text-gray-900 hover:bg-[#FFD93D]"
+                    }`}
+                    onClick={() => setRecommendationFilter(type.value)}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              {scrollPosition > 0 && (
                 <button
-                  onClick={() => handleScroll("right")}
-                  className="absolute right-0 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 hover:bg-gray-100"
+                  onClick={() => handleScroll("left")}
+                  className={`absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white p-2 hover:bg-[#FFD93D] ${COMIC_BTN}`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -736,164 +729,239 @@ const ProductDetails = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+                      strokeWidth={3}
+                      d="M15 19l-7-7 7-7"
                     />
                   </svg>
                 </button>
               )}
-          </div>
-        </div>
 
-        <div className="pt-10 ">
-          <h2 className="pb-6 text-2xl font-semibold md:text-4xl ">
-            Frequently asked questions
-          </h2>
-          <div className="md:flex md:gap-8 ">
-            <div className="flex flex-col flex-1 gap-4 mb-8 ">
-              {FAQ_PRODUCT_DETAILS.map((faq, index) => (
-                <FAQCard
-                  key={faq.id}
-                  faq={faq}
-                  isExpanded={expandedIndex === index}
-                  onClick={() =>
-                    setExpandedIndex(index === expandedIndex ? -1 : index)
-                  }
-                />
-              ))}
-            </div>
-
-            <div className="flex flex-col flex-1 gap-4 p-4 text-center border-2 md:mb-8 rounded-xl">
-              <div className="w-[80%] mx-auto ">
-                <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
-                  <BiSolidMessage className="text-5xl " />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold md:text-3xl md:pb-4">
-                    Have Doubts? We are here to help you!
-                  </h3>
-                  <p className="pt-2 pb-4 text-gray-600 md:text-xl md:pb-6">
-                    Contact us for additional help regarding your assessment or
-                    purchase made on this platform, We will help you!{" "}
-                  </p>
-                </div>
-                <div className="">
-                  <form
-                    className="flex flex-col w-full gap-10"
-                    onSubmit={(e) => handleSubmit(e)}
+              <div
+                ref={scrollContainerRef}
+                onScroll={checkScrollPosition}
+                className="flex py-16 overflow-x-scroll scrollbar-hide"
+              >
+                {recommendedProducts?.length > 0 ? (
+                  recommendedProducts
+                    .filter((item) => item.type === recommendationsFilter)
+                    .map((product) => {
+                      return (
+                        <div
+                          className="min-w-[400px] flex justify-center"
+                          key={product._id}
+                        >
+                          <ProductCard productDetails={product} />
+                        </div>
+                      );
+                    })
+                ) : (
+                  <div
+                    className={`w-full rounded-2xl p-8 text-center ${COMIC_CARD}`}
                   >
-                    <textarea
-                      name="doubt"
-                      id="doubt"
-                      placeholder="Enter your doubt here"
-                      className="box-border w-full p-3 rounded-lg shadow-xl border-2 border-[#60C6E6]"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                    ></textarea>
+                    <p className="font-comic text-3xl tracking-wide text-gray-900">
+                      No products found in this category
+                    </p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Try selecting a different category
+                    </p>
+                  </div>
+                )}
+              </div>
 
-                    <button
-                      className="w-full py-3 mt-4 text-xl font-semibold text-white transition-all duration-200 rounded-lg shadow-lg text- text-ellipsist-white bg-primary "
-                      type="submit"
+              {scrollContainerRef.current &&
+                scrollPosition <
+                  scrollContainerRef.current.scrollWidth -
+                    scrollContainerRef.current.clientWidth && (
+                  <button
+                    onClick={() => handleScroll("right")}
+                    className={`absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white p-2 hover:bg-[#FFD93D] ${COMIC_BTN}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      Submit
-                    </button>
-                  </form>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                )}
+            </div>
+          </div>
+
+          <div className="pt-10">
+            <h2 className="font-comic pb-6 text-4xl tracking-wide text-gray-900 md:text-5xl">
+              Frequently asked questions
+            </h2>
+            <div className="md:flex md:gap-8">
+              <div className="flex flex-col flex-1 gap-4 mb-8">
+                {FAQ_PRODUCT_DETAILS.map((faq, index) => (
+                  <FAQCard
+                    key={faq.id}
+                    faq={faq}
+                    isExpanded={expandedIndex === index}
+                    onClick={() =>
+                      setExpandedIndex(index === expandedIndex ? -1 : index)
+                    }
+                  />
+                ))}
+              </div>
+
+              <div
+                className={`flex flex-col flex-1 gap-4 rounded-2xl p-4 text-center md:mb-8 shadow-[6px_6px_0_0_#111827] border-2 border-gray-900 bg-[#FFD93D]`}
+              >
+                <div className="w-[85%] mx-auto">
+                  <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
+                    <BiSolidMessage className="text-6xl text-gray-900" />
+                  </div>
+                  <div>
+                    <h3 className="font-comic text-3xl tracking-wide text-gray-900 md:text-5xl md:pb-4">
+                      Have Doubts? We are here to help you!
+                    </h3>
+                    <p className="pt-2 pb-4 text-gray-800 md:text-xl md:pb-6">
+                      Contact us for additional help regarding your assessment
+                      or purchase made on this platform, We will help you!{" "}
+                    </p>
+                  </div>
+                  <div>
+                    <form
+                      className="flex flex-col w-full gap-6"
+                      onSubmit={(e) => handleSubmit(e)}
+                    >
+                      <textarea
+                        name="doubt"
+                        id="doubt"
+                        placeholder="Enter your doubt here"
+                        className="box-border w-full rounded-xl border-2 border-gray-900 bg-white p-3 shadow-[4px_4px_0_0_#111827] outline-none focus:bg-[#FFFBEB]"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                      ></textarea>
+
+                      <button
+                        className={`font-comic w-full rounded-full bg-[#ff9800] py-3 text-2xl tracking-wide text-white hover:bg-[#e68900] ${COMIC_BTN}`}
+                        type="submit"
+                      >
+                        Submit
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      {showAddToCartModal && (
-        <AddToCartModal
-          onClose={() => setShowAddToCartModal(false)}
-          isOpen={showAddToCartModal}
-          productName={product.title}
-        />
-      )}
-      {showEnquiryModal && (
-        <EnquiryModal
-          isOpen={showEnquiryModal}
-          onClose={() => setShowEnquiryModal(false)}
-          message={ModalMessage.ENQUIRY_MESSAGE}
-        />
-      )}
+        {showAddToCartModal && (
+          <AddToCartModal
+            onClose={() => setShowAddToCartModal(false)}
+            isOpen={showAddToCartModal}
+            productName={product.title}
+          />
+        )}
+        {showEnquiryModal && (
+          <EnquiryModal
+            isOpen={showEnquiryModal}
+            onClose={() => setShowEnquiryModal(false)}
+            message={ModalMessage.ENQUIRY_MESSAGE}
+          />
+        )}
 
-      {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Share this product</h3>
-              <button
-                onClick={handleShare}
-                className="text-xl text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6">
-              <FacebookShareButton
-                url={window.location.href}
-                hashtag="#Mentoons"
-                onShareWindowClose={() => handleShareCompleted("Facebook")}
-              >
-                <FacebookIcon size={50} round />
-                <p className="mt-1 text-xs text-center">Facebook</p>
-              </FacebookShareButton>
-
-              <TwitterShareButton
-                url={window.location.href}
-                title={`Check out ${product.title} on Mentoons!`}
-                onShareWindowClose={() => handleShareCompleted("Twitter")}
-              >
-                <TwitterIcon size={50} round />
-                <p className="mt-1 text-xs text-center">Twitter</p>
-              </TwitterShareButton>
-
-              <WhatsappShareButton
-                url={window.location.href}
-                title={`Check out ${product.title} on Mentoons!`}
-                onShareWindowClose={() => handleShareCompleted("WhatsApp")}
-              >
-                <WhatsappIcon size={50} round />
-                <p className="mt-1 text-xs text-center">WhatsApp</p>
-              </WhatsappShareButton>
-
-              <EmailShareButton
-                url={window.location.href}
-                subject={`Check out ${product.title} on Mentoons!`}
-                body={`I thought you might be interested in this product: ${product.title}\n\n${product.description}\n\nCheck it out here: ${window.location.href}`}
-                onShareWindowClose={() => handleShareCompleted("Email")}
-              >
-                <EmailIcon size={50} round />
-                <p className="mt-1 text-xs text-center">Email</p>
-              </EmailShareButton>
-            </div>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-500">Or copy link</p>
-              <div className="flex mt-2">
-                <input
-                  type="text"
-                  value={window.location.href}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary"
-                  readOnly
-                />
+        {showShareModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div
+              className={`mx-4 w-full max-w-md rounded-2xl p-6 shadow-[8px_8px_0_0_#111827] border-2 border-gray-900 bg-white`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-comic text-3xl tracking-wide text-gray-900">
+                  Share this product
+                </h3>
                 <button
-                  className="px-4 py-2 text-white rounded-r-md bg-primary hover:bg-primary-dark"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success("Link copied to clipboard!");
-                    handleShareCompleted("Direct Link");
-                  }}
+                  onClick={handleShare}
+                  className={`font-comic flex h-9 w-9 items-center justify-center rounded-full bg-[#FFD93D] text-2xl leading-none text-gray-900 hover:bg-yellow-300 ${COMIC_BTN}`}
+                  aria-label="Close share dialog"
                 >
-                  Copy
+                  ×
                 </button>
               </div>
+              <div className="flex flex-wrap justify-center gap-6">
+                <FacebookShareButton
+                  url={window.location.href}
+                  hashtag="#Mentoons"
+                  onShareWindowClose={() => handleShareCompleted("Facebook")}
+                >
+                  <FacebookIcon size={50} round />
+                  <p className="font-comic mt-1 text-center text-base tracking-wide">
+                    Facebook
+                  </p>
+                </FacebookShareButton>
+
+                <TwitterShareButton
+                  url={window.location.href}
+                  title={`Check out ${product.title} on Mentoons!`}
+                  onShareWindowClose={() => handleShareCompleted("Twitter")}
+                >
+                  <TwitterIcon size={50} round />
+                  <p className="font-comic mt-1 text-center text-base tracking-wide">
+                    Twitter
+                  </p>
+                </TwitterShareButton>
+
+                <WhatsappShareButton
+                  url={window.location.href}
+                  title={`Check out ${product.title} on Mentoons!`}
+                  onShareWindowClose={() => handleShareCompleted("WhatsApp")}
+                >
+                  <WhatsappIcon size={50} round />
+                  <p className="font-comic mt-1 text-center text-base tracking-wide">
+                    WhatsApp
+                  </p>
+                </WhatsappShareButton>
+
+                <EmailShareButton
+                  url={window.location.href}
+                  subject={`Check out ${product.title} on Mentoons!`}
+                  body={`I thought you might be interested in this product: ${product.title}\n\n${product.description}\n\nCheck it out here: ${window.location.href}`}
+                  onShareWindowClose={() => handleShareCompleted("Email")}
+                >
+                  <EmailIcon size={50} round />
+                  <p className="font-comic mt-1 text-center text-base tracking-wide">
+                    Email
+                  </p>
+                </EmailShareButton>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="font-comic text-xl tracking-wide text-gray-700">
+                  Or copy link
+                </p>
+                <div className="flex mt-2">
+                  <input
+                    type="text"
+                    value={window.location.href}
+                    className="flex-1 min-w-0 rounded-l-xl border-2 border-r-0 border-gray-900 px-3 py-2 focus:outline-none focus:bg-[#FFFBEB]"
+                    readOnly
+                  />
+                  <button
+                    className={`font-comic rounded-r-xl bg-[#ff9800] px-4 py-2 text-xl tracking-wide text-white hover:bg-[#e68900] ${COMIC_BTN}`}
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link copied to clipboard!");
+                      handleShareCompleted("Direct Link");
+                    }}
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -915,6 +983,8 @@ const Rating = ({ ratings }: { ratings: number }) => {
               <svg
                 className="w-8 h-8 text-gray-300"
                 fill="currentColor"
+                stroke="#111827"
+                strokeWidth="0.8"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -926,8 +996,10 @@ const Rating = ({ ratings }: { ratings: number }) => {
                 style={{ width: filled ? "100%" : `${percentage}%` }}
               >
                 <svg
-                  className="w-8 h-8 text-yellow-400"
+                  className="w-8 h-8 text-[#FFD93D]"
                   fill="currentColor"
+                  stroke="#111827"
+                  strokeWidth="0.8"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -938,7 +1010,9 @@ const Rating = ({ ratings }: { ratings: number }) => {
           );
         })}
       </div>
-      <span className="font-semibold text-gray-500 ">{ratings}</span>
+      <span className="font-comic text-2xl tracking-wide text-gray-700">
+        {ratings}
+      </span>
     </div>
   );
 };

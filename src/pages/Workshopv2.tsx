@@ -20,6 +20,27 @@ import AboutWorkshop from "@/components/Workshop/about";
 import ErrorModal from "@/components/adda/modal/error";
 import WorkshopPlans from "@/components/Workshop/plans/workshopPlan";
 
+
+const ACCENT = "#FFAA15";
+
+const inputClass =
+  "box-border w-full p-3 rounded-lg bg-white border-2 border-[#1a1a1a] " +
+  "shadow-[3px_3px_0_0_#1a1a1a] transition-all duration-150 " +
+  "placeholder:text-gray-400 focus:outline-none focus:translate-x-[2px] " +
+  "focus:translate-y-[2px] focus:shadow-[1px_1px_0_0_#1a1a1a] " +
+  "focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2";
+
+const labelClass = "text-lg font-semibold text-[#1a1a1a]";
+
+const panelClass =
+  "bg-[#FFF8E7] border-2 border-[#1a1a1a] rounded-xl shadow-[6px_6px_0_0_#1a1a1a]";
+
+const halftone = {
+  backgroundImage:
+    "radial-gradient(rgba(26,26,26,0.14) 1.5px, transparent 1.5px)",
+  backgroundSize: "14px 14px",
+};
+
 const Workshopv2 = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>(0);
@@ -244,23 +265,6 @@ const Workshopv2 = () => {
     }));
   };
 
-  // const handleWorkshopButtonClick = (
-  //   categoryIndex: number,
-  //   // workshopIndex: number
-  //   workshopName: string,
-  // ) => {
-  //   // const workshopName =
-  //   //   categories[categoryIndex]?.workshops[workshopIndex]?.workshopName || "";
-  //   setSelectedCategory(workshopName);
-  //   setSelectedCategoryIndex(categoryIndex);
-  //   // setSelectedWorkshopIndex(workshopIndex);
-  //   setCurrentSlide(categoryIndex);
-  //   setDirection(categoryIndex > currentSlide ? 1 : -1);
-  //   if (carouselRef.current) {
-  //     carouselRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // };
-
   const handleRegisterationForm = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = await getToken();
@@ -385,17 +389,20 @@ const Workshopv2 = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
+      <div
+        className="min-h-screen bg-[#FFF8E7] flex items-center justify-center"
+        style={halftone}
+      >
+        <div className={`${panelClass} text-center px-10 py-8`}>
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"
+            className="w-16 h-16 border-4 border-[#1a1a1a]/20 border-t-[#FFAA15] rounded-full mx-auto mb-4"
           />
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-3xl luckiest-guy-regular tracking-wider text-[#1a1a1a]">
             Loading Workshops...
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-700 mt-2">
             Preparing amazing content for you
           </p>
         </div>
@@ -408,12 +415,15 @@ const Workshopv2 = () => {
     categories.every((category) => category.workshops.length === 0)
   ) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800">
+      <div
+        className="min-h-screen bg-[#FFF8E7] flex items-center justify-center p-4"
+        style={halftone}
+      >
+        <div className={`${panelClass} text-center px-10 py-8`}>
+          <h2 className="text-3xl luckiest-guy-regular tracking-wider text-[#1a1a1a]">
             No Workshops Available
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-700 mt-2">
             Please check back later for available workshops.
           </p>
         </div>
@@ -427,10 +437,7 @@ const Workshopv2 = () => {
   return (
     <>
       {/* Banner */}
-      <WorkshopBanner
-      // categories={categories}
-      // onWorkshopClick={handleWorkshopButtonClick}
-      />
+      <WorkshopBanner />
       <div className="">
         <AboutWorkshop categories={categories} />
 
@@ -447,15 +454,18 @@ const Workshopv2 = () => {
           />
         </div>
         <WorkshopPlans />
+
+        {/* Registration */}
         <motion.div
           ref={registerRef}
           initial="hidden"
           animate={registerInView ? "visible" : "hidden"}
           variants={fadeIn}
-          className="p-4 md:py-12 bg-orange-400 flex flex-col md:flex-row justify-center"
+          className="p-4 md:py-12 bg-orange-400 flex flex-col md:flex-row justify-center border-y-4 border-[#1a1a1a]"
+          style={halftone}
         >
           <motion.div className="flex flex-col flex-1 h-full">
-            <h2 className="pt-4 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_white] w-[90%] mx-auto tracking-widest">
+            <h2 className="pt-4 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_2px_white] [text-shadow:4px_4px_0_#1a1a1a] w-[90%] mx-auto tracking-widest">
               REGISTER FOR OUR WORKSHOPS HERE
             </h2>
 
@@ -478,77 +488,66 @@ const Workshopv2 = () => {
           <motion.div variants={fadeInUp} className="flex-1 h-full ">
             <motion.div
               variants={scaleIn}
-              className="items-start justify-start flex-1 h-full px-2 md:px-6 lg:px-36"
+              className="items-start justify-start flex-1 h-full px-2 md:px-6 lg:px-16 xl:px-24"
             >
               <form
-                className="flex flex-col visible w-full h-full gap-4"
+                className={`${panelClass} flex flex-col visible w-full h-full gap-4 p-5 md:p-7`}
                 onSubmit={handleRegisterationForm}
               >
                 <div className="box-border space-y-4 lg:space-y-0 lg:flex gap-4">
                   <div className="flex-1">
-                    <label
-                      htmlFor="firstname"
-                      className="text-lg font-semibold"
-                    >
+                    <label htmlFor="firstname" className={labelClass}>
                       First Name
                     </label>
                     <input
                       type="text"
+                      id="firstname"
                       placeholder="first name"
-                      className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
+                      className={`${inputClass} mt-1`}
                       onChange={handleFormChange}
                       name="firstname"
                       value={formData.firstname}
-                      style={{
-                        border: `2px solid #FFAA15`,
-                      }}
                     />
                   </div>
                   <div className="flex-1">
-                    <label htmlFor="lastname" className="text-lg font-semibold">
+                    <label htmlFor="lastname" className={labelClass}>
                       Last Name
                     </label>
                     <input
                       type="text"
+                      id="lastname"
                       placeholder="last name"
-                      className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
+                      className={`${inputClass} mt-1`}
                       onChange={handleFormChange}
                       name="lastname"
                       value={formData.lastname}
-                      style={{
-                        border: `2px solid #FFAA15`,
-                      }}
                     />
                   </div>
                 </div>
                 <div className="box-border space-y-4 lg:space-y-0 lg:flex gap-4">
                   <div className="flex-1">
-                    <label htmlFor="email" className="text-lg font-semibold">
+                    <label htmlFor="email" className={labelClass}>
                       Email
                     </label>
                     <input
                       type="email"
+                      id="email"
                       placeholder="email"
-                      className="box-border w-full p-3 rounded-lg shadow-xl"
-                      style={{
-                        border: `2px solid #FFAA15`,
-                      }}
+                      className={`${inputClass} mt-1`}
                       onChange={handleFormChange}
                       name="email"
                       value={formData.email}
                     />
                   </div>
                   <div className="flex-1">
-                    <label htmlFor="phone" className="text-lg font-semibold">
+                    <label htmlFor="phone" className={labelClass}>
                       Phone
                     </label>
                     <input
                       type="text"
+                      id="phone"
                       placeholder="phone"
-                      className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
-                      style={{
-                        border: `2px solid #FFAA15`,
-                      }}
+                      className={`${inputClass} mt-1`}
                       onChange={handleFormChange}
                       name="phone"
                       value={formData.phone}
@@ -556,10 +555,7 @@ const Workshopv2 = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label
-                    htmlFor="ageCategory"
-                    className="text-lg font-semibold"
-                  >
+                  <label htmlFor="ageCategory" className={labelClass}>
                     Select Age Category
                   </label>
                   <select
@@ -567,10 +563,7 @@ const Workshopv2 = () => {
                     id="ageCategory"
                     value={formData.ageCategory}
                     onChange={handleFormChange}
-                    className="box-border w-full p-3 border-2 rounded-lg shadow-xl mt-2"
-                    style={{
-                      border: `2px solid #FFAA15`,
-                    }}
+                    className={`${inputClass} mt-1 disabled:opacity-60`}
                     disabled={!selectedWorkshop?.ageGroups.length}
                   >
                     {selectedWorkshop?.ageGroups.length ? (
@@ -585,60 +578,65 @@ const Workshopv2 = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="message" className="text-lg font-semibold">
+                  <label htmlFor="message" className={labelClass}>
                     Message
                   </label>
                   <textarea
                     name="message"
                     id="message"
+                    rows={4}
                     placeholder="message"
-                    className="box-border w-full p-3 border-2 rounded-lg shadow-xl"
-                    style={{
-                      border: `2px solid #FFAA15`,
-                    }}
+                    className={`${inputClass} mt-1`}
                     onChange={handleFormChange}
                     value={formData.message}
                   ></textarea>
                 </div>
-                <div className="flex-1">
-                  <label className="text-lg font-semibold">
-                    Select Workshop
-                  </label>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
+                <fieldset className="flex-1">
+                  <legend className={labelClass}>Select Workshop</legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                     {categories.map((category, catIndex) =>
-                      category.workshops.map((workshop, workshopIndex) => (
-                        <label
-                          key={`${catIndex}-${workshopIndex}`}
-                          className="flex items-center gap-2"
-                        >
-                          <input
-                            type="radio"
-                            name="category"
-                            value={workshop.workshopName}
-                            checked={selectedCategory === workshop.workshopName}
-                            onChange={() =>
-                              handleSelectedCategory(
-                                workshop.workshopName,
-                                catIndex,
-                                workshopIndex,
-                              )
-                            }
-                            className="w-4 h-4"
-                          />
-                          <span>{workshop.workshopName}</span>
-                        </label>
-                      )),
+                      category.workshops.map((workshop, workshopIndex) => {
+                        const isSelected =
+                          selectedCategory === workshop.workshopName;
+                        return (
+                          <label
+                            key={`${catIndex}-${workshopIndex}`}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-[#1a1a1a] cursor-pointer transition-all duration-150 ${
+                              isSelected
+                                ? "bg-[#FFAA15] shadow-[1px_1px_0_0_#1a1a1a] translate-x-[2px] translate-y-[2px]"
+                                : "bg-white shadow-[3px_3px_0_0_#1a1a1a] hover:bg-[#FFF1CC]"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="category"
+                              value={workshop.workshopName}
+                              checked={isSelected}
+                              onChange={() =>
+                                handleSelectedCategory(
+                                  workshop.workshopName,
+                                  catIndex,
+                                  workshopIndex,
+                                )
+                              }
+                              className="w-4 h-4 accent-[#1a1a1a]"
+                            />
+                            <span className="font-medium text-[#1a1a1a]">
+                              {workshop.workshopName}
+                            </span>
+                          </label>
+                        );
+                      }),
                     )}
                   </div>
-                </div>
+                </fieldset>
 
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="py-3 text-xl font-semibold text-white rounded-lg shadow-lg border"
-                  style={{
-                    backgroundColor: "#FFAA15",
-                  }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ x: 3, y: 3 }}
+                  type="submit"
+                  className="py-3 text-2xl tracking-widest text-[#1a1a1a] rounded-lg border-2 border-[#1a1a1a] shadow-[4px_4px_0_0_#1a1a1a] active:shadow-none luckiest-guy-regular"
+                  style={{ backgroundColor: ACCENT }}
                 >
                   Submit
                 </motion.button>
@@ -653,16 +651,17 @@ const Workshopv2 = () => {
         {/* Activities */}
         <WorkshopActivities />
 
+        {/* FAQ */}
         <motion.div
           ref={faqRef}
           initial="hidden"
           animate={faqInView ? "visible" : "hidden"}
           variants={fadeIn}
-          className="p-4 md:p-8 md:px-10 lg:px-28 bg-gradient-to-b from-[#FEB977] to-[#FF942E]"
+          className="p-4 md:p-8 md:px-10 lg:px-28 bg-gradient-to-b from-[#FEB977] to-[#FF942E] border-t-4 border-[#1a1a1a]"
         >
           <motion.h2
             variants={fadeInUp}
-            className="pb-6 text-2xl font-semibold"
+            className="pb-6 text-3xl md:text-5xl luckiest-guy-regular tracking-wider text-black [-webkit-text-stroke:_1.5px_white] [text-shadow:3px_3px_0_#1a1a1a]"
           >
             Frequently asked questions
           </motion.h2>
@@ -682,7 +681,7 @@ const Workshopv2 = () => {
                   <FAQCard
                     faq={faq}
                     isExpanded={expandedIndex === index}
-                    color="#FFAA15"
+                    color={ACCENT}
                     onClick={() =>
                       setExpandedIndex(index === expandedIndex ? -1 : index)
                     }
@@ -693,28 +692,24 @@ const Workshopv2 = () => {
 
             <motion.div
               variants={scaleIn}
-              className="flex flex-col flex-1 gap-4 p-4 text-center border-2 border-white/80 bg-white/80 md:mb-8 rounded-xl"
+              className={`${panelClass} flex flex-col flex-1 gap-4 p-4 md:p-6 text-center md:mb-8 self-start`}
             >
-              <div className="md:px-4 lg:px-8 mx-auto">
-                <div className="flex items-center justify-center gap-4 py-2 md:pb-6">
+              <div className="md:px-4 lg:px-8 mx-auto w-full">
+                <div className="flex items-center justify-center py-2 md:pb-6">
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 10 }}
+                    whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.3 }}
+                    className="flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#1a1a1a] shadow-[3px_3px_0_0_#1a1a1a]"
+                    style={{ backgroundColor: ACCENT }}
                   >
-                    <BiSolidMessage
-                      className="text-5xl"
-                      style={{ color: "#FFAA15" }}
-                    />
+                    <BiSolidMessage className="text-4xl text-[#1a1a1a]" />
                   </motion.div>
                 </div>
                 <div>
-                  <h3
-                    className="text-xl font-bold md:text-3xl md:pb-4"
-                    style={{ color: "#FFAA15" }}
-                  >
+                  <h3 className="text-2xl md:text-4xl luckiest-guy-regular tracking-wider text-[#1a1a1a] md:pb-4">
                     Have Doubts? We are here to help you!
                   </h3>
-                  <p className="pt-2 pb-2 text-gray-600 md:text-xl md:pb-6">
+                  <p className="pt-2 pb-2 text-gray-700 md:text-xl md:pb-6">
                     Contact us for additional help regarding your workshop or
                     purchase made on this platform, We will help you!
                   </p>
@@ -724,31 +719,25 @@ const Workshopv2 = () => {
                     className="flex flex-col w-full gap-4"
                     onSubmit={(e) => handleDoubtSubmission(e)}
                   >
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <input
                         type="text"
                         name="name"
                         id="name"
                         placeholder="Your Name"
-                        value={user?.name || enquiryName}
+                        value={enquiryName}
                         onChange={(e) => setEnquiryName(e.target.value)}
-                        className="w-full p-3 rounded-lg shadow-xl"
-                        style={{
-                          border: `2px solid #FFAA15`,
-                        }}
+                        className={inputClass}
                         required
                       />
                       <input
                         type="email"
                         name="email"
-                        id="email"
-                        value={user?.email || enquiryEmail}
+                        id="enquiry-email"
+                        value={enquiryEmail}
                         onChange={(e) => setEnquiryEmail(e.target.value)}
                         placeholder="Your Email"
-                        className="w-full p-3 rounded-lg shadow-xl"
-                        style={{
-                          border: `2px solid #FFAA15`,
-                        }}
+                        className={inputClass}
                         required
                       />
                     </div>
@@ -756,21 +745,17 @@ const Workshopv2 = () => {
                       required
                       name="doubt"
                       id="doubt"
+                      rows={4}
                       value={enquiryMessage}
                       onChange={(e) => setEnquiryMessage(e.target.value)}
                       placeholder="Enter your doubt here"
-                      className="box-border w-full p-3 rounded-lg shadow-xl"
-                      style={{
-                        border: `2px solid #FFAA15`,
-                      }}
+                      className={inputClass}
                     ></textarea>
                     <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="w-full py-3 mt-4 text-xl font-semibold text-white transition-all duration-200 rounded-lg shadow-lg text-ellipsist-white"
-                      style={{
-                        backgroundColor: "#FFAA15",
-                      }}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ x: 3, y: 3 }}
+                      className="w-full py-3 mt-2 text-2xl tracking-widest text-[#1a1a1a] rounded-lg border-2 border-[#1a1a1a] shadow-[4px_4px_0_0_#1a1a1a] active:shadow-none luckiest-guy-regular"
+                      style={{ backgroundColor: ACCENT }}
                       type="submit"
                     >
                       Submit

@@ -146,12 +146,12 @@ const ShopByCategory = ({ selectedId, onSelect }: ShopByCategoryProps) => {
     <section aria-labelledby="shop-by-category" className="pt-6">
       <h2
         id="shop-by-category"
-        className="mb-4 text-xl font-bold text-gray-900 sm:text-2xl"
+        className="font-comic mb-5 text-3xl tracking-wide text-gray-900 sm:text-4xl"
       >
         Shop by Category
       </h2>
 
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-7">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-7">
         {CATEGORY_FILTERS.map((category) => {
           const isSelected = category.id === selectedId;
           const Icon = category.icon;
@@ -162,24 +162,30 @@ const ShopByCategory = ({ selectedId, onSelect }: ShopByCategoryProps) => {
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onSelect(category)}
-                className={`flex h-full w-full flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition ${
+                className={`flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-gray-900 px-2 py-3 text-center transition ${
                   isSelected
-                    ? "border-[#ff9800] bg-[#fff3e0] shadow-sm"
-                    : "border-gray-200 bg-gray-100 hover:border-[#ff9800]/60 hover:bg-white"
+                    ? "translate-x-[3px] translate-y-[3px] bg-[#FFD93D] shadow-none"
+                    : "bg-white shadow-[4px_4px_0_0_#111827] hover:-translate-y-0.5 hover:bg-[#fff3e0] hover:shadow-[6px_6px_0_0_#111827]"
                 }`}
               >
-                <Icon
-                  className={`h-6 w-6 sm:h-7 sm:w-7 ${
-                    isSelected ? "text-[#ff9800]" : "text-gray-600"
+                <span
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-gray-900 ${
+                    isSelected ? "bg-white" : "bg-[#ff9800]"
                   }`}
-                  strokeWidth={1.8}
-                  aria-hidden="true"
-                />
-                <span className="text-xs font-semibold leading-tight text-gray-900">
+                >
+                  <Icon
+                    className={`h-6 w-6 ${
+                      isSelected ? "text-gray-900" : "text-white"
+                    }`}
+                    strokeWidth={2.2}
+                    aria-hidden="true"
+                  />
+                </span>
+                <span className="font-comic text-lg leading-none tracking-wide text-gray-900">
                   {category.label}
                 </span>
                 {category.tagline && (
-                  <span className="text-[10px] leading-tight text-gray-500">
+                  <span className="text-[11px] font-medium leading-tight text-gray-700">
                     {category.tagline}
                   </span>
                 )}

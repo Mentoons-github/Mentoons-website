@@ -346,58 +346,73 @@ const BookingSection = ({ selectedPsychologist }: BookingSectionProps) => {
 
   return (
     <section ref={topRef} className="w-full">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <DateTimeSection
-            selectedDate={selectedDate}
-            onSelectDate={handleSelectDate}
-            selectedSlot={selectedSlot}
-            onSelectSlot={handleSelectSlot}
-            duration={duration}
-            onSelectDuration={setDuration}
-            bookedCalls={bookedCalls}
-            dateError={
-              attempted && !selectedDate ? "Please select a date" : undefined
-            }
-            slotError={
-              attempted && !selectedSlot ? "Please pick a slot" : undefined
-            }
-            slots={slots}
-            slotsLoading={slotsLoading}
-          />
-          <DetailsSection
-            formik={formik}
-            child={child}
-            childErrors={childErrors}
-            onChildChange={handleChildChange}
-          />
+      <h2 className="font-comic mb-6 inline-block rotate-1 rounded-2xl border-2 border-gray-900 bg-[#FFD93D] px-5 py-1 text-3xl tracking-wide text-gray-900 shadow-[5px_5px_0_0_#111827] sm:text-4xl">
+        Book Your Session!
+      </h2>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Left column: each child is framed like a comic panel */}
+        <div className="space-y-8 lg:col-span-2">
+          <div className="overflow-hidden bg-white p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] [&_input]:border-2 [&_input]:border-gray-900 [&_select]:border-2 [&_select]:border-gray-900 [&_textarea]:border-2 [&_textarea]:border-gray-900">
+            <DateTimeSection
+              selectedDate={selectedDate}
+              onSelectDate={handleSelectDate}
+              selectedSlot={selectedSlot}
+              onSelectSlot={handleSelectSlot}
+              duration={duration}
+              onSelectDuration={setDuration}
+              bookedCalls={bookedCalls}
+              dateError={
+                attempted && !selectedDate ? "Please select a date" : undefined
+              }
+              slotError={
+                attempted && !selectedSlot ? "Please pick a slot" : undefined
+              }
+              slots={slots}
+              slotsLoading={slotsLoading}
+            />
+          </div>
+
+          <div className="overflow-hidden bg-[#E0F7FD] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] [&_input]:border-2 [&_input]:border-gray-900 [&_select]:border-2 [&_select]:border-gray-900 [&_textarea]:border-2 [&_textarea]:border-gray-900">
+            <DetailsSection
+              formik={formik}
+              child={child}
+              childErrors={childErrors}
+              onChildChange={handleChildChange}
+            />
+          </div>
         </div>
 
-        <div className="space-y-6 lg:col-span-1">
+        {/* Right column */}
+        <div className="space-y-8 lg:col-span-1">
           {psychologistHiring.length > 0 && (
-            <WeAreHiring hiring={psychologistHiring} />
+            <div className="-rotate-1 overflow-hidden bg-[#7AE582] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]">
+              <WeAreHiring hiring={psychologistHiring} />
+            </div>
           )}
 
-          <SessionSummary
-            selectedDate={selectedDate}
-            selectedSlot={selectedSlot}
-            option={activeOption}
-            submitting={submitting}
-            onBook={onBook}
-            psychologist={selectedPsychologist}
-          >
-            {selectedDateBookings.length > 0 && (
-              <SelectedDateBookings
-                date={selectedDate}
-                bookings={selectedDateBookings}
-                scrollToBookingForm={scrollToBookingForm}
-              />
-            )}
-          </SessionSummary>
+          <div className="overflow-hidden bg-[#FFD93D] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]">
+            <SessionSummary
+              selectedDate={selectedDate}
+              selectedSlot={selectedSlot}
+              option={activeOption}
+              submitting={submitting}
+              onBook={onBook}
+              psychologist={selectedPsychologist}
+            >
+              {selectedDateBookings.length > 0 && (
+                <SelectedDateBookings
+                  date={selectedDate}
+                  bookings={selectedDateBookings}
+                  scrollToBookingForm={scrollToBookingForm}
+                />
+              )}
+            </SessionSummary>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-stone-200 bg-white">
+      <div className="mt-10 overflow-hidden bg-white rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]">
         <BookedSession
           error={error}
           loading={loading}

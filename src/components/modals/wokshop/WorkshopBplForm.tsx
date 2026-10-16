@@ -10,6 +10,11 @@ import { uploadFile } from "@/redux/fileUploadSlice";
 import { toast } from "sonner";
 import { resetInvoiceReducer } from "@/redux/workshop/workshopSlice";
 
+const labelCls = "font-comic text-lg tracking-wider block mb-1";
+const inputCls =
+  "w-full border-2 border-black bg-white px-4 py-2 transition focus:outline-none focus:bg-[#fff9d6] focus:shadow-[4px_4px_0_#000] disabled:bg-gray-200 disabled:cursor-not-allowed";
+const errCls = "text-red-600 text-xs font-semibold mt-1";
+
 const WorkshopBplForm = ({
   onClose,
   onUpdateStatus,
@@ -39,7 +44,14 @@ const WorkshopBplForm = ({
       toast.error(error);
       dispatch(resetInvoiceReducer());
     }
-  }, [dispatch, error, message, onClose, onUpdateStatus, verificationSubmitSuccess]);
+  }, [
+    dispatch,
+    error,
+    message,
+    onClose,
+    onUpdateStatus,
+    verificationSubmitSuccess,
+  ]);
 
   const formik = useFormik({
     initialValues: {
@@ -95,15 +107,23 @@ const WorkshopBplForm = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[9999]">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 relative">
+      <div className="bg-white border-4 border-black shadow-[10px_10px_0_#000] w-full max-w-2xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-gray-500 hover:text-black"
+          aria-label="Close"
+          className="absolute top-4 right-4 bg-[#ff4b3e] text-black border-2 border-black shadow-[2px_2px_0_#000] p-1 transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
         >
-          <X size={22} />
+          <X size={20} strokeWidth={3} />
         </button>
 
-        <h2 className="text-3xl font-bold text-center mb-6">
+        <h2
+          className="font-comic-chip text-3xl md:text-4xl tracking-wide text-center text-[#ffd93d] -rotate-1 mb-8"
+          style={{
+            WebkitTextStroke: "2px #000",
+            paintOrder: "stroke fill",
+            textShadow: "3px 3px 0 #000",
+          }}
+        >
           BPL Verification
         </h2>
 
@@ -111,32 +131,30 @@ const WorkshopBplForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Ration Card */}
             <div>
-              <label className="text-sm font-medium">Ration Card Number</label>
+              <label className={labelCls}>Ration Card Number</label>
               <input
                 type="text"
                 name="rationCardNumber"
                 value={formik.values.rationCardNumber}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="w-full border rounded-xl px-4 py-2"
+                className={inputCls}
               />
               {formik.touched.rationCardNumber &&
                 formik.errors.rationCardNumber && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {formik.errors.rationCardNumber}
-                  </p>
+                  <p className={errCls}>{formik.errors.rationCardNumber}</p>
                 )}
             </div>
 
             {/* State */}
             <div>
-              <label className="text-sm font-medium">State / UT</label>
+              <label className={labelCls}>State / UT</label>
               <select
                 name="state"
                 value={formik.values.state}
                 onChange={handleStateChange}
                 onBlur={formik.handleBlur}
-                className="w-full border rounded-xl px-4 py-2"
+                className={inputCls}
               >
                 <option value="">Select State / UT</option>
                 {states.map((state) => (
@@ -146,22 +164,20 @@ const WorkshopBplForm = ({
                 ))}
               </select>
               {formik.touched.state && formik.errors.state && (
-                <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.state}
-                </p>
+                <p className={errCls}>{formik.errors.state}</p>
               )}
             </div>
 
             {/* District */}
             <div>
-              <label className="text-sm font-medium">District</label>
+              <label className={labelCls}>District</label>
               <select
                 name="district"
                 value={formik.values.district}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={!formik.values.state}
-                className="w-full border rounded-xl px-4 py-2"
+                className={inputCls}
               >
                 <option value="">Select District</option>
                 {districts.map((district) => (
@@ -171,58 +187,55 @@ const WorkshopBplForm = ({
                 ))}
               </select>
               {formik.touched.district && formik.errors.district && (
-                <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.district}
-                </p>
+                <p className={errCls}>{formik.errors.district}</p>
               )}
             </div>
 
             {/* Head Name */}
             <div>
-              <label className="text-sm font-medium">Head of Family Name</label>
+              <label className={labelCls}>Head of Family Name</label>
               <input
                 type="text"
                 name="headOfFamilyName"
                 value={formik.values.headOfFamilyName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="w-full border rounded-xl px-4 py-2"
+                className={inputCls}
               />
               {formik.touched.headOfFamilyName &&
                 formik.errors.headOfFamilyName && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {formik.errors.headOfFamilyName}
-                  </p>
+                  <p className={errCls}>{formik.errors.headOfFamilyName}</p>
                 )}
             </div>
 
             {/* Mobile */}
             <div className="md:col-span-2">
-              <label className="text-sm font-medium">Mobile Number</label>
+              <label className={labelCls}>Mobile Number</label>
               <input
                 type="tel"
                 name="mobileNumber"
                 value={formik.values.mobileNumber}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="w-full border rounded-xl px-4 py-2"
+                className={inputCls}
               />
               {formik.touched.mobileNumber && formik.errors.mobileNumber && (
-                <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.mobileNumber}
-                </p>
+                <p className={errCls}>{formik.errors.mobileNumber}</p>
               )}
             </div>
           </div>
 
           {/* Upload */}
           <div>
-            <label className="text-sm font-medium">
+            <label className={labelCls}>
               Upload DigiLocker BPL Card (PDF Only)
             </label>
 
-            <div className="border-2 border-dashed rounded-2xl p-6 text-center relative">
-              <UploadCloud size={40} className="mx-auto text-gray-400" />
+            <div className="border-4 border-dashed border-black bg-[#fff3b0] hover:bg-[#ffe66d] transition p-6 text-center relative">
+              <UploadCloud size={40} className="mx-auto text-black" />
+              <p className="font-comic text-lg tracking-wider mt-1">
+                Click to choose your PDF
+              </p>
               <input
                 type="file"
                 accept="application/pdf"
@@ -234,13 +247,11 @@ const WorkshopBplForm = ({
             </div>
 
             {formik.touched.document && formik.errors.document && (
-              <p className="text-red-500 text-xs mt-1">
-                {formik.errors.document as string}
-              </p>
+              <p className={errCls}>{formik.errors.document as string}</p>
             )}
 
             {formik.values.document && (
-              <p className="text-green-600 text-sm mt-2">
+              <p className="inline-block mt-3 bg-[#b9f5d0] border-2 border-black px-3 py-0.5 text-sm font-semibold text-black">
                 Selected: {formik.values.document.name}
               </p>
             )}
@@ -248,7 +259,7 @@ const WorkshopBplForm = ({
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-xl"
+            className="w-full font-comic text-2xl tracking-widest bg-[#2ea7ff] text-black border-4 border-black shadow-[5px_5px_0_#000] py-2 transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#000] active:translate-y-1 active:shadow-none"
           >
             Submit for Verification
           </button>

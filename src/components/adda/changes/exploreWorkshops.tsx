@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { getAllWorkshops } from "@/api/workshop/workshops";
 import { useAsyncEffect } from "@/hooks";
 
+const INK = "#1a1a1a";
+
 const UNWANTED_IMAGE = [
   "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1759234938507-b72e75aa-f04d-495a-bdb8-23ee0223d299.png",
   "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1759234940170-86763a83-9253-4a79-8e39-9d1260ad5fd5.png",
   "https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1759235982570-cdc97188-a8d5-498c-bd65-9faf59c02781.png",
 ];
+
+/* Shared comic button style for the carousel controls */
+const comicBtn =
+  "flex items-center justify-center w-11 h-11 rounded-full bg-[#FFD60A] text-[#1a1a1a] border-[3px] border-[#1a1a1a] shadow-[3px_3px_0_#1a1a1a] transition-all duration-100 hover:bg-white hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]";
 
 const ExploreWorkshops = () => {
   const navigate = useNavigate();
@@ -38,6 +44,7 @@ const ExploreWorkshops = () => {
     [],
     { errorMessage: "Error fetching workshops" },
   );
+
   // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying || workshops.length === 0) return;
@@ -60,56 +67,139 @@ const ExploreWorkshops = () => {
   };
 
   return (
-    <div className="p-4 my-20">
-      <div className="text-center mb-12">
-        <h2 className="text-5xl md:text-6xl font-extrabold text-orange-600 mb-4">
+    <div
+      className="px-4 py-20"
+      style={{
+        backgroundColor: "#FFF6D6",
+        backgroundImage: `radial-gradient(${INK}22 1.6px, transparent 1.8px)`,
+        backgroundSize: "18px 18px",
+      }}
+    >
+      <div className="text-center mb-14">
+        <h2
+          className="font-comic mb-5"
+          style={{
+            fontSize: "clamp(2.8rem, 8vw, 5rem)",
+            lineHeight: 1.05,
+            color: "#FF6A00",
+            letterSpacing: "0.04em",
+            WebkitTextStroke: `3px ${INK}`,
+            paintOrder: "stroke fill",
+            textShadow: `5px 5px 0 ${INK}`,
+            transform: "rotate(-1.5deg)",
+            display: "inline-block",
+          }}
+        >
           Explore Our Workshops
         </h2>
-        <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+
+        <div
+          className="max-w-2xl mx-auto bg-white font-bold text-base md:text-lg text-[#1a1a1a] px-5 py-3"
+          style={{
+            border: `3px solid ${INK}`,
+            boxShadow: `5px 5px 0 ${INK}`,
+            transform: "rotate(0.6deg)",
+          }}
+        >
           Discover engaging workshops designed to inspire creativity and
           learning
-        </p>
-        {workshops.length > 0 && (
-          <div className="mt-4 text-sm text-gray-600">
-            <span className="font-semibold text-orange-600">
-              {currentIndex + 1}
-            </span>{" "}
-            / {total}
+        </div>
+
+        {total > 0 && (
+          <div
+            className="font-comic-chip inline-block mt-6 px-5 py-1 bg-[#2D9CFF] text-white text-xl"
+            style={{
+              border: `3px solid ${INK}`,
+              borderRadius: 999,
+              boxShadow: `4px 4px 0 ${INK}`,
+              textShadow: `2px 2px 0 ${INK}`,
+              letterSpacing: "0.06em",
+            }}
+            aria-live="polite"
+          >
+            {currentIndex + 1} / {total}
           </div>
         )}
       </div>
 
-      {workshops.length === 0 ? (
-        <div className="flex items-center justify-center text-6xl font-extrabold text-orange-800 animate-pulse">
-          Loading Workshops
+      {total === 0 ? (
+        <div
+          className="font-comic flex items-center justify-center text-center animate-pulse"
+          style={{
+            fontSize: "clamp(2.4rem, 7vw, 4.5rem)",
+            color: "#fff",
+            letterSpacing: "0.05em",
+            WebkitTextStroke: `3px ${INK}`,
+            paintOrder: "stroke fill",
+            textShadow: `5px 5px 0 ${INK}`,
+          }}
+        >
+          Loading Workshops...
         </div>
       ) : (
         <div className="flex items-center justify-center gap-4">
-          <div className="w-1/3 h-1/3 cursor-pointer transition-all duration-300 hover:scale-105 hover:opacity-70">
+          {/* Left preview */}
+          <div
+            className="w-1/3 cursor-pointer transition-all duration-200 hover:scale-105 hover:-rotate-2"
+            onClick={() => handleNavigate(leftIndex)}
+          >
             <img
               src={workshops[leftIndex]}
               alt={`Workshop ${leftIndex + 1}`}
-              className="w-full h-full object-contain opacity-50"
-              onClick={() => handleNavigate(leftIndex)}
+              className="w-full h-full object-contain opacity-60 bg-white"
+              style={{
+                border: `3px solid ${INK}`,
+                borderRadius: 12,
+                boxShadow: `5px 5px 0 ${INK}`,
+              }}
             />
           </div>
 
+          {/* Main panel */}
           <div
             onClick={() => navigate("/mentoons-workshops")}
-            className="group relative cursor-pointer w-1/2 h-1/2 -mx-10 z-10 rounded-xl border-2 border-gray-600 overflow-hidden shadow-2xl transition-transform duration-300 hover:scale-105"
+            className="group relative cursor-pointer w-1/2 -mx-10 z-10 overflow-hidden bg-white transition-transform duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5"
+            style={{
+              border: `5px solid ${INK}`,
+              borderRadius: 16,
+              boxShadow: `10px 10px 0 ${INK}`,
+            }}
           >
-            <div className="absolute inset-0 bg-gray-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
             <img
               src={workshops[currentIndex]}
               alt={`Workshop ${currentIndex + 1}`}
               className="w-full h-full object-contain"
             />
 
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="flex items-center justify-center gap-2">
+            {/* Tap-to-open tag */}
+            <span
+              className="font-comic-chip absolute top-3 left-3 px-3 py-0.5 bg-[#FF3B3B] text-white text-sm md:text-base opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+              style={{
+                border: `3px solid ${INK}`,
+                borderRadius: 8,
+                boxShadow: `3px 3px 0 ${INK}`,
+                textShadow: `2px 2px 0 ${INK}`,
+                transform: "rotate(-4deg)",
+                letterSpacing: "0.06em",
+              }}
+            >
+              OPEN!
+            </span>
+
+            {/* Controls */}
+            <div
+              className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150"
+              style={{
+                background: `linear-gradient(to top, ${INK}cc, transparent)`,
+              }}
+            >
+              <div className="flex items-center justify-center gap-3">
                 <button
-                  onClick={() => handleNavigate(leftIndex)}
-                  className="bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavigate(leftIndex);
+                  }}
+                  className={comicBtn}
                   aria-label="Previous workshop"
                 >
                   <svg
@@ -121,55 +211,44 @@ const ExploreWorkshops = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={3}
                       d="M15 19l-7-7 7-7"
                     />
                   </svg>
                 </button>
                 <button
-                  onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                  className="bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsAutoPlaying(!isAutoPlaying);
+                  }}
+                  className={comicBtn}
                   aria-label={isAutoPlaying ? "Pause" : "Play"}
                 >
                   {isAutoPlaying ? (
                     <svg
                       className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
+                      fill="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
+                      <rect x="6" y="5" width="4" height="14" rx="1" />
+                      <rect x="14" y="5" width="4" height="14" rx="1" />
                     </svg>
                   ) : (
                     <svg
                       className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
+                      fill="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
+                      <path d="M8 5v14l11-7z" />
                     </svg>
                   )}
                 </button>
                 <button
-                  onClick={() => handleNavigate(rightIndex)}
-                  className="bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavigate(rightIndex);
+                  }}
+                  className={comicBtn}
                   aria-label="Next workshop"
                 >
                   <svg
@@ -181,7 +260,7 @@ const ExploreWorkshops = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={3}
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
@@ -190,29 +269,44 @@ const ExploreWorkshops = () => {
             </div>
           </div>
 
-          <div className="w-1/3 h-1/3 cursor-pointer transition-all duration-300 hover:scale-105 hover:opacity-70">
+          {/* Right preview */}
+          <div
+            className="w-1/3 cursor-pointer transition-all duration-200 hover:scale-105 hover:rotate-2"
+            onClick={() => handleNavigate(rightIndex)}
+          >
             <img
               src={workshops[rightIndex]}
               alt={`Workshop ${rightIndex + 1}`}
-              className="w-full h-full object-contain opacity-50"
-              onClick={() => handleNavigate(rightIndex)}
+              className="w-full h-full object-contain opacity-60 bg-white"
+              style={{
+                border: `3px solid ${INK}`,
+                borderRadius: 12,
+                boxShadow: `5px 5px 0 ${INK}`,
+              }}
             />
           </div>
         </div>
       )}
 
-      {workshops.length > 0 && (
-        <div className="flex justify-center gap-2 mt-8">
+      {/* Dots */}
+      {total > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 mt-12">
           {workshops.map((_, index) => (
             <button
               key={index}
               onClick={() => handleNavigate(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`h-4 transition-all duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] ${
                 index === currentIndex
-                  ? "bg-orange-600 w-8"
-                  : "bg-gray-300 hover:bg-gray-400"
+                  ? "w-10 bg-[#FF6A00]"
+                  : "w-4 bg-white hover:bg-[#FFD60A]"
               }`}
+              style={{
+                border: `3px solid ${INK}`,
+                borderRadius: 999,
+                boxShadow: index === currentIndex ? `3px 3px 0 ${INK}` : "none",
+              }}
               aria-label={`Go to workshop ${index + 1}`}
+              aria-current={index === currentIndex}
             />
           ))}
         </div>

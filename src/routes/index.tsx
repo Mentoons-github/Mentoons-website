@@ -22,12 +22,12 @@ import SubscriptionGuard from "../components/protected/subscriptionGuard.tsx";
 import QuizPage from "../pages/quiz/quiz.tsx";
 import EmployeeRouter from "./employeeRouter.tsx";
 import AdminRouter from "./adminRouter.tsx";
-import Profile from "../pages/v2/profile.tsx";
+// import Profile from "../pages/v2/profile.tsx";
 import CommunityPage from "../pages/v2/community/community.tsx";
 import CommunityGroups from "../pages/v2/community/groups.tsx";
 import MentoonsServices from "../pages/v2/services/service.tsx";
 import AddPasswordPage from "../pages/admin/employee/setPasword.tsx";
-import WhyComics from "../pages/v2/comics/whyComics.tsx";
+// import WhyComics from "../pages/v2/comics/whyComics.tsx";
 import RootRedirect from "../layout/rootRedirect.tsx";
 import ImageUploadFormSubmit from "../pages/v2/adda/ImageUploadFormSubmit.tsx";
 import Explore from "../pages/v2/chnages.tsx";
@@ -158,9 +158,9 @@ export const routes = [
   { path: "/community", element: <CommunityPage /> },
   { path: "/community/group/:id", element: <CommunityGroups /> },
   { path: "/services", element: <MentoonsServices /> },
-  { path: "/prof", element: <Profile /> },
+  // { path: "/prof", element: <Profile /> },
   { path: "/add-password", element: <AddPasswordPage /> },
-  { path: "/why-comics", element: <WhyComics /> },
+  // { path: "/why-comics", element: <WhyComics /> },
   { path: "payment", element: <PaymentDetailPage /> },
   { path: "/form-submit", element: <ImageUploadFormSubmit /> },
   { path: "/emi", element: <Emi /> },
@@ -170,7 +170,7 @@ export const routes = [
   { path: "/other-product/:productId", element: <OtherProduct /> },
   { path: "/meetups", element: <LetsRevive /> },
   // { path: "/new-home", element: <NewHomePage /> },
-  { path: "/sample", element: <ProductPageV3 /> },
+  // { path: "/sample", element: <ProductPageV3 /> },
   // { path: "/new-meetups", element: <Meetups /> },
   { path: "/join-us", element: <JoinOurTeam /> },
   { path: "/bookings", element: <OneOnOneSessionPage /> },

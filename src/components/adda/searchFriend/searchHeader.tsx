@@ -1,5 +1,8 @@
 import { Clock, TrendingUp } from "lucide-react";
 
+// Fonts come from index.css:
+// .font-comic -> Bangers, .font-comic-chip -> Luckiest Guy, .font-number -> Cabin
+
 interface SearchHeaderProps {
   searchQuery: string;
   totalResults: number;
@@ -7,23 +10,26 @@ interface SearchHeaderProps {
 
 const SearchHeader = ({ searchQuery, totalResults }: SearchHeaderProps) => {
   return (
-    <div className="bg-blue-600 shadow-xl border-b-4 border-orange-500 sticky top-0 z-10">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="bg-blue-500 border-b-4 border-black shadow-[0_6px_0_0_#EC9600] sticky top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">
+            <h1 className="font-comic tracking-wider text-3xl sm:text-4xl md:text-5xl text-white mb-4 [text-shadow:3px_3px_0_#000] [-webkit-text-stroke:1px_#000]">
               Search Results for "
-              <span className="text-orange-300">{searchQuery}</span>"
+              <span className="text-yellow-300">{searchQuery}</span>"
             </h1>
-            <div className="flex items-center space-x-4 text-blue-100">
-              <span className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                <TrendingUp className="w-5 h-5 text-green-400" />
-                <span className="font-bold">Found {totalResults} results</span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <span className="font-comic-chip tracking-wider flex items-center space-x-2 bg-yellow-300 text-black px-3 py-1 rounded-lg border-[3px] border-black shadow-[3px_3px_0_0_#000] -rotate-1">
+                <TrendingUp className="w-5 h-5 text-black" />
+                <span>
+                  Found{" "}
+                  <span className="font-number font-bold">{totalResults}</span>{" "}
+                  results
+                </span>
               </span>
-              <span className="text-blue-200">•</span>
-              <span className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                <Clock className="w-4 h-4 text-orange-400" />
-                <span className="font-semibold">Updated just now</span>
+              <span className="font-comic-chip tracking-wider flex items-center space-x-2 bg-white text-black px-3 py-1 rounded-lg border-[3px] border-black shadow-[3px_3px_0_0_#000] rotate-1">
+                <Clock className="w-4 h-4 text-black" />
+                <span>Updated just now</span>
               </span>
             </div>
           </div>

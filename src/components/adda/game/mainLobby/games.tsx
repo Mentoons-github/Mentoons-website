@@ -8,6 +8,30 @@ import { fetchCandyCoin } from "@/api/game/mentoonsCoin";
 import { useStatusModal } from "@/context/adda/statusModalContext";
 import { CandyCoins } from "@/types/adda/game/candyCoins";
 
+/*
+  Comic theme (shared with the store pages)
+  The lobby keeps a DARK backdrop on purpose: the header, scoring and game
+  items children were built for light text on dark, so a white page would
+  make them hard to read. Dark navy + yellow halftone dots keeps it comic.
+  Switch .comic-lobby to a white background once those children are restyled.
+*/
+const comicCss = `
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700;900&display=swap');
+
+.comic-lobby {
+  font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+  background-color: #0F1B4D;
+  background-image: radial-gradient(rgba(255, 217, 59, 0.22) 2px, transparent 2px);
+  background-size: 18px 18px;
+}
+.comic-lobby .comic-title { font-family: 'Bangers', 'Impact', sans-serif; letter-spacing: 0.04em; }
+.comic-coin-pill { border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
+
+@media (min-width: 1024px) {
+  .comic-coin-pill { border-width: 4px; box-shadow: 6px 6px 0 #000; }
+}
+`;
+
 export interface LeaderboardEntry {
   rank: number;
   playerId: string;
@@ -78,31 +102,25 @@ const GameLobby = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 lg:top-10 lg:right-10">
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 rounded-full blur-md opacity-75 animate-pulse"></div>
-          <div className="relative bg-gradient-to-br from-orange-500 via-amber-400 to-orange-600 rounded-full p-[2px] sm:p-[3px] shadow-2xl">
-            <div className="flex items-center justify-center rounded-full h-10 w-28 sm:h-16 sm:w-40 md:h-20 md:w-48 lg:h-24 lg:w-56 bg-gradient-to-br from-slate-900 to-slate-800 shadow-inner">
-              <div className="flex items-center justify-between w-full px-2 relative">
-                <div className="absolute -left-6 sm:-left-7 md:-left-9 lg:-left-11 top-1/2 -translate-y-1/2">
-                  <img
-                    src="/assets/games/coins/candyCoin.png"
-                    alt="Coin"
-                    className="w-16 h-16 md:w-32 md:h-32 lg:w-40 lg:h-40 drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] relative z-10"
-                  />
-                </div>
+    <div className="comic-lobby relative min-h-screen">
+      <style>{comicCss}</style>
 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-amber-300 font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ml-auto pr-3">
-                  {coins?.currentCoins ?? 0}
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* Candy coin balance: coin overlaps the pill's left edge, number gets its own space */}
+      <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 md:right-8 md:top-8 lg:right-10 lg:top-10">
+        <div className="comic-coin-pill relative flex h-12 min-w-[7.5rem] items-center justify-end rounded-full bg-[#FFD93B] pl-12 pr-4 sm:h-14 sm:pl-14 md:h-16 md:pl-16 md:pr-5 lg:h-20 lg:pl-20 lg:pr-6">
+          <img
+            src="/assets/games/coins/candyCoin.png"
+            alt="Coin"
+            className="absolute left-0 top-1/2 h-14 w-14 -translate-x-1/3 -translate-y-1/2 drop-shadow-[3px_3px_0_#000] sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24"
+          />
+          <span className="comic-title text-3xl leading-none text-black sm:text-4xl md:text-5xl lg:text-6xl">
+            {coins?.currentCoins ?? 0}
+          </span>
         </div>
       </div>
+
       <GameLobbyHeader />
-      <div className="px-1 md:px-8 pb-8">
+      <div className="px-1 pb-8 md:px-8">
         <ScoringDashboard
           handleLeaderboardClick={handleLeaderboardClick}
           currentUser={currentUser}

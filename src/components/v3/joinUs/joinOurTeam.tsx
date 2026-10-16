@@ -23,7 +23,20 @@ import SelectedJobModal from "@/components/modals/career/selectedJobModal";
 
 const LIMIT = 8;
 
-/* ---------------- icon + label helpers ---------------- */
+const COMIC_BTN =
+  "border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] transition active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-[3px_3px_0_0_#111827]";
+
+const COMIC_CARD =
+  "border-2 border-gray-900 bg-white shadow-[5px_5px_0_0_#111827]";
+
+const CARD_COLORS = [
+  "bg-[#FFD93D]",
+  "bg-green-400",
+  "bg-sky-300",
+  "bg-pink-300",
+  "bg-purple-300",
+  "bg-[#ff9800]",
+];
 
 const ICON_RULES: { keywords: string[]; icon: LucideIcon }[] = [
   { keywords: ["illustrat", "design", "art"], icon: Paintbrush },
@@ -80,7 +93,6 @@ const JOB_TYPES = [
   "INTERNSHIP",
 ];
 
-/* Shows at most 5 page buttons with "..." gaps so it fits on phones */
 const getPageNumbers = (current: number, total: number) => {
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
 
@@ -95,8 +107,6 @@ const getPageNumbers = (current: number, total: number) => {
 
   return pages;
 };
-
-/* ---------------- filters bar ---------------- */
 
 interface OpenPositionsFiltersProps {
   query: string;
@@ -114,15 +124,15 @@ const OpenPositionsFilters = ({
   const [showTypeMenu, setShowTypeMenu] = useState(false);
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <div className="relative min-w-0 flex-1">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900" />
         <input
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           type="text"
           placeholder="Search job title or keyword..."
-          className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-gray-300 sm:h-12 sm:text-base"
+          className="h-11 w-full rounded-full border-2 border-gray-900 bg-white pl-11 pr-4 text-sm text-gray-900 shadow-[3px_3px_0_0_#111827] outline-none placeholder:text-gray-500 focus:bg-[#FFFBEB] sm:h-12 sm:text-base"
         />
       </div>
 
@@ -130,15 +140,15 @@ const OpenPositionsFilters = ({
         <button
           type="button"
           onClick={() => setShowTypeMenu((s) => !s)}
-          className="flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:h-12 sm:w-auto sm:justify-start sm:text-base"
+          className={`font-comic flex h-11 w-full items-center justify-between gap-2 rounded-full bg-white px-5 text-lg tracking-wide text-gray-900 hover:bg-[#FFD93D] sm:h-12 sm:w-auto sm:justify-start sm:text-xl ${COMIC_BTN}`}
         >
           <span className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-gray-500" />
+            <Briefcase className="h-5 w-5" />
             {jobTypeFilter === "All Types"
               ? "Job Type"
               : formatJobType(jobTypeFilter)}
           </span>
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          <ChevronDown className="h-4 w-4" />
         </button>
 
         {showTypeMenu && (
@@ -147,7 +157,7 @@ const OpenPositionsFilters = ({
               className="fixed inset-0 z-10"
               onClick={() => setShowTypeMenu(false)}
             />
-            <div className="absolute left-0 top-full z-20 mt-2 w-full rounded-xl border border-gray-200 bg-white py-2 shadow-lg sm:right-0 sm:left-auto sm:w-48">
+            <div className="absolute left-0 top-full z-20 mt-3 w-full overflow-hidden rounded-xl border-2 border-gray-900 bg-white py-1 shadow-[5px_5px_0_0_#111827] sm:right-0 sm:left-auto sm:w-52">
               {JOB_TYPES.map((type) => (
                 <button
                   key={type}
@@ -156,10 +166,8 @@ const OpenPositionsFilters = ({
                     onJobTypeChange(type);
                     setShowTypeMenu(false);
                   }}
-                  className={`block w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 ${
-                    jobTypeFilter === type
-                      ? "font-semibold text-gray-900"
-                      : "text-gray-600"
+                  className={`font-comic block w-full px-4 py-2 text-left text-xl tracking-wide text-gray-900 hover:bg-[#FFD93D] ${
+                    jobTypeFilter === type ? "bg-[#ff9800] text-white" : ""
                   }`}
                 >
                   {type === "All Types" ? "All Types" : formatJobType(type)}
@@ -173,29 +181,33 @@ const OpenPositionsFilters = ({
   );
 };
 
-/* ---------------- position card ---------------- */
-
 interface PositionCardProps {
   position: TPOSITION;
+  colorClass: string;
   onViewDetails: (position: TPOSITION) => void;
   onApply: (jobId: string) => void;
 }
 
 const PositionCard = ({
   position,
+  colorClass,
   onViewDetails,
   onApply,
 }: PositionCardProps) => {
   const Icon = getJobIcon(position.jobTitle);
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+    <div
+      className={`flex min-w-0 flex-col gap-3 rounded-2xl p-4 transition hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#111827] sm:p-5 ${COMIC_CARD}`}
+    >
       <button
         type="button"
         onClick={() => onViewDetails(position)}
         className="flex min-w-0 items-center gap-3 text-left"
       >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-white sm:h-12 sm:w-12">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-gray-900 text-gray-900 shadow-[3px_3px_0_0_#111827] sm:h-14 sm:w-14 ${colorClass}`}
+        >
           {position.thumbnail ? (
             <img
               src={position.thumbnail}
@@ -203,34 +215,34 @@ const PositionCard = ({
               className="h-full w-full object-cover"
             />
           ) : (
-            <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+            <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
           )}
         </div>
-        <h3 className="min-w-0 break-words text-base font-semibold text-gray-900 hover:text-blue-600 sm:text-lg">
+        <h3 className="font-comic min-w-0 break-words text-2xl leading-tight tracking-wide text-gray-900 hover:text-[#ff9800] sm:text-3xl">
           {position.jobTitle}
         </h3>
       </button>
 
       <div className="flex flex-wrap gap-2">
-        <span className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 sm:text-sm">
+        <span className="font-comic rounded-full border-2 border-gray-900 bg-[#FFD93D] px-3 py-0.5 text-base tracking-wide text-gray-900 sm:text-lg">
           {formatJobType(position.jobType)}
         </span>
-        <span className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 sm:text-sm">
+        <span className="font-comic rounded-full border-2 border-gray-900 bg-green-300 px-3 py-0.5 text-base tracking-wide text-gray-900 sm:text-lg">
           {position.location}
         </span>
       </div>
 
-      <p className="line-clamp-3 text-sm leading-relaxed text-gray-600 sm:text-base">
+      <p className="line-clamp-3 text-sm leading-relaxed text-gray-700 sm:text-base">
         {position.jobDescription}
       </p>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-gray-500 sm:text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t-2 border-dashed border-gray-900/30 pt-3 text-xs font-medium text-gray-700 sm:text-sm">
         <span className="flex min-w-0 items-center gap-1.5">
-          <MapPin className="h-4 w-4 shrink-0 text-gray-400" />
+          <MapPin className="h-4 w-4 shrink-0 text-gray-900" />
           <span className="truncate">{position.location}</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <Users className="h-4 w-4 shrink-0 text-gray-400" />
+          <Users className="h-4 w-4 shrink-0 text-gray-900" />
           {position.applicationCount ?? 0} applicants
         </span>
       </div>
@@ -238,7 +250,7 @@ const PositionCard = ({
       <button
         type="button"
         onClick={() => onApply(position._id)}
-        className="mt-auto flex w-full items-center justify-center gap-1.5 rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-200 sm:text-base"
+        className={`font-comic mt-auto flex w-full items-center justify-center gap-1.5 rounded-full bg-[#ff9800] px-4 py-2 text-xl tracking-wide text-white hover:bg-[#e68900] sm:text-2xl ${COMIC_BTN}`}
       >
         Apply Now
         <ArrowRight className="h-5 w-5" />
@@ -246,8 +258,6 @@ const PositionCard = ({
     </div>
   );
 };
-
-/* ---------------- main component ---------------- */
 
 const OpenPositions = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -261,7 +271,6 @@ const OpenPositions = () => {
   const [detailsJob, setDetailsJob] = useState<TPOSITION | null>(null);
   const [applyJobId, setApplyJobId] = useState<string | null>(null);
 
-  // debounced fetch on search/page change
   useEffect(() => {
     const timeout = setTimeout(() => {
       dispatch(
@@ -276,7 +285,6 @@ const OpenPositions = () => {
     return () => clearTimeout(timeout);
   }, [dispatch, currentPage, query]);
 
-  // reset to page 1 whenever the search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [query]);
@@ -305,11 +313,10 @@ const OpenPositions = () => {
     refetch();
   };
 
-  const pageBtn =
-    "rounded-full border-2 px-3 py-1.5 text-sm font-medium transition-all duration-300 sm:px-4 sm:py-2 sm:text-base";
+  const pageBtn = `font-comic rounded-full px-4 py-1 text-lg tracking-wide sm:px-5 sm:py-1.5 sm:text-xl ${COMIC_BTN}`;
 
   return (
-    <div className="mx-auto my-6 space-y-5 px-4 sm:my-10 sm:space-y-6 sm:px-6 md:px-10 lg:px-20">
+    <div className="mx-auto my-6 space-y-6 px-4 sm:my-10 sm:space-y-8 sm:px-6 md:px-10 lg:px-20">
       <OpenPositionsFilters
         query={query}
         onQueryChange={setQuery}
@@ -318,21 +325,30 @@ const OpenPositions = () => {
       />
 
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
+        <h2 className="font-comic text-4xl tracking-wide text-gray-900 sm:text-5xl">
           Open Positions ({positions.length})
         </h2>
       </div>
 
       {loading ? (
-        <p className="text-base text-gray-600">Loading jobs...</p>
+        <div className={`rounded-2xl p-8 text-center ${COMIC_CARD}`}>
+          <p className="font-comic text-3xl tracking-wide text-gray-900">
+            Loading jobs...
+          </p>
+        </div>
       ) : positions.length === 0 ? (
-        <p className="text-base text-gray-600">No jobs match your search.</p>
+        <div className={`rounded-2xl p-8 text-center ${COMIC_CARD}`}>
+          <p className="font-comic text-3xl tracking-wide text-gray-900">
+            No jobs match your search.
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-          {positions.map((position: TPOSITION) => (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 xl:grid-cols-4">
+          {positions.map((position: TPOSITION, index: number) => (
             <PositionCard
               key={position._id}
               position={position}
+              colorClass={CARD_COLORS[index % CARD_COLORS.length]}
               onViewDetails={setDetailsJob}
               onApply={setApplyJobId}
             />
@@ -341,24 +357,20 @@ const OpenPositions = () => {
       )}
 
       {totalPages > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`${pageBtn} ${
-              currentPage === 1
-                ? "cursor-not-allowed border-gray-300 text-gray-400"
-                : "border-gray-400 text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`${pageBtn} bg-white text-gray-900 hover:bg-[#FFD93D]`}
           >
             Previous
           </button>
-          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {getPageNumbers(currentPage, totalPages).map((page, i) =>
               page === "..." ? (
                 <span
                   key={`gap-${i}`}
-                  className="px-1 py-1.5 text-gray-400 sm:py-2"
+                  className="font-comic px-1 py-1.5 text-2xl text-gray-900 sm:py-2"
                 >
                   …
                 </span>
@@ -368,8 +380,8 @@ const OpenPositions = () => {
                   onClick={() => handlePageChange(page)}
                   className={`${pageBtn} ${
                     currentPage === page
-                      ? "border-black bg-black text-white"
-                      : "border-gray-400 text-gray-700 hover:bg-gray-100"
+                      ? "bg-[#ff9800] text-white"
+                      : "bg-white text-gray-900 hover:bg-[#FFD93D]"
                   }`}
                 >
                   {page}
@@ -380,11 +392,7 @@ const OpenPositions = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`${pageBtn} ${
-              currentPage === totalPages
-                ? "cursor-not-allowed border-gray-300 text-gray-400"
-                : "border-gray-400 text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`${pageBtn} bg-white text-gray-900 hover:bg-[#FFD93D]`}
           >
             Next
           </button>
@@ -404,9 +412,6 @@ const OpenPositions = () => {
         />
       )}
 
-      {/* JobApplicationForm renders its own full-screen fixed overlay
-          (z-[9999], scrollable) — do not wrap it in another fixed
-          container here. */}
       {applyJobId && (
         <JobApplicationForm
           id={applyJobId}

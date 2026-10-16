@@ -75,6 +75,44 @@ interface SearchResults {
   freeGames: GamesData[];
 }
 
+/* ---------- Comic style tokens (fonts come from index.css) ---------- */
+// .font-comic       -> Bangers      (headings, captions)
+// .font-comic-chip  -> Luckiest Guy (chips, buttons, tags)
+// .font-number      -> Cabin        (counts / numbers)
+const PANEL = "border-4 border-black shadow-[6px_6px_0_0_#000]";
+const PANEL_SM = "border-[3px] border-black shadow-[4px_4px_0_0_#000]";
+const POP =
+  "transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none";
+
+const sectionTheme = {
+  blue: {
+    caption: "bg-blue-400",
+    link: "bg-blue-300 hover:bg-blue-200",
+    icon: "text-black",
+  },
+  red: {
+    caption: "bg-red-400",
+    link: "bg-red-300 hover:bg-red-200",
+    icon: "text-black",
+  },
+  green: {
+    caption: "bg-green-400",
+    link: "bg-green-300 hover:bg-green-200",
+    icon: "text-black",
+  },
+  purple: {
+    caption: "bg-purple-400",
+    link: "bg-purple-300 hover:bg-purple-200",
+    icon: "text-black",
+  },
+} as const;
+
+const viewAllClass = (theme: keyof typeof sectionTheme) =>
+  `font-comic-chip tracking-wider text-black flex items-center space-x-2 px-3 md:px-4 py-2 rounded-lg text-sm md:text-lg ${PANEL_SM} ${POP} ${sectionTheme[theme].link}`;
+
+const captionClass = (theme: keyof typeof sectionTheme) =>
+  `font-comic tracking-wider text-3xl md:text-5xl text-black inline-flex items-center px-4 py-1 -rotate-1 ${PANEL} ${sectionTheme[theme].caption}`;
+
 const SearchResultsPage = () => {
   const [activeFilter, setActiveFilter] = useState<
     | "all"
@@ -112,7 +150,7 @@ const SearchResultsPage = () => {
   const [playbackTracking, setPlaybackTracking] = useState<any>(null);
   const [dbUser, setDbUser] = useState<any>(null);
   const [userLimits, setUserLimits] = useState<UserSubscriptionLimits | null>(
-    null
+    null,
   );
   const [modalShownTimestamp, setModalShownTimestamp] = useState<number>(0);
   const { isSignedIn } = useUser();
@@ -156,16 +194,16 @@ const SearchResultsPage = () => {
       user.clerkId === userId
         ? "self"
         : user.followStatus === "friend"
-        ? "friends"
-        : user.followStatus === "following"
-        ? "pendingSent"
-        : user.followStatus === "follow back"
-        ? "followBack"
-        : user.followStatus === "pending"
-        ? "pendingReceived"
-        : user.followStatus === "connect"
-        ? "connect"
-        : "guest",
+          ? "friends"
+          : user.followStatus === "following"
+            ? "pendingSent"
+            : user.followStatus === "follow back"
+              ? "followBack"
+              : user.followStatus === "pending"
+                ? "pendingReceived"
+                : user.followStatus === "connect"
+                  ? "connect"
+                  : "guest",
   });
 
   const onSendRequest = useCallback(
@@ -182,7 +220,7 @@ const SearchResultsPage = () => {
           { friendId },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         if (response.data.success) {
           setSearchResults((prev) => ({
@@ -190,7 +228,7 @@ const SearchResultsPage = () => {
             users: prev.users.map((user) =>
               user._id === friendId
                 ? { ...user, followStatus: "pending" }
-                : user
+                : user,
             ),
           }));
         } else {
@@ -202,7 +240,7 @@ const SearchResultsPage = () => {
         setIsConnecting(false);
       }
     },
-    [getToken]
+    [getToken],
   );
 
   const onCancelRequest = useCallback(
@@ -214,7 +252,7 @@ const SearchResultsPage = () => {
           `/user/friend-request/${friendId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         if (response.data.success) {
           setSearchResults((prev) => ({
@@ -222,7 +260,7 @@ const SearchResultsPage = () => {
             users: prev.users.map((user) =>
               user._id === friendId
                 ? { ...user, followStatus: "connect" }
-                : user
+                : user,
             ),
           }));
         } else {
@@ -234,7 +272,7 @@ const SearchResultsPage = () => {
         setIsConnecting(false);
       }
     },
-    [getToken]
+    [getToken],
   );
 
   const fetchDBUser = useCallback(async () => {
@@ -246,7 +284,7 @@ const SearchResultsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
         const userData = response.data.data;
@@ -260,7 +298,7 @@ const SearchResultsPage = () => {
   }, [userId, getToken]);
 
   const updateUserSubscriptionLimits = async (
-    updatedLimits: UserSubscriptionLimits
+    updatedLimits: UserSubscriptionLimits,
   ) => {
     try {
       const token = await getToken();
@@ -275,7 +313,7 @@ const SearchResultsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setUserLimits(updatedLimits);
@@ -311,7 +349,7 @@ const SearchResultsPage = () => {
   const openComicModal = (
     comicLink: string,
     comic?: ProductBase | null,
-    productType?: string
+    productType?: string,
   ) => {
     if (!comic) {
       setComicToView(comicLink);
@@ -349,7 +387,7 @@ const SearchResultsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const transformProduct = (item: any): ProductBase => ({
@@ -378,7 +416,7 @@ const SearchResultsPage = () => {
         cleanedQuery.includes("free") || cleanedQuery.includes("games")
           ? gamesData
           : gamesData.filter((data) =>
-              cleanedQuery.includes(data.name.toLowerCase())
+              cleanedQuery.includes(data.name.toLowerCase()),
             );
 
       const transformedResults = {
@@ -445,7 +483,7 @@ const SearchResultsPage = () => {
         const response = await axios.post(
           `${import.meta.env.VITE_PROD_URL}/subscription/access`,
           { type: "podcasts", itemId: podcast._id },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const { access, reason } = response.data;
         if (access) {
@@ -467,12 +505,12 @@ const SearchResultsPage = () => {
         if (reason === "upgrade") {
           setLimitModalTitle("Upgrade Your Plan");
           setLimitModalMessage(
-            `You've reached the podcast limit. Upgrade to access more content!`
+            `You've reached the podcast limit. Upgrade to access more content!`,
           );
         } else if (reason === "charge") {
           setLimitModalTitle("Purchase Content");
           setLimitModalMessage(
-            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`
+            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
           );
         }
         setCurrentProductId(podcast._id || "");
@@ -489,7 +527,7 @@ const SearchResultsPage = () => {
         return false;
       }
     },
-    [isSignedIn, dbUser, getToken, modalShownTimestamp, fetchDBUser]
+    [isSignedIn, dbUser, getToken, modalShownTimestamp, fetchDBUser],
   );
 
   const onPlaybackTrackingUpdate = useCallback((update: (prev: any) => any) => {
@@ -513,7 +551,7 @@ const SearchResultsPage = () => {
         mentoonsBooks: [],
         users: [],
         freeGames: searchResults.freeGames.filter(
-          (game) => game.name !== "Emergency Contact Numbers"
+          (game) => game.name !== "Emergency Contact Numbers",
         ),
       };
     }
@@ -525,7 +563,7 @@ const SearchResultsPage = () => {
       mentoonsBooks: searchResults.mentoonsBooks,
       users: searchResults.users.filter((user) => user.clerkId !== userId),
       freeGames: searchResults.freeGames.filter(
-        (game) => game.name !== "Emergency Contact Numbers"
+        (game) => game.name !== "Emergency Contact Numbers",
       ),
     };
   }, [searchResults, searchQuery, userId]);
@@ -540,74 +578,85 @@ const SearchResultsPage = () => {
       label: "All Results",
       count: totalResults,
       icon: TrendingUp,
-      color: "from-blue-600 to-blue-700",
+      color: "bg-yellow-400",
     },
     {
       id: "users" as const,
       label: "Users",
       count: filteredResults.users.length,
       icon: Users,
-      color: "from-blue-600 to-blue-700",
+      color: "bg-blue-400",
     },
     {
       id: "comics" as const,
       label: "Comics",
       count: filteredResults.comics.length,
       icon: BookOpen,
-      color: "from-red-600 to-red-700",
+      color: "bg-red-400",
     },
     {
       id: "audioComics" as const,
       label: "Audio Comics",
       count: filteredResults.audioComics.length,
       icon: BookOpen,
-      color: "from-red-600 to-red-700",
+      color: "bg-red-400",
     },
     {
       id: "podcasts" as const,
       label: "Podcasts",
       count: filteredResults.podcasts.length,
       icon: BookOpen,
-      color: "from-red-600 to-red-700",
+      color: "bg-red-400",
     },
     {
       id: "mentoonsCards" as const,
       label: "Mentoons Cards",
       count: filteredResults.mentoonsCards.length,
       icon: ShoppingCart,
-      color: "from-green-600 to-green-700",
+      color: "bg-green-400",
     },
     {
       id: "mentoonsBooks" as const,
       label: "Mentoons Books",
       count: filteredResults.mentoonsBooks.length,
       icon: ShoppingCart,
-      color: "from-green-600 to-green-700",
+      color: "bg-green-400",
     },
     {
       id: "freeGames" as const,
       label: "Free Games",
       count: filteredResults.freeGames.length,
       icon: MdCloudDownload,
-      color: "from-purple-600 to-purple-700",
+      color: "bg-purple-400",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
+    <div
+      className="min-h-screen bg-[#FFF6D6]"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(0,0,0,0.13) 1.4px, transparent 1.4px)",
+        backgroundSize: "16px 16px",
+      }}
+    >
       <SearchHeader searchQuery={searchQuery} totalResults={totalResults} />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-8">
         {loading && (
           <div className="text-center py-12 md:py-20">
-            <p className="text-xl md:text-2xl font-bold text-black">
+            <p
+              className={`font-comic tracking-widest text-3xl md:text-5xl text-black inline-block px-6 py-2 rotate-1 bg-yellow-300 animate-pulse ${PANEL}`}
+            >
               Loading...
             </p>
           </div>
         )}
         {error && (
           <div className="text-center py-12 md:py-20">
-            <p className="text-xl md:text-2xl font-bold text-red-600">
+            <p
+              className={`font-comic tracking-widest text-2xl md:text-4xl text-white inline-block px-6 py-3 -rotate-1 bg-red-500 ${PANEL}`}
+            >
               {error}
             </p>
           </div>
@@ -615,18 +664,19 @@ const SearchResultsPage = () => {
 
         {!loading && !error && (
           <>
-            <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-6 md:mb-10">
+            <div className="flex flex-wrap gap-3 md:gap-4 mb-8 md:mb-12">
               {filters.map((filter) => {
                 if (filter.count === 0 && filter.id !== "all") return null;
                 const Icon = filter.icon;
+                const isActive = activeFilter === filter.id;
                 return (
                   <button
                     key={filter.id}
                     onClick={() => setActiveFilter(filter.id)}
-                    className={`flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4 rounded-xl md:rounded-2xl text-sm sm:text-base md:text-lg font-bold transition-all transform hover:scale-105 shadow-lg ${
-                      activeFilter === filter.id
-                        ? `bg-gradient-to-r ${filter.color} text-white shadow-2xl border-2 border-white`
-                        : "bg-white text-black hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300"
+                    className={`font-comic-chip tracking-wider text-black flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-3 sm:px-4 md:px-5 py-2 md:py-3 rounded-lg text-sm sm:text-base md:text-xl ${PANEL_SM} ${POP} ${
+                      isActive
+                        ? `${filter.color} -rotate-2 scale-105`
+                        : "bg-white hover:bg-yellow-100"
                     }`}
                   >
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
@@ -635,10 +685,8 @@ const SearchResultsPage = () => {
                       {filter.label.split(" ")[0]}
                     </span>
                     <span
-                      className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${
-                        activeFilter === filter.id
-                          ? "bg-white/30 text-white"
-                          : "bg-gray-200 text-black"
+                      className={`font-number px-2 sm:px-3 py-0.5 rounded-full text-xs sm:text-sm border-2 border-black ${
+                        isActive ? "bg-white text-black" : "bg-yellow-300"
                       }`}
                     >
                       {filter.count}
@@ -648,13 +696,15 @@ const SearchResultsPage = () => {
               })}
             </div>
 
-            <div className="space-y-8 md:space-y-16">
+            <div className="space-y-10 md:space-y-20">
               {(activeFilter === "all" || activeFilter === "users") &&
                 filteredResults.users.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <Users className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-blue-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("blue")}>
+                        <Users
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.blue.icon}`}
+                        />
                         Users ({filteredResults.users.length})
                       </h2>
                     </div>
@@ -677,14 +727,16 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "comics") &&
                 filteredResults.comics.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("red")}>
+                        <BookOpen
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.red.icon}`}
+                        />
                         Comics ({filteredResults.comics.length})
                       </h2>
                       <NavLink
                         to="/mentoons-comics"
-                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                        className={viewAllClass("red")}
                       >
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -707,14 +759,16 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "audioComics") &&
                 filteredResults.audioComics.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("red")}>
+                        <BookOpen
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.red.icon}`}
+                        />
                         Audio Comics ({filteredResults.audioComics.length})
                       </h2>
                       <NavLink
                         to="/mentoons-comics?option=audio+comic"
-                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                        className={viewAllClass("red")}
                       >
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -737,14 +791,16 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "podcasts") &&
                 filteredResults.podcasts.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <BookOpen className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-red-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("red")}>
+                        <BookOpen
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.red.icon}`}
+                        />
                         Podcasts ({filteredResults.podcasts.length})
                       </h2>
                       <NavLink
                         to="/mentoons-podcast"
-                        className="text-red-700 hover:text-red-800 font-bold flex items-center space-x-2 bg-red-100 px-3 md:px-4 py-2 rounded-xl hover:bg-red-200 transition-all text-sm md:text-base"
+                        className={viewAllClass("red")}
                       >
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -777,15 +833,14 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "mentoonsCards") &&
                 filteredResults.mentoonsCards.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-green-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("green")}>
+                        <ShoppingCart
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.green.icon}`}
+                        />
                         Mentoons Cards ({filteredResults.mentoonsCards.length})
                       </h2>
-                      <NavLink
-                        to="/products"
-                        className="text-green-700 hover:text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
-                      >
+                      <NavLink to="/products" className={viewAllClass("green")}>
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                       </NavLink>
@@ -804,14 +859,16 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "mentoonsBooks") &&
                 filteredResults.mentoonsBooks.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-green-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("green")}>
+                        <ShoppingCart
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.green.icon}`}
+                        />
                         Mentoons Books ({filteredResults.mentoonsBooks.length})
                       </h2>
                       <NavLink
                         to="/products?productType=mentoons+books#product"
-                        className="text-green-700 hover:                      text-green-800 font-bold flex items-center space-x-2 bg-green-100 px-3 md:px-4 py-2 rounded-xl hover:bg-green-200 transition-all text-sm md:text-base"
+                        className={viewAllClass("green")}
                       >
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -831,14 +888,16 @@ const SearchResultsPage = () => {
               {(activeFilter === "all" || activeFilter === "freeGames") &&
                 filteredResults.freeGames.length > 0 && (
                   <section>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-8 gap-4">
-                      <h2 className="text-2xl md:text-3xl font-bold text-black flex items-center">
-                        <MdCloudDownload className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-4 text-purple-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 md:mb-10 gap-4">
+                      <h2 className={captionClass("purple")}>
+                        <MdCloudDownload
+                          className={`w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3 ${sectionTheme.purple.icon}`}
+                        />
                         Free Games ({filteredResults.freeGames.length})
                       </h2>
                       <NavLink
                         to="/free-download"
-                        className="text-purple-700 hover:text-purple-800 font-bold flex items-center space-x-2 bg-purple-100 px-3 md:px-4 py-2 rounded-xl hover:bg-purple-200 transition-all text-sm md:text-base"
+                        className={viewAllClass("purple")}
                       >
                         <span>View all</span>
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -853,7 +912,7 @@ const SearchResultsPage = () => {
                           key={uuidv4()}
                           className={`${
                             item.cardStyling || "bg-white"
-                          } shadow-2xl group cursor-pointer text-black rounded-xl md:rounded-2xl px-3 md:px-5 py-3 md:py-5 space-y-3`}
+                          } ${PANEL} ${POP} group cursor-pointer text-black rounded-xl px-3 md:px-5 py-3 md:py-5 space-y-3`}
                           onClick={() => {
                             setShowFreeDownloadForm(true);
                             setSelectedComic({
@@ -865,29 +924,29 @@ const SearchResultsPage = () => {
                           <div
                             className={`${
                               item.imgStyling || ""
-                            } overflow-hidden rounded-xl md:rounded-2xl`}
+                            } overflow-hidden rounded-lg border-[3px] border-black`}
                           >
                             <img
-                              className="w-full h-[14rem] sm:h-[16rem] md:h-[18rem] lg:h-[20rem] rounded-xl md:rounded-2xl group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
+                              className="w-full h-[14rem] sm:h-[16rem] md:h-[18rem] lg:h-[20rem] group-hover:scale-105 transition-all ease-in-out duration-300 object-cover object-top"
                               src={item.image}
                               alt="game image"
                             />
                           </div>
                           <div className="space-y-1 md:space-y-2">
-                            <div className="text-base md:text-xl font-semibold tracking-wide">
+                            <div className="font-comic text-xl md:text-3xl tracking-wider [&_span]:![font-family:inherit]">
                               {highlightText(item.name, searchQuery)}
                             </div>
-                            <div className="text-xs md:text-sm tracking-wide line-clamp-2">
+                            <div className="text-xs md:text-sm line-clamp-2">
                               {highlightText(item.desc, searchQuery)}
                             </div>
                           </div>
                           <a
                             href="#"
                             onClick={(e) => e.preventDefault()}
-                            className="flex items-center justify-end gap-2 pt-2 md:pt-4 text-sm md:text-xl border-t border-gray-200 cursor-pointer text-end group-hover:text-red-500 group-hover:underline"
+                            className="font-comic-chip tracking-wider flex items-center justify-end gap-2 pt-2 md:pt-4 text-sm md:text-xl border-t-4 border-dashed border-black cursor-pointer group-hover:text-red-600"
                           >
                             Download Now
-                            <MdCloudDownload className="text-lg md:text-2xl text-red-700 group-hover:text-red-500" />
+                            <MdCloudDownload className="text-lg md:text-2xl text-red-600 group-hover:text-red-500" />
                           </a>
                         </motion.div>
                       ))}
@@ -897,16 +956,24 @@ const SearchResultsPage = () => {
 
               {totalResults === 0 && activeFilter === "all" && (
                 <div className="text-center py-12 md:py-20">
-                  <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-red-200 via-orange-200 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-xl">
-                    <BookOpen className="w-16 h-16 md:w-20 md:h-20 text-red-600" />
+                  <div
+                    className={`w-32 h-32 md:w-40 md:h-40 bg-yellow-300 rounded-full flex items-center justify-center mx-auto mb-8 ${PANEL}`}
+                  >
+                    <BookOpen className="w-16 h-16 md:w-20 md:h-20 text-black" />
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-black mb-3 md:mb-4">
-                    No results found
-                  </h3>
-                  <p className="text-gray-700 mb-6 md:mb-10 max-w-md mx-auto text-base md:text-lg font-medium">
-                    We couldn't find anything matching your search. Try
-                    different keywords.
-                  </p>
+                  {/* speech bubble */}
+                  <div
+                    className={`relative inline-block bg-white rounded-3xl px-6 md:px-10 py-5 md:py-6 max-w-md mx-auto ${PANEL}`}
+                  >
+                    <h3 className="font-comic tracking-wider text-3xl md:text-5xl text-black mb-2 md:mb-3">
+                      No results found!
+                    </h3>
+                    <p className="font-comic-chip tracking-wide text-black text-base md:text-xl">
+                      We couldn't find anything matching your search. Try
+                      different keywords.
+                    </p>
+                    <span className="absolute -top-[14px] left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-l-4 border-t-4 border-black rotate-45" />
+                  </div>
                 </div>
               )}
             </div>
@@ -924,11 +991,12 @@ const SearchResultsPage = () => {
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="relative w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] h-[80vh] md:h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden"
+                  className="relative w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] h-[80vh] md:h-[90vh] bg-white rounded-xl border-4 border-black shadow-[8px_8px_0_0_#FFD60A] overflow-hidden"
                 >
                   <button
                     onClick={closeComicModal}
-                    className="absolute z-50 p-1.5 md:p-2 text-gray-600 transition-colors top-2 md:top-4 right-2 md:right-4 hover:text-gray-900"
+                    aria-label="Close comic viewer"
+                    className="absolute z-50 p-1.5 md:p-2 text-white bg-red-500 border-[3px] border-black rounded-full shadow-[3px_3px_0_0_#000] top-2 md:top-4 right-2 md:right-4 hover:bg-red-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     <MdClose className="text-xl md:text-2xl" />
                   </button>

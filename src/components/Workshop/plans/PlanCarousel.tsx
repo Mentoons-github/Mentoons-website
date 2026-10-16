@@ -50,6 +50,9 @@ interface PlanCarouselProps {
   carouselClick?: { from: string; title: string } | null;
 }
 
+const navBtn =
+  "absolute top-1/2 z-10 -translate-y-1/2 p-2 md:p-3 rounded-full bg-[#ffd93d] border-4 border-black shadow-[3px_3px_0_#000] transition hover:-translate-y-[55%] active:translate-y-[-45%] active:shadow-none";
+
 const PlanCarousel = ({
   handleCarouselClick,
   carouselClick,
@@ -68,19 +71,20 @@ const PlanCarousel = ({
   };
 
   return (
-    <div className="relative w-full mx-auto py-6">
+    <div className="relative w-full mx-auto py-4">
       {/* LEFT BUTTON */}
       <button
         onClick={() => scroll("left")}
-        className="absolute left-0 top-1/2 z-10 p-3 -translate-y-1/2 bg-white rounded-full shadow-xl hover:bg-orange-100 hover:scale-110 transition"
+        className={`${navBtn} left-0`}
+        aria-label="Scroll left"
       >
-        <IoIosArrowBack className="text-2xl text-orange-500" />
+        <IoIosArrowBack className="text-2xl text-black" />
       </button>
 
       {/* CAROUSEL */}
       <div
         ref={carouselRef}
-        className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory gap-6 px-8 md:px-12 p-3 scrollbar-hide"
+        className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory gap-6 px-12 md:px-16 pt-6 pb-8 scrollbar-hide"
       >
         {PlanHeads.map((plan, index) => {
           const isActive =
@@ -90,38 +94,39 @@ const PlanCarousel = ({
           return (
             <motion.div
               key={index}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ y: -4 }}
+              whileTap={{ y: 2 }}
+              animate={{ scale: isActive ? 1.05 : 1 }}
               onClick={() => handleCarouselClick(plan.from, plan.title)}
-              className={`relative min-w-[260px] sm:min-w-[300px] snap-center rounded-xl p-4 md:p-6 flex flex-col justify-between space-y-2 md:space-y-3 cursor-pointer border-4 transition-all duration-300`}
+              className="relative min-w-[260px] sm:min-w-[300px] snap-center p-4 md:p-6 flex flex-col justify-between gap-2 md:gap-3 cursor-pointer border-4 border-black"
               style={{
                 backgroundColor: plan.bg,
-                borderColor:  plan.border,
                 boxShadow: isActive
-                  ? "0px 12px 30px rgba(0,0,0,0.2)"
-                  : "0px 4px 12px rgba(0,0,0,0.08)",
-                transform: isActive ? "scale(1.05)" : "scale(1)",
+                  ? `8px 8px 0 ${plan.border}, 8px 8px 0 2px #000`
+                  : "5px 5px 0 #000",
               }}
             >
               {isActive && (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -30 }}
+                  animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className={`absolute -top-3 -right-3 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-lg`}
-                  style={{backgroundColor:plan.border}}
+                  className="absolute -top-4 -right-4 text-black w-9 h-9 rounded-full border-4 border-black flex items-center justify-center"
+                  style={{ backgroundColor: plan.border }}
                 >
-                  <CheckCircle size={14} />
+                  <CheckCircle size={18} strokeWidth={3} />
                 </motion.div>
               )}
 
-              <h3 className="text-lg font-semibold text-[#221c1c]">
+              <h3 className="font-comic-chip text-2xl tracking-wide text-[#221c1c]">
                 {plan.title} {plan.from === "plan" ? "Workshop" : ""}
               </h3>
 
-              <p className="text-[#272071] font-bold">6-12 & 13-19</p>
+              <p className="font-comic text-xl tracking-wider text-[#272071]">
+                6-12 & 13-19
+              </p>
 
-              <p style={{ color: plan.border }} className="font-bold">
+              <p className="font-number text-xl tracking-wider self-start bg-white border-2 border-black px-3 py-0.5 text-black -rotate-1">
                 {plan.bottom} {plan.price && <span>({plan.price})</span>}
               </p>
             </motion.div>
@@ -131,9 +136,10 @@ const PlanCarousel = ({
 
       <button
         onClick={() => scroll("right")}
-        className="absolute right-0 top-1/2 z-10 p-3 -translate-y-1/2 bg-white rounded-full shadow-xl hover:bg-orange-100 hover:scale-110 transition"
+        className={`${navBtn} right-0`}
+        aria-label="Scroll right"
       >
-        <IoIosArrowForward className="text-2xl text-orange-500" />
+        <IoIosArrowForward className="text-2xl text-black" />
       </button>
     </div>
   );

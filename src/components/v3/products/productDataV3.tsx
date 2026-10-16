@@ -50,6 +50,10 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "price-desc", label: "Price: High to Low" },
 ];
 
+// Comic look: ink border + hard offset shadow that "presses" on click
+const COMIC_BTN =
+  "border-2 border-gray-900 shadow-[2px_2px_0_0_#111827] transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none";
+
 const getProductDetailPath = (product: ProductBase): string =>
   product.type === ProductType.TOONLAND
     ? `/mentoons-store/toonland-product/${product._id}`
@@ -125,16 +129,16 @@ const ProductCardV3 = ({
   return (
     <article
       onClick={() => navigate(getProductDetailPath(product))}
-      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-2 transition hover:border-[#ff9800]/50 hover:shadow-md"
+      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-gray-900 bg-white p-2 shadow-[5px_5px_0_0_#111827] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_#111827]"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border-2 border-gray-900 bg-[#FFF3E0]">
         {product.ageCategory && (
-          <span className="absolute left-2 top-2 z-10 rounded-md bg-gray-700/85 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          <span className="font-comic absolute left-2 top-2 z-10 rounded-md border-2 border-gray-900 bg-[#FFD93D] px-1.5 text-sm leading-5 tracking-wide text-gray-900">
             {product.ageCategory} yrs
           </span>
         )}
         {discount && (
-          <span className="absolute right-2 top-2 z-10 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="font-comic-chip absolute right-2 top-2 z-10 rotate-6 rounded-full border-2 border-gray-900 bg-red-500 px-2 py-0.5 text-xs tracking-wide text-white shadow-[2px_2px_0_0_#111827]">
             {discount.percentOff}% OFF
           </span>
         )}
@@ -146,14 +150,14 @@ const ProductCardV3 = ({
             className="h-full w-full object-contain"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-gray-400">
+          <div className="font-comic flex h-full items-center justify-center text-lg tracking-wide text-gray-500">
             No image
           </div>
         )}
       </div>
 
       <div className="flex flex-1 flex-col px-1 pb-1 pt-2.5">
-        <h3 className="line-clamp-1 text-sm font-semibold text-gray-900">
+        <h3 className="font-comic line-clamp-1 text-xl tracking-wide text-gray-900">
           {product.title}
         </h3>
 
@@ -165,9 +169,9 @@ const ProductCardV3 = ({
             {[0, 1, 2, 3, 4].map((i) => (
               <Star
                 key={i}
-                className={`h-3 w-3 ${
+                className={`h-3.5 w-3.5 ${
                   i < Math.round(product.rating ?? 0)
-                    ? "fill-yellow-400 text-yellow-400"
+                    ? "fill-yellow-400 text-gray-900"
                     : "text-gray-300"
                 }`}
               />
@@ -176,14 +180,14 @@ const ProductCardV3 = ({
         )}
 
         {product.description && (
-          <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+          <p className="mt-1 line-clamp-2 text-xs text-gray-600">
             {product.description}
           </p>
         )}
 
         <div className="mt-auto flex items-center justify-between pt-3">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold text-gray-900">
+            <span className="font-comic-chip text-xl tracking-wide text-gray-900">
               ₹{discount ? discount.sellingPrice : product.price}
             </span>
             {discount && (
@@ -203,17 +207,17 @@ const ProductCardV3 = ({
               e.stopPropagation();
               onToggleFavourite(product._id);
             }}
-            className="rounded-full p-1 text-gray-400 hover:text-red-500"
+            className="rounded-full border-2 border-gray-900 bg-white p-1 text-gray-900 transition hover:bg-red-100"
           >
             <Heart
-              className={`h-5 w-5 ${
+              className={`h-4 w-4 ${
                 isFavourite ? "fill-red-500 text-red-500" : ""
               }`}
             />
           </button>
         </div>
 
-        <div className="mt-2 flex flex-nowrap items-stretch gap-1.5">
+        <div className="mt-3 flex flex-nowrap items-stretch gap-1.5">
           <button
             type="button"
             disabled={isLoading}
@@ -221,7 +225,7 @@ const ProductCardV3 = ({
               e.stopPropagation();
               handleAddToCart(e, product);
             }}
-            className="flex min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-lg bg-gray-100 px-1.5 py-2 text-[11px] font-semibold text-gray-900 transition hover:bg-[#ff9800] hover:text-white disabled:opacity-50"
+            className={`font-comic flex min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-lg bg-[#FFD93D] px-1.5 py-1.5 text-base tracking-wide text-gray-900 hover:bg-[#ff9800] hover:text-white disabled:opacity-50 ${COMIC_BTN}`}
           >
             {isPreorder ? (
               <>
@@ -242,7 +246,7 @@ const ProductCardV3 = ({
               e.stopPropagation();
               onSendGift(product);
             }}
-            className="flex min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-1.5 py-2 text-[11px] font-semibold text-white shadow-sm transition hover:from-red-600 hover:to-pink-600 hover:shadow-md active:scale-95 disabled:opacity-50"
+            className={`font-comic flex min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-lg bg-pink-500 px-1.5 py-1.5 text-base tracking-wide text-white hover:bg-red-500 disabled:opacity-50 ${COMIC_BTN}`}
           >
             <Gift className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Send as Gift</span>
@@ -255,9 +259,9 @@ const ProductCardV3 = ({
               e.stopPropagation();
               handleBuyNow(e, product);
             }}
-            className="flex shrink-0 items-center justify-center rounded-lg border border-[#ff9800] px-2.5 text-[#ff9800] transition hover:bg-[#fff3e0] disabled:opacity-50"
+            className={`flex shrink-0 items-center justify-center rounded-lg bg-white px-2.5 text-gray-900 hover:bg-[#ff9800] hover:text-white disabled:opacity-50 ${COMIC_BTN}`}
           >
-            <Zap className="h-3.5 w-3.5" />
+            <Zap className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -292,7 +296,6 @@ const ProductSectionsV3 = ({
     error,
   } = useSelector((state: RootState) => state.products);
 
-  
   const [hasLoaded, setHasLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [sortKey, setSortKey] = useState<SortKey>("popularity");
@@ -469,15 +472,18 @@ const ProductSectionsV3 = ({
 
   return (
     <div className="w-full" id="product">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-gray-900">
-          {selectedCategory.label} ({totalShown})
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-comic text-3xl tracking-wide text-gray-900 sm:text-4xl">
+          {selectedCategory.label}{" "}
+          <span className="font-comic-chip ml-1 inline-block -rotate-3 rounded-full border-2 border-gray-900 bg-[#ff9800] px-3 py-0.5 align-middle text-lg text-white shadow-[2px_2px_0_0_#111827]">
+            {totalShown}
+          </span>
         </h2>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-900"
               aria-hidden="true"
             />
             <input
@@ -486,26 +492,26 @@ const ProductSectionsV3 = ({
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search products..."
               aria-label="Search products"
-              className="w-52 rounded-lg border border-gray-300 bg-white py-1.5 pl-9 pr-8 text-sm outline-none focus:border-[#ff9800]"
+              className="w-56 rounded-xl border-2 border-gray-900 bg-white py-2 pl-9 pr-8 text-sm font-medium shadow-[3px_3px_0_0_#111827] outline-none focus:bg-[#FFF3E0]"
             />
             {searchTerm && (
               <button
                 type="button"
                 aria-label="Clear search"
                 onClick={() => setSearchTerm("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-900 hover:text-red-500"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
-          <label className="relative flex items-center text-sm text-gray-600">
+          <label className="relative flex items-center text-sm text-gray-900">
             <span className="sr-only">Sort products</span>
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="cursor-pointer appearance-none rounded-lg border border-gray-300 bg-white py-1.5 pl-3 pr-8 text-sm outline-none focus:border-[#ff9800]"
+              className="font-comic cursor-pointer appearance-none rounded-xl border-2 border-gray-900 bg-[#FFD93D] py-1.5 pl-3 pr-9 text-base tracking-wide shadow-[3px_3px_0_0_#111827] outline-none"
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -514,7 +520,8 @@ const ProductSectionsV3 = ({
               ))}
             </select>
             <ChevronDown
-              className="pointer-events-none absolute right-2 h-4 w-4 text-gray-500"
+              className="pointer-events-none absolute right-2 h-4 w-4 text-gray-900"
+              strokeWidth={3}
               aria-hidden="true"
             />
           </label>
@@ -522,17 +529,17 @@ const ProductSectionsV3 = ({
       </div>
 
       {hasLoaded && totalShown === 0 && (
-        <div className="rounded-lg bg-gray-50 py-12 text-center">
+        <div className="rounded-2xl border-2 border-dashed border-gray-900 bg-white py-12 text-center shadow-[5px_5px_0_0_#111827]">
           <img
             src="/assets/notFound/notFound.png"
             alt="No products found"
-            className="mx-auto mb-4 h-32 w-32 opacity-60"
+            className="mx-auto mb-4 h-32 w-32 opacity-80"
             loading="lazy"
           />
-          <h3 className="text-lg font-medium text-gray-600">
+          <h3 className="font-comic text-3xl tracking-wide text-gray-900">
             No products found
           </h3>
-          <p className="mt-2 px-4 text-sm text-gray-500">
+          <p className="mt-2 px-4 text-sm text-gray-600">
             Try adjusting your search or filters to find what you're looking
             for.
           </p>
@@ -543,7 +550,7 @@ const ProductSectionsV3 = ({
                 setSearchTerm("");
                 onClearAll();
               }}
-              className="mt-4 rounded-lg bg-[#ff9800] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e68900]"
+              className="font-comic mt-4 rounded-xl border-2 border-gray-900 bg-[#ff9800] px-5 py-2 text-lg tracking-wide text-white shadow-[3px_3px_0_0_#111827] transition hover:bg-[#e68900] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
             >
               Clear filters
             </button>
@@ -552,7 +559,7 @@ const ProductSectionsV3 = ({
       )}
 
       {isAllView && sections.length > 0 && (
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-12">
           {sections.map(({ category, items }) => {
             const Icon = category.icon;
             return (
@@ -562,12 +569,18 @@ const ProductSectionsV3 = ({
               >
                 <h3
                   id={`section-${category.id}`}
-                  className="mb-3 flex items-center gap-2 text-base font-bold text-gray-900"
+                  className="font-comic mb-4 flex items-center gap-2 text-2xl tracking-wide text-gray-900 sm:text-3xl"
                 >
-                  <Icon className="h-5 w-5 text-[#ff9800]" aria-hidden="true" />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-900 bg-[#ff9800] shadow-[2px_2px_0_0_#111827]">
+                    <Icon
+                      className="h-5 w-5 text-white"
+                      strokeWidth={2.2}
+                      aria-hidden="true"
+                    />
+                  </span>
                   {category.label}
                 </h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {items.map(renderCard)}
                 </div>
               </section>
@@ -577,7 +590,7 @@ const ProductSectionsV3 = ({
       )}
 
       {!isAllView && categoryProducts.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categoryProducts.map(renderCard)}
         </div>
       )}

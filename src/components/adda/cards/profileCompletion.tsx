@@ -23,7 +23,7 @@ const ProfileCompletionTooltip = ({
       <div className="fixed inset-0 z-40" onClick={handleCloseTooltip} />
       <div
         className={`
-          relative mr-4 bg-white rounded-xl shadow-2xl border border-gray-200 max-w-sm z-50
+          relative mr-4 bg-white rounded-xl border-2 border-gray-900 shadow-[5px_5px_0_0_#111827] max-w-sm z-50
           transform transition-all duration-300 ease-out
           ${
             isAnimating
@@ -32,18 +32,18 @@ const ProfileCompletionTooltip = ({
           }
         `}
       >
-        <div className="absolute right-0 top-1/2 transform translate-x-2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-white border-t-8 border-t-transparent border-b-8 border-b-transparent" />
+        <div className="absolute right-0 top-1/2 transform translate-x-2.5 -translate-y-1/2 w-0 h-0 border-l-8 border-l-gray-900 border-t-8 border-t-transparent border-b-8 border-b-transparent" />
         <button
           onClick={handleCloseTooltip}
-          className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
+          className="absolute top-3 right-3 p-1 rounded-full border-2 border-gray-900 bg-white hover:bg-orange-100 transition-colors duration-200"
           aria-label="Close"
         >
-          <X size={16} className="text-gray-400" />
+          <X size={14} className="text-gray-900" />
         </button>
         <div className="p-6">
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center">
+            <div className="flex items-center justify-between mb-2 pr-8">
+              <h3 className="font-comic tracking-wide text-2xl text-gray-900 flex items-center">
                 {isProfileComplete ? (
                   <>
                     <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
@@ -56,16 +56,14 @@ const ProfileCompletionTooltip = ({
                   </>
                 )}
               </h3>
-              <span className="text-sm font-semibold text-gray-500">
+              <span className="font-comic tracking-wide text-lg text-gray-700">
                 {profileCompletionPercentage}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-white border-2 border-gray-900 rounded-full h-3 overflow-hidden">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  isProfileComplete
-                    ? "bg-green-500"
-                    : "bg-gradient-to-r from-orange-500 to-orange-400"
+                className={`h-full transition-all duration-500 ${
+                  isProfileComplete ? "bg-green-500" : "bg-[#F69306]"
                 }`}
                 style={{ width: `${profileCompletionPercentage}%` }}
               />
@@ -85,7 +83,7 @@ const ProfileCompletionTooltip = ({
               <ul className="space-y-2 mb-4">
                 {incompleteFields.map((field, index) => (
                   <li key={index} className="flex items-center text-gray-700">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-3 flex-shrink-0" />
+                    <div className="w-2.5 h-2.5 bg-orange-400 border border-gray-900 rounded-full mr-3 flex-shrink-0" />
                     <span className="text-sm">{field}</span>
                   </li>
                 ))}
@@ -95,11 +93,11 @@ const ProfileCompletionTooltip = ({
           <button
             onClick={handleEditProfile}
             className={`
-              w-full font-semibold rounded-lg px-4 py-3 transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center
+              font-comic tracking-wide text-lg w-full text-white border-2 border-gray-900 rounded-lg px-4 py-2.5 shadow-[3px_3px_0_0_#111827] transition-all duration-200 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center
               ${
                 isProfileComplete
-                  ? "bg-gradient-to-r from-green-500 to-green-400 text-white hover:shadow-lg"
-                  : "bg-gradient-to-r from-blue-500 to-blue-400 text-white hover:shadow-lg"
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-blue-500 hover:bg-blue-600"
               }
             `}
           >
@@ -166,18 +164,18 @@ const ProfileCompletionWidget = ({
       <button
         onClick={handleToggleFields}
         className={`
-          relative font-semibold rounded-full px-5 py-3 shadow-lg transition-all duration-300 transform hover:scale-110 active:scale-95
+          font-comic tracking-wide text-lg relative text-white border-2 border-gray-900 rounded-full px-5 py-2.5 shadow-[4px_4px_0_0_#111827] transition-all duration-200 hover:-rotate-2 hover:scale-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
           ${
             isProfileComplete
-              ? "bg-gradient-to-r from-green-500 to-green-400 text-white hover:shadow-green-200"
-              : "bg-gradient-to-r from-orange-500 to-orange-400 text-white hover:shadow-orange-200"
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-[#F69306] hover:bg-orange-500"
           }
-          hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-200 focus:ring-opacity-50
+          focus:outline-none focus:ring-4 focus:ring-orange-200 focus:ring-opacity-50
         `}
         aria-label={`Profile completion: ${profileCompletionPercentage}% complete`}
       >
         {!isProfileComplete && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 animate-pulse">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs border-2 border-gray-900 rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 animate-pulse">
             {incompleteFields.length}
           </span>
         )}

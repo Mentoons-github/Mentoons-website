@@ -1,6 +1,21 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, CSSProperties } from "react";
 import { WorkshopCategory } from "@/types";
+
+const INK = "#1f1308";
+
+// ---- inline comic styles ----
+const headingStyle: CSSProperties = {
+  color: INK,
+  letterSpacing: "0.03em",
+  lineHeight: 1.05,
+  textShadow: "3px 3px 0 #fb923c",
+};
+
+const pillBase: CSSProperties = {
+  border: `3px solid ${INK}`,
+  boxShadow: `3px 3px 0 ${INK}`,
+};
 
 interface CarouselHeaderProps {
   categories: WorkshopCategory[];
@@ -38,16 +53,15 @@ const CarouselHeader = ({
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 85%", "end 15%"], // Starts earlier, ends later → gentler over longer scroll distance
+    offset: ["start 85%", "end 15%"],
   });
 
-  // Very subtle movements – nothing disappears or moves dramatically
   const titleY = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const contentY = useTransform(scrollYProgress, [0, 1], [0, -25]);
   const buttonsY = useTransform(scrollYProgress, [0, 1], [0, -30]);
-  const imageY = useTransform(scrollYProgress, [0, 1], [0, -90]); // decorative image moves more (classic parallax)
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]); // tiny gentle zoom
-  const imageRotate = useTransform(scrollYProgress, [0, 1], [-2, 6]); // soft rotation
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, -90]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [-2, 6]);
 
   const handleCategoryClick = (index: number) => {
     const newDirection = index > currentCategoryIndex ? 1 : -1;
@@ -70,23 +84,23 @@ const CarouselHeader = ({
   return (
     <motion.div ref={ref} className="mb-12 relative">
       <motion.h1
-        style={{ y: titleY }}
-        className="text-4xl md:text-7xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 text-start"
+        style={{ ...headingStyle, y: titleY }}
+        className="font-comic text-5xl md:text-7xl mb-4 text-start"
       >
         {categories[currentCategoryIndex].categoryName}
       </motion.h1>
 
       {categories[currentCategoryIndex].description ? (
         <motion.p
-          style={{ y: contentY }}
-          className="text-xl text-slate-600 text-start"
+          style={{ y: contentY, color: INK }}
+          className="text-xl text-start font-medium"
         >
           {categories[currentCategoryIndex].description}
         </motion.p>
       ) : (
         <motion.p
-          style={{ y: contentY }}
-          className="text-xl text-slate-600 text-start"
+          style={{ y: contentY, color: INK }}
+          className="text-xl text-start font-medium"
         >
           Discover engaging, educational experiences designed to inspire and
           nurture young minds
@@ -102,10 +116,16 @@ const CarouselHeader = ({
           <button
             key={index}
             onClick={() => handleCategoryClick(index)}
-            className={`px-4 py-2 rounded-full font-semibold transition-all duration-300 ${
+            style={{
+              ...pillBase,
+              color: currentCategoryIndex === index ? "#fff" : INK,
+              textShadow:
+                currentCategoryIndex === index ? `2px 2px 0 ${INK}` : "none",
+            }}
+            className={`font-comic-chip tracking-wide px-4 py-2 rounded-full transition-all duration-300 hover:-translate-y-0.5 ${
               currentCategoryIndex === index
-                ? `bg-gradient-to-r ${currentTheme.primary} text-white`
-                : "bg-slate-200 text-gray-600 hover:bg-slate-300"
+                ? `bg-gradient-to-r ${currentTheme.primary}`
+                : "bg-white hover:bg-orange-100"
             }`}
           >
             {categories[index].categoryName}
@@ -113,22 +133,24 @@ const CarouselHeader = ({
         ))}
       </motion.div>
 
-      {/* Workshop indicators – kept static so they're always easy to click */}
-      <div className="flex flex-wrap justify-start gap-3 mt-4">
+      {/* Workshop indicators */}
+      <div className="flex flex-wrap justify-start gap-3 mt-5">
         {categories[currentCategoryIndex].workshops.map((_, index) => (
           <button
             key={index}
             onClick={() => handleWorkshopClick(index)}
-            className={`h-3 rounded-full transition-all duration-300 ${
+            aria-label={`Show workshop ${index + 1}`}
+            style={{ border: `2px solid ${INK}` }}
+            className={`h-4 rounded-full transition-all duration-300 ${
               currentWorkshopIndex === index
                 ? `w-12 bg-gradient-to-r ${currentTheme.primary}`
-                : "w-3 bg-slate-300 hover:bg-slate-400"
+                : "w-4 bg-white hover:bg-orange-200"
             }`}
           />
         ))}
       </div>
 
-      {/* Decorative image – main parallax hero */}
+      {/* Decorative image */}
       <motion.img
         src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1787297731778-f7efe25d-e02b-4bf0-b9d6-ed6458d8cf66.png"
         alt="Decorative growth sparkle"
@@ -137,6 +159,7 @@ const CarouselHeader = ({
           y: imageY,
           scale: imageScale,
           rotate: imageRotate,
+          filter: `drop-shadow(3px 3px 0 ${INK})`,
         }}
         whileHover={{ scale: 1.12, rotate: 12 }}
       />

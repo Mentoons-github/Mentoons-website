@@ -51,11 +51,9 @@ const CoverPicture = ({
   };
 
   return (
-    // Outer wrapper: pb gives space below for the profile picture overflow
     <div className="relative mb-16 sm:mb-18 lg:mb-20">
-      {/* Cover photo */}
       <div
-        className={`w-full h-48 sm:h-64 lg:h-80 rounded-t-2xl bg-cover bg-center relative overflow-hidden ${
+        className={`w-full h-48 sm:h-64 lg:h-80 rounded-t-2xl border-2 border-gray-900 shadow-[5px_5px_0_0_#111827] bg-cover bg-center relative overflow-hidden ${
           userDetails.coverImage
             ? ""
             : "bg-gradient-to-r from-orange-300 to-green-400"
@@ -66,9 +64,8 @@ const CoverPicture = ({
             : {}
         }
       >
-        {/* Cover photo edit button */}
         <div
-          className="absolute bottom-4 right-4 p-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 w-11 h-11 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95 z-10"
+          className="absolute bottom-4 right-4 p-3 rounded-full bg-[#F69306] border-2 border-gray-900 w-11 h-11 flex items-center justify-center shadow-[3px_3px_0_0_#111827] transition-all duration-200 cursor-pointer hover:bg-orange-500 hover:-rotate-6 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none z-10"
           onClick={() => coverPhotoInputRef.current?.click()}
           title="Edit cover photo"
         >
@@ -92,7 +89,7 @@ const CoverPicture = ({
               "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
             }
             alt="Profile"
-            className="w-full h-full object-cover rounded-full border-[3px] border-white shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover rounded-full border-4 border-gray-900 bg-white shadow-[4px_4px_0_0_#111827] transition-transform duration-300 group-hover:scale-[1.03] group-hover:-rotate-2"
           />
           <div
             className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100"
@@ -102,7 +99,7 @@ const CoverPicture = ({
           </div>
 
           <div
-            className="absolute bottom-0.5 right-0.5 bg-gradient-to-br from-orange-500 to-orange-400 p-2 rounded-full shadow-md border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95"
+            className="absolute bottom-0.5 right-0.5 bg-[#F69306] p-2 rounded-full shadow-[2px_2px_0_0_#111827] border-2 border-gray-900 transition-all duration-200 cursor-pointer hover:bg-orange-500 hover:scale-110 active:scale-95"
             onClick={() => profilePhotoInputRef.current?.click()}
           >
             <Plus className="text-white w-3 h-3 sm:w-3.5 sm:h-3.5" />

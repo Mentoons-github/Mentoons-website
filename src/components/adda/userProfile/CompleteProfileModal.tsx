@@ -38,7 +38,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
               damping: 20,
               stiffness: 300,
             }}
-            className="relative w-full max-w-md bg-[#F69306] p-4 rounded-2xl"
+            className="relative w-full max-w-md bg-[#F69306] p-4 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]"
           >
             <motion.div
               initial={{ scale: 0.95 }}
@@ -48,13 +48,13 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                 type: "spring",
                 stiffness: 200,
               }}
-              className="relative p-6 overflow-hidden bg-white rounded-lg"
+              className="relative p-6 overflow-hidden bg-white border-2 border-gray-900 rounded-lg"
             >
               <motion.button
                 onClick={onClose}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="absolute text-orange-500 top-4 right-4 hover:text-orange-600"
+                className="absolute text-gray-900 top-4 right-4 hover:text-orange-600"
                 aria-label="Close"
               >
                 <svg
@@ -64,7 +64,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
@@ -82,7 +82,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     type: "spring",
                     stiffness: 300,
                   }}
-                  className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-400 sm:w-20 sm:h-20 md:w-24 md:h-24"
+                  className="flex items-center justify-center w-16 h-16 mb-6 rounded-full border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] bg-gradient-to-br from-purple-600 to-blue-400 sm:w-20 sm:h-20 md:w-24 md:h-24"
                 >
                   <motion.div
                     animate={{
@@ -95,7 +95,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                       repeatType: "reverse",
                       repeatDelay: 3,
                     }}
-                    className="w-10 h-10 bg-white rounded-full sm:w-12 sm:h-12 md:w-16 md:h-16"
+                    className="w-10 h-10 bg-white rounded-full border-2 border-gray-900 sm:w-12 sm:h-12 md:w-16 md:h-16"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +116,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="mb-4 text-2xl font-bold text-center text-gray-800 sm:text-3xl sm:mb-6 md:mb-8"
+                  className="mb-4 text-3xl tracking-wide text-center text-gray-900 font-comic sm:text-4xl sm:mb-6 md:mb-8"
                 >
                   Complete Your Profile to Earn 10 Points!
                 </motion.h2>
@@ -126,7 +126,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="mb-4 text-lg sm:text-xl"
+                    className="mb-4 text-lg tracking-wide font-comic sm:text-xl"
                   >
                     Finish setting up your profile to:
                   </motion.p>
@@ -155,7 +155,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                       >
                         <motion.div
                           whileHover={{ scale: 1.1 }}
-                          className="flex items-center justify-center w-5 h-5 text-white bg-green-500 rounded sm:w-6 sm:h-6"
+                          className="flex items-center justify-center w-5 h-5 text-white bg-green-500 border-2 border-gray-900 rounded sm:w-6 sm:h-6"
                         >
                           ✓
                         </motion.div>
@@ -172,7 +172,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.8 }}
-                  className="w-full py-2 text-lg font-semibold text-white transition-colors bg-orange-500 rounded-lg sm:py-3 sm:text-xl hover:bg-orange-600"
+                  className="w-full py-2 text-xl tracking-wide text-white transition-colors bg-orange-500 border-2 border-gray-900 rounded-lg shadow-[4px_4px_0_0_#111827] font-comic sm:py-3 sm:text-2xl hover:bg-orange-600"
                 >
                   Complete My Profile
                 </motion.button>
@@ -182,7 +182,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 };
 

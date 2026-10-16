@@ -10,7 +10,7 @@ const FreeBanner = () => {
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        defaults: { ease: "power3.out" },
+        defaults: { ease: "back.out(1.6)" },
         scrollTrigger: {
           trigger: bannerRef.current,
           start: "top 82%",
@@ -20,20 +20,20 @@ const FreeBanner = () => {
 
       tl.fromTo(
         titleRef.current,
-        { y: 45, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, duration: 1.1 },
+        { y: 45, opacity: 0, scale: 0.8, rotation: -4 },
+        { y: 0, opacity: 1, scale: 1, rotation: -2, duration: 0.9 },
       )
         .fromTo(
           textRef.current,
-          { y: 35, opacity: 0, scale: 0.97 },
-          { y: 0, opacity: 1, scale: 1, duration: 1 },
-          "-=0.7",
+          { y: 35, opacity: 0, scale: 0.9 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.8 },
+          "-=0.5",
         )
         .fromTo(
           imgRef.current,
-          { x: 60, opacity: 0, scale: 0.85, rotation: 4 },
-          { x: 0, opacity: 1, scale: 1, rotation: 0, duration: 1.3 },
-          "-=0.9",
+          { x: 60, opacity: 0, scale: 0.7, rotation: 10 },
+          { x: 0, opacity: 1, scale: 1, rotation: 0, duration: 1 },
+          "-=0.6",
         );
     }, bannerRef);
 
@@ -43,49 +43,54 @@ const FreeBanner = () => {
   return (
     <div
       ref={bannerRef}
-      className="relative min-h-[50vh] bg-gradient-to-br from-orange-400 via-yellow-300 to-orange-500 p-6 md:p-10 rounded-3xl overflow-hidden"
+      className="relative min-h-[50vh] bg-gradient-to-br from-orange-400 via-yellow-300 to-orange-500 p-6 md:p-10 rounded-3xl overflow-hidden border-4 border-black shadow-[10px_10px_0_#000]"
     >
-      <svg
-        className="absolute inset-0 w-full h-full"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <clipPath id="curveClip">
-            <path d="M0,0 Q30,40 100,10 L100,90 Q70,100 30,100 L0,80 Q10,40 0,0 Z" />
-          </clipPath>
-        </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill="url(#gradient)"
-          clipPath="url(#curveClip)"
-        />
-      </svg>
+      {/* halftone overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-30"
+        style={{
+          backgroundImage: "radial-gradient(#000 1.5px, transparent 1.5px)",
+          backgroundSize: "14px 14px",
+          maskImage: "linear-gradient(to left, black, transparent 70%)",
+          WebkitMaskImage: "linear-gradient(to left, black, transparent 70%)",
+        }}
+      />
 
-      <div className="relative z-10 ml-6 md:ml-12 font-montserrat space-y-6">
+      <div className="relative z-10 ml-2 md:ml-12 space-y-8">
         <h1
           ref={titleRef}
-          className="text-5xl md:text-7xl font-bold tracking-wider text-gray-900 drop-shadow-lg w-48 md:w-64"
+          className="font-comic text-6xl md:text-8xl tracking-widest text-white uppercase leading-none max-w-xs md:max-w-md"
+          style={{
+            WebkitTextStroke: "3px #000",
+            textShadow: "6px 6px 0 #000",
+            paintOrder: "stroke fill",
+          }}
         >
           FREE DOWNLOADS
         </h1>
+
         <p
           ref={textRef}
-          className="max-w-md md:max-w-xl text-gray-900 text-base md:text-lg leading-relaxed"
+          className="font-comic relative max-w-md md:max-w-xl bg-white text-gray-900 text-lg md:text-2xl tracking-wide leading-snug border-4 border-black rounded-2xl p-5 shadow-[6px_6px_0_#000]"
         >
           Dive into a collection of fun and engaging games to play anytime,
           anywhere — plus access important emergency contact tools designed to
           keep you informed and prepared. Everything is just a click away, and
           completely free!
+          {/* speech bubble tail */}
+          <span className="absolute -top-[18px] left-10 w-0 h-0 border-l-[14px] border-r-[14px] border-b-[18px] border-l-transparent border-r-transparent border-b-black" />
+          <span className="absolute -top-[10px] left-[42px] w-0 h-0 border-l-[12px] border-r-[12px] border-b-[15px] border-l-transparent border-r-transparent border-b-white" />
         </p>
       </div>
 
-      <img
-        ref={imgRef}
-        src="/assets/freeDownloads/bg.png"
-        alt="Free Downloads Icon"
-        className="absolute top-4 right-4 md:top-1/4 md:right-1/4 translate-x-1/2 w-auto h-[250px]"
-      />
+      <div className="absolute inset-y-0 right-0 hidden lg:flex items-center pr-10 xl:pr-24 pointer-events-none">
+        <img
+          ref={imgRef}
+          src="/assets/freeDownloads/bg.png"
+          alt="Free Downloads Icon"
+          className="w-auto h-[300px] xl:h-[380px] drop-shadow-[6px_6px_0_rgba(0,0,0,0.9)]"
+        />
+      </div>
     </div>
   );
 };

@@ -37,7 +37,7 @@ const LeftSection = ({
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div className="p-4 sm:p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+    <div className="p-4 sm:p-6 bg-white rounded-2xl border-2 border-gray-900 shadow-[5px_5px_0_0_#111827]">
       {isEditing ? (
         <ProfileFormModal
           userDetails={userDetails}
@@ -52,7 +52,7 @@ const LeftSection = ({
         <>
           <div className="flex flex-col items-center">
             <div className="text-center">
-              <h1 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">
+              <h1 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900">
                 {userDetails.name || "User Name"}
               </h1>
               <p className="text-gray-600 mt-1 text-xs sm:text-sm">
@@ -66,24 +66,24 @@ const LeftSection = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 sm:gap-6 mt-6 p-2 sm:p-3 bg-gray-50 rounded-xl w-full justify-center">
+            <div className="flex items-center gap-4 sm:gap-6 mt-6 p-2 sm:p-3 bg-orange-50 border-2 border-gray-900 rounded-xl w-full justify-center">
               <button
                 className="flex flex-col items-center text-center group cursor-pointer"
                 onClick={() => setModalType("following")}
               >
-                <span className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-orange-500 transition-colors">
+                <span className="font-number tracking-wide text-xl sm:text-2xl text-gray-900 group-hover:text-orange-500 transition-colors">
                   {totalFollowing.length}
                 </span>
                 <span className="text-xs sm:text-sm text-gray-600">
                   Following
                 </span>
               </button>
-              <div className="w-px h-6 sm:h-8 bg-gray-300"></div>
+              <div className="w-0.5 h-6 sm:h-8 bg-gray-900"></div>
               <button
                 className="flex flex-col items-center text-center group cursor-pointer"
                 onClick={() => setModalType("followers")}
               >
-                <span className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-orange-500 transition-colors">
+                <span className="font-number tracking-wide text-xl sm:text-2xl text-gray-900 group-hover:text-orange-500 transition-colors">
                   {totalFollowers.length}
                 </span>
                 <span className="text-xs sm:text-sm text-gray-600">
@@ -95,18 +95,18 @@ const LeftSection = ({
 
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-base sm:text-lg text-gray-900">
+              <h2 className="font-comic tracking-wide text-xl sm:text-2xl text-gray-900">
                 Personal Info
               </h2>
               <Edit
-                className="w-4 h-4 text-gray-400 cursor-pointer hover:text-orange-500 transition-colors"
+                className="w-4 h-4 text-gray-500 cursor-pointer hover:text-orange-500 transition-colors"
                 onClick={() => setIsEditing(true)}
               />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <div className="p-2 bg-orange-100 rounded-lg">
+              <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-transparent hover:border-gray-900 hover:bg-orange-50 transition-all cursor-pointer">
+                <div className="p-2 bg-orange-100 border-2 border-gray-900 rounded-lg">
                   <MapPin className="w-4 h-4 text-orange-600" />
                 </div>
                 <div>
@@ -117,8 +117,8 @@ const LeftSection = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-transparent hover:border-gray-900 hover:bg-orange-50 transition-all cursor-pointer">
+                <div className="p-2 bg-blue-100 border-2 border-gray-900 rounded-lg">
                   <CalendarRange className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
@@ -131,8 +131,8 @@ const LeftSection = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <div className="p-2 bg-green-100 rounded-lg">
+              <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-transparent hover:border-gray-900 hover:bg-orange-50 transition-all cursor-pointer">
+                <div className="p-2 bg-green-100 border-2 border-gray-900 rounded-lg">
                   <Hourglass className="w-4 h-4 text-green-600" />
                 </div>
                 <div>
@@ -148,8 +148,8 @@ const LeftSection = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <div className="p-2 bg-green-100 rounded-lg">
+              <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-transparent hover:border-gray-900 hover:bg-orange-50 transition-all cursor-pointer">
+                <div className="p-2 bg-green-100 border-2 border-gray-900 rounded-lg">
                   <Phone className="w-4 h-4 text-green-600" />
                 </div>
                 <div>
@@ -163,7 +163,7 @@ const LeftSection = ({
 
             <div className="mt-6">
               <button
-                className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white rounded-xl h-11 sm:h-12 font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm"
+                className="font-comic tracking-wide flex items-center justify-center gap-2 w-full bg-[#F69306] text-white border-2 border-gray-900 rounded-xl h-11 sm:h-12 text-lg shadow-[4px_4px_0_0_#111827] hover:bg-orange-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all duration-200"
                 onClick={() => setIsEditing(true)}
               >
                 <Edit className="w-4 h-4" />

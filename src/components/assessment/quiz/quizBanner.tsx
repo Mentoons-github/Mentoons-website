@@ -5,32 +5,42 @@ interface QuizBanner {
   categories: Category[];
 }
 
+const HALFTONE_BG = {
+  backgroundColor: "#F5F5F4",
+  backgroundImage: "radial-gradient(#d6d3d1 1.2px, transparent 1.2px)",
+  backgroundSize: "16px 16px",
+};
+
+const HALFTONE_OVERLAY = {
+  backgroundImage:
+    "radial-gradient(rgba(17,24,39,0.16) 1.6px, transparent 1.6px)",
+  backgroundSize: "16px 16px",
+};
+
 const QuizBanner = ({ categories }: QuizBanner) => {
   return (
-    <div className="relative">
+    <div className="relative pb-16" style={HALFTONE_BG}>
       <div
-        className="relative overflow-hidden"
-        style={{
-          clipPath: "ellipse(100% 90% at 50% 0%)",
-          WebkitClipPath: "ellipse(100% 90% at 50% 0%)",
-          minHeight: "75vh",
-        }}
+        className="relative overflow-hidden border-b-4 border-gray-900 bg-[#ff9800]"
+        style={{ minHeight: "75vh" }}
       >
         <div
-          className="absolute inset-0 block md:hidden"
-          style={{
-            background: `radial-gradient(circle at 80% 50%, #fdf081ff 0%, #fff98dff 10%, #FF9900 40%)`,
-          }}
+          className="absolute inset-0 pointer-events-none"
+          style={HALFTONE_OVERLAY}
         />
 
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(110deg, #e07000 0%, #f08800 30%, #f59500 55%, #fdb830 75%, #fdd060 100%)`,
-          }}
-        />
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-70" />
 
-        <div className="relative z-10 flex items-start justify-start pt-10 md:pt-20">
+        {/* Psychologists badge - top right, responsive */}
+        <div className="absolute right-3 top-3 z-20 w-16 sm:right-4 sm:top-4 sm:w-20 md:right-6 md:top-5 md:w-28 lg:right-8 lg:top-6 lg:w-36 xl:w-40 drop-shadow-[4px_4px_0_rgba(17,24,39,0.9)] transition-transform duration-300 hover:rotate-3 hover:scale-105">
+          <img
+            src="/assets/LandingPage/psyco.png"
+            alt="Carefully crafted by psychologists"
+            className="h-auto w-full object-contain"
+          />
+        </div>
+
+        <div className="relative z-10 flex items-start justify-start pt-24 sm:pt-10 md:pt-20 pb-28 sm:pb-32 md:pb-44 lg:pb-52 xl:pb-56">
           <img
             src="/assets/assesments/quiz/bannerBG.png"
             alt="Quiz Banner Background"
@@ -46,20 +56,17 @@ const QuizBanner = ({ categories }: QuizBanner) => {
   "
           />
 
-          <div className="ml-5 sm:ml-10 md:ml-16 lg:ml-20 space-y-4 md:space-y-6 w-[90%] sm:w-auto max-w-[92%] sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl p-4 sm:p-5 md:p-6 relative z-10">
+          <div className="ml-5 sm:ml-10 md:ml-16 lg:ml-20 space-y-5 md:space-y-7 w-[90%] sm:w-auto max-w-[92%] sm:max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl p-4 sm:p-5 md:p-6 relative z-10">
             <h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight"
+              className="font-comic text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight tracking-wide text-white"
               style={{
-                textShadow:
-                  "0 2px 14px rgba(160,80,0,0.5), 0 1px 3px rgba(0,0,0,0.2)",
+                WebkitTextStroke: "2px #111827",
+                textShadow: "5px 5px 0 #111827",
               }}
             >
               Challenge Your Mind with Mentoons Quizzes!
             </h1>
-            <p
-              className="text-base sm:text-base md:text-xl lg:text-2xl font-medium text-white opacity-90"
-              style={{ textShadow: "0 1px 8px rgba(140,70,0,0.45)" }}
-            >
+            <p className="inline-block -rotate-1 rounded-2xl border-2 border-gray-900 bg-white px-5 py-3 text-base font-medium text-gray-900 shadow-[5px_5px_0_0_#111827] sm:text-base md:text-xl lg:text-2xl">
               Test your knowledge, sharpen your logic, and enjoy hours of
               engaging quizzes designed for all ages.
             </p>
