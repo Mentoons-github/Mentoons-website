@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, MotionConfig } from "framer-motion";
 import {
   FiChevronDown,
   FiChevronUp,
@@ -25,6 +26,15 @@ const burst = (points = 14, inner = 38, outer = 50) =>
   }).join(", ")})`;
 
 const BURST = burst();
+
+/* ── Comic animation helpers (framer-motion, all inline) ── */
+
+/* Springy "pop" used for boxes, chips and buttons when they scroll into view */
+const POP_SPRING = {
+  type: "spring" as const,
+  stiffness: 240,
+  damping: 14,
+};
 
 const PolicyPage = () => {
   const sections = [
@@ -125,31 +135,19 @@ const PolicyPage = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: PAPER,
-        backgroundImage: `radial-gradient(${INK}22 1.6px, transparent 1.8px)`,
-        backgroundSize: "18px 18px",
-        position: "relative",
-        overflowX: "hidden",
-      }}
-    >
-      <style>{`
+    <MotionConfig reducedMotion="user">
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: PAPER,
+          backgroundImage: `radial-gradient(${INK}22 1.6px, transparent 1.8px)`,
+          backgroundSize: "18px 18px",
+          position: "relative",
+          overflowX: "hidden",
+        }}
+      >
+        <style>{`
         *, *::before, *::after { box-sizing: border-box; }
-
-        @keyframes cm-pop {
-          0%   { transform: scale(0.6) rotate(-8deg); opacity: 0; }
-          70%  { transform: scale(1.08) rotate(-3deg); opacity: 1; }
-          100% { transform: scale(1) rotate(-2deg); opacity: 1; }
-        }
-        @keyframes cm-bubble {
-          from { transform: scale(0.92) translateY(-8px); opacity: 0; }
-          to   { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        .cm-title-pop { animation: cm-pop 0.6s cubic-bezier(.3,1.4,.5,1) both; }
-        .cm-bubble-in { animation: cm-bubble 0.28s ease-out both; }
 
         .cm-card {
           background: #fff;
@@ -212,414 +210,531 @@ const PolicyPage = () => {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .cm-title-pop, .cm-bubble-in { animation: none; }
           .cm-card, .cm-cta { transition: none; }
         }
       `}</style>
 
-      {/* ══════════════ PAGE CONTENT ══════════════ */}
-      <div
-        style={{
-          maxWidth: 860,
-          margin: "0 auto",
-          padding: "48px 20px 72px",
-          position: "relative",
-        }}
-      >
-        {/* ── Header ── */}
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
-          {/* Starburst badge */}
-          <div
-            style={{
-              width: 130,
-              height: 130,
-              margin: "0 auto 8px",
-              position: "relative",
-              transform: "rotate(-6deg)",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: INK,
-                clipPath: BURST,
-                transform: "translate(5px, 5px)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "#FFD60A",
-                clipPath: BURST,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FiShield style={{ width: 52, height: 52, color: INK }} />
-            </div>
-          </div>
-
-          <h1
-            className="font-comic cm-outline-text cm-title-pop"
-            style={{
-              fontSize: "clamp(3rem, 9vw, 5.5rem)",
-              lineHeight: 1,
-              margin: "6px 0 18px",
-              display: "inline-block",
-            }}
-          >
-            Terms &amp; Conditions
-          </h1>
-
-          {/* Narration box */}
-          <div
-            style={{
-              maxWidth: 560,
-              margin: "0 auto 24px",
-              background: "#FFF1B8",
-              border: `3px solid ${INK}`,
-              boxShadow: `5px 5px 0 ${INK}`,
-              padding: "12px 18px",
-              textAlign: "left",
-              fontWeight: 700,
-              fontSize: "1.05rem",
-              lineHeight: 1.55,
-              color: INK,
-              transform: "rotate(0.6deg)",
-            }}
-          >
-            Please take a moment to review our terms and conditions. We've
-            designed them to be clear, fair, and transparent.
-          </div>
-
-          <span
-            className="font-comic-chip"
-            style={{
-              display: "inline-block",
-              background: "#2D9CFF",
-              color: "#fff",
-              border: `3px solid ${INK}`,
-              borderRadius: 999,
-              padding: "6px 20px",
-              fontSize: "1.1rem",
-              letterSpacing: "0.06em",
-              boxShadow: `4px 4px 0 ${INK}`,
-              textShadow: `2px 2px 0 ${INK}`,
-            }}
-          >
-            Last updated: {new Date().toLocaleDateString()}
-          </span>
-        </div>
-
-        {/* ── Section cards ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          {sections.map((section, index) => {
-            const isOpen = expandedSection === index;
-            const panelId = `cm-panel-${index}`;
-            return (
-              <div
-                key={section.title}
-                className="cm-card"
-                style={{
-                  transform: undefined,
-                  overflow: "visible",
-                }}
-              >
-                {/* SFX tag, pinned top-right */}
-                <span
-                  className="font-comic-chip"
-                  style={{
-                    position: "absolute",
-                    top: -18,
-                    right: 18,
-                    background: section.color,
-                    color: "#fff",
-                    border: `3px solid ${INK}`,
-                    borderRadius: 8,
-                    padding: "2px 12px",
-                    fontSize: "1rem",
-                    letterSpacing: "0.06em",
-                    textShadow: `2px 2px 0 ${INK}`,
-                    boxShadow: `3px 3px 0 ${INK}`,
-                    transform: `rotate(${index % 2 === 0 ? 3 : -3}deg)`,
-                    pointerEvents: "none",
-                  }}
-                >
-                  {section.sfx}
-                </span>
-
-                {/* Toggle row */}
-                <button
-                  type="button"
-                  className="cm-toggle"
-                  onClick={() => toggleSection(index)}
-                  aria-expanded={isOpen}
-                  aria-controls={panelId}
-                  style={{
-                    width: "100%",
-                    background: isOpen ? section.bg : "transparent",
-                    border: "none",
-                    borderRadius: 14,
-                    padding: "18px 20px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 16,
-                    textAlign: "left",
-                    transition: "background 0.2s",
-                  }}
-                >
-                  {/* Emoji panel */}
-                  <div
-                    className="cm-halftone"
-                    style={{
-                      width: 64,
-                      height: 64,
-                      backgroundColor: section.color,
-                      border: `3px solid ${INK}`,
-                      borderRadius: 12,
-                      boxShadow: `4px 4px 0 ${INK}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 32,
-                      flexShrink: 0,
-                      transform: isOpen ? "rotate(-8deg)" : "rotate(0deg)",
-                      transition: "transform 0.2s",
-                    }}
-                  >
-                    {section.emoji}
-                  </div>
-
-                  {/* Title + tagline */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      className="font-comic"
-                      style={{
-                        fontSize: "clamp(1.6rem, 4vw, 2.1rem)",
-                        color: INK,
-                        lineHeight: 1.1,
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      {section.title}
-                    </div>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "0.92rem",
-                        color: "#555",
-                        marginTop: 2,
-                      }}
-                    >
-                      {section.highlight}
-                    </div>
-                  </div>
-
-                  {/* Chevron */}
-                  <div
-                    style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: "50%",
-                      background: isOpen ? section.color : "#fff",
-                      border: `3px solid ${INK}`,
-                      boxShadow: `3px 3px 0 ${INK}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isOpen ? (
-                      <FiChevronUp
-                        style={{
-                          width: 22,
-                          height: 22,
-                          color: "#fff",
-                          strokeWidth: 3,
-                        }}
-                      />
-                    ) : (
-                      <FiChevronDown
-                        style={{
-                          width: 22,
-                          height: 22,
-                          color: INK,
-                          strokeWidth: 3,
-                        }}
-                      />
-                    )}
-                  </div>
-                </button>
-
-                {/* Speech bubble content */}
-                {isOpen && (
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-label={section.title}
-                    style={{ padding: "6px 22px 26px" }}
-                  >
-                    <div
-                      className="cm-bubble-in"
-                      style={{
-                        position: "relative",
-                        background: "#fff",
-                        border: `3px solid ${INK}`,
-                        borderRadius: 22,
-                        padding: "18px 22px",
-                        boxShadow: `5px 5px 0 ${section.color}`,
-                        marginTop: 14,
-                      }}
-                    >
-                      {/* Bubble tail (outer = border, inner = fill) */}
-                      <span
-                        aria-hidden
-                        style={{
-                          position: "absolute",
-                          top: -19,
-                          left: 36,
-                          width: 0,
-                          height: 0,
-                          borderLeft: "14px solid transparent",
-                          borderRight: "14px solid transparent",
-                          borderBottom: `19px solid ${INK}`,
-                        }}
-                      />
-                      <span
-                        aria-hidden
-                        style={{
-                          position: "absolute",
-                          top: -12,
-                          left: 40,
-                          width: 0,
-                          height: 0,
-                          borderLeft: "10px solid transparent",
-                          borderRight: "10px solid transparent",
-                          borderBottom: "14px solid #fff",
-                        }}
-                      />
-                      <p
-                        style={{
-                          fontWeight: 600,
-                          fontSize: "1.05rem",
-                          color: INK,
-                          lineHeight: 1.7,
-                          margin: 0,
-                          maxWidth: "68ch",
-                        }}
-                      >
-                        {section.content}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── Footer CTA ── */}
+        {/* ══════════════ PAGE CONTENT ══════════════ */}
         <div
-          className="cm-halftone"
           style={{
-            marginTop: 72,
-            backgroundColor: "#FF5FA2",
-            border: `5px solid ${INK}`,
-            borderRadius: 24,
-            boxShadow: `10px 10px 0 ${INK}`,
-            padding: "44px 24px 40px",
-            textAlign: "center",
+            maxWidth: 860,
+            margin: "0 auto",
+            padding: "48px 20px 72px",
             position: "relative",
           }}
         >
-          <span
-            className="font-comic-chip"
-            style={{
-              position: "absolute",
-              top: -22,
-              left: "50%",
-              transform: "translateX(-50%) rotate(-3deg)",
-              background: "#FFD60A",
-              color: INK,
-              border: `4px solid ${INK}`,
-              borderRadius: 10,
-              padding: "4px 18px",
-              fontSize: "1.2rem",
-              letterSpacing: "0.08em",
-              boxShadow: `4px 4px 0 ${INK}`,
-              whiteSpace: "nowrap",
-            }}
+          {/* ── Header (shakes when the title lands) ── */}
+          <motion.div
+            style={{ textAlign: "center", marginBottom: 56 }}
+            animate={{ x: [0, -6, 5, -4, 3, 0], y: [0, 3, -4, -2, 2, 0] }}
+            transition={{ duration: 0.35, delay: 0.75, ease: "linear" }}
           >
-            TO BE CONTINUED...
-          </span>
-
-          <h2
-            className="font-comic cm-outline-text"
-            style={{
-              fontSize: "clamp(2.2rem, 6vw, 3.4rem)",
-              margin: "0 0 14px",
-              lineHeight: 1.05,
-            }}
-          >
-            Questions About Our Terms?
-          </h2>
-
-          <p
-            style={{
-              fontWeight: 800,
-              color: INK,
-              fontSize: "1.1rem",
-              lineHeight: 1.6,
-              margin: "0 auto 28px",
-              maxWidth: 480,
-              background: "#fff",
-              border: `3px solid ${INK}`,
-              borderRadius: 14,
-              padding: "10px 16px",
-              boxShadow: `4px 4px 0 ${INK}`,
-            }}
-          >
-            Our team is here to help clarify any aspect of these terms and
-            conditions.
-          </p>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 20,
-            }}
-          >
-            <a href="mailto:info@mentoons.com" className="cm-cta font-comic">
-              <FiMail style={{ width: 24, height: 24, strokeWidth: 3 }} />
-              Contact Support
-            </a>
-            <span
-              className="font-comic-chip"
+            {/* Starburst badge spins and bounces in */}
+            <motion.div
               style={{
-                background: "#fff",
-                color: INK,
-                border: `3px solid ${INK}`,
-                borderRadius: 999,
-                padding: "8px 18px",
-                fontSize: "1rem",
-                letterSpacing: "0.05em",
-                boxShadow: `4px 4px 0 ${INK}`,
+                width: 130,
+                height: 130,
+                margin: "0 auto 8px",
+                position: "relative",
+              }}
+              initial={{ scale: 0, rotate: -200 }}
+              animate={{ scale: [0, 1.2, 0.95, 1], rotate: [-200, 10, -9, -6] }}
+              transition={{
+                duration: 0.8,
+                times: [0, 0.5, 0.75, 1],
+                ease: "easeOut",
               }}
             >
-              ⚡ Response time: usually within 24 hours
-            </span>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: INK,
+                  clipPath: BURST,
+                  transform: "translate(5px, 5px)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "#FFD60A",
+                  clipPath: BURST,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <FiShield style={{ width: 52, height: 52, color: INK }} />
+              </div>
+            </motion.div>
+
+            <motion.h1
+              className="font-comic cm-outline-text"
+              style={{
+                fontSize: "clamp(3rem, 9vw, 5.5rem)",
+                lineHeight: 1,
+                margin: "6px 0 18px",
+                display: "inline-block",
+              }}
+              initial={{ opacity: 0, scale: 2.4, rotate: -10, y: -40 }}
+              animate={{
+                opacity: [0, 1, 1, 1],
+                scale: [2.4, 0.94, 1.03, 1],
+                rotate: [-10, -0.5, -2.5, -2],
+                y: [-40, 0, 0, 0],
+              }}
+              transition={{
+                duration: 0.7,
+                delay: 0.35,
+                times: [0, 0.55, 0.75, 1],
+                ease: "easeOut",
+              }}
+            >
+              Terms &amp; Conditions
+            </motion.h1>
+
+            {/* Narration box */}
+            <motion.div
+              style={{
+                maxWidth: 560,
+                margin: "0 auto 24px",
+                background: "#FFF1B8",
+                border: `3px solid ${INK}`,
+                boxShadow: `5px 5px 0 ${INK}`,
+                padding: "12px 18px",
+                textAlign: "left",
+                fontWeight: 700,
+                fontSize: "1.05rem",
+                lineHeight: 1.55,
+                color: INK,
+              }}
+              initial={{ opacity: 0, scale: 0.5, rotate: -6, y: 30 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0.6, y: 0 }}
+              transition={{ ...POP_SPRING, delay: 1.0 }}
+            >
+              Please take a moment to review our terms and conditions. We've
+              designed them to be clear, fair, and transparent.
+            </motion.div>
+
+            <motion.span
+              className="font-comic-chip"
+              style={{
+                display: "inline-block",
+                background: "#2D9CFF",
+                color: "#fff",
+                border: `3px solid ${INK}`,
+                borderRadius: 999,
+                padding: "6px 20px",
+                fontSize: "1.1rem",
+                letterSpacing: "0.06em",
+                boxShadow: `4px 4px 0 ${INK}`,
+                textShadow: `2px 2px 0 ${INK}`,
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ ...POP_SPRING, delay: 1.25 }}
+            >
+              Last updated: {new Date().toLocaleDateString()}
+            </motion.span>
+          </motion.div>
+
+          {/* ── Section cards ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            {sections.map((section, index) => {
+              const isOpen = expandedSection === index;
+              const panelId = `cm-panel-${index}`;
+              const fromLeft = index % 2 === 0;
+              return (
+                /* Wrapper carries the entrance so the card's own hover CSS keeps working */
+                <motion.div
+                  key={section.title}
+                  initial={{
+                    opacity: 0,
+                    x: fromLeft ? -90 : 90,
+                    rotate: fromLeft ? -5 : 5,
+                    scale: 0.85,
+                  }}
+                  whileInView={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                >
+                  <div
+                    className="cm-card"
+                    style={{
+                      transform: undefined,
+                      overflow: "visible",
+                    }}
+                  >
+                    {/* SFX tag stamps onto the corner */}
+                    <motion.span
+                      className="font-comic-chip"
+                      style={{
+                        position: "absolute",
+                        top: -18,
+                        right: 18,
+                        background: section.color,
+                        color: "#fff",
+                        border: `3px solid ${INK}`,
+                        borderRadius: 8,
+                        padding: "2px 12px",
+                        fontSize: "1rem",
+                        letterSpacing: "0.06em",
+                        textShadow: `2px 2px 0 ${INK}`,
+                        boxShadow: `3px 3px 0 ${INK}`,
+                        pointerEvents: "none",
+                      }}
+                      initial={{
+                        opacity: 0,
+                        scale: 3,
+                        rotate: fromLeft ? 20 : -20,
+                      }}
+                      whileInView={{
+                        opacity: 1,
+                        scale: 1,
+                        rotate: fromLeft ? 3 : -3,
+                      }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 13,
+                        delay: 0.3,
+                      }}
+                    >
+                      {section.sfx}
+                    </motion.span>
+
+                    {/* Toggle row */}
+                    <button
+                      type="button"
+                      className="cm-toggle"
+                      onClick={() => toggleSection(index)}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      style={{
+                        width: "100%",
+                        background: isOpen ? section.bg : "transparent",
+                        border: "none",
+                        borderRadius: 14,
+                        padding: "18px 20px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 16,
+                        textAlign: "left",
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      {/* Emoji panel */}
+                      <div
+                        className="cm-halftone"
+                        style={{
+                          width: 64,
+                          height: 64,
+                          backgroundColor: section.color,
+                          border: `3px solid ${INK}`,
+                          borderRadius: 12,
+                          boxShadow: `4px 4px 0 ${INK}`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 32,
+                          flexShrink: 0,
+                          transform: isOpen ? "rotate(-8deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s",
+                        }}
+                      >
+                        {section.emoji}
+                      </div>
+
+                      {/* Title + tagline */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          className="font-comic"
+                          style={{
+                            fontSize: "clamp(1.6rem, 4vw, 2.1rem)",
+                            color: INK,
+                            lineHeight: 1.1,
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {section.title}
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            fontSize: "0.92rem",
+                            color: "#555",
+                            marginTop: 2,
+                          }}
+                        >
+                          {section.highlight}
+                        </div>
+                      </div>
+
+                      {/* Chevron */}
+                      <div
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: "50%",
+                          background: isOpen ? section.color : "#fff",
+                          border: `3px solid ${INK}`,
+                          boxShadow: `3px 3px 0 ${INK}`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isOpen ? (
+                          <FiChevronUp
+                            style={{
+                              width: 22,
+                              height: 22,
+                              color: "#fff",
+                              strokeWidth: 3,
+                            }}
+                          />
+                        ) : (
+                          <FiChevronDown
+                            style={{
+                              width: 22,
+                              height: 22,
+                              color: INK,
+                              strokeWidth: 3,
+                            }}
+                          />
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Speech bubble content */}
+                    {isOpen && (
+                      <div
+                        id={panelId}
+                        role="region"
+                        aria-label={section.title}
+                        style={{ padding: "6px 22px 26px" }}
+                      >
+                        <motion.div
+                          /* Bubble pops out from its tail */
+                          initial={{
+                            opacity: 0,
+                            scale: 0.6,
+                            y: -10,
+                            rotate: -2,
+                          }}
+                          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 350,
+                            damping: 18,
+                          }}
+                          style={{
+                            position: "relative",
+                            background: "#fff",
+                            border: `3px solid ${INK}`,
+                            borderRadius: 22,
+                            padding: "18px 22px",
+                            boxShadow: `5px 5px 0 ${section.color}`,
+                            marginTop: 14,
+                            transformOrigin: "40px 0px",
+                          }}
+                        >
+                          {/* Bubble tail (outer = border, inner = fill) */}
+                          <span
+                            aria-hidden
+                            style={{
+                              position: "absolute",
+                              top: -19,
+                              left: 36,
+                              width: 0,
+                              height: 0,
+                              borderLeft: "14px solid transparent",
+                              borderRight: "14px solid transparent",
+                              borderBottom: `19px solid ${INK}`,
+                            }}
+                          />
+                          <span
+                            aria-hidden
+                            style={{
+                              position: "absolute",
+                              top: -12,
+                              left: 40,
+                              width: 0,
+                              height: 0,
+                              borderLeft: "10px solid transparent",
+                              borderRight: "10px solid transparent",
+                              borderBottom: "14px solid #fff",
+                            }}
+                          />
+                          <p
+                            style={{
+                              fontWeight: 600,
+                              fontSize: "1.05rem",
+                              color: INK,
+                              lineHeight: 1.7,
+                              margin: 0,
+                              maxWidth: "68ch",
+                            }}
+                          >
+                            {section.content}
+                          </p>
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
+
+          {/* ── Footer CTA ── */}
+          <motion.div
+            className="cm-halftone"
+            style={{
+              marginTop: 72,
+              backgroundColor: "#FF5FA2",
+              border: `5px solid ${INK}`,
+              borderRadius: 24,
+              boxShadow: `10px 10px 0 ${INK}`,
+              padding: "44px 24px 40px",
+              textAlign: "center",
+              position: "relative",
+            }}
+            initial={{ opacity: 0, scale: 0.85, y: 60, rotate: -2 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ type: "spring", stiffness: 160, damping: 14 }}
+          >
+            <motion.span
+              className="font-comic-chip"
+              style={{
+                position: "absolute",
+                top: -22,
+                left: "50%",
+                x: "-50%",
+                background: "#FFD60A",
+                color: INK,
+                border: `4px solid ${INK}`,
+                borderRadius: 10,
+                padding: "4px 18px",
+                fontSize: "1.2rem",
+                letterSpacing: "0.08em",
+                boxShadow: `4px 4px 0 ${INK}`,
+                whiteSpace: "nowrap",
+              }}
+              initial={{ opacity: 0, scale: 3, rotate: 14 }}
+              whileInView={{ opacity: 1, scale: 1, rotate: -3 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 13,
+                delay: 0.35,
+              }}
+            >
+              TO BE CONTINUED...
+            </motion.span>
+
+            <motion.h2
+              className="font-comic cm-outline-text"
+              style={{
+                fontSize: "clamp(2.2rem, 6vw, 3.4rem)",
+                margin: "0 0 14px",
+                lineHeight: 1.05,
+              }}
+              initial={{ opacity: 0, scale: 2.2, rotate: -6, y: -30 }}
+              whileInView={{
+                opacity: [0, 1, 1, 1],
+                scale: [2.2, 0.94, 1.03, 1],
+                rotate: [-6, 1, -0.5, 0],
+                y: [-30, 0, 0, 0],
+              }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{
+                duration: 0.7,
+                delay: 0.4,
+                times: [0, 0.55, 0.75, 1],
+                ease: "easeOut",
+              }}
+            >
+              Questions About Our Terms?
+            </motion.h2>
+
+            <motion.p
+              style={{
+                fontWeight: 800,
+                color: INK,
+                fontSize: "1.1rem",
+                lineHeight: 1.6,
+                margin: "0 auto 28px",
+                maxWidth: 480,
+                background: "#fff",
+                border: `3px solid ${INK}`,
+                borderRadius: 14,
+                padding: "10px 16px",
+                boxShadow: `4px 4px 0 ${INK}`,
+              }}
+              initial={{ opacity: 0, scale: 0.6, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ ...POP_SPRING, delay: 0.9 }}
+            >
+              Our team is here to help clarify any aspect of these terms and
+              conditions.
+            </motion.p>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 20,
+              }}
+            >
+              {/* Wrapper carries the pop so the button's hover CSS keeps working */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0, rotate: -10 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ ...POP_SPRING, delay: 1.1 }}
+              >
+                <a
+                  href="mailto:info@mentoons.com"
+                  className="cm-cta font-comic"
+                >
+                  <FiMail style={{ width: 24, height: 24, strokeWidth: 3 }} />
+                  Contact Support
+                </a>
+              </motion.div>
+              <motion.span
+                className="font-comic-chip"
+                style={{
+                  background: "#fff",
+                  color: INK,
+                  border: `3px solid ${INK}`,
+                  borderRadius: 999,
+                  padding: "8px 18px",
+                  fontSize: "1rem",
+                  letterSpacing: "0.05em",
+                  boxShadow: `4px 4px 0 ${INK}`,
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ ...POP_SPRING, delay: 1.3 }}
+              >
+                ⚡ Response time: usually within 24 hours
+              </motion.span>
+            </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 };
 
