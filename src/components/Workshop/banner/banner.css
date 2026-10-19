@@ -1,20 +1,33 @@
-.custom-shape-divider-bottom-1756203234 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
+/* Halftone dot texture */
+.comic-halftone {
+  background-image: radial-gradient(
+    rgba(31, 19, 8, 0.14) 1.5px,
+    transparent 1.6px
+  );
+  background-size: 14px 14px;
 }
 
-.custom-shape-divider-bottom-1756203234 svg {
-  position: relative;
-  display: block;
-  width: calc(107% + 1.3px);
-  height: 137px;
+/* Sticker-style outline on images */
+.comic-sticker {
+  filter: drop-shadow(2px 2px 0 #1f1308);
 }
 
-.custom-shape-divider-bottom-1756203234 .shape-fill {
-  fill: #ffffff;
+/* Comic title: white fill, ink outline, hard shadow */
+.comic-title {
+  color: #fff;
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: clamp(1.5px, 0.35vw, 5px) #1f1308;
+  paint-order: stroke fill;
+  text-shadow:
+    3px 3px 0 #1f1308,
+    6px 6px 0 rgba(31, 19, 8, 0.25);
+}
+
+/* Tagline chip */
+.comic-chip {
+  background: #fff;
+  color: #1f1308;
+  border: 3px solid #1f1308;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 #1f1308;
 }

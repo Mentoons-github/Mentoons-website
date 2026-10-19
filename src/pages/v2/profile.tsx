@@ -86,7 +86,6 @@ const Profile = () => {
     joinedDate: "",
   });
 
-  // Level Tracker State
   // const [currentLevel, setCurrentLevel] = useState(7);
   // const [currentXP, setCurrentXP] = useState(1850);
   // const [xpToNextLevel, setXpToNextLevel] = useState(2400);
@@ -676,7 +675,7 @@ const Profile = () => {
         onCompleteProfile={handleCompleteProfile}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="min-h-screen bg-orange-50 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="w-full mx-auto">
           <CoverPicture
             coverPhotoInputRef={coverPhotoInputRef}
@@ -696,7 +695,7 @@ const Profile = () => {
           )}
 
           {showCompletionForm && (
-            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 mb-6 sm:mb-8">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] mb-6 sm:mb-8">
               <ProfileFormModal
                 userDetails={userDetails}
                 setUserDetails={setUserDetails}
@@ -771,23 +770,23 @@ const Profile = () => {
               />
             </div>
 
-            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
-                <div className="flex flex-wrap gap-2 sm:gap-3 bg-white rounded-xl p-1 w-fit shadow-sm">
+            <div className="flex-1 bg-white rounded-2xl border-2 border-gray-900 shadow-[5px_5px_0_0_#111827] overflow-hidden">
+              <div className="border-b-2 border-gray-900 bg-orange-100 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex items-center justify-between">
+                <div className="flex flex-wrap gap-2 sm:gap-2 bg-white rounded-xl p-1.5 w-fit border-2 border-gray-900 shadow-[3px_3px_0_0_#111827]">
                   {["Posts", "Rewards", "Saved", "Details", "Badges"].map(
                     (tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
-                        className={`px-2 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 relative ${
+                        className={`font-comic tracking-wide px-2 sm:px-5 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base transition-all duration-200 relative ${
                           activeTab === tab
-                            ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            ? "bg-[#F69306] text-white border-2 border-gray-900 -rotate-1"
+                            : "text-gray-700 border-2 border-transparent hover:bg-orange-100 hover:border-gray-900"
                         }`}
                       >
                         {tab}
                         {activeTab === tab && (
-                          <span className="ml-2 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
+                          <span className="ml-2 px-2 py-0.5 bg-white text-gray-900 rounded-full text-xs">
                             {tab === "Posts"
                               ? userPosts.length
                               : tab === "Rewards"
@@ -805,9 +804,9 @@ const Profile = () => {
                 <div className="relative">
                   <div
                     onClick={() => setMoreModal((prev) => !prev)}
-                    className="cursor-pointer"
+                    className="flex items-center justify-center w-9 h-9 bg-white border-2 border-gray-900 rounded-full cursor-pointer shadow-[2px_2px_0_0_#111827] hover:bg-orange-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                   >
-                    {moreModal ? <X size={20} /> : <Ellipsis size={20} />}
+                    {moreModal ? <X size={18} /> : <Ellipsis size={18} />}
                   </div>
                   {moreModal && (
                     <UserProfileMoreModal
@@ -863,13 +862,15 @@ const Profile = () => {
           onClick={() => closeCropper("cover")}
         >
           <div
-            className="bg-white p-6 rounded-2xl shadow-xl max-w-4xl w-full mx-4"
+            className="bg-white p-6 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] max-w-4xl w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold mb-4">Crop Cover Photo</h3>
-            <div className="max-h-96 overflow-hidden bg-gray-50 rounded-lg relative">
+            <h3 className="font-comic tracking-wide text-2xl mb-4 text-gray-900">
+              Crop Cover Photo
+            </h3>
+            <div className="max-h-96 overflow-hidden bg-orange-50 border-2 border-gray-900 rounded-lg relative">
               {!coverImageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-comic tracking-wide">
                   Loading image...
                 </div>
               )}
@@ -884,14 +885,14 @@ const Profile = () => {
             <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => closeCropper("cover")}
-                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                className="font-comic tracking-wide px-6 py-2 text-gray-900 bg-white border-2 border-gray-900 rounded-lg shadow-[3px_3px_0_0_#111827] hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={() => applyCrop("cover")}
                 disabled={!coverImageLoaded}
-                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                className="font-comic tracking-wide px-6 py-2 bg-[#F69306] text-white border-2 border-gray-900 rounded-lg shadow-[3px_3px_0_0_#111827] hover:bg-orange-600 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
               >
                 Apply Crop
               </button>
@@ -906,13 +907,15 @@ const Profile = () => {
           onClick={() => closeCropper("profile")}
         >
           <div
-            className="bg-white p-6 rounded-2xl shadow-xl max-w-lg w-full mx-4"
+            className="bg-white p-6 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] max-w-lg w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold mb-4">Crop Profile Photo</h3>
-            <div className="max-h-96 overflow-hidden bg-gray-50 rounded-lg relative">
+            <h3 className="font-comic tracking-wide text-2xl mb-4 text-gray-900">
+              Crop Profile Photo
+            </h3>
+            <div className="max-h-96 overflow-hidden bg-orange-50 border-2 border-gray-900 rounded-lg relative">
               {!profileImageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-comic tracking-wide">
                   Loading image...
                 </div>
               )}
@@ -927,14 +930,14 @@ const Profile = () => {
             <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => closeCropper("profile")}
-                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                className="font-comic tracking-wide px-6 py-2 text-gray-900 bg-white border-2 border-gray-900 rounded-lg shadow-[3px_3px_0_0_#111827] hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={() => applyCrop("profile")}
                 disabled={!profileImageLoaded}
-                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                className="font-comic tracking-wide px-6 py-2 bg-[#F69306] text-white border-2 border-gray-900 rounded-lg shadow-[3px_3px_0_0_#111827] hover:bg-orange-600 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
               >
                 Apply Crop
               </button>

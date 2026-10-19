@@ -27,7 +27,7 @@ import PatternRace from "@/pages/v2/adda/games/PatternRace";
 import WordsQuest from "@/pages/v2/adda/games/WordsQuest";
 
 const AddaHome = lazy(() => import("@/pages/v2/adda/home.tsx"));
-const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
+// const AddaGroups = lazy(() => import("@/pages/v2/adda/groups"));
 const AddaMessages = lazy(() => import("@/pages/v2/adda/messages"));
 const PostDetails = lazy(() => import("@/pages/v2/adda/postDetails"));
 const ProfileDetails = lazy(() => import("@/pages/v2/adda/profileDetails"));
@@ -76,7 +76,7 @@ const AddaRouter = () => {
               </SubscriptionGuard>
             }
           />
-          <Route path="community" element={<AddaGroups />} />
+          {/* <Route path="community" element={<AddaGroups />} /> */}
           <Route path="messages" element={<AddaMessages />} />
           <Route path="post/:postId" element={<PostDetails />} />
           <Route path="notifications" element={<Notification />} />

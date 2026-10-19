@@ -17,7 +17,14 @@ const FreeDownloads = () => {
     useState<boolean>(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100">
+    <div
+      className="min-h-screen bg-yellow-100"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(234,88,12,0.18) 2px, transparent 2px)",
+        backgroundSize: "18px 18px",
+      }}
+    >
       <div className="mx-4 md:mx-8 lg:mx-20 py-10">
         <FreeBanner />
         <Items

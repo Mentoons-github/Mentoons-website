@@ -17,6 +17,27 @@ import html2canvas from "html2canvas";
 import InvoiceGenerator from "@/components/products/invoice/invoiceGenerator";
 import Pagination from "@/components/common/pagination/pagination";
 
+/* ------------------------------------------------------------------
+   COMIC STYLE TOKENS
+   font-comic       -> Bangers      (body / labels / buttons)
+   font-comic-chip  -> Luckiest Guy (big headings / chips)
+   Both are defined in your global CSS.
+------------------------------------------------------------------- */
+const comicShadow = "shadow-[4px_4px_0_#000]";
+const comicShadowSm = "shadow-[3px_3px_0_#000]";
+
+// halftone dots background (comic book print look)
+const halftoneBg: React.CSSProperties = {
+  backgroundColor: "#FFF1DC",
+  backgroundImage:
+    "radial-gradient(rgba(255,148,46,0.35) 1.5px, transparent 1.5px)",
+  backgroundSize: "18px 18px",
+};
+
+const comicSelect = `w-full px-4 py-2 text-base tracking-wider text-black bg-white border-[3px] border-black rounded-full outline-none cursor-pointer font-comic ${comicShadowSm} focus:ring-4 focus:ring-orange-300`;
+
+const comicBtnBase = `font-comic-chip tracking-wider border-[3px] border-black rounded-full ${comicShadowSm} transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`;
+
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -51,84 +72,65 @@ const contentVariants = {
 
 const AnimatedLoader = () => (
   <motion.div
-    className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-[99999]"
+    className="fixed inset-0 flex items-center justify-center z-[99999] bg-[#FF942E]"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     transition={{ duration: 0.3 }}
   >
-    <div className="text-center px-4">
+    <div className="px-4 text-center">
       <motion.div
-        className="relative mb-8"
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        className={`relative inline-flex items-center justify-center w-28 h-28 mb-6 bg-white border-4 border-black rounded-full ${comicShadow}`}
+        animate={{ rotate: [0, 6, -6, 0], scale: [1, 1.06, 1] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       >
-        <motion.div
-          className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 relative"
-          animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <MdShoppingBag className="w-full h-full text-indigo-600" />
-        </motion.div>
-        <motion.div
-          className="absolute inset-0 w-20 h-20 sm:w-24 sm:h-24 mx-auto border-4 border-indigo-200 border-t-indigo-600 rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
+        <MdShoppingBag className="w-14 h-14 text-orange-600" />
       </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-      >
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-          Loading Your Orders
-        </h3>
-        <p className="text-sm sm:text-base text-gray-600">
-          Please wait while we fetch your order history...
-        </p>
-      </motion.div>
-      <motion.div
-        className="flex justify-center mt-4 space-x-1"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
+
+      <h3 className="mb-2 text-3xl tracking-widest text-white sm:text-4xl font-comic-chip drop-shadow-[3px_3px_0_#000]">
+        Loading Your Orders
+      </h3>
+      <p className="text-lg tracking-wider text-black font-comic">
+        Hang tight! Fetching your order history...
+      </p>
+
+      <div className="flex justify-center mt-5 space-x-2">
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
-            className="w-2 h-2 bg-indigo-600 rounded-full"
-            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+            className="w-4 h-4 bg-yellow-300 border-2 border-black rounded-full"
+            animate={{ y: [0, -10, 0] }}
             transition={{
-              duration: 1.5,
+              duration: 0.8,
               repeat: Infinity,
-              delay: i * 0.2,
+              delay: i * 0.15,
               ease: "easeInOut",
             }}
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   </motion.div>
 );
 
 const FilterLoader = () => (
   <motion.div
-    className="py-16 text-center px-4"
+    className="px-4 py-16 text-center"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     transition={{ duration: 0.3 }}
   >
     <motion.div
-      className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-indigo-600"
+      className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-orange-600 bg-white border-4 border-black rounded-full"
       animate={{ rotate: 360 }}
       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
     >
-      <MdShoppingBag className="w-full h-full" />
+      <MdShoppingBag className="w-8 h-8" />
     </motion.div>
-    <p className="text-sm sm:text-base text-gray-600">Filtering orders...</p>
+    <p className="text-xl tracking-wider text-black font-comic-chip">
+      Filtering orders...
+    </p>
   </motion.div>
 );
 
@@ -249,19 +251,19 @@ const OrderHistory: React.FC = () => {
         setGroupedOrders(backendOrders);
         setTotalItems(backendTotalItems);
         setCurrentPage(
-          isNaN(serverPage) || serverPage < 1 ? validPage : Number(serverPage)
+          isNaN(serverPage) || serverPage < 1 ? validPage : Number(serverPage),
         );
         setItemsPerPage(
           isNaN(serverLimit) || serverLimit < 1
             ? validLimit
-            : Number(serverLimit)
+            : Number(serverLimit),
         );
       } catch (error: unknown) {
         console.error("Error fetching orders:", error);
         setError(
           error instanceof Error
             ? error.message
-            : "Failed to load orders. Please try again."
+            : "Failed to load orders. Please try again.",
         );
       } finally {
         if (isFirstLoad) {
@@ -289,24 +291,24 @@ const OrderHistory: React.FC = () => {
 
   const uniqueYears = useMemo(
     () => [...new Set(allYears)].sort((a, b) => Number(b) - Number(a)),
-    [allYears]
+    [allYears],
   );
   const uniqueMonths = useMemo(
     () =>
       [...new Set(allMonths)].sort(
         (a, b) =>
-          new Date(`1 ${b} 2000`).getTime() - new Date(`1 ${a} 2000`).getTime()
+          new Date(`1 ${b} 2000`).getTime() - new Date(`1 ${a} 2000`).getTime(),
       ),
-    [allMonths]
+    [allMonths],
   );
   const uniqueDays = useMemo(
     () => [...new Set(allDays)].sort((a, b) => Number(a) - Number(b)),
-    [allDays]
+    [allDays],
   );
 
   const totalPages = useMemo(
     () => Math.ceil(totalItems / (itemsPerPage || 5)),
-    [totalItems, itemsPerPage]
+    [totalItems, itemsPerPage],
   );
 
   const getTotalPrice = () => {
@@ -315,7 +317,7 @@ const OrderHistory: React.FC = () => {
       .flat()
       .reduce(
         (total: number, order: OrderData) => total + order.totalAmount,
-        0
+        0,
       );
   };
 
@@ -323,7 +325,7 @@ const OrderHistory: React.FC = () => {
     if (!Array.isArray(orders)) return 0;
     return orders.reduce(
       (total: number, order: OrderData) => total + order.totalAmount,
-      0
+      0,
     );
   };
 
@@ -332,11 +334,11 @@ const OrderHistory: React.FC = () => {
     const entries = Object.entries(groupedOrders);
     if (selectedSort === "purchaseDate") {
       return entries.sort(
-        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime(),
       );
     } else if (selectedSort === "-purchaseDate") {
       return entries.sort(
-        (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
+        (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime(),
       );
     } else if (selectedSort === "amount") {
       return entries.sort((a, b) => {
@@ -389,7 +391,7 @@ const OrderHistory: React.FC = () => {
 
       const noPrintElements = invoiceElement.querySelectorAll(".no-print");
       noPrintElements.forEach(
-        (el) => ((el as HTMLElement).style.display = "none")
+        (el) => ((el as HTMLElement).style.display = "none"),
       );
 
       const canvas = await html2canvas(invoiceElement, {
@@ -429,7 +431,7 @@ const OrderHistory: React.FC = () => {
         xOffset,
         yOffset,
         imgScaledWidth,
-        imgScaledHeight
+        imgScaledHeight,
       );
       pdf.save(`Mentoons_Invoice_${order.orderId}.pdf`);
       setSelectedOrder(null);
@@ -452,7 +454,9 @@ const OrderHistory: React.FC = () => {
         updated[dateKey] = prev[dateKey].map((order) => ({
           ...order,
           items: order.items.map((item) =>
-            item.productId === productId ? { ...item, hasReviewed: true } : item
+            item.productId === productId
+              ? { ...item, hasReviewed: true }
+              : item,
           ),
         }));
       });
@@ -494,47 +498,39 @@ const OrderHistory: React.FC = () => {
   if (error) {
     return (
       <motion.div
-        className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6"
+        className="min-h-screen p-4 sm:p-6"
+        style={halftoneBg}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="max-w-6xl mx-auto text-center py-20">
-          <motion.div
-            className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-6 text-red-500"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        <div className="max-w-xl mx-auto py-16">
+          <div
+            className={`p-8 text-center bg-white border-4 border-black rounded-3xl ${comicShadow}`}
           >
-            <MdShoppingBag className="w-full h-full" />
-          </motion.div>
-          <motion.h2
-            className="text-xl sm:text-2xl font-bold text-gray-900 mb-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            Oops! Something went wrong
-          </motion.h2>
-          <motion.p
-            className="text-sm sm:text-base text-gray-600 mb-6 px-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            {error}
-          </motion.p>
-          <motion.button
-            onClick={handleRetry}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Try Again
-          </motion.button>
+            <motion.div
+              className="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-white bg-red-500 border-4 border-black rounded-full"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <MdShoppingBag className="w-10 h-10" />
+            </motion.div>
+            <h2 className="mb-2 text-3xl tracking-widest text-orange-600 sm:text-4xl font-comic-chip">
+              Oops! Something went wrong
+            </h2>
+            <p className="px-2 mb-6 text-lg tracking-wider text-gray-800 font-comic">
+              {error}
+            </p>
+            <motion.button
+              onClick={handleRetry}
+              className={`px-8 py-3 text-xl text-white bg-orange-600 hover:bg-orange-500 ${comicBtnBase}`}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Try Again
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     );
@@ -542,26 +538,26 @@ const OrderHistory: React.FC = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6"
+      className="min-h-screen p-4 sm:p-6"
+      style={halftoneBg}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          className="mb-6 sm:mb-8"
-          variants={titleVariants}
-          whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-        >
-          <div className="flex items-center gap-2 sm:gap-3 mb-2">
-            <div className="p-1.5 sm:p-2 bg-indigo-100 rounded-lg">
-              <MdHistory className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
+        {/* ---------- TITLE ---------- */}
+        <motion.div className="mb-6 sm:mb-8" variants={titleVariants}>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className={`p-2 bg-yellow-300 border-4 border-black rounded-2xl -rotate-6 ${comicShadowSm}`}
+            >
+              <MdHistory className="w-7 h-7 sm:w-9 sm:h-9 text-black" />
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
+            <h1 className="relative inline-block pb-1 text-3xl sm:text-4xl lg:text-5xl tracking-[0.12em] uppercase text-black font-comic-chip drop-shadow-[3px_3px_0_rgba(255,255,255,0.9)] after:absolute after:left-0 after:bottom-0 after:h-1.5 after:w-full after:rounded-full after:bg-black after:content-['']">
               Purchase History
             </h1>
           </div>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 ml-10 sm:ml-14">
+          <p className="ml-1 text-lg tracking-wider text-gray-800 sm:ml-2 sm:text-xl font-comic">
             Track and manage all your purchases
           </p>
         </motion.div>
@@ -571,25 +567,28 @@ const OrderHistory: React.FC = () => {
           initial="hidden"
           animate="visible"
         >
+          {/* ---------- FILTERS ---------- */}
           <motion.div
-            className="mb-6 sm:mb-8 space-y-4"
+            className={`p-4 mb-6 space-y-4 bg-white border-4 border-black sm:p-6 sm:mb-8 rounded-3xl ${comicShadow}`}
             variants={contentVariants}
           >
-            <div className="flex items-center gap-2 flex-wrap">
-              <MdCalendarToday className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-              <span className="text-xs sm:text-sm font-medium text-gray-700">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex items-center justify-center w-8 h-8 bg-orange-600 border-2 border-black rounded-full">
+                <MdCalendarToday className="w-4 h-4 text-white" />
+              </span>
+              <span className="text-xl tracking-wider text-orange-600 font-comic-chip">
                 Filter by:
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <select
                 value={selectedYear}
                 onChange={(e) => {
                   setSelectedYear(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                className={comicSelect}
               >
                 <option value="all">All Years</option>
                 {uniqueYears.map((year) => (
@@ -604,7 +603,7 @@ const OrderHistory: React.FC = () => {
                   setSelectedMonth(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                className={comicSelect}
               >
                 <option value="all">All Months</option>
                 {uniqueMonths.map((month) => (
@@ -619,7 +618,7 @@ const OrderHistory: React.FC = () => {
                   setSelectedDay(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                className={comicSelect}
               >
                 <option value="all">All Days</option>
                 {uniqueDays.map((day) => (
@@ -630,10 +629,12 @@ const OrderHistory: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex items-center gap-2 flex-1">
-                <MdSort className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center flex-1 gap-2">
+                <span className="flex items-center justify-center w-8 h-8 bg-orange-600 border-2 border-black rounded-full shrink-0">
+                  <MdSort className="w-4 h-4 text-white" />
+                </span>
+                <span className="text-xl tracking-wider text-orange-600 whitespace-nowrap font-comic-chip">
                   Sort by:
                 </span>
                 <select
@@ -642,7 +643,7 @@ const OrderHistory: React.FC = () => {
                     setSelectedSort(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                  className={`flex-1 ${comicSelect}`}
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -653,34 +654,37 @@ const OrderHistory: React.FC = () => {
               </div>
               <motion.button
                 onClick={resetFilters}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm whitespace-nowrap"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className={`px-6 py-2 text-lg text-black bg-yellow-300 hover:bg-yellow-200 whitespace-nowrap ${comicBtnBase}`}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
               >
                 Reset Filters
               </motion.button>
             </div>
           </motion.div>
 
+          {/* ---------- TOTAL SPENT ---------- */}
           <motion.div
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 shadow-lg"
+            className={`relative p-4 mb-6 text-white bg-orange-600 border-4 border-black sm:p-6 lg:p-8 sm:mb-8 rounded-3xl ${comicShadow}`}
             variants={contentVariants}
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div className="flex-1">
-                <h2 className="text-sm sm:text-base lg:text-lg font-medium opacity-90 mb-2">
+                <h2 className="mb-2 text-xl tracking-widest sm:text-2xl font-comic-chip drop-shadow-[2px_2px_0_#000]">
                   Total Spent
                   {selectedYear !== "all" ? ` in ${selectedYear}` : ""}
                   {selectedMonth !== "all" ? ` ${selectedMonth}` : ""}
                   {selectedDay !== "all" ? ` on Day ${selectedDay}` : ""}
                 </h2>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                <p className="text-4xl tracking-wider sm:text-5xl font-comic-chip drop-shadow-[3px_3px_0_#000]">
                   ₹ {getTotalPrice().toLocaleString()}
                 </p>
               </div>
-              <div className="text-left sm:text-right">
-                <p className="text-xs sm:text-sm opacity-90 mb-2">Orders</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-semibold">
+              <div
+                className={`px-6 py-3 text-center text-black bg-yellow-300 border-4 border-black rounded-2xl rotate-3 ${comicShadowSm}`}
+              >
+                <p className="text-lg tracking-wider font-comic">Orders</p>
+                <p className="text-3xl tracking-wider sm:text-4xl font-comic-chip">
                   {Object.values(groupedOrders).flat().length}
                 </p>
               </div>
@@ -693,26 +697,27 @@ const OrderHistory: React.FC = () => {
             </div>
           )}
 
+          {/* ---------- ORDERS ---------- */}
           <AnimatePresence mode="wait">
             {isFilterLoading ? (
               <FilterLoader />
             ) : sortedDateGroups.length === 0 ? (
               <motion.div
-                className="text-center py-16 text-gray-600 px-4"
+                className={`px-4 py-12 mx-auto text-center bg-white border-4 border-black max-w-xl rounded-3xl ${comicShadow}`}
                 variants={contentVariants}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
               >
                 <motion.div
-                  className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-400"
+                  className="flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-yellow-300 border-4 border-black rounded-full"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 >
-                  <MdShoppingBag className="w-full h-full" />
+                  <MdShoppingBag className="w-10 h-10 text-black" />
                 </motion.div>
-                <p className="text-base sm:text-lg font-medium">
+                <p className="text-2xl tracking-wider text-black font-comic-chip">
                   No orders found
                   {selectedYear !== "all" ? ` for ${selectedYear}` : ""}
                   {selectedMonth !== "all" ? ` ${selectedMonth}` : ""}
@@ -721,7 +726,7 @@ const OrderHistory: React.FC = () => {
               </motion.div>
             ) : (
               <motion.div
-                className="space-y-6 sm:space-y-8 lg:space-y-10"
+                className="space-y-8 sm:space-y-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -731,49 +736,54 @@ const OrderHistory: React.FC = () => {
                 {sortedDateGroups.map(([date, orders], index) => (
                   <motion.div
                     key={date}
-                    className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+                    className={`overflow-hidden bg-white border-4 border-black rounded-3xl ${comicShadow}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 sm:p-6 border-b border-gray-200">
+                    {/* Date header strip */}
+                    <div className="p-4 bg-[#FF942E] border-b-4 border-black sm:p-6">
                       <div className="flex flex-col gap-4">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                           <div>
-                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+                            <h3 className="mb-1 text-2xl tracking-widest text-white sm:text-3xl font-comic-chip drop-shadow-[2px_2px_0_#000]">
                               {date}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-600">
+                            <span className="inline-block px-3 py-0.5 text-base tracking-wider text-black bg-white border-2 border-black rounded-full font-comic">
                               {orders.length} order
                               {orders.length > 1 ? "s" : ""} placed
-                            </p>
+                            </span>
                           </div>
                           <div className="text-left sm:text-right">
-                            <p className="text-xs sm:text-sm text-gray-600 mb-1">
+                            <p className="mb-1 text-base tracking-wider text-black sm:text-lg font-comic">
                               Total for {date}
                             </p>
-                            <p className="text-lg sm:text-xl font-bold text-gray-900">
+                            <p
+                              className={`inline-block px-4 py-1 text-2xl tracking-wider text-black bg-yellow-300 border-[3px] border-black rounded-full font-comic-chip ${comicShadowSm}`}
+                            >
                               ₹ {getTotalForDate(orders).toLocaleString()}
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2 justify-end">
+                        <div className="flex flex-wrap justify-end gap-2">
                           {orders.map((order) => (
                             <motion.button
                               key={order.orderId}
                               onClick={() => downloadInvoice(order)}
-                              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-orange-600 text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-orange-700 active:bg-orange-800 transition-all shadow-sm"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
+                              className={`flex items-center gap-2 px-4 py-1.5 text-base text-white bg-black hover:bg-gray-800 ${comicBtnBase}`}
+                              whileHover={{ y: -2 }}
+                              whileTap={{ scale: 0.97 }}
                             >
-                              <FaMoneyBill className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <FaMoneyBill className="w-4 h-4" />
                               Invoice #{order.orderId.slice(-4)}
                             </motion.button>
                           ))}
                         </div>
                       </div>
                     </div>
-                    <div className="divide-y divide-gray-100">
+
+                    {/* Items */}
+                    <div className="divide-y-4 divide-black divide-dashed">
                       {orders.map((order: OrderData, orderIndex: number) => (
                         <div key={order.orderId} className="p-4 sm:p-6 lg:p-8">
                           <div className="space-y-4 sm:space-y-6">
@@ -781,7 +791,7 @@ const OrderHistory: React.FC = () => {
                               (item: OrderItem, itemIndex: number) => (
                                 <motion.div
                                   key={`${order.orderId}-${item.productId}`}
-                                  className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300"
+                                  className={`flex flex-col items-start gap-4 p-4 bg-[#FFF8EC] border-4 border-black sm:flex-row sm:gap-6 sm:p-5 rounded-2xl ${comicShadowSm} transition-transform duration-200 hover:-translate-y-1`}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
@@ -791,63 +801,66 @@ const OrderHistory: React.FC = () => {
                                       itemIndex * 0.03,
                                     duration: 0.4,
                                   }}
-                                  whileHover={{ scale: 1.01 }}
                                 >
-                                  <div className="flex-shrink-0 w-full sm:w-28 sm:h-28 lg:w-36 lg:h-36">
+                                  <div className="flex-shrink-0 w-full p-1.5 bg-white border-4 border-black sm:w-28 sm:h-28 lg:w-36 lg:h-36 rounded-xl">
                                     <img
                                       src={
                                         item.productImage || "/placeholder.png"
                                       }
                                       alt={item.productName}
-                                      className="w-full h-full object-cover rounded-xl border border-gray-200"
+                                      className="object-cover w-full h-full rounded-lg"
                                     />
                                   </div>
-                                  <div className="flex-1 flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6 w-full">
+
+                                  <div className="flex flex-col items-start justify-between flex-1 w-full gap-4 sm:flex-row sm:gap-6">
                                     <div className="flex-1">
-                                      <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-2 sm:mb-3 leading-tight">
+                                      <h4 className="mb-2 text-xl leading-tight tracking-wider text-black sm:text-2xl font-comic-chip">
                                         {item.productName}
                                       </h4>
-                                      <p className="text-lg sm:text-xl lg:text-2xl font-bold text-indigo-600 mb-2 sm:mb-3">
+                                      <p
+                                        className={`inline-block px-3 py-0.5 mb-3 text-2xl tracking-wider text-white bg-orange-600 border-[3px] border-black rounded-full font-comic-chip ${comicShadowSm}`}
+                                      >
                                         ₹ {item.price.toLocaleString()}
                                       </p>
-                                      <div className="space-y-1 sm:space-y-2 mb-3 sm:mb-4">
-                                        <p className="text-xs sm:text-sm text-gray-600">
-                                          <span className="font-medium">
+                                      <div className="mb-2 space-y-2">
+                                        <p className="text-lg tracking-wider text-gray-800 font-comic">
+                                          <span className="text-orange-600">
                                             Quantity:
                                           </span>{" "}
                                           {item.quantity}
                                         </p>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-xs sm:text-sm text-gray-600 font-medium">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <span className="text-lg tracking-wider text-orange-600 font-comic">
                                             Order ID:
                                           </span>
-                                          <span className="text-xs sm:text-sm font-mono text-gray-800 bg-gray-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                          <span className="px-2 py-0.5 text-sm tracking-wider text-black bg-white border-2 border-black rounded-lg font-comic break-all">
                                             {order.orderId}
                                           </span>
                                         </div>
                                       </div>
                                     </div>
-                                    <div className="flex flex-col gap-3 sm:gap-4 w-full sm:w-auto ml-auto">
+
+                                    <div className="flex flex-col w-full gap-3 ml-auto sm:w-auto">
                                       <motion.button
                                         onClick={() => handleReviewClick(item)}
                                         disabled={item.hasReviewed}
-                                        className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition-all shadow-sm w-full sm:min-w-[140px] justify-center text-xs sm:text-sm ${
+                                        className={`flex items-center justify-center w-full gap-2 px-6 py-2.5 text-lg sm:min-w-[160px] ${comicBtnBase} ${
                                           item.hasReviewed
-                                            ? "bg-yellow-100 text-yellow-700 cursor-not-allowed"
-                                            : "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
+                                            ? "bg-yellow-200 text-gray-700 cursor-not-allowed !shadow-none opacity-80"
+                                            : "bg-green-500 text-white hover:bg-green-400"
                                         }`}
                                         whileHover={
                                           item.hasReviewed
                                             ? undefined
-                                            : { scale: 1.05 }
+                                            : { y: -2 }
                                         }
                                         whileTap={
                                           item.hasReviewed
                                             ? undefined
-                                            : { scale: 0.95 }
+                                            : { scale: 0.97 }
                                         }
                                       >
-                                        <MdStar className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        <MdStar className="w-5 h-5" />
                                         {item.hasReviewed
                                           ? "Reviewed"
                                           : "Write Review"}
@@ -855,7 +868,7 @@ const OrderHistory: React.FC = () => {
                                     </div>
                                   </div>
                                 </motion.div>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -867,9 +880,9 @@ const OrderHistory: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* Pagination - responsive */}
-          <div className="mt-4 sm:mt-5">
-            <p className="text-xs sm:text-sm text-gray-600 mb-2 px-2">
+          {/* ---------- PAGINATION ---------- */}
+          <div className="mt-6 sm:mt-8">
+            <p className="inline-block px-4 py-1 mb-3 text-base tracking-wider text-black bg-white border-[3px] border-black rounded-full sm:text-lg font-comic">
               Showing {sortedDateGroups.length} date groups (page {currentPage}{" "}
               of {totalPages})
             </p>
@@ -885,7 +898,7 @@ const OrderHistory: React.FC = () => {
             />
           </div>
 
-          {/* Review modal */}
+          {/* ---------- REVIEW MODAL ---------- */}
           <AnimatePresence>
             {showReviewModal && selectedItem && (
               <ReviewModal

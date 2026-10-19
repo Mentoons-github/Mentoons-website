@@ -20,7 +20,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [gatewayTimeout, setGatewayTimeout] = useState<NodeJS.Timeout | null>(
-    null
+    null,
   );
 
   const minLoadingDuration = 1500;
@@ -34,7 +34,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
 
     const timeoutId = setTimeout(() => {
       setPaymentError(
-        "Payment gateway is taking longer than expected. Please try again."
+        "Payment gateway is taking longer than expected. Please try again.",
       );
     }, 15000);
 
@@ -107,14 +107,14 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const requestDuration = Date.now() - requestStartTime;
 
         const calculatedDuration = Math.max(
           minLoadingDuration,
-          requestDuration * 1.5
+          requestDuration * 1.5,
         );
         setLoadingDuration(calculatedDuration);
 
@@ -132,25 +132,25 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
           form.submit();
         } else {
           setPaymentError(
-            "Unable to initialize payment gateway. Please try again."
+            "Unable to initialize payment gateway. Please try again.",
           );
         }
       } catch (error) {
         const requestDuration = Date.now() - requestStartTime;
         const calculatedDuration = Math.max(
           minLoadingDuration,
-          requestDuration * 1.2
+          requestDuration * 1.2,
         );
         setLoadingDuration(calculatedDuration);
 
         clearGatewayTimeoutCheck();
         if (axios.isAxiosError(error) && error.response) {
           setPaymentError(
-            `Gateway error: ${error.response.status}. Please try again.`
+            `Gateway error: ${error.response.status}. Please try again.`,
           );
         } else {
           setPaymentError(
-            "Failed to connect to payment gateway. Please try again."
+            "Failed to connect to payment gateway. Please try again.",
           );
         }
       }
@@ -161,7 +161,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         setPaymentError(error.message);
       } else {
         setPaymentError(
-          "Failed to process membership payment. Please try again later."
+          "Failed to process membership payment. Please try again later.",
         );
       }
 
@@ -169,7 +169,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
       errorToast(
         error instanceof Error
           ? error.message
-          : "Failed to process membership payment. Please try again later."
+          : "Failed to process membership payment. Please try again later.",
       );
     }
   };
@@ -186,6 +186,8 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
     setPaymentError(null);
   };
 
+  const isPlatinum = membership.type === "Platinum";
+
   return (
     <>
       <motion.div
@@ -195,88 +197,86 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         whileHover={{ scale: 1.03 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="border-transparent border shadow-xl rounded-lg relative bg-yellow-200 w-full max-w-md p-4 sm:p-5 font-akshar"
+        className={`relative w-full max-w-md rounded-2xl border-2 border-gray-900 p-4 shadow-[8px_8px_0_0_#111827] sm:p-5 ${
+          isPlatinum ? "bg-[#4CC9F0]" : "bg-[#FFD93D]"
+        }`}
       >
-        {membership.type === "Platinum" && (
+        {isPlatinum && (
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={isInView ? { y: 0, opacity: 1 } : {}}
             transition={{ delay: 0.2, duration: 0.3 }}
-            className="absolute -top-5 left-1/3 -translate-x-1/2 bg-gradient-to-r from-blue-400 to-blue-500 px-3 py-1.5 rounded-md shadow-lg border border-blue-800 z-20"
+            className="font-comic-chip absolute -top-5 left-1/3 z-20 -translate-x-1/2 -rotate-3 rounded-full border-2 border-gray-900 bg-[#FF5D8F] px-3 py-1.5 shadow-[3px_3px_0_0_#111827]"
           >
-            <h1 className="text-xs font-medium flex items-center gap-2 text-white">
-              Recommended Plan <FaStar className="text-yellow-400" />
+            <h1 className="flex items-center gap-2 text-xs tracking-wide text-white">
+              Recommended Plan <FaStar className="text-[#FFD93D]" />
             </h1>
           </motion.div>
         )}
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center w-full bg-gray-100 p-3 rounded-lg">
+
+        <div className="flex flex-col gap-4">
+          <div className="flex w-full items-center justify-between rounded-xl border-2 border-gray-900 bg-white p-3 shadow-[3px_3px_0_0_#111827]">
             <div>
-              <h2
-                className={`text-lg font-semibold ${
-                  membership.type === "Platinum"
-                    ? "bg-gradient-to-r from-gray-400 to-gray-500 text-transparent bg-clip-text"
-                    : "bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text"
-                }`}
-              >
+              <h2 className="font-comic text-2xl tracking-wide text-gray-900 md:text-3xl">
                 Mentoons {membership.type}
               </h2>
 
-              <strong className="text-lg md:text-xl text-gray-800">
+              <strong className="font-comic-chip text-xl tracking-wide text-gray-900 md:text-2xl">
                 ₹{membership.price}
-                <span className="text-sm text-gray-500"> / annum</span>
+                <span className="font-sans text-sm font-semibold text-gray-600">
+                  {" "}
+                  / annum
+                </span>
               </strong>
-              <p className="text-xs md:text-sm font-medium text-green-500">
+              <p className="text-xs font-bold text-green-700 md:text-sm">
                 (~₹{(membership.price / 12).toFixed(0)} per month)
               </p>
             </div>
             <img
               src={membership.character}
               alt={membership.type}
-              className="w-10 sm:w-12 object-contain"
+              className="w-12 object-contain sm:w-14"
             />
           </div>
 
-          <ul className="w-full">
+          <ul className="flex w-full flex-col gap-2">
             {membership.benefits.map((data, index) => (
               <motion.li
                 key={index}
                 initial={{ opacity: 0, x: -10 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
-                className={`flex justify-between items-center gap-2 p-2 rounded-md text-xs md:text-sm transition-all
-                ${
-                  membership.type === "Platinum"
-                    ? data.important
-                      ? "bg-gradient-to-l from-purple-500 to-indigo-600 text-white font-bold shadow-lg border-l-4 border-purple-700"
-                      : "bg-indigo-50 border-l-4 border-indigo-500 font-semibold"
-                    : data.important
-                    ? "bg-yellow-200 text-black font-medium shadow border-l-4 border-yellow-500"
-                    : "bg-gray-100 border-l-4 border-gray-300 text-gray-600"
+                className={`flex items-center justify-between gap-2 rounded-lg border-2 border-gray-900 p-2 text-xs transition-all md:text-sm ${
+                  data.important
+                    ? isPlatinum
+                      ? "bg-[#FF5D8F] font-bold text-white shadow-[3px_3px_0_0_#111827]"
+                      : "bg-[#FF9800] font-bold text-gray-900 shadow-[3px_3px_0_0_#111827]"
+                    : "bg-white font-semibold text-gray-700"
                 }`}
               >
                 <span>{data.feature}</span>
                 <div className="flex items-center gap-2">
                   <span>{data.details}</span>
                   {data.details === "Not available" ? (
-                    <FaTimes className="text-red-500" />
+                    <FaTimes className="text-red-600" />
                   ) : (
-                    <FaCheck className="text-green-500" />
+                    <FaCheck
+                      className={
+                        data.important ? "text-gray-900" : "text-green-700"
+                      }
+                    />
                   )}
                 </div>
               </motion.li>
             ))}
           </ul>
-          <div className="flex justify-center mt-4">
+
+          <div className="mt-2 flex justify-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`px-4 py-1.5 text-white text-sm rounded-md transition-all duration-300 shadow-md 
-            ${
-              membership.type === "Platinum"
-                ? "bg-orange-500 hover:from-orange-300 hover:to-orange-800"
-                : "bg-orange-500 hover:bg-orange-900"
-            }`}
+              className="font-comic-chip rounded-xl border-2 border-gray-900 bg-[#FF9800] px-8 py-2 text-lg tracking-wide text-white shadow-[4px_4px_0_0_#111827] transition-all hover:shadow-[2px_2px_0_0_#111827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              style={{ textShadow: "2px 2px 0 #111827" }}
               onClick={() => handleMembership(membership)}
             >
               Buy Now
@@ -284,6 +284,7 @@ const MembershipCard = ({ membership }: { membership: Membership }) => {
           </div>
         </div>
       </motion.div>
+
       <PaymentProcessFlow
         isActive={isProcessingPayment}
         onComplete={() => {

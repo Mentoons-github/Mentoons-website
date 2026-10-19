@@ -1,7 +1,35 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { WorkshopCategory, WorkshopFormValues } from "@/types";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, CSSProperties } from "react";
+
+const INK = "#1f1308";
+
+// ---- inline comic styles ----
+const cardStyle: CSSProperties = {
+  border: `4px solid ${INK}`,
+  boxShadow: `8px 8px 0 ${INK}`,
+};
+
+const halftoneStyle: CSSProperties = {
+  backgroundImage:
+    "radial-gradient(rgba(31,19,8,0.14) 1.5px, transparent 1.6px)",
+  backgroundSize: "14px 14px",
+};
+
+const titleStyle: CSSProperties = {
+  color: "#fff",
+  letterSpacing: "0.04em",
+  WebkitTextStroke: `clamp(1px, 0.2vw, 3px) ${INK}`,
+  paintOrder: "stroke fill",
+  textShadow: `3px 3px 0 ${INK}`,
+};
+
+const btnBase: CSSProperties = {
+  border: `3px solid ${INK}`,
+  boxShadow: `3px 3px 0 ${INK}`,
+  color: INK,
+};
 
 interface WorkshopCardProps {
   category: WorkshopCategory;
@@ -41,7 +69,6 @@ const WorkshopCard = ({
   const isFirstRender = useRef(true);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Scroll-based parallax effect
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ["start end", "end start"],
@@ -49,6 +76,7 @@ const WorkshopCard = ({
 
   const cardY = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const circleRotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
+  const circleRotateReverse = useTransform(scrollYProgress, [0, 1], [0, -180]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -78,7 +106,7 @@ const WorkshopCard = ({
                 mb-6 xs:mb-8 
                 text-white relative overflow-hidden`}
       layoutId={`workshop-${category.categoryName}-${workshop.workshopName}`}
-      style={{ y: cardY }}
+      style={{ ...cardStyle, y: cardY }}
       initial={{ opacity: 0, scale: 0.9, y: 100 }}
       whileInView={{ opacity: 1, scale: 1, y: 0 }}
       viewport={{ once: false, amount: 0.2 }}
@@ -87,22 +115,36 @@ const WorkshopCard = ({
         ease: [0.25, 0.4, 0.25, 1],
       }}
     >
-      {/* Animated background circles with parallax rotation */}
+      {/* Halftone dots */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={halftoneStyle}
+      />
+
+      {/* Outlined background circles with parallax rotation */}
       <motion.div
         className="absolute top-0 right-0 
                     w-32 h-32 xs:w-48 xs:h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 
-                    bg-white/10 rounded-full 
+                    rounded-full 
                     -translate-y-16 translate-x-16 xs:-translate-y-24 xs:translate-x-24 sm:-translate-y-28 sm:translate-x-28 md:-translate-y-32 md:translate-x-32"
-        style={{ rotate: circleRotate }}
+        style={{
+          rotate: circleRotate,
+          background: "rgba(255,255,255,0.15)",
+          border: `3px solid ${INK}`,
+        }}
         initial={{ scale: 0, rotate: -180 }}
         whileInView={{ scale: 1, rotate: 0 }}
         viewport={{ once: false, amount: 0.2 }}
         transition={{ duration: 1.2, ease: "backOut", delay: 0.2 }}
       />
       <motion.div
-        className="absolute bottom-0 left-0 w-24 h-24 xs:w-32 xs:h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-white/10 rounded-full 
+        className="absolute bottom-0 left-0 w-24 h-24 xs:w-32 xs:h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full 
                     translate-y-12 -translate-x-12 xs:translate-y-16 xs:-translate-x-16 sm:translate-y-20 sm:-translate-x-20 md:translate-y-24 md:-translate-x-24"
-        style={{ rotate: useTransform(scrollYProgress, [0, 1], [0, -180]) }}
+        style={{
+          rotate: circleRotateReverse,
+          background: "rgba(255,255,255,0.15)",
+          border: `3px solid ${INK}`,
+        }}
         initial={{ scale: 0, rotate: 180 }}
         whileInView={{ scale: 1, rotate: 0 }}
         viewport={{ once: false, amount: 0.2 }}
@@ -111,10 +153,11 @@ const WorkshopCard = ({
 
       <div className="relative z-10 lg:flex justify-between">
         <div className="flex flex-col mb-4 xs:mb-6 lg:justify-between lg:min-h-[280px]">
-          {/* Workshop title with slide-in animation */}
+          {/* Workshop title */}
           <motion.h2
-            className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl 
-                     font-black leading-tight text-center lg:text-left
+            style={titleStyle}
+            className="font-comic text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl 
+                     leading-tight text-center lg:text-left
                      max-w-full lg:max-w-2xl"
             initial={{ opacity: 0, x: -100 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -129,7 +172,7 @@ const WorkshopCard = ({
           </motion.h2>
 
           <div className="mt-auto">
-            {/* Action buttons with stagger */}
+            {/* Action buttons */}
             <motion.div
               className="flex flex-row flex-wrap justify-center lg:justify-start 
                    gap-2 xs:gap-3 sm:gap-4 mt-6 xs:mt-8"
@@ -147,15 +190,15 @@ const WorkshopCard = ({
                       : setActiveSection(section);
                     setCurrentAgeGroup("");
                   }}
-                  className={`px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base sm:text-lg transition-all duration-300 
-                       min-w-[100px] xs:min-w-[120px] sm:min-w-[140px] text-center
-                       ${
-                         activeSection === section
-                           ? "bg-white text-gray-800 shadow-xl scale-105"
-                           : "bg-white/20 hover:bg-white/30 backdrop-blur-sm hover:scale-102"
-                       }`}
+                  style={{
+                    ...btnBase,
+                    background: activeSection === section ? "#fde047" : "#fff",
+                  }}
+                  className="font-comic-chip tracking-wide px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-xl xs:rounded-2xl text-sm xs:text-base sm:text-lg transition-colors duration-300 
+                       min-w-[100px] xs:min-w-[120px] sm:min-w-[140px] text-center"
                   whileHover={{
-                    scale: activeSection === section ? 1.05 : 1.02,
+                    scale: activeSection === section ? 1.05 : 1.03,
+                    y: -2,
                   }}
                   whileTap={{ scale: 0.98 }}
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -186,15 +229,16 @@ const WorkshopCard = ({
                 .toLowerCase()
                 .includes("career corner") && (
                 <motion.button
-                  className={`px-6 py-3 rounded-lg font-semibold text-white transition-all duration-300
-                ${
-                  activeSection === "services"
-                    ? "bg-white text-black shadow-xl scale-105"
-                    : `bg-gradient-to-r ${currentTheme.accent} text-white hover:opacity-90`
-                }`}
+                  style={{
+                    ...btnBase,
+                    color: "#fff",
+                    textShadow: `2px 2px 0 ${INK}`,
+                  }}
+                  className={`font-comic-chip tracking-wide px-6 py-3 rounded-xl bg-gradient-to-r ${currentTheme.accent} hover:opacity-90 transition-all duration-300`}
                   onClick={() => navigate(`/services`)}
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  whileHover={{ scale: 1.03, y: -2 }}
                   viewport={{ once: false }}
                   transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
                 >
@@ -215,10 +259,11 @@ const WorkshopCard = ({
                 {(["overview", "whyChoose"] as const).map((section, index) => (
                   <motion.div
                     key={section}
-                    className={`w-2 h-2 xs:w-3 xs:h-3 rounded-full transition-all duration-300 ${
+                    style={{ border: `2px solid ${INK}` }}
+                    className={`w-3 h-3 xs:w-4 xs:h-4 rounded-full transition-all duration-300 ${
                       activeSection === section
-                        ? "bg-white scale-125"
-                        : "bg-white/40"
+                        ? "bg-yellow-300 scale-125"
+                        : "bg-white"
                     }`}
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
@@ -236,7 +281,7 @@ const WorkshopCard = ({
           </div>
         </div>
 
-        {/* Age group images with stagger animation */}
+        {/* Age group images */}
         <motion.div
           className="flex items-center justify-center lg:justify-end h-full  
                      gap-2 xs:gap-3 sm:gap-4 
@@ -267,12 +312,16 @@ const WorkshopCard = ({
                   src={ageGroup.image!}
                   alt={`Age group ${ageGroup.ageRange}`}
                   className="h-32 w-32 md:h-40 md:w-40 xl:h-48 xl:w-48 
-                           object-cover rounded-lg xs:rounded-xl border-2 flex-shrink-0 transition-transform duration-300"
-                  style={{ borderColor: currentTheme.border }}
+                           object-cover rounded-lg xs:rounded-xl flex-shrink-0 transition-transform duration-300"
+                  style={{
+                    border: `3px solid ${INK}`,
+                    boxShadow: `4px 4px 0 ${INK}`,
+                    background: "#fff",
+                  }}
                   title={ageGroup.ageRange}
                   whileHover={{
-                    scale: 1.1,
-                    rotate: 5,
+                    scale: 1.08,
+                    rotate: 4,
                     transition: { duration: 0.3 },
                   }}
                   whileTap={{ scale: 0.95 }}
@@ -286,12 +335,15 @@ const WorkshopCard = ({
                         ? setActiveSection("")
                         : setActiveSection("ageGroups");
                     }}
-                    className={`px-8 py-3 rounded-2xl font-bold text-lg transition-all duration-300 ${
-                      currentAgeGroup === ageGroup.ageRange &&
-                      activeSection === "ageGroups"
-                        ? `bg-gradient-to-r ${currentTheme.primary} text-white shadow-2xl scale-105`
-                        : "bg-white text-gray-600 shadow-lg hover:shadow-xl hover:bg-gray-300 hover:scale-102"
-                    }`}
+                    style={{
+                      ...btnBase,
+                      background:
+                        currentAgeGroup === ageGroup.ageRange &&
+                        activeSection === "ageGroups"
+                          ? "#fde047"
+                          : "#fff",
+                    }}
+                    className="font-comic-chip tracking-wide px-6 sm:px-8 py-3 rounded-2xl text-base sm:text-lg transition-colors duration-300"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: false }}
@@ -300,7 +352,7 @@ const WorkshopCard = ({
                       type: "spring",
                       stiffness: 150,
                     }}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Age {ageGroup.ageRange}
@@ -310,28 +362,6 @@ const WorkshopCard = ({
             ))}
         </motion.div>
       </div>
-
-      {/* Gradient overlay with fade-in */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: false, amount: 0.2 }}
-        transition={{ delay: 0.6, duration: 1 }}
-      />
-
-      {/* Shimmer effect */}
-      <motion.div
-        className="absolute inset-0 bg-white/5 rounded-2xl xs:rounded-3xl pointer-events-none"
-        animate={{
-          opacity: [0, 0.5, 0],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
     </motion.div>
   );
 };

@@ -12,7 +12,7 @@ import { useSessionForm } from "@/utils/formik/sessionForm";
 import BookedSession from "@/pages/v2/user/sessionBooking/bookedSession";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import DateTimeSection from "./DateTimeSelection";
@@ -26,6 +26,96 @@ import SessionSummary from "./sessionSummary";
 import ErrorModal from "@/components/adda/modal/error";
 import WeAreHiring from "@/components/assessment/weAreHiring";
 import { HIRING } from "@/constant/constants";
+
+/* ---- Inline comic animations (Web Animations API, no CSS needed) ---- */
+type ComicKind = "slam" | "pop";
+
+const COMIC = {
+  slam: (r: number) => ({
+    duration: 700,
+    easing: "ease-out",
+    frames: [
+      { opacity: 0, transform: "translateY(-40px) scale(2.4) rotate(-6deg)" },
+      {
+        offset: 0.55,
+        opacity: 1,
+        transform: `translateY(0px) scale(0.94) rotate(${r + 1}deg)`,
+      },
+      {
+        offset: 0.75,
+        opacity: 1,
+        transform: `translateY(0px) scale(1.03) rotate(${r - 0.5}deg)`,
+      },
+      { opacity: 1, transform: `translateY(0px) scale(1) rotate(${r}deg)` },
+    ] as Keyframe[],
+  }),
+  pop: (r: number) => ({
+    duration: 650,
+    easing: "ease-out",
+    frames: [
+      { opacity: 0, transform: "translateY(40px) scale(0.6) rotate(-6deg)" },
+      {
+        offset: 0.6,
+        opacity: 1,
+        transform: `translateY(-8px) scale(1.04) rotate(${r + 2}deg)`,
+      },
+      {
+        offset: 0.8,
+        opacity: 1,
+        transform: `translateY(2px) scale(0.99) rotate(${r}deg)`,
+      },
+      { opacity: 1, transform: `translateY(0px) scale(1) rotate(${r}deg)` },
+    ] as Keyframe[],
+  }),
+};
+
+/* Plays once on load, or when the element scrolls into view (onView).
+   `rotate` = the element's existing Tailwind tilt in degrees (e.g. -1). */
+const useComic = <T extends HTMLElement>(
+  kind: ComicKind,
+  delay = 0,
+  rotate = 0,
+  onView = false,
+) => {
+  const ref = useRef<T>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof el.animate !== "function") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const spec = COMIC[kind](rotate);
+    const play = () => {
+      el.style.opacity = "";
+      el.animate(spec.frames, {
+        duration: spec.duration,
+        delay,
+        easing: spec.easing,
+        fill: "backwards",
+      });
+    };
+
+    if (!onView || typeof IntersectionObserver === "undefined") {
+      play();
+      return;
+    }
+
+    el.style.opacity = "0";
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          play();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.05, rootMargin: "0px 0px -6% 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return ref;
+};
 
 interface BookingValues {
   name: string;
@@ -49,6 +139,14 @@ const BookingSection = ({ selectedPsychologist }: BookingSectionProps) => {
   const { getToken } = useAuth();
   const { user } = useUser();
   const topRef = useRef<HTMLElement>(null);
+
+  // Scroll-triggered comic animations (animation only)
+  const titleRef = useComic<HTMLHeadingElement>("slam", 0, 1, true);
+  const dateRef = useComic<HTMLDivElement>("pop", 0, 0, true);
+  const detailsRef = useComic<HTMLDivElement>("pop", 0, 0, true);
+  const hiringRef = useComic<HTMLDivElement>("pop", 150, -1, true);
+  const summaryRef = useComic<HTMLDivElement>("pop", 300, 0, true);
+  const bookedRef = useComic<HTMLDivElement>("pop", 0, 0, true);
 
   const [duration, setDuration] = useState<SessionDuration>("1hr");
   const [child, setChild] = useState({ name: "", age: "" });
@@ -346,58 +444,91 @@ const BookingSection = ({ selectedPsychologist }: BookingSectionProps) => {
 
   return (
     <section ref={topRef} className="w-full">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <DateTimeSection
-            selectedDate={selectedDate}
-            onSelectDate={handleSelectDate}
-            selectedSlot={selectedSlot}
-            onSelectSlot={handleSelectSlot}
-            duration={duration}
-            onSelectDuration={setDuration}
-            bookedCalls={bookedCalls}
-            dateError={
-              attempted && !selectedDate ? "Please select a date" : undefined
-            }
-            slotError={
-              attempted && !selectedSlot ? "Please pick a slot" : undefined
-            }
-            slots={slots}
-            slotsLoading={slotsLoading}
-          />
-          <DetailsSection
-            formik={formik}
-            child={child}
-            childErrors={childErrors}
-            onChildChange={handleChildChange}
-          />
+      <h2
+        ref={titleRef}
+        className={`font-comic mb-6 inline-block rotate-1 rounded-2xl border-2 border-gray-900 bg-[#FFD93D] px-5 py-1 text-3xl tracking-wide text-gray-900 shadow-[5px_5px_0_0_#111827] sm:text-4xl`}
+      >
+        Book Your Session!
+      </h2>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Left column: each child is framed like a comic panel */}
+        <div className="space-y-8 lg:col-span-2">
+          <div
+            ref={dateRef}
+            className={`overflow-hidden bg-white p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] [&_input]:border-2 [&_input]:border-gray-900 [&_select]:border-2 [&_select]:border-gray-900 [&_textarea]:border-2 [&_textarea]:border-gray-900`}
+          >
+            <DateTimeSection
+              selectedDate={selectedDate}
+              onSelectDate={handleSelectDate}
+              selectedSlot={selectedSlot}
+              onSelectSlot={handleSelectSlot}
+              duration={duration}
+              onSelectDuration={setDuration}
+              bookedCalls={bookedCalls}
+              dateError={
+                attempted && !selectedDate ? "Please select a date" : undefined
+              }
+              slotError={
+                attempted && !selectedSlot ? "Please pick a slot" : undefined
+              }
+              slots={slots}
+              slotsLoading={slotsLoading}
+            />
+          </div>
+
+          <div
+            ref={detailsRef}
+            className={`overflow-hidden bg-[#E0F7FD] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] [&_input]:border-2 [&_input]:border-gray-900 [&_select]:border-2 [&_select]:border-gray-900 [&_textarea]:border-2 [&_textarea]:border-gray-900`}
+          >
+            <DetailsSection
+              formik={formik}
+              child={child}
+              childErrors={childErrors}
+              onChildChange={handleChildChange}
+            />
+          </div>
         </div>
 
-        <div className="space-y-6 lg:col-span-1">
+        {/* Right column */}
+        <div className="space-y-8 lg:col-span-1">
           {psychologistHiring.length > 0 && (
-            <WeAreHiring hiring={psychologistHiring} />
+            <div
+              ref={hiringRef}
+              className={`-rotate-1 overflow-hidden bg-[#7AE582] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]`}
+            >
+              <WeAreHiring hiring={psychologistHiring} />
+            </div>
           )}
 
-          <SessionSummary
-            selectedDate={selectedDate}
-            selectedSlot={selectedSlot}
-            option={activeOption}
-            submitting={submitting}
-            onBook={onBook}
-            psychologist={selectedPsychologist}
+          <div
+            ref={summaryRef}
+            className={`overflow-hidden bg-[#FFD93D] p-1 rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]`}
           >
-            {selectedDateBookings.length > 0 && (
-              <SelectedDateBookings
-                date={selectedDate}
-                bookings={selectedDateBookings}
-                scrollToBookingForm={scrollToBookingForm}
-              />
-            )}
-          </SessionSummary>
+            <SessionSummary
+              selectedDate={selectedDate}
+              selectedSlot={selectedSlot}
+              option={activeOption}
+              submitting={submitting}
+              onBook={onBook}
+              psychologist={selectedPsychologist}
+            >
+              {selectedDateBookings.length > 0 && (
+                <SelectedDateBookings
+                  date={selectedDate}
+                  bookings={selectedDateBookings}
+                  scrollToBookingForm={scrollToBookingForm}
+                />
+              )}
+            </SessionSummary>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-stone-200 bg-white">
+      <div
+        ref={bookedRef}
+        className={`mt-10 overflow-hidden bg-white rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827]`}
+      >
         <BookedSession
           error={error}
           loading={loading}

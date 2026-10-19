@@ -64,18 +64,19 @@ const FilterGroup = ({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="border-b border-gray-200 py-4 last:border-b-0">
+    <div className="border-b-2 border-dashed border-gray-900/40 py-4 last:border-b-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between text-left text-sm font-semibold text-gray-900"
+        className="font-comic flex w-full items-center justify-between text-left text-xl tracking-wide text-gray-900"
       >
         {title}
         <ChevronUp
-          className={`h-4 w-4 text-gray-500 transition-transform ${
+          className={`h-5 w-5 text-gray-900 transition-transform ${
             open ? "" : "rotate-180"
           }`}
+          strokeWidth={3}
           aria-hidden="true"
         />
       </button>
@@ -93,12 +94,12 @@ const CheckboxRow = ({
   checked: boolean;
   onChange: () => void;
 }) => (
-  <label className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 hover:text-gray-900">
+  <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-gray-800 hover:text-[#ff9800]">
     <input
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-[#ff9800]"
+      className="h-5 w-5 cursor-pointer rounded border-2 border-gray-900 accent-[#ff9800]"
     />
     {label}
   </label>
@@ -146,12 +147,14 @@ const ProductFilters = ({
 
   return (
     <aside aria-label="Product filters" className="w-full">
-      <div className="flex items-center justify-between border-b border-gray-200 pb-3">
-        <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+      <div className="flex items-center justify-between border-b-2 border-gray-900 pb-3">
+        <h2 className="font-comic text-3xl tracking-wide text-gray-900">
+          Filters
+        </h2>
         <button
           type="button"
           onClick={onClearAll}
-          className="text-sm text-gray-500 underline underline-offset-2 hover:text-[#ff9800]"
+          className="font-comic rounded-full border-2 border-gray-900 bg-[#FFD93D] px-3 py-0.5 text-base tracking-wide text-gray-900 shadow-[2px_2px_0_0_#111827] transition hover:bg-[#ff9800] hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           Clear all
         </button>

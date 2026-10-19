@@ -26,6 +26,52 @@ import axiosInstance from "@/api/axios";
 import ComicHero from "@/components/comics/hero";
 import ScrollTextSection from "@/components/comics/scrollText";
 
+/*
+  Comic theme tokens (shared with Cart / OrderSummary / PaymentStatus)
+  page   #FFFFFF   white background
+  ink    #000      outlines + hard shadows
+  yellow #FFD93B   banners / secondary actions
+  red    #FF4D3D   primary actions
+  blue   #2D6BFF   accents
+
+  The font is applied with .comic-body only on the sections of this page, so
+  ComicHero, ScrollTextSection and ComicViewer keep their own typography.
+  Mobile (< lg): thinner borders, smaller shadows, no tilt, swipe-snap carousel
+  (arrow buttons hidden), stacked card buttons.
+*/
+const comicCss = `
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700;900&display=swap');
+
+.comic-body { font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif; color: #000; }
+.comic-title { font-family: 'Bangers', 'Impact', sans-serif; letter-spacing: 0.04em; }
+
+.comic-panel { border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
+.comic-btn {
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.comic-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+.comic-btn:focus-visible { outline: 4px dashed #2D6BFF; outline-offset: 3px; }
+.comic-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (min-width: 1024px) {
+  .comic-panel { border-width: 4px; box-shadow: 8px 8px 0 #000; }
+  .comic-btn { border-width: 4px; box-shadow: 5px 5px 0 #000; }
+  .comic-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; }
+  .comic-btn:active:not(:disabled) { transform: translate(5px, 5px); box-shadow: 0 0 0 #000; }
+}
+
+.comic-snap { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.comic-snap > * { scroll-snap-align: center; }
+.comic-hide-scroll { scrollbar-width: none; }
+.comic-hide-scroll::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .comic-btn { transition: none; }
+}
+`;
+
 interface DBUser {
   _id: string;
   subscription: {
@@ -82,12 +128,6 @@ const ComicsPageV2 = () => {
     window.addEventListener("scroll", handleScrollProgress, { passive: true });
     return () => window.removeEventListener("scroll", handleScrollProgress);
   }, []);
-
-  // const handleSelectedOption = (option: string) => {
-  //   setSearchParams({ option });
-  //   setCurrentIndex(0);
-  //   setIsPlaying(false);
-  // };
 
   const handleScroll = () => {
     const carousel = trendingCarouselRef.current;
@@ -281,16 +321,6 @@ const ComicsPageV2 = () => {
     }
   };
 
-  // const pauseAllVideos = () => {
-  //   videoRefs.current.forEach((video) => {
-  //     if (video && !video.paused) {
-  //       video.pause();
-  //       video.currentTime = 0;
-  //     }
-  //   });
-  //   setIsPlaying(false);
-  // };
-
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
 
@@ -344,310 +374,52 @@ const ComicsPageV2 = () => {
 
   return (
     <div>
-      {/* Scroll progress bar — replaces Framer Motion scaleX spring */}
+      <style>{comicCss}</style>
+
+      {/* Scroll progress bar */}
       <div
-        className="fixed top-0 left-0 right-0 z-50 h-1 bg-primary origin-left transition-all duration-150"
+        className="fixed left-0 right-0 top-0 z-50 h-2 origin-left border-b-2 border-black bg-[#FF4D3D] transition-all duration-150"
         style={{ transform: `scaleX(${scrollProgress / 100})` }}
       />
 
       <ComicHero />
 
-      {/* Replaced motion.div with Tailwind animate-fade-in via CSS class */}
-      {/* <div className="animate-fade-in">
-        <h2 className="text-4xl font-bold text-center py-6 text-black">
-          Re-Discover the <br /> Passion of Reading
-        </h2>
-        <div className="flex items-center justify-center gap-6 pb-6">
-          <button
-            className={`flex items-center justify-center p-5 py-2 rounded-full bg-yellow-100 border border-yellow-400 hover:ring-4 hover:ring-yellow-300 transition-all duration-200 font-medium ${
-              selectedOption === "comic" &&
-              "ring-4 ring-yellow-400 shadow-xl shadow-yellow-100"
-            }`}
-            onClick={() => handleSelectedOption("comic")}
-          >
-            <span className="w-1 h-1 bg-black rounded-full" /> E-Comics
-          </button>
-          <button
-            className={`flex items-center justify-center gap-3 px-5 py-2 rounded-full bg-rose-200 border border-rose-500 hover:ring-4 hover:ring-rose-500 transition-all duration-200 font-medium ${
-              selectedOption === "audio comic" &&
-              "ring-4 ring-rose-500 shadow-xl shadow-rose-100"
-            }`}
-            onClick={() => handleSelectedOption("audio comic")}
-          >
-            <span className="w-1 h-1 bg-black rounded-full" /> Audio Comics
-          </button>
-        </div>
-        <p className="pb-12 text-xs text-center text-gray-500">
-          pdf format - download, print and your comic is ready!
-        </p>
-      </div> */}
-
-      {/* Replaced AnimatePresence + motion.div with Tailwind transitions */}
-      {/* <div className="transition-opacity duration-300">
-        {selectedOption === "comic" ? (
-          <div className="animate-fade-in w-[95%] md:w-[90%] mx-auto mb-16">
-            {isFetchingProducts ? (
-              <div className="flex items-center justify-center h-[700px] md:h-[800px] bg-yellow-100">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-500 text-lg">
-                    Loading comics...
-                  </span>
-                </div>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="flex items-center justify-center h-[400px] bg-yellow-100">
-                <span className="text-gray-500 text-lg">
-                  No comics available.
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center pb-6 bg-yellow-100 relative overflow-hidden h-[700px] md:h-[800px]">
-                <div className="absolute w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] rounded-full bg-primary -bottom-50 -left-[300px] md:-left-96"></div>
-                <div className="absolute w-[150px] h-[150px] md:w-[200px] md:h-[200px] rounded-full bg-primary -top-8 -right-8 md:-top-16 md:-right-16"></div>
-                <div className="relative w-[95%] md:w-[90%] mx-auto flex flex-col items-center justify-between overflow-y-scroll overflow-x-hidden gap-10 md:gap-20 h-full py-10 md:py-20">
-                  {products.map((product) => (
-                    <div
-                      className="flex flex-col items-start justify-between w-full gap-8 p-4 mt-4 duration-200 rounded-lg md:gap-20 md:mt-8 md:flex-row group transition-all"
-                      key={product._id}
-                    >
-                      <div className="relative flex-1 w-full">
-                        <div className="absolute inset-0 border-4 border-yellow-300" />
-                        <img
-                          src={product?.productImages?.[0].imageUrl}
-                          alt={product?.title}
-                          className="relative object-cover w-full h-auto"
-                        />
-                      </div>
-                      <div className="flex-1 w-full">
-                        <div>
-                          <h2 className="py-4 font-bold leading-none text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
-                            {product.title}
-                          </h2>
-                          <p className="pb-4 text-base md:text-xl tracking-wide text-neutral-700 w-full md:w-[80%]">
-                            {product.description}
-                          </p>
-                        </div>
-                        <div>
-                          <button
-                            className="px-6 py-2 text-lg font-bold text-white transition-all rounded-full shadow-xl md:px-8 md:py-3 md:text-xl bg-primary hover:scale-110 duration-200"
-                            onClick={() => {
-                              openComicModal(
-                                (product.details as ComicProduct["details"])
-                                  ?.sampleUrl || "",
-                                product,
-                              );
-                            }}
-                          >
-                            Read More
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="animate-fade-in bg-[#FFBABA] relative min-h-[400px] md:h-[800px] w-[95%] md:w-[90%] mx-auto overflow-hidden p-4 md:p-12 mb-20 transition-all duration-400">
-            {isFetchingProducts ? (
-              <div className="flex items-center justify-center min-h-[400px] md:h-[800px]">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-600 text-lg">
-                    Loading audio comics...
-                  </span>
-                </div>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="flex items-center justify-center h-[400px]">
-                <span className="text-gray-500 text-lg">
-                  No audio comics available.
-                </span>
-              </div>
-            ) : (
-              <>
-                <div className="absolute w-[300px] h-[300px] md:w-[1000px] md:h-[1000px] rounded-full bg-[#EF4444] -bottom-24 -left-[150px] md:-left-96"></div>
-                <div className="absolute w-[100px] h-[100px] md:w-[200px] md:h-[200px] rounded-full bg-[#EF4444] -top-8 -right-8 md:-top-16 md:-right-16"></div>
-
-                <div className="relative h-[400px] md:h-[800px] rounded-xl overflow-hidden">
-                  <div className="h-full">
-                    {products.map((comic, index) => (
-                      <div
-                        key={comic._id}
-                        className={`absolute inset-0 w-full h-[350px] md:h-[680px] bg-white rounded-2xl group transition-opacity duration-300 shadow-xl border-2 md:border-4 border-rose-500 ${
-                          currentIndex === index
-                            ? "opacity-100"
-                            : "opacity-0 pointer-events-none"
-                        }`}
-                      >
-                        {(
-                          comic.details as
-                            | ComicProduct["details"]
-                            | AudioComicProduct["details"]
-                        )?.sampleUrl ? (
-                          <video
-                            className="object-contain w-full h-full p-2 md:py-6 rounded-2xl"
-                            src={
-                              (
-                                comic.details as
-                                  | ComicProduct["details"]
-                                  | AudioComicProduct["details"]
-                              )?.sampleUrl
-                            }
-                            poster={
-                              comic.productImages?.[0].imageUrl ||
-                              "/placeholder-image.jpg"
-                            }
-                            onEnded={() => setIsPlaying(false)}
-                            onPlay={() => setIsPlaying(true)}
-                            onPause={() => setIsPlaying(false)}
-                            playsInline
-                            ref={(el) => {
-                              videoRefs.current[index] = el;
-                            }}
-                          />
-                        ) : (
-                          <img
-                            src={
-                              comic.productImages?.[0].imageUrl ||
-                              "/placeholder-image.jpg"
-                            }
-                            alt={comic.title}
-                            className="object-cover w-full h-full rounded-2xl"
-                            onError={(e) => {
-                              e.currentTarget.src = "/placeholder-image.jpg";
-                              e.currentTarget.alt = "Placeholder image";
-                            }}
-                          />
-                        )}
-
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0 md:p-8 rounded-2xl bg-black/70 group-hover:opacity-100">
-                          <h3 className="mb-2 text-xl font-bold text-center text-white md:mb-4 md:text-3xl">
-                            {comic?.title || "Untitled Comic"}
-                          </h3>
-                          <p className="mb-4 text-sm text-center text-white md:mb-8 md:text-base line-clamp-3">
-                            {comic?.description || "No description available"}
-                          </p>
-
-                          {(comic?.details as ComicProduct["details"])
-                            ?.sampleUrl && (
-                            <button
-                              className="flex items-center justify-center w-12 h-12 transition-colors rounded-full md:w-16 md:h-16 bg-white/20 hover:bg-white/30"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const video = e.currentTarget.parentElement
-                                  ?.previousElementSibling as HTMLVideoElement;
-                                if (video) {
-                                  if (video.paused) {
-                                    video.play();
-                                    setIsPlaying(true);
-                                  } else {
-                                    video.pause();
-                                    setIsPlaying(false);
-                                  }
-                                }
-                              }}
-                            >
-                              {currentIndex === index && !isPlaying ? (
-                                <svg
-                                  className="w-6 h-6 text-white md:w-8 md:h-8"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M8 5v14l11-7z" />
-                                </svg>
-                              ) : (
-                                <svg
-                                  className="w-6 h-6 text-white md:w-8 md:h-8"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                                </svg>
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {isPlaying && (
-                    <div className="absolute flex items-center gap-1 px-2 py-1 text-xs text-white rounded-full md:px-3 md:text-sm top-2 md:top-4 right-2 md:right-4 bg-black/50">
-                      <span className="w-1.5 md:w-2 h-1.5 md:h-2 bg-red-500 rounded-full animate-pulse"></span>
-                      Playing
-                    </div>
-                  )}
-                </div>
-
-                <div className="absolute flex gap-1 pt-2 md:gap-2 md:pt-4 bottom-2 md:bottom-4 right-4 md:right-12">
-                  <button
-                    onClick={() => {
-                      pauseAllVideos();
-                      setCurrentIndex((prevIndex) =>
-                        prevIndex === 0 ? products.length - 1 : prevIndex - 1,
-                      );
-                    }}
-                    className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
-                  >
-                    <IoIosArrowBack className="text-xl md:text-2xl" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      pauseAllVideos();
-                      setCurrentIndex(
-                        (prevIndex) => (prevIndex + 1) % products.length,
-                      );
-                    }}
-                    className="p-1 bg-white rounded-full shadow-lg md:p-2 hover:bg-gray-100"
-                  >
-                    <IoIosArrowForward className="text-xl md:text-2xl" />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div> */}
-
-      {/* Replaced motion.div (whileInView) with Tailwind scroll-animation class */}
+      {/* Trending comics */}
       <div
         ref={trendingRef}
-        className="w-[95%] md:w-[90%] mx-auto mb-20 relative mt-10 animate-slide-up"
+        className="comic-body animate-slide-up relative mx-auto mb-12 mt-10 w-[95%] md:w-[90%] lg:mb-20"
       >
-        <h2 className="pb-6 text-3xl font-semibold md:text-4xl">
+        <h2 className="comic-title mb-6 inline-block border-[3px] border-black bg-[#FFD93B] px-4 py-1.5 text-4xl leading-none shadow-[4px_4px_0_#000] sm:text-5xl lg:-rotate-1 lg:border-4 lg:px-6 lg:py-2 lg:text-6xl lg:shadow-[6px_6px_0_#000]">
           Trending Comics For You!
         </h2>
+
         {isFetchingProducts ? (
-          <div className="flex items-center justify-center h-[320px]">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="flex h-[320px] items-center justify-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-[5px] border-black border-t-[#FFD93B]" />
           </div>
         ) : (
           <div
-            className="flex gap-4 px-6 pb-20 overflow-x-auto md:gap-8 scroll-smooth"
+            className="comic-snap comic-hide-scroll flex scroll-smooth gap-5 overflow-x-auto px-2 pb-10 pr-4 pt-2 md:gap-8 lg:pb-14"
             ref={trendingCarouselRef}
           >
             {products.map((comic: ProductBase, index) => (
               <div
-                className="flex-shrink-0 w-[320px] h-full relative group animate-fade-in-up"
+                className="animate-fade-in-up group relative h-full w-[78vw] max-w-[320px] flex-shrink-0 sm:w-[320px]"
                 key={comic._id}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="relative w-full h-full overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
-                  <div className="relative h-[60%] overflow-hidden">
+                <div className="comic-panel relative h-full overflow-hidden rounded-xl bg-white lg:transition-transform lg:duration-200 lg:hover:-rotate-1">
+                  <div className="relative h-48 overflow-hidden border-b-[3px] border-black lg:border-b-4">
                     <img
                       src={
                         comic.productImages?.[0].imageUrl ||
                         "/placeholder-image.jpg"
                       }
                       alt={comic.title}
-                      className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                      className="h-full w-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute flex gap-2 bottom-4 left-4">
-                      <span className="px-3 py-1 text-sm font-medium rounded-lg bg-white/90">
+                    <div className="absolute bottom-3 left-3 flex gap-2">
+                      <span className="border-[3px] border-black bg-white px-3 py-0.5 text-sm font-black shadow-[2px_2px_0_#000]">
                         {formatDateString(
                           (comic.details as ComicProduct["details"])
                             ?.releaseDate || "",
@@ -655,17 +427,17 @@ const ComicsPageV2 = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-1">
+                  <div className="p-4 sm:p-5">
+                    <h3 className="comic-title mb-2 line-clamp-1 text-3xl leading-none">
                       {comic?.title}
                     </h3>
-                    <p className="mb-4 text-sm text-gray-600 line-clamp-2">
+                    <p className="mb-4 line-clamp-2 text-sm font-bold text-gray-700">
                       {comic?.description}
                     </p>
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                    <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-black">
                       <div className="flex items-center gap-1">
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -689,7 +461,7 @@ const ComicsPageV2 = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -700,7 +472,7 @@ const ComicsPageV2 = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -721,31 +493,29 @@ const ComicsPageV2 = () => {
                               );
                             }
                           }}
-                          className="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary/90"
+                          className="comic-btn comic-title flex-1 rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
                         >
                           {comic.type === "comic" ? "Read Now" : "Listen Now"}
                         </button>
                       )}
                       {!comic.product_type && (
-                        <div className="flex flex-col">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={(e) => handleAddtoCart(e, comic)}
-                              disabled={isLoading}
-                              className="flex items-center flex-1 gap-2 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary whitespace-nowrap"
-                            >
-                              <FaShoppingCart className="self-center inline-block w-4 h-4" />
-                              {isLoading ? "Adding..." : "Add to Cart"}
-                            </button>
-                            <button
-                              onClick={(e) => handleBuyNow(e, comic)}
-                              disabled={isLoading}
-                              className="flex items-center flex-1 gap-2 px-4 py-2 font-medium transition-colors border rounded-lg text-primary hover:bg-primary/10 whitespace-nowrap border-primary"
-                            >
-                              <FaBolt className="self-center inline-block w-4 h-4" />
-                              {isLoading ? "Buying..." : "Buy Now"}
-                            </button>
-                          </div>
+                        <div className="flex w-full flex-col gap-3">
+                          <button
+                            onClick={(e) => handleAddtoCart(e, comic)}
+                            disabled={isLoading}
+                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
+                          >
+                            <FaShoppingCart className="inline-block h-4 w-4 self-center" />
+                            {isLoading ? "Adding..." : "Add to Cart"}
+                          </button>
+                          <button
+                            onClick={(e) => handleBuyNow(e, comic)}
+                            disabled={isLoading}
+                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FFD93B] px-4 py-2 text-2xl text-black"
+                          >
+                            <FaBolt className="inline-block h-4 w-4 self-center" />
+                            {isLoading ? "Buying..." : "Buy Now"}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -755,6 +525,8 @@ const ComicsPageV2 = () => {
             ))}
           </div>
         )}
+
+        {/* Arrow buttons: desktop only; on mobile the carousel is swipeable */}
         <button
           onClick={() => {
             const carousel = trendingCarouselRef.current;
@@ -762,8 +534,10 @@ const ComicsPageV2 = () => {
               carousel.scrollBy({ left: -300, behavior: "smooth" });
             }
           }}
-          className="absolute left-0 p-2 transition-colors -translate-y-1/2 rounded-full shadow-lg top-1/2 bg-white/80 hover:bg-white"
-          style={{ display: isAtStart ? "none" : "block" }}
+          aria-label="Scroll left"
+          className={`comic-btn absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-[#FFD93B] p-2 ${
+            isAtStart ? "hidden" : "hidden lg:block"
+          }`}
         >
           <IoIosArrowBack className="text-2xl" />
         </button>
@@ -774,8 +548,10 @@ const ComicsPageV2 = () => {
               carousel.scrollBy({ left: 300, behavior: "smooth" });
             }
           }}
-          className="absolute right-0 p-2 transition-colors -translate-y-1/2 rounded-full shadow-lg top-1/2 bg-white/80 hover:bg-white"
-          style={{ display: isAtEnd ? "none" : "block" }}
+          aria-label="Scroll right"
+          className={`comic-btn absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-[#FFD93B] p-2 ${
+            isAtEnd ? "hidden" : "hidden lg:block"
+          }`}
         >
           <IoIosArrowForward className="text-2xl" />
         </button>
@@ -783,13 +559,14 @@ const ComicsPageV2 = () => {
 
       <ScrollTextSection />
 
-      {/* Comic modal — replaced motion.div with Tailwind animate-fade-in + scale */}
+      {/* Comic modal */}
       {showComicModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75 animate-fade-in">
-          <div className="relative w-[95%] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden items-center animate-scale-in">
+        <div className="animate-fade-in fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75">
+          <div className="comic-body comic-panel animate-scale-in relative h-[90vh] w-[95%] items-center overflow-hidden rounded-lg bg-white">
             <button
               onClick={closeComicModal}
-              className="absolute z-4 p-2 top-4 right-2 text-gray-600 transition-colors hover:bg-gray-100 rounded-full"
+              aria-label="Close"
+              className="comic-btn absolute right-3 top-3 z-10 rounded-full bg-[#FF4D3D] p-1.5 text-white"
             >
               <MdClose className="text-2xl" />
             </button>
@@ -813,21 +590,21 @@ const ComicsPageV2 = () => {
         productId={currentProductId}
       />
 
-      {/* Replaced motion.div (whileInView) with Tailwind animate-fade-in */}
-      <div className="px-6 py-10 lg:py-12 flex flex-col-reverse lg:flex-row lg:items-center md:px-12 lg:px-20 bg-gradient-to-r from-[#FFCF7B] to-[#FFFFFF] animate-fade-in">
-        <div className="flex-1 pt-5 lg:pt-0">
+      {/* Why our comics matter */}
+      <div className="comic-body animate-fade-in flex flex-col-reverse border-t-4 border-black bg-white px-4 py-10 md:px-12 lg:flex-row lg:items-center lg:gap-10 lg:border-t-8 lg:px-20 lg:py-14">
+        <div className="flex-1 space-y-5 pt-8 lg:pt-0">
           {WORKSHOP_MATTERS_POINTS.map((point, index) => (
             <div
               key={point.id}
-              className="flex items-start gap-4 p-4 md:items-center animate-slide-in-left"
+              className="animate-slide-in-left comic-panel flex items-start gap-4 rounded-2xl bg-white p-4 md:items-center"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <figure>
-                <img src={point.icon} alt="icon" className="w-24 md:w-24" />
+              <figure className="shrink-0 rounded-full border-[3px] border-black bg-[#FFD93B] p-2">
+                <img src={point.icon} alt="icon" className="w-16 md:w-20" />
               </figure>
               <div>
-                <p className="text-xl md:text-2xl">
-                  <span className="text-2xl font-bold">{point.lable}:</span>{" "}
+                <p className="text-lg font-bold md:text-xl">
+                  <span className="comic-title text-3xl">{point.lable}:</span>{" "}
                   {point.description}
                 </p>
               </div>
@@ -835,7 +612,7 @@ const ComicsPageV2 = () => {
           ))}
         </div>
         <div className="relative flex-1">
-          <h2 className="pt-8 text-5xl md:text-7xl md:pt-4 font-semibold text-center luckiest-guy-regular text-black [-webkit-text-stroke:_1px_black] pr-8">
+          <h2 className="comic-title mx-auto max-w-xl border-[3px] border-black bg-[#FFD93B] px-4 py-6 text-center text-5xl leading-[1.05] shadow-[4px_4px_0_#000] md:text-7xl lg:-rotate-2 lg:border-4 lg:px-8 lg:py-10 lg:text-8xl lg:shadow-[8px_8px_0_#000]">
             Why our Comics matter?
           </h2>
         </div>

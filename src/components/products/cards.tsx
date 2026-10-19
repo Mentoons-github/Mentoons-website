@@ -5,6 +5,9 @@ import { ProductBase } from "@/types/productTypes";
 import { ProductType } from "@/utils/enum";
 import NewBadge from "../common/badge/new";
 
+// Fonts come from index.css:
+// .font-comic -> Bangers, .font-comic-chip -> Luckiest Guy, .font-number -> Cabin
+
 const getDisplayPricing = (product: ProductBase) => {
   if (product.type === ProductType.TOONLAND) {
     return {
@@ -58,13 +61,13 @@ const ProductDetailCards = ({
 
   return (
     <div className="px-2 sm:px-4 md:px-8 py-6 sm:py-8">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6">
+      <h1 className="font-comic tracking-wider text-2xl sm:text-3xl md:text-4xl text-black mb-5 sm:mb-8">
         {ageCategory === "Toonland Products"
           ? "Toonland Products"
           : `Explore Products For ${ageCategory}`}
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
         {productDetails.map((product, index) => {
           const { sellingPrice, originalPrice } = getDisplayPricing(product);
           const hasDiscount =
@@ -79,11 +82,11 @@ const ProductDetailCards = ({
 
           return (
             <div
-              className="group relative bg-white rounded-2xl shadow-sm p-3 sm:p-4 flex flex-col border border-gray-200 h-80 sm:h-[22rem] transition-all duration-300 hover:shadow-xl hover:border-[#EC9600] hover:-translate-y-1 cursor-pointer"
+              className="group relative bg-white rounded-xl p-3 sm:p-4 flex flex-col border-4 border-black shadow-[6px_6px_0_0_#000] h-full min-h-[26rem] transition-all duration-200 hover:shadow-[9px_9px_0_0_#EC9600] hover:-translate-x-0.5 hover:-translate-y-1 cursor-pointer"
               key={index}
               onClick={() => handleCardClick(product)}
             >
-              <div className="relative h-28 sm:h-32 flex items-center justify-center mb-2 sm:mb-3 bg-gray-50 rounded-xl">
+              <div className="relative h-28 sm:h-32 flex items-center justify-center mb-2 sm:mb-3 bg-yellow-100 rounded-lg border-[3px] border-black">
                 <img
                   src={
                     product?.productImages?.[0]?.imageUrl ||
@@ -95,7 +98,7 @@ const ProductDetailCards = ({
                 {product.isNew && <NewBadge />}
 
                 {hasDiscount && (
-                  <span className="absolute bottom-1 left-1 z-20 px-2 py-0.5 text-[10px] sm:text-xs font-bold text-white bg-red-500 rounded-full shadow-sm">
+                  <span className="absolute -bottom-3 -left-3 z-20 px-2 py-0.5 text-xs sm:text-sm font-comic-chip tracking-wider text-black bg-yellow-300 border-[3px] border-black rounded-full shadow-[2px_2px_0_0_#000] -rotate-6">
                     {discountPercent}% OFF
                   </span>
                 )}
@@ -114,7 +117,7 @@ const ProductDetailCards = ({
                         }`}
                         download
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-green-700 transition-all duration-200 bg-green-200 border border-green-300 shadow-md hover:opacity-55 rounded-xl"
+                        className="font-comic-chip tracking-wider px-2 sm:px-3 py-1 text-xs sm:text-sm text-black bg-green-300 border-[3px] border-black rounded-lg shadow-[2px_2px_0_0_#000] rotate-3 hover:bg-green-200 transition-colors"
                       >
                         Free Sample
                       </a>
@@ -123,8 +126,11 @@ const ProductDetailCards = ({
               </div>
 
               <div className="flex flex-col flex-1">
-                <div className="h-11 sm:h-12 overflow-hidden mb-1">
-                  <h3 className="text-sm sm:text-base font-medium line-clamp-2 w-full">
+                <div className="min-h-[3.5rem] mb-1">
+                  {/* highlightText returns <span>s, and index.css sets a global
+                      span font (DM Sans) that beats inheritance, so we force
+                      spans inside the title to inherit the comic font. */}
+                  <h3 className="font-comic tracking-wide text-lg sm:text-xl leading-tight text-black line-clamp-2 w-full [&_span]:![font-family:inherit] [&_span]:!leading-tight">
                     {highlightText(product.title, searchQuery)}
                   </h3>
                 </div>
@@ -134,14 +140,14 @@ const ProductDetailCards = ({
                     {[...Array(5)].map((_, i) => (
                       <FaStar
                         key={i}
-                        className={`w-3 h-3 ${
+                        className={`w-3.5 h-3.5 ${
                           i < Math.round(product.rating)
-                            ? "text-yellow-400"
-                            : "text-gray-200"
+                            ? "text-yellow-400 drop-shadow-[1px_1px_0_#000]"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
-                    <span className="ml-1 text-[11px] text-gray-500">
+                    <span className="font-number ml-1 text-xs text-black">
                       {product.rating.toFixed(1)}
                     </span>
                   </div>
@@ -149,18 +155,18 @@ const ProductDetailCards = ({
                   <div className="mb-1 h-4" />
                 )}
 
-                <div className="flex flex-col gap-0.5 h-9 sm:h-10">
+                <div className="flex flex-col gap-0.5 min-h-[2.5rem]">
                   {hasDiscount && (
-                    <span className="text-[9px] sm:text-[10px] font-semibold text-green-600 uppercase tracking-wide">
+                    <span className="font-comic-chip text-[10px] sm:text-xs tracking-wider text-green-700">
                       Introductory Price
                     </span>
                   )}
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-[#333] font-bold text-sm sm:text-base">
+                    <span className="font-number text-black font-bold text-base sm:text-lg">
                       ₹{sellingPrice}
                     </span>
                     {hasDiscount && (
-                      <span className="text-gray-400 text-xs sm:text-sm line-through">
+                      <span className="font-number text-gray-500 text-xs sm:text-sm line-through">
                         ₹{originalPrice}
                       </span>
                     )}
@@ -169,14 +175,14 @@ const ProductDetailCards = ({
 
                 <div className="flex flex-col gap-1.5 sm:gap-2 mt-auto pt-2">
                   <button
-                    className="text-white py-1.5 rounded-lg bg-gradient-to-r from-[#EC9600] to-[#f0a929] transition-all duration-300 hover:shadow-md hover:brightness-105 text-xs sm:text-sm font-medium"
+                    className="font-comic-chip tracking-wider text-black py-1.5 rounded-lg bg-[#EC9600] border-[3px] border-black shadow-[3px_3px_0_0_#000] transition-all hover:bg-[#f0a929] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-60 text-sm sm:text-base"
                     onClick={(e) => handleAddToCart(e, product)}
                     disabled={isLoading}
                   >
                     Add To Cart
                   </button>
                   <button
-                    className="bg-white hover:bg-orange-50 border border-[#EC9600] text-[#EC9600] py-1.5 rounded-lg transition-all duration-300 hover:shadow-md text-xs sm:text-sm font-medium"
+                    className="font-comic-chip tracking-wider bg-white hover:bg-yellow-100 border-[3px] border-black text-black py-1.5 rounded-lg shadow-[3px_3px_0_0_#000] transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-60 text-sm sm:text-base"
                     onClick={(e) => handleBuyNow(e, product)}
                     disabled={isLoading}
                   >

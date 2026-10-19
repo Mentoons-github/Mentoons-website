@@ -219,25 +219,27 @@ const UserListModal: React.FC<UserListModalProps> = ({
       style={{ backdropFilter: isVisible ? "blur(4px)" : "blur(0px)" }}
     >
       <div
-        className={`bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 max-h-[80vh] overflow-hidden transition-all duration-300 ease-out transform ${
+        className={`bg-white rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] max-w-md w-full mx-4 max-h-[80vh] overflow-hidden transition-all duration-300 ease-out transform ${
           isVisible
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-95 opacity-0 translate-y-4"
         }`}
       >
-        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
+        <div className="px-6 py-4 border-b-2 border-gray-900 bg-[#F69306]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
-                <User size={16} className="text-white" />
+              <div className="flex items-center justify-center w-9 h-9 bg-white border-2 border-gray-900 rounded-full shadow-[2px_2px_0_0_#111827]">
+                <User size={16} className="text-gray-900" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              <h2 className="font-comic tracking-wide text-2xl text-white">
+                {title}
+              </h2>
             </div>
             <button
               onClick={handleClose}
-              className="p-1 text-gray-400 transition-colors duration-200 rounded-full hover:text-gray-600 hover:bg-white hover:bg-opacity-50"
+              className="p-1 text-gray-900 transition-all duration-200 bg-white border-2 border-gray-900 rounded-full hover:bg-orange-100"
             >
-              <X size={22} />
+              <X size={18} />
             </button>
           </div>
         </div>
@@ -246,17 +248,19 @@ const UserListModal: React.FC<UserListModalProps> = ({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="relative">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                <div className="absolute inset-0 border-2 border-blue-100 rounded-full"></div>
+                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                <div className="absolute inset-0 border-2 border-orange-100 rounded-full"></div>
               </div>
-              <p className="mt-3 text-sm text-gray-500">Loading users...</p>
+              <p className="mt-3 text-base tracking-wide text-gray-600 font-comic">
+                Loading users...
+              </p>
             </div>
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="flex items-center justify-center w-16 h-16 mb-4 bg-gray-100 rounded-full">
-                <User size={24} className="text-gray-400" />
+              <div className="flex items-center justify-center w-16 h-16 mb-4 bg-orange-50 border-2 border-gray-900 rounded-full">
+                <User size={24} className="text-gray-500" />
               </div>
-              <p className="text-sm text-center text-gray-500">
+              <p className="text-base tracking-wide text-center text-gray-600 font-comic">
                 No {title.toLowerCase()} found.
               </p>
             </div>
@@ -272,7 +276,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
                 return (
                   <div
                     key={user._id}
-                    className={`flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] ${
+                    className={`flex items-center justify-between gap-4 p-3 rounded-xl border-2 border-transparent hover:border-gray-900 hover:bg-orange-50 transition-all duration-200 cursor-pointer group ${
                       isVisible ? "animate-slideInUp" : ""
                     }`}
                     style={{
@@ -280,7 +284,6 @@ const UserListModal: React.FC<UserListModalProps> = ({
                       animationFillMode: "both",
                     }}
                   >
-                    {/* Left: Avatar + Name */}
                     <div
                       className="flex items-center gap-3 flex-1 min-w-0"
                       onClick={() =>
@@ -296,37 +299,36 @@ const UserListModal: React.FC<UserListModalProps> = ({
                           <img
                             src={user.picture}
                             alt={user.name}
-                            className="object-cover w-full h-full transition-shadow duration-200 border-2 border-white rounded-full shadow-md group-hover:shadow-lg"
+                            className="object-cover w-full h-full transition-shadow duration-200 border-2 border-gray-900 rounded-full"
                           />
                         ) : (
-                          <div className="flex items-center justify-center w-full h-full rounded-full shadow-md bg-gradient-to-br from-blue-400 to-purple-500 group-hover:shadow-lg">
-                            <span className="text-sm font-medium text-white">
+                          <div className="flex items-center justify-center w-full h-full border-2 border-gray-900 rounded-full bg-[#F69306]">
+                            <span className="font-comic tracking-wide text-lg text-white">
                               {user.name[0]?.toUpperCase() || "U"}
                             </span>
                           </div>
                         )}
                       </div>
-                      <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-blue-600">
+                      <p className="text-sm font-semibold text-gray-900 truncate transition-colors duration-200 group-hover:text-orange-600">
                         {user.name}
                       </p>
                     </div>
 
-                    {/* Right: Follow button (hidden if current user) */}
                     {!isMe && (
                       <button
                         onClick={() =>
                           title === "Blocked Users"
-                            ? handleUnblock(user._id) // or whatever your unblock function is
+                            ? handleUnblock(user._id)
                             : handleFollowToggle(user._id, status)
                         }
-                        className={`py-1 px-3 rounded-md font-medium whitespace-nowrap
+                        className={`font-comic tracking-wide py-1 px-3 rounded-md whitespace-nowrap border-2 border-gray-900 shadow-[2px_2px_0_0_#111827] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all
                       ${
                         title === "Blocked Users"
                           ? "bg-red-500 text-white"
                           : status === "following"
-                            ? "bg-gray-300 text-gray-700"
+                            ? "bg-gray-200 text-gray-800"
                             : status === "requested"
-                              ? "bg-blue-200 text-blue-600"
+                              ? "bg-blue-200 text-blue-800"
                               : status === "followBack"
                                 ? "bg-green-500 text-white"
                                 : "bg-orange-500 text-white"
@@ -352,8 +354,8 @@ const UserListModal: React.FC<UserListModalProps> = ({
         </div>
 
         {users.length > 0 && (
-          <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
-            <p className="text-xs text-center text-gray-500">
+          <div className="px-6 py-3 border-t-2 border-gray-900 bg-orange-50">
+            <p className="text-sm tracking-wide text-center text-gray-700 font-comic">
               {users.length} {users.length === 1 ? "user" : "users"} total
             </p>
           </div>
@@ -380,15 +382,16 @@ const UserListModal: React.FC<UserListModalProps> = ({
       </style>
       {followStatusModalOpen && statusClickedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
-            {/* User Info */}
+          <div className="bg-white rounded-2xl border-2 border-gray-900 shadow-[6px_6px_0_0_#111827] w-full max-w-sm mx-4 p-6 space-y-4">
             <div className="flex items-center gap-3">
               <img
                 src={statusClickedUser.picture}
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-900"
               />
               <div>
-                <p className="font-semibold">{statusClickedUser.name}</p>
+                <p className="font-comic tracking-wide text-xl text-gray-900">
+                  {statusClickedUser.name}
+                </p>
                 <p className="text-xs text-gray-500">
                   {statusClickedStatus === "requested"
                     ? "Request pending"
@@ -397,11 +400,10 @@ const UserListModal: React.FC<UserListModalProps> = ({
               </div>
             </div>
 
-            {/* Actions */}
             {statusClickedStatus === "requested" && (
               <button
                 onClick={() => handleUnfollowCancelRequest("cancel")}
-                className="w-full py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600"
+                className="font-comic tracking-wide w-full py-2 rounded-lg bg-red-500 text-white border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] hover:bg-red-600 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 Cancel Request
               </button>
@@ -410,7 +412,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
             {statusClickedStatus === "following" && (
               <button
                 onClick={() => handleUnfollowCancelRequest("unfollow")}
-                className="w-full py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600"
+                className="font-comic tracking-wide w-full py-2 rounded-lg bg-red-500 text-white border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] hover:bg-red-600 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 Unfollow
               </button>
@@ -418,7 +420,7 @@ const UserListModal: React.FC<UserListModalProps> = ({
 
             <button
               onClick={() => setFollowStatusModalOpen(false)}
-              className="w-full py-2 rounded-lg bg-gray-200 text-gray-700 font-medium"
+              className="font-comic tracking-wide w-full py-2 rounded-lg bg-white text-gray-900 border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
             >
               Close
             </button>

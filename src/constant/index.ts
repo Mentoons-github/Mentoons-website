@@ -744,11 +744,11 @@ export const FOOTER_PAGELINKS = [
         label: "About Mentoons",
         url: "/about-mentoons",
       },
-      {
-        id: "AB_2",
-        label: "Help & FAQ's",
-        url: "/faq",
-      },
+      // {
+      //   id: "AB_2",
+      //   label: "Help & FAQ's",
+      //   url: "/faq",
+      // },
       {
         id: "AB_3",
         label: "Mentoons Privacy Policy",
@@ -757,7 +757,7 @@ export const FOOTER_PAGELINKS = [
       {
         id: "AB_4",
         label: "Hiring",
-        url: "/joinus/careers",
+        url: "/join-us",
       },
       {
         id: "AB_5",

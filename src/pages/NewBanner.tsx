@@ -952,15 +952,22 @@ const NewBanner = () => {
         ))}
       </div>
 
+      {/* Psychologist Verified badge — pinned to the top-right corner on all screens */}
+      <img
+        src="/assets/LandingPage/psyco.png"
+        alt="Psychologist Verified"
+        className="absolute -top-4 -right-6 z-20 pointer-events-none object-contain w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48"
+      />
+
       <div className="w-full lg:w-[400px] xl:w-[520px] lg:flex-shrink-0 flex flex-col items-start justify-start z-10">
         <div className="flex items-center justify-start">
-          <div
+          {/* <div
             ref={rocketRef}
             className="p-3 rounded-full text-3xl sm:text-4xl font-bold text-white"
             style={{ filter: "drop-shadow(3px 3px 0 #000)" }}
           >
             <div ref={badgeRef}>🚀</div>
-          </div>
+          </div> */}
           <div
             ref={badgeSubRef}
             className="comic-badge comic-font px-4 py-1 text-lg sm:text-xl uppercase"
@@ -1051,7 +1058,7 @@ const NewBanner = () => {
             ref={headingLine2Ref}
             className="comic-heading-sub inline-block text-3xl sm:text-4xl lg:text-2xl xl:text-3xl mt-1"
           >
-            {splitToWords("especially for Gen A to Z").map((word, index) => (
+            {splitToWords("For Gen A to Z").map((word, index) => (
               <span key={index} className="word mr-2">
                 {word}
               </span>
@@ -1194,14 +1201,6 @@ const NewBanner = () => {
               }`}
             />
           ))}
-        </div>
-
-        <div className="w-full flex justify-center mt-4 xl:-mt-[44px]">
-          <img
-            src="/assets/LandingPage/psyco.png"
-            alt="Psychologist Verified"
-            className="w-48 h-48 sm:w-64 sm:h-64 lg:w-48 lg:h-48 xl:w-44 xl:h-44 object-contain"
-          />
         </div>
       </div>
 

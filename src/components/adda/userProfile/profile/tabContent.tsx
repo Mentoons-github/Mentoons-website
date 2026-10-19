@@ -33,10 +33,10 @@ const ProfileTabContent = ({
         <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8 overflow-y-auto">
           {userPosts.length === 0 ? (
             <div className="text-center py-10 sm:py-12 lg:py-16">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <span className="text-2xl sm:text-3xl">📝</span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900 mb-2">
                 No posts yet
               </h3>
               <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6">
@@ -49,7 +49,7 @@ const ProfileTabContent = ({
                 <div
                   key={post._id}
                   onClick={() => navigate(`/adda/post/${post._id}`)}
-                  className="flex flex-col items-center justify-start w-full gap-5 p-2 border border-orange-200 rounded-xl min-h-fit hover:shadow-md transition-shadow cursor-pointer"
+                  className="flex flex-col items-center justify-start w-full gap-5 p-2 border-2 border-gray-900 rounded-xl min-h-fit shadow-[3px_3px_0_0_#111827] hover:shadow-[5px_5px_0_0_#111827] hover:-translate-x-[1px] hover:-translate-y-[1px] transition-all cursor-pointer"
                 >
                   <ProfilePostCard
                     setUserPosts={setUserPosts}
@@ -75,10 +75,10 @@ const ProfileTabContent = ({
         <div className="space-y-3 sm:space-y-4 mt-6 sm:mt-8">
           {userSavedPosts.length === 0 ? (
             <div className="text-center py-10 sm:py-12 lg:py-16">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <span className="text-2xl sm:text-3xl">📚</span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900 mb-2">
                 No saved items yet
               </h3>
               <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6">
@@ -86,7 +86,7 @@ const ProfileTabContent = ({
               </p>
               <NavLink
                 to="/adda"
-                className="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-sm sm:text-base inline-block"
+                className="font-comic tracking-wide bg-[#F69306] text-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] px-6 sm:px-8 py-2 sm:py-3 rounded-xl text-lg hover:bg-orange-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all duration-200 inline-block"
               >
                 Explore Content
               </NavLink>
@@ -95,9 +95,9 @@ const ProfileTabContent = ({
             userSavedPosts.map((post) => (
               <div
                 key={post._id}
-                className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] hover:shadow-[5px_5px_0_0_#111827] hover:-translate-x-[1px] hover:-translate-y-[1px] transition-all"
               >
-                <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+                <h3 className="font-comic tracking-wide text-xl text-gray-900 mb-2">
                   {post.content?.slice(0, 50)}...
                 </h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
@@ -108,7 +108,7 @@ const ProfileTabContent = ({
                     Saved {format(new Date(post.createdAt), "MMMM d, yyyy")}
                   </span>
                   <button
-                    className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium"
+                    className="font-comic tracking-wide text-orange-600 hover:text-orange-700 text-base"
                     onClick={() => navigate(`/adda/post/${post._id}`)}
                   >
                     View →
@@ -123,14 +123,14 @@ const ProfileTabContent = ({
     case "Details":
       return (
         <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
-          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-900 shadow-[4px_4px_0_0_#111827]">
+            <h2 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900 mb-3 sm:mb-4">
               Profile Details
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
               {userDetails.name && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Name
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -140,7 +140,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.email && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Email
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -150,7 +150,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.phoneNumber && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Phone Number
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -160,7 +160,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.location && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Location
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -170,7 +170,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.bio && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Bio
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -180,7 +180,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.education && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Education
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -190,7 +190,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.occupation && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Occupation
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -200,7 +200,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.interests && userDetails.interests.length > 0 && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Interests
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -210,7 +210,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.dateOfBirth && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Date of Birth
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -227,7 +227,7 @@ const ProfileTabContent = ({
               )}
               {userDetails.gender && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Gender
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -238,7 +238,7 @@ const ProfileTabContent = ({
               {userDetails.socialLinks &&
                 userDetails.socialLinks.length > 0 && (
                   <div>
-                    <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                    <h3 className="font-comic tracking-wide text-base text-orange-600">
                       Social Links
                     </h3>
                     <ul className="list-disc list-inside text-sm sm:text-base">
@@ -259,7 +259,7 @@ const ProfileTabContent = ({
                 )}
               {userDetails.joinedDate && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600">
+                  <h3 className="font-comic tracking-wide text-base text-orange-600">
                     Joined Date
                   </h3>
                   <p className="text-gray-900 text-sm sm:text-base">
@@ -273,10 +273,10 @@ const ProfileTabContent = ({
               (value) => !value || (Array.isArray(value) && value.length === 0),
             ) && (
               <div className="text-center py-10 sm:py-12 lg:py-16">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <span className="text-2xl sm:text-3xl">ℹ️</span>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900 mb-2">
                   No profile details available
                 </h3>
                 <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6">
@@ -284,7 +284,7 @@ const ProfileTabContent = ({
                 </p>
                 <button
                   onClick={() => setShowCompletionForm(true)}
-                  className="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-sm sm:text-base"
+                  className="font-comic tracking-wide bg-[#F69306] text-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] px-6 sm:px-8 py-2 sm:py-3 rounded-xl text-lg hover:bg-orange-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all duration-200"
                 >
                   Complete Profile
                 </button>
@@ -298,7 +298,7 @@ const ProfileTabContent = ({
       return (
         <div className="space-y-6 sm:space-y-8 mt-6 sm:mt-8">
           <div>
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="font-comic tracking-wide text-2xl sm:text-3xl text-gray-900 mb-2">
               Achievements & Badges
             </h2>
             <p className="text-gray-500 text-sm sm:text-base">
@@ -311,9 +311,9 @@ const ProfileTabContent = ({
               {badges.map((userBadge, index) => (
                 <div
                   key={index}
-                  className="group bg-white border border-gray-100 rounded-2xl p-5 hover:border-orange-200 hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center"
+                  className="group bg-white border-2 border-gray-900 rounded-2xl p-5 shadow-[3px_3px_0_0_#111827] hover:shadow-[5px_5px_0_0_#111827] hover:-translate-x-[1px] hover:-translate-y-[1px] transition-all duration-300 flex flex-col items-center text-center"
                 >
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 group-hover:-rotate-3 duration-300">
                     <img
                       src={userBadge.image}
                       alt={userBadge.name}
@@ -321,7 +321,7 @@ const ProfileTabContent = ({
                     />
                   </div>
 
-                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
+                  <h3 className="font-comic tracking-wide text-gray-900 text-lg sm:text-xl mb-1">
                     {userBadge.name}
                   </h3>
 
@@ -339,7 +339,9 @@ const ProfileTabContent = ({
             </div>
           ) : (
             <div className="text-center py-10">
-              <p className="text-gray-500">No badges earned yet</p>
+              <p className="font-comic tracking-wide text-xl text-gray-500">
+                No badges earned yet
+              </p>
             </div>
           )}
         </div>

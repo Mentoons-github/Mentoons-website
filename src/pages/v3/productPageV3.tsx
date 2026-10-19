@@ -13,7 +13,18 @@ import ShopByCategory, {
   type CategoryFilter,
 } from "@/components/v3/products/shopByCategory";
 
+import LightSwitchIntro from "@/components/v3/products/lightSwitchIntro";
+
 const NAV_HEIGHT = 100;
+
+const COMIC_BTN =
+  "border-2 border-gray-900 shadow-[3px_3px_0_0_#111827] transition active:translate-x-[3px] active:translate-y-[3px] active:shadow-none";
+
+const HALFTONE_BG = {
+  backgroundColor: "#F5F5F4",
+  backgroundImage: "radial-gradient(#d6d3d1 1.2px, transparent 1.2px)",
+  backgroundSize: "16px 16px",
+};
 
 const toggleInList = (list: string[], value: string) =>
   list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -41,8 +52,6 @@ const ProductPageV3 = () => {
   );
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Footer / sidebar links change the URL while this page is already open,
-  // so re-apply the params whenever the query string changes.
   useEffect(() => {
     setSelectedAgeCategories(ageFromParam(searchParams.get("category")));
     setSelectedCategory(
@@ -55,7 +64,6 @@ const ProductPageV3 = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
-  // Footer links end in #product: scroll to the products list.
   useEffect(() => {
     if (location.hash !== "#product") return;
     const timer = setTimeout(() => {
@@ -88,23 +96,31 @@ const ProductPageV3 = () => {
         selectedAgeCategories[0] === value;
 
   return (
-    <div>
-      <ProductBanner />
-      <div className="px-4 sm:px-8">
+    <div style={HALFTONE_BG}>
+      <LightSwitchIntro oncePerSession />
+
+      <div className="relative overflow-hidden">
+        <img
+          src="/assets/LandingPage/psyco.png"
+          alt="Carefully crafted by psychologists"
+          className="absolute -top-3 -right-4 z-20 pointer-events-none object-contain w-28 h-28 sm:w-44 sm:h-44 lg:w-56 lg:h-56"
+        />
+        <ProductBanner />
+      </div>
+      <div className="px-4 pb-12 sm:px-8">
         <ShopByCategory
           selectedId={selectedCategory.id}
           onSelect={setSelectedCategory}
         />
 
-        {/* Age-wise quick tabs */}
-        <section aria-labelledby="shop-by-age" className="pt-6">
+        <section aria-labelledby="shop-by-age" className="pt-8">
           <h2
             id="shop-by-age"
-            className="mb-3 text-xl font-bold text-gray-900 sm:text-2xl"
+            className="font-comic mb-4 text-3xl tracking-wide text-gray-900 sm:text-4xl"
           >
             Shop by Age
           </h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {ageTabs.map((tab) => {
               const active = isAgeTabActive(tab.value);
               return (
@@ -117,10 +133,10 @@ const ProductPageV3 = () => {
                       tab.value === "all" ? [] : [tab.value],
                     )
                   }
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  className={`font-comic rounded-full px-5 py-2 text-lg tracking-wide ${COMIC_BTN} ${
                     active
-                      ? "border-[#ff9800] bg-[#ff9800] text-white"
-                      : "border-gray-300 bg-white text-gray-700 hover:border-[#ff9800] hover:text-[#ff9800]"
+                      ? "bg-[#ff9800] text-white"
+                      : "bg-white text-gray-900 hover:bg-[#FFD93D]"
                   }`}
                 >
                   {tab.label}
@@ -130,27 +146,27 @@ const ProductPageV3 = () => {
           </div>
         </section>
 
-        <div className="mt-6 flex flex-col items-start gap-5 lg:mt-10 lg:flex-row">
+        <div className="mt-8 flex flex-col items-start gap-6 lg:mt-10 lg:flex-row">
           {/* Filters: collapsible on small screens, sidebar on lg+ */}
-          <div className="w-full lg:w-1/5 lg:py-10">
+          <div className="w-full lg:w-1/5">
             <button
               type="button"
               onClick={() => setFiltersOpen((o) => !o)}
               aria-expanded={filtersOpen}
               aria-controls="product-filters-panel"
-              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm lg:hidden"
+              className={`font-comic flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-xl tracking-wide text-gray-900 lg:hidden ${COMIC_BTN}`}
             >
               <span className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="rounded-full bg-[#ff9800] px-2 py-0.5 text-xs font-bold text-white">
+                  <span className="font-comic rounded-full border-2 border-gray-900 bg-[#ff9800] px-2 text-base text-white">
                     {activeFilterCount}
                   </span>
                 )}
               </span>
               <ChevronDown
-                className={`h-4 w-4 text-gray-500 transition-transform ${
+                className={`h-5 w-5 transition-transform ${
                   filtersOpen ? "rotate-180" : ""
                 }`}
                 aria-hidden="true"
@@ -161,7 +177,7 @@ const ProductPageV3 = () => {
               id="product-filters-panel"
               className={`${
                 filtersOpen ? "block" : "hidden"
-              } mt-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:mt-0 lg:block lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none`}
+              } mt-3 rounded-2xl border-2 border-gray-900 bg-white p-4 shadow-[5px_5px_0_0_#111827] lg:mt-0 lg:block`}
             >
               <ProductFilters
                 selectedAgeCategories={selectedAgeCategories}
@@ -184,7 +200,7 @@ const ProductPageV3 = () => {
               <button
                 type="button"
                 onClick={() => setFiltersOpen(false)}
-                className="mt-4 w-full rounded-xl bg-[#ff9800] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#e68900] lg:hidden"
+                className={`font-comic mt-4 w-full rounded-xl bg-[#ff9800] px-4 py-3 text-xl tracking-wide text-white hover:bg-[#e68900] lg:hidden ${COMIC_BTN}`}
               >
                 Show results
               </button>

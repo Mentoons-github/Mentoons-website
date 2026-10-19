@@ -34,42 +34,41 @@ const MeetupPreviewCards: React.FC<MeetupPreviewCardsProps> = ({
     Math.floor(Math.random() * maxCapacity);
 
   return (
-    <div className="mt-8 grid md:grid-cols-3 gap-4">
+    <div className="mt-10 grid gap-5 md:grid-cols-3">
       {currentMeetups.map((meetup, index) => {
         const participants = getMockParticipants(meetup.maxCapacity);
+        const isActive = index === currentIndex;
 
         return (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`p-4 rounded-lg border-2 transition-all duration-300 ease-in-out text-left transform hover:scale-105 ${
-              index === currentIndex
-                ? "border-blue-500 bg-blue-50 shadow-md scale-105"
-                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+            className={`rounded-2xl border-2 border-gray-900 p-4 text-left transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 ${
+              isActive
+                ? "-translate-y-1 bg-[#FFD93D] shadow-[7px_7px_0_0_#111827]"
+                : "bg-white shadow-[4px_4px_0_0_#111827] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111827]"
             }`}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="font-comic-chip flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-gray-900 bg-[#FF5D8F] text-base text-white">
                 {meetup.title.charAt(0)}
               </div>
-              <h3 className="font-semibold text-gray-800 truncate">
+              <h3 className="font-comic truncate text-xl tracking-wide text-gray-900">
                 {meetup.title}
               </h3>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+            <div className="mb-3 flex items-center gap-4 text-sm font-semibold text-gray-800">
               <span>{meetup.date}</span>
               <span>{meetup.time}</span>
             </div>
-            <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center justify-between text-sm font-semibold text-gray-800">
               <span className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
+                <Users className="h-4 w-4" strokeWidth={2.5} />
                 {participants}/{meetup.maxCapacity}
               </span>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  meetup.isOnline
-                    ? "bg-green-100 text-green-700"
-                    : "bg-purple-100 text-purple-700"
+                className={`font-comic-chip rounded-full border-2 border-gray-900 px-3 py-0.5 text-xs tracking-wide text-gray-900 ${
+                  meetup.isOnline ? "bg-[#7AE582]" : "bg-[#4CC9F0]"
                 }`}
               >
                 {meetup.isOnline ? "Online" : "Offline"}

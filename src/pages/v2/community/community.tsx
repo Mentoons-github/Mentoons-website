@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, CSSProperties } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
 import { fetchGroups } from "@/redux/community/groupsThunk";
@@ -35,6 +35,58 @@ const parentGroups: ParentGroup[] = [
   { id: "business", name: "Business" },
   { id: "health&wellness", name: "Health & Wellness" },
 ];
+
+/* ---------- Comic inline styles (fonts from common css variables) ---------- */
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  backgroundColor: "#fff8e1",
+  backgroundImage: "radial-gradient(#00000014 1.2px, transparent 1.2px)",
+  backgroundSize: "14px 14px",
+  fontFamily: "var(--font-comic)",
+};
+
+const panelStyle: CSSProperties = {
+  position: "relative",
+  background: "#fff",
+  border: "4px solid #111",
+  borderRadius: "16px",
+  boxShadow: "8px 8px 0 #111",
+  padding: "2.5rem 1.5rem 1.5rem",
+};
+
+const stickerStyle: CSSProperties = {
+  position: "absolute",
+  top: "-22px",
+  left: "20px",
+  background: "#ffd23f",
+  color: "#111",
+  border: "3px solid #111",
+  borderRadius: "8px",
+  boxShadow: "4px 4px 0 #111",
+  padding: "0.15rem 1rem",
+  fontFamily: "var(--font-comic-chip)",
+  fontSize: "1.5rem",
+  letterSpacing: "0.06em",
+  transform: "rotate(-3deg)",
+};
+
+const toastBase: CSSProperties = {
+  fontFamily: "var(--font-comic)",
+  fontSize: "1.1rem",
+  letterSpacing: "0.05em",
+  color: "#111",
+  border: "3px solid #111",
+  borderRadius: "10px",
+  boxShadow: "4px 4px 0 #111",
+};
+
+const comicToast = {
+  success: (msg?: string) =>
+    toast.success(msg, { style: { ...toastBase, background: "#b6f2a1" } }),
+  error: (msg?: string) =>
+    toast.error(msg, { style: { ...toastBase, background: "#ff8b8b" } }),
+};
 
 const Community = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -84,12 +136,12 @@ const Community = () => {
     console.log(resultAction);
 
     if (!uploadFile.fulfilled.match(resultAction)) {
-      toast.error("Failed to upload Image");
+      comicToast.error("OOPS! Failed to upload image");
       return;
     }
     const uploadedUrl = resultAction.payload.data.fileDetails?.url;
     setFormData((prev) => ({ ...prev, image: uploadedUrl }));
-    toast.success("File Uploaded successfully");
+    comicToast.success("POW! File uploaded successfully");
 
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -126,7 +178,7 @@ const Community = () => {
   const handleSubmit = async () => {
     const token = await getToken();
     if (!token) {
-      toast.error("Please login");
+      comicToast.error("HOLD ON! Please login");
       return;
     }
 
@@ -136,18 +188,18 @@ const Community = () => {
       !formData.description.trim() ||
       !formData.parentGroup
     ) {
-      toast.error("Please fill in all required fields");
+      comicToast.error("WHOA! Please fill in all required fields");
       return;
     }
 
     const response = await createCommunity({ data: formData, token });
 
     if (!response.success) {
-      toast.error("Couldn't create Community. Please try again");
+      comicToast.error("OOPS! Couldn't create Community. Please try again");
       return;
     }
 
-    toast.success(response.data?.message);
+    comicToast.success(response.data?.message);
 
     setFormData({
       groupName: "",
@@ -170,20 +222,38 @@ const Community = () => {
     formData.parentGroup !== "";
 
   return (
-    <>
+    <div style={pageStyle}>
       <CommunityBanner />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10 space-y-20">
-        <GroupsSection
-          groups={groups}
-          loading={loading}
-          error={error}
-          refetch={fetchAllGroups}
-        />
+      <div
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        style={{
+          paddingTop: "2.5rem",
+          paddingBottom: "2.5rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6rem",
+        }}
+      >
+        <section style={panelStyle}>
+          <span style={stickerStyle}>Groups</span>
+          <GroupsSection
+            groups={groups}
+            loading={loading}
+            error={error}
+            refetch={fetchAllGroups}
+          />
+        </section>
 
-        <LetsRevive />
+        <section style={panelStyle}>
+          <span style={stickerStyle}>Let's Revive!</span>
+          <LetsRevive />
+        </section>
 
-        <CreateOwnGroup onOpenForm={() => setShowForm(true)} />
+        <section style={panelStyle}>
+          <span style={stickerStyle}>Start Your Own</span>
+          <CreateOwnGroup onOpenForm={() => setShowForm(true)} />
+        </section>
       </div>
 
       {showForm && (
@@ -204,7 +274,7 @@ const Community = () => {
           parentGroups={parentGroups}
         />
       )}
-    </>
+    </div>
   );
 };
 

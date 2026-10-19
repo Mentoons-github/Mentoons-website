@@ -1,14 +1,9 @@
 import axiosInstance from "@/api/axios";
 import { companyImg, FOOTER_PAGELINKS, SOCIAL_LINKS } from "@/constant";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
-import { MdEmail, MdLocationOn } from "react-icons/md";
+import { MdEmail, MdLocationOn, MdPlayCircleFilled } from "react-icons/md";
 import { PiPhoneCallFill } from "react-icons/pi";
-import {
-  SiFacebook,
-  SiInstagram,
-  SiWhatsapp,
-  SiYoutube,
-} from "react-icons/si";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiYoutube } from "react-icons/si";
 
 import { ModalMessage } from "@/utils/enum";
 import { useState } from "react";
@@ -17,7 +12,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import NewsletterModal from "../modals/NewsletterModal";
-// import MapComponent from "./MapComponent";
 import { AxiosError } from "axios";
 import { TiSocialLinkedin } from "react-icons/ti";
 
@@ -43,6 +37,87 @@ const validationSchema = Yup.object({
     .required("Email is required"),
 });
 
+// ---------------------------------------------------------------
+// 👉 PASTE YOUR VIDEO LINK HERE
+// Examples:
+//   "https://www.youtube.com/watch?v=XXXXXXXXXXX"
+//   "https://youtu.be/XXXXXXXXXXX"
+//   "https://yourdomain.com/videos/intro.mp4"
+// Leave empty ("") to show the placeholder.
+// ---------------------------------------------------------------
+const FOOTER_VIDEO_URL = "/assets/v3/footer/footerVideo.mp4";
+
+// Converts any YouTube link into an embeddable URL (returns null if not YouTube)
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
+
+// ---- section lookups (Products removed) ----
+const hasTitle = (title: string, key: string) =>
+  title.toLowerCase().includes(key);
+
+const aboutSection = FOOTER_PAGELINKS.find((s) => hasTitle(s.title, "about"));
+const contactSection = FOOTER_PAGELINKS.find((s) =>
+  hasTitle(s.title, "contact"),
+);
+const otherSections = FOOTER_PAGELINKS.filter(
+  (s) =>
+    !hasTitle(s.title, "product") &&
+    !hasTitle(s.title, "about") &&
+    !hasTitle(s.title, "contact"),
+);
+
+// comic look: hard shadow on cards/buttons
+const comicShadow = "shadow-[3px_3px_0_#000]";
+
+// heading: big, bold, uppercase, underlined bar
+const comicHeading =
+  "relative inline-block pb-1 text-2xl md:text-3xl tracking-[0.15em] uppercase text-black font-comic-chip drop-shadow-[2px_2px_0_rgba(255,255,255,0.7)] after:absolute after:left-0 after:bottom-0 after:h-1 after:w-full after:rounded-full after:bg-black after:content-['']";
+
+// ---- Video block (placeholder until a URL is provided) ----
+const FooterVideo = ({ url }: { url: string }) => {
+  const embedUrl = url ? getYouTubeEmbedUrl(url) : null;
+
+  return (
+    <div
+      className={`w-full max-w-xl mx-auto overflow-hidden bg-black border-4 border-black rounded-2xl ${comicShadow}`}
+    >
+      <div className="relative w-full aspect-video">
+        {!url ? (
+          // Placeholder
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-orange-600">
+            <MdPlayCircleFilled className="text-6xl text-white drop-shadow-[2px_2px_0_#000]" />
+            <p className="text-lg tracking-wider text-white font-comic-chip">
+              Video Coming Soon
+            </p>
+          </div>
+        ) : embedUrl ? (
+          // YouTube
+          <iframe
+            src={embedUrl}
+            title="Mentoons footer video"
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          // Direct video file (mp4, webm, etc.)
+          <video
+            src={url}
+            controls
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 object-cover w-full h-full"
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,9 +131,7 @@ const Footer = () => {
     try {
       const response = await axiosInstance.post<ApiResponse>(
         "email/subscribeToNewsletter",
-        {
-          email: values.email,
-        },
+        { email: values.email },
       );
 
       const res: ApiResponse = response.data;
@@ -69,7 +142,6 @@ const Footer = () => {
       }
     } catch (err: unknown) {
       const error = err as AxiosError<{ error: string }>;
-
       toast(` ${error.response?.data.error}`);
     } finally {
       resetForm();
@@ -95,9 +167,6 @@ const Footer = () => {
       const path = url.substring(0, hashIndex);
       const section = url.substring(hashIndex + 1);
 
-      console.log("Navigating to path:", path);
-      console.log("Scrolling to section:", section);
-
       const currentPath = location.pathname + location.search;
       if (currentPath !== path) {
         navigate(path + "#" + section);
@@ -110,10 +179,7 @@ const Footer = () => {
             const offsetPosition =
               elementPosition + window.pageYOffset - headerOffset;
 
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth",
-            });
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
           }
         }, 100);
       }
@@ -127,7 +193,7 @@ const Footer = () => {
 
   const renderSocialIcons = (iconSize: "sm" | "lg") => (
     <div
-      className={`flex items-center justify-center gap-[8px] relative ${
+      className={`relative z-10 flex items-center justify-center gap-[8px] ${
         iconSize === "lg" ? "my-4" : "my-1 w-full"
       }`}
     >
@@ -135,218 +201,180 @@ const Footer = () => {
         <Link
           key={socialItem.id}
           to={socialItem.link}
-          className="p-3 text-xl bg-white rounded-full cursor-pointer"
+          className={`p-3 text-xl bg-white rounded-full cursor-pointer border-2 border-black ${comicShadow} transition-all duration-200 hover:-translate-y-1`}
         >
           {socialItem.icon === "linkedin" ? (
-            <TiSocialLinkedin className="transition-all duration-300 hover:scale-110" />
+            <TiSocialLinkedin />
           ) : socialItem.icon === "facebook" ? (
-            <SiFacebook className="transition-all duration-300 hover:scale-110" />
+            <SiFacebook />
           ) : socialItem.icon === "instagram" ? (
-            <SiInstagram className="transition-all duration-300 hover:scale-110" />
+            <SiInstagram />
           ) : socialItem.icon === "youtube" ? (
-            <SiYoutube className="transition-all duration-300 hover:scale-110" />
+            <SiYoutube />
           ) : socialItem.icon === "whatsapp" ? (
-            <SiWhatsapp className="transition-all duration-300 hover:scale-110" />
+            <SiWhatsapp />
           ) : null}
         </Link>
       ))}
     </div>
   );
 
+  // smaller, tighter links
+  const renderLinkItems = (items: LinkItem[], textColor = "text-black") =>
+    items.map((linkItem) => (
+      <div
+        onClick={() => handleLinkClick(linkItem)}
+        key={linkItem.id}
+        className={`flex items-center gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide ${textColor} cursor-pointer transition-all duration-200 hover:translate-x-1 hover:text-white`}
+      >
+        {linkItem.label.includes("@") && <MdEmail />}
+        {linkItem.label.includes("+91") && <PiPhoneCallFill />}
+        {linkItem.label}
+      </div>
+    ));
+
   return (
-    <footer className="bg-[#FF942E] relative ">
-      <div className="absolute bottom-0 w-full">
+    // small bottom padding on mobile only, so the last link clears the illustration
+    <footer className="relative bg-[#FF942E] pb-24 md:pb-0">
+      {/* Illustration restored: full width, natural proportions, behind content */}
+      <div className="absolute bottom-0 left-0 z-0 w-full pointer-events-none">
         <img
           src="/assets/images/footer-illustration.png"
-          alt="Mentoons logo"
+          alt="Mentoons illustration"
           className="w-full max-h-96"
         />
       </div>
-      <div className="flex flex-wrap items-center justify-center p-4 px-20 pt-8 lg:justify-between">
-        <div>
+
+      <div className="relative z-10 grid gap-6 px-6 pt-8 md:px-16 lg:grid-cols-[1fr_1.5fr_auto_auto] lg:items-start">
+        {/* Logo + About list directly underneath */}
+        <div className="flex flex-col items-center gap-2 lg:items-start">
           <img
             src="/assets/images/mentoons-logo.png"
-            alt=""
-            className="object-cover h-24"
+            alt="Mentoons logo"
+            className="object-cover h-20 md:h-24"
           />
-        </div>
-      </div>
-      <div className="relative gap-10 px-16 lg:flex">
-        <div className="flex items-start justify-center gap-10  flex-[0.76] flex-wrap mb-8 lg:gap-10 lg:justify-end   ">
-          {FOOTER_PAGELINKS.map((item) => (
-            <div key={item.id} className="text-center lg:text-start">
-              <Link to={item.url} className="mb-4 text-lg font-semibold">
-                {item.title}
+          {aboutSection && (
+            <div className="flex flex-col items-center w-full gap-1 lg:items-start">
+              <Link
+                to={aboutSection.url}
+                className="relative inline-block pb-1 mb-1 text-3xl md:text-4xl tracking-[0.15em] uppercase text-black font-comic-chip drop-shadow-[2px_2px_0_rgba(255,255,255,0.7)] after:absolute after:left-0 after:bottom-0 after:h-1 after:w-full after:rounded-full after:bg-black after:content-['']"
+              >
+                {aboutSection.title}
               </Link>
-              <div className="mt-2 text-center">
-                {item.items.map((linkItem) => (
-                  <div
-                    onClick={() => handleLinkClick(linkItem)}
-                    key={linkItem.id}
-                    className="flex items-center justify-center gap-2 text-center transition-all duration-300 cursor-pointer lg:justify-normal hover:scale-110"
-                  >
-                    {linkItem.label.includes("@") && <MdEmail />}
-                    {linkItem.label.includes("+91") && <PiPhoneCallFill />}
-                    {linkItem.label}
-                  </div>
-                ))}
-              </div>
+              {renderLinkItems(aboutSection.items, "text-black")}
             </div>
-          ))}
+          )}
         </div>
 
-        <div className="bg-gradient-to-br from-orange-600 to-orange-400 p-6 rounded-2xl shadow-2xl flex flex-col items-center mb-6 lg:mb-0 border-2 border-orange-200/40 transition-all duration-300 hover:shadow-orange-500/30 h-fit">
-          <div className="text-center mb-4">
-            <p className="text-orange-50 text-base font-medium tracking-wide">
-              Scan to Contribute ₹1
-            </p>
-            <p className="text-orange-100 text-xs mt-1">
-              Support us with a quick scan!
-            </p>
-          </div>
-          <div className="relative p-4 bg-white rounded-xl shadow-inner group">
+        {/* CENTER: Video (placeholder) + remaining link sections */}
+        <div className="flex flex-col items-center gap-6 lg:px-4">
+          <FooterVideo url={FOOTER_VIDEO_URL} />
+
+          {otherSections.length > 0 && (
+            <div className="flex flex-wrap items-start justify-center gap-8 lg:justify-start">
+              {otherSections.map((item) => (
+                <div key={item.id} className="text-center lg:text-start">
+                  <Link to={item.url} className={comicHeading}>
+                    {item.title}
+                  </Link>
+                  <div className="flex flex-col items-center gap-1 mt-2 lg:items-start">
+                    {renderLinkItems(item.items)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Smaller QR */}
+        <div
+          className={`flex flex-col items-center self-start p-3 mx-auto bg-orange-600 border-4 border-black rounded-2xl ${comicShadow} h-fit w-fit`}
+        >
+          <p className="font-comic-chip text-base tracking-wide text-white">
+            Scan to Contribute ₹1
+          </p>
+          <div className="relative p-2 mt-2 bg-white border-2 border-black rounded-xl group">
             <img
               src="/assets/adda/QRCode/qrCode.jpg"
-              className="w-40 h-40 rounded-lg transition-transform duration-300 group-hover:scale-105"
+              className="w-24 h-24 transition-transform duration-300 rounded-lg group-hover:scale-105"
               alt="QR Code for contributing 1 rupee"
             />
-            <div className="absolute -top-3 -right-3 bg-orange-600 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+            <div className="absolute -top-3 -right-3 bg-yellow-300 text-black font-comic-chip text-xs px-2 py-1 rounded-full border-2 border-black">
               ₹1
             </div>
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-orange-500/20 rounded-xl">
-              <span className="text-white text-xs font-medium">Scan Now</span>
-            </div>
           </div>
-          <div className="flex items-center text-orange-100 text-sm mt-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2 text-orange-200"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Instant & Secure</span>
-          </div>
-          <div className="relative group">
-            <span className="absolute hidden group-hover:block -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2">
-              Scan with your phone to contribute
-            </span>
-          </div>
+          <span className="mt-2 font-comic text-sm tracking-wider text-white">
+            Instant & Secure
+          </span>
         </div>
 
-        <div className="flex flex-col items-start justify-start flex-[0.24] mx-auto gap-4 shadow-xl p-3 bg-gradient-to-tr from-orange-600 t-orange-300 rounded-xl hover:shadow-none">
+        {/* Smaller subscription + Contact underneath */}
+        <div className="flex flex-col w-full gap-4 mx-auto lg:w-64">
           <Formik
             initialValues={{ email: "" }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ isSubmitting, isValid, dirty }) => (
-              <Form className="relative flex flex-col w-full gap-6 p-3 rounded-2xl bg-gradient-to-br from-white to-orange-50 shadow-xl border-2 border-orange-200 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full -translate-y-16 translate-x-16 blur-2xl opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-200 rounded-full translate-y-12 -translate-x-12 blur-2xl opacity-40"></div>
-
-                <div className="relative z-10 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
-                      Wellness Subscription
-                    </h1>
-                  </div>
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed pl-3">
-                    Get free Comics, self help books, relationships, menstrual
+              <Form
+                className={`flex flex-col w-full gap-3 p-3 bg-white border-4 border-black rounded-2xl ${comicShadow}`}
+              >
+                <div>
+                  <h3 className="text-xl font-comic-chip tracking-wide text-orange-600">
+                    Wellness Subscription
+                  </h3>
+                  <p className="text-xs leading-snug text-gray-700">
+                    Get free comics, self help books, relationships, menstrual
                     cycle, friendship
                   </p>
                 </div>
 
-                <div className="relative z-10 space-y-2">
+                <div>
                   <Field
                     name="email"
                     type="email"
-                    className="w-full p-3.5 px-5 rounded-full border-2 border-orange-200 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100 transition-all duration-300 bg-white text-gray-800 placeholder:text-gray-400"
-                    placeholder="Enter your email address"
+                    className="w-full px-3 py-2 text-sm bg-white border-2 border-black rounded-full outline-none focus:ring-2 focus:ring-orange-300"
+                    placeholder="Enter your email"
                   />
                   <ErrorMessage
                     name="email"
                     component="div"
-                    className="text-red-600 text-sm font-medium ml-5 flex items-center gap-1"
+                    className="ml-3 text-xs font-medium text-red-600"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || !isValid || !dirty}
-                  className="relative z-10 w-full p-3.5 text-white font-semibold transition-all duration-300 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full cursor-pointer shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none overflow-hidden group"
+                  className={`w-full py-2 font-comic-chip text-base tracking-wider text-white bg-orange-600 border-2 border-black rounded-full ${comicShadow} transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  <span className="relative flex items-center justify-center gap-2">
-                    {isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin h-5 w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Subscribing...
-                      </>
-                    ) : (
-                      <>
-                        Get Notified
-                        <svg
-                          className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 7l5 5m0 0l-5 5m5-5H6"
-                          />
-                        </svg>
-                      </>
-                    )}
-                  </span>
+                  {isSubmitting ? "Subscribing..." : "Get Notified"}
                 </button>
               </Form>
             )}
           </Formik>
-          <div className="w-full space-y-2">
-            {/* <MapComponent />{" "} */}
-            <div className="flex items-center justify-start w-full text-lg font-medium tracking-wide">
-              <MdLocationOn />
-              Domlur, Bangalore{" "}
-            </div>{" "}
-          </div>
+
+          {/* Contact directly under subscription */}
+          {contactSection && (
+            <div className="flex flex-col items-center gap-1 lg:items-start">
+              <Link to={contactSection.url} className={comicHeading}>
+                {contactSection.title}
+              </Link>
+              <div className="flex flex-col items-center gap-1 mt-2 lg:items-start">
+                {renderLinkItems(contactSection.items)}
+                <div className="flex items-center gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide text-black">
+                  <MdLocationOn />
+                  Domlur, Bangalore
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {isMobile ? renderSocialIcons("sm") : renderSocialIcons("lg")}
 
-      <div className="relative flex flex-wrap items-center justify-center gap-8 mt-16">
+      <div className="relative z-10 flex flex-wrap items-center justify-center gap-8 mt-16">
         {companyImg.map((item) => (
           <div key={item.id} className="h-16">
             <Link to={item.url} className="cursor-pointer">
@@ -359,6 +387,7 @@ const Footer = () => {
           </div>
         ))}
       </div>
+
       {showNewletterModal && (
         <NewsletterModal
           isOpen={showNewletterModal}

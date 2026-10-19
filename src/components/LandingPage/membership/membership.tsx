@@ -5,6 +5,18 @@ import MembershipCard from "../cards/membershipCard";
 import { NavLink } from "react-router-dom";
 import { useRef } from "react";
 
+const HALFTONE_BG = {
+  backgroundColor: "#F5F5F4",
+  backgroundImage: "radial-gradient(#d6d3d1 1.2px, transparent 1.2px)",
+  backgroundSize: "16px 16px",
+};
+
+const HALFTONE_OVERLAY = {
+  backgroundImage:
+    "radial-gradient(rgba(17,24,39,0.16) 1.6px, transparent 1.6px)",
+  backgroundSize: "16px 16px",
+};
+
 const Membership = () => {
   const isMobile = window.innerWidth < 768;
   const { ref: sectionRef, isInView } = useInView(isMobile ? 0.1 : 0.3, false);
@@ -55,64 +67,41 @@ const Membership = () => {
     },
   };
 
+  // Flat, ink-outlined comic circles (replace the old gradient blobs)
   const backgroundElements = [
     {
       className:
-        "absolute -top-[25%] -left-[10%] w-[500px] h-[500px] bg-gradient-to-br from-yellow-200 via-yellow-300 to-orange-200 rounded-full blur-sm",
-      animate: { y: [0, 25, 0], scale: [1, 1.15, 1], rotate: [0, 10, 0] },
+        "absolute -top-[25%] -left-[10%] h-[420px] w-[420px] rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-80",
+      animate: { y: [0, 25, 0], scale: [1, 1.1, 1] },
       transition: { duration: 8, repeat: Infinity, ease: "easeInOut" },
     },
     {
       className:
-        "absolute top-[40%] -left-[3%] w-32 h-32 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full shadow-xl",
-      animate: { y: [0, 15, 0], rotate: [0, 15, -15, 0], scale: [1, 1.1, 1] },
+        "absolute top-[40%] -left-[3%] h-28 w-28 rounded-full border-4 border-gray-900 bg-[#FF5D8F] shadow-[6px_6px_0_0_#111827]",
+      animate: { y: [0, 15, 0], rotate: [0, 15, -15, 0] },
       transition: { duration: 7, repeat: Infinity, ease: "easeInOut" },
     },
     {
       className:
-        "absolute top-1/2 -left-[9%] w-[28%] h-[40%] bg-gradient-to-tr from-orange-300 to-yellow-400 rounded-full opacity-80",
-      animate: { y: [0, -20, 0], scale: [1, 1.08, 1] },
-      transition: { duration: 9, repeat: Infinity, ease: "easeInOut" },
-    },
-    {
-      className:
-        "absolute -bottom-[8%] -left-[5%] w-[28%] h-[40%] bg-gradient-to-tl from-orange-400 to-yellow-300 rounded-full",
+        "absolute -bottom-[10%] -left-[5%] h-[34%] w-[24%] rounded-full border-4 border-gray-900 bg-[#4CC9F0] opacity-80",
       animate: { y: [0, 18, 0], rotate: [-8, 8, -8] },
       transition: { duration: 8.5, repeat: Infinity, ease: "easeInOut" },
     },
     {
       className:
-        "absolute -top-[12%] -right-[9%] w-80 h-80 bg-gradient-to-bl from-yellow-100 via-yellow-200 to-orange-200 rounded-full opacity-90",
-      animate: { y: [0, 30, 0], scale: [1, 1.12, 1] },
+        "absolute -top-[12%] -right-[9%] h-72 w-72 rounded-full border-4 border-gray-900 bg-[#7AE582] opacity-80",
+      animate: { y: [0, 30, 0], scale: [1, 1.1, 1] },
       transition: { duration: 10, repeat: Infinity, ease: "easeInOut" },
     },
     {
       className:
-        "absolute top-[4%] -right-[12%] w-96 h-96 bg-gradient-to-tl from-orange-200 via-yellow-300 to-orange-300 rounded-full opacity-70",
-      animate: { y: [0, 20, 0], rotate: [-5, 5, -5] },
-      transition: { duration: 8.8, repeat: Infinity, ease: "easeInOut" },
-    },
-    {
-      className:
-        "absolute top-1/5 -right-[10%] w-64 h-64 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-full",
-      animate: { y: [0, -15, 0], scale: [1, 1.1, 1] },
-      transition: { duration: 7.5, repeat: Infinity, ease: "easeInOut" },
-    },
-    {
-      className:
-        "absolute top-1/2 -right-[4%] w-32 h-32 bg-gradient-to-tr from-orange-200 to-yellow-300 rounded-full shadow-lg",
+        "absolute top-1/2 -right-[4%] h-28 w-28 rounded-full border-4 border-gray-900 bg-[#FF9800] shadow-[6px_6px_0_0_#111827]",
       animate: { y: [0, 20, 0], scale: [1, 1.08, 1] },
       transition: { duration: 6.5, repeat: Infinity, ease: "easeInOut" },
     },
     {
       className:
-        "absolute bottom-10 -right-[15%] w-[28%] h-[40%] bg-gradient-to-bl from-orange-300 to-yellow-400 rounded-full opacity-85",
-      animate: { y: [0, -12, 0], scale: [1, 1.06, 1] },
-      transition: { duration: 9.2, repeat: Infinity, ease: "easeInOut" },
-    },
-    {
-      className:
-        "absolute -bottom-[20%] -right-[5%] w-[28%] h-[40%] bg-gradient-to-tr from-yellow-200 via-orange-200 to-yellow-300 rounded-full",
+        "absolute -bottom-[20%] -right-[5%] h-[36%] w-[26%] rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-80",
       animate: { y: [0, 22, 0], rotate: [-6, 6, -6] },
       transition: { duration: 8.7, repeat: Infinity, ease: "easeInOut" },
     },
@@ -121,9 +110,16 @@ const Membership = () => {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen p-6 md:p-12 lg:p-16 flex flex-col justify-center overflow-hidden items-center bg-gradient-to-br from-white via-orange-50 to-yellow-50"
+      style={HALFTONE_BG}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden border-y-2 border-gray-900 p-6 md:p-12 lg:p-16"
       id="subscription"
     >
+      {/* halftone shading over the whole section */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={HALFTONE_OVERLAY}
+      />
+
       {backgroundElements.map((element, index) => (
         <motion.div
           key={index}
@@ -133,14 +129,15 @@ const Membership = () => {
           style={index % 2 === 0 ? { y: y1 } : { y: y2 }}
         />
       ))}
+
       <motion.div
-        className="absolute -top-[25%] -left-[10%] translate-x-[25%] translate-y-[33%] w-[500px] h-[500px] pointer-events-none"
+        className="pointer-events-none absolute -top-[25%] -left-[10%] h-[500px] w-[500px] translate-x-[25%] translate-y-[33%]"
         style={{ rotate }}
       >
         <motion.img
           src="/assets/home/homepage fillers/klement Homepage Illustration.png"
           alt="klement"
-          className="absolute top-2/4 right-0 w-[20rem] hidden xl:block drop-shadow-2xl"
+          className="absolute right-0 top-2/4 hidden w-[20rem] drop-shadow-2xl xl:block"
           animate={{
             y: [0, -20, 0],
             rotate: [0, 5, -5, 0],
@@ -151,14 +148,14 @@ const Membership = () => {
       </motion.div>
 
       <motion.div
-        className="absolute -bottom-[8%] -left-[5%] translate-y-[5%] w-[28%] h-[40%] flex justify-center items-start pointer-events-none"
+        className="pointer-events-none absolute -bottom-[8%] -left-[5%] flex h-[40%] w-[28%] translate-y-[5%] items-start justify-center"
         animate={{ y: [0, 15, 0], scale: [1, 1.03, 1] }}
         transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
       >
         <img
           src="/assets/payments/payments logo.png"
           alt="payments"
-          className="lg:block w-[60%] max-w-[450px] hidden xl:block drop-shadow-xl"
+          className="hidden w-[60%] max-w-[450px] drop-shadow-xl xl:block"
         />
       </motion.div>
 
@@ -167,14 +164,14 @@ const Membership = () => {
         variants={containerVariants}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
-        className="relative z-10 w-full max-w-7xl mx-auto"
+        className="relative z-10 mx-auto w-full max-w-7xl"
       >
         <motion.div
           variants={itemVariants}
-          className="text-center mb-12 md:mb-16"
+          className="mb-12 text-center md:mb-16"
         >
           <motion.div
-            className="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4"
+            className="font-comic-chip mb-5 inline-flex -rotate-2 items-center rounded-full border-2 border-gray-900 bg-[#FFD93D] px-4 py-2 text-sm tracking-wide text-gray-900 shadow-[3px_3px_0_0_#111827]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -183,22 +180,27 @@ const Membership = () => {
 
           <motion.h1
             variants={itemVariants}
-            className="font-bold font-inter text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight bg-gradient-to-r from-gray-800 via-orange-600 to-yellow-600 bg-clip-text text-transparent mb-4"
+            className="font-comic mb-6 text-5xl leading-tight tracking-wide text-white sm:text-6xl md:text-7xl"
+            style={{
+              WebkitTextStroke: "2px #111827",
+              textShadow: "5px 5px 0 #111827",
+            }}
           >
             Membership Plans
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-inter"
+            className="mx-auto inline-block max-w-2xl rotate-1 rounded-2xl border-2 border-gray-900 bg-white px-5 py-3 text-base font-medium leading-relaxed text-gray-900 shadow-[5px_5px_0_0_#111827] md:text-lg"
           >
             Unlock the full potential of Mentoons with our carefully crafted
             membership tiers designed for every need.
           </motion.p>
         </motion.div>
+
         <motion.div
           variants={cardContainerVariants}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 place-items-center w-full max-w-6xl mx-auto mb-12"
+          className="mx-auto mb-14 grid w-full max-w-6xl grid-cols-1 place-items-center gap-10 lg:grid-cols-2 lg:gap-14"
         >
           {[PRIME, PLATINUM].map((data, index) => (
             <motion.div
@@ -216,7 +218,7 @@ const Membership = () => {
           ))}
         </motion.div>
 
-        {/* Enhanced CTA Section */}
+        {/* CTA */}
         <motion.div variants={itemVariants} className="text-center">
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -225,16 +227,15 @@ const Membership = () => {
           >
             <NavLink
               to="/mentoons-works"
-              className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-orange-500/25 focus:outline-none focus:ring-4 focus:ring-orange-400/50 transition-all duration-300 overflow-hidden"
+              className="font-comic-chip group inline-flex items-center gap-3 rounded-2xl border-2 border-gray-900 bg-[#FF9800] px-8 py-4 text-lg tracking-wide text-white shadow-[6px_6px_0_0_#111827] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#111827] focus:outline-none focus-visible:ring-4 focus-visible:ring-gray-900/40"
               aria-label="Learn how Mentoons work"
+              style={{ textShadow: "2px 2px 0 #111827" }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-              <span className="relative z-10 mr-3">How Mentoons Work</span>
+              <span>How Mentoons Work</span>
 
               <motion.svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="relative z-10 h-6 w-6"
+                className="h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -249,61 +250,21 @@ const Membership = () => {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   d="M9 5l7 7-7 7"
                 />
               </motion.svg>
-
-              {/* Sparkle Effect */}
-              <motion.div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                animate={{
-                  background: [
-                    "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                    "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                    "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
             </NavLink>
           </motion.div>
 
           <motion.p
             variants={itemVariants}
-            className="mt-4 text-gray-500 text-sm"
+            className="font-comic mt-5 text-xl tracking-wide text-gray-900"
           >
             Discover the magic behind our educational approach
           </motion.p>
         </motion.div>
       </motion.div>
-
-      {/* Floating Particles */}
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-orange-300 rounded-full opacity-60"
-          style={{
-            left: `${20 + i * 15}%`,
-            top: `${30 + (i % 3) * 20}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.6, 1, 0.6],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 3 + i * 0.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: i * 0.2,
-          }}
-        />
-      ))}
     </section>
   );
 };
