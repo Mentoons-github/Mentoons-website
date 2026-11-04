@@ -16,6 +16,7 @@ import DataCapture from "@/pages/employee/dataCapture/dataCapture";
 import PsychologistWorkshops from "@/pages/employee/workshops/PsychologistWorkshops";
 import SinglePsychologistWorkshop from "@/pages/employee/workshops/SinglePsychologistWorkshop";
 import Incentive from "@/pages/employee/incentive/incentive";
+import DailyReport from "@/pages/employee/dailyReport/DailyReport";
 
 const EmployeeRouter = () => {
   return (
@@ -45,9 +46,9 @@ const EmployeeRouter = () => {
             element={<SinglePsychologistWorkshop />}
           />
           <Route path="incentive" element={<Incentive />} />
+          <Route path="daily-report" element={<DailyReport />} />
         </Route>
         <Route path="/login" element={<EmployeeLoginPanel />} />
-        
       </Routes>
     </Suspense>
   );

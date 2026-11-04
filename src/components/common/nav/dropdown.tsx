@@ -52,6 +52,32 @@ const ageSortValue = (age: string) => {
   return idx === -1 ? AGE_ORDER.length : idx;
 };
 
+const COMIC_FONT = {
+  fontFamily: "var(--font-comic)",
+  fontWeight: 400,
+  letterSpacing: "0.04em",
+};
+
+const MENU_BOX =
+  "absolute mt-3 z-50 overflow-hidden rounded-xl border-[3px] border-black bg-white shadow-[4px_4px_0_0_#000]";
+
+const TITLE_STRIP = "border-b-[3px] border-black bg-[#fde047] px-4 py-2.5";
+
+const TITLE_TEXT = "text-sm uppercase tracking-wider text-black";
+
+const rowClass = (active: boolean) =>
+  `group flex w-full cursor-pointer items-center justify-between px-4 py-2 text-left text-black transition-colors duration-100 md:py-2.5 ${
+    active ? "bg-[#fde047]" : "bg-transparent hover:bg-[#fed7aa]"
+  }`;
+
+const Dot = ({ active }: { active: boolean }) => (
+  <span
+    className={`h-2.5 w-2.5 shrink-0 rounded-full border-2 border-black ${
+      active ? "bg-black" : "bg-[#ff9800] group-hover:bg-black"
+    }`}
+  />
+);
+
 let menuProductsCache: ProductBase[] | null = null;
 let menuProductsPromise: Promise<ProductBase[]> | null = null;
 
@@ -240,8 +266,6 @@ const DropDown = ({
     if (isOpen) isOpen(false);
     setHoveredAge(null);
 
-    // Build query string manually so spaces become literal spaces
-    // (matching ?category=6-12&productType=mentoons+cards&cardType=story+re-teller+card)
     const parts = [`category=${encodeURIComponent(age)}`];
     parts.push(
       `productType=${encodeURIComponent(filter.productType).replace(/%20/g, "+")}`,
@@ -302,18 +326,7 @@ const DropDown = ({
     },
   };
 
-  const hoverVariants = {
-    hover: {
-      scale: 1.02,
-      x: 8,
-      backgroundColor: "#f8fafc",
-      borderLeftColor: "#3b82f6",
-      borderLeftWidth: "4px",
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
+  const tapVariants = {
     tap: {
       scale: 0.98,
       transition: {
@@ -324,52 +337,39 @@ const DropDown = ({
 
   if (labelType === "products") {
     return (
-      <div className="relative font-akshar">
+      <div className="relative" style={COMIC_FONT}>
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`absolute ${
+          className={`${MENU_BOX} ${
             alignLeft ? "right-0" : "left-0"
-          } mt-3 w-52 md:w-60 bg-white shadow-2xl z-50 rounded-xl overflow-hidden border border-gray-100 backdrop-blur-sm`}
-          style={{
-            background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-            boxShadow:
-              "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-          }}
+          } w-52 md:w-60`}
         >
-          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Shop by Age
-            </h3>
+          <div className={TITLE_STRIP}>
+            <h3 className={TITLE_TEXT}>Shop by Age</h3>
           </div>
 
-          <div className="md:py-2">
-            <motion.div
-              variants={itemVariants}
-              whileHover="hover"
-              whileTap="tap"
-            >
+          <div>
+            <motion.div variants={itemVariants} whileTap="tap">
               <motion.button
-                variants={hoverVariants}
+                variants={tapVariants}
                 onClick={() => handleClick("all")}
-                className="w-full px-4 py-2 md:py-3 text-left transition-all duration-200 flex items-center justify-between group border-l-4 border-transparent hover:border-blue-500"
+                className={rowClass(false)}
               >
-                <span className="text-gray-700 text-sm md:text-base font-medium group-hover:text-gray-900">
-                  All Products
+                <span className="flex items-center gap-3">
+                  <Dot active={false} />
+                  <span className="text-sm md:text-base">All Products</span>
                 </span>
-                <BiChevronRight
-                  size={18}
-                  className="text-gray-400 group-hover:text-blue-500"
-                />
+                <BiChevronRight size={18} className="text-black" />
               </motion.button>
             </motion.div>
           </div>
 
-          <div className="md:py-2 border-t border-gray-100">
+          <div className="border-t-[3px] border-black">
             {menuProducts.length === 0 ? (
-              <p className="px-4 py-3 text-xs text-gray-400">
+              <p className="px-4 py-3 text-xs text-black">
                 {productsError
                   ? "Couldn't load ages. Try again."
                   : "Loading..."}
@@ -381,64 +381,34 @@ const DropDown = ({
                   filterIds.includes(f.id),
                 );
                 const ageActive = isAgeActive(age);
-                console.log("[DropDown] age row:", {
-                  age,
-                  hoveredAge,
-                  isThisAgeHovered: hoveredAge === age,
-                  filterIds,
-                  filtersForAge: filtersForAge.map((f) => f.label),
-                });
 
                 return (
                   <div
                     key={age}
-                    className="relative group/age z-[99999]"
-                    onMouseEnter={() => {
-                      console.log("ENTER", age);
-                      setHoveredAge(age);
-                    }}
-                    onMouseLeave={() => {
-                      console.log("LEAVE", age);
-                      setHoveredAge(null);
-                    }}
+                    className="relative z-[99999]"
+                    onMouseEnter={() => setHoveredAge(age)}
+                    onMouseLeave={() => setHoveredAge(null)}
                   >
                     <motion.div
                       variants={itemVariants}
-                      whileHover="hover"
                       whileTap="tap"
-                      className="group relative"
+                      className="relative"
                     >
                       <motion.button
-                        variants={hoverVariants}
+                        variants={tapVariants}
                         onClick={() => handleAgeClick(age)}
-                        className={`w-full px-4 py-2 md:py-3 text-left transition-all duration-200 flex items-center justify-between group border-l-4 ${
-                          ageActive
-                            ? "border-blue-500 bg-blue-50/60"
-                            : "border-transparent hover:border-blue-500"
-                        }`}
+                        className={rowClass(ageActive || hoveredAge === age)}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
-                          <span
-                            className={`text-sm md:text-base font-medium transition-colors duration-200 ${
-                              ageActive
-                                ? "text-blue-600 font-semibold"
-                                : "text-gray-700 group-hover:text-gray-900"
-                            }`}
-                          >
+                        <span className="flex items-center gap-3">
+                          <Dot active={ageActive || hoveredAge === age} />
+                          <span className="text-sm md:text-base">
                             {age === "20+" ? "20+ yrs" : `${age} yrs`}
                           </span>
-                        </div>
-                        <BiChevronRight
-                          size={18}
-                          className="text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
-                        />
+                        </span>
+                        <BiChevronRight size={18} className="text-black" />
                       </motion.button>
                     </motion.div>
 
-                    {/* Invisible bridge: closes the gap between the age
-                        row and the flyout submenu so the mouse doesn't
-                        leave the hover zone while moving sideways. */}
                     {filtersForAge.length > 0 && (
                       <div
                         className={`absolute top-0 h-full w-2 ${
@@ -454,18 +424,12 @@ const DropDown = ({
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
                           transition={{ duration: 0.15 }}
-                          className={`absolute top-0 ${
+                          className={`absolute top-0 z-50 w-60 overflow-hidden rounded-xl border-[3px] border-black bg-white shadow-[4px_4px_0_0_#000] ${
                             alignLeft ? "right-full" : "left-full"
-                          } w-56 bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-100 z-50`}
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow:
-                              "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                          }}
+                          }`}
                         >
-                          <div className="px-4 py-2.5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <div className={TITLE_STRIP}>
+                            <h4 className={TITLE_TEXT}>
                               {age === "20+" ? "20+ yrs" : `${age} yrs`}
                             </h4>
                           </div>
@@ -477,11 +441,7 @@ const DropDown = ({
                                 onClick={() =>
                                   handleAgeCategoryClick(age, filter)
                                 }
-                                className={`w-full px-4 py-2.5 text-left text-sm transition-colors duration-150 border-l-4 ${
-                                  active
-                                    ? "border-blue-500 bg-blue-50/60 text-blue-600 font-semibold"
-                                    : "border-transparent text-gray-700 hover:bg-gray-50 hover:border-blue-500"
-                                }`}
+                                className={`${rowClass(active)} text-sm`}
                               >
                                 {filter.label}
                               </button>
@@ -501,28 +461,21 @@ const DropDown = ({
   }
 
   return (
-    <div className="relative font-akshar">
+    <div className="relative" style={COMIC_FONT}>
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        className={`absolute ${
+        className={`${MENU_BOX} ${
           alignLeft ? "right-0" : "left-0"
-        } mt-3 w-48 md:w-56 bg-white shadow-2xl z-50 rounded-xl overflow-hidden border border-gray-100 backdrop-blur-sm`}
-        style={{
-          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-          boxShadow:
-            "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-        }}
+        } w-48 md:w-56`}
       >
-        <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            {labelType}
-          </h3>
+        <div className={TITLE_STRIP}>
+          <h3 className={TITLE_TEXT}>{labelType}</h3>
         </div>
 
-        <div className="md:py-2">
+        <div>
           {items.map((data, index) => {
             let sideLine = "";
             if (labelType === "workshops") {
@@ -538,72 +491,37 @@ const DropDown = ({
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover="hover"
                 whileTap="tap"
-                className="group relative"
+                className="relative"
               >
                 <motion.button
-                  variants={hoverVariants}
+                  variants={tapVariants}
                   onClick={() => handleClick(data.label)}
-                  className={`w-full px-4 py-2 md:py-3 text-left transition-all duration-200 flex items-center justify-between group border-l-4 ${
-                    active
-                      ? "border-blue-500 bg-blue-50/60"
-                      : "border-transparent hover:border-blue-500"
-                  }`}
+                  className={rowClass(active)}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 transition-opacity duration-200 ${
-                        active
-                          ? "opacity-100"
-                          : "opacity-60 group-hover:opacity-100"
-                      }`}
-                    ></div>
+                  <span className="flex items-center gap-3">
+                    <Dot active={active} />
 
                     <span className="flex flex-col">
-                      <span
-                        className={`text-sm md:text-base font-medium transition-colors duration-200 ${
-                          active
-                            ? "text-blue-600 font-semibold"
-                            : "text-gray-700 group-hover:text-gray-900"
-                        }`}
-                      >
-                        {data.label}
-                      </span>
+                      <span className="text-sm md:text-base">{data.label}</span>
 
                       {sideLine && (
-                        <span className="text-xs text-gray-400 group-hover:text-gray-600 transition-colors duration-200">
+                        <span className="text-xs text-black/70">
                           {sideLine}
                         </span>
                       )}
                     </span>
-                  </div>
+                  </span>
 
-                  <motion.div
-                    className={`transition-colors duration-200 ${
-                      active
-                        ? "text-blue-500"
-                        : "text-gray-400 group-hover:text-blue-500"
-                    }`}
-                    animate={{ x: 0 }}
-                    whileHover={{ x: 4, transition: { duration: 0.2 } }}
-                  >
-                    <BiChevronRight size={18} />
-                  </motion.div>
+                  <BiChevronRight size={18} className="text-black" />
                 </motion.button>
-
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10 rounded-lg mx-2"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                />
               </motion.div>
             );
           })}
         </div>
 
-        <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-t border-gray-100">
-          <p className="text-xs text-gray-400 text-center">
+        <div className="border-t-[3px] border-black bg-[#fed7aa] px-4 py-2">
+          <p className="text-center text-xs text-black">
             {items.length} {items.length === 1 ? "option" : "options"} available
           </p>
         </div>

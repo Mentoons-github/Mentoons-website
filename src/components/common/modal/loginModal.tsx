@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LoginModal = ({
   isOpen,
@@ -9,6 +9,7 @@ const LoginModal = ({
   onClose: () => void;
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const overlayVariants = {
     hidden: { opacity: 0 },
@@ -61,7 +62,9 @@ const LoginModal = ({
   ) => {
     e.stopPropagation();
     onClose();
-    navigate(`/${path}`);
+
+    const returnTo = `${location.pathname}${location.search}${location.hash}`;
+    navigate(`/${path}?redirect_url=${encodeURIComponent(returnTo)}`);
   };
 
   const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {

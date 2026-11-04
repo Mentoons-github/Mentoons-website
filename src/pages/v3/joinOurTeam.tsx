@@ -13,7 +13,6 @@ const HALFTONE_OVERLAY = {
   backgroundSize: "16px 16px",
 };
 
-/* Animation only: per-element delay / final rotation via CSS variables */
 const anim = (delayMs: number, rotate = "0deg") =>
   ({ "--d": `${delayMs}ms`, "--r": rotate }) as CSSProperties;
 
@@ -80,15 +79,14 @@ const JoinOurTeam = () => {
         />
         <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-70" />
 
-        {/* Psychologists badge - top right, responsive */}
-        <div
-          style={anim(900)}
-          className="jt-drop absolute right-3 top-3 z-20 w-16 sm:right-4 sm:top-4 sm:w-20 md:right-6 md:top-5 md:w-28 lg:right-8 lg:top-6 lg:w-36 xl:w-40 drop-shadow-[4px_4px_0_rgba(17,24,39,0.9)] transition-transform duration-300 hover:rotate-3 hover:scale-105"
-        >
+        <div className="absolute right-0 top-0 z-20 aspect-square w-24 sm:w-28 md:w-36 lg:w-40 xl:w-44">
+          <div className="absolute inset-0 rounded-bl-full border-b-4 border-l-4 border-gray-900 bg-[#FFD93D] shadow-[-3px_3px_0_0_rgba(17,24,39,0.9)]" />
+
           <img
             src="/assets/LandingPage/psyco.png"
             alt="Carefully crafted by psychologists"
-            className="h-auto w-full object-contain"
+            style={anim(900)}
+            className="jt-drop absolute right-1 top-1 z-10 h-auto w-[72%] object-contain transition-transform duration-300 hover:rotate-3 hover:scale-105 sm:right-2 sm:top-2"
           />
         </div>
 

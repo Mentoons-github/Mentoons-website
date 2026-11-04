@@ -208,7 +208,7 @@ const AboutWorkshop = ({ categories }: AboutWorkshopProps) => {
   return (
     <div
       ref={containerRef}
-      className="relative flex flex-col lg:flex-row justify-between items-center overflow-hidden w-full px-4 lg:px-8 py-8 md:py-12 min-h-screen bg-[#fff7e6]"
+      className="relative flex flex-col lg:flex-row justify-between items-center overflow-hidden w-full px-4 lg:px-8 py-8 md:py-12 min-h-screen"
     >
       {/* Halftone dots */}
       <div

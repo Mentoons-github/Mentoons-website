@@ -8,7 +8,7 @@ import { BiSolidMessage } from "react-icons/bi";
 import EnquiryModal from "@/components/modals/EnquiryModal";
 import RegirstrationModal from "@/components/modals/RegistrationModal";
 import FAQCard from "@/components/shared/FAQSection/FAQCard";
-import WorkshopActivities from "@/components/Workshop/activities";
+// import WorkshopActivities from "@/components/Workshop/activities";
 import WorkshopBanner from "@/components/Workshop/banner/banner";
 import WorkshopInfoCarousel from "@/components/Workshop/carousal";
 // import WorkShopChallenges from "@/components/Workshop/challenges/challenges";
@@ -18,8 +18,7 @@ import { ModalMessage } from "@/utils/enum";
 import { useSearchParams } from "react-router-dom";
 import AboutWorkshop from "@/components/Workshop/about";
 import ErrorModal from "@/components/adda/modal/error";
-import WorkshopPlans from "@/components/Workshop/plans/workshopPlan";
-
+// import WorkshopPlans from "@/components/Workshop/plans/workshopPlan";
 
 const ACCENT = "#FFAA15";
 
@@ -30,7 +29,7 @@ const inputClass =
   "focus:translate-y-[2px] focus:shadow-[1px_1px_0_0_#1a1a1a] " +
   "focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2";
 
-const labelClass = "text-lg font-semibold text-[#1a1a1a]";
+// const labelClass = "text-lg font-semibold text-[#1a1a1a]";
 
 const panelClass =
   "bg-[#FFF8E7] border-2 border-[#1a1a1a] rounded-xl shadow-[6px_6px_0_0_#1a1a1a]";
@@ -64,6 +63,8 @@ const Workshopv2 = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState("");
 
+  const workshopRef = useRef<HTMLDivElement | null>(null);
+
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -81,6 +82,14 @@ const Workshopv2 = () => {
     setEnquiryEmail(user?.email || "");
     setEnquiryName(user?.name || "");
   }, [user]);
+
+  const scrollDownWorkshop = () => {
+    if (!workshopRef?.current) return;
+    workshopRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   const fetchWorkshops = useCallback(async () => {
     try {
@@ -235,74 +244,74 @@ const Workshopv2 = () => {
     }
   }, [workshopName, categories]);
 
-  const handleFormChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // const handleFormChange = (
+  //   e: React.ChangeEvent<
+  //     HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  //   >,
+  // ) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  const handleSelectedCategory = (
-    category: string,
-    categoryIndex: number,
-    workshopIndex: number,
-  ) => {
-    setSelectedCategory(category);
-    setSelectedCategoryIndex(categoryIndex);
-    setSelectedWorkshopIndex(workshopIndex);
-    setCurrentSlide(categoryIndex);
-    const selectedWorkshop =
-      categories[categoryIndex]?.workshops[workshopIndex];
-    setFormData((prev) => ({
-      ...prev,
-      workshop: category,
-      ageCategory: selectedWorkshop?.ageGroups[0]?.ageRange || "",
-    }));
-  };
+  // const handleSelectedCategory = (
+  //   category: string,
+  //   categoryIndex: number,
+  //   workshopIndex: number,
+  // ) => {
+  //   setSelectedCategory(category);
+  //   setSelectedCategoryIndex(categoryIndex);
+  //   setSelectedWorkshopIndex(workshopIndex);
+  //   setCurrentSlide(categoryIndex);
+  //   const selectedWorkshop =
+  //     categories[categoryIndex]?.workshops[workshopIndex];
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     workshop: category,
+  //     ageCategory: selectedWorkshop?.ageGroups[0]?.ageRange || "",
+  //   }));
+  // };
 
-  const handleRegisterationForm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = await getToken();
-    if (formData.message.length < 50) {
-      toast.error("Message must be at least 50 characters long");
-      return;
-    }
-    try {
-      const workshopRegistrationResponse = await axios.post(
-        `${import.meta.env.VITE_PROD_URL}/workshop/submit-form`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (workshopRegistrationResponse.status === 200) {
-        setShowRegistrationModal(true);
-        setFormData({
-          firstname: user?.name?.split(" ")[0] || "",
-          lastname: user?.name?.split(" ")[1] || "",
-          email: user?.email || "",
-          phone: user?.phoneNumber || 0,
-          message: "",
-          workshop: categories[0]?.workshops[0]?.workshopName || "",
-          ageCategory:
-            categories[0]?.workshops[0]?.ageGroups[0]?.ageRange || "",
-          doubt: "",
-        });
-      } else {
-        toast.error("Registration Failed");
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("Registration Failed");
-    }
-  };
+  // const handleRegisterationForm = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const token = await getToken();
+  //   if (formData.message.length < 50) {
+  //     toast.error("Message must be at least 50 characters long");
+  //     return;
+  //   }
+  //   try {
+  //     const workshopRegistrationResponse = await axios.post(
+  //       `${import.meta.env.VITE_PROD_URL}/workshop/submit-form`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     if (workshopRegistrationResponse.status === 200) {
+  //       setShowRegistrationModal(true);
+  //       setFormData({
+  //         firstname: user?.name?.split(" ")[0] || "",
+  //         lastname: user?.name?.split(" ")[1] || "",
+  //         email: user?.email || "",
+  //         phone: user?.phoneNumber || 0,
+  //         message: "",
+  //         workshop: categories[0]?.workshops[0]?.workshopName || "",
+  //         ageCategory:
+  //           categories[0]?.workshops[0]?.ageGroups[0]?.ageRange || "",
+  //         doubt: "",
+  //       });
+  //     } else {
+  //       toast.error("Registration Failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Registration error:", error);
+  //     toast.error("Registration Failed");
+  //   }
+  // };
 
   const handleDoubtSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -381,10 +390,10 @@ const Workshopv2 = () => {
     },
   };
 
-  const [registerRef, registerInView] = useInView({
-    threshold: 0.2,
-    triggerOnce: true,
-  });
+  // const [registerRef, registerInView] = useInView({
+  //   threshold: 0.2,
+  //   triggerOnce: true,
+  // });
   const [faqRef, faqInView] = useInView({ threshold: 0.2, triggerOnce: true });
 
   if (loading) {
@@ -431,19 +440,20 @@ const Workshopv2 = () => {
     );
   }
 
-  const selectedWorkshop =
-    categories[selectedCategoryIndex]?.workshops[selectedWorkshopIndex];
+  // const selectedWorkshop =
+  //   categories[selectedCategoryIndex]?.workshops[selectedWorkshopIndex];
 
   return (
     <>
       {/* Banner */}
-      <WorkshopBanner />
+      <WorkshopBanner scrollDownWorkshop={scrollDownWorkshop} />
       <div className="">
         <AboutWorkshop categories={categories} />
 
         {/* Workshop Carousel */}
         <div ref={carouselRef} className="mt-10">
           <WorkshopInfoCarousel
+            workshopRef={workshopRef}
             categories={categories}
             currentCategoryIndex={selectedCategoryIndex}
             currentWorkshopIndex={selectedWorkshopIndex}
@@ -453,10 +463,10 @@ const Workshopv2 = () => {
             setDirection={setDirection}
           />
         </div>
-        <WorkshopPlans />
+        {/* <WorkshopPlans /> */}
 
         {/* Registration */}
-        <motion.div
+        {/* <motion.div
           ref={registerRef}
           initial="hidden"
           animate={registerInView ? "visible" : "hidden"}
@@ -643,13 +653,13 @@ const Workshopv2 = () => {
               </form>
             </motion.div>
           </motion.div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Challenges */}
         {/* <WorkShopChallenges /> */}
 
         {/* Activities */}
-        <WorkshopActivities />
+        {/* <WorkshopActivities /> */}
 
         {/* FAQ */}
         <motion.div

@@ -1,41 +1,17 @@
-import axiosInstance from "@/api/axios";
-import { companyImg, FOOTER_PAGELINKS, SOCIAL_LINKS } from "@/constant";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { FOOTER_PAGELINKS, SOCIAL_LINKS } from "@/constant";
 import { MdEmail, MdLocationOn, MdPlayCircleFilled } from "react-icons/md";
 import { PiPhoneCallFill } from "react-icons/pi";
 import { SiFacebook, SiInstagram, SiWhatsapp, SiYoutube } from "react-icons/si";
 
-import { ModalMessage } from "@/utils/enum";
-import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import * as Yup from "yup";
-import NewsletterModal from "../modals/NewsletterModal";
-import { AxiosError } from "axios";
 import { TiSocialLinkedin } from "react-icons/ti";
-
-interface ApiResponse {
-  success: boolean;
-  data?: unknown;
-  message?: string;
-}
-
-interface FormValues {
-  email: string;
-}
 
 interface LinkItem {
   id: string;
   label: string;
   url: string;
 }
-
-const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-});
 
 // ---------------------------------------------------------------
 // 👉 PASTE YOUR VIDEO LINK HERE
@@ -122,32 +98,6 @@ const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const [showNewletterModal, setShowNewsletterModal] = useState(false);
-
-  const handleSubmit = async (
-    values: FormValues,
-    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
-  ) => {
-    try {
-      const response = await axiosInstance.post<ApiResponse>(
-        "email/subscribeToNewsletter",
-        { email: values.email },
-      );
-
-      const res: ApiResponse = response.data;
-      if (res.success) {
-        setShowNewsletterModal(true);
-      } else {
-        throw new Error("Something went wrong");
-      }
-    } catch (err: unknown) {
-      const error = err as AxiosError<{ error: string }>;
-      toast(` ${error.response?.data.error}`);
-    } finally {
-      resetForm();
-      setSubmitting(false);
-    }
-  };
 
   const handleLinkClick = (linkItem: LinkItem) => {
     const { label, url } = linkItem;
@@ -234,17 +184,7 @@ const Footer = () => {
     ));
 
   return (
-    // small bottom padding on mobile only, so the last link clears the illustration
-    <footer className="relative bg-[#FF942E] pb-24 md:pb-0">
-      {/* Illustration restored: full width, natural proportions, behind content */}
-      <div className="absolute bottom-0 left-0 z-0 w-full pointer-events-none">
-        <img
-          src="/assets/images/footer-illustration.png"
-          alt="Mentoons illustration"
-          className="w-full max-h-96"
-        />
-      </div>
-
+    <footer className="relative bg-[#FF942E] pb-8">
       <div className="relative z-10 grid gap-6 px-6 pt-8 md:px-16 lg:grid-cols-[1fr_1.5fr_auto_auto] lg:items-start">
         {/* Logo + About list directly underneath */}
         <div className="flex flex-col items-center gap-2 lg:items-start">
@@ -308,53 +248,8 @@ const Footer = () => {
           </span>
         </div>
 
-        {/* Smaller subscription + Contact underneath */}
+        {/* Contact */}
         <div className="flex flex-col w-full gap-4 mx-auto lg:w-64">
-          <Formik
-            initialValues={{ email: "" }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, isValid, dirty }) => (
-              <Form
-                className={`flex flex-col w-full gap-3 p-3 bg-white border-4 border-black rounded-2xl ${comicShadow}`}
-              >
-                <div>
-                  <h3 className="text-xl font-comic-chip tracking-wide text-orange-600">
-                    Wellness Subscription
-                  </h3>
-                  <p className="text-xs leading-snug text-gray-700">
-                    Get free comics, self help books, relationships, menstrual
-                    cycle, friendship
-                  </p>
-                </div>
-
-                <div>
-                  <Field
-                    name="email"
-                    type="email"
-                    className="w-full px-3 py-2 text-sm bg-white border-2 border-black rounded-full outline-none focus:ring-2 focus:ring-orange-300"
-                    placeholder="Enter your email"
-                  />
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="ml-3 text-xs font-medium text-red-600"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !isValid || !dirty}
-                  className={`w-full py-2 font-comic-chip text-base tracking-wider text-white bg-orange-600 border-2 border-black rounded-full ${comicShadow} transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isSubmitting ? "Subscribing..." : "Get Notified"}
-                </button>
-              </Form>
-            )}
-          </Formik>
-
-          {/* Contact directly under subscription */}
           {contactSection && (
             <div className="flex flex-col items-center gap-1 lg:items-start">
               <Link to={contactSection.url} className={comicHeading}>
@@ -373,28 +268,6 @@ const Footer = () => {
       </div>
 
       {isMobile ? renderSocialIcons("sm") : renderSocialIcons("lg")}
-
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-8 mt-16">
-        {companyImg.map((item) => (
-          <div key={item.id} className="h-16">
-            <Link to={item.url} className="cursor-pointer">
-              <img
-                src={item.image}
-                alt=""
-                className="object-cover transition-all duration-300 h-14 hover:scale-105"
-              />
-            </Link>
-          </div>
-        ))}
-      </div>
-
-      {showNewletterModal && (
-        <NewsletterModal
-          isOpen={showNewletterModal}
-          onClose={() => setShowNewsletterModal(false)}
-          message={ModalMessage.NEWSLETTER_MESSAGE}
-        />
-      )}
     </footer>
   );
 };

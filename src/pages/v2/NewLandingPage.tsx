@@ -1,8 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, type CSSProperties } from "react";
-import LandingBanner from "@/components/adda/landing/landingHero/banner";
+// import LandingBanner from "@/components/adda/landing/landingHero/banner";
 import { FaChevronDown } from "react-icons/fa6";
-import { FaGamepad, FaSmile, FaBook } from "react-icons/fa";
+import {
+  FaGamepad,
+  FaSmile,
+  FaBook,
+  FaHandshake,
+  FaMicrophone,
+  FaChalkboardTeacher,
+  FaPuzzlePiece,
+  FaPalette,
+  FaPenFancy,
+  FaClone,
+  FaClipboardCheck,
+} from "react-icons/fa";
 import {
   LandingAchievements,
   LandingColors,
@@ -16,8 +28,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import { User } from "@/types";
 import EnquiryModal from "@/components/modals/EnquiryModal";
-import { ModalMessage } from "@/utils/enum";
-import ProductVideoShowCase from "@/components/Home/newVersion/productVideoShowcase";
+import { ModalMessage, ProductType } from "@/utils/enum";
+// import ProductVideoShowCase from "@/components/Home/newVersion/productVideoShowcase";
 import { getUserDetails } from "@/api";
 import { useAsyncEffect } from "@/hooks/shared/useAsyncEffect";
 
@@ -57,6 +69,93 @@ const LandingChildrenPoints = [
     icon: <FaBook />,
     color: "bg-purple-100 text-purple-600",
     text: "Workshops and stories that build confidence, friendship skills and independence away from the screen.",
+  },
+];
+
+// Extra accordion item for the Parents card (Meetups)
+const ParentMeetupPoint = {
+  title: "Parent Meetups",
+  icon: <FaHandshake />,
+  color: "bg-green-100 text-green-600",
+  text: "Join meetups with other parents and mentors to share experiences, swap ideas and learn practical ways to guide your child.",
+};
+
+const LandingParentPointsWithMeetups = [
+  ...LandingParentPoints,
+  ParentMeetupPoint,
+];
+
+// Product page deep links. "#product" makes the page scroll down to the products.
+const COLORING_BOOKS_URL = `/products?productType=${encodeURIComponent(
+  ProductType.MENTOONS_COLORING_BOOKS,
+)}#product`;
+const JOURNALS_URL = "/products?filter=pocket-series#product";
+const CARDS_URL = "/products?filter=cards#product";
+
+const productItems = [
+  {
+    title: "Comics",
+    icon: <FaBook />,
+    color: "#f97316",
+    text: "Story-driven comics that teach emotions, values and healthy gadget habits.",
+    url: "/mentoons-comics",
+    cta: "Read Comics",
+  },
+  {
+    title: "Podcasts",
+    icon: <FaMicrophone />,
+    color: "#a855f7",
+    text: "Listen-along episodes for kids and parents on real-life situations.",
+    url: "/mentoons-podcast",
+    cta: "Listen Now",
+  },
+  {
+    title: "Workshops",
+    icon: <FaChalkboardTeacher />,
+    color: "#22c55e",
+    text: "Guided sessions led by psychologists and mentors to build confidence.",
+    url: "/mentoons-workshops",
+    cta: "Join Workshop",
+  },
+  {
+    title: "Games",
+    icon: <FaPuzzlePiece />,
+    color: "#3b82f6",
+    text: "Play and learn with games that build friendship and thinking skills.",
+    url: "/adda/game-lobby",
+    cta: "Play Games",
+  },
+  {
+    title: "Coloring Books",
+    icon: <FaPalette />,
+    color: "#ec4899",
+    text: "Creative coloring pages that help kids relax, focus and express themselves.",
+    url: COLORING_BOOKS_URL,
+    cta: "Start Coloring",
+  },
+  {
+    title: "Journals",
+    icon: <FaPenFancy />,
+    color: "#14b8a6",
+    text: "Guided journals that encourage kids to reflect, write and understand their feelings.",
+    url: JOURNALS_URL,
+    cta: "Shop Journals",
+  },
+  {
+    title: "Cards",
+    icon: <FaClone />,
+    color: "#ef4444",
+    text: "Fun activity and conversation cards for playful learning with family and friends.",
+    url: CARDS_URL,
+    cta: "Shop Cards",
+  },
+  {
+    title: "Assessments",
+    icon: <FaClipboardCheck />,
+    color: "#6366f1",
+    text: "Simple, psychologist-designed assessments that help parents understand their child's strengths and needs.",
+    url: "/assessment-page",
+    cta: "Take Assessment",
   },
 ];
 
@@ -360,12 +459,12 @@ const NewLandingPage = () => {
           box-shadow: 2px 2px 0 #000;
           border-radius: 12px;
         }
-        .cm-frame {
-          border: 4px solid #000;
-          box-shadow: 8px 8px 0 #000;
-          border-radius: 12px;
-          background: #fff;
-          transform: rotate(2deg);
+        .cm-corner {
+          background: #fde047;
+          border-left: 4px solid #000;
+          border-bottom: 4px solid #000;
+          border-bottom-left-radius: 9999px;
+          box-shadow: -4px 4px 0 #000;
         }
         .cm-btn {
           background: var(--btn, #f97316);
@@ -441,211 +540,316 @@ const NewLandingPage = () => {
         }
         .cm-row { border-bottom: 3px solid #000; }
         .cm-row:last-child { border-bottom: 0; }
+
+        /* ===== Workshops slider ===== */
+        .ws-no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ws-no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .ws-pill {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 10px;
+          transform: rotate(-1deg);
+        }
+        .ws-card {
+          background: #fffdf5;
+          border: 3px solid #000;
+          border-radius: 6px;
+          box-shadow: 5px 5px 0 #000;
+          transform: rotate(var(--tilt, 0deg));
+          transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+        }
+        .ws-group:hover .ws-card,
+        .ws-group:focus-within .ws-card {
+          transform: rotate(0deg) translate(-3px, -3px) scale(1.04);
+          box-shadow: 9px 9px 0 #000;
+        }
+        .ws-title {
+          background: var(--accent);
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          color: #fff;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transform: skewX(-8deg);
+        }
+        .ws-halftone {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: radial-gradient(rgba(0,0,0,0.28) 1.2px, transparent 1.6px);
+          background-size: 7px 7px;
+          -webkit-mask-image: linear-gradient(135deg, transparent 45%, #000 100%);
+          mask-image: linear-gradient(135deg, transparent 45%, #000 100%);
+          mix-blend-mode: multiply;
+        }
+        .ws-bubble {
+          position: relative;
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 14px;
+        }
+        .ws-bubble::before,
+        .ws-bubble::after {
+          content: "";
+          position: absolute;
+          border-style: solid;
+          border-color: transparent;
+        }
+        .ws-bubble::before {
+          top: -17px;
+          left: 22px;
+          border-width: 0 11px 17px 11px;
+          border-bottom-color: #000;
+        }
+        .ws-bubble::after {
+          top: -11px;
+          left: 25px;
+          border-width: 0 8px 13px 8px;
+          border-bottom-color: #fde047;
+        }
+        .ws-btn {
+          background: #ef4444;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          text-shadow: 1px 1px 0 #000;
+          transform: rotate(-3deg);
+          transition: transform 0.1s ease, box-shadow 0.1s ease;
+          cursor: pointer;
+        }
+        .ws-btn:hover { background: #dc2626; transform: rotate(-3deg) scale(1.08); }
+        .ws-btn:active { transform: rotate(-3deg) translate(3px, 3px); box-shadow: 0 0 0 #000; }
+        .ws-card-link:focus-visible, .ws-dot:focus-visible {
+          outline: 3px solid #000;
+          outline-offset: 3px;
+        }
       `}</style>
 
-      <LandingBanner />
+      {/* <LandingBanner /> */}
       <div className="cm-page min-h-screen px-4 md:px-12 lg:px-28 pt-10 pb-12 space-y-14 md:space-y-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-10 flex flex-col-reverse lg:flex-col">
-            <div className="space-y-6 max-w-2xl">
-              <h2 className="cm-title cm-reveal text-5xl lg:text-7xl">
-                <span style={{ color: LandingColors[colorIndex] }}>
-                  Mentoring
-                </span>{" "}
-                Through{" "}
-                <span style={{ color: LandingColors[colorIndex] }}>
-                  Cartoons
-                </span>
-              </h2>
+        {/* ================= HERO (relative parent for the badge) ================= */}
+        <div className="relative z-20 space-y-10">
+          <div className="relative grid lg:grid-cols-2 gap-16 items-center">
+            {/* Psychologist badge: absolute inside the hero.
+              Negative offsets match the page padding, so it stays flush in the page's top-right corner. */}
+            <div className="cm-corner absolute z-20 -top-10 -right-4 md:-right-12 lg:-right-28 w-28 h-28 sm:w-40 sm:h-40 lg:w-52 lg:h-52">
+              <img
+                src="/assets/home/psychologist-developed.png"
+                alt="Carefully crafted by psychologists"
+                className="absolute w-[50%] left-[33%] top-[17%] drop-shadow-[2px_2px_0_#000]"
+              />
+            </div>
 
-              <p
-                className="cm-narration cm-text cm-reveal text-xl md:text-2xl"
-                style={{ animationDelay: "0.1s", transform: "rotate(1deg)" }}
-              >
-                Discover how our services help families create a healthy balance
-                between gadgets, social media and real-life relationships.
-              </p>
+            <div className="space-y-10 flex flex-col-reverse lg:flex-col">
+              <div className="space-y-6 max-w-2xl">
+                <h2 className="cm-title cm-reveal text-5xl lg:text-7xl">
+                  <span style={{ color: LandingColors[colorIndex] }}>
+                    Mentoring
+                  </span>{" "}
+                  Through{" "}
+                  <span style={{ color: LandingColors[colorIndex] }}>
+                    Cartoons
+                  </span>
+                </h2>
 
-              <div className="w-full flex justify-between items-center gap-3">
-                <img
-                  src="/assets/home/psychologist-developed.png"
-                  alt=""
-                  className="h-40 md:h-60 lg:h-40 hidden sm:block drop-shadow-[4px_4px_0_#000]"
-                />
+                <p
+                  className="cm-narration cm-text cm-reveal text-xl md:text-2xl"
+                  style={{ animationDelay: "0.1s", transform: "rotate(1deg)" }}
+                >
+                  Discover how our services help families create a healthy
+                  balance between gadgets, social media and real-life
+                  relationships.
+                </p>
 
-                <div className="flex flex-wrap justify-center gap-3">
-                  {quickLinks.map((item, ind) => (
-                    <button
-                      key={ind}
-                      onClick={() => navigate(item.url)}
-                      className="cm-chip cm-chip-font text-xs md:text-sm cm-reveal"
-                      style={
-                        {
-                          ["--c" as string]:
-                            chipColors[ind % chipColors.length],
-                          ["--rot" as string]: `${ind % 2 === 0 ? -3 : 3}deg`,
-                          animationDelay: `${0.15 + ind * 0.08}s`,
-                        } as CSSProperties
-                      }
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+                <div className="w-full flex justify-start items-center gap-3">
+                  <div className="flex flex-wrap justify-start gap-3">
+                    {quickLinks.map((item, ind) => (
+                      <button
+                        key={ind}
+                        onClick={() => navigate(item.url)}
+                        className="cm-chip cm-chip-font text-xs md:text-sm cm-reveal"
+                        style={
+                          {
+                            ["--c" as string]:
+                              chipColors[ind % chipColors.length],
+                            ["--rot" as string]: `${ind % 2 === 0 ? -3 : 3}deg`,
+                            animationDelay: `${0.15 + ind * 0.08}s`,
+                          } as CSSProperties
+                        }
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              </div>
+            </div>
 
+            {/* Kids image (replaces the team image) */}
+            <div className="hidden lg:flex justify-center lg:justify-end lg:pt-10">
+              <div className="relative cm-reveal">
+                <ComicBurst
+                  word="FUN!"
+                  fill="#fde047"
+                  size={96}
+                  rot={-10}
+                  className="-top-8 -left-6"
+                />
+                <ComicStar
+                  size={26}
+                  fill="#fde047"
+                  className="-bottom-4 -right-4"
+                />
                 <img
                   src="/assets/home/landing-mobile.png"
-                  alt=""
-                  className="h-40 md:h-60 lg:h-40 hidden sm:block drop-shadow-[4px_4px_0_#000]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex justify-center lg:justify-end">
-            <div className="relative cm-reveal">
-              <ComicBurst
-                word="FUN!"
-                fill="#fde047"
-                size={96}
-                rot={10}
-                className="-top-8 -right-6"
-              />
-              <ComicStar
-                size={26}
-                fill="#fde047"
-                className="-bottom-4 -left-4"
-              />
-              <div className="cm-frame p-2">
-                <img
-                  src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1783594514947-27275b14-8f64-4d0f-810a-b8442e6db018.png"
-                  alt="Mentoon Team"
-                  className="relative w-full max-w-lg rounded-md"
+                  alt="Mentoons kids"
+                  className="relative w-full max-w-lg drop-shadow-[6px_6px_0_#000]"
                 />
               </div>
             </div>
           </div>
         </div>
-        <ProductVideoShowCase />
 
-        <div className="cm-panel relative py-14 lg:py-20 overflow-visible">
-          <ComicBurst
-            word="OOPS!"
-            fill="#f9a8d4"
-            size={92}
-            rot={-10}
-            className="-top-9 -right-4"
-          />
-          <ComicStar
-            size={24}
-            fill="#ffffff"
-            className="top-6 left-6"
-            delay={0.3}
-          />
-          <ComicStar
-            size={20}
-            fill="#ef4444"
-            className="bottom-6 right-10"
-            delay={0.7}
-          />
+        {/* ================= WHY MENTOONS + CHALLENGES ================= */}
+        <div>
+          <div className="cm-panel relative py-14 lg:py-20 overflow-visible">
+            <ComicBurst
+              word="OOPS!"
+              fill="#f9a8d4"
+              size={92}
+              rot={-10}
+              className="-top-9 -right-4"
+            />
+            <ComicStar
+              size={24}
+              fill="#ffffff"
+              className="top-6 left-6"
+              delay={0.3}
+            />
+            <ComicStar
+              size={20}
+              fill="#ef4444"
+              className="bottom-6 right-10"
+              delay={0.7}
+            />
 
-          <div className="grid lg:grid-cols-5 gap-10 items-center max-w-6xl mx-auto px-6">
-            <div className="lg:col-span-2 space-y-5">
-              <span className="cm-tag cm-chip-font text-sm uppercase cm-reveal">
-                {LandingIssues.length} common challenges
-              </span>
+            <div className="grid lg:grid-cols-5 gap-10 items-center max-w-6xl mx-auto px-6">
+              {/* LEFT: Why Mentoons? + common challenges */}
+              <div className="lg:col-span-2 space-y-5">
+                <h2 className="cm-title cm-reveal text-5xl md:text-6xl">
+                  Why{" "}
+                  <span style={{ color: LandingColors[colorIndex] }}>
+                    Mentoons
+                  </span>
+                  <span className="text-yellow-300">?</span>
+                </h2>
 
-              <div className="cm-card w-full overflow-hidden cm-reveal">
-                {LandingIssues.map((issue, ind) => {
-                  const isOpen = openIssue === ind;
+                <span className="cm-tag cm-chip-font text-sm uppercase cm-reveal">
+                  {LandingIssues.length} common challenges
+                </span>
 
-                  return (
-                    <div
-                      key={ind}
-                      className={`cm-row ${
-                        isOpen ? "bg-yellow-100" : "bg-white"
-                      } transition-colors duration-200`}
-                    >
+                <div className="cm-card w-full overflow-hidden cm-reveal">
+                  {LandingIssues.map((issue, ind) => {
+                    const isOpen = openIssue === ind;
+
+                    return (
                       <div
-                        onClick={() => setOpenIssue(isOpen ? null : ind)}
-                        className="cursor-pointer px-4 py-3 flex items-center gap-3 hover:bg-yellow-50 transition-colors duration-200"
+                        key={ind}
+                        className={`cm-row ${
+                          isOpen ? "bg-yellow-100" : "bg-white"
+                        } transition-colors duration-200`}
                       >
                         <div
-                          className="cm-icon w-10 h-10 flex-shrink-0 flex items-center justify-center text-lg"
-                          style={{
-                            color: issue.iconColor,
-                            backgroundColor: `${issue.iconColor}30`,
-                          }}
+                          onClick={() => setOpenIssue(isOpen ? null : ind)}
+                          className="cursor-pointer px-4 py-3 flex items-center gap-3 hover:bg-yellow-50 transition-colors duration-200"
                         >
-                          {issue.icon}
+                          <div
+                            className="cm-icon w-10 h-10 flex-shrink-0 flex items-center justify-center text-lg"
+                            style={{
+                              color: issue.iconColor,
+                              backgroundColor: `${issue.iconColor}30`,
+                            }}
+                          >
+                            {issue.icon}
+                          </div>
+
+                          <h3 className="cm-font text-lg text-gray-900 flex-1">
+                            {issue.title}
+                          </h3>
+
+                          <FaChevronDown
+                            className={`flex-shrink-0 text-sm transition-transform duration-300 text-black ${
+                              isOpen ? "rotate-180" : ""
+                            }`}
+                          />
                         </div>
 
-                        <h3 className="cm-font text-lg text-gray-900 flex-1">
-                          {issue.title}
-                        </h3>
-
-                        <FaChevronDown
-                          className={`flex-shrink-0 text-sm transition-transform duration-300 text-black ${
-                            isOpen ? "rotate-180" : ""
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            isOpen
+                              ? "max-h-40 opacity-100"
+                              : "max-h-0 opacity-0"
                           }`}
-                        />
+                        >
+                          <p className="cm-text text-base px-4 pb-3 pl-16">
+                            {issue.text}
+                          </p>
+                        </div>
                       </div>
-
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${
-                          isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                        }`}
-                      >
-                        <p className="cm-text text-base px-4 pb-3 pl-16">
-                          {issue.text}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            <div className="lg:col-span-3 space-y-6">
-              <h2 className="cm-title cm-reveal text-4xl md:text-5xl lg:text-6xl">
-                If you're facing these challenges,
-                <span className="cm-bubble cm-font text-3xl md:text-4xl lg:text-5xl inline-block mt-6 px-6 py-2">
-                  <span
-                    style={{
-                      WebkitTextStroke: "0",
-                      textShadow: "none",
-                      color: "#000",
-                    }}
-                  >
-                    don't worry!
+              {/* RIGHT: "If you're facing these challenges" */}
+              <div className="lg:col-span-3 space-y-6">
+                <h2 className="cm-title cm-reveal text-4xl md:text-5xl lg:text-6xl">
+                  If you're facing these challenges,
+                  <span className="cm-bubble cm-font text-3xl md:text-4xl lg:text-5xl inline-block mt-6 px-6 py-2">
+                    <span
+                      style={{
+                        WebkitTextStroke: "0",
+                        textShadow: "none",
+                        color: "#000",
+                      }}
+                    >
+                      don't worry!
+                    </span>
                   </span>
-                </span>
-              </h2>
+                </h2>
 
-              <p className="cm-narration cm-text cm-reveal text-xl md:text-2xl">
-                We understand what families go through in today's digital world.
-                Our programs help children build emotional balance, creativity,
-                and meaningful real-life relationships.
-              </p>
+                <p className="cm-narration cm-text cm-reveal text-xl md:text-2xl">
+                  We understand what families go through in today's digital
+                  world. Our programs help children build emotional balance,
+                  creativity, and meaningful real-life relationships.
+                </p>
 
-              <button
-                onClick={() => navigate("/mentoons-workshops")}
-                className="cm-btn cm-font inline-flex items-center gap-2 px-8 py-3 text-2xl uppercase"
-              >
-                Discover How →
-              </button>
+                <button
+                  onClick={() => navigate("/mentoons-workshops")}
+                  className="cm-btn cm-font inline-flex items-center gap-2 px-8 py-3 text-2xl uppercase"
+                >
+                  Discover How →
+                </button>
 
-              <div className="flex justify-center lg:justify-start pt-2">
-                <img
-                  src="/assets/home/help.png"
-                  alt="Help Illustration"
-                  className="cm-bob w-[240px] md:w-[300px] drop-shadow-[5px_5px_0_#000]"
-                />
+                <div className="flex justify-center lg:justify-start pt-2">
+                  <img
+                    src="/assets/home/help.png"
+                    alt="Help Illustration"
+                    className="cm-bob w-[240px] md:w-[300px] drop-shadow-[5px_5px_0_#000]"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* ================= VIDEO SHOWCASE (commented out) ================= */}
+        {/* <ProductVideoShowCase /> */}
+
+        {/* ================= ACHIEVEMENTS ================= */}
         <div className="space-y-12">
           <h2 className="cm-title cm-reveal text-4xl md:text-6xl text-center max-w-5xl mx-auto">
             By choosing{" "}
@@ -705,10 +909,16 @@ const NewLandingPage = () => {
           </div>
         </div>
 
+        {/* ================= PARENTS + CHILDREN ================= */}
         <div className="relative py-5 lg:py-10">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-12">
+            {/* ---- For Parents ---- */}
             <div className="cm-card cm-reveal flex flex-col gap-6 p-6 lg:p-8">
               <div className="flex flex-col items-center text-center gap-4">
+                <span className="cm-tag cm-chip-font text-sm uppercase">
+                  Meetups
+                </span>
+
                 <div
                   className="cm-icon w-16 h-16 flex items-center justify-center bg-orange-200 text-orange-600"
                   style={{ transform: "rotate(-4deg)" }}
@@ -730,7 +940,7 @@ const NewLandingPage = () => {
               </div>
 
               <div className="space-y-4">
-                {LandingParentPoints.map((item, ind) => {
+                {LandingParentPointsWithMeetups.map((item, ind) => {
                   const isOpen = openParentPoint === ind;
 
                   return (
@@ -777,13 +987,14 @@ const NewLandingPage = () => {
               </div>
 
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/meetups")}
                 className="cm-btn cm-font inline-flex items-center gap-2 px-8 py-3 text-2xl uppercase self-center"
               >
                 Start Your Journey →
               </button>
             </div>
 
+            {/* ---- For Children ---- */}
             <div
               className="cm-card cm-reveal flex flex-col gap-6 p-6 lg:p-8"
               style={{ animationDelay: "0.12s" }}
@@ -867,6 +1078,59 @@ const NewLandingPage = () => {
           </div>
         </div>
 
+        {/* ================= PRODUCTS ================= */}
+        <div className="space-y-12">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <h2 className="cm-title cm-reveal text-4xl md:text-6xl max-w-4xl">
+              Our{" "}
+              <span style={{ color: LandingColors[colorIndex] }}>Products</span>
+            </h2>
+          </div>
+
+          {/* flex-wrap + justify-center keeps any incomplete last row centered */}
+          <div className="flex flex-wrap justify-center gap-6 lg:gap-8">
+            {productItems.map((item, ind) => (
+              <div
+                key={ind}
+                onClick={() => navigate(item.url)}
+                className="cm-card cm-tilt cm-reveal cursor-pointer p-5 flex flex-col items-center text-center gap-4 w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.5rem)]"
+                style={
+                  {
+                    ["--tilt" as string]: `${ind % 2 === 0 ? -1.5 : 1.5}deg`,
+                    animationDelay: `${(ind % 4) * 0.1}s`,
+                  } as CSSProperties
+                }
+              >
+                <div
+                  className="cm-icon w-16 h-16 flex items-center justify-center text-3xl"
+                  style={{
+                    color: item.color,
+                    backgroundColor: `${item.color}30`,
+                  }}
+                >
+                  {item.icon}
+                </div>
+
+                <h3 className="cm-font text-3xl text-gray-900">{item.title}</h3>
+
+                <p className="cm-text text-lg flex-1">{item.text}</p>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(item.url);
+                  }}
+                  className="cm-btn cm-font px-6 py-2 text-xl uppercase"
+                  style={{ ["--btn" as string]: item.color } as CSSProperties}
+                >
+                  {item.cta} →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= COMMUNITY + DOUBTS ================= */}
         <div className="grid lg:grid-cols-2 gap-14 items-start">
           <div className="cm-card cm-reveal space-y-8 p-5 lg:p-8">
             <h2

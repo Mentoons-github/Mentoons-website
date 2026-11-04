@@ -8,6 +8,7 @@ import BadgeManagement from "@/pages/admin/badge/badgeManagement";
 import ApplicantsTable from "@/pages/admin/candidate/candidate";
 import AddCommunity from "@/pages/admin/community/addCommunity";
 import AllCommunities from "@/pages/admin/community/communityManagement";
+import AdminDailyReports from "@/pages/admin/dailyReport";
 // import AllottedCalls from "@/pages/admin/allottedCalls";
 import DashboardAnalytics from "@/pages/admin/dashboard";
 import AdminAttendanceView from "@/pages/admin/employee/attendance";
@@ -118,6 +119,7 @@ const AdminRouter = () => {
             path="workshop-sessions/:workshopId"
             element={<SinglePsychologistWorkshop />}
           />
+          <Route path="reports-by-date" element={<AdminDailyReports />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="revenue" element={<RevenuePage />} />
         </Route>
