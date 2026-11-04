@@ -1,6 +1,8 @@
 import ComicViewer from "@/components/common/ComicViewer";
 import LoginModal from "@/components/common/modal/loginModal";
 import AddToCartModal from "@/components/modals/AddToCartModal";
+import NewsletterModal from "@/components/modals/NewsletterModal";
+import axiosInstance from "@/api/axios";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
 import { addItemCart } from "@/redux/cartSlice";
 import { fetchProducts } from "@/redux/productSlice";
@@ -11,20 +13,21 @@ import {
   ProductBase,
 } from "@/types/productTypes";
 import { formatDateString } from "@/utils/formateDate";
+import { ModalMessage } from "@/utils/enum";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaBolt } from "react-icons/fa6";
-import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import * as Yup from "yup";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import axiosInstance from "@/api/axios";
 import ComicHero from "@/components/comics/hero";
-import ScrollTextSection from "@/components/comics/scrollText";
+// import ScrollTextSection from "@/components/comics/scrollText";
 
 /*
   Comic theme tokens (shared with Cart / OrderSummary / PaymentStatus)
@@ -34,17 +37,16 @@ import ScrollTextSection from "@/components/comics/scrollText";
   red    #FF4D3D   primary actions
   blue   #2D6BFF   accents
 
-  The font is applied with .comic-body only on the sections of this page, so
-  ComicHero, ScrollTextSection and ComicViewer keep their own typography.
+  Fonts now come from the global CSS (index.css):
+    .font-comic       -> Bangers      (titles, buttons)
+    .font-comic-chip  -> Luckiest Guy (chips / badges)
+  Body text uses the app's default font.
+
+  Only the panel / button / carousel helpers stay here.
   Mobile (< lg): thinner borders, smaller shadows, no tilt, swipe-snap carousel
   (arrow buttons hidden), stacked card buttons.
 */
 const comicCss = `
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700;900&display=swap');
-
-.comic-body { font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif; color: #000; }
-.comic-title { font-family: 'Bangers', 'Impact', sans-serif; letter-spacing: 0.04em; }
-
 .comic-panel { border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
 .comic-btn {
   border: 3px solid #000;
@@ -80,6 +82,22 @@ interface DBUser {
   };
 }
 
+interface ApiResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string;
+}
+
+interface NewsletterFormValues {
+  email: string;
+}
+
+const newsletterSchema = Yup.object({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+});
+
 const ComicsPageV2 = () => {
   const { items: products } = useSelector((state: RootState) => state.products);
 
@@ -100,13 +118,8 @@ const ComicsPageV2 = () => {
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [hasFetchedUser, setHasFetchedUser] = useState(false);
-  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
-    useState(false);
-  const [limitModalMessage, setLimitModalMessage] = useState("");
-  const [limitModalTitle, setLimitModalTitle] = useState("");
   const [currentProductId, setCurrentProductId] = useState<string>("");
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -139,83 +152,23 @@ const ComicsPageV2 = () => {
     }
   };
 
-  const checkContentAccess = async (product: ProductBase): Promise<boolean> => {
-    if (!user) {
-      setTimeout(() => setShowLoginModal(true), 100);
-      return false;
-    }
-    if (isLoadingUser) {
-      toast.info("Loading user data, please wait...");
-      return false;
-    }
-    if (!dbUser || !userId) {
-      if (!hasFetchedUser) {
-        toast.info("Loading user data...");
-        fetchDBUser();
-      } else {
-        toast.error("Unable to verify user. Please refresh the page.");
-      }
-      return false;
-    }
-    try {
-      const token = await getToken();
-      const type =
-        product.type === "comic"
-          ? "comics"
-          : product.type === "audio comic"
-            ? "audioComics"
-            : "podcasts";
-      const response = await axiosInstance.post(
-        `${import.meta.env.VITE_PROD_URL}/subscription/access`,
-        { type, itemId: product._id },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const { access, reason } = response.data;
-      if (access) {
-        return true;
-      }
-      if (reason === "upgrade") {
-        setLimitModalTitle("Upgrade Your Plan");
-        setLimitModalMessage(
-          `You've reached the ${type} limit for your ${membershipType} plan. Upgrade to access more content!`,
-        );
-      } else if (reason === "charge") {
-        setLimitModalTitle("Purchase Content");
-        setLimitModalMessage(
-          `You've reached the ${type} limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
-        );
-      }
-      setCurrentProductId(product._id || "");
-      setShowSubscriptionLimitModal(true);
-      return false;
-    } catch (error) {
-      console.error("Error checking access:", error);
-      toast.error("Failed to verify access. Please try again.");
-      return false;
-    }
-  };
-
-  const openComicModal = async (
+  // Opens the viewer only for logged-in users (no subscription / limit check)
+  const openComicModal = (
     comicLink: string,
     comic?: ProductBase | null,
     productType?: string,
   ) => {
-    if (!comic) {
-      setComicToView(comicLink);
-      setShowComicModal(true);
-      if (productType) setProductType(productType);
-      document.body.style.overflow = "hidden";
+    if (!user) {
+      setTimeout(() => setShowLoginModal(true), 100);
       return;
     }
-    const canAccess = await checkContentAccess(comic);
-    if (canAccess) {
-      setComicToView(comicLink);
-      setCurrentProductId(comic._id || "");
-      setShowComicModal(true);
-      if (productType || comic.product_type)
-        setProductType(productType || comic.product_type || "");
-      document.body.style.overflow = "hidden";
+    setComicToView(comicLink);
+    setCurrentProductId(comic?._id || "");
+    setShowComicModal(true);
+    if (productType || comic?.product_type) {
+      setProductType(productType || comic?.product_type || "");
     }
+    document.body.style.overflow = "hidden";
   };
 
   const closeComicModal = () => {
@@ -226,11 +179,7 @@ const ComicsPageV2 = () => {
   };
 
   const fetchDBUser = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoadingUser(false);
-      return;
-    }
-    setIsLoadingUser(true);
+    if (!user?.id) return;
     try {
       const token = await getToken();
       const response = await axios.get(
@@ -239,13 +188,10 @@ const ComicsPageV2 = () => {
       );
       if (response.status === 200) {
         setDbUser(response.data.data);
-        setHasFetchedUser(true);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Failed to load user data");
-    } finally {
-      setIsLoadingUser(false);
     }
   }, [user?.id, getToken]);
 
@@ -321,6 +267,32 @@ const ComicsPageV2 = () => {
     }
   };
 
+  // Wellness subscription (moved here from the Footer)
+  const handleNewsletterSubmit = async (
+    values: NewsletterFormValues,
+    { setSubmitting, resetForm }: FormikHelpers<NewsletterFormValues>,
+  ) => {
+    try {
+      const response = await axiosInstance.post<ApiResponse>(
+        "email/subscribeToNewsletter",
+        { email: values.email },
+      );
+
+      const res: ApiResponse = response.data;
+      if (res.success) {
+        setShowNewsletterModal(true);
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ error: string }>;
+      toast(` ${error.response?.data?.error ?? "Something went wrong"}`);
+    } finally {
+      resetForm();
+      setSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
 
@@ -387,9 +359,9 @@ const ComicsPageV2 = () => {
       {/* Trending comics */}
       <div
         ref={trendingRef}
-        className="comic-body animate-slide-up relative mx-auto mb-12 mt-10 w-[95%] md:w-[90%] lg:mb-20"
+        className="animate-slide-up relative mx-auto mb-12 mt-10 w-[95%] text-black md:w-[90%] lg:mb-20"
       >
-        <h2 className="comic-title mb-6 inline-block border-[3px] border-black bg-[#FFD93B] px-4 py-1.5 text-4xl leading-none shadow-[4px_4px_0_#000] sm:text-5xl lg:-rotate-1 lg:border-4 lg:px-6 lg:py-2 lg:text-6xl lg:shadow-[6px_6px_0_#000]">
+        <h2 className="font-comic mb-6 inline-block border-[3px] border-black bg-[#FFD93B] px-4 py-1.5 text-4xl leading-none tracking-wider shadow-[4px_4px_0_#000] sm:text-5xl lg:-rotate-1 lg:border-4 lg:px-6 lg:py-2 lg:text-6xl lg:shadow-[6px_6px_0_#000]">
           Trending Comics For You!
         </h2>
 
@@ -419,7 +391,7 @@ const ComicsPageV2 = () => {
                       className="h-full w-full object-cover"
                     />
                     <div className="absolute bottom-3 left-3 flex gap-2">
-                      <span className="border-[3px] border-black bg-white px-3 py-0.5 text-sm font-black shadow-[2px_2px_0_#000]">
+                      <span className="font-comic-chip border-[3px] border-black bg-white px-3 py-0.5 text-sm tracking-wide shadow-[2px_2px_0_#000]">
                         {formatDateString(
                           (comic.details as ComicProduct["details"])
                             ?.releaseDate || "",
@@ -428,7 +400,7 @@ const ComicsPageV2 = () => {
                     </div>
                   </div>
                   <div className="p-4 sm:p-5">
-                    <h3 className="comic-title mb-2 line-clamp-1 text-3xl leading-none">
+                    <h3 className="font-comic mb-2 line-clamp-1 text-3xl leading-none tracking-wider">
                       {comic?.title}
                     </h3>
                     <p className="mb-4 line-clamp-2 text-sm font-bold text-gray-700">
@@ -493,7 +465,7 @@ const ComicsPageV2 = () => {
                               );
                             }
                           }}
-                          className="comic-btn comic-title flex-1 rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
+                          className="comic-btn font-comic-chip flex-1 rounded-xl bg-[#FF4D3D] px-4 py-2 text-xl tracking-wider text-white [text-shadow:2px_2px_0_#000]"
                         >
                           {comic.type === "comic" ? "Read Now" : "Listen Now"}
                         </button>
@@ -503,7 +475,7 @@ const ComicsPageV2 = () => {
                           <button
                             onClick={(e) => handleAddtoCart(e, comic)}
                             disabled={isLoading}
-                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
+                            className="comic-btn font-comic-chip flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FF4D3D] px-4 py-2 text-xl tracking-wider text-white [text-shadow:2px_2px_0_#000]"
                           >
                             <FaShoppingCart className="inline-block h-4 w-4 self-center" />
                             {isLoading ? "Adding..." : "Add to Cart"}
@@ -511,7 +483,7 @@ const ComicsPageV2 = () => {
                           <button
                             onClick={(e) => handleBuyNow(e, comic)}
                             disabled={isLoading}
-                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FFD93B] px-4 py-2 text-2xl text-black"
+                            className="comic-btn font-comic-chip flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FFD93B] px-4 py-2 text-xl tracking-wider text-black"
                           >
                             <FaBolt className="inline-block h-4 w-4 self-center" />
                             {isLoading ? "Buying..." : "Buy Now"}
@@ -557,12 +529,60 @@ const ComicsPageV2 = () => {
         </button>
       </div>
 
-      <ScrollTextSection />
+      {/* <ScrollTextSection /> */}
+
+      {/* Wellness Subscription (moved from the Footer) */}
+      <section className="animate-fade-in border-y-4 border-black bg-[#FFD93B] px-4 py-10 text-black md:px-12 lg:border-y-8 lg:px-20 lg:py-14">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="text-center lg:text-left">
+            <h2 className="font-comic inline-block border-[3px] border-black bg-white px-4 py-2 text-4xl leading-none tracking-wider shadow-[4px_4px_0_#000] sm:text-5xl lg:-rotate-1 lg:border-4 lg:px-6 lg:py-3 lg:text-6xl lg:shadow-[6px_6px_0_#000]">
+              Wellness Subscription
+            </h2>
+            <p className="mt-5 text-base font-bold text-gray-900 md:text-lg">
+              Get free comics, self help books, relationships, menstrual cycle
+              and friendship guides straight to your inbox.
+            </p>
+          </div>
+
+          <Formik
+            initialValues={{ email: "" }}
+            validationSchema={newsletterSchema}
+            onSubmit={handleNewsletterSubmit}
+          >
+            {({ isSubmitting, isValid, dirty }) => (
+              <Form className="comic-panel flex w-full flex-col gap-4 rounded-2xl bg-white p-5 md:p-6">
+                <div>
+                  <Field
+                    name="email"
+                    type="email"
+                    aria-label="Email address"
+                    placeholder="Enter your email"
+                    className="w-full rounded-full border-[3px] border-black bg-white px-4 py-3 text-base font-bold outline-none focus:ring-4 focus:ring-[#2D6BFF]/40"
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="ml-4 mt-1 text-sm font-bold text-[#FF4D3D]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !isValid || !dirty}
+                  className="comic-btn font-comic-chip w-full rounded-full bg-[#FF4D3D] px-6 py-3 text-xl tracking-wider text-white [text-shadow:2px_2px_0_#000]"
+                >
+                  {isSubmitting ? "Subscribing..." : "Get Notified"}
+                </button>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      </section>
 
       {/* Comic modal */}
       {showComicModal && (
         <div className="animate-fade-in fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75">
-          <div className="comic-body comic-panel animate-scale-in relative h-[90vh] w-[95%] items-center overflow-hidden rounded-lg bg-white">
+          <div className="comic-panel animate-scale-in relative h-[90vh] w-[95%] items-center overflow-hidden rounded-lg bg-white text-black">
             <button
               onClick={closeComicModal}
               aria-label="Close"
@@ -581,17 +601,8 @@ const ComicsPageV2 = () => {
         </div>
       )}
 
-      <SubscriptionLimitModal
-        isOpen={showSubscriptionLimitModal}
-        onClose={() => setShowSubscriptionLimitModal(false)}
-        message={limitModalMessage}
-        title={limitModalTitle}
-        planType={membershipType as "free" | "prime" | "platinum"}
-        productId={currentProductId}
-      />
-
       {/* Why our comics matter */}
-      <div className="comic-body animate-fade-in flex flex-col-reverse border-t-4 border-black bg-white px-4 py-10 md:px-12 lg:flex-row lg:items-center lg:gap-10 lg:border-t-8 lg:px-20 lg:py-14">
+      <div className="animate-fade-in flex flex-col-reverse border-t-4 border-black bg-white px-4 py-10 text-black md:px-12 lg:flex-row lg:items-center lg:gap-10 lg:border-t-8 lg:px-20 lg:py-14">
         <div className="flex-1 space-y-5 pt-8 lg:pt-0">
           {WORKSHOP_MATTERS_POINTS.map((point, index) => (
             <div
@@ -604,7 +615,9 @@ const ComicsPageV2 = () => {
               </figure>
               <div>
                 <p className="text-lg font-bold md:text-xl">
-                  <span className="comic-title text-3xl">{point.lable}:</span>{" "}
+                  <span className="font-comic text-3xl tracking-wider">
+                    {point.lable}:
+                  </span>{" "}
                   {point.description}
                 </p>
               </div>
@@ -612,7 +625,7 @@ const ComicsPageV2 = () => {
           ))}
         </div>
         <div className="relative flex-1">
-          <h2 className="comic-title mx-auto max-w-xl border-[3px] border-black bg-[#FFD93B] px-4 py-6 text-center text-5xl leading-[1.05] shadow-[4px_4px_0_#000] md:text-7xl lg:-rotate-2 lg:border-4 lg:px-8 lg:py-10 lg:text-8xl lg:shadow-[8px_8px_0_#000]">
+          <h2 className="font-comic mx-auto max-w-xl border-[3px] border-black bg-[#FFD93B] px-4 py-6 text-center text-5xl leading-[1.05] tracking-wider shadow-[4px_4px_0_#000] md:text-7xl lg:-rotate-2 lg:border-4 lg:px-8 lg:py-10 lg:text-8xl lg:shadow-[8px_8px_0_#000]">
             Why our Comics matter?
           </h2>
         </div>
@@ -629,6 +642,13 @@ const ComicsPageV2 = () => {
           onClose={() => setShowAddToCartModal(false)}
           isOpen={showAddToCartModal}
           productName={selectedComic?.title || ""}
+        />
+      )}
+      {showNewsletterModal && (
+        <NewsletterModal
+          isOpen={showNewsletterModal}
+          onClose={() => setShowNewsletterModal(false)}
+          message={ModalMessage.NEWSLETTER_MESSAGE}
         />
       )}
     </div>

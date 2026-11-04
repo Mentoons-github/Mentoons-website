@@ -427,6 +427,10 @@ const ProductSectionsV3 = ({
   ]);
 
   const isAllView = selectedCategory.id === ALL_CATEGORY_ID;
+  // A group view (e.g. "Cards") shows several categories as sections
+  const groupIds = selectedCategory.groupIds;
+  const isGroupView = !!groupIds && groupIds.length > 0;
+  const showSections = isAllView || isGroupView;
 
   const sections = useMemo(() => {
     const buckets = new Map<string, ProductBase[]>();
@@ -435,22 +439,24 @@ const ProductSectionsV3 = ({
       if (!category) return;
       buckets.set(category.id, [...(buckets.get(category.id) ?? []), product]);
     });
-    return CATEGORY_FILTERS.filter((c) => c.id !== ALL_CATEGORY_ID)
+    return CATEGORY_FILTERS.filter(
+      (c) => c.id !== ALL_CATEGORY_ID && (!groupIds || groupIds.includes(c.id)),
+    )
       .map((category) => ({ category, items: buckets.get(category.id) ?? [] }))
       .filter((section) => section.items.length > 0);
-  }, [visibleProducts]);
+  }, [visibleProducts, groupIds]);
 
   const categoryProducts = useMemo(
     () =>
-      isAllView
+      showSections
         ? []
         : visibleProducts.filter(
             (product) => classifyProduct(product)?.id === selectedCategory.id,
           ),
-    [visibleProducts, isAllView, selectedCategory.id],
+    [visibleProducts, showSections, selectedCategory.id],
   );
 
-  const totalShown = isAllView
+  const totalShown = showSections
     ? sections.reduce((sum, section) => sum + section.items.length, 0)
     : categoryProducts.length;
 
@@ -558,7 +564,7 @@ const ProductSectionsV3 = ({
         </div>
       )}
 
-      {isAllView && sections.length > 0 && (
+      {showSections && sections.length > 0 && (
         <div className="flex flex-col gap-12">
           {sections.map(({ category, items }) => {
             const Icon = category.icon;
@@ -589,7 +595,7 @@ const ProductSectionsV3 = ({
         </div>
       )}
 
-      {!isAllView && categoryProducts.length > 0 && (
+      {!showSections && categoryProducts.length > 0 && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categoryProducts.map(renderCard)}
         </div>

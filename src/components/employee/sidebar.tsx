@@ -68,6 +68,11 @@ const navItems: NavItem[] = [
     icon: <Wallet2 className="w-5 h-5" />,
     path: "/employee/incentive",
   },
+  {
+    name: "Daily Report",
+    icon: <FileText className="w-5 h-5" />,
+    path: "/employee/daily-report",
+  },
 ];
 
 const EmployeeSidebar = ({ showSession }: { showSession: boolean }) => {

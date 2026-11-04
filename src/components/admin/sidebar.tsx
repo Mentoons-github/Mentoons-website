@@ -240,7 +240,6 @@ const AdminSidebar = ({
           toggleSection={() => toggleSection("Newsletter")}
           onItemClick={handleLinkClick}
         />
-
         <SidebarSection
           icon={<FaUsers size={collapsed ? 20 : 16} />}
           title="Employees"
@@ -248,6 +247,7 @@ const AdminSidebar = ({
             { href: "/admin/employee-table", label: "Employees Details" },
             { href: "/admin/employee/add", label: "Add Employees" },
             { href: "/admin/task-submissions", label: "Task Submissions" },
+            { href: "/admin/reports-by-date", label: "Daily Reports" },
             {
               href: "/admin/employee-attendance",
               label: "Employee Attendance",
@@ -259,7 +259,6 @@ const AdminSidebar = ({
           toggleSection={() => toggleSection("Employees")}
           onItemClick={handleLinkClick}
         />
-
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}
           title="Meetup"

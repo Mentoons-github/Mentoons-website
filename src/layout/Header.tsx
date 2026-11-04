@@ -23,6 +23,8 @@ const MENU_BASE_PATHS: Record<string, string> = {
   joinus: "/joinus",
 };
 
+const SPLASH_TAGLINE = "Blogs, Comics, Workshops, Music";
+
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +44,8 @@ const Header = () => {
   const headerLogoRef = useRef<HTMLDivElement>(null);
   const splashRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const welcomeTextRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
 
   const [dropdown, setDropDown] = useState<DropDownInterface>({
     games: false,
@@ -53,6 +57,17 @@ const Header = () => {
     joinus: false,
   });
 
+  const closeAllDropdowns = () =>
+    setDropDown({
+      games: false,
+      comics: false,
+      products: false,
+      services: false,
+      subscription: false,
+      workshops: false,
+      joinus: false,
+    });
+
   const [hasAnimated, setHasAnimated] = useState(() => {
     return sessionStorage.getItem("splashAnimationShown") === "true";
   });
@@ -63,8 +78,18 @@ const Header = () => {
       const headerLogo = headerLogoRef.current;
       const splash = splashRef.current;
       const text = textRef.current;
+      const welcomeText = welcomeTextRef.current;
+      const tagline = taglineRef.current;
 
-      if (!splashLogo || !headerLogo || !splash || !text) return;
+      if (
+        !splashLogo ||
+        !headerLogo ||
+        !splash ||
+        !text ||
+        !welcomeText ||
+        !tagline
+      )
+        return;
 
       if (hasAnimated) {
         gsap.set(splash, { display: "none", pointerEvents: "none" });
@@ -104,9 +129,12 @@ const Header = () => {
         opacity: 0,
       });
 
+      gsap.set(tagline, { opacity: 0, y: 20 });
+
       gsap.set(headerLogo, { opacity: 0 });
 
-      const chars = text.querySelectorAll("span > span");
+      // Only the letters of "Welcome to Mentoons" (tagline is a plain <p>, so not matched)
+      const chars = welcomeText.querySelectorAll("span > span");
 
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
@@ -136,6 +164,16 @@ const Header = () => {
           "-=0.6",
         )
         .to(
+          tagline,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: "power2.out",
+          },
+          "-=0.3",
+        )
+        .to(
           splashLogo,
           {
             left: finalX,
@@ -146,7 +184,7 @@ const Header = () => {
             duration: 1.4,
             ease: "power2.inOut",
           },
-          "+=0.3",
+          "+=1",
         )
         .to(
           text,
@@ -185,7 +223,8 @@ const Header = () => {
         )
         .set(splash, { display: "none", pointerEvents: "none" })
         .set(splashLogo, { clearProps: "all" })
-        .set(text, { clearProps: "all" });
+        .set(text, { clearProps: "all" })
+        .set(tagline, { clearProps: "all" });
     },
     { scope: containerRef, dependencies: [hasAnimated] },
   );
@@ -210,6 +249,7 @@ const Header = () => {
 
   const handleMenuClick = (menuKey: string) => {
     const base = MENU_BASE_PATHS[menuKey];
+    closeAllDropdowns();
     if (base) navigate(base);
   };
 
@@ -288,7 +328,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close the search overlay with Escape
   useEffect(() => {
     if (!showSearch) return;
     const onKey = (e: KeyboardEvent) => {
@@ -301,6 +340,10 @@ const Header = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [showSearch]);
 
+  useEffect(() => {
+    closeAllDropdowns();
+  }, [location.pathname, location.search]);
+
   const handleHover = (menu: string) =>
     setDropDown((prev) => ({ ...prev, [menu]: true }));
   const handleMouseLeave = (menu: string) =>
@@ -309,7 +352,6 @@ const Header = () => {
   const linkClass = (active: boolean) =>
     `hdr-link hdr-font ${active ? "hdr-link-active" : ""}`;
 
-  // Icons are hidden below 2xl so the full menu fits on laptop screens
   const renderIcon = (Icon: any) =>
     Icon && typeof Icon === "function" ? (
       <Icon className="hidden w-5 h-5 2xl:block" />
@@ -455,27 +497,36 @@ const Header = () => {
           />
         </div>
 
-        <div
-          ref={textRef}
-          className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center px-6 mt-8"
-        >
-          {"Welcome to Mentoons".split(" ").map((word, wordIndex) => (
-            <span
-              key={wordIndex}
-              className="inline-block whitespace-nowrap"
-              style={{ marginRight: "0.3em" }}
-            >
-              {word.split("").map((char, charIndex) => (
-                <span
-                  key={charIndex}
-                  className="inline-block"
-                  style={{ display: "inline-block" }}
-                >
-                  {char}
-                </span>
-              ))}
-            </span>
-          ))}
+        <div ref={textRef} className="text-white text-center px-6 mt-8">
+          <div
+            ref={welcomeTextRef}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+          >
+            {"Welcome to Mentoons".split(" ").map((word, wordIndex) => (
+              <span
+                key={wordIndex}
+                className="inline-block whitespace-nowrap"
+                style={{ marginRight: "0.3em" }}
+              >
+                {word.split("").map((char, charIndex) => (
+                  <span
+                    key={charIndex}
+                    className="inline-block"
+                    style={{ display: "inline-block" }}
+                  >
+                    {char}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+
+          <p
+            ref={taglineRef}
+            className="mt-3 sm:mt-4 text-base sm:text-xl md:text-2xl lg:text-3xl font-medium tracking-wide opacity-0"
+          >
+            {SPLASH_TAGLINE}
+          </p>
         </div>
       </div>
 
@@ -484,7 +535,6 @@ const Header = () => {
           isScrolled ? "fixed top-0 left-0 w-full" : "relative"
         } hdr-bar flex justify-between items-center bg-primary h-16 px-3 sm:px-6 xl:px-6 2xl:px-10 transition-all duration-300 z-40 w-full`}
       >
-        {/* Left nav */}
         <div className="flex items-center min-w-0 xl:w-[38%] 2xl:w-1/3">
           <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2">
             {navLeft.map(({ id, label, url, icon: Icon, items }) =>
@@ -513,6 +563,7 @@ const Header = () => {
                       <DropDown
                         labelType={label.toLowerCase() as any}
                         items={items}
+                        isOpen={() => closeAllDropdowns()}
                       />
                     )}
                   </NavButton>
@@ -531,7 +582,6 @@ const Header = () => {
           </nav>
         </div>
 
-        {/* Centre logo */}
         <div
           ref={headerLogoRef}
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
@@ -546,7 +596,6 @@ const Header = () => {
           </NavLink>
         </div>
 
-        {/* Mobile / tablet actions */}
         <div className="flex items-center gap-2 sm:gap-3 ml-auto xl:hidden">
           <motion.button
             type="button"
@@ -589,7 +638,6 @@ const Header = () => {
           </motion.button>
         </div>
 
-        {/* Right nav (desktop) */}
         <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2">
           <motion.button
             type="button"
@@ -686,7 +734,11 @@ const Header = () => {
                   onMouseLeave={() => handleMouseLeave(label.toLowerCase())}
                 >
                   {dropdown[label.toLowerCase() as keyof DropDownInterface] && (
-                    <DropDown labelType={"joinus"} items={items} />
+                    <DropDown
+                      labelType={"joinus"}
+                      items={items}
+                      isOpen={() => closeAllDropdowns()}
+                    />
                   )}
                 </NavButton>
               </div>
@@ -720,7 +772,6 @@ const Header = () => {
           </SignedIn>
         </nav>
 
-        {/* Search overlay */}
         <AnimatePresence>
           {showSearch && (
             <motion.div

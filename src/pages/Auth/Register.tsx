@@ -1,12 +1,15 @@
 import { SignUp, useSignUp } from "@clerk/clerk-react";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { getSafeRedirect, withQueryParam } from "@/utils/authRedirect";
 
 const Register = () => {
   const { signUp } = useSignUp();
-  const location = useLocation();
-  const previousUrl = location.state?.from || "/";
-  console.log("previousUrl", previousUrl);
+  const [params] = useSearchParams();
+  const previousUrl = getSafeRedirect(params.get("redirect_url"));
+
+  // Return to the original page, with openModal=true so your welcome popup still shows
+  const afterSignUpUrl = withQueryParam(previousUrl, "openModal", "true");
 
   // Handle successful signup
   useEffect(() => {
@@ -15,29 +18,28 @@ const Register = () => {
     if (signUp.status === "complete") {
       handleSendPDF();
     }
-
-    // No need for cleanup since we're not using listeners
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signUp?.status]);
 
   const handleSendPDF = async () => {
     try {
       // Add your PDF sending logic here
-      // Example:
       // await fetch('/api/send-welcome-pdf', {
       //   method: 'POST',
-      //   body: JSON.stringify({ email: signUp.emailAddress }),
+      //   body: JSON.stringify({ email: signUp?.emailAddress }),
       // });
       console.log("User registration complete");
       localStorage.setItem("Signed up", "true");
-      // Redirect to home with openModal parameter
-      window.location.href = "/?openModal=true";
+
+      // Full reload so Router re-reads openModal / "Signed up" and shows the popup
+      window.location.href = afterSignUpUrl;
     } catch (error) {
       console.error("Error sending PDF:", error);
     }
   };
 
   return (
-    <div className="h-screen flex  bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
+    <div className="h-screen flex bg-[url(/assets/images/team-background.png)] bg-cover bg-center bg-no-repeat">
       <div className="hidden flex-1 lg:block">
         <img
           src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1783594514947-27275b14-8f64-4d0f-810a-b8442e6db018.png"
@@ -47,13 +49,8 @@ const Register = () => {
       </div>
       <div className="flex flex-1 justify-center items-center">
         <SignUp
-          signInUrl="/sign-in"
-          // redirectUrl={
-          //   window.location.search
-          //     ? window.location.pathname + window.location.search
-          //     : "/?openModal=true"
-          // }
-          forceRedirectUrl={previousUrl + "?openModal=true"}
+          signInUrl={`/sign-in?redirect_url=${encodeURIComponent(previousUrl)}`}
+          forceRedirectUrl={afterSignUpUrl}
         />
       </div>
     </div>
