@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 // import LandingBanner from "@/components/adda/landing/landingHero/banner";
 import { FaChevronDown } from "react-icons/fa6";
 import {
@@ -49,60 +49,6 @@ const chipColors = [
   "#f87171",
   "#60a5fa",
   "#fde047",
-];
-
-// Workshops slider data (moved over from the banner page)
-const workshops = [
-  {
-    title: "Comic Making",
-    image: "/assets/home/banner/new banner/workshops/workshops.png",
-    icon: "/assets/home/banner/new banner/icon.png",
-    accent: "#fb923c",
-    tilt: -2.5,
-    description:
-      "Make your own comic from scratch. learning basics of comic making",
-    link: "/mentoons-workshops",
-  },
-  {
-    title: "Art & Craft",
-    icon: "/assets/workshopv2/new/kalakrithi.png",
-    image: "/assets/home/banner/new banner/workshops/art.png",
-    accent: "#22c55e",
-    tilt: 2,
-    description:
-      "Unleash your imagination with art & craft your own masterpieces",
-    link: "/mentoons-workshops?category=KalaKriti",
-  },
-  {
-    title: "Music",
-    icon: "/assets/workshopv2/new/Swar2.png",
-    image: "/assets/home/banner/new banner/workshops/music.png",
-    accent: "#a855f7",
-    tilt: -1.5,
-    description:
-      "Musical adventure exploring rhythm, sing catchy songs & try out different instruments",
-    link: "/mentoons-workshops?category=Swar",
-  },
-  {
-    title: "Laughter",
-    icon: "/assets/workshopv2/new/hasyaras-04.png",
-    image: "/assets/home/banner/new banner/workshops/laughter.png",
-    accent: "#ef4444",
-    tilt: 2.5,
-    description:
-      "Giggle challenges, playful movements & stress-busting laughter exercises",
-    link: "/mentoons-workshops?category=Hasyaras",
-  },
-  {
-    title: "Story Telling",
-    icon: "/assets/workshopv2/new/instant katha-05.png",
-    image: "/assets/home/banner/new banner/workshops/story telling.png",
-    accent: "#3b82f6",
-    tilt: -2,
-    description:
-      "Bring vibrant characters to life & learn how to spin your own tales",
-    link: "/mentoons-workshops?category=Instant%20Katha",
-  },
 ];
 
 const LandingChildrenPoints = [
@@ -318,33 +264,6 @@ const NewLandingPage = () => {
   const [enquiryName, setEnquiryName] = useState("");
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [user, setUser] = useState<null | User>(null);
-
-  // Workshops slider
-  const workshopScrollRef = useRef<HTMLDivElement>(null);
-  const [activeWorkshop, setActiveWorkshop] = useState(0);
-
-  const handleWorkshopScroll = () => {
-    const el = workshopScrollRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (maxScroll <= 0) return;
-    const ratio = el.scrollLeft / maxScroll;
-    setActiveWorkshop(Math.round(ratio * (workshops.length - 1)));
-  };
-
-  const scrollToWorkshop = (index: number) => {
-    const el = workshopScrollRef.current;
-    if (!el) return;
-    const safeIndex = Math.max(0, Math.min(workshops.length - 1, index));
-    const card = el.children[safeIndex] as HTMLElement | undefined;
-    if (card) {
-      el.scrollTo({
-        left: card.offsetLeft - el.offsetLeft,
-        behavior: "smooth",
-      });
-    }
-    setActiveWorkshop(safeIndex);
-  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -790,107 +709,6 @@ const NewLandingPage = () => {
                   className="relative w-full max-w-lg drop-shadow-[6px_6px_0_#000]"
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Workshops slider (same as the banner), part of the hero */}
-          <div className="w-full min-w-0 flex flex-col items-start justify-start relative z-10">
-            <div className="w-full flex justify-center mt-2">
-              <span className="ws-pill cm-font text-base sm:text-lg px-5 py-1 text-center uppercase">
-                Workshops for Developing Brains
-              </span>
-            </div>
-
-            <div
-              ref={workshopScrollRef}
-              onScroll={handleWorkshopScroll}
-              className="w-full flex flex-nowrap overflow-x-auto xl:overflow-visible snap-x snap-mandatory xl:snap-none ws-no-scrollbar items-start justify-start xl:justify-center gap-5 xl:gap-4 mt-4 px-3 pt-2 pb-8 xl:pb-20"
-            >
-              {workshops.map((workshop, index) => (
-                <div
-                  key={index}
-                  className="ws-group relative w-32 sm:w-36 flex-shrink-0 snap-center xl:w-auto xl:flex-1 xl:min-w-0 xl:max-w-[11rem] xl:flex-shrink hover:z-40 focus-within:z-40"
-                >
-                  <div
-                    className="ws-card relative p-2 pb-3"
-                    style={
-                      {
-                        ["--tilt" as string]: `${workshop.tilt}deg`,
-                        ["--accent" as string]: workshop.accent,
-                      } as CSSProperties
-                    }
-                  >
-                    <span className="cm-font absolute -top-3 -left-3 z-20 w-7 h-7 rounded-full bg-yellow-300 border-[3px] border-black flex items-center justify-center text-sm leading-none">
-                      {index + 1}
-                    </span>
-
-                    <h3 className="ws-title cm-font text-sm sm:text-base text-center truncate mb-2 px-2 py-0.5 uppercase">
-                      {workshop.title}
-                    </h3>
-
-                    <div
-                      onClick={() => navigate(workshop.link)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          navigate(workshop.link);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Go to ${workshop.title}`}
-                      className="ws-card-link relative w-full h-32 sm:h-40 xl:h-auto xl:aspect-[4/5] bg-gray-50 border-[3px] border-black rounded-sm overflow-hidden cursor-pointer xl:cursor-default"
-                    >
-                      <img
-                        src={workshop.image}
-                        alt={workshop.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      <div className="ws-halftone" />
-                    </div>
-
-                    <div className="absolute -right-3 -bottom-3 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white border-[3px] border-black shadow-[2px_2px_0_#000] overflow-hidden xl:group-hover:opacity-0 transition-opacity duration-200">
-                      <img
-                        src={workshop.icon}
-                        alt=""
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-
-                    {/* Hover / focus speech bubble (xl screens) */}
-                    <div className="hidden xl:block absolute top-full left-0 right-0 pt-4 z-30 opacity-0 pointer-events-none translate-y-2 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 transition-all duration-200">
-                      <div className="ws-bubble flex flex-col items-center gap-2 px-3 py-3">
-                        <p className="cm-text text-sm text-black text-center">
-                          {workshop.description}
-                        </p>
-                        <button
-                          onClick={() => navigate(workshop.link)}
-                          className="ws-btn cm-font px-4 py-1 text-sm uppercase"
-                        >
-                          Explore!
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Dots (below xl) */}
-            <div className="flex xl:hidden w-full items-center justify-center gap-2 mt-2">
-              {workshops.map((workshop, index) => (
-                <button
-                  key={`dot-${index}`}
-                  type="button"
-                  onClick={() => scrollToWorkshop(index)}
-                  aria-label={`Go to ${workshop.title}`}
-                  className={`ws-dot h-2.5 rounded-full border-2 border-black transition-all duration-300 ${
-                    activeWorkshop === index
-                      ? "w-6 bg-yellow-300"
-                      : "w-2.5 bg-white"
-                  }`}
-                />
-              ))}
             </div>
           </div>
         </div>
