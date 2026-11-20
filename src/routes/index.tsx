@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import OrderSummary from "@/components/OrderSummary";
-import Membership from "../components/LandingPage/membership/membership.tsx";
+// import Membership from "../components/LandingPage/membership/membership.tsx";
 import LogIn from "../pages/Auth/LogIn";
 import Register from "../pages/Auth/Register";
 // import CareerPage from "../pages/CareerPage";
@@ -18,7 +18,7 @@ import OrderHistory from "../pages/v2/orderHistory.tsx";
 // import AdvancedBookingSystem from "../pages/v2/user/sessionBooking/sessionBooking.tsx";
 import AddaRouter from "./addaRouter.tsx";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import SubscriptionGuard from "../components/protected/subscriptionGuard.tsx";
+// import SubscriptionGuard from "../components/protected/subscriptionGuard.tsx";
 import QuizPage from "../pages/quiz/quiz.tsx";
 import EmployeeRouter from "./employeeRouter.tsx";
 import AdminRouter from "./adminRouter.tsx";
@@ -51,12 +51,15 @@ import JoinOurTeam from "@/pages/v3/joinOurTeam.tsx";
 import OneOnOneSessionPage from "@/pages/v3/oneOnOneSession.tsx";
 import AssessmentsPage from "@/pages/v3/assessment.tsx";
 import ProductPageV3 from "@/pages/v3/productPageV3.tsx";
+import RegisterWorkshopPage from "@/components/Workshop/WorkshopRegister.tsx";
+import WorkshopLearnPage from "@/components/Workshop/WorkshopLearn.tsx";
+import Workshopv2 from "@/pages/Workshopv2.tsx";
 // import ProductPageV3 from "@/pages/v3/productPageV3.tsx";
 
 const Cart = lazy(() => import("../pages/Cart"));
 const ComicsPageV2 = lazy(() => import("../pages/ComicsPageV2"));
 const Podcastv2 = lazy(() => import("../pages/Podcastv2"));
-const Workshopv2 = lazy(() => import("../pages/Workshopv2"));
+const Workshopv3 = lazy(() => import("../pages/v3/workshopsV3.tsx"));
 const FreeDownload = lazy(() => import("../pages/v2/user/freeDownloads.tsx"));
 const FAQ = lazy(() => import("../pages/faq.tsx"));
 const Plans = lazy(() => import("../components/common/Plans"));
@@ -93,21 +96,13 @@ export const routes = [
   },
   {
     path: "/mentoons-comics",
-    element: (
-      <SubscriptionGuard>
-        <ComicsPageV2 />
-      </SubscriptionGuard>
-    ),
+    element: <ComicsPageV2 />,
   },
   { path: "/free-download", element: <FreeDownload /> },
-  { path: "/mentoons-workshops", element: <Workshopv2 /> },
+  { path: "/mentoons-workshops", element: <Workshopv3 /> },
   {
     path: "/mentoons-podcast",
-    element: (
-      <SubscriptionGuard>
-        <Podcastv2 />
-      </SubscriptionGuard>
-    ),
+    element: <Podcastv2 />,
   },
   { path: "/faq", element: <FAQ /> },
   { path: "/website-plans", element: <Plans /> },
@@ -132,11 +127,7 @@ export const routes = [
   { path: "/joinus/explore", element: <Explore /> },
   {
     path: "/assessment-page",
-    element: (
-      <SubscriptionGuard>
-        <AssessmentsPage />
-      </SubscriptionGuard>
-    ),
+    element: <AssessmentsPage />,
   },
   { path: "/assessment-questions", element: <AssessmentQuestions /> },
   { path: "/order-summary", element: <OrderSummary /> },
@@ -144,7 +135,7 @@ export const routes = [
   { path: "/adda/*", element: <AddaRouter /> },
   // { path: "/bookings", element: <AdvancedBookingSystem /> },
   { path: "/search", element: <SearchResultsPage /> },
-  { path: "/membership", element: <Membership /> },
+  // { path: "/membership", element: <Membership /> },
   { path: "/order-history", element: <OrderHistory /> },
   { path: "/chat", element: <ChatPage /> },
   { path: "/chat/:selectedUser", element: <ChatPage /> },
@@ -175,6 +166,9 @@ export const routes = [
   { path: "/join-us", element: <JoinOurTeam /> },
   { path: "/bookings", element: <OneOnOneSessionPage /> },
   // { path: "/new-assessment", element: <AssessmentsPage /> },
+  { path: "/workshop-register", element: <RegisterWorkshopPage /> },
+  { path: "/workshop-learn", element: <WorkshopLearnPage /> },
+  { path: "/workshopv2", element: <Workshopv2 /> },
 ];
 
 export const NotFoundPage = NotFound;

@@ -1,7 +1,10 @@
 import ComicViewer from "@/components/common/ComicViewer";
 import LoginModal from "@/components/common/modal/loginModal";
 import AddToCartModal from "@/components/modals/AddToCartModal";
+import NewsletterModal from "@/components/modals/NewsletterModal";
+import axiosInstance from "@/api/axios";
 import { WORKSHOP_MATTERS_POINTS } from "@/constant";
+import { LandingColors } from "@/constant/adda/Landing/landingItems";
 import { addItemCart } from "@/redux/cartSlice";
 import { fetchProducts } from "@/redux/productSlice";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -11,64 +14,190 @@ import {
   ProductBase,
 } from "@/types/productTypes";
 import { formatDateString } from "@/utils/formateDate";
-import { FaShoppingCart } from "react-icons/fa";
+import { ModalMessage } from "@/utils/enum";
+import {
+  FaBookOpen,
+  FaLightbulb,
+  FaPenFancy,
+  FaShoppingCart,
+} from "react-icons/fa";
 import { FaBolt } from "react-icons/fa6";
-import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import axios from "axios";
-import { useCallback, useEffect, useRef, useState } from "react";
+import axios, { AxiosError } from "axios";
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import * as Yup from "yup";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import axiosInstance from "@/api/axios";
+import { motion, useReducedMotion } from "framer-motion";
 import ComicHero from "@/components/comics/hero";
-import ScrollTextSection from "@/components/comics/scrollText";
+// import ScrollTextSection from "@/components/comics/scrollText";
 
 /*
-  Comic theme tokens (shared with Cart / OrderSummary / PaymentStatus)
-  page   #FFFFFF   white background
-  ink    #000      outlines + hard shadows
-  yellow #FFD93B   banners / secondary actions
-  red    #FF4D3D   primary actions
-  blue   #2D6BFF   accents
-
-  The font is applied with .comic-body only on the sections of this page, so
-  ComicHero, ScrollTextSection and ComicViewer keep their own typography.
-  Mobile (< lg): thinner borders, smaller shadows, no tilt, swipe-snap carousel
-  (arrow buttons hidden), stacked card buttons.
+  Comics page theme = SAME theme as the new landing page (NewLandingPage):
+    - cream dotted page background           (.cm-page)
+    - Bangers / Luckiest Guy fonts           (.cm-font / .cm-chip-font / .cm-text)
+    - white outlined headings + color word   (.cm-title)
+    - white cards with hard black shadow     (.cm-card)
+    - yellow dotted panels                   (.cm-panel)
+    - orange comic buttons                   (.cm-btn)
+  Text sizes follow the landing page:
+    section headings  text-4xl md:text-6xl
+    card titles       text-3xl
+    body text         text-lg / text-xl
 */
 const comicCss = `
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Luckiest+Guy&display=swap');
 
-.comic-body { font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif; color: #000; }
-.comic-title { font-family: 'Bangers', 'Impact', sans-serif; letter-spacing: 0.04em; }
+@keyframes cm-wiggle {
+  0%, 100% { transform: rotate(-2deg) scale(1.06); }
+  25% { transform: rotate(3deg) scale(1.08); }
+  50% { transform: rotate(-4deg) scale(1.08); }
+  75% { transform: rotate(2deg) scale(1.06); }
+}
 
-.comic-panel { border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
-.comic-btn {
+.cm-page {
+  background-color: #fff7e6;
+  background-image: radial-gradient(rgba(249,115,22,0.18) 1.5px, transparent 2px);
+  background-size: 16px 16px;
+}
+.cm-font {
+  font-family: 'Bangers', 'Comic Sans MS', 'Chalkboard SE', cursive !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.05em;
+}
+.cm-chip-font {
+  font-family: 'Luckiest Guy', 'Bangers', 'Comic Sans MS', cursive !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+}
+.cm-text {
+  font-family: 'Bangers', 'Comic Sans MS', 'Chalkboard SE', cursive !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  color: #1f2937;
+}
+.cm-title, .cm-title * {
+  font-family: 'Bangers', 'Comic Sans MS', 'Chalkboard SE', cursive !important;
+  font-weight: 400 !important;
+}
+.cm-title {
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: #fff;
+  -webkit-text-stroke: 3px #000;
+  paint-order: stroke fill;
+  text-shadow: 4px 4px 0 #000;
+}
+.cm-title-sm {
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 3px 3px 0 #000;
+}
+.cm-narration {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+.cm-card {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0 #000;
+  border-radius: 16px;
+}
+.cm-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.cm-lift:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 #000;
+  background: #fef9c3;
+}
+.cm-panel {
+  background-color: #fde68a;
+  background-image: radial-gradient(rgba(0,0,0,0.12) 1.6px, transparent 2px);
+  background-size: 14px 14px;
+  border: 4px solid #000;
+  box-shadow: 8px 8px 0 #000;
+  border-radius: 20px;
+}
+.cm-icon {
+  border: 3px solid #000;
+  box-shadow: 2px 2px 0 #000;
+  border-radius: 12px;
+}
+.cm-btn {
+  background: var(--btn, #f97316);
+  color: #fff;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  border-radius: 12px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  transform: rotate(-2deg);
+  transition: box-shadow 0.1s ease, filter 0.1s ease;
+  cursor: pointer;
+}
+.cm-btn:hover:not(:disabled) { filter: brightness(1.08); animation: cm-wiggle 0.4s ease-in-out; }
+.cm-btn:active:not(:disabled) { box-shadow: 0 0 0 #000; transform: rotate(-2deg) translate(3px, 3px); }
+.cm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.cm-btn:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+
+.cm-chip {
+  background: var(--c, #fde047);
+  color: #000;
   border: 3px solid #000;
   box-shadow: 3px 3px 0 #000;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  border-radius: 8px;
+  padding: 2px 10px;
+  text-transform: uppercase;
+  transform: rotate(var(--rot, 0deg)) skewX(-6deg);
 }
-.comic-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
-.comic-btn:focus-visible { outline: 4px dashed #2D6BFF; outline-offset: 3px; }
-.comic-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-@media (min-width: 1024px) {
-  .comic-panel { border-width: 4px; box-shadow: 8px 8px 0 #000; }
-  .comic-btn { border-width: 4px; box-shadow: 5px 5px 0 #000; }
-  .comic-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; }
-  .comic-btn:active:not(:disabled) { transform: translate(5px, 5px); box-shadow: 0 0 0 #000; }
+.cm-input {
+  font-family: 'Bangers', 'Comic Sans MS', cursive !important;
+  letter-spacing: 0.05em;
+  font-size: 1.05rem;
+  background: #fff;
+  border: 3px solid #000 !important;
+  box-shadow: 3px 3px 0 #000;
+  border-radius: 10px;
+  outline: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
+.cm-input:focus {
+  background: #fef9c3;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #000;
+}
+.cm-arrow {
+  background: #fde047;
+  border: 3px solid #000;
+  box-shadow: 2px 2px 0 #000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+.cm-arrow:hover { background: #facc15; }
+.cm-arrow:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
 
-.comic-snap { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.comic-snap > * { scroll-snap-align: center; }
-.comic-hide-scroll { scrollbar-width: none; }
-.comic-hide-scroll::-webkit-scrollbar { display: none; }
+/* swipe carousel */
+.cm-snap { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.cm-snap > * { scroll-snap-align: center; }
+.cm-hide-scroll { scrollbar-width: none; }
+.cm-hide-scroll::-webkit-scrollbar { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .comic-btn { transition: none; }
+  .cm-btn, .cm-lift { transition: none; }
+  .cm-btn:hover:not(:disabled) { animation: none; }
 }
 `;
 
@@ -80,8 +209,90 @@ interface DBUser {
   };
 }
 
+interface ApiResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string;
+}
+
+interface NewsletterFormValues {
+  email: string;
+}
+
+const newsletterSchema = Yup.object({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+});
+
+// Stable "views" number per comic (the old Math.random() would change on every re-render,
+// and this page re-renders every second for the color-changing headings).
+const viewsFor = (id: string) =>
+  [...id].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 20;
+
+/* ---------- Age group filter ---------- */
+type AgeFilter = "all" | "6-12" | "13-19";
+
+const AGE_FILTERS: { key: AgeFilter; label: string }[] = [
+  { key: "all", label: "All Ages" },
+  { key: "6-12", label: "Ages 6-12" },
+  { key: "13-19", label: "Ages 13-19" },
+];
+
+// "13-16" -> first number 13 -> belongs to the 13-19 group
+// "20+"   -> first number 20 -> not in 6-12 or 13-19 (only shows under "All")
+const matchesAgeFilter = (
+  ageCategory: string | undefined,
+  filter: AgeFilter,
+) => {
+  if (filter === "all") return true;
+  const nums = (ageCategory || "").match(/\d+/g)?.map(Number);
+  if (!nums || nums.length === 0) return true; // e.g. "All ages" -> show everywhere
+  const min = nums[0];
+  return filter === "6-12" ? min <= 12 : min >= 13 && min <= 19;
+};
+
+/* ---------- Benefits of reading comics ---------- */
+const COMIC_BENEFITS = [
+  {
+    id: "vocabulary-imagination",
+    title: "Vocabulary & Imagination",
+    description:
+      "Pictures and short dialogue help kids pick up new words in context, while the gaps between panels let their imagination fill in the story.",
+    Icon: FaBookOpen,
+    color: "#fde047",
+  },
+  {
+    id: "writing-skills",
+    title: "Writing Skills",
+    description:
+      "Following a story panel by panel teaches sequencing, dialogue and storytelling, which helps children structure their own stories and write with confidence.",
+    Icon: FaPenFancy,
+    color: "#fdba74",
+  },
+  {
+    id: "situation-handling",
+    title: "Situation Handling",
+    description:
+      "Characters face real situations like peer pressure, screen time and online safety. Kids see how choices play out and learn calm ways to handle similar moments.",
+    Icon: FaLightbulb,
+    color: "#93c5fd",
+  },
+];
+
 const ComicsPageV2 = () => {
   const { items: products } = useSelector((state: RootState) => state.products);
+
+  const [ageFilter, setAgeFilter] = useState<AgeFilter>("all");
+  const reduceMotion = useReducedMotion();
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((c: ProductBase) =>
+        matchesAgeFilter(c.ageCategory, ageFilter),
+      ),
+    [products, ageFilter],
+  );
 
   const { user } = useUser();
   const [isAtStart, setIsAtStart] = useState(true);
@@ -96,19 +307,25 @@ const ComicsPageV2 = () => {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { getToken, userId } = useAuth();
+
+  // Keep the latest getToken in a ref so effects don't re-run (and re-call the
+  // APIs) whenever Clerk returns a new function identity on re-render.
+  const getTokenRef = useRef(getToken);
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [hasFetchedUser, setHasFetchedUser] = useState(false);
-  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
-    useState(false);
-  const [limitModalMessage, setLimitModalMessage] = useState("");
-  const [limitModalTitle, setLimitModalTitle] = useState("");
   const [currentProductId, setCurrentProductId] = useState<string>("");
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
-  const [scrollProgress, setScrollProgress] = useState(0);
+  // scroll progress bar is updated through a ref (no re-render on every scroll)
+  const progressRef = useRef<HTMLDivElement>(null);
+  // same color-changing highlight word as the landing page
+  const [colorIndex, setColorIndex] = useState(0);
 
   const [searchParams] = useSearchParams();
   const selectedOption = searchParams.get("option") || "comic";
@@ -117,13 +334,27 @@ const ComicsPageV2 = () => {
 
   const trendingRef = useRef(null);
 
+  // go back to the first card when the filter changes
+  useEffect(() => {
+    trendingCarouselRef.current?.scrollTo({ left: 0 });
+    setIsAtStart(true);
+  }, [ageFilter]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setColorIndex((prev) => (prev + 1) % LandingColors.length);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const handleScrollProgress = () => {
-      const scrollTop = window.scrollY;
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setScrollProgress(progress);
+      const progress = docHeight > 0 ? window.scrollY / docHeight : 0;
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${progress})`;
+      }
     };
     window.addEventListener("scroll", handleScrollProgress, { passive: true });
     return () => window.removeEventListener("scroll", handleScrollProgress);
@@ -139,83 +370,23 @@ const ComicsPageV2 = () => {
     }
   };
 
-  const checkContentAccess = async (product: ProductBase): Promise<boolean> => {
-    if (!user) {
-      setTimeout(() => setShowLoginModal(true), 100);
-      return false;
-    }
-    if (isLoadingUser) {
-      toast.info("Loading user data, please wait...");
-      return false;
-    }
-    if (!dbUser || !userId) {
-      if (!hasFetchedUser) {
-        toast.info("Loading user data...");
-        fetchDBUser();
-      } else {
-        toast.error("Unable to verify user. Please refresh the page.");
-      }
-      return false;
-    }
-    try {
-      const token = await getToken();
-      const type =
-        product.type === "comic"
-          ? "comics"
-          : product.type === "audio comic"
-            ? "audioComics"
-            : "podcasts";
-      const response = await axiosInstance.post(
-        `${import.meta.env.VITE_PROD_URL}/subscription/access`,
-        { type, itemId: product._id },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const { access, reason } = response.data;
-      if (access) {
-        return true;
-      }
-      if (reason === "upgrade") {
-        setLimitModalTitle("Upgrade Your Plan");
-        setLimitModalMessage(
-          `You've reached the ${type} limit for your ${membershipType} plan. Upgrade to access more content!`,
-        );
-      } else if (reason === "charge") {
-        setLimitModalTitle("Purchase Content");
-        setLimitModalMessage(
-          `You've reached the ${type} limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
-        );
-      }
-      setCurrentProductId(product._id || "");
-      setShowSubscriptionLimitModal(true);
-      return false;
-    } catch (error) {
-      console.error("Error checking access:", error);
-      toast.error("Failed to verify access. Please try again.");
-      return false;
-    }
-  };
-
-  const openComicModal = async (
+  // Opens the viewer only for logged-in users (no subscription / limit check)
+  const openComicModal = (
     comicLink: string,
     comic?: ProductBase | null,
     productType?: string,
   ) => {
-    if (!comic) {
-      setComicToView(comicLink);
-      setShowComicModal(true);
-      if (productType) setProductType(productType);
-      document.body.style.overflow = "hidden";
+    if (!user) {
+      setTimeout(() => setShowLoginModal(true), 100);
       return;
     }
-    const canAccess = await checkContentAccess(comic);
-    if (canAccess) {
-      setComicToView(comicLink);
-      setCurrentProductId(comic._id || "");
-      setShowComicModal(true);
-      if (productType || comic.product_type)
-        setProductType(productType || comic.product_type || "");
-      document.body.style.overflow = "hidden";
+    setComicToView(comicLink);
+    setCurrentProductId(comic?._id || "");
+    setShowComicModal(true);
+    if (productType || comic?.product_type) {
+      setProductType(productType || comic?.product_type || "");
     }
+    document.body.style.overflow = "hidden";
   };
 
   const closeComicModal = () => {
@@ -226,28 +397,21 @@ const ComicsPageV2 = () => {
   };
 
   const fetchDBUser = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoadingUser(false);
-      return;
-    }
-    setIsLoadingUser(true);
+    if (!user?.id) return;
     try {
-      const token = await getToken();
+      const token = await getTokenRef.current();
       const response = await axios.get(
         `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.status === 200) {
         setDbUser(response.data.data);
-        setHasFetchedUser(true);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Failed to load user data");
-    } finally {
-      setIsLoadingUser(false);
     }
-  }, [user?.id, getToken]);
+  }, [user?.id]);
 
   const handleAddtoCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -321,6 +485,32 @@ const ComicsPageV2 = () => {
     }
   };
 
+  // Wellness subscription (moved here from the Footer)
+  const handleNewsletterSubmit = async (
+    values: NewsletterFormValues,
+    { setSubmitting, resetForm }: FormikHelpers<NewsletterFormValues>,
+  ) => {
+    try {
+      const response = await axiosInstance.post<ApiResponse>(
+        "email/subscribeToNewsletter",
+        { email: values.email },
+      );
+
+      const res: ApiResponse = response.data;
+      if (res.success) {
+        setShowNewsletterModal(true);
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ error: string }>;
+      toast(` ${error.response?.data?.error ?? "Something went wrong"}`);
+    } finally {
+      resetForm();
+      setSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
 
@@ -349,7 +539,7 @@ const ComicsPageV2 = () => {
     const fetchComics = async () => {
       setIsFetchingProducts(true);
       try {
-        const token = await getToken();
+        const token = await getTokenRef.current();
         await dispatch(fetchProducts({ type: selectedOption, token: token! }));
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -358,7 +548,7 @@ const ComicsPageV2 = () => {
       }
     };
     fetchComics();
-  }, [dispatch, selectedOption, getToken]);
+  }, [dispatch, selectedOption]);
 
   useEffect(() => {
     const carousel = trendingCarouselRef.current;
@@ -372,44 +562,97 @@ const ComicsPageV2 = () => {
     fetchDBUser();
   }, [fetchDBUser]);
 
+  const highlight = LandingColors[colorIndex];
+
   return (
-    <div>
+    <div className="cm-page">
       <style>{comicCss}</style>
 
       {/* Scroll progress bar */}
       <div
-        className="fixed left-0 right-0 top-0 z-50 h-2 origin-left border-b-2 border-black bg-[#FF4D3D] transition-all duration-150"
-        style={{ transform: `scaleX(${scrollProgress / 100})` }}
+        ref={progressRef}
+        className="fixed left-0 right-0 top-0 z-50 h-2 origin-left scale-x-0 border-b-2 border-black bg-[#f97316]"
       />
 
       <ComicHero />
 
       {/* Trending comics */}
       <div
+        id="comics"
         ref={trendingRef}
-        className="comic-body animate-slide-up relative mx-auto mb-12 mt-10 w-[95%] md:w-[90%] lg:mb-20"
+        className="relative mx-auto mb-14 mt-12 w-[95%] text-black md:w-[90%] lg:mb-20"
       >
-        <h2 className="comic-title mb-6 inline-block border-[3px] border-black bg-[#FFD93B] px-4 py-1.5 text-4xl leading-none shadow-[4px_4px_0_#000] sm:text-5xl lg:-rotate-1 lg:border-4 lg:px-6 lg:py-2 lg:text-6xl lg:shadow-[6px_6px_0_#000]">
-          Trending Comics For You!
+        <h2 className="cm-title mb-6 text-4xl md:text-6xl">
+          Trending <span style={{ color: highlight }}>Comics</span> For You!
         </h2>
+
+        {/* Age group filter */}
+        <div className="mb-8 flex flex-wrap items-center gap-3 md:gap-4">
+          {AGE_FILTERS.map((f) => {
+            const active = ageFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setAgeFilter(f.key)}
+                aria-pressed={active}
+                className="cm-btn cm-font px-6 py-2 text-xl uppercase md:text-2xl"
+                style={
+                  {
+                    ["--btn" as string]: active ? "#f97316" : "#3b82f6",
+                    ...(active
+                      ? { transform: "rotate(-2deg) scale(1.1)" }
+                      : {}),
+                  } as CSSProperties
+                }
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
 
         {isFetchingProducts ? (
           <div className="flex h-[320px] items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-[5px] border-black border-t-[#FFD93B]" />
+            <div className="h-12 w-12 animate-spin rounded-full border-[5px] border-black border-t-[#f97316]" />
           </div>
         ) : (
           <div
-            className="comic-snap comic-hide-scroll flex scroll-smooth gap-5 overflow-x-auto px-2 pb-10 pr-4 pt-2 md:gap-8 lg:pb-14"
+            className="cm-snap cm-hide-scroll flex scroll-smooth gap-5 overflow-x-auto px-2 pb-10 pr-6 pt-3 md:gap-8"
             ref={trendingCarouselRef}
           >
-            {products.map((comic: ProductBase, index) => (
-              <div
-                className="animate-fade-in-up group relative h-full w-[78vw] max-w-[320px] flex-shrink-0 sm:w-[320px]"
-                key={comic._id}
-                style={{ animationDelay: `${index * 100}ms` }}
+            {filteredProducts.length === 0 && (
+              <motion.p
+                key={`empty-${ageFilter}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="cm-narration cm-text text-xl"
               >
-                <div className="comic-panel relative h-full overflow-hidden rounded-xl bg-white lg:transition-transform lg:duration-200 lg:hover:-rotate-1">
-                  <div className="relative h-48 overflow-hidden border-b-[3px] border-black lg:border-b-4">
+                No comics in this age group yet. Try another one!
+              </motion.p>
+            )}
+            {filteredProducts.map((comic: ProductBase, index: number) => (
+              <motion.div
+                // the age filter is part of the key, so cards re-mount and
+                // play the pop-in animation every time the age group changes
+                key={`${ageFilter}-${comic._id}`}
+                initial={
+                  reduceMotion
+                    ? false
+                    : { opacity: 0, y: 40, scale: 0.85, rotate: -4 }
+                }
+                animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  delay: Math.min(index, 8) * 0.07,
+                }}
+                className="group relative h-full w-[78vw] max-w-[320px] flex-shrink-0 sm:w-[320px]"
+              >
+                <div className="cm-card cm-lift relative h-full overflow-hidden">
+                  <div className="relative h-48 overflow-hidden border-b-[3px] border-black">
                     <img
                       src={
                         comic.productImages?.[0].imageUrl ||
@@ -419,7 +662,15 @@ const ComicsPageV2 = () => {
                       className="h-full w-full object-cover"
                     />
                     <div className="absolute bottom-3 left-3 flex gap-2">
-                      <span className="border-[3px] border-black bg-white px-3 py-0.5 text-sm font-black shadow-[2px_2px_0_#000]">
+                      <span
+                        className="cm-chip cm-chip-font text-xs md:text-sm"
+                        style={
+                          {
+                            ["--c" as string]: "#ffffff",
+                            ["--rot" as string]: "-3deg",
+                          } as CSSProperties
+                        }
+                      >
                         {formatDateString(
                           (comic.details as ComicProduct["details"])
                             ?.releaseDate || "",
@@ -428,13 +679,13 @@ const ComicsPageV2 = () => {
                     </div>
                   </div>
                   <div className="p-4 sm:p-5">
-                    <h3 className="comic-title mb-2 line-clamp-1 text-3xl leading-none">
+                    <h3 className="cm-font mb-2 line-clamp-1 text-3xl text-gray-900">
                       {comic?.title}
                     </h3>
-                    <p className="mb-4 line-clamp-2 text-sm font-bold text-gray-700">
+                    <p className="cm-text mb-4 line-clamp-2 text-lg">
                       {comic?.description}
                     </p>
-                    <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-black">
+                    <div className="cm-text mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
                       <div className="flex items-center gap-1">
                         <svg
                           className="h-4 w-4"
@@ -468,7 +719,7 @@ const ComicsPageV2 = () => {
                           <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                           <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <span>{Math.floor(Math.random() * 20)} views</span>
+                        <span>{viewsFor(comic._id)} views</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <svg
@@ -493,7 +744,10 @@ const ComicsPageV2 = () => {
                               );
                             }
                           }}
-                          className="comic-btn comic-title flex-1 rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
+                          className="cm-btn cm-font flex-1 px-4 py-2 text-xl uppercase"
+                          style={
+                            { ["--btn" as string]: "#ef4444" } as CSSProperties
+                          }
                         >
                           {comic.type === "comic" ? "Read Now" : "Listen Now"}
                         </button>
@@ -503,7 +757,12 @@ const ComicsPageV2 = () => {
                           <button
                             onClick={(e) => handleAddtoCart(e, comic)}
                             disabled={isLoading}
-                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FF4D3D] px-4 py-2 text-2xl text-white [text-shadow:2px_2px_0_#000]"
+                            className="cm-btn cm-font flex w-full items-center justify-center gap-2 whitespace-nowrap px-4 py-2 text-xl uppercase"
+                            style={
+                              {
+                                ["--btn" as string]: "#f97316",
+                              } as CSSProperties
+                            }
                           >
                             <FaShoppingCart className="inline-block h-4 w-4 self-center" />
                             {isLoading ? "Adding..." : "Add to Cart"}
@@ -511,7 +770,12 @@ const ComicsPageV2 = () => {
                           <button
                             onClick={(e) => handleBuyNow(e, comic)}
                             disabled={isLoading}
-                            className="comic-btn comic-title flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FFD93B] px-4 py-2 text-2xl text-black"
+                            className="cm-btn cm-font flex w-full items-center justify-center gap-2 whitespace-nowrap px-4 py-2 text-xl uppercase"
+                            style={
+                              {
+                                ["--btn" as string]: "#3b82f6",
+                              } as CSSProperties
+                            }
                           >
                             <FaBolt className="inline-block h-4 w-4 self-center" />
                             {isLoading ? "Buying..." : "Buy Now"}
@@ -521,7 +785,7 @@ const ComicsPageV2 = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
@@ -535,11 +799,11 @@ const ComicsPageV2 = () => {
             }
           }}
           aria-label="Scroll left"
-          className={`comic-btn absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-[#FFD93B] p-2 ${
+          className={`cm-arrow absolute left-0 top-1/2 -translate-y-1/2 rounded-full p-2 ${
             isAtStart ? "hidden" : "hidden lg:block"
           }`}
         >
-          <IoIosArrowBack className="text-2xl" />
+          <IoIosArrowBack className="text-2xl text-black" />
         </button>
         <button
           onClick={() => {
@@ -549,24 +813,98 @@ const ComicsPageV2 = () => {
             }
           }}
           aria-label="Scroll right"
-          className={`comic-btn absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-[#FFD93B] p-2 ${
+          className={`cm-arrow absolute right-0 top-1/2 -translate-y-1/2 rounded-full p-2 ${
             isAtEnd ? "hidden" : "hidden lg:block"
           }`}
         >
-          <IoIosArrowForward className="text-2xl" />
+          <IoIosArrowForward className="text-2xl text-black" />
         </button>
       </div>
 
-      <ScrollTextSection />
+      {/* <ScrollTextSection /> */}
+
+      {/* Benefits of reading comics */}
+      <section className="mx-auto mb-14 w-[95%] text-black md:w-[90%] lg:mb-20">
+        <h2 className="cm-title mb-8 text-4xl md:text-6xl">
+          Benefits of Reading <span style={{ color: highlight }}>Comics</span>
+        </h2>
+
+        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+          {COMIC_BENEFITS.map(({ id, title, description, Icon, color }) => (
+            <div key={id} className="cm-card cm-lift flex flex-col gap-4 p-5">
+              <figure
+                className="cm-icon flex h-16 w-16 shrink-0 items-center justify-center"
+                style={{ backgroundColor: color }}
+              >
+                <Icon className="text-3xl text-black" aria-hidden="true" />
+              </figure>
+              <h3 className="cm-font text-3xl text-gray-900">{title}</h3>
+              <p className="cm-text text-lg md:text-xl">{description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Wellness Subscription (moved from the Footer) */}
+      <section className="mx-auto mb-14 w-[95%] text-black md:w-[90%] lg:mb-20">
+        <div className="cm-panel px-5 py-10 md:px-10 lg:px-14 lg:py-14">
+          <div className="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="space-y-5 text-center lg:text-left">
+              <h2 className="cm-title text-4xl md:text-6xl">
+                Wellness <span style={{ color: highlight }}>Subscription</span>
+              </h2>
+              <p className="cm-narration cm-text text-xl md:text-2xl">
+                Get free comics, self help books, relationships, menstrual cycle
+                and friendship guides straight to your inbox.
+              </p>
+            </div>
+
+            <Formik
+              initialValues={{ email: "" }}
+              validationSchema={newsletterSchema}
+              onSubmit={handleNewsletterSubmit}
+            >
+              {({ isSubmitting, isValid, dirty }) => (
+                <Form className="cm-card flex w-full flex-col gap-4 p-5 md:p-6">
+                  <div>
+                    <Field
+                      name="email"
+                      type="email"
+                      aria-label="Email address"
+                      placeholder="Enter your email"
+                      className="cm-input w-full p-3"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="cm-text mt-2 text-base text-red-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !isValid || !dirty}
+                    className="cm-btn cm-font w-full py-3 text-3xl uppercase"
+                    style={{ ["--btn" as string]: "#ef4444" } as CSSProperties}
+                  >
+                    {isSubmitting ? "Subscribing..." : "Get Notified"}
+                  </button>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+      </section>
 
       {/* Comic modal */}
       {showComicModal && (
-        <div className="animate-fade-in fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75">
-          <div className="comic-body comic-panel animate-scale-in relative h-[90vh] w-[95%] items-center overflow-hidden rounded-lg bg-white">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75">
+          <div className="cm-card relative h-[90vh] w-[95%] items-center overflow-hidden bg-white text-black">
             <button
               onClick={closeComicModal}
               aria-label="Close"
-              className="comic-btn absolute right-3 top-3 z-10 rounded-full bg-[#FF4D3D] p-1.5 text-white"
+              className="cm-btn absolute right-3 top-3 z-10 rounded-full p-1.5"
+              style={{ ["--btn" as string]: "#ef4444" } as CSSProperties}
             >
               <MdClose className="text-2xl" />
             </button>
@@ -581,30 +919,22 @@ const ComicsPageV2 = () => {
         </div>
       )}
 
-      <SubscriptionLimitModal
-        isOpen={showSubscriptionLimitModal}
-        onClose={() => setShowSubscriptionLimitModal(false)}
-        message={limitModalMessage}
-        title={limitModalTitle}
-        planType={membershipType as "free" | "prime" | "platinum"}
-        productId={currentProductId}
-      />
-
       {/* Why our comics matter */}
-      <div className="comic-body animate-fade-in flex flex-col-reverse border-t-4 border-black bg-white px-4 py-10 md:px-12 lg:flex-row lg:items-center lg:gap-10 lg:border-t-8 lg:px-20 lg:py-14">
+      <div className="flex flex-col-reverse px-4 pb-14 pt-4 text-black md:px-12 lg:flex-row lg:items-center lg:gap-10 lg:px-20 lg:pb-20">
         <div className="flex-1 space-y-5 pt-8 lg:pt-0">
-          {WORKSHOP_MATTERS_POINTS.map((point, index) => (
+          {WORKSHOP_MATTERS_POINTS.map((point) => (
             <div
               key={point.id}
-              className="animate-slide-in-left comic-panel flex items-start gap-4 rounded-2xl bg-white p-4 md:items-center"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="cm-card cm-lift flex items-start gap-4 p-4 md:items-center"
             >
-              <figure className="shrink-0 rounded-full border-[3px] border-black bg-[#FFD93B] p-2">
-                <img src={point.icon} alt="icon" className="w-16 md:w-20" />
+              <figure className="cm-icon shrink-0 bg-yellow-200 p-2">
+                <img src={point.icon} alt="icon" className="w-14 md:w-16" />
               </figure>
               <div>
-                <p className="text-lg font-bold md:text-xl">
-                  <span className="comic-title text-3xl">{point.lable}:</span>{" "}
+                <p className="cm-text text-lg md:text-xl">
+                  <span className="cm-font text-2xl text-gray-900 md:text-3xl">
+                    {point.lable}:
+                  </span>{" "}
                   {point.description}
                 </p>
               </div>
@@ -612,9 +942,11 @@ const ComicsPageV2 = () => {
           ))}
         </div>
         <div className="relative flex-1">
-          <h2 className="comic-title mx-auto max-w-xl border-[3px] border-black bg-[#FFD93B] px-4 py-6 text-center text-5xl leading-[1.05] shadow-[4px_4px_0_#000] md:text-7xl lg:-rotate-2 lg:border-4 lg:px-8 lg:py-10 lg:text-8xl lg:shadow-[8px_8px_0_#000]">
-            Why our Comics matter?
-          </h2>
+          <div className="cm-panel mx-auto max-w-xl px-4 py-8 text-center lg:-rotate-2 lg:px-8 lg:py-12">
+            <h2 className="cm-title text-5xl md:text-7xl lg:text-8xl">
+              Why our <span style={{ color: highlight }}>Comics</span> matter?
+            </h2>
+          </div>
         </div>
       </div>
 
@@ -629,6 +961,13 @@ const ComicsPageV2 = () => {
           onClose={() => setShowAddToCartModal(false)}
           isOpen={showAddToCartModal}
           productName={selectedComic?.title || ""}
+        />
+      )}
+      {showNewsletterModal && (
+        <NewsletterModal
+          isOpen={showNewsletterModal}
+          onClose={() => setShowNewsletterModal(false)}
+          message={ModalMessage.NEWSLETTER_MESSAGE}
         />
       )}
     </div>

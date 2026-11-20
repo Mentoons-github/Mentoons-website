@@ -88,6 +88,8 @@ const ProductPageV3 = () => {
     setSelectedCategory(CATEGORY_FILTERS[0]);
   };
 
+  
+
   const ageTabs = [{ value: "all", label: "All Ages" }, ...AGE_OPTIONS];
   const isAgeTabActive = (value: string) =>
     value === "all"

@@ -1,33 +1,171 @@
-/* Halftone dot texture */
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap");
+
+/* ===== Luckiest Guy everywhere inside the banner =====
+   (your global `span { font-family: DM Sans }` rule was overriding the
+   heading font, so we force it on the element AND its children) */
+.font-luckiest,
+.font-luckiest *,
+.welcome-ribbon,
+.welcome-ribbon *,
+.slide-tag,
+.cta-pill .font-luckiest {
+  font-family: "Luckiest Guy", "Bangers", "Comic Sans MS", cursive !important;
+  font-weight: 400 !important;
+}
+
+/* ===== Halftone dots ===== */
 .comic-halftone {
   background-image: radial-gradient(
-    rgba(31, 19, 8, 0.14) 1.5px,
-    transparent 1.6px
+    rgba(247, 147, 30, 0.35) 2px,
+    transparent 2.5px
   );
-  background-size: 14px 14px;
+  background-size: 20px 20px;
 }
 
-/* Sticker-style outline on images */
-.comic-sticker {
-  filter: drop-shadow(2px 2px 0 #1f1308);
+/* ===== Big heading letters ===== */
+.hero-line {
+  /* shrinks with screen HEIGHT too, so all 3 lines fit without scrolling */
+  font-size: min(5.5rem, 5.2vw, calc((100svh - var(--banner-header-h)) / 6));
+  font-size: max(
+    2.6rem,
+    min(5.5rem, 5.2vw, calc((100svh - var(--banner-header-h)) / 6))
+  );
+  line-height: 1.05;
+  letter-spacing: 0.03em;
 }
-
-/* Comic title: white fill, ink outline, hard shadow */
-.comic-title {
-  color: #fff;
-  letter-spacing: 0.04em;
-  -webkit-text-stroke: clamp(1.5px, 0.35vw, 5px) #1f1308;
+.hero-letter {
+  line-height: 1;
+  color: var(--fill);
+  -webkit-text-stroke: 2.5px #1f1308;
   paint-order: stroke fill;
-  text-shadow:
-    3px 3px 0 #1f1308,
-    6px 6px 0 rgba(31, 19, 8, 0.25);
+  text-shadow: 4px 4px 0 #1f1308;
+  cursor: default;
 }
 
-/* Tagline chip */
-.comic-chip {
-  background: #fff;
+/* ===== Welcome ribbon ===== */
+.welcome-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 22px;
+  border-radius: 999px;
+  background: #cfcdf7;
   color: #1f1308;
   border: 3px solid #1f1308;
-  border-radius: 12px;
+  box-shadow: 5px 5px 0 #1f1308;
+  font-size: clamp(0.9rem, 2.2vw, 1.5rem);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.welcome-ribbon span:first-child,
+.welcome-ribbon span:last-child {
+  color: #ff4f8b;
+  -webkit-text-stroke: 1px #1f1308;
+}
+
+/* ===== Slide tag ===== */
+.slide-tag {
+  position: absolute;
+  top: -8%;
+  right: -6%;
+  padding: 4px 16px;
+  border: 3px solid #1f1308;
+  border-radius: 999px;
   box-shadow: 4px 4px 0 #1f1308;
+  font-size: clamp(1rem, 2.4vw, 1.6rem);
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/* ===== CTA pill ===== */
+.cta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 28px 6px 6px;
+  border-radius: 999px;
+  background: #1f5fff;
+  color: #fff;
+  border: 3px solid #1f1308;
+  box-shadow: 5px 5px 0 #1f1308;
+  text-decoration: none;
+}
+.cta-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: #ffaab9;
+  border: 3px solid #1f1308;
+}
+
+/* ===== Slider dots ===== */
+.comic-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #1f1308;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+  cursor: pointer;
+}
+.comic-dot-active {
+  transform: scale(1.35);
+}
+
+/* ===== Emoji bubbles ===== */
+.emoji-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  font-size: 1.8rem;
+  line-height: 1;
+  background: #fff;
+  border: 3px solid #1f1308;
+  border-radius: 50%;
+  box-shadow: 4px 4px 0 #1f1308;
+  cursor: pointer;
+}
+@media (min-width: 640px) {
+  .emoji-bubble {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2.1rem;
+  }
+}
+
+/* ===== Fit the whole banner inside one screen ===== */
+:root {
+  /* height of your top bar + orange navbar. Adjust if the banner still scrolls. */
+  --banner-header-h: 320px;
+}
+.banner-section {
+  min-height: 0;
+}
+@media (min-width: 1024px) {
+  .banner-section {
+    height: calc(100svh - var(--banner-header-h));
+    min-height: 520px;
+  }
+}
+.banner-visual {
+  aspect-ratio: 1 / 1;
+  width: 300px;
+}
+@media (min-width: 640px) {
+  .banner-visual {
+    width: 400px;
+  }
+}
+@media (min-width: 1024px) {
+  .banner-visual {
+    /* leave room for ribbon + dots + emoji row */
+    width: clamp(240px, calc(100svh - var(--banner-header-h) - 230px), 500px);
+  }
 }

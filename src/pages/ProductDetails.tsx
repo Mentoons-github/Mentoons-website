@@ -94,6 +94,8 @@ const ProductDetails = () => {
   };
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchProduct = async () => {
       console.log("fetching product");
       try {
@@ -104,6 +106,8 @@ const ProductDetails = () => {
         const productResponse = await dispatch(fetchProductById(productId));
         console.log("product response :", productResponse);
 
+        if (cancelled) return;
+
         if (
           typeof productResponse.payload === "object" &&
           productResponse.payload !== null
@@ -111,6 +115,7 @@ const ProductDetails = () => {
           console.log(productResponse.payload);
           setProduct(productResponse.payload as ProductBase);
           setRecommendationFilter(productResponse.payload?.type);
+          setSelectedImage(0);
         } else {
           toast.error("Failed to fetch product details");
         }
@@ -119,13 +124,14 @@ const ProductDetails = () => {
       }
     };
     fetchProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch, productId]);
 
-  const {
-    items: recommendedProducts,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.products);
+  const { items: recommendedProducts, loading: recommendationsLoading } =
+    useSelector((state: RootState) => state.products);
 
   useEffect(() => {
     const RecommendedProducts = async () => {
@@ -136,7 +142,7 @@ const ProductDetails = () => {
       }
     };
     RecommendedProducts();
-  }, [product, dispatch]);
+  }, [dispatch]);
 
   const handleUpdateQuantity = (flag: string) => {
     const newQuantity = flag === "+" ? quantity + 1 : Math.max(1, quantity - 1);
@@ -271,7 +277,7 @@ const ProductDetails = () => {
       ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
       : 0;
 
-  if (loading || !product) {
+  if (!product) {
     return (
       <div style={HALFTONE_BG} className="min-h-screen">
         <div className="w-[90%] mx-auto py-20 animate-pulse">
@@ -318,28 +324,9 @@ const ProductDetails = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div style={HALFTONE_BG} className="min-h-screen">
-        <div className="w-[90%] mx-auto py-20 text-center">
-          <div
-            className={`flex flex-col items-center gap-4 p-8 mx-auto max-w-lg rounded-2xl ${COMIC_CARD}`}
-          >
-            <h2 className="font-comic text-4xl tracking-wide text-red-600">
-              Oops! Error Loading Product
-            </h2>
-            <p className="text-gray-700">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className={`font-comic rounded-full bg-[#ff9800] px-6 py-2 text-xl tracking-wide text-white hover:bg-[#e68900] ${COMIC_BTN}`}
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const filteredRecommendations = (recommendedProducts ?? []).filter(
+    (item) => item.type === recommendationsFilter,
+  );
 
   return (
     <div style={HALFTONE_BG}>
@@ -741,19 +728,26 @@ const ProductDetails = () => {
                 onScroll={checkScrollPosition}
                 className="flex py-16 overflow-x-scroll scrollbar-hide"
               >
-                {recommendedProducts?.length > 0 ? (
-                  recommendedProducts
-                    .filter((item) => item.type === recommendationsFilter)
-                    .map((product) => {
-                      return (
-                        <div
-                          className="min-w-[400px] flex justify-center"
-                          key={product._id}
-                        >
-                          <ProductCard productDetails={product} />
-                        </div>
-                      );
-                    })
+                {recommendationsLoading && !recommendedProducts?.length ? (
+                  <div className="flex gap-4 w-full animate-pulse">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-64 min-w-[300px] bg-gray-300 border-2 border-gray-900 rounded-2xl"
+                      ></div>
+                    ))}
+                  </div>
+                ) : filteredRecommendations.length > 0 ? (
+                  filteredRecommendations.map((item) => {
+                    return (
+                      <div
+                        className="min-w-[400px] flex justify-center"
+                        key={item._id}
+                      >
+                        <ProductCard productDetails={item} />
+                      </div>
+                    );
+                  })
                 ) : (
                   <div
                     className={`w-full rounded-2xl p-8 text-center ${COMIC_CARD}`}

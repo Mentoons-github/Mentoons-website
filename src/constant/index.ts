@@ -764,11 +764,11 @@ export const FOOTER_PAGELINKS = [
         label: "Explore",
         url: "/joinus/explore",
       },
-      {
-        id: "AB_6",
-        label: "Feedback",
-        url: "/feedback",
-      },
+      // {
+      //   id: "AB_6",
+      //   label: "Feedback",
+      //   url: "/feedback",
+      // },
     ],
   },
   {
@@ -1291,12 +1291,12 @@ export const COMMON_NAV: NavLink[] = [
     url: "/bookings",
   },
 
-  {
-    id: "NL_11",
-    label: "Browse Plans",
-    // icon: FaCreditCard,
-    url: "/mentoons#subscription",
-  },
+  // {
+  //   id: "NL_11",
+  //   label: "Browse Plans",
+  //   // icon: FaCreditCard,
+  //   url: "/mentoons#subscription",
+  // },
   // {
   //   id: "NL_08",
   //   label: "Profile",

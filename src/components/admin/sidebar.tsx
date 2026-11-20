@@ -8,11 +8,12 @@ import {
   FaQuestionCircle,
   FaNewspaper,
   FaTachometerAlt,
+  FaHome,
 } from "react-icons/fa";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaIdBadge, FaPhone } from "react-icons/fa6";
+import { FaChartLine, FaIdBadge, FaPhone } from "react-icons/fa6";
 import { MdGroups } from "react-icons/md";
 import { SECTIONS } from "@/constant/admin/sidebar";
 
@@ -61,6 +62,9 @@ const AdminSidebar = ({
     if (isMobile && onMobileClose) onMobileClose();
   };
 
+  const isHomeActive = location.pathname === "/admin/home";
+  const isDashboardActive = location.pathname === "/admin/dashboard";
+
   return (
     <motion.aside
       initial={false}
@@ -88,25 +92,57 @@ const AdminSidebar = ({
             collapsed ? "h-10 w-10" : "h-12 w-auto"
           }`}
           onClick={() => {
-            navigate("/admin/dashboard");
+            navigate("/admin/home");
             handleLinkClick();
           }}
           data-tooltip-id="logo-tooltip"
-          data-tooltip-content="Dashboard"
+          data-tooltip-content="Home"
         />
         <Tooltip id="logo-tooltip" place="right" />
       </motion.div>
 
       {/* ---------- Navigation ---------- */}
       <nav className="flex-1 overflow-y-auto px-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100">
+        {/* Home (top) */}
+        <motion.div
+          whileHover={{ backgroundColor: "#f3f4f6" }}
+          whileTap={{ scale: 0.98 }}
+          className={`py-3 px-2 rounded-lg ${
+            isHomeActive ? "bg-blue-50 text-blue-600" : "text-gray-600"
+          }`}
+        >
+          <NavLink
+            to="/admin/home"
+            onClick={handleLinkClick}
+            className="flex items-center"
+            data-tooltip-id="section-tooltip"
+            data-tooltip-content={collapsed ? "Home" : ""}
+          >
+            <motion.span
+              className={`mr-2 ${
+                isHomeActive ? "text-blue-500" : "text-gray-600"
+              }`}
+            >
+              <FaHome size={collapsed ? 20 : 16} />
+            </motion.span>
+            {!collapsed && (
+              <h2
+                className={`text-base font-medium ${
+                  isHomeActive ? "text-blue-600" : "text-gray-800"
+                }`}
+              >
+                Home
+              </h2>
+            )}
+          </NavLink>
+        </motion.div>
+
         {/* Dashboard */}
         <motion.div
           whileHover={{ backgroundColor: "#f3f4f6" }}
           whileTap={{ scale: 0.98 }}
           className={`py-3 px-2 rounded-lg ${
-            location.pathname === "/admin/dashboard"
-              ? "bg-blue-50 text-blue-600"
-              : "text-gray-600"
+            isDashboardActive ? "bg-blue-50 text-blue-600" : "text-gray-600"
           }`}
         >
           <NavLink
@@ -118,9 +154,7 @@ const AdminSidebar = ({
           >
             <motion.span
               className={`mr-2 ${
-                location.pathname === "/admin/dashboard"
-                  ? "text-blue-500"
-                  : "text-gray-600"
+                isDashboardActive ? "text-blue-500" : "text-gray-600"
               }`}
             >
               <FaTachometerAlt size={collapsed ? 20 : 16} />
@@ -128,9 +162,7 @@ const AdminSidebar = ({
             {!collapsed && (
               <h2
                 className={`text-base font-medium ${
-                  location.pathname === "/admin/dashboard"
-                    ? "text-blue-600"
-                    : "text-gray-800"
+                  isDashboardActive ? "text-blue-600" : "text-gray-800"
                 }`}
               >
                 Dashboard
@@ -160,6 +192,16 @@ const AdminSidebar = ({
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Products"}
           toggleSection={() => toggleSection("Products")}
+          onItemClick={handleLinkClick}
+        />
+
+        <SidebarSection
+          icon={<FaChartLine size={collapsed ? 20 : 16} />}
+          title="Product Sales"
+          items={[{ href: "/admin/product-sales", label: "Product Sales" }]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Product Sales"}
+          toggleSection={() => toggleSection("Product Sales")}
           onItemClick={handleLinkClick}
         />
 
@@ -240,7 +282,6 @@ const AdminSidebar = ({
           toggleSection={() => toggleSection("Newsletter")}
           onItemClick={handleLinkClick}
         />
-
         <SidebarSection
           icon={<FaUsers size={collapsed ? 20 : 16} />}
           title="Employees"
@@ -248,6 +289,7 @@ const AdminSidebar = ({
             { href: "/admin/employee-table", label: "Employees Details" },
             { href: "/admin/employee/add", label: "Add Employees" },
             { href: "/admin/task-submissions", label: "Task Submissions" },
+            { href: "/admin/reports-by-date", label: "Daily Reports" },
             {
               href: "/admin/employee-attendance",
               label: "Employee Attendance",
@@ -259,7 +301,6 @@ const AdminSidebar = ({
           toggleSection={() => toggleSection("Employees")}
           onItemClick={handleLinkClick}
         />
-
         <SidebarSection
           icon={<FaPhone size={collapsed ? 20 : 16} />}
           title="Meetup"
@@ -314,6 +355,16 @@ const AdminSidebar = ({
           isCollapsed={collapsed}
           isExpanded={expandedSection === "Applicants"}
           toggleSection={() => toggleSection("Applicants")}
+          onItemClick={handleLinkClick}
+        />
+
+        <SidebarSection
+          icon={<MdGroups size={collapsed ? 20 : 16} />}
+          title="Expense"
+          items={[{ href: "/admin/expense", label: "Expense" }]}
+          isCollapsed={collapsed}
+          isExpanded={expandedSection === "Expense"}
+          toggleSection={() => toggleSection("Expense")}
           onItemClick={handleLinkClick}
         />
       </nav>

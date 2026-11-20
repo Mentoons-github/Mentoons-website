@@ -1094,7 +1094,8 @@ const NewBanner = () => {
           ref={descriptionRef}
           className="comic-narration comic-body text-base sm:text-lg mt-4"
         >
-          Kick start your learning journey with our exciting hands-on workshops
+          Platform where children learn life skills through cartoons, stories,
+          games, and real-world activities.
         </p>
 
         <button

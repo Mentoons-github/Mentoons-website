@@ -139,7 +139,7 @@ const AuthButton = () => {
 
   const handleRoleAccess = () => {
     if (role === "ADMIN") {
-      navigate("/admin/dashboard", { replace: true });
+      navigate("/admin/home", { replace: true });
       return;
     }
 

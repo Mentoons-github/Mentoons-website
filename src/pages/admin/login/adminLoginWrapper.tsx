@@ -17,7 +17,7 @@ const AdminLoginWrapper = () => {
     const handleSessionCheck = async () => {
       if (isSignedIn) {
         if (user?.publicMetadata?.role === "ADMIN") {
-          navigate("/admin/dashboard");
+          navigate("/admin/home");
         } else {
           await signOut();
         }

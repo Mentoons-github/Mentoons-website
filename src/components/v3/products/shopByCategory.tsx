@@ -7,6 +7,7 @@ import { CardType, ProductType } from "@/utils/enum";
 import {
   BookOpen,
   BookText,
+  Hash,
   Layers,
   LayoutGrid,
   MessagesSquare,
@@ -20,17 +21,17 @@ export interface CategoryFilter {
   label: string;
   tagline: string;
   icon: LucideIcon;
-  /** product.type values that belong here (checked second) */
   productTypes?: string[];
-  /** ?cardType= values from footer/sidebar links */
   cardTypes?: string[];
-  /** getBaseTitle() results that belong here (checked first) */
   baseTitles?: string[];
-  /** lowercase words in the title that put a product here (checked first) */
   titleKeywords?: string[];
+  series?: string[];
+  // A "group" shows several real categories together (e.g. all Cards)
+  groupIds?: string[];
 }
 
 export const ALL_CATEGORY_ID = "all";
+export const CARDS_CATEGORY_ID = "cards";
 
 export const CATEGORY_FILTERS: CategoryFilter[] = [
   {
@@ -86,18 +87,53 @@ export const CATEGORY_FILTERS: CategoryFilter[] = [
     icon: BookOpen,
     baseTitles: [POCKET_SERIES_LABEL],
   },
+  {
+    id: "number-series",
+    label: "Number Series",
+    tagline: "Learn through numbers",
+    icon: Hash,
+    series: ["Number Series"],
+  },
 ];
+
+// Virtual category: all four card types together.
+// Not part of CATEGORY_FILTERS, so it doesn't appear in the Shop by Category grid;
+// it's reached with /products?filter=cards
+export const CARDS_GROUP: CategoryFilter = {
+  id: CARDS_CATEGORY_ID,
+  label: "Cards",
+  tagline: "",
+  icon: MessagesSquare,
+  groupIds: [
+    "conversation-starter-cards",
+    "conversation-story-cards",
+    "story-reteller-cards",
+    "silent-stories",
+  ],
+};
 
 const REAL_CATEGORIES = CATEGORY_FILTERS.filter(
   (c) => c.id !== ALL_CATEGORY_ID,
 );
 
-/** Returns the single category a product belongs to (undefined = none). */
+type WithDetails = { details?: { series?: string } };
+
 export const classifyProduct = (
   product: ProductBase,
 ): CategoryFilter | undefined => {
   const title = product.title.toLowerCase();
   const base = getBaseTitle(product.title).toLowerCase();
+  const series = ((product as unknown as WithDetails).details?.series ?? "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  if (series) {
+    const bySeries = REAL_CATEGORIES.find((c) =>
+      c.series?.some((s) => s.toLowerCase() === series),
+    );
+    if (bySeries) return bySeries;
+  }
 
   const byTitle = REAL_CATEGORIES.find(
     (c) =>
@@ -111,15 +147,23 @@ export const classifyProduct = (
   );
 };
 
-/** Maps footer / sidebar URL params to a category (defaults to "All"). */
 export const getCategoryFromParams = (
   productType?: string | null,
   cardType?: string | null,
   filter?: string | null,
 ): CategoryFilter => {
+  if (filter === CARDS_CATEGORY_ID) {
+    return CARDS_GROUP;
+  }
   if (filter === "pocket-series") {
     return (
       REAL_CATEGORIES.find((c) => c.id === "pocket-series") ??
+      CATEGORY_FILTERS[0]
+    );
+  }
+  if (filter === "number-series") {
+    return (
+      REAL_CATEGORIES.find((c) => c.id === "number-series") ??
       CATEGORY_FILTERS[0]
     );
   }
@@ -151,7 +195,7 @@ const ShopByCategory = ({ selectedId, onSelect }: ShopByCategoryProps) => {
         Shop by Category
       </h2>
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-7">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-8">
         {CATEGORY_FILTERS.map((category) => {
           const isSelected = category.id === selectedId;
           const Icon = category.icon;

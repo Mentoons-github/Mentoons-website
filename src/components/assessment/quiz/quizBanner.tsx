@@ -18,10 +18,9 @@ const HALFTONE_OVERLAY = {
   backgroundSize: "16px 16px",
 };
 
-/* Comic loop: seconds the text rests between each replay (change as you like) */
 const LOOP_GAP = 3;
 const H1_DURATION = 0.7;
-const CYCLE = H1_DURATION + LOOP_GAP; // one full loop = animation + rest
+const CYCLE = H1_DURATION + LOOP_GAP;
 
 const QuizBanner = ({ categories }: QuizBanner) => {
   return (
@@ -38,12 +37,13 @@ const QuizBanner = ({ categories }: QuizBanner) => {
 
           <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-70" />
 
-          {/* Psychologists badge - top right, responsive */}
-          <div className="absolute right-3 top-3 z-20 w-16 sm:right-4 sm:top-4 sm:w-20 md:right-6 md:top-5 md:w-28 lg:right-8 lg:top-6 lg:w-36 xl:w-40 drop-shadow-[4px_4px_0_rgba(17,24,39,0.9)] transition-transform duration-300 hover:rotate-3 hover:scale-105">
+          <div className="absolute right-0 top-0 z-20 aspect-square w-24 sm:w-32 md:w-40 lg:w-48 xl:w-52">
+            <div className="absolute inset-0 rounded-bl-full border-b-4 border-l-4 border-gray-900 bg-[#FFD93D] shadow-[-3px_3px_0_0_rgba(17,24,39,0.9)]" />
+
             <motion.img
               src="/assets/LandingPage/psyco.png"
               alt="Carefully crafted by psychologists"
-              className="h-auto w-full object-contain"
+              className="absolute right-1 top-1 z-10 h-auto w-[72%] object-contain transition-transform duration-300 hover:rotate-3 hover:scale-105 sm:right-2 sm:top-2"
               initial={{ opacity: 0, y: -140, rotate: -20 }}
               animate={{
                 opacity: 1,
@@ -59,7 +59,6 @@ const QuizBanner = ({ categories }: QuizBanner) => {
             />
           </div>
 
-          {/* Content shakes on the headline's impact */}
           <motion.div
             animate={{ x: [0, -6, 5, -4, 3, 0], y: [0, 3, -4, -2, 2, 0] }}
             transition={{

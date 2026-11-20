@@ -1,8 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, type CSSProperties } from "react";
-import LandingBanner from "@/components/adda/landing/landingHero/banner";
-import { FaChevronDown } from "react-icons/fa6";
-import { FaGamepad, FaSmile, FaBook } from "react-icons/fa";
+// import LandingBanner from "@/components/adda/landing/landingHero/banner";
+import { FaChevronDown, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import {
+  FaGamepad,
+  FaBook,
+  FaHandshake,
+  FaMicrophone,
+  FaChalkboardTeacher,
+  FaPalette,
+  FaPenFancy,
+  FaClone,
+  FaClipboardCheck,
+  FaUserFriends,
+  FaCompass,
+  FaOm,
+} from "react-icons/fa";
 import {
   LandingAchievements,
   LandingColors,
@@ -10,53 +23,303 @@ import {
   LandingIssues,
   LandingParentPoints,
 } from "@/constant/adda/Landing/landingItems";
-import { Baby, Users } from "lucide-react";
+import { SLIDES as IMPORTED_SLIDES } from "@/constant/adda/Landing/slide";
 import { BiSolidMessage } from "react-icons/bi";
 import { toast } from "sonner";
 import axios from "axios";
 import { User } from "@/types";
 import EnquiryModal from "@/components/modals/EnquiryModal";
-import { ModalMessage } from "@/utils/enum";
-import ProductVideoShowCase from "@/components/Home/newVersion/productVideoShowcase";
+import { ModalMessage, ProductType } from "@/utils/enum";
+// import ProductVideoShowCase from "@/components/Home/newVersion/productVideoShowcase";
 import { getUserDetails } from "@/api";
 import { useAsyncEffect } from "@/hooks/shared/useAsyncEffect";
 
-const quickLinks = [
-  { label: "Workshops", url: "/mentoons-workshops" },
-  { label: "Podcasts", url: "/mentoons-podcast" },
-  { label: "Comics", url: "/mentoons-comics" },
-  { label: "Products", url: "/products" },
-  { label: "Games", url: "/adda/game-lobby" },
-  { label: "Blog", url: "/adda" },
+// Banner tags: shown as plain labels (NOT clickable, no links)
+const heroTags = [
+  "Workshops",
+  "Podcasts",
+  "Comics",
+  "Products",
+  "Games",
+  "Blog",
 ];
 
 const chipColors = [
   "#fb923c",
   "#4ade80",
-  "#c084fc",
+  "#ffffff",
   "#f87171",
   "#60a5fa",
   "#fde047",
 ];
 
+// Set to true to mirror the kids image (hand would then point right).
+// false = original artwork: the boy's hand points up-left toward the heading.
+const MIRROR_KIDS = false;
+
+// "Gen A to Z" label shown in the empty space beside the hero heading.
+const GEN_A_TO_Z = "Gen A to Z";
+
+// ---------------- Hero slider: extra banners ----------------
+interface BannerSlide {
+  id: number | string;
+  img: string;
+  tag: string;
+  emoji: string;
+  headline: string;
+  highlightWord: string;
+  sub: string;
+  badges?: string[];
+  accent: string;
+  link?: string;
+  cta?: string;
+  features?: string[];
+}
+
+const OUR_CORE_SLIDE = {
+  id: 99,
+  img: "/assets/home/newPage/bg/banner/community banner.png",
+  tag: "Our Core",
+  headline: "Discover Our Core",
+  highlightWord: "Core",
+  sub: "Understanding the roots of digital addiction",
+  badges: ["Awareness", "Recovery", "Community"],
+  accent: "#ff6b35",
+  emoji: "🧠",
+  link: "/community",
+  cta: "Join Community →",
+};
+
+const MENTOONS_MYTHOS_SLIDE = {
+  id: 100,
+  img: "/assets/home/newPage/bg/mythos.png",
+  tag: "Mentoons Mythos",
+  headline: "The Inner Cosmos",
+  highlightWord: "Cosmos",
+  sub: "Blending psychology and spiritual guidance to help you understand yourself and your path",
+  badges: ["Psychology", "Spirituality", "Self-Discovery"],
+  accent: "#6c5ce7",
+  emoji: "🌌",
+  link: "https://mentoonsmythos.com/",
+  cta: "Explore Your Path →",
+};
+
+// Three Mentoons brand verticals — shown immediately after the main hero.
+const BRAND_VERTICAL_SLIDES: BannerSlide[] = [
+  {
+    id: "gen-z",
+    img: "https://images.openai.com/static-rsc-4/Qm5bs69d5MgqNV9oYTXyz7pSL9Jr0q1goyDOv8OeICh4VefVaWoD69yPx_c8LRGWZqffZCo2tYZlWsRxT-NjxJHfDKOUaGul-kIrL5ZZVPwL3eGc7_k18NbKLO_bjZAx3D0DUgE2ZxcH3gkqNpSFwRU1ofZZIiE0E69dHmLBURk?purpose=inline",
+    tag: "Mentoons Gen Z",
+    emoji: "🎨",
+    headline: "MENTOONS GEN Z",
+    highlightWord: "Z",
+    sub: "Explore • Express • Earn",
+    accent: "#a855f7",
+    features: [
+      "Storytelling and communication",
+      "Music and art appreciation",
+      "Painting and creative entrepreneurship",
+      "Personal branding",
+      "Career readiness and confidence",
+    ],
+  },
+  {
+    id: "parenting",
+    img: "https://images.openai.com/static-rsc-4/EMgHOlIhFO_-Wo5YvmPHKu_JYUi9aJkIoN78COWP2_fDlfxRtTegq4joh1ipaXWmhEYXAiPp3zoJeIAETs6eQ-wX9OSVGyUs5UrQ0oGTYIr_OjmztpEcNB_z1R9SY8Q-urJssqZIW6NQ0N7ApQD-ANnxN0p2_eG89RKrkbNvEuw?purpose=inline",
+    tag: "Mentoons Parenting",
+    emoji: "👨‍👩‍👧",
+    headline: "MENTOONS PARENTING",
+    highlightWord: "PARENTING",
+    sub: "Understand • Connect • Guide",
+    accent: "#14b8a6",
+    features: [
+      "Parenting in the digital age",
+      "Screen-time awareness",
+      "Teen communication",
+      "Emotional intelligence",
+      "Parent-child bonding activities",
+    ],
+  },
+  {
+    id: "products",
+    img: "/assets/home/newPage/bg/banner/Products banner.png",
+    tag: "Mentoons Products",
+    emoji: "🧩",
+    headline: "MENTOONS PRODUCTS",
+    highlightWord: "PRODUCTS",
+    sub: "Play • Learn • Grow",
+    accent: "#f97316",
+    link: "/products",
+    cta: "Explore Products →",
+    features: [
+      "Comic-based learning kits",
+      "Personality and creativity cards",
+      "Emotional journals",
+      "Board games and puzzles",
+      "Storytelling and art activity boxes",
+    ],
+  },
+];
+
+// workshop item tiles are intentionally NOT used anymore
+const bannerSlides: BannerSlide[] = [
+  ...BRAND_VERTICAL_SLIDES,
+  ...(IMPORTED_SLIDES as unknown as BannerSlide[]),
+  OUR_CORE_SLIDE,
+  MENTOONS_MYTHOS_SLIDE,
+];
+
+// total = 1 (the main hero) + extra banners
+const TOTAL_HERO_SLIDES = bannerSlides.length + 1;
+const AUTOPLAY_MS = 6000;
+
+// Extra items for "By choosing Mentoons as your guide you can achieve..."
+const ExtraAchievements = [
+  {
+    title: "Career Guidance",
+    icon: <FaCompass />,
+    color: "#0ea5e9",
+    text: "Our psychologists help children discover their strengths and interests and plan their future path with confidence.",
+  },
+  {
+    title: "Introducing Spirituality",
+    icon: <FaOm />,
+    color: "#f97316",
+    text: "Gently introduce values like mindfulness, gratitude and inner calm, helping children feel grounded and understand themselves better.",
+  },
+];
+
+const AllAchievements = [...LandingAchievements, ...ExtraAchievements];
+
+// "For Children" dropdown items
 const LandingChildrenPoints = [
   {
-    title: "Fun & Engaging Learning",
+    title: "Podcasts",
+    icon: <FaMicrophone />,
+    color: "bg-purple-100 text-purple-600",
+    text: "Listen-along episodes for kids and parents on real-life situations, emotions and growing up.",
+  },
+  {
+    title: "Workshops",
+    icon: <FaChalkboardTeacher />,
+    color: "bg-green-100 text-green-600",
+    text: "Guided sessions led by psychologists and mentors that build confidence, friendship skills and independence away from the screen.",
+  },
+  {
+    title: "Comics",
+    icon: <FaBook />,
+    color: "bg-yellow-100 text-yellow-600",
+    text: "Fun comic stories that help children recognise, understand and express their feelings in healthy ways.",
+  },
+  {
+    title: "Games",
     icon: <FaGamepad />,
     color: "bg-orange-100 text-orange-600",
-    text: "Comics, podcasts and games designed to make learning about emotions and real-life skills genuinely fun for kids.",
+    text: "Playful games designed to make learning about emotions and real-life skills genuinely fun for kids.",
+  },
+];
+
+// Extra accordion item for the Parents card (Meetups)
+const ParentMeetupPoint = {
+  title: "Parent Meetups",
+  icon: <FaHandshake />,
+  color: "bg-green-100 text-green-600",
+  text: "Join meetups with other parents and mentors to share experiences, swap ideas and learn practical ways to guide your child.",
+};
+
+const LandingParentPointsWithMeetups = [
+  ...LandingParentPoints,
+  ParentMeetupPoint,
+];
+
+// Product page deep links. "#product" makes the page scroll down to the products.
+const COLORING_BOOKS_URL = `/products?productType=${encodeURIComponent(
+  ProductType.MENTOONS_COLORING_BOOKS,
+)}#product`;
+const JOURNALS_URL = "/products?filter=pocket-series#product";
+const CARDS_URL = "/products?filter=cards#product";
+
+// Link for the One-on-One sessions page. Change it to your real route.
+const ONE_ON_ONE_URL = "/one-on-one";
+
+// The offer section is split into 3 categories: Products, Services, Subscription.
+const offerCategories = [
+  {
+    title: "Products",
+    color: "#ec4899",
+    sub: "Things kids can hold, write in and create with",
+    items: [
+      {
+        title: "Cards",
+        icon: <FaClone />,
+        color: "#ef4444",
+        text: "Fun activity and conversation cards for playful learning with family and friends.",
+        url: CARDS_URL,
+        cta: "Shop Cards",
+      },
+      {
+        title: "Journals",
+        icon: <FaPenFancy />,
+        color: "#14b8a6",
+        text: "Guided journals that encourage kids to reflect, write and understand their feelings.",
+        url: JOURNALS_URL,
+        cta: "Shop Journals",
+      },
+      {
+        title: "Coloring Books",
+        icon: <FaPalette />,
+        color: "#ec4899",
+        text: "Creative coloring pages that help kids relax, focus and express themselves.",
+        url: COLORING_BOOKS_URL,
+        cta: "Start Coloring",
+      },
+    ],
   },
   {
-    title: "Emotional Growth",
-    icon: <FaSmile />,
-    color: "bg-yellow-100 text-yellow-600",
-    text: "Age-appropriate content that helps children recognise, understand and express their feelings in healthy ways.",
+    title: "Services",
+    color: "#22c55e",
+    sub: "Expert-led support for your child and family",
+    items: [
+      {
+        title: "Assessments",
+        icon: <FaClipboardCheck />,
+        color: "#6366f1",
+        text: "Simple, psychologist-designed assessments that help parents understand their child's strengths and needs.",
+        url: "/assessment-page",
+        cta: "Take Assessment",
+      },
+      {
+        title: "Workshops",
+        icon: <FaChalkboardTeacher />,
+        color: "#22c55e",
+        text: "Guided sessions led by psychologists and mentors to build confidence.",
+        url: "/mentoons-workshops",
+        cta: "Join Workshop",
+      },
+    ],
   },
   {
-    title: "Real-Life Skills",
-    icon: <FaBook />,
-    color: "bg-purple-100 text-purple-600",
-    text: "Workshops and stories that build confidence, friendship skills and independence away from the screen.",
+    title: "Subscription",
+    color: "#3b82f6",
+    sub: "Keep learning every week with ongoing content and mentoring",
+    items: [
+      {
+        title: "Podcasts",
+        icon: <FaMicrophone />,
+        color: "#a855f7",
+        text: "Listen-along episodes for kids and parents on real-life situations.",
+        url: "/mentoons-podcast",
+        cta: "Listen Now",
+      },
+      {
+        title: "One-on-One Sessions",
+        icon: <FaUserFriends />,
+        color: "#0ea5e9",
+        text: "Private sessions with a psychologist or mentor, tailored to your child's needs.",
+        url: ONE_ON_ONE_URL,
+        cta: "Book Session",
+      },
+    ],
   },
 ];
 
@@ -153,6 +416,126 @@ const ComicStar = ({
   </div>
 );
 
+// Compact brand slides fit within the hero stage; standard slides keep their original layout.
+const BannerSlideView = ({
+  slide,
+  highlightColor,
+}: {
+  slide: BannerSlide;
+  highlightColor: string;
+}) => {
+  const isBrand = Boolean(slide.features?.length);
+  return (
+    <div
+      className={`relative grid min-w-0 items-center lg:grid-cols-2 ${isBrand ? "cm-brand-slide " : ""} ${isBrand ? "gap-3 lg:gap-6 py-2" : "gap-8 lg:gap-12"}`}
+    >
+      <div
+        className={`min-w-0 ${isBrand ? "space-y-2 lg:space-y-3" : "space-y-4 lg:space-y-5"}`}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={`cm-icon bg-white flex items-center justify-center ${isBrand ? "h-9 w-9 text-lg" : "h-11 w-11 text-2xl"}`}
+          >
+            {slide.emoji}
+          </div>
+          <span className="cm-tag cm-chip-font text-xs sm:text-sm uppercase">
+            {slide.tag}
+          </span>
+        </div>
+        <h2
+          className={`cm-title cm-title-sm ${isBrand ? "text-xl lg:text-2xl" : "text-3xl md:text-4xl"}`}
+        >
+          {isBrand ? (
+            <span style={{ color: "#fde047" }}>
+              {slide.id === "gen-z"
+                ? "CREATE YOUR OWN PATH"
+                : slide.id === "parenting"
+                  ? "GROW TOGETHER"
+                  : "DISCOVER THROUGH PLAY"}
+            </span>
+          ) : (
+            <>
+              Welcome to <span style={{ color: "#fde047" }}>Mentoons</span>
+            </>
+          )}
+        </h2>
+        <h2
+          className={`cm-title ${isBrand ? "text-3xl sm:text-4xl lg:text-[clamp(2rem,3vw,3.4rem)]" : "text-5xl lg:text-6xl xl:text-7xl"}`}
+        >
+          {slide.headline.split(" ").map((word, i) => (
+            <span
+              key={i}
+              style={
+                word === slide.highlightWord
+                  ? { color: highlightColor }
+                  : undefined
+              }
+            >
+              {word}{" "}
+            </span>
+          ))}
+        </h2>
+        <p
+          className={`cm-narration cm-text ${isBrand ? "!px-3 !py-2 text-base lg:text-lg" : "text-xl md:text-2xl"}`}
+        >
+          {slide.sub}
+        </p>
+        {isBrand ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs lg:text-sm">
+            {slide.features!.map((feature) => (
+              <li
+                key={feature}
+                className="flex min-w-0 items-center gap-2 rounded-lg border-2 border-black bg-white px-2.5 py-1.5 font-semibold leading-snug text-gray-900 shadow-[2px_2px_0_#000]"
+              >
+                <span className="shrink-0" style={{ color: slide.accent }}>
+                  ★
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        ) : slide.badges?.length ? (
+          <div className="flex flex-wrap gap-3">
+            {slide.badges.map((badge, i) => (
+              <span
+                key={i}
+                className="cm-chip cm-chip-font text-xs md:text-sm"
+                style={
+                  {
+                    ["--c" as string]: chipColors[i % chipColors.length],
+                    ["--rot" as string]: `${i % 2 === 0 ? -3 : 3}deg`,
+                  } as CSSProperties
+                }
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {slide.link && slide.cta && (
+          <a href={slide.link} className="inline-block">
+            <span
+              className={`cm-btn cm-font inline-flex items-center gap-2 uppercase ${isBrand ? "px-5 py-2 text-lg" : "px-8 py-3 text-2xl"}`}
+              style={{ ["--btn" as string]: slide.accent } as CSSProperties}
+            >
+              {slide.cta}
+            </span>
+          </a>
+        )}
+      </div>
+      <div
+        className={`min-w-0 flex justify-center lg:justify-end ${isBrand ? "max-h-44 sm:max-h-52 lg:max-h-[min(48vh,420px)]" : ""}`}
+      >
+        <img
+          src={slide.img}
+          alt={slide.headline}
+          className={`cm-hero-banner-img w-full object-contain drop-shadow-[5px_5px_0_#000] ${isBrand ? "!max-h-44 sm:!max-h-52 lg:!max-h-[min(48vh,420px)]" : "cm-bob max-w-md lg:max-w-lg"}`}
+        />
+      </div>
+    </div>
+  );
+};
+
 const NewLandingPage = () => {
   const navigate = useNavigate();
   const [colorIndex, setColorIndex] = useState(0);
@@ -166,6 +549,27 @@ const NewLandingPage = () => {
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [user, setUser] = useState<null | User>(null);
 
+  // hero slider state
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
+  const [sliderPaused, setSliderPaused] = useState(false);
+
+  const goToHeroSlide = (index: number) => {
+    if (index === activeSlide) return;
+    setSlideDirection(index > activeSlide ? "next" : "prev");
+    setActiveSlide(index);
+  };
+  const nextHeroSlide = () => {
+    setSlideDirection("next");
+    setActiveSlide((prev) => (prev + 1) % TOTAL_HERO_SLIDES);
+  };
+  const prevHeroSlide = () => {
+    setSlideDirection("prev");
+    setActiveSlide(
+      (prev) => (prev - 1 + TOTAL_HERO_SLIDES) % TOTAL_HERO_SLIDES,
+    );
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setColorIndex((prev) => (prev + 1) % LandingColors.length);
@@ -174,8 +578,19 @@ const NewLandingPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // autoplay (restarts whenever the slide changes, pauses on hover)
   useEffect(() => {
-    const els = document.querySelectorAll(".cm-reveal");
+    if (sliderPaused) return;
+    const timer = setTimeout(() => {
+      setSlideDirection("next");
+      setActiveSlide((prev) => (prev + 1) % TOTAL_HERO_SLIDES);
+    }, AUTOPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [activeSlide, sliderPaused]);
+
+  // re-run when the slide changes so freshly mounted .cm-reveal elements animate in
+  useEffect(() => {
+    const els = document.querySelectorAll(".cm-reveal:not(.cm-in)");
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -189,7 +604,7 @@ const NewLandingPage = () => {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [activeSlide]);
 
   useAsyncEffect(
     async () => {
@@ -256,9 +671,19 @@ const NewLandingPage = () => {
           50% { transform: rotate(-4deg) scale(1.08); }
           75% { transform: rotate(2deg) scale(1.06); }
         }
+        @keyframes cm-slide-next {
+          from { opacity: 0; transform: translateX(60px); }
+          to   { opacity: 1; transform: none; }
+        }
+        @keyframes cm-slide-prev {
+          from { opacity: 0; transform: translateX(-60px); }
+          to   { opacity: 1; transform: none; }
+        }
 
         .cm-bob { animation: cm-bob 1.4s steps(4) infinite; }
         .cm-star { animation: cm-star 1.4s steps(3) infinite; }
+        .cm-slide-next { animation: cm-slide-next 0.45s cubic-bezier(.2,.8,.3,1) both; }
+        .cm-slide-prev { animation: cm-slide-prev 0.45s cubic-bezier(.2,.8,.3,1) both; }
         .cm-reveal { opacity: 0; }
         .cm-reveal.cm-in {
           opacity: 1;
@@ -266,7 +691,54 @@ const NewLandingPage = () => {
         }
         @media (prefers-reduced-motion: reduce) {
           .cm-reveal { opacity: 1; }
-          .cm-reveal.cm-in, .cm-bob, .cm-star { animation: none; }
+          .cm-reveal.cm-in, .cm-bob, .cm-star, .cm-slide-next, .cm-slide-prev { animation: none; }
+        }
+
+        /* ===== Hero: fit the whole banner inside one screen (desktop) =====
+           230px  = navbar + top padding + slider controls + gaps.
+           If your navbar is taller/shorter, tweak these numbers only. */
+        @media (min-width: 1024px) {
+          .cm-hero-stage {
+            height: calc(100vh - 230px);
+            height: calc(100svh - 230px);
+            min-height: 400px;
+          }
+          .cm-hero-stage:has(.cm-brand-slide) { min-height: 0; height: auto; min-height: calc(100svh - 230px); }
+          .cm-hero-kids {
+            width: auto;
+            max-width: 100%;
+            max-height: max(240px, calc(100vh - 390px));
+            max-height: max(240px, calc(100svh - 390px));
+          }
+          .cm-hero-banner-img {
+            width: auto;
+            max-width: 100%;
+            max-height: max(240px, calc(100vh - 300px));
+            max-height: max(240px, calc(100svh - 300px));
+            object-fit: contain;
+          }
+          /* heading always stays on ONE line: scales with the screen width */
+          .cm-hero-title {
+            font-size: clamp(2.25rem, 3.6vw, 4.5rem);
+          }
+        }
+
+        /* "Gen A to Z" sticker */
+        .cm-genaz {
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 14px;
+          transform: rotate(2deg);
+        }
+        .cm-genaz-az {
+          background: #f97316;
+          color: #fff;
+          border: 3px solid #000;
+          border-radius: 10px;
+          padding: 6px 10px;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transform: rotate(-4deg);
         }
 
         .cm-page {
@@ -360,13 +832,6 @@ const NewLandingPage = () => {
           box-shadow: 2px 2px 0 #000;
           border-radius: 12px;
         }
-        .cm-frame {
-          border: 4px solid #000;
-          box-shadow: 8px 8px 0 #000;
-          border-radius: 12px;
-          background: #fff;
-          transform: rotate(2deg);
-        }
         .cm-btn {
           background: var(--btn, #f97316);
           color: #fff;
@@ -380,8 +845,10 @@ const NewLandingPage = () => {
         }
         .cm-btn:hover { filter: brightness(1.08); animation: cm-wiggle 0.4s ease-in-out; }
         .cm-btn:active { box-shadow: 0 0 0 #000; transform: rotate(-2deg) translate(3px, 3px); }
+
+        /* Chips: the color is ALWAYS visible (not only on hover) */
         .cm-chip {
-          background: #fff;
+          background: var(--c, #fde047);
           color: #000;
           border: 3px solid #000;
           box-shadow: 3px 3px 0 #000;
@@ -389,10 +856,10 @@ const NewLandingPage = () => {
           padding: 4px 12px;
           text-transform: uppercase;
           transform: rotate(var(--rot, 0deg)) skewX(-6deg);
-          transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+          transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
         }
         .cm-chip:hover {
-          background: var(--c, #fde047);
+          filter: brightness(1.08);
           transform: rotate(0deg) skewX(-6deg) translate(-2px, -2px) scale(1.08);
           box-shadow: 5px 5px 0 #000;
         }
@@ -441,211 +908,397 @@ const NewLandingPage = () => {
         }
         .cm-row { border-bottom: 3px solid #000; }
         .cm-row:last-child { border-bottom: 0; }
+
+        /* ===== Hero slider controls ===== */
+        .cm-arrow {
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 2px 2px 0 #000;
+          transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+        }
+        .cm-arrow:hover { background: #facc15; }
+        .cm-arrow:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+
+        /* ===== Workshops slider ===== */
+        .ws-no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ws-no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .ws-pill {
+          background: #fde047;
+          color: #000;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 10px;
+          transform: rotate(-1deg);
+        }
+        .ws-card {
+          background: #fffdf5;
+          border: 3px solid #000;
+          border-radius: 6px;
+          box-shadow: 5px 5px 0 #000;
+          transform: rotate(var(--tilt, 0deg));
+          transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+        }
+        .ws-group:hover .ws-card,
+        .ws-group:focus-within .ws-card {
+          transform: rotate(0deg) translate(-3px, -3px) scale(1.04);
+          box-shadow: 9px 9px 0 #000;
+        }
+        .ws-title {
+          background: var(--accent);
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          color: #fff;
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          transform: skewX(-8deg);
+        }
+        .ws-halftone {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: radial-gradient(rgba(0,0,0,0.28) 1.2px, transparent 1.6px);
+          background-size: 7px 7px;
+          -webkit-mask-image: linear-gradient(135deg, transparent 45%, #000 100%);
+          mask-image: linear-gradient(135deg, transparent 45%, #000 100%);
+          mix-blend-mode: multiply;
+        }
+        .ws-bubble {
+          position: relative;
+          background: #fde047;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          border-radius: 14px;
+        }
+        .ws-bubble::before,
+        .ws-bubble::after {
+          content: "";
+          position: absolute;
+          border-style: solid;
+          border-color: transparent;
+        }
+        .ws-bubble::before {
+          top: -17px;
+          left: 22px;
+          border-width: 0 11px 17px 11px;
+          border-bottom-color: #000;
+        }
+        .ws-bubble::after {
+          top: -11px;
+          left: 25px;
+          border-width: 0 8px 13px 8px;
+          border-bottom-color: #fde047;
+        }
+        .ws-btn {
+          background: #ef4444;
+          color: #fff;
+          border: 3px solid #000;
+          box-shadow: 3px 3px 0 #000;
+          text-shadow: 1px 1px 0 #000;
+          transform: rotate(-3deg);
+          transition: transform 0.1s ease, box-shadow 0.1s ease;
+          cursor: pointer;
+        }
+        .ws-btn:hover { background: #dc2626; transform: rotate(-3deg) scale(1.08); }
+        .ws-btn:active { transform: rotate(-3deg) translate(3px, 3px); box-shadow: 0 0 0 #000; }
+        .ws-card-link:focus-visible, .ws-dot:focus-visible {
+          outline: 3px solid #000;
+          outline-offset: 3px;
+        }
       `}</style>
 
-      <LandingBanner />
-      <div className="cm-page min-h-screen px-4 md:px-12 lg:px-28 pt-10 pb-12 space-y-14 md:space-y-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-10 flex flex-col-reverse lg:flex-col">
-            <div className="space-y-6 max-w-2xl">
-              <h2 className="cm-title cm-reveal text-5xl lg:text-7xl">
-                <span style={{ color: LandingColors[colorIndex] }}>
-                  Mentoring
-                </span>{" "}
-                Through{" "}
-                <span style={{ color: LandingColors[colorIndex] }}>
-                  Cartoons
-                </span>
-              </h2>
+      {/* <LandingBanner /> */}
+      <div className="cm-page min-h-screen px-4 md:px-12 lg:px-28 pt-6 pb-12 space-y-14 md:space-y-20">
+        {/* ================= HERO SLIDER ================= */}
+        <div
+          className="relative z-20 space-y-4"
+          onMouseEnter={() => setSliderPaused(true)}
+          onMouseLeave={() => setSliderPaused(false)}
+        >
+          {/* Psychologist badge: common for EVERY slide (lives outside the slides).
+              No background, no border; bigger so the text is readable.
+              Negative offsets match the page padding, so it stays flush in the page's top-right corner. */}
+          <img
+            src="/assets/home/psychologist-developed.png"
+            alt="Carefully crafted by psychologists"
+            className="pointer-events-none absolute z-30 -top-6 -right-4 md:-right-12 lg:-right-28 w-32 sm:w-36 md:w-36 lg:w-40 xl:w-48 h-auto drop-shadow-[3px_3px_0_rgba(0,0,0,0.55)]"
+          />
 
-              <p
-                className="cm-narration cm-text cm-reveal text-xl md:text-2xl"
-                style={{ animationDelay: "0.1s", transform: "rotate(1deg)" }}
-              >
-                Discover how our services help families create a healthy balance
-                between gadgets, social media and real-life relationships.
-              </p>
+          {/* cm-hero-stage = fixed height (desktop) so the banner + controls fit one screen */}
+          <div
+            key={activeSlide}
+            className={`cm-hero-stage relative z-0 flex flex-col justify-center ${
+              slideDirection === "next" ? "cm-slide-next" : "cm-slide-prev"
+            }`}
+          >
+            {activeSlide === 0 ? (
+              /* ---------- Slide 1: main hero ----------
+                 Row 1: heading on ONE line (top-left).
+                 Row 2: kids on the LEFT, paragraph + tags on the RIGHT. */
+              <div className="relative space-y-6 lg:space-y-3">
+                {/* Heading: single line on desktop; right padding keeps it clear of the badge */}
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-4 lg:pr-44 xl:pr-52">
+                  <h2 className="cm-title cm-hero-title cm-reveal text-5xl lg:whitespace-nowrap">
+                    <span style={{ color: LandingColors[colorIndex] }}>
+                      Mentoring
+                    </span>{" "}
+                    Through{" "}
+                    <span style={{ color: LandingColors[colorIndex] }}>
+                      Cartoons
+                    </span>
+                  </h2>
 
-              <div className="w-full flex justify-between items-center gap-3">
-                <img
-                  src="/assets/home/psychologist-developed.png"
-                  alt=""
-                  className="h-40 md:h-60 lg:h-40 hidden sm:block drop-shadow-[4px_4px_0_#000]"
-                />
-
-                <div className="flex flex-wrap justify-center gap-3">
-                  {quickLinks.map((item, ind) => (
-                    <button
-                      key={ind}
-                      onClick={() => navigate(item.url)}
-                      className="cm-chip cm-chip-font text-xs md:text-sm cm-reveal"
-                      style={
-                        {
-                          ["--c" as string]:
-                            chipColors[ind % chipColors.length],
-                          ["--rot" as string]: `${ind % 2 === 0 ? -3 : 3}deg`,
-                          animationDelay: `${0.15 + ind * 0.08}s`,
-                        } as CSSProperties
-                      }
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+                  {/* Gen A to Z: static label (not clickable) in the empty space next to the heading */}
+                  <div
+                    className="cm-genaz cm-reveal flex lg:hidden xl:flex items-center gap-3 pl-2 pr-5 py-2"
+                    style={{ animationDelay: "0.2s" }}
+                  >
+                    <span className="cm-genaz-az cm-font text-2xl">A-Z</span>
+                    <span className="cm-font text-3xl md:text-4xl text-gray-900 leading-none">
+                      {GEN_A_TO_Z}
+                    </span>
+                  </div>
                 </div>
 
-                <img
-                  src="/assets/home/landing-mobile.png"
-                  alt=""
-                  className="h-40 md:h-60 lg:h-40 hidden sm:block drop-shadow-[4px_4px_0_#000]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex justify-center lg:justify-end">
-            <div className="relative cm-reveal">
-              <ComicBurst
-                word="FUN!"
-                fill="#fde047"
-                size={96}
-                rot={10}
-                className="-top-8 -right-6"
-              />
-              <ComicStar
-                size={26}
-                fill="#fde047"
-                className="-bottom-4 -left-4"
-              />
-              <div className="cm-frame p-2">
-                <img
-                  src="https://mentoons-products.s3.ap-northeast-1.amazonaws.com/uploads/OpinionJournal/1783594514947-27275b14-8f64-4d0f-810a-b8442e6db018.png"
-                  alt="Mentoon Team"
-                  className="relative w-full max-w-lg rounded-md"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <ProductVideoShowCase />
-
-        <div className="cm-panel relative py-14 lg:py-20 overflow-visible">
-          <ComicBurst
-            word="OOPS!"
-            fill="#f9a8d4"
-            size={92}
-            rot={-10}
-            className="-top-9 -right-4"
-          />
-          <ComicStar
-            size={24}
-            fill="#ffffff"
-            className="top-6 left-6"
-            delay={0.3}
-          />
-          <ComicStar
-            size={20}
-            fill="#ef4444"
-            className="bottom-6 right-10"
-            delay={0.7}
-          />
-
-          <div className="grid lg:grid-cols-5 gap-10 items-center max-w-6xl mx-auto px-6">
-            <div className="lg:col-span-2 space-y-5">
-              <span className="cm-tag cm-chip-font text-sm uppercase cm-reveal">
-                {LandingIssues.length} common challenges
-              </span>
-
-              <div className="cm-card w-full overflow-hidden cm-reveal">
-                {LandingIssues.map((issue, ind) => {
-                  const isOpen = openIssue === ind;
-
-                  return (
-                    <div
-                      key={ind}
-                      className={`cm-row ${
-                        isOpen ? "bg-yellow-100" : "bg-white"
-                      } transition-colors duration-200`}
-                    >
-                      <div
-                        onClick={() => setOpenIssue(isOpen ? null : ind)}
-                        className="cursor-pointer px-4 py-3 flex items-center gap-3 hover:bg-yellow-50 transition-colors duration-200"
-                      >
-                        <div
-                          className="cm-icon w-10 h-10 flex-shrink-0 flex items-center justify-center text-lg"
-                          style={{
-                            color: issue.iconColor,
-                            backgroundColor: `${issue.iconColor}30`,
-                          }}
-                        >
-                          {issue.icon}
-                        </div>
-
-                        <h3 className="cm-font text-lg text-gray-900 flex-1">
-                          {issue.title}
-                        </h3>
-
-                        <FaChevronDown
-                          className={`flex-shrink-0 text-sm transition-transform duration-300 text-black ${
-                            isOpen ? "rotate-180" : ""
-                          }`}
-                        />
-                      </div>
-
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${
-                          isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                  {/* Kids image: LEFT (desktop only) */}
+                  <div className="hidden lg:flex justify-center lg:justify-start lg:order-1">
+                    <div className="relative cm-reveal">
+                      <ComicStar
+                        size={26}
+                        fill="#fde047"
+                        className="-bottom-4 -right-4"
+                      />
+                      <img
+                        src="/assets/home/landing-mobile.png"
+                        alt="Mentoons kids"
+                        className={`cm-hero-kids relative w-full max-w-lg ${
+                          MIRROR_KIDS
+                            ? "scale-x-[-1] drop-shadow-[-6px_6px_0_#000]"
+                            : "drop-shadow-[6px_6px_0_#000]"
                         }`}
-                      >
-                        <p className="cm-text text-base px-4 pb-3 pl-16">
-                          {issue.text}
-                        </p>
+                      />
+                    </div>
+                  </div>
+
+                  {/* Paragraph + tags: RIGHT */}
+                  <div className="space-y-6 max-w-2xl lg:order-2">
+                    <p
+                      className="cm-narration cm-text cm-reveal text-xl md:text-2xl"
+                      style={{
+                        animationDelay: "0.1s",
+                        transform: "rotate(1deg)",
+                      }}
+                    >
+                      Discover how our services help families create a healthy
+                      balance between gadgets, social media and real-life
+                      relationships.
+                    </p>
+
+                    {/* Tags: plain labels, NO links */}
+                    <div className="w-full flex justify-start items-center gap-3">
+                      <div className="flex flex-wrap justify-start gap-3">
+                        {heroTags.map((label, ind) => (
+                          <span
+                            key={label}
+                            className="cm-chip cm-chip-font text-xs md:text-sm cm-reveal cursor-default select-none"
+                            style={
+                              {
+                                ["--c" as string]:
+                                  chipColors[ind % chipColors.length],
+                                ["--rot" as string]: `${ind % 2 === 0 ? -3 : 3}deg`,
+                                animationDelay: `${0.15 + ind * 0.08}s`,
+                              } as CSSProperties
+                            }
+                          >
+                            {label}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* ---------- Slides 2+: other banners ---------- */
+              <BannerSlideView
+                slide={bannerSlides[activeSlide - 1]}
+                highlightColor={LandingColors[colorIndex]}
+              />
+            )}
+          </div>
 
-            <div className="lg:col-span-3 space-y-6">
-              <h2 className="cm-title cm-reveal text-4xl md:text-5xl lg:text-6xl">
-                If you're facing these challenges,
-                <span className="cm-bubble cm-font text-3xl md:text-4xl lg:text-5xl inline-block mt-6 px-6 py-2">
-                  <span
-                    style={{
-                      WebkitTextStroke: "0",
-                      textShadow: "none",
-                      color: "#000",
-                    }}
-                  >
-                    don't worry!
-                  </span>
-                </span>
-              </h2>
-
-              <p className="cm-narration cm-text cm-reveal text-xl md:text-2xl">
-                We understand what families go through in today's digital world.
-                Our programs help children build emotional balance, creativity,
-                and meaningful real-life relationships.
-              </p>
-
+          {/* Slider controls */}
+          <div className="relative z-40 flex justify-center pointer-events-auto">
+            <div className="cm-card flex items-center gap-3 px-3 py-2 !rounded-full">
               <button
-                onClick={() => navigate("/mentoons-workshops")}
-                className="cm-btn cm-font inline-flex items-center gap-2 px-8 py-3 text-2xl uppercase"
+                onClick={prevHeroSlide}
+                className="cm-arrow w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                aria-label="Previous slide"
               >
-                Discover How →
+                <FaChevronLeft className="text-black text-sm" />
               </button>
 
-              <div className="flex justify-center lg:justify-start pt-2">
-                <img
-                  src="/assets/home/help.png"
-                  alt="Help Illustration"
-                  className="cm-bob w-[240px] md:w-[300px] drop-shadow-[5px_5px_0_#000]"
-                />
+              <div className="flex items-center gap-1.5 sm:gap-2 max-w-[65vw] overflow-x-auto py-1">
+                {Array.from({ length: TOTAL_HERO_SLIDES }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToHeroSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    className={`shrink-0 rounded-full border-2 border-black transition-all duration-300 ${
+                      index === activeSlide
+                        ? "w-7 h-3 bg-orange-500"
+                        : "w-3 h-3 bg-white hover:bg-yellow-200"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={nextHeroSlide}
+                className="cm-arrow w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                aria-label="Next slide"
+              >
+                <FaChevronRight className="text-black text-sm" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ================= WHY MENTOONS + CHALLENGES ================= */}
+        <div>
+          <div className="cm-panel relative py-10 lg:py-12 overflow-visible">
+            <ComicBurst
+              word="OOPS!"
+              fill="#f9a8d4"
+              size={92}
+              rot={-10}
+              className="-top-9 -right-4"
+            />
+            <ComicStar
+              size={24}
+              fill="#ffffff"
+              className="top-6 left-6"
+              delay={0.3}
+            />
+            <ComicStar
+              size={20}
+              fill="#ef4444"
+              className="bottom-6 right-10"
+              delay={0.7}
+            />
+
+            {/* items-start: everything sits at the TOP, no extra space above */}
+            <div className="grid lg:grid-cols-5 gap-10 items-start max-w-6xl mx-auto px-6">
+              {/* LEFT: Why Mentoons? + common challenges */}
+              <div className="lg:col-span-2 space-y-5">
+                <h2 className="cm-title cm-reveal text-5xl md:text-6xl">
+                  Why{" "}
+                  <span style={{ color: LandingColors[colorIndex] }}>
+                    Mentoons
+                  </span>
+                  <span className="text-yellow-300">?</span>
+                </h2>
+
+                <span className="cm-tag cm-chip-font text-sm uppercase cm-reveal">
+                  {LandingIssues.length} common challenges
+                </span>
+
+                <div className="cm-card w-full overflow-hidden cm-reveal">
+                  {LandingIssues.map((issue, ind) => {
+                    const isOpen = openIssue === ind;
+
+                    return (
+                      <div
+                        key={ind}
+                        className={`cm-row ${
+                          isOpen ? "bg-yellow-100" : "bg-white"
+                        } transition-colors duration-200`}
+                      >
+                        <div
+                          onClick={() => setOpenIssue(isOpen ? null : ind)}
+                          className="cursor-pointer px-4 py-3 flex items-center gap-3 hover:bg-yellow-50 transition-colors duration-200"
+                        >
+                          <div
+                            className="cm-icon w-10 h-10 flex-shrink-0 flex items-center justify-center text-lg"
+                            style={{
+                              color: issue.iconColor,
+                              backgroundColor: `${issue.iconColor}30`,
+                            }}
+                          >
+                            {issue.icon}
+                          </div>
+
+                          <h3 className="cm-font text-lg text-gray-900 flex-1">
+                            {issue.title}
+                          </h3>
+
+                          <FaChevronDown
+                            className={`flex-shrink-0 text-sm transition-transform duration-300 text-black ${
+                              isOpen ? "rotate-180" : ""
+                            }`}
+                          />
+                        </div>
+
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            isOpen
+                              ? "max-h-40 opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <p className="cm-text text-base px-4 pb-3 pl-16">
+                            {issue.text}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* RIGHT: "If you're facing these challenges" + video */}
+              <div className="lg:col-span-3 space-y-6">
+                <h2 className="cm-title cm-reveal text-4xl md:text-5xl lg:text-6xl">
+                  If you're facing these challenges,
+                  <span className="cm-bubble cm-font text-3xl md:text-4xl lg:text-5xl inline-block mt-6 px-6 py-2">
+                    <span
+                      style={{
+                        WebkitTextStroke: "0",
+                        textShadow: "none",
+                        color: "#000",
+                      }}
+                    >
+                      don't worry!
+                    </span>
+                  </span>
+                </h2>
+
+                <p className="cm-narration cm-text cm-reveal text-xl md:text-2xl">
+                  We understand what families go through in today's digital
+                  world. Our workshops help our children build emotional
+                  balance, creativity and meaningful real-life relationships.
+                </p>
+
+                {/* Video replaces the old image */}
+                <div className="flex justify-center lg:justify-start pt-2">
+                  <video
+                    src="/assets/v3/footer/footerVideo.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full max-w-xl rounded-2xl border-[3px] border-black shadow-[6px_6px_0_#000]"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* ================= VIDEO SHOWCASE (commented out) ================= */}
+        {/* <ProductVideoShowCase /> */}
+
+        {/* ================= ACHIEVEMENTS (now includes Career Guidance + Spirituality) ================= */}
         <div className="space-y-12">
           <h2 className="cm-title cm-reveal text-4xl md:text-6xl text-center max-w-5xl mx-auto">
             By choosing{" "}
@@ -654,7 +1307,7 @@ const NewLandingPage = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-9 items-start self-start">
-            {LandingAchievements.map((item, ind) => {
+            {AllAchievements.map((item, ind) => {
               const isOpen = openAchievement === ind;
               return (
                 <div
@@ -705,15 +1358,24 @@ const NewLandingPage = () => {
           </div>
         </div>
 
+        {/* ================= PARENTS + CHILDREN ================= */}
         <div className="relative py-5 lg:py-10">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-12">
+            {/* ---- For Parents ---- */}
             <div className="cm-card cm-reveal flex flex-col gap-6 p-6 lg:p-8">
               <div className="flex flex-col items-center text-center gap-4">
+                {/* Letters spread edge to edge: M at the left end, S at the right end.
+                    Yellow text with the comic black outline (no box, no border). */}
                 <div
-                  className="cm-icon w-16 h-16 flex items-center justify-center bg-orange-200 text-orange-600"
-                  style={{ transform: "rotate(-4deg)" }}
+                  className="cm-title cm-title-sm flex w-full justify-between text-5xl md:text-6xl px-12 md:px-28"
+                  style={{ color: "#fde047" }}
+                  aria-label="Meetups"
                 >
-                  <Users className="w-8 h-8" />
+                  {"MEETUPS".split("").map((letter, i) => (
+                    <span key={i} aria-hidden="true">
+                      {letter}
+                    </span>
+                  ))}
                 </div>
 
                 <h2
@@ -730,7 +1392,7 @@ const NewLandingPage = () => {
               </div>
 
               <div className="space-y-4">
-                {LandingParentPoints.map((item, ind) => {
+                {LandingParentPointsWithMeetups.map((item, ind) => {
                   const isOpen = openParentPoint === ind;
 
                   return (
@@ -777,25 +1439,19 @@ const NewLandingPage = () => {
               </div>
 
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/meetups")}
                 className="cm-btn cm-font inline-flex items-center gap-2 px-8 py-3 text-2xl uppercase self-center"
               >
                 Start Your Journey →
               </button>
             </div>
 
+            {/* ---- For Children: Podcasts / Workshops / Comics / Games as dropdowns ---- */}
             <div
               className="cm-card cm-reveal flex flex-col gap-6 p-6 lg:p-8"
               style={{ animationDelay: "0.12s" }}
             >
               <div className="flex flex-col items-center text-center gap-4">
-                <div
-                  className="cm-icon w-16 h-16 flex items-center justify-center bg-blue-200 text-blue-600"
-                  style={{ transform: "rotate(4deg)" }}
-                >
-                  <Baby className="w-8 h-8" />
-                </div>
-
                 <h2
                   className="cm-title cm-title-sm text-5xl"
                   style={{ color: "#3b82f6" }}
@@ -867,6 +1523,96 @@ const NewLandingPage = () => {
           </div>
         </div>
 
+        {/* ================= WHAT WE OFFER (Products / Services / Subscription) ================= */}
+        <div>
+          <div className="cm-panel cm-reveal relative px-4 md:px-8 lg:px-12 py-12 lg:py-16 space-y-14 overflow-visible">
+            <ComicStar
+              size={24}
+              fill="#ffffff"
+              className="top-6 left-6"
+              delay={0.3}
+            />
+            <ComicStar
+              size={20}
+              fill="#ef4444"
+              className="bottom-6 right-10"
+              delay={0.7}
+            />
+
+            <div className="flex flex-col items-center gap-4 text-center">
+              <h2 className="cm-title text-4xl md:text-6xl max-w-4xl">
+                What{" "}
+                <span style={{ color: LandingColors[colorIndex] }}>
+                  Mentoons
+                </span>{" "}
+                Offers
+              </h2>
+            </div>
+
+            {offerCategories.map((category) => (
+              <div key={category.title} className="space-y-8">
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <h3
+                    className="cm-title cm-title-sm text-4xl md:text-5xl"
+                    style={{ color: category.color }}
+                  >
+                    {category.title}
+                  </h3>
+                  <p className="cm-narration cm-text text-lg md:text-xl">
+                    {category.sub}
+                  </p>
+                </div>
+
+                {/* flex-wrap + justify-center keeps incomplete rows centered */}
+                <div className="flex flex-wrap justify-center gap-6 lg:gap-8">
+                  {category.items.map((item, ind) => (
+                    <div
+                      key={item.title}
+                      onClick={() => navigate(item.url)}
+                      className="cm-card cm-tilt cursor-pointer p-5 flex flex-col items-center text-center gap-4 w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc((100%-4rem)/3)]"
+                      style={
+                        {
+                          ["--tilt" as string]: `${ind % 2 === 0 ? -1.5 : 1.5}deg`,
+                        } as CSSProperties
+                      }
+                    >
+                      <div
+                        className="cm-icon w-16 h-16 flex items-center justify-center text-3xl"
+                        style={{
+                          color: item.color,
+                          backgroundColor: `${item.color}30`,
+                        }}
+                      >
+                        {item.icon}
+                      </div>
+
+                      <h3 className="cm-font text-3xl text-gray-900">
+                        {item.title}
+                      </h3>
+
+                      <p className="cm-text text-lg flex-1">{item.text}</p>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(item.url);
+                        }}
+                        className="cm-btn cm-font px-6 py-2 text-xl uppercase"
+                        style={
+                          { ["--btn" as string]: item.color } as CSSProperties
+                        }
+                      >
+                        {item.cta} →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= COMMUNITY + DOUBTS ================= */}
         <div className="grid lg:grid-cols-2 gap-14 items-start">
           <div className="cm-card cm-reveal space-y-8 p-5 lg:p-8">
             <h2

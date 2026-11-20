@@ -4,6 +4,7 @@ export const SECTIONS = [
     title: "Products",
     paths: ["/admin/product-table", "/admin/add-products"],
   },
+  { title: "Product Sales", paths: ["/admin/product-sales"] },
   {
     title: "Workshops",
     paths: [
@@ -58,5 +59,9 @@ export const SECTIONS = [
   {
     title: "Applicants",
     paths: ["/admin/applicants"],
+  },
+  {
+    title: "Expenses",
+    paths: ["/admin/expense"],
   },
 ];

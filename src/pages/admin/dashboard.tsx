@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { FaBox, FaBriefcase, FaFileAlt, FaUsers } from "react-icons/fa";
 import {
   Area,
@@ -8,10 +9,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -573,9 +570,6 @@ const DashboardAnalytics: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedChart, setSelectedChart] = useState<"area" | "line" | "bar">(
-    "area",
-  );
   const [revenueCategory, setRevenueCategory] = useState<
     "workshops" | "services" | "products"
   >("workshops");
@@ -654,128 +648,6 @@ const DashboardAnalytics: React.FC = () => {
       </div>
     );
 
-  const renderChart = () => {
-    const chartData = data?.completedOrdersInMonthOrder || [];
-
-    switch (selectedChart) {
-      case "line":
-        return (
-          <LineChart
-            data={chartData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.6}
-            />
-            <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-            <YAxis stroke="#6B7280" fontSize={12} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                border: "none",
-                borderRadius: "1rem",
-                boxShadow:
-                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                backdropFilter: "blur(10px)",
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="sales"
-              stroke="#4F46E5"
-              strokeWidth={4}
-              dot={{ fill: "#4F46E5", strokeWidth: 2, r: 6 }}
-              activeDot={{
-                r: 8,
-                stroke: "#4F46E5",
-                strokeWidth: 2,
-                fill: "#fff",
-              }}
-            />
-          </LineChart>
-        );
-
-      case "bar":
-        return (
-          <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="colorSalesBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.4} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.6}
-            />
-            <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-            <YAxis stroke="#6B7280" fontSize={12} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                border: "none",
-                borderRadius: "1rem",
-                boxShadow:
-                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                backdropFilter: "blur(10px)",
-              }}
-            />
-            <Bar
-              dataKey="sales"
-              fill="url(#colorSalesBar)"
-              radius={[8, 8, 0, 0]}
-            />
-          </BarChart>
-        );
-
-      default:
-        return (
-          <AreaChart
-            data={chartData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.6}
-            />
-            <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-            <YAxis stroke="#6B7280" fontSize={12} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                border: "none",
-                borderRadius: "1rem",
-                boxShadow:
-                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                backdropFilter: "blur(10px)",
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="sales"
-              stroke="#4F46E5"
-              fillOpacity={1}
-              fill="url(#colorSales)"
-              strokeWidth={3}
-            />
-          </AreaChart>
-        );
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8">
       {/* Background decorations */}
@@ -842,40 +714,8 @@ const DashboardAnalytics: React.FC = () => {
           />
         </div>
 
-        {/* Charts Section */}
+        {/* Job Distribution + link to the Sales page */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Main Chart */}
-          <div className="lg:col-span-2 bg-white/70 backdrop-blur-sm shadow-2xl rounded-3xl p-8 border border-white/20">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                  Sales Performance
-                </h2>
-                <p className="text-gray-600">Monthly revenue trends</p>
-              </div>
-              <div className="flex space-x-2">
-                {(["area", "line", "bar"] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedChart(type)}
-                    className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${
-                      selectedChart === type
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="w-full h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                {renderChart()}
-              </ResponsiveContainer>
-            </div>
-          </div>
-
           {/* Pie Chart */}
           <div className="bg-white/70 backdrop-blur-sm shadow-2xl rounded-3xl p-8 border border-white/20">
             <h3 className="text-2xl font-bold text-gray-800 mb-6">
@@ -922,6 +762,24 @@ const DashboardAnalytics: React.FC = () => {
                   <span className="font-bold text-gray-800">{item.value}%</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Sales page link card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 to-indigo-700 shadow-2xl rounded-3xl p-8 text-white flex flex-col justify-center">
+            <h3 className="text-3xl font-bold mb-3">Sales Analytics</h3>
+            <p className="text-blue-100 mb-6 max-w-xl">
+              See sales by category (one-on-one sessions, comics, podcasts,
+              workshops, products), by product and by location, with graphs and
+              detailed tables.
+            </p>
+            <div>
+              <Link
+                to="/admin/sales"
+                className="inline-block px-6 py-3 rounded-xl bg-white text-blue-700 font-semibold shadow-lg hover:shadow-xl hover:bg-blue-50 transition"
+              >
+                View Sales Analytics
+              </Link>
             </div>
           </div>
         </div>

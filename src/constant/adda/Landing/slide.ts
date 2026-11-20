@@ -1,28 +1,28 @@
 import { Slide } from "@/types";
 
 export const SLIDES: Slide[] = [
-  {
-    id: 1,
-    img: "/assets/home/newPage/bg/banner/plan banner.png",
-    tag: "⚡ LIMITED OFFER",
-    headline: "3 Day Trial",
-    highlightWord: "Trial",
-    sub: "Try everything free for 3 days — full access with zero hassle.",
-    cta: "Browse Plans",
-    accent: "#a8ff78",
-    bg: "from-[#071a0e] via-[#0f2e1a] to-[#1a4a2e]",
-    shape: "circle",
-    emoji: "🎯",
-    badges: ["✓ Full Access", "✓ Zero Risk"],
-    link: "/membership",
-    items: [
-      {
-        name: "Explore Membership",
-        link: "/membership",
-        color: "#a8ff78",
-      },
-    ],
-  },
+  // {
+  //   id: 1,
+  //   img: "/assets/home/newPage/bg/banner/plan banner.png",
+  //   tag: "⚡ LIMITED OFFER",
+  //   headline: "3 Day Trial",
+  //   highlightWord: "Trial",
+  //   sub: "Try everything free for 3 days — full access with zero hassle.",
+  //   cta: "Browse Plans",
+  //   accent: "#a8ff78",
+  //   bg: "from-[#071a0e] via-[#0f2e1a] to-[#1a4a2e]",
+  //   shape: "circle",
+  //   emoji: "🎯",
+  //   badges: ["✓ Full Access", "✓ Zero Risk"],
+  //   link: "/membership",
+  //   items: [
+  //     {
+  //       name: "Explore Membership",
+  //       link: "/membership",
+  //       color: "#a8ff78",
+  //     },
+  //   ],
+  // },
   // {
   //   id: 2,
   //   img: "/assets/home/newPage/bg/banner/workshop banner.png",

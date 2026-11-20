@@ -12,6 +12,7 @@ import BlockedGuard from "./components/adda/auth/blockedGuard.tsx";
 import BlockedPage from "./components/adda/auth/blockedPage.tsx";
 import { RootState } from "./redux/store";
 import { routes, NotFoundPage } from "./routes/index.tsx";
+import QuizPromptModal from "./components/common/introQuizModal.tsx";
 
 const Router = () => {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -77,6 +78,7 @@ const Router = () => {
       )}
       <GlobalAuthModal />
       <StatusModal />
+      <QuizPromptModal />
     </>
   );
 };

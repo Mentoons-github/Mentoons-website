@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { ShieldCheck, Heart, Gift } from "lucide-react";
 
-/* ---- Inline comic animations (Web Animations API, no CSS needed) ---- */
 type ComicKind = "slam" | "pop" | "drop" | "panel" | "shake";
 
 const COMIC = {
@@ -84,8 +83,6 @@ const COMIC = {
   }),
 };
 
-/* Plays once on load, or when the element scrolls into view (onView).
-   `rotate` = the element's existing Tailwind tilt in degrees (e.g. -1). */
 const useComic = <T extends HTMLElement>(
   kind: ComicKind,
   delay = 0,
@@ -165,7 +162,6 @@ const TRUST_POINTS = [
   },
 ];
 
-/* Same <li> as before; only adds the staggered pop animation */
 const TrustChip = ({
   icon: Icon,
   label,
@@ -212,13 +208,16 @@ const HeroSection = () => {
           />
           <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full border-4 border-gray-900 bg-[#FFD93D] opacity-70" />
 
-          {/* Psychologist badge: same position and size as the assessment banner */}
-          <img
-            src="/assets/LandingPage/psyco.png"
-            alt="Carefully crafted by psychologists"
-            ref={badgeRef}
-            className="absolute -top-3 -right-4 z-20 pointer-events-none object-contain w-28 h-28 sm:w-44 sm:h-44 lg:w-56 lg:h-56"
-          />
+          <div className="absolute right-0 top-0 z-20 aspect-square w-24 sm:w-32 md:w-40 lg:w-48 xl:w-52">
+            <div className="absolute inset-0 rounded-bl-full border-b-4 border-l-4 border-gray-900 bg-[#FFD93D] shadow-[-3px_3px_0_0_rgba(17,24,39,0.9)]" />
+
+            <img
+              src="/assets/LandingPage/psyco.png"
+              alt="Carefully crafted by psychologists"
+              ref={badgeRef}
+              className="absolute right-1 top-1 z-10 h-auto w-[72%] object-contain transition-transform duration-300 hover:rotate-3 hover:scale-105 sm:right-2 sm:top-2"
+            />
+          </div>
 
           <div className="relative z-10">
             <h1

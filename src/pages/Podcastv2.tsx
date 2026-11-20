@@ -1,5 +1,5 @@
 import EnquiryModal from "@/components/modals/EnquiryModal";
-import SubscriptionLimitModal from "@/components/modals/SubscriptionLimitModal";
+import LoginModal from "@/components/common/modal/loginModal";
 import NewReleaseModal from "@/components/podcast/newReleaseModal";
 import PodcastCard from "@/components/podcast/card";
 import HeroSectionPodcast from "@/components/shared/HeroSectionPodcast";
@@ -18,22 +18,10 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
-interface Subscription {
-  plan: string;
-  validUntil: string;
-  isActive: boolean;
-  consumedContent?: {
-    prime?: number;
-    platinum?: number;
-    lastResetDate?: string;
-  };
-}
-
 interface DBUser {
   _id: string;
   name: string;
   email: string;
-  subscription: Subscription;
 }
 
 interface PlaybackTrackingState {
@@ -77,11 +65,7 @@ const Podcastv2 = () => {
   const [message, setMessage] = useState("");
   const [enquiryEmail, setEnquiryEmail] = useState("");
   const [enquiryName, setEnquiryName] = useState("");
-  const [showSubscriptionLimitModal, setShowSubscriptionLimitModal] =
-    useState(false);
-  const [limitModalMessage, setLimitModalMessage] = useState("");
-  const [limitModalTitle, setLimitModalTitle] = useState("");
-  const [currentProductId, setCurrentProductId] = useState<string>("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [filteredPodcast, setFilteredPodcast] = useState<ProductBase[]>([]);
   const [currentPodcastIndex, setCurrentPodcastIndex] = useState(0);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
@@ -134,11 +118,6 @@ const Podcastv2 = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { items: products } = useSelector((state: RootState) => state.products);
 
-  const membershipType: "free" | "prime" | "platinum" = dbUser?.subscription
-    ?.plan
-    ? (dbUser.subscription.plan.toLowerCase() as "free" | "prime" | "platinum")
-    : "free";
-
   const handleScroll = () => {
     const carousel = carouselRef.current;
     if (carousel) {
@@ -186,10 +165,11 @@ const Podcastv2 = () => {
   };
 
   const fetchDBUser = useCallback(async () => {
+    if (!user?.id) return;
     try {
       const token = await getToken();
       const response = await axios.get(
-        `${import.meta.env.VITE_PROD_URL}/user/user/${user?.id}`,
+        `${import.meta.env.VITE_PROD_URL}/user/user/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.status === 200) {
@@ -200,153 +180,50 @@ const Podcastv2 = () => {
     }
   }, [user?.id, getToken]);
 
+  // Playback gate: only requires the user to be signed in.
+  // (No subscription / plan / limit checks.)
   const checkAccessAndControlPlayback = useCallback(
     async (podcast: ProductBase, audioElement?: HTMLAudioElement | null) => {
       const podcastId = String(podcast._id);
       const podcastType = String(podcast.product_type || "free").toLowerCase();
 
       if (!isSignedIn) {
-        setTimeout(() => {
-          if (audioElement && !audioElement.paused) {
-            audioElement.pause();
-            const timeNow = Date.now();
-            if (timeNow - modalShownTimestamp > 5000) {
-              setLimitModalTitle("Sign In Required");
-              setLimitModalMessage("Please sign in to access this podcast.");
-              setShowSubscriptionLimitModal(true);
-              setModalShownTimestamp(timeNow);
-            }
-          }
-        }, 45000);
-        return false;
-      }
-
-      if (!dbUser) {
-        toast.info("Loading user data...");
-        fetchDBUser();
-        return false;
-      }
-
-      try {
-        const token = await getToken();
-        const response = await axios.post(
-          `${import.meta.env.VITE_PROD_URL}/subscription/access`,
-          { type: "podcasts", itemId: podcast._id },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        const { access, reason } = response.data;
-        if (access) {
-          setPlaybackTracking({
-            startTime: Date.now(),
-            paused: false,
-            skipped: false,
-            podcastId,
-            podcastType,
-          });
-          return true;
-        }
-
-        const timeNow = Date.now();
-        if (timeNow - modalShownTimestamp <= 5000) {
-          return false;
-        }
-
-        if (reason === "upgrade") {
-          setLimitModalTitle("Upgrade Your Plan");
-          setLimitModalMessage(
-            `You've reached the podcast limit for your ${membershipType} plan. Upgrade to access more content!`,
-          );
-        } else if (reason === "charge") {
-          setLimitModalTitle("Purchase Content");
-          setLimitModalMessage(
-            `You've reached the podcast limit for your Platinum plan. Purchase this content for ₹1 to continue.`,
-          );
-        }
-        setCurrentProductId(podcast._id || "");
-        setShowSubscriptionLimitModal(true);
-        setModalShownTimestamp(timeNow);
-
         if (audioElement && !audioElement.paused) {
           audioElement.pause();
-          setPlayingPodcastId(null);
+        }
+        setPlayingPodcastId(null);
+        const timeNow = Date.now();
+        if (timeNow - modalShownTimestamp > 5000) {
+          setShowLoginModal(true);
+          setModalShownTimestamp(timeNow);
         }
         return false;
-      } catch (error) {
-        console.error("Error checking access:", error);
-        toast.error("Failed to verify access. Please try again.");
-        return false;
       }
+
+      setPlaybackTracking({
+        startTime: Date.now(),
+        paused: false,
+        skipped: false,
+        podcastId,
+        podcastType,
+      });
+      return true;
     },
-    [
-      isSignedIn,
-      dbUser,
-      getToken,
-      modalShownTimestamp,
-      membershipType,
-      fetchDBUser,
-    ],
+    [isSignedIn, modalShownTimestamp],
   );
 
-  const handlePodcastCompletion = (podcastId: string, podcastType: string) => {
-    podcastType = podcastType.toLowerCase();
+  const handlePodcastCompletion = (podcastId: string) => {
     if (
       isSignedIn &&
-      dbUser &&
       playbackTracking &&
       playbackTracking.podcastId === podcastId &&
       !playbackTracking.paused &&
       !playbackTracking.skipped
     ) {
-      if (podcastType !== "free") {
-        updateContentConsumption(podcastType);
-      }
       triggerReward(RewardEventType.LISTEN_PODCAST, podcastId);
       toast.success("You earned points for completing this podcast!");
     }
   };
-
-  const updateContentConsumption = useCallback(
-    async (podcastType: string) => {
-      if (!isSignedIn || !dbUser || !dbUser._id) return;
-      try {
-        const consumptionKey = `${dbUser._id}_consumption`;
-        const storedConsumption = localStorage.getItem(consumptionKey);
-        const consumption = storedConsumption
-          ? JSON.parse(storedConsumption)
-          : { prime: 0, platinum: 0 };
-
-        if (podcastType === "prime") {
-          consumption.prime += 1;
-        } else if (podcastType === "platinum") {
-          consumption.platinum += 1;
-        }
-
-        localStorage.setItem(consumptionKey, JSON.stringify(consumption));
-
-        const updatedUser = { ...dbUser };
-        const consumedContent = dbUser.subscription.consumedContent || {
-          prime: 0,
-          platinum: 0,
-        };
-        if (podcastType === "prime") {
-          updatedUser.subscription.consumedContent = {
-            ...consumedContent,
-            prime: (consumedContent.prime || 0) + 1,
-          };
-        } else if (podcastType === "platinum") {
-          updatedUser.subscription.consumedContent = {
-            ...consumedContent,
-            platinum: (consumedContent.platinum || 0) + 1,
-          };
-        }
-        setDbUser(updatedUser);
-        fetchDBUser();
-      } catch (error) {
-        console.error("Error updating content consumption:", error);
-      }
-    },
-    [dbUser, isSignedIn, fetchDBUser],
-  );
 
   useEffect(() => {
     const fetchPodcast = async () => {
@@ -549,10 +426,6 @@ const Podcastv2 = () => {
                               handlePodcastCompletion(
                                 String(
                                   filteredPodcast[currentPodcastIndex]._id,
-                                ),
-                                String(
-                                  filteredPodcast[currentPodcastIndex]
-                                    .product_type || "free",
                                 ),
                               );
                             }}
@@ -797,14 +670,10 @@ const Podcastv2 = () => {
           </motion.div>
         </div>
       </div>
-      {showSubscriptionLimitModal && (
-        <SubscriptionLimitModal
-          isOpen={showSubscriptionLimitModal}
-          onClose={() => setShowSubscriptionLimitModal(false)}
-          message={limitModalMessage}
-          title={limitModalTitle}
-          planType={membershipType}
-          productId={currentProductId}
+      {showLoginModal && (
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
         />
       )}
       {showEnquiryModal && (

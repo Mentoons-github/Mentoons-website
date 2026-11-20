@@ -46,7 +46,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   const dispatch = useDispatch<AppDispatch>();
 
   const { notifications, isLoading } = useSelector(
-    (state: RootState) => state.notification
+    (state: RootState) => state.notification,
   );
 
   // Fetch notifications on mount
@@ -177,7 +177,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
     const date = new Date(createdAt);
     const now = new Date();
     const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / 1000 / 60
+      (now.getTime() - date.getTime()) / 1000 / 60,
     );
 
     if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
@@ -380,6 +380,18 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                   >
                     <User className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
                     View Profile
+                  </button>
+                </div>
+                <div className="py-2">
+                  <button
+                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 group"
+                    onClick={() => {
+                      navigate("/");
+                      setUserMenuOpen(false);
+                    }}
+                  >
+                    <User className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
+                    Go to website
                   </button>
                 </div>
 

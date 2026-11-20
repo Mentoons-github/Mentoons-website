@@ -1,41 +1,17 @@
-import axiosInstance from "@/api/axios";
-import { companyImg, FOOTER_PAGELINKS, SOCIAL_LINKS } from "@/constant";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
-import { MdEmail, MdLocationOn, MdPlayCircleFilled } from "react-icons/md";
+import { FOOTER_PAGELINKS, SOCIAL_LINKS } from "@/constant";
+import { MdEmail, MdLocationOn } from "react-icons/md";
 import { PiPhoneCallFill } from "react-icons/pi";
 import { SiFacebook, SiInstagram, SiWhatsapp, SiYoutube } from "react-icons/si";
 
-import { ModalMessage } from "@/utils/enum";
-import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import * as Yup from "yup";
-import NewsletterModal from "../modals/NewsletterModal";
-import { AxiosError } from "axios";
 import { TiSocialLinkedin } from "react-icons/ti";
-
-interface ApiResponse {
-  success: boolean;
-  data?: unknown;
-  message?: string;
-}
-
-interface FormValues {
-  email: string;
-}
 
 interface LinkItem {
   id: string;
   label: string;
   url: string;
 }
-
-const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-});
 
 // ---------------------------------------------------------------
 // 👉 PASTE YOUR VIDEO LINK HERE
@@ -44,20 +20,22 @@ const validationSchema = Yup.object({
 //   "https://youtu.be/XXXXXXXXXXX"
 //   "https://yourdomain.com/videos/intro.mp4"
 // Leave empty ("") to show the placeholder.
-// ---------------------------------------------------------------
-const FOOTER_VIDEO_URL = "/assets/v3/footer/footerVideo.mp4";
+// // ---------------------------------------------------------------
+// const FOOTER_VIDEO_URL = "/assets/v3/footer/footerVideo.mp4";
 
 // Converts any YouTube link into an embeddable URL (returns null if not YouTube)
-const getYouTubeEmbedUrl = (url: string): string | null => {
-  const match = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
-  );
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
-};
+// const getYouTubeEmbedUrl = (url: string): string | null => {
+//   const match = url.match(
+//     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+//   );
+//   return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+// };
 
 // ---- section lookups (Products removed) ----
 const hasTitle = (title: string, key: string) =>
   title.toLowerCase().includes(key);
+
+const isPhoneLabel = (label: string) => /^[\d\s+()-]+$/.test(label);
 
 const aboutSection = FOOTER_PAGELINKS.find((s) => hasTitle(s.title, "about"));
 const contactSection = FOOTER_PAGELINKS.find((s) =>
@@ -78,76 +56,57 @@ const comicHeading =
   "relative inline-block pb-1 text-2xl md:text-3xl tracking-[0.15em] uppercase text-black font-comic-chip drop-shadow-[2px_2px_0_rgba(255,255,255,0.7)] after:absolute after:left-0 after:bottom-0 after:h-1 after:w-full after:rounded-full after:bg-black after:content-['']";
 
 // ---- Video block (placeholder until a URL is provided) ----
-const FooterVideo = ({ url }: { url: string }) => {
-  const embedUrl = url ? getYouTubeEmbedUrl(url) : null;
+// const FooterVideo = ({
+//   url,
+//   className = "",
+// }: {
+//   url: string;
+//   className?: string;
+// }) => {
+//   const embedUrl = url ? getYouTubeEmbedUrl(url) : null;
 
-  return (
-    <div
-      className={`w-full max-w-xl mx-auto overflow-hidden bg-black border-4 border-black rounded-2xl ${comicShadow}`}
-    >
-      <div className="relative w-full aspect-video">
-        {!url ? (
-          // Placeholder
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-orange-600">
-            <MdPlayCircleFilled className="text-6xl text-white drop-shadow-[2px_2px_0_#000]" />
-            <p className="text-lg tracking-wider text-white font-comic-chip">
-              Video Coming Soon
-            </p>
-          </div>
-        ) : embedUrl ? (
-          // YouTube
-          <iframe
-            src={embedUrl}
-            title="Mentoons footer video"
-            className="absolute inset-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          // Direct video file (mp4, webm, etc.)
-          <video
-            src={url}
-            controls
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 object-cover w-full h-full"
-          />
-        )}
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div
+//       className={`w-full overflow-hidden bg-black border-4 border-black rounded-2xl ${comicShadow} ${className}`}
+//     >
+//       <div className="relative w-full aspect-video">
+//         {!url ? (
+//           // Placeholder
+//           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-orange-600">
+//             <MdPlayCircleFilled className="text-6xl text-white drop-shadow-[2px_2px_0_#000]" />
+//             <p className="text-lg tracking-wider text-white font-comic-chip">
+//               Video Coming Soon
+//             </p>
+//           </div>
+//         ) : embedUrl ? (
+//           // YouTube
+//           <iframe
+//             src={embedUrl}
+//             title="Mentoons footer video"
+//             className="absolute inset-0 w-full h-full"
+//             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+//             allowFullScreen
+//           />
+//         ) : (
+//           // Direct video file (mp4, webm, etc.)
+//           <video
+//             src={url}
+//             controls
+//             playsInline
+//             preload="metadata"
+//             className="absolute inset-0 object-cover w-full h-full"
+//           />
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 
 const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery({ maxWidth: 767 });
-  const [showNewletterModal, setShowNewsletterModal] = useState(false);
-
-  const handleSubmit = async (
-    values: FormValues,
-    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
-  ) => {
-    try {
-      const response = await axiosInstance.post<ApiResponse>(
-        "email/subscribeToNewsletter",
-        { email: values.email },
-      );
-
-      const res: ApiResponse = response.data;
-      if (res.success) {
-        setShowNewsletterModal(true);
-      } else {
-        throw new Error("Something went wrong");
-      }
-    } catch (err: unknown) {
-      const error = err as AxiosError<{ error: string }>;
-      toast(` ${error.response?.data.error}`);
-    } finally {
-      resetForm();
-      setSubmitting(false);
-    }
-  };
+  // phones only (below the 480px tablet layout)
+  const isMobile = useMediaQuery({ maxWidth: 479 });
 
   const handleLinkClick = (linkItem: LinkItem) => {
     const { label, url } = linkItem;
@@ -157,7 +116,7 @@ const Footer = () => {
       return;
     }
 
-    if (/^[\d\s+()-]+$/.test(label)) {
+    if (isPhoneLabel(label)) {
       window.location.href = `tel:${label}`;
       return;
     }
@@ -219,13 +178,13 @@ const Footer = () => {
     </div>
   );
 
-  // smaller, tighter links
+  // smaller, tighter links (always left-aligned)
   const renderLinkItems = (items: LinkItem[], textColor = "text-black") =>
     items.map((linkItem) => (
       <div
         onClick={() => handleLinkClick(linkItem)}
         key={linkItem.id}
-        className={`flex items-center gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide ${textColor} cursor-pointer transition-all duration-200 hover:translate-x-1 hover:text-white`}
+        className={`flex items-center justify-start gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide text-left ${textColor} cursor-pointer transition-all duration-200 hover:translate-x-1 hover:text-white`}
       >
         {linkItem.label.includes("@") && <MdEmail />}
         {linkItem.label.includes("+91") && <PiPhoneCallFill />}
@@ -233,28 +192,56 @@ const Footer = () => {
       </div>
     ));
 
-  return (
-    // small bottom padding on mobile only, so the last link clears the illustration
-    <footer className="relative bg-[#FF942E] pb-24 md:pb-0">
-      {/* Illustration restored: full width, natural proportions, behind content */}
-      <div className="absolute bottom-0 left-0 z-0 w-full pointer-events-none">
-        <img
-          src="/assets/images/footer-illustration.png"
-          alt="Mentoons illustration"
-          className="w-full max-h-96"
-        />
-      </div>
+  // contact links: phone number gets a highlighted pill so it stands out
+  const renderContactItems = (items: LinkItem[]) =>
+    items.map((linkItem) => {
+      if (isPhoneLabel(linkItem.label)) {
+        return (
+          <div
+            onClick={() => handleLinkClick(linkItem)}
+            key={linkItem.id}
+            className={`flex items-center justify-start gap-2 px-3 py-1.5 my-1 font-comic text-base md:text-lg font-bold leading-tight tracking-wider text-left text-black bg-white border-2 border-black rounded-full cursor-pointer ${comicShadow} transition-all duration-200 hover:-translate-y-0.5 hover:bg-yellow-300`}
+          >
+            <PiPhoneCallFill className="text-xl text-orange-600" />
+            {linkItem.label}
+          </div>
+        );
+      }
 
-      <div className="relative z-10 grid gap-6 px-6 pt-8 md:px-16 lg:grid-cols-[1fr_1.5fr_auto_auto] lg:items-start">
-        {/* Logo + About list directly underneath */}
-        <div className="flex flex-col items-center gap-2 lg:items-start">
+      return (
+        <div
+          onClick={() => handleLinkClick(linkItem)}
+          key={linkItem.id}
+          className="flex items-center justify-start gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide text-left text-black cursor-pointer transition-all duration-200 hover:translate-x-1 hover:text-white"
+        >
+          {linkItem.label.includes("@") && <MdEmail />}
+          {linkItem.label}
+        </div>
+      );
+    });
+
+  return (
+    <footer className="relative bg-[#FF942E] pb-8">
+      {/*
+        Phone (<480)      : single column
+                            1 About → 2 Contact → 3 Video → 4 QR → 5 other links → icons at bottom
+        Tablet (480-1023) : 2 columns
+                            row 1: About | Contact
+                            row 2: Video (left, smaller) | QR (right)
+                            row 3: Social icons (under video + QR)
+                            row 4: other link sections
+        Desktop (1024+)   : 4 columns in DOM order, icons at the bottom
+      */}
+      <div className="relative z-10 grid gap-6 px-6 pt-8 min-[480px]:grid-cols-2 min-[480px]:items-center min-[480px]:gap-x-8 min-[480px]:gap-y-8 min-[480px]:px-8 md:gap-x-10 md:px-16 lg:grid-cols-[1fr_1.5fr_auto_auto] lg:items-start lg:gap-x-6 lg:gap-y-6">
+        {/* 1. Logo + About list directly underneath */}
+        <div className="flex flex-col items-start order-1 gap-2 min-[480px]:self-start lg:order-none">
           <img
             src="/assets/images/mentoons-logo.png"
             alt="Mentoons logo"
             className="object-cover h-20 md:h-24"
           />
           {aboutSection && (
-            <div className="flex flex-col items-center w-full gap-1 lg:items-start">
+            <div className="flex flex-col items-start w-full gap-1">
               <Link
                 to={aboutSection.url}
                 className="relative inline-block pb-1 mb-1 text-3xl md:text-4xl tracking-[0.15em] uppercase text-black font-comic-chip drop-shadow-[2px_2px_0_rgba(255,255,255,0.7)] after:absolute after:left-0 after:bottom-0 after:h-1 after:w-full after:rounded-full after:bg-black after:content-['']"
@@ -266,18 +253,27 @@ const Footer = () => {
           )}
         </div>
 
-        {/* CENTER: Video (placeholder) + remaining link sections */}
-        <div className="flex flex-col items-center gap-6 lg:px-4">
-          <FooterVideo url={FOOTER_VIDEO_URL} />
+        {/*
+          CENTER wrapper:
+          - phone + tablet : "contents" → video and link sections become direct grid items
+          - desktop        : flex column (video on top, link sections below)
+        */}
+        <div className="contents lg:flex lg:flex-col lg:items-center lg:gap-6 lg:px-4">
+          {/* 3. Video: full width on phone, smaller + left on tablet */}
+          {/* <FooterVideo
+            url={FOOTER_VIDEO_URL}
+            className="order-3 max-w-xl mx-auto min-[480px]:mx-0 min-[480px]:max-w-xs min-[480px]:justify-self-start lg:order-none lg:mx-auto lg:max-w-xl lg:justify-self-auto"
+          /> */}
 
+          {/* 5. Other link sections */}
           {otherSections.length > 0 && (
-            <div className="flex flex-wrap items-start justify-center gap-8 lg:justify-start">
+            <div className="flex flex-wrap items-start justify-start order-5 w-full gap-8 min-[480px]:order-6 min-[480px]:col-span-2 min-[480px]:justify-center min-[480px]:gap-x-16 lg:order-none lg:col-span-1 lg:justify-start lg:gap-x-8">
               {otherSections.map((item) => (
-                <div key={item.id} className="text-center lg:text-start">
+                <div key={item.id} className="text-left">
                   <Link to={item.url} className={comicHeading}>
                     {item.title}
                   </Link>
-                  <div className="flex flex-col items-center gap-1 mt-2 lg:items-start">
+                  <div className="flex flex-col items-start gap-1 mt-2">
                     {renderLinkItems(item.items)}
                   </div>
                 </div>
@@ -286,9 +282,9 @@ const Footer = () => {
           )}
         </div>
 
-        {/* Smaller QR */}
+        {/* 4. QR: below the video on phone, right of the video on tablet */}
         <div
-          className={`flex flex-col items-center self-start p-3 mx-auto bg-orange-600 border-4 border-black rounded-2xl ${comicShadow} h-fit w-fit`}
+          className={`flex flex-col items-center self-start order-4 p-3 mx-auto bg-orange-600 border-4 border-black rounded-2xl ${comicShadow} h-fit w-fit min-[480px]:mx-0 min-[480px]:self-center min-[480px]:justify-self-center lg:order-none lg:mx-auto lg:self-start lg:justify-self-auto`}
         >
           <p className="font-comic-chip text-base tracking-wide text-white">
             Scan to Contribute ₹1
@@ -308,93 +304,34 @@ const Footer = () => {
           </span>
         </div>
 
-        {/* Smaller subscription + Contact underneath */}
-        <div className="flex flex-col w-full gap-4 mx-auto lg:w-64">
-          <Formik
-            initialValues={{ email: "" }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, isValid, dirty }) => (
-              <Form
-                className={`flex flex-col w-full gap-3 p-3 bg-white border-4 border-black rounded-2xl ${comicShadow}`}
-              >
-                <div>
-                  <h3 className="text-xl font-comic-chip tracking-wide text-orange-600">
-                    Wellness Subscription
-                  </h3>
-                  <p className="text-xs leading-snug text-gray-700">
-                    Get free comics, self help books, relationships, menstrual
-                    cycle, friendship
-                  </p>
-                </div>
-
-                <div>
-                  <Field
-                    name="email"
-                    type="email"
-                    className="w-full px-3 py-2 text-sm bg-white border-2 border-black rounded-full outline-none focus:ring-2 focus:ring-orange-300"
-                    placeholder="Enter your email"
-                  />
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="ml-3 text-xs font-medium text-red-600"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !isValid || !dirty}
-                  className={`w-full py-2 font-comic-chip text-base tracking-wider text-white bg-orange-600 border-2 border-black rounded-full ${comicShadow} transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isSubmitting ? "Subscribing..." : "Get Notified"}
-                </button>
-              </Form>
-            )}
-          </Formik>
-
-          {/* Contact directly under subscription */}
+        {/* 2. Contact: right after About on phone, right of About on tablet */}
+        <div className="flex flex-col order-2 w-full gap-4 min-[480px]:self-start min-[480px]:pt-[5.5rem] md:pt-[6.5rem] lg:order-none lg:w-64 lg:pt-0">
           {contactSection && (
-            <div className="flex flex-col items-center gap-1 lg:items-start">
+            <div className="flex flex-col items-start gap-1">
               <Link to={contactSection.url} className={comicHeading}>
                 {contactSection.title}
               </Link>
-              <div className="flex flex-col items-center gap-1 mt-2 lg:items-start">
-                {renderLinkItems(contactSection.items)}
-                <div className="flex items-center gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide text-black">
+              <div className="flex flex-col items-start gap-1 mt-2">
+                {renderContactItems(contactSection.items)}
+                <div className="flex items-center justify-start gap-1.5 font-comic text-sm md:text-base leading-tight tracking-wide text-black text-left">
                   <MdLocationOn />
-                  Domlur, Bangalore
+                  Domlur, Bangalore, India
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Social icons: tablet only, directly under video + QR */}
+        <div className="hidden min-[480px]:order-5 min-[480px]:col-span-2 min-[480px]:block lg:hidden">
+          {renderSocialIcons("lg")}
+        </div>
       </div>
 
-      {isMobile ? renderSocialIcons("sm") : renderSocialIcons("lg")}
-
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-8 mt-16">
-        {companyImg.map((item) => (
-          <div key={item.id} className="h-16">
-            <Link to={item.url} className="cursor-pointer">
-              <img
-                src={item.image}
-                alt=""
-                className="object-cover transition-all duration-300 h-14 hover:scale-105"
-              />
-            </Link>
-          </div>
-        ))}
+      {/* Social icons: phone + desktop (bottom of footer) */}
+      <div className="min-[480px]:hidden lg:block">
+        {isMobile ? renderSocialIcons("sm") : renderSocialIcons("lg")}
       </div>
-
-      {showNewletterModal && (
-        <NewsletterModal
-          isOpen={showNewletterModal}
-          onClose={() => setShowNewsletterModal(false)}
-          message={ModalMessage.NEWSLETTER_MESSAGE}
-        />
-      )}
     </footer>
   );
 };
